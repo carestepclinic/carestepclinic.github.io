@@ -662,6 +662,19 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
 .individual-download-panel.hidden{display:none}.individual-download-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:9px}.individual-download-head b{font-size:11px;color:#24406c}.individual-download-head span{font-size:8.8px;color:#728099}.individual-download-list{display:grid;gap:6px}.individual-download-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 9px;border:1px solid #dde7f7;border-radius:9px;background:#fff}.individual-download-name{min-width:0;font-size:9px;color:#43516a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.individual-download-row .btn{flex:0 0 auto;padding:6px 9px;font-size:9px}.individual-download-actions{display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap;margin-top:9px}.individual-download-note{margin:8px 0 0;font-size:8.5px;color:#75839a;line-height:1.45}
 @media(max-width:700px){.batch-download-mode-options{grid-template-columns:1fr}.batch-download-mode-head{display:block}.batch-download-mode-head>span{display:block;margin-top:3px}.individual-download-head{display:block}.individual-download-head span{display:block;margin-top:3px}.individual-download-row{align-items:flex-start}.individual-download-name{white-space:normal;word-break:break-all}}
 </style>
+
+<style id="carestep-hotfix29-output-format">
+/* v9.0.2 Hotfix 29 · simplified output flow + PDF/PNG choice */
+.output-format-mode{margin:10px 0 12px;padding:12px;border:1px solid #dce5f3;border-radius:12px;background:#f8fbff}
+.output-format-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:9px}
+.output-format-head>b{font-size:11px;color:#263247}.output-format-head>span{font-size:9px;color:#6d7c92}
+.output-format-options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.output-format-options label{display:flex;gap:8px;align-items:flex-start;padding:10px;border:1px solid #dfe6f0;border-radius:10px;background:#fff;cursor:pointer}
+.output-format-options label:has(input:checked){border-color:#1f5eff;background:#eef4ff;box-shadow:0 0 0 1px #1f5eff22}
+.output-format-options input{margin-top:2px}.output-format-options span{display:block}.output-format-options b{display:block;font-size:10.5px;color:#344258}.output-format-options small{display:block;margin-top:2px;font-size:8.5px;color:#7a8799;line-height:1.35}
+#outputFormatHint{margin:8px 0 0;font-size:8.8px;color:#6e7c91;line-height:1.45}
+@media(max-width:700px){.output-format-options{grid-template-columns:1fr}.output-format-head{display:block}.output-format-head>span{display:block;margin-top:3px}}
+</style>
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -1016,35 +1029,9 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
             <div class="wizard-pane output-section-compact" data-wizard-pane="5">
               <div class="wizard-pane-title"><div><h4>⑤ 확인하고 출력 → 후속관리</h4><p>출력 완료 후 현재 환자·질환·퇴원일·개별지시를 그대로 후속관리로 넘깁니다.</p></div></div>
               <div id="readinessPanel" class="readiness-panel"></div>
-              <div class="package-panel">
-                <h4>퇴원·후속관리 패키지</h4><p>퇴원 당일 자료와 현재 선택한 Patient Journey의 후속관리 자료를 한 번에 정리합니다. 약·재진 정보가 없거나 투약일수가 미완성인 경우 관련 파일은 자동 제외됩니다.</p>
-                <div class="package-primary-box"><b>병원 기본 패키지</b><span id="packageDefaultSummary">권장 출력 구성을 확인 중입니다.</span></div>
-                <button id="downloadPackage" class="package-download" type="button">병원 기본 패키지 생성 →</button>
-                <details id="packageAdvanced" class="package-advanced">
-                  <summary><span>출력물 상세 설정</span><span>필요할 때만 변경</span></summary>
-                  <div class="package-advanced-body">
-                    <div class="package-options">
-                      <label class="package-option"><input id="packageSummary" type="checkbox" checked /><span><b>퇴원 1P 요약</b><span>보호자가 당일 바로 보는 핵심</span></span></label>
-                      <label class="package-option"><input id="packagePdf" type="checkbox" checked /><span><b>보호자 PDF</b><span>8P + 복약표 자동 포함</span></span></label>
-                      <label class="package-option" id="packageMedsLabel"><input id="packageMeds" type="checkbox" checked /><span><b>복약 일정표</b><span>약 1–8종 · 시간순</span></span></label>
-                      <label class="package-option" id="packageMedCheckLabel"><input id="packageMedCheck" type="checkbox" checked /><span><b>복약 체크표</b><span>약별 투약일수 × 설정시간 자동 반영</span></span></label>
-                      <label class="package-option"><input id="packageD1" type="checkbox" checked /><span><b>D+1 체크카드</b><span>1페이지 핵심관리</span></span></label>
-                      <label class="package-option followup"><input id="packageMobileAll" type="checkbox" checked /><span><b>D+1·3·7·14 모바일 4종</b><span>1080×1920 PNG 일괄 생성</span></span></label>
-                      <label class="package-option followup" id="packageCalendarLabel"><input id="packageCalendar" type="checkbox" checked /><span><b>재진 캘린더</b><span>.ics · 휴대폰 캘린더 등록</span></span></label>
-                      <label class="package-option automation" id="packageFollowupAutomationLabel"><input id="packageFollowupAutomation" type="checkbox" checked /><span><b>후속관리 자동알림</b><span>D+ 일정 .ics + 발송문구 TXT</span></span></label>
-                      <label class="package-option"><input id="packageStaff" type="checkbox" checked /><span><b>직원 체크리스트</b><span>60초 설명 + 8가지 확인</span></span></label>
-                    </div>
-                    <div class="package-preset-bar"><button id="applyPackagePreset" class="btn btn-secondary" type="button">저장된 출력 기본값 적용</button><button id="savePackagePreset" class="btn btn-ghost" type="button">현재 구성을 병원 기본값으로 저장</button></div>
-                    <div class="package-note">ZIP 안에서 <b>00_퇴원당일</b>과 <b>01_후속관리</b> 폴더로 자동 정리합니다. 약이 없으면 복약자료, 투약일수가 없으면 복약 체크표, 재진일이 없으면 캘린더 파일은 자동 제외됩니다.</div>
-                    <div class="followup-folder-preview"><b>ZIP 구조</b><br>00_퇴원당일/ 1P요약 · 보호자PDF · 복약자료 · 직원교육<br>01_후속관리/ D+1·3·7·14 모바일카드 · 재진캘린더.ics · 후속관리자동알림.ics · 발송문구.txt</div>
-                  </div>
-                </details>
-                <div id="completionPanel" class="completion-panel"><strong>퇴원 패키지 생성 완료</strong><p id="completionText"></p><div class="completion-actions"><button id="completionGoFollowup" class="btn btn-primary" type="button">현재 정보로 후속관리 계속 →</button><button id="completionNewCase" class="btn btn-secondary" type="button">다음 환자 시작</button></div><div id="pilotFeedbackPrompt" class="pilot-feedback-prompt"><div class="pilot-feedback-title"><b>10초 사용성 피드백</b><span>환자정보는 저장하지 않습니다.</span></div><div class="rating-row" id="pilotRatingRow"><button type="button" data-rating="1">1</button><button type="button" data-rating="2">2</button><button type="button" data-rating="3">3</button><button type="button" data-rating="4">4</button><button type="button" data-rating="5">5</button></div><div class="feedback-tags" id="pilotFeedbackTags"><button type="button" data-feedback-tag="입력 오래 걸림">입력 오래 걸림</button><button type="button" data-feedback-tag="복약 입력">복약 입력</button><button type="button" data-feedback-tag="PDF">PDF</button><button type="button" data-feedback-tag="모바일 카드">모바일 카드</button><button type="button" data-feedback-tag="기타">기타</button></div><textarea id="pilotFeedbackNote" class="input" maxlength="180" placeholder="선택 메모 · 환자 개인정보는 입력하지 마세요"></textarea><button id="savePilotFeedback" class="btn btn-secondary" type="button">피드백 저장</button></div></div>
-              </div>
-
-              <label class="field-label">개별 출력물 미리보기 / 생성</label>
+              <label class="field-label">출력물 선택 · 미리보기 · 다운로드</label>
               <div id="outputChooser" class="output-chooser">
-                <div class="output-option active selected" data-output="pdf"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="pdf" checked /><span class="output-copy"><b>고급 보호자 PDF</b><small>8P · 복약 입력 시 9–10P</small></span></label><button class="output-preview-btn" type="button" data-preview-output="pdf">미리보기</button></div>
+                <div class="output-option active selected" data-output="pdf"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="pdf" checked /><span class="output-copy"><b>고급 보호자 자료</b><small>8P · PDF 또는 페이지별 이미지</small></span></label><button class="output-preview-btn" type="button" data-preview-output="pdf">미리보기</button></div>
                 <div class="output-option" data-output="summary"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="summary" /><span class="output-copy"><b>퇴원 1P 요약</b><small>당일 핵심만 한 장</small></span></label><button class="output-preview-btn" type="button" data-preview-output="summary">미리보기</button></div>
                 <div class="output-option" data-output="meds"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="meds" /><span class="output-copy"><b>복약 일정표</b><small>약 이름·용량·횟수·시간</small></span></label><button class="output-preview-btn" type="button" data-preview-output="meds">미리보기</button></div>
                 <div class="output-option" data-output="medcheck"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="medcheck" /><span class="output-copy"><b>복약 체크표</b><small>약별 투약일수 × 날짜 × 설정시간</small></span></label><button class="output-preview-btn" type="button" data-preview-output="medcheck">미리보기</button></div>
@@ -1054,11 +1041,19 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
                 <div class="output-option" data-output="d3"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="d3" /><span class="output-copy"><b>D+3 체크카드</b><small>질환별 초기 반응</small></span></label><button class="output-preview-btn" type="button" data-preview-output="d3">미리보기</button></div>
                 <div class="output-option" data-output="d7"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="d7" /><span class="output-copy"><b>D+7 체크카드</b><small>질환별 1주 평가</small></span></label><button class="output-preview-btn" type="button" data-preview-output="d7">미리보기</button></div>
                 <div class="output-option" data-output="d14"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="d14" /><span class="output-copy"><b>D+14 체크카드</b><small>질환별 장기전환</small></span></label><button class="output-preview-btn" type="button" data-preview-output="d14">미리보기</button></div>
-                <div class="output-option" data-output="mobile"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="mobile" /><span class="output-copy"><b>휴대폰 이미지 카드</b><small>1080×1920 PNG</small></span></label><button class="output-preview-btn" type="button" data-preview-output="mobile">미리보기</button></div>
-                <div class="output-option" data-output="mobile4"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="mobile4" /><span class="output-copy"><b>모바일 카드 4종</b><small>D+1·3·7·14 일괄 PNG</small></span></label><button class="output-preview-btn" type="button" data-preview-output="mobile4">미리보기</button></div>
+                <div class="output-option" data-output="mobile"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="mobile" /><span class="output-copy"><b>휴대폰 카드</b><small>D+ 시점 · PDF 또는 1080×1920 PNG</small></span></label><button class="output-preview-btn" type="button" data-preview-output="mobile">미리보기</button></div>
+                <div class="output-option" data-output="mobile4"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="mobile4" /><span class="output-copy"><b>모바일 카드 4종</b><small>D+1·3·7·14 · PDF 또는 PNG</small></span></label><button class="output-preview-btn" type="button" data-preview-output="mobile4">미리보기</button></div>
                 <div class="output-option" data-output="staff"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="staff" /><span class="output-copy"><b>직원용 퇴원교육</b><small>60초 설명 + 체크리스트</small></span></label><button class="output-preview-btn" type="button" data-preview-output="staff">미리보기</button></div>
               </div>
               <div id="selectedOutputSummary" class="output-selection-summary"><b>1개 선택</b> · 체크박스로 여러 출력물을 선택하고, 미리보기 버튼으로 화면을 전환하세요.</div>
+              <div id="outputFormatMode" class="output-format-mode" aria-label="출력 파일 형식">
+                <div class="output-format-head"><b>출력 파일 형식</b><span>보호자 전송은 이미지가 더 편리합니다.</span></div>
+                <div class="output-format-options">
+                  <label><input type="radio" name="outputFileFormat" value="png" checked><span><b>이미지 (PNG)</b><small>보호자 카톡·문자 전송 권장 · 여러 페이지는 페이지별 PNG</small></span></label>
+                  <label><input type="radio" name="outputFileFormat" value="pdf"><span><b>PDF</b><small>인쇄·문서 보관 권장 · 여러 페이지는 PDF 1개</small></span></label>
+                </div>
+                <p id="outputFormatHint">카카오용 문구와 문자는 파일 형식 선택과 관계없이 TXT/복사 기능을 유지합니다.</p>
+              </div>
               <div id="batchDownloadMode" class="batch-download-mode hidden" aria-label="여러 자료 다운로드 방식">
                 <div class="batch-download-mode-head"><b>여러 자료 다운로드 방식</b><span>필요할 때 ZIP으로도 받을 수 있습니다.</span></div>
                 <div class="batch-download-mode-options">
@@ -3462,25 +3457,13 @@ function batchModeNeeded(selected=selectedOutputTypes()){
 }
 function updateSelectedOutputUi(){
   const selected=selectedOutputTypes();
-  document.querySelectorAll('.output-option').forEach(card=>{
-    const type=card.dataset.output||'';
-    card.classList.toggle('selected',selected.includes(type));
-    card.classList.toggle('active',type===currentOutput);
-  });
-  const summary=$('selectedOutputSummary');
-  if(summary)summary.innerHTML=`<b>${selected.length}개 선택</b> · 체크박스로 복수선택 후 한 번에 생성합니다. 파란 테두리는 현재 미리보기입니다.`;
-  const modeBox=$('batchDownloadMode'),needsMode=batchModeNeeded(selected),mode=selectedBatchDownloadMode();
-  modeBox?.classList.toggle('hidden',!needsMode);
-  const modeHint=$('batchDownloadModeHint');
-  if(modeHint)modeHint.textContent=mode==='individual'?'개별 파일은 먼저 준비한 뒤 PDF·PNG·TXT를 각각 다운로드합니다. 시스템/보호 폴더를 직접 선택하지 않습니다.':'선택한 모든 파일을 기존 방식대로 ZIP 1개에 묶어 저장합니다.';
-  const btn=$('generateOutputBtn');
-  if(btn){
-    btn.disabled=!selected.length;
-    if(!selected.length)btn.textContent='출력물을 하나 이상 선택해주세요';
-    else if(!needsMode)btn.textContent='선택한 1종 생성 · 다운로드';
-    else if(mode==='individual')btn.textContent=selected.length===1?'모바일 카드 4종 개별 파일 준비':`선택한 ${selected.length}종 개별 파일 준비`;
-    else btn.textContent=selected.length===1?'모바일 카드 4종 ZIP 다운로드':`선택한 ${selected.length}종 ZIP 생성 · 다운로드`;
-  }
+  document.querySelectorAll('.output-option').forEach(card=>{const type=card.dataset.output||'';card.classList.toggle('selected',selected.includes(type));card.classList.toggle('active',type===currentOutput);});
+  const summary=$('selectedOutputSummary');if(summary)summary.innerHTML=`<b>${selected.length}개 선택</b> · 필요한 자료만 고른 뒤 파일 형식과 다운로드 방식을 선택하세요.`;
+  const visualSelected=selected.some(outputSupportsFileFormat),formatBox=$('outputFormatMode'),format=selectedOutputFileFormat();formatBox?.classList.toggle('hidden',!visualSelected);
+  const formatHint=$('outputFormatHint');if(formatHint)formatHint.textContent=format==='png'?'보호자에게 바로 전송하기 편한 PNG입니다. 여러 페이지 자료는 페이지별 이미지로 생성됩니다. 카카오/문자는 TXT 그대로입니다.':'인쇄·문서보관용 PDF입니다. 여러 페이지 자료는 PDF 한 파일로 생성됩니다. 카카오/문자는 TXT 그대로입니다.';
+  const modeBox=$('batchDownloadMode'),needsMode=batchModeNeeded(selected),mode=selectedBatchDownloadMode();modeBox?.classList.toggle('hidden',!needsMode);
+  const modeHint=$('batchDownloadModeHint');if(modeHint)modeHint.textContent=mode==='individual'?'개별 파일을 먼저 준비한 뒤 파일별 다운로드 버튼으로 저장합니다.':'선택한 결과 파일을 ZIP 1개에 묶어 저장합니다.';
+  const btn=$('generateOutputBtn');if(btn){btn.disabled=!selected.length;if(!selected.length)btn.textContent='출력물을 하나 이상 선택해주세요';else{const visualLabel=visualSelected?(format==='png'?'이미지':'PDF'):'';if(!needsMode)btn.textContent=visualSelected?`선택한 자료 ${visualLabel} 생성 · 다운로드`:'선택한 문구 사용';else if(mode==='individual')btn.textContent=`선택한 ${selected.length}종 ${visualLabel||'파일'} 개별 준비`;else btn.textContent=`선택한 ${selected.length}종 ${visualLabel||'파일'} ZIP 생성`;}}
 }
 
 function loadHospital(){
@@ -3751,8 +3734,8 @@ function renderMonthlyOperationsReport(){
   $('mrMessageSuccess').textContent=(Number(m.messagesSent||0)+Number(m.messagesFailed||0))?monthlyPct(m.messageSuccessRate):'--';$('mrMessageSub').textContent=`성공 ${Number(m.messagesSent||0)} · 실패 ${Number(m.messagesFailed||0)} · 예약 ${Number(m.messagesPending||0)}`;
   $('mrSurveyResponse').textContent=Number(m.surveyInvited||0)?monthlyPct(m.surveyResponseRate):'--';$('mrSurveySub').textContent=`응답 ${Number(m.surveyResponded||0)} / 초대 ${Number(m.surveyInvited||0)}`;$('mrSatisfaction').textContent=Number(m.avgSatisfaction)>0?`${Number(m.avgSatisfaction).toFixed(1)}/5`:'--';
   $('mrRiskCases').textContent=Number(m.riskCases||0).toLocaleString('ko-KR');$('mrRiskSub').textContent=`신호 ${Number(m.riskSignals||0)} · 검토 ${Number(m.riskReviewed||0)}`;$('mrTouchpoints').textContent=Number(m.guardianTouchpoints||0).toLocaleString('ko-KR');
-  const value=[];value.push(`이번 달 <b>퇴원 패키지 ${Number(m.packageGenerations||0).toLocaleString('ko-KR')}건</b>을 생성했습니다.`);if(m.followupCases)value.push(`<b>${Number(m.followupCases).toLocaleString('ko-KR')}개 후속관리 케이스</b>가 CARESTEP에 연결됐습니다.`);if(m.guardianTouchpoints)value.push(`문자·설문·결과입력을 합쳐 <b>보호자 관리 접점 ${Number(m.guardianTouchpoints).toLocaleString('ko-KR')}회</b>를 기록했습니다.`);if(m.riskCases)value.push(`그중 <b>${Number(m.riskCases).toLocaleString('ko-KR')}개 케이스</b>에서 주의/악화 신호를 조기에 확인했습니다.`);$('monthlyReportValue').innerHTML=value.join(' ');
-  $('monthlyReportComparison').innerHTML=[monthlyDeltaText('퇴원 패키지',cmp.packageGenerations),monthlyDeltaText('후속관리 케이스',cmp.followupCases),monthlyDeltaText('문자 성공률',cmp.messageSuccessRate,true),monthlyDeltaText('설문 응답률',cmp.surveyResponseRate,true),monthlyDeltaText('만족도',cmp.avgSatisfaction),monthlyDeltaText('위험 케이스',cmp.riskCases,false,true),monthlyDeltaText('관리 접점',cmp.guardianTouchpoints)].join('');
+  const value=[];value.push(`이번 달 <b>퇴원자료 ${Number(m.packageGenerations||0).toLocaleString('ko-KR')}건</b>을 생성했습니다.`);if(m.followupCases)value.push(`<b>${Number(m.followupCases).toLocaleString('ko-KR')}개 후속관리 케이스</b>가 CARESTEP에 연결됐습니다.`);if(m.guardianTouchpoints)value.push(`문자·설문·결과입력을 합쳐 <b>보호자 관리 접점 ${Number(m.guardianTouchpoints).toLocaleString('ko-KR')}회</b>를 기록했습니다.`);if(m.riskCases)value.push(`그중 <b>${Number(m.riskCases).toLocaleString('ko-KR')}개 케이스</b>에서 주의/악화 신호를 조기에 확인했습니다.`);$('monthlyReportValue').innerHTML=value.join(' ');
+  $('monthlyReportComparison').innerHTML=[monthlyDeltaText('퇴원자료 생성',cmp.packageGenerations),monthlyDeltaText('후속관리 케이스',cmp.followupCases),monthlyDeltaText('문자 성공률',cmp.messageSuccessRate,true),monthlyDeltaText('설문 응답률',cmp.surveyResponseRate,true),monthlyDeltaText('만족도',cmp.avgSatisfaction),monthlyDeltaText('위험 케이스',cmp.riskCases,false,true),monthlyDeltaText('관리 접점',cmp.guardianTouchpoints)].join('');
   $('monthlyOutcomeSummary').innerHTML=[['결과 입력',m.outcomesCompleted],['호전',m.outcomesImproved],['안정',m.outcomesStable],['악화',m.outcomesWorsened],['연락 안 됨',m.outcomesUnreachable],['수의사 확인',m.outcomesEscalated]].map(([k,v])=>`<div><span>${k}</span><b>${Number(v||0).toLocaleString('ko-KR')}</b></div>`).join('');
   const tt=c.topTemplates||[];$('monthlyTemplateTable').innerHTML=tt.length?`<table class="monthly-mini-table"><thead><tr><th>교육자료</th><th class="right">생성</th><th class="right">평균시간</th></tr></thead><tbody>${tt.map(x=>`<tr><td>${escapeHtml(templateNameById(x.templateId))}</td><td class="right">${Number(x.count||0)}건</td><td class="right">${x.avgSeconds?Math.round(x.avgSeconds)+'초':'-'}</td></tr>`).join('')}</tbody></table>`:monthlyReportRowEmpty();
   const jt=c.topJourneys||[];$('monthlyJourneyTable').innerHTML=jt.length?`<table class="monthly-mini-table"><thead><tr><th>Journey</th><th class="right">완료</th><th class="right">호전</th><th class="right">확인</th></tr></thead><tbody>${jt.map(x=>`<tr><td>${escapeHtml(x.journeyName||'기본 후속관리')}</td><td class="right">${Number(x.completed||0)}</td><td class="right">${Number(x.improved||0)}</td><td class="right">${Number(x.escalated||0)}</td></tr>`).join('')}</tbody></table>`:monthlyReportRowEmpty();
@@ -3764,7 +3747,7 @@ async function loadMonthlyOperationsReport(showToast=true){
   if(saasMode!=='auth'||!saasMe)return;const month=$('monthlyReportMonth')?.value||currentKstMonth();if($('monthlyReportStatus'))$('monthlyReportStatus').textContent='월간 리포트를 집계하고 있습니다…';
   try{monthlyReportState=await saasRequest('/saas/reports/monthly?month='+encodeURIComponent(month),{method:'GET'});renderMonthlyOperationsReport();if(showToast)toast(`${month} 운영 리포트를 새로고침했습니다.`);}catch(e){if($('monthlyReportStatus'))$('monthlyReportStatus').textContent=e.message||'월간 리포트를 불러오지 못했습니다.';if(showToast)toast(e.message||'월간 리포트 조회 실패');}
 }
-function monthlyReportCsvRows(){const d=monthlyReportState,c=d?.current,m=c?.metrics||{};if(!c)return [];const rows=[['CARESTEP 월간 운영 리포트',c.month],['병원',d.clinic?.name||hospitalName()],[],['지표','값'],['퇴원 패키지 생성',m.packageGenerations],['평균 패키지 생성시간(초)',m.avgPackageSeconds],['후속관리 케이스',m.followupCases],['후속관리 등록 업무',m.followupTasksRegistered],['후속관리 결과입력 완료',m.followupTasksCompleted],['후속관리 완료율(%)',m.followupCompletionRate],['문자 성공',m.messagesSent],['문자 실패',m.messagesFailed],['문자 성공률(%)',m.messageSuccessRate],['설문 초대',m.surveyInvited],['설문 응답',m.surveyResponded],['설문 응답률(%)',m.surveyResponseRate],['평균 만족도',m.avgSatisfaction],['위험 케이스',m.riskCases],['보호자 관리 접점',m.guardianTouchpoints],[],['직원','역할','패키지','후속완료','전체 이벤트'],...(c.staff||[]).map(x=>[x.displayName,x.role,x.packages,x.followupCompleted,x.events]),[],['교육자료','패키지 생성','평균 생성시간(초)'],...(c.topTemplates||[]).map(x=>[templateNameById(x.templateId),x.count,x.avgSeconds]),[],['Journey','완료','호전','악화','수의사 확인'],...(c.topJourneys||[]).map(x=>[x.journeyName,x.completed,x.improved,x.worsened,x.escalated])];return rows;}
+function monthlyReportCsvRows(){const d=monthlyReportState,c=d?.current,m=c?.metrics||{};if(!c)return [];const rows=[['CARESTEP 월간 운영 리포트',c.month],['병원',d.clinic?.name||hospitalName()],[],['지표','값'],['퇴원자료 생성',m.packageGenerations],['평균 자료 생성시간(초)',m.avgPackageSeconds],['후속관리 케이스',m.followupCases],['후속관리 등록 업무',m.followupTasksRegistered],['후속관리 결과입력 완료',m.followupTasksCompleted],['후속관리 완료율(%)',m.followupCompletionRate],['문자 성공',m.messagesSent],['문자 실패',m.messagesFailed],['문자 성공률(%)',m.messageSuccessRate],['설문 초대',m.surveyInvited],['설문 응답',m.surveyResponded],['설문 응답률(%)',m.surveyResponseRate],['평균 만족도',m.avgSatisfaction],['위험 케이스',m.riskCases],['보호자 관리 접점',m.guardianTouchpoints],[],['직원','역할','자료 생성','후속완료','전체 이벤트'],...(c.staff||[]).map(x=>[x.displayName,x.role,x.packages,x.followupCompleted,x.events]),[],['교육자료','자료 생성','평균 생성시간(초)'],...(c.topTemplates||[]).map(x=>[templateNameById(x.templateId),x.count,x.avgSeconds]),[],['Journey','완료','호전','악화','수의사 확인'],...(c.topJourneys||[]).map(x=>[x.journeyName,x.completed,x.improved,x.worsened,x.escalated])];return rows;}
 function exportMonthlyOperationsCsv(){if(!monthlyReportState?.current){toast('먼저 월간 리포트를 불러와주세요.');return;}const a=document.createElement('a'),blob=csvBlob(monthlyReportCsvRows());a.href=URL.createObjectURL(blob);a.download=`${safeFileName(hospitalName())}_CARESTEP_${monthlyReportState.current.month}_운영리포트.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('월간 운영 리포트 CSV를 저장했습니다.');}
 async function exportMonthlyOperationsPdf(){if(!monthlyReportState?.current){toast('먼저 월간 리포트를 불러와주세요.');return;}const src=$('monthlyReportExportSurface');if(!src)return;if(typeof html2pdf==='undefined'){toast('PDF 라이브러리를 불러오지 못했습니다.');return;}const clone=src.cloneNode(true);clone.style.width='760px';clone.style.border='0';clone.style.borderRadius='0';const host=document.createElement('div');host.style.cssText='position:fixed;left:-10000px;top:0;width:794px;background:#fff;padding:17px;z-index:-99999';host.appendChild(clone);document.body.appendChild(host);try{if(document.fonts?.ready)await document.fonts.ready;await html2pdf().set({margin:[7,7,7,7],filename:`${safeFileName(hospitalName())}_CARESTEP_${monthlyReportState.current.month}_월간운영리포트.pdf`,image:{type:'jpeg',quality:.97},html2canvas:{scale:1.5,backgroundColor:'#ffffff',logging:false},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy'],avoid:['.monthly-report-card','.monthly-report-kpis article']}}).from(clone).save();toast('월간 운영 리포트 PDF를 저장했습니다.');}catch(e){toast(e.message||'PDF 저장에 실패했습니다.');}finally{host.remove();}}
 
@@ -3778,7 +3761,7 @@ function recordPilotUsage(type,extra={}){
   workflowSettings.usage=[...(workflowSettings.usage||[]),event].slice(-500);saveWorkflowSettings();renderPilotDashboard();saasRecordUsageEvent(event.type,event.templateId,{elapsedMs:event.elapsedMs,fileCount:event.fileCount,outputs:event.outputs});return event.id;
 }
 function templateNameById(id){return templateDisplayTitle(templates.find(t=>t.id===id)||{})||id||'--';}
-function outputLabel(k){if(k==='medcheck')return medicationCheckLabel();const m={package:'퇴원 패키지',individual_batch:'개별 출력물 묶음',pdf:'보호자 PDF',summary:'퇴원 1P 요약',meds:'복약 일정표',kakao:'카카오톡',sms:'문자',d1:'D+1 체크카드',d3:'D+3 체크카드',d7:'D+7 체크카드',d14:'D+14 체크카드',mobile:'모바일 카드',mobileall:'모바일 4종',mobile4:'모바일 4종',calendar:'재진 캘린더',followup:'후속관리 자동화',staff:'직원 체크리스트'};return m[k]||k;}
+function outputLabel(k){if(k==='medcheck')return medicationCheckLabel();const m={package:'퇴원자료 묶음',individual_batch:'개별 출력물 묶음',pdf:'보호자 PDF',summary:'퇴원 1P 요약',meds:'복약 일정표',kakao:'카카오톡',sms:'문자',d1:'D+1 체크카드',d3:'D+3 체크카드',d7:'D+7 체크카드',d14:'D+14 체크카드',mobile:'모바일 카드',mobileall:'모바일 4종',mobile4:'모바일 4종',calendar:'재진 캘린더',followup:'후속관리 자동화',staff:'직원 체크리스트'};return m[k]||k;}
 function pilotPackageEvents(){return (workflowSettings.usage||[]).filter(e=>e.type==='package');}
 function pilotStats(){
   const pkg=pilotPackageEvents(); const ms=pkg.map(e=>Number(e.elapsedMs)||0).filter(Boolean).sort((a,b)=>a-b); const avg=ms.length?ms.reduce((a,b)=>a+b,0)/ms.length:0; const med=ms.length?(ms.length%2?ms[(ms.length-1)/2]:(ms[ms.length/2-1]+ms[ms.length/2])/2):0; const best=ms.length?ms[0]:0; const under=ms.length?ms.filter(x=>x<=120000).length/ms.length*100:0; const ratings=(workflowSettings.feedback||[]).map(f=>Number(f.rating)).filter(x=>x>0); const rating=ratings.length?ratings.reduce((a,b)=>a+b,0)/ratings.length:0; return {pkgCount:pkg.length,avg,med,best,under,rating,feedbackCount:ratings.length};
@@ -3797,7 +3780,7 @@ function renderPilotDashboard(){
 }
 function savePilotSetup(){workflowSettings.pilot={label:$('pilotLabel')?.value?.trim()||'',target:Math.max(1,Number($('pilotTarget')?.value)||20),start:$('pilotStart')?.value||'',staffCount:Math.max(1,Number($('pilotStaffCount')?.value)||1)};saveWorkflowSettings();renderPilotDashboard();toast('Pilot 설정을 저장했습니다.');}
 function showPilotFeedback(eventId){pendingPilotEventId=eventId||'';pendingPilotRating=0;pendingPilotTags=[];document.querySelectorAll('#pilotRatingRow button,#pilotFeedbackTags button').forEach(b=>b.classList.remove('active'));if($('pilotFeedbackNote'))$('pilotFeedbackNote').value='';}
-function savePilotFeedback(){if(!pendingPilotEventId){toast('먼저 퇴원 패키지를 생성해주세요.');return;}if(!pendingPilotRating){toast('사용성 점수 1~5를 선택해주세요.');return;}const ev=(workflowSettings.usage||[]).find(e=>e.id===pendingPilotEventId);workflowSettings.feedback=[...(workflowSettings.feedback||[]),{id:pilotUid(),eventId:pendingPilotEventId,templateId:ev?.templateId||currentTemplateId,rating:pendingPilotRating,tags:[...pendingPilotTags],note:$('pilotFeedbackNote')?.value?.trim()||'',at:Date.now()}].slice(-300);saveWorkflowSettings();renderPilotDashboard();toast('Pilot 피드백을 저장했습니다.');pendingPilotEventId='';}
+function savePilotFeedback(){if(!pendingPilotEventId){toast('먼저 출력물을 생성해주세요.');return;}if(!pendingPilotRating){toast('사용성 점수 1~5를 선택해주세요.');return;}const ev=(workflowSettings.usage||[]).find(e=>e.id===pendingPilotEventId);workflowSettings.feedback=[...(workflowSettings.feedback||[]),{id:pilotUid(),eventId:pendingPilotEventId,templateId:ev?.templateId||currentTemplateId,rating:pendingPilotRating,tags:[...pendingPilotTags],note:$('pilotFeedbackNote')?.value?.trim()||'',at:Date.now()}].slice(-300);saveWorkflowSettings();renderPilotDashboard();toast('Pilot 피드백을 저장했습니다.');pendingPilotEventId='';}
 function csvCell(v){const s=String(v??'');return /[",\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s;}
 function csvBlob(rows){return new Blob(['\ufeff'+rows.map(r=>r.map(csvCell).join(',')).join('\n')],{type:'text/csv;charset=utf-8'});}
 function pilotSummaryText(){const p=workflowSettings.pilot||defaultWorkflowSettings.pilot,st=pilotStats(),tr=countBy(workflowSettings.usage||[],e=>e.templateId),outs=[];(workflowSettings.usage||[]).forEach(e=>(e.outputs||[e.type]).forEach(o=>outs.push({o})));const or=countBy(outs,x=>x.o);return `CARESTEP Clinic Pilot Report\nPilot: ${p.label||'-'}\n병원: ${hospitalName()}\n시작일: ${p.start||'-'}\n목표: ${Number(p.target)||20}건\n테스트 직원: ${Number(p.staffCount)||1}명\n\n[핵심 지표]\n완료 패키지: ${st.pkgCount}건\n평균 생성시간: ${st.avg?formatElapsed(st.avg):'-'}\n중앙값: ${st.med?formatElapsed(st.med):'-'}\n최단: ${st.best?formatElapsed(st.best):'-'}\n2분 이내: ${st.pkgCount?Math.round(st.under)+'%':'-'}\n평균 사용성: ${st.feedbackCount?st.rating.toFixed(2)+'/5':'-'} (${st.feedbackCount}건)\n\n[최다 사용 자료]\n${tr.slice(0,10).map(([k,n],i)=>`${i+1}. ${templateNameById(k)} - ${n}회`).join('\n')||'-'}\n\n[출력물 사용]\n${or.slice(0,15).map(([k,n],i)=>`${i+1}. ${outputLabel(k)} - ${n}회`).join('\n')||'-'}\n\n※ 환자명·보호자명·복약정보·퇴원일·개별 퇴원지시는 Pilot 통계에 저장되지 않습니다.`;}
@@ -7063,21 +7046,21 @@ function renderCurrentOutput(){
   const t=templates.find(x=>x.id===currentTemplateId)||templates[0];
   document.querySelectorAll('.output-option').forEach(b=>b.classList.toggle('active',b.dataset.output===currentOutput));
   readCaseInfoFromForm(); const medPages=medicationPageCount(); const pdfCount=8+medPages;
-  const statusMap={pdf:`${pdfCount}P`,summary:'1P',meds:medPages?`${medPages}P`:'MEDS',medcheck:'1P',kakao:'KAKAO',sms:'SMS',d1:'D+1',d3:'D+3',d7:'D+7',d14:'D+14',mobile:'MOBILE',mobile4:'4 PNG',staff:'STAFF'};
+  const statusMap={pdf:`${pdfCount}P`,summary:'1P',meds:medPages?`${medPages}P`:'MEDS',medcheck:'1P',kakao:'KAKAO',sms:'SMS',d1:'D+1',d3:'D+3',d7:'D+7',d14:'D+14',mobile:'MOBILE',mobile4:'4 FILE',staff:'STAFF'};
   $('selectedStatus').textContent=`${categoryLabel(t.category)} · ${statusMap[currentOutput]||''}`;
-  const labels={pdf:'고급 보호자 PDF 미리보기',summary:'퇴원 당일 1페이지 요약 미리보기',meds:'복약 일정표 미리보기',medcheck:medicationCheckLabel()+' 미리보기',kakao:'카카오톡 문구 미리보기',sms:'문자 문구 미리보기',d1:'D+1 체크카드 미리보기',d3:'D+3 체크카드 미리보기',d7:'D+7 체크카드 미리보기',d14:'D+14 체크카드 미리보기',mobile:'휴대폰 이미지 카드 미리보기',mobile4:'D+1·3·7·14 모바일 카드 4종',staff:'직원용 퇴원교육 미리보기'};
+  const labels={pdf:'고급 보호자 자료 미리보기',summary:'퇴원 당일 1페이지 요약 미리보기',meds:'복약 일정표 미리보기',medcheck:medicationCheckLabel()+' 미리보기',kakao:'카카오톡 문구 미리보기',sms:'문자 문구 미리보기',d1:'D+1 체크카드 미리보기',d3:'D+3 체크카드 미리보기',d7:'D+7 체크카드 미리보기',d14:'D+14 체크카드 미리보기',mobile:'휴대폰 카드 미리보기',mobile4:'D+1·3·7·14 모바일 카드 4종',staff:'직원용 퇴원교육 미리보기'};
   $('previewLabel').textContent=labels[currentOutput]||'미리보기';
   $('mobileDayControl')?.classList.toggle('hidden',currentOutput!=='mobile');
   const btn=$('generateOutputBtn'), sec=$('secondaryOutputBtn'), hint=$('outputHint');
-  if(currentOutput==='pdf'){btn.textContent=`고급 PDF ${pdfCount}P 생성 · 다운로드`;sec.textContent='인쇄 / PDF 저장';hint.textContent=medPages?`복약 일정표 ${medPages}페이지가 포함되어 총 ${pdfCount}페이지로 생성됩니다.`:'복약표 미입력 상태로 8페이지가 생성됩니다.';renderAdvancedPdf();}
-  else if(currentOutput==='summary'){btn.textContent='퇴원 1P 요약 PDF 다운로드';sec.textContent='인쇄 / PDF 저장';hint.textContent='보호자가 퇴원 당일 가장 먼저 보는 개별지시·복약·재진·위험신호 한 장 요약입니다.';renderDischargeSummary();}
-  else if(currentOutput==='meds'){btn.textContent='복약 일정표 PDF 다운로드';sec.textContent='인쇄 / PDF 저장';hint.textContent=medPages?`입력한 ${validMedications().length}종 약을 ${medPages}페이지 일정표로 생성합니다.`:'약을 입력하면 복약 일정표를 생성할 수 있습니다.';renderMedicationSheet();}
-  else if(currentOutput==='medcheck'){const meta=medicationCheckMeta();btn.textContent=`${medicationCheckLabel()} PDF 다운로드`;sec.textContent='인쇄 / PDF 저장';hint.textContent=meta.valid?`최장 ${meta.maxDays}일 처방 기준 · ${meta.pageCount}페이지 · 각 약은 입력한 투약일수까지만 시간별 체크칸을 표시합니다.`:'각 약의 투약 기간(일수)을 입력하면 처방기간에 맞춰 자동 생성됩니다.';renderMedicationCheckSheet();}
+  if(currentOutput==='pdf'){btn.textContent=`고급 PDF ${pdfCount}P 생성 · 다운로드`;sec.textContent='인쇄 / PDF 저장';hint.textContent=medPages?`복약 일정표 ${medPages}페이지가 포함되어 총 ${pdfCount}페이지입니다. 아래에서 PNG 또는 PDF를 선택해 저장하세요.`:'복약표 미입력 상태로 8페이지입니다. 아래에서 PNG 또는 PDF를 선택해 저장하세요.';renderAdvancedPdf();}
+  else if(currentOutput==='summary'){btn.textContent='퇴원 1P 요약 PDF 다운로드';sec.textContent='인쇄 / PDF 저장';hint.textContent='보호자가 퇴원 당일 가장 먼저 보는 한 장 요약입니다. PNG 또는 PDF로 저장할 수 있습니다.';renderDischargeSummary();}
+  else if(currentOutput==='meds'){btn.textContent='복약 일정표 PDF 다운로드';sec.textContent='인쇄 / PDF 저장';hint.textContent=medPages?`입력한 ${validMedications().length}종 약을 ${medPages}페이지 일정표로 구성합니다. PNG 또는 PDF로 저장할 수 있습니다.`:'약을 입력하면 복약 일정표를 생성할 수 있습니다.';renderMedicationSheet();}
+  else if(currentOutput==='medcheck'){const meta=medicationCheckMeta();btn.textContent=`${medicationCheckLabel()} PDF 다운로드`;sec.textContent='인쇄 / PDF 저장';hint.textContent=meta.valid?`최장 ${meta.maxDays}일 처방 기준 · ${meta.pageCount}페이지 · PNG 또는 PDF로 저장할 수 있습니다.`:'각 약의 투약 기간(일수)을 입력하면 처방기간에 맞춰 자동 생성됩니다.';renderMedicationCheckSheet();}
   else if(currentOutput==='kakao'||currentOutput==='sms'){btn.textContent=currentOutput==='sms'?'문자 문구 복사':'카카오톡 문구 복사';sec.textContent='TXT 다운로드';hint.textContent='보호자에게 바로 보낼 수 있는 안내문입니다.';renderMessageOutput(currentOutput);}
-  else if(['d1','d3','d7','d14'].includes(currentOutput)){const day=Number(currentOutput.replace('d',''));btn.textContent=`D+${day} 체크카드 PDF 다운로드`;sec.textContent='인쇄 / PDF 저장';hint.textContent=`D+${day}${actualDateFor(day)?` · ${actualDateFor(day)}`:''}에 확인할 내용을 1페이지로 정리합니다.`;renderCheckCard(day);}
-  else if(currentOutput==='mobile'){readCaseInfoFromForm();mobileDay=Number($('mobileDaySelect')?.value||1);btn.textContent='1080×1920 PNG 다운로드';sec.textContent='현재 카드 인쇄 / PDF 저장';hint.textContent=`D+${mobileDay}${actualDateFor(mobileDay)?` · ${actualDateFor(mobileDay)}`:''} 보호자 휴대폰 저장용 세로 이미지입니다.`;renderMobileCard(mobileDay);}
-  else if(currentOutput==='mobile4'){btn.textContent='D+1·3·7·14 모바일 4종 ZIP';sec.textContent='D+1 카드 인쇄 / PDF 저장';hint.textContent='D+1·3·7·14 모바일 카드를 1080×1920 PNG 4개로 생성해 ZIP으로 묶습니다.';renderMobileCard(1);}
-  else if(currentOutput==='staff'){btn.textContent='직원용 1P PDF 다운로드';sec.textContent='인쇄 / PDF 저장';hint.textContent='직원이 60초 설명과 퇴원 전 8가지 확인을 같은 순서로 진행하는 1페이지 자료입니다.';renderStaffSheet();}
+  else if(['d1','d3','d7','d14'].includes(currentOutput)){const day=Number(currentOutput.replace('d',''));btn.textContent=`D+${day} 체크카드 PDF 다운로드`;sec.textContent='인쇄 / PDF 저장';hint.textContent=`D+${day}${actualDateFor(day)?` · ${actualDateFor(day)}`:''} 확인 내용을 1페이지로 정리합니다. PNG 또는 PDF로 저장할 수 있습니다.`;renderCheckCard(day);}
+  else if(currentOutput==='mobile'){readCaseInfoFromForm();mobileDay=Number($('mobileDaySelect')?.value||1);btn.textContent='1080×1920 PNG 다운로드';sec.textContent='현재 카드 인쇄 / PDF 저장';hint.textContent=`D+${mobileDay}${actualDateFor(mobileDay)?` · ${actualDateFor(mobileDay)}`:''} 보호자 휴대폰용 카드입니다. PNG 또는 PDF를 선택해 저장할 수 있습니다.`;renderMobileCard(mobileDay);}
+  else if(currentOutput==='mobile4'){btn.textContent='D+1·3·7·14 모바일 4종 ZIP';sec.textContent='D+1 카드 인쇄 / PDF 저장';hint.textContent='D+1·3·7·14 카드 4종을 PNG 또는 PDF로 만들고, 개별 파일 또는 ZIP으로 받을 수 있습니다.';renderMobileCard(1);}
+  else if(currentOutput==='staff'){btn.textContent='직원용 1P PDF 다운로드';sec.textContent='인쇄 / PDF 저장';hint.textContent='직원이 60초 설명과 퇴원 전 8가지 확인을 같은 순서로 진행하는 1페이지 자료입니다. PNG 또는 PDF로 저장할 수 있습니다.';renderStaffSheet();}
   updateSelectedOutputUi();
 }
 function renderBuilder(){ updateCaseDatePreview(); updateRecheckPreview(); updateClinicPresetStatus(); renderCurrentOutput(); updateReadiness(); renderGlobalCaseBadge(); }
@@ -7698,7 +7681,7 @@ function voiceRenderType(){
  if($('voiceTitleLabel'))$('voiceTitleLabel').textContent=cond?'요청할 질환 / 관리주제 *':voiceType==='feature'?'기능 제안 제목 *':'문의 제목 *';
  if($('voiceDetailsLabel'))$('voiceDetailsLabel').textContent=cond?'요청 이유 / 포함했으면 하는 내용':voiceType==='feature'?'어떤 업무가 더 쉬워져야 하나요?':'문의 내용';
  if($('voiceTitle'))$('voiceTitle').placeholder=cond?'예: 고양이 천식 장기관리':voiceType==='feature'?'예: 카카오톡으로 D+1 카드 자동 발송':'예: PDF 로고가 작게 보여요';
- if($('voiceDetails'))$('voiceDetails').placeholder=cond?'예: 흡입기 교육과 휴식 시 호흡수 기록 항목도 포함되면 좋겠습니다.':voiceType==='feature'?'예: 퇴원 패키지 생성 후 보호자에게 예약시간에 자동 발송되면 좋겠습니다.':'문의 내용을 적어주세요. 환자 개인정보는 입력하지 마세요.';
+ if($('voiceDetails'))$('voiceDetails').placeholder=cond?'예: 흡입기 교육과 휴식 시 호흡수 기록 항목도 포함되면 좋겠습니다.':voiceType==='feature'?'예: 퇴원자료 생성 후 보호자에게 예약시간에 자동 발송되면 좋겠습니다.':'문의 내용을 적어주세요. 환자 개인정보는 입력하지 마세요.';
 }
 function voiceLooksLikePatientPii(text){return /(?:01[016789][\s.-]?\d{3,4}[\s.-]?\d{4})|(?:환자명|보호자명|차트번호|주민등록번호)\s*[:：]/i.test(String(text||''));}
 async function voiceSubmit(){
@@ -8131,11 +8114,56 @@ function printCurrent(){
 </style></head><body><div class="pdf-document">${$('pdfDocument').innerHTML}</div><!-- CARESTEP v9.0.2 · PILOT READY HOTFIX 16 · fixed Worker endpoint + Hotfix 15 security hardening -->
 </body></html>`); w.document.close(); setTimeout(()=>{w.focus();w.print();},600);
 }
+
+// v9.0.2 Hotfix 29 · user chooses PDF or PNG at download time.
+function selectedOutputFileFormat(){return document.querySelector('input[name="outputFileFormat"]:checked')?.value==='pdf'?'pdf':'png';}
+function outputSupportsFileFormat(type){return ['pdf','summary','meds','medcheck','d1','d3','d7','d14','mobile','mobile4','staff'].includes(String(type||''));}
+function documentOutputDescriptor(type){
+  if(type==='pdf')return {label:`보호자교육_${8+medicationPageCount()}P`,render:renderAdvancedPdf};
+  if(type==='summary')return {label:'퇴원1P요약',render:renderDischargeSummary};
+  if(type==='meds')return {label:`복약일정표_${medicationPageCount()}P`,render:renderMedicationSheet};
+  if(type==='medcheck')return {label:medicationCheckFileLabel(),render:renderMedicationCheckSheet};
+  if(type==='staff')return {label:'직원용_퇴원교육',render:renderStaffSheet};
+  if(['d1','d3','d7','d14'].includes(type)){const day=Number(type.replace('d',''));return {label:`D+${day}_체크카드`,render:()=>renderCheckCard(day)};}
+  return null;
+}
+async function renderedOutputPngBlobs(renderFn){
+  if(typeof html2pdf==='undefined')throw new Error('이미지 변환 라이브러리를 불러오지 못했습니다.');
+  renderFn();await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));if(document.fonts?.ready)await document.fonts.ready;
+  const sourcePages=[...$('pdfDocument').querySelectorAll('.pdf-page')];if(!sourcePages.length)throw new Error('이미지로 변환할 페이지가 없습니다.');
+  const blobs=[];
+  for(const src of sourcePages){
+    const host=document.createElement('div');host.style.cssText='position:fixed;left:-10000px;top:0;width:794px;height:1123px;background:#fff;overflow:hidden;z-index:-2147483646;pointer-events:none';
+    const clone=src.cloneNode(true);clone.style.width='794px';clone.style.height='1123px';clone.style.minWidth='794px';clone.style.minHeight='1123px';clone.style.maxWidth='794px';clone.style.maxHeight='1123px';clone.style.margin='0';clone.style.boxShadow='none';host.appendChild(clone);document.body.appendChild(host);
+    try{
+      await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+      const worker=html2pdf().set({margin:0,image:{type:'png',quality:1},html2canvas:{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',logging:false,scrollX:0,scrollY:0},jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},pagebreak:{mode:[]}}).from(clone).toCanvas();
+      const canvas=await worker.get('canvas');if(!canvas)throw new Error('PNG 캡처에 실패했습니다.');
+      const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png',1));if(!blob)throw new Error('PNG 파일 생성에 실패했습니다.');blobs.push(blob);canvas.width=1;canvas.height=1;
+    }finally{host.remove();}
+  }
+  return blobs;
+}
+function blobToDataUrl(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=()=>reject(r.error||new Error('파일 변환 실패'));r.readAsDataURL(blob);});}
+async function mobileCardPdfBlob(day){
+  const png=await mobileCardPngBlob(day);if(!png)throw new Error('모바일 카드를 생성하지 못했습니다.');
+  const data=await blobToDataUrl(png),host=document.createElement('div');host.style.cssText='position:fixed;left:-10000px;top:0;width:1px;height:1px;background:#fff;z-index:-2147483647';document.body.appendChild(host);
+  try{
+    const worker=html2pdf().set({margin:0,image:{type:'png',quality:1},html2canvas:{scale:1,backgroundColor:'#fff',logging:false},jsPDF:{unit:'pt',format:[540,960],orientation:'portrait'},pagebreak:{mode:[]}}).from(host).toPdf();
+    const pdf=await worker.get('pdf');if(!pdf)throw new Error('PDF 생성기를 불러오지 못했습니다.');const w=pdf.internal.pageSize.getWidth(),h=pdf.internal.pageSize.getHeight();pdf.addImage(data,'PNG',0,0,w,h,undefined,'FAST');return pdf.output('blob');
+  }finally{host.remove();}
+}
+function downloadBlobDirect(blob,filename){if(!blob)return false;const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=safeFileName(filename);document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1800);return true;}
 async function generateSingleSelectedOutput(type){
-  const original=currentOutput;currentOutput=type;renderCurrentOutput();const t=templates.find(x=>x.id===currentTemplateId)||templates[0];
-  if(type==='kakao'||type==='sms'){await copyCurrentMessage();return true;}if(type==='mobile'){await downloadMobileCard();return true;}if(type==='mobile4'){await downloadAllMobileCards();return true;}
+  const original=currentOutput;currentOutput=type;renderCurrentOutput();const t=templates.find(x=>x.id===currentTemplateId)||templates[0],format=selectedOutputFileFormat();
+  if(type==='kakao'||type==='sms'){await copyCurrentMessage();currentOutput=original;renderCurrentOutput();return true;}
   readCaseInfoFromForm();if((type==='meds'||type==='medcheck')&&!validMedications().length){toast('선택한 복약 출력물을 만들려면 약 이름을 하나 이상 입력해주세요.');currentOutput=original;renderCurrentOutput();return false;}if(type==='medcheck'&&!medicationCheckMeta().valid){toast('복약 체크표를 만들려면 모든 약의 투약 기간(일수)을 입력해주세요.');currentOutput=original;renderCurrentOutput();return false;}
-  const suffix=type==='pdf'?`보호자교육_${8+medicationPageCount()}P`:type==='summary'?'퇴원_1P_요약':type==='meds'?`복약_일정표_${medicationPageCount()}P`:type==='medcheck'?medicationCheckFileLabel():type==='staff'?'직원용_퇴원교육_1P':`체크카드_${type.toUpperCase().replace('D','D+')}`;const filename=`${hospitalName()}_${templateDisplayTitle(t)}_${suffix}_CARESTEP.pdf`.replace(/[\/:*?"<>|]/g,'_');await exportPdfElement(filename);recordPilotUsage(type,{fileCount:1});return true;
+  if(format==='png'||type==='mobile4'){currentOutput=original;renderCurrentOutput();return await generateIndividualSelectedOutputs([type]);}
+  const base=safeFileName(`${hospitalName()}_${caseInfo.patientName||templateDisplayTitle(t)}_${templateDisplayTitle(t)}`);
+  if(type==='mobile'){
+    const day=Number($('mobileDaySelect')?.value||mobileDay||1),blob=await mobileCardPdfBlob(day);downloadBlobDirect(blob,`${base}_D+${day}_모바일카드.pdf`);recordPilotUsage(type,{fileCount:1,outputs:[type]});currentOutput=original;renderCurrentOutput();return true;
+  }
+  const desc=documentOutputDescriptor(type);if(!desc){currentOutput=original;renderCurrentOutput();return false;}desc.render();await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));await exportPdfElement(`${base}_${desc.label}.pdf`);recordPilotUsage(type,{fileCount:1,outputs:[type]});currentOutput=original;renderCurrentOutput();return true;
 }
 
 // v9.0.2 Hotfix 26 · generate multiple selected outputs as real individual files.
@@ -8179,40 +8207,35 @@ function downloadAllPreparedIndividualArtifacts(){
 }
 async function generateIndividualSelectedOutputs(selected){
   clearPreparedIndividualArtifacts(false);
-  const btn=$('generateOutputBtn'),old=btn?.textContent,original=currentOutput;
-  if(btn){btn.disabled=true;btn.textContent='개별 파일 준비 중…';}
+  const btn=$('generateOutputBtn'),old=btn?.textContent,original=currentOutput,format=selectedOutputFileFormat();
+  if(btn){btn.disabled=true;btn.textContent=`${format==='png'?'이미지':'PDF'} 파일 준비 중…`;}
   let count=0;
   try{
     const t=templates.find(x=>x.id===currentTemplateId)||templates[0];
     const base=safeFileName(`${hospitalName()}_${caseInfo.patientName||templateDisplayTitle(t)}_${templateDisplayTitle(t)}`);
-    const savePdf=async(filename,renderFn)=>{
-      renderFn();await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
-      const blob=await exportPdfElement(filename,{save:false,silent:true});
-      if(blob&&addPreparedIndividualArtifact(blob,filename)){count++;if(btn)btn.textContent=`개별 파일 준비 중… ${count}`;}
+    const addDoc=async(type)=>{
+      const desc=documentOutputDescriptor(type);if(!desc)return;
+      if(format==='pdf'){
+        desc.render();await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));const blob=await exportPdfElement(`${base}_${desc.label}.pdf`,{save:false,silent:true});
+        if(blob&&addPreparedIndividualArtifact(blob,`${base}_${desc.label}.pdf`)){count++;if(btn)btn.textContent=`PDF 파일 준비 중… ${count}`;}
+      }else{
+        const blobs=await renderedOutputPngBlobs(desc.render);for(let i=0;i<blobs.length;i++){const page=blobs.length>1?`_${i+1}P`:'';if(addPreparedIndividualArtifact(blobs[i],`${base}_${desc.label}${page}.png`)){count++;if(btn)btn.textContent=`이미지 파일 준비 중… ${count}`;}}
+      }
     };
     for(const type of selected){
       currentOutput=type;
-      if(type==='pdf')await savePdf(`${base}_보호자교육_${8+medicationPageCount()}P.pdf`,renderAdvancedPdf);
-      else if(type==='summary')await savePdf(`${base}_퇴원1P요약.pdf`,renderDischargeSummary);
-      else if(type==='meds')await savePdf(`${base}_복약일정표_${medicationPageCount()}P.pdf`,renderMedicationSheet);
-      else if(type==='medcheck')await savePdf(`${base}_${medicationCheckFileLabel()}.pdf`,renderMedicationCheckSheet);
-      else if(type==='staff')await savePdf(`${base}_직원용_퇴원교육.pdf`,renderStaffSheet);
-      else if(['d1','d3','d7','d14'].includes(type)){const day=Number(type.replace('d',''));await savePdf(`${base}_D+${day}_체크카드.pdf`,()=>renderCheckCard(day));}
+      if(documentOutputDescriptor(type))await addDoc(type);
       else if(type==='kakao'||type==='sms'){
-        const label=type==='sms'?'문자':'카카오톡',blob=new Blob([currentMessage()],{type:'text/plain;charset=utf-8'});
-        if(addPreparedIndividualArtifact(blob,`${base}_${label}.txt`)){count++;if(btn)btn.textContent=`개별 파일 준비 중… ${count}`;}
-      }
-      else if(type==='mobile'){
-        const day=Number($('mobileDaySelect')?.value||mobileDay||1),blob=await mobileCardPngBlob(day);
-        if(blob&&addPreparedIndividualArtifact(blob,`${base}_D+${day}_모바일카드_1080x1920.png`)){count++;if(btn)btn.textContent=`개별 파일 준비 중… ${count}`;}
-      }
-      else if(type==='mobile4'){
-        for(const day of [1,3,7,14]){const blob=await mobileCardPngBlob(day);if(blob&&addPreparedIndividualArtifact(blob,`${base}_D+${day}_모바일카드_1080x1920.png`)){count++;if(btn)btn.textContent=`개별 파일 준비 중… ${count}`;}}
+        renderMessageOutput(type);const label=type==='sms'?'문자':'카카오톡',blob=new Blob([currentMessage()],{type:'text/plain;charset=utf-8'});if(addPreparedIndividualArtifact(blob,`${base}_${label}.txt`)){count++;if(btn)btn.textContent=`파일 준비 중… ${count}`;}
+      }else if(type==='mobile'){
+        const day=Number($('mobileDaySelect')?.value||mobileDay||1),blob=format==='pdf'?await mobileCardPdfBlob(day):await mobileCardPngBlob(day),ext=format==='pdf'?'pdf':'png';if(blob&&addPreparedIndividualArtifact(blob,`${base}_D+${day}_모바일카드.${ext}`)){count++;if(btn)btn.textContent=`파일 준비 중… ${count}`;}
+      }else if(type==='mobile4'){
+        for(const day of [1,3,7,14]){const blob=format==='pdf'?await mobileCardPdfBlob(day):await mobileCardPngBlob(day),ext=format==='pdf'?'pdf':'png';if(blob&&addPreparedIndividualArtifact(blob,`${base}_D+${day}_모바일카드.${ext}`)){count++;if(btn)btn.textContent=`파일 준비 중… ${count}`;}}
       }
     }
     renderPreparedIndividualArtifacts();
     setGeneratedCount(getGeneratedCount()+count);renderHospitalMeta();markRecentTemplate(currentTemplateId);recordPilotUsage('individual_batch',{fileCount:count,outputs:selected});
-    toast(`${count}개 개별 파일을 준비했습니다. 아래에서 각각 다운로드할 수 있습니다.`);return true;
+    toast(`${count}개 ${format==='png'?'이미지/텍스트':'PDF/텍스트'} 파일을 준비했습니다. 아래에서 다운로드하세요.`);return true;
   }catch(e){console.error(e);clearPreparedIndividualArtifacts();toast('개별 파일 생성 중 오류가 발생했습니다.');return false;}
   finally{currentOutput=original;renderCurrentOutput();if(btn){btn.disabled=false;btn.textContent=old||'선택 출력물 생성';}updateSelectedOutputUi();}
 }
@@ -8229,7 +8252,6 @@ async function generateSelectedOutputs(){
   if(selected.length===1&&!needsMode){const ok=await generateSingleSelectedOutput(selected[0]);if(ok)scheduleBuilderFollowupHandoff();return;}
   if(selected.length>1&&!saasAdvancedExportAllowed())return;
   if(needsMode&&batchMode==='individual'){await generateIndividualSelectedOutputs(selected);return;}
-  if(selected.length===1&&selected[0]==='mobile4'){const ok=await generateSingleSelectedOutput('mobile4');if(ok)scheduleBuilderFollowupHandoff();return;}
   if(typeof JSZip==='undefined'){toast('ZIP 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');return;}
   const btn=$('generateOutputBtn'); const old=btn?.textContent; if(btn){btn.disabled=true;btn.textContent=`선택한 ${selected.length}종 생성 중…`;}
   const original=currentOutput;
@@ -8241,19 +8263,23 @@ async function generateSelectedOutputs(){
     const msgFolder=zip.folder('메시지');
     const imgFolder=zip.folder('이미지');
     let count=0;
+    const format=selectedOutputFileFormat();
     for(const type of selected){
       currentOutput=type;
-      if(type==='pdf'){await addRenderedPdfToZip(pdfFolder,`${base}_보호자교육_${8+medicationPageCount()}P.pdf`,renderAdvancedPdf);count++;}
-      else if(type==='summary'){await addRenderedPdfToZip(pdfFolder,`${base}_퇴원1P요약.pdf`,renderDischargeSummary);count++;}
-      else if(type==='meds'){await addRenderedPdfToZip(pdfFolder,`${base}_복약일정표_${medicationPageCount()}P.pdf`,renderMedicationSheet);count++;}
-      else if(type==='medcheck'){await addRenderedPdfToZip(pdfFolder,`${base}_${medicationCheckFileLabel()}.pdf`,renderMedicationCheckSheet);count++;}
-      else if(type==='staff'){await addRenderedPdfToZip(pdfFolder,`${base}_직원용_퇴원교육.pdf`,renderStaffSheet);count++;}
-      else if(['d1','d3','d7','d14'].includes(type)){const day=Number(type.replace('d',''));await addRenderedPdfToZip(pdfFolder,`${base}_D+${day}_체크카드.pdf`,()=>renderCheckCard(day));count++;}
-      else if(type==='kakao'||type==='sms'){const label=type==='sms'?'문자':'카카오톡';msgFolder.file(`${base}_${label}.txt`,currentMessage());count++;}
-      else if(type==='mobile'){const day=Number($('mobileDaySelect')?.value||mobileDay||1);const blob=await mobileCardPngBlob(day);if(blob){imgFolder.file(`${base}_D+${day}_모바일카드_1080x1920.png`,blob);count++;}}
-      else if(type==='mobile4'){for(const day of [1,3,7,14]){const blob=await mobileCardPngBlob(day);if(blob){imgFolder.file(`${base}_D+${day}_모바일카드_1080x1920.png`,blob);count++;}}}
+      const desc=documentOutputDescriptor(type);
+      if(desc){
+        if(format==='pdf'){await addRenderedPdfToZip(pdfFolder,`${base}_${desc.label}.pdf`,desc.render);count++;}
+        else{const blobs=await renderedOutputPngBlobs(desc.render);for(let i=0;i<blobs.length;i++){const page=blobs.length>1?`_${i+1}P`:'';imgFolder.file(`${base}_${desc.label}${page}.png`,blobs[i]);count++;}}
+      }
+      else if(type==='kakao'||type==='sms'){renderMessageOutput(type);const label=type==='sms'?'문자':'카카오톡';msgFolder.file(`${base}_${label}.txt`,currentMessage());count++;}
+      else if(type==='mobile'){
+        const day=Number($('mobileDaySelect')?.value||mobileDay||1),blob=format==='pdf'?await mobileCardPdfBlob(day):await mobileCardPngBlob(day),ext=format==='pdf'?'pdf':'png';if(blob){(format==='pdf'?pdfFolder:imgFolder).file(`${base}_D+${day}_모바일카드.${ext}`,blob);count++;}
+      }
+      else if(type==='mobile4'){
+        for(const day of [1,3,7,14]){const blob=format==='pdf'?await mobileCardPdfBlob(day):await mobileCardPngBlob(day),ext=format==='pdf'?'pdf':'png';if(blob){(format==='pdf'?pdfFolder:imgFolder).file(`${base}_D+${day}_모바일카드.${ext}`,blob);count++;}}
+      }
     }
-    zip.file('00_README.txt',`CARESTEP 선택 출력물\n병원: ${hospitalName()}\n자료: ${t.title}\n퇴원/관리 시작일: ${caseInfo.dischargeDate||'-'}\n선택 항목: ${selected.map(outputLabel).join(', ')}\n생성 파일: ${count}개\n\n환자정보와 복약정보는 CARESTEP 서버에 저장되지 않습니다.`);
+    zip.file('00_README.txt' ,`CARESTEP 선택 출력물\n병원: ${hospitalName()}\n자료: ${t.title}\n퇴원/관리 시작일: ${caseInfo.dischargeDate||'-'}\n선택 항목: ${selected.map(outputLabel).join(', ')}\n생성 파일: ${count}개\n\n환자정보와 복약정보는 CARESTEP 서버에 저장되지 않습니다.`);
     const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${base}_선택출력물_${selected.length}종_CARESTEP.zip`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
     setGeneratedCount(getGeneratedCount()+count);renderHospitalMeta();markRecentTemplate(currentTemplateId);recordPilotUsage('individual_batch',{fileCount:count,outputs:selected});toast(`선택한 ${selected.length}종에서 ${count}개 파일을 생성했습니다. 후속관리로 이어갑니다.`);scheduleBuilderFollowupHandoff();
@@ -8266,6 +8292,7 @@ $('sessionRestoreLogin')?.addEventListener('click',saasCancelRestoreAndLogin);
 
 $('generateOutputBtn').addEventListener('click',generateSelectedOutputs);
 document.querySelectorAll('input[name="batchDownloadMode"]').forEach(x=>x.addEventListener('change',()=>{clearPreparedIndividualArtifacts();updateSelectedOutputUi();}));
+document.querySelectorAll('input[name="outputFileFormat"]').forEach(x=>x.addEventListener('change',()=>{clearPreparedIndividualArtifacts();updateSelectedOutputUi();}));
 $('downloadAllPreparedFiles')?.addEventListener('click',downloadAllPreparedIndividualArtifacts);
 $('clearPreparedFiles')?.addEventListener('click',()=>clearPreparedIndividualArtifacts());
 $('secondaryOutputBtn').addEventListener('click',()=>{
