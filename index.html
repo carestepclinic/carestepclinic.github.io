@@ -658,7 +658,9 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
 .batch-download-mode-options label:has(input:checked){border-color:#1f5eff;background:#eef4ff;box-shadow:0 0 0 1px #1f5eff22}
 .batch-download-mode-options input{margin-top:2px}.batch-download-mode-options span{display:block}.batch-download-mode-options b{display:block;font-size:10.5px;color:#344258}.batch-download-mode-options small{display:block;margin-top:2px;font-size:8.5px;color:#7a8799;line-height:1.35}
 #batchDownloadModeHint{margin:8px 0 0;font-size:8.8px;color:#6e7c91;line-height:1.45}
-@media(max-width:700px){.batch-download-mode-options{grid-template-columns:1fr}.batch-download-mode-head{display:block}.batch-download-mode-head>span{display:block;margin-top:3px}}
+.individual-download-panel{margin:10px 0 12px;padding:12px;border:1px solid #cfe0ff;border-radius:12px;background:#f5f9ff}
+.individual-download-panel.hidden{display:none}.individual-download-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:9px}.individual-download-head b{font-size:11px;color:#24406c}.individual-download-head span{font-size:8.8px;color:#728099}.individual-download-list{display:grid;gap:6px}.individual-download-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 9px;border:1px solid #dde7f7;border-radius:9px;background:#fff}.individual-download-name{min-width:0;font-size:9px;color:#43516a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.individual-download-row .btn{flex:0 0 auto;padding:6px 9px;font-size:9px}.individual-download-actions{display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap;margin-top:9px}.individual-download-note{margin:8px 0 0;font-size:8.5px;color:#75839a;line-height:1.45}
+@media(max-width:700px){.batch-download-mode-options{grid-template-columns:1fr}.batch-download-mode-head{display:block}.batch-download-mode-head>span{display:block;margin-top:3px}.individual-download-head{display:block}.individual-download-head span{display:block;margin-top:3px}.individual-download-row{align-items:flex-start}.individual-download-name{white-space:normal;word-break:break-all}}
 </style>
 </head>
 <body>
@@ -1063,7 +1065,13 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
                   <label><input type="radio" name="batchDownloadMode" value="individual" checked><span><b>개별 파일</b><small>선택한 PDF·PNG·TXT를 각각 저장</small></span></label>
                   <label><input type="radio" name="batchDownloadMode" value="zip"><span><b>ZIP 묶음</b><small>기존처럼 압축파일 1개로 저장</small></span></label>
                 </div>
-                <p id="batchDownloadModeHint">Chrome/Edge에서는 저장 폴더를 한 번 선택하면 개별 파일을 그 폴더에 바로 저장합니다.</p>
+                <p id="batchDownloadModeHint">개별 파일은 먼저 준비한 뒤 파일별 다운로드 버튼으로 저장합니다. Windows 보호 폴더 선택 오류 없이 사용할 수 있습니다.</p>
+              </div>
+              <div id="individualDownloadPanel" class="individual-download-panel hidden" aria-live="polite">
+                <div class="individual-download-head"><b>개별 파일 준비 완료</b><span id="individualDownloadCount">0개 파일</span></div>
+                <div id="individualDownloadList" class="individual-download-list"></div>
+                <div class="individual-download-actions"><button id="downloadAllPreparedFiles" class="btn btn-primary" type="button">모두 다운로드</button><button id="clearPreparedFiles" class="btn btn-ghost" type="button">목록 닫기</button></div>
+                <p class="individual-download-note">브라우저가 여러 파일 다운로드 허용을 물으면 허용해주세요. 차단되면 각 파일의 ‘다운로드’를 하나씩 누르면 됩니다.</p>
               </div>
               <div id="mobileDayControl" class="mobile-day-control hidden"><label class="field-label" for="mobileDaySelect">모바일 카드 시점</label><select id="mobileDaySelect" class="input"><option value="1">D+1</option><option value="3">D+3</option><option value="7">D+7</option><option value="14">D+14</option></select></div>
               <div class="info-box"><strong>병원정보 자동 반영</strong><span>병원명 · 로고 · 대표원장 · 대표전화 · 주소 · 홈페이지 · 라이선스 번호</span></div>
@@ -3464,13 +3472,13 @@ function updateSelectedOutputUi(){
   const modeBox=$('batchDownloadMode'),needsMode=batchModeNeeded(selected),mode=selectedBatchDownloadMode();
   modeBox?.classList.toggle('hidden',!needsMode);
   const modeHint=$('batchDownloadModeHint');
-  if(modeHint)modeHint.textContent=mode==='individual'?'Chrome/Edge에서는 저장 폴더를 한 번 선택하면 PDF·PNG·TXT를 각각 바로 저장합니다. 다른 브라우저에서는 여러 파일 다운로드 허용이 필요할 수 있습니다.':'선택한 모든 파일을 기존 방식대로 ZIP 1개에 묶어 저장합니다.';
+  if(modeHint)modeHint.textContent=mode==='individual'?'개별 파일은 먼저 준비한 뒤 PDF·PNG·TXT를 각각 다운로드합니다. 시스템/보호 폴더를 직접 선택하지 않습니다.':'선택한 모든 파일을 기존 방식대로 ZIP 1개에 묶어 저장합니다.';
   const btn=$('generateOutputBtn');
   if(btn){
     btn.disabled=!selected.length;
     if(!selected.length)btn.textContent='출력물을 하나 이상 선택해주세요';
     else if(!needsMode)btn.textContent='선택한 1종 생성 · 다운로드';
-    else if(mode==='individual')btn.textContent=selected.length===1?'모바일 카드 4종 개별 다운로드':`선택한 ${selected.length}종 개별 파일 생성 · 다운로드`;
+    else if(mode==='individual')btn.textContent=selected.length===1?'모바일 카드 4종 개별 파일 준비':`선택한 ${selected.length}종 개별 파일 준비`;
     else btn.textContent=selected.length===1?'모바일 카드 4종 ZIP 다운로드':`선택한 ${selected.length}종 ZIP 생성 · 다운로드`;
   }
 }
@@ -8134,29 +8142,43 @@ async function generateSingleSelectedOutput(type){
 // Chrome/Edge use the File System Access API so one folder permission saves all files
 // without the browser's automatic-download blocker. Other browsers fall back to
 // standard download links and may ask the user to allow multiple downloads.
-async function pickIndividualDownloadDirectory(){
-  if(typeof window.showDirectoryPicker!=='function')return null;
-  try{return await window.showDirectoryPicker({id:'carestep-selected-outputs',mode:'readwrite',startIn:'downloads'});}
-  catch(e){if(e?.name==='AbortError')return false;console.warn('Directory picker unavailable',e);return null;}
+// v9.0.2 Hotfix 28 · protected-folder-safe individual downloads.
+// Files are generated in memory first. The user then downloads each file directly,
+// avoiding showDirectoryPicker / protected Windows folder restrictions.
+let preparedIndividualArtifacts=[];
+function clearPreparedIndividualArtifacts(hide=true){
+  preparedIndividualArtifacts.forEach(x=>{try{if(x.url)URL.revokeObjectURL(x.url);}catch{}});
+  preparedIndividualArtifacts=[];
+  if($('individualDownloadList'))$('individualDownloadList').innerHTML='';
+  if($('individualDownloadCount'))$('individualDownloadCount').textContent='0개 파일';
+  if(hide)$('individualDownloadPanel')?.classList.add('hidden');
 }
-async function saveIndividualArtifact(blob,filename,directoryHandle){
+function downloadPreparedArtifact(item){
+  if(!item?.url)return;
+  const a=document.createElement('a');a.href=item.url;a.download=item.filename;document.body.appendChild(a);a.click();a.remove();
+}
+function renderPreparedIndividualArtifacts(){
+  const panel=$('individualDownloadPanel'),list=$('individualDownloadList');
+  if(!panel||!list)return;
+  $('individualDownloadCount').textContent=`${preparedIndividualArtifacts.length}개 파일`;
+  list.innerHTML=preparedIndividualArtifacts.map((x,i)=>`<div class="individual-download-row"><span class="individual-download-name" title="${escapeHtml(x.filename)}">${escapeHtml(x.filename)}</span><button class="btn btn-secondary" type="button" data-prepared-download="${i}">다운로드</button></div>`).join('');
+  list.querySelectorAll('[data-prepared-download]').forEach(b=>b.addEventListener('click',()=>downloadPreparedArtifact(preparedIndividualArtifacts[Number(b.dataset.preparedDownload)])));
+  panel.classList.remove('hidden');
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function addPreparedIndividualArtifact(blob,filename){
   if(!blob)return false;
-  const safe=safeFileName(filename);
-  if(directoryHandle){
-    const fileHandle=await directoryHandle.getFileHandle(safe,{create:true});
-    const writable=await fileHandle.createWritable();
-    await writable.write(blob);await writable.close();return true;
-  }
-  const url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download=safe;document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1800);
-  await new Promise(r=>setTimeout(r,260));
-  return true;
+  const safe=safeFileName(filename),url=URL.createObjectURL(blob);
+  preparedIndividualArtifacts.push({blob,filename:safe,url});return true;
+}
+function downloadAllPreparedIndividualArtifacts(){
+  if(!preparedIndividualArtifacts.length){toast('먼저 개별 파일을 준비해주세요.');return;}
+  // All blobs already exist, so these clicks run directly from the user's button click.
+  preparedIndividualArtifacts.forEach((item,i)=>setTimeout(()=>downloadPreparedArtifact(item),i*180));
+  toast(`${preparedIndividualArtifacts.length}개 파일 다운로드를 시작했습니다. 브라우저가 허용을 물으면 허용해주세요.`);
 }
 async function generateIndividualSelectedOutputs(selected){
-  const directoryHandle=await pickIndividualDownloadDirectory();
-  if(directoryHandle===false){toast('개별 파일 저장을 취소했습니다.');return false;}
-  if(!directoryHandle&&selected.length>1)toast('여러 파일 다운로드 허용 요청이 표시되면 허용해주세요.');
+  clearPreparedIndividualArtifacts(false);
   const btn=$('generateOutputBtn'),old=btn?.textContent,original=currentOutput;
   if(btn){btn.disabled=true;btn.textContent='개별 파일 준비 중…';}
   let count=0;
@@ -8166,7 +8188,7 @@ async function generateIndividualSelectedOutputs(selected){
     const savePdf=async(filename,renderFn)=>{
       renderFn();await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
       const blob=await exportPdfElement(filename,{save:false,silent:true});
-      if(blob&&await saveIndividualArtifact(blob,filename,directoryHandle)){count++;if(btn)btn.textContent=`개별 파일 저장 중… ${count}`;}
+      if(blob&&addPreparedIndividualArtifact(blob,filename)){count++;if(btn)btn.textContent=`개별 파일 준비 중… ${count}`;}
     };
     for(const type of selected){
       currentOutput=type;
@@ -8178,19 +8200,20 @@ async function generateIndividualSelectedOutputs(selected){
       else if(['d1','d3','d7','d14'].includes(type)){const day=Number(type.replace('d',''));await savePdf(`${base}_D+${day}_체크카드.pdf`,()=>renderCheckCard(day));}
       else if(type==='kakao'||type==='sms'){
         const label=type==='sms'?'문자':'카카오톡',blob=new Blob([currentMessage()],{type:'text/plain;charset=utf-8'});
-        if(await saveIndividualArtifact(blob,`${base}_${label}.txt`,directoryHandle)){count++;if(btn)btn.textContent=`개별 파일 저장 중… ${count}`;}
+        if(addPreparedIndividualArtifact(blob,`${base}_${label}.txt`)){count++;if(btn)btn.textContent=`개별 파일 준비 중… ${count}`;}
       }
       else if(type==='mobile'){
         const day=Number($('mobileDaySelect')?.value||mobileDay||1),blob=await mobileCardPngBlob(day);
-        if(blob&&await saveIndividualArtifact(blob,`${base}_D+${day}_모바일카드_1080x1920.png`,directoryHandle)){count++;if(btn)btn.textContent=`개별 파일 저장 중… ${count}`;}
+        if(blob&&addPreparedIndividualArtifact(blob,`${base}_D+${day}_모바일카드_1080x1920.png`)){count++;if(btn)btn.textContent=`개별 파일 준비 중… ${count}`;}
       }
       else if(type==='mobile4'){
-        for(const day of [1,3,7,14]){const blob=await mobileCardPngBlob(day);if(blob&&await saveIndividualArtifact(blob,`${base}_D+${day}_모바일카드_1080x1920.png`,directoryHandle)){count++;if(btn)btn.textContent=`개별 파일 저장 중… ${count}`;}}
+        for(const day of [1,3,7,14]){const blob=await mobileCardPngBlob(day);if(blob&&addPreparedIndividualArtifact(blob,`${base}_D+${day}_모바일카드_1080x1920.png`)){count++;if(btn)btn.textContent=`개별 파일 준비 중… ${count}`;}}
       }
     }
+    renderPreparedIndividualArtifacts();
     setGeneratedCount(getGeneratedCount()+count);renderHospitalMeta();markRecentTemplate(currentTemplateId);recordPilotUsage('individual_batch',{fileCount:count,outputs:selected});
-    toast(`${count}개 파일을 압축 없이 개별 저장했습니다. 후속관리로 이어갑니다.`);scheduleBuilderFollowupHandoff();return true;
-  }catch(e){console.error(e);toast('개별 파일 생성 중 오류가 발생했습니다.');return false;}
+    toast(`${count}개 개별 파일을 준비했습니다. 아래에서 각각 다운로드할 수 있습니다.`);return true;
+  }catch(e){console.error(e);clearPreparedIndividualArtifacts();toast('개별 파일 생성 중 오류가 발생했습니다.');return false;}
   finally{currentOutput=original;renderCurrentOutput();if(btn){btn.disabled=false;btn.textContent=old||'선택 출력물 생성';}updateSelectedOutputUi();}
 }
 
@@ -8242,7 +8265,9 @@ $('sessionRestoreRetry')?.addEventListener('click',()=>saasBootstrap());
 $('sessionRestoreLogin')?.addEventListener('click',saasCancelRestoreAndLogin);
 
 $('generateOutputBtn').addEventListener('click',generateSelectedOutputs);
-document.querySelectorAll('input[name="batchDownloadMode"]').forEach(x=>x.addEventListener('change',updateSelectedOutputUi));
+document.querySelectorAll('input[name="batchDownloadMode"]').forEach(x=>x.addEventListener('change',()=>{clearPreparedIndividualArtifacts();updateSelectedOutputUi();}));
+$('downloadAllPreparedFiles')?.addEventListener('click',downloadAllPreparedIndividualArtifacts);
+$('clearPreparedFiles')?.addEventListener('click',()=>clearPreparedIndividualArtifacts());
 $('secondaryOutputBtn').addEventListener('click',()=>{
   if(currentOutput==='kakao'||currentOutput==='sms') downloadText(); else printCurrent();
 });
