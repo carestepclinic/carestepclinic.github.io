@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>CARESTEP Clinic v9.0.2 · Daily Workflow & UX Polish · Hotfix 25</title>
+  <title>CARESTEP Clinic v9.0.2 · Daily Workflow & UX Polish · Hotfix 26</title>
   <meta name="description" content="동물병원 보호자 교육자료 라이브러리 및 병원 맞춤 PDF 생성 MVP" />
   <style>
 :root {
@@ -643,6 +643,19 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
 }
 
 </style>
+
+<style id="carestep-hotfix26-individual-download">
+/* v9.0.2 Hotfix 26 · multi-output individual downloads */
+.batch-download-mode{margin:10px 0 12px;padding:12px;border:1px solid #dce5f3;border-radius:12px;background:#f8fbff}
+.batch-download-mode-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:9px}
+.batch-download-mode-head>b{font-size:11px;color:#263247}.batch-download-mode-head>span{font-size:9px;color:#7a8799}
+.batch-download-mode-options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.batch-download-mode-options label{display:flex;gap:8px;align-items:flex-start;padding:10px;border:1px solid #dfe6f0;border-radius:10px;background:#fff;cursor:pointer}
+.batch-download-mode-options label:has(input:checked){border-color:#1f5eff;background:#eef4ff;box-shadow:0 0 0 1px #1f5eff22}
+.batch-download-mode-options input{margin-top:2px}.batch-download-mode-options span{display:block}.batch-download-mode-options b{display:block;font-size:10.5px;color:#344258}.batch-download-mode-options small{display:block;margin-top:2px;font-size:8.5px;color:#7a8799;line-height:1.35}
+#batchDownloadModeHint{margin:8px 0 0;font-size:8.8px;color:#6e7c91;line-height:1.45}
+@media(max-width:700px){.batch-download-mode-options{grid-template-columns:1fr}.batch-download-mode-head{display:block}.batch-download-mode-head>span{display:block;margin-top:3px}}
+</style>
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -1036,15 +1049,23 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
                 <div class="output-option" data-output="d7"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="d7" /><span class="output-copy"><b>D+7 체크카드</b><small>질환별 1주 평가</small></span></label><button class="output-preview-btn" type="button" data-preview-output="d7">미리보기</button></div>
                 <div class="output-option" data-output="d14"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="d14" /><span class="output-copy"><b>D+14 체크카드</b><small>질환별 장기전환</small></span></label><button class="output-preview-btn" type="button" data-preview-output="d14">미리보기</button></div>
                 <div class="output-option" data-output="mobile"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="mobile" /><span class="output-copy"><b>휴대폰 이미지 카드</b><small>1080×1920 PNG</small></span></label><button class="output-preview-btn" type="button" data-preview-output="mobile">미리보기</button></div>
-                <div class="output-option" data-output="mobile4"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="mobile4" /><span class="output-copy"><b>모바일 카드 4종 ZIP</b><small>D+1·3·7·14 일괄 PNG</small></span></label><button class="output-preview-btn" type="button" data-preview-output="mobile4">미리보기</button></div>
+                <div class="output-option" data-output="mobile4"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="mobile4" /><span class="output-copy"><b>모바일 카드 4종</b><small>D+1·3·7·14 일괄 PNG</small></span></label><button class="output-preview-btn" type="button" data-preview-output="mobile4">미리보기</button></div>
                 <div class="output-option" data-output="staff"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="staff" /><span class="output-copy"><b>직원용 퇴원교육</b><small>60초 설명 + 체크리스트</small></span></label><button class="output-preview-btn" type="button" data-preview-output="staff">미리보기</button></div>
               </div>
               <div id="selectedOutputSummary" class="output-selection-summary"><b>1개 선택</b> · 체크박스로 여러 출력물을 선택하고, 미리보기 버튼으로 화면을 전환하세요.</div>
+              <div id="batchDownloadMode" class="batch-download-mode hidden" aria-label="여러 자료 다운로드 방식">
+                <div class="batch-download-mode-head"><b>여러 자료 다운로드 방식</b><span>필요할 때 ZIP으로도 받을 수 있습니다.</span></div>
+                <div class="batch-download-mode-options">
+                  <label><input type="radio" name="batchDownloadMode" value="individual" checked><span><b>개별 파일</b><small>선택한 PDF·PNG·TXT를 각각 저장</small></span></label>
+                  <label><input type="radio" name="batchDownloadMode" value="zip"><span><b>ZIP 묶음</b><small>기존처럼 압축파일 1개로 저장</small></span></label>
+                </div>
+                <p id="batchDownloadModeHint">Chrome/Edge에서는 저장 폴더를 한 번 선택하면 개별 파일을 그 폴더에 바로 저장합니다.</p>
+              </div>
               <div id="mobileDayControl" class="mobile-day-control hidden"><label class="field-label" for="mobileDaySelect">모바일 카드 시점</label><select id="mobileDaySelect" class="input"><option value="1">D+1</option><option value="3">D+3</option><option value="7">D+7</option><option value="14">D+14</option></select></div>
               <div class="info-box"><strong>병원정보 자동 반영</strong><span>병원명 · 로고 · 대표원장 · 대표전화 · 주소 · 홈페이지 · 라이선스 번호</span></div>
               <div class="output-actions"><button id="generateOutputBtn" class="btn btn-primary">선택한 1종 생성</button><button id="secondaryOutputBtn" class="btn btn-secondary">현재 미리보기 인쇄 / 저장</button></div>
               <div class="builder-followup-handoff"><b>다음 단계 · 후속관리</b><span>출력물을 생성하면 자동으로 후속관리로 이동합니다. 필요하면 아래 버튼으로 바로 이동할 수도 있습니다. 현재 환자정보와 질환 선택은 그대로 전달됩니다.</span><button id="continueToFollowupBtn" class="btn btn-primary" type="button">현재 정보로 후속관리 계속 →</button></div>
-              <p id="outputHint" class="output-hint">체크박스로 여러 출력물을 선택하면 한 번에 ZIP으로 생성합니다. 파란 테두리는 현재 미리보기 항목입니다.</p>
+              <p id="outputHint" class="output-hint">여러 출력물은 개별 파일 또는 ZIP으로 받을 수 있습니다. 파란 테두리는 현재 미리보기 항목입니다.</p>
               <button class="btn btn-ghost btn-block" data-go="settings">병원정보 수정</button>
             </div>
 
@@ -3421,6 +3442,12 @@ function resetIndividualOutputSelection(){
   if($('mobileDaySelect'))$('mobileDaySelect').value='1';
   updateSelectedOutputUi();
 }
+function selectedBatchDownloadMode(){
+  return document.querySelector('input[name="batchDownloadMode"]:checked')?.value==='zip'?'zip':'individual';
+}
+function batchModeNeeded(selected=selectedOutputTypes()){
+  return selected.length>1||selected.includes('mobile4');
+}
 function updateSelectedOutputUi(){
   const selected=selectedOutputTypes();
   document.querySelectorAll('.output-option').forEach(card=>{
@@ -3430,10 +3457,17 @@ function updateSelectedOutputUi(){
   });
   const summary=$('selectedOutputSummary');
   if(summary)summary.innerHTML=`<b>${selected.length}개 선택</b> · 체크박스로 복수선택 후 한 번에 생성합니다. 파란 테두리는 현재 미리보기입니다.`;
+  const modeBox=$('batchDownloadMode'),needsMode=batchModeNeeded(selected),mode=selectedBatchDownloadMode();
+  modeBox?.classList.toggle('hidden',!needsMode);
+  const modeHint=$('batchDownloadModeHint');
+  if(modeHint)modeHint.textContent=mode==='individual'?'Chrome/Edge에서는 저장 폴더를 한 번 선택하면 PDF·PNG·TXT를 각각 바로 저장합니다. 다른 브라우저에서는 여러 파일 다운로드 허용이 필요할 수 있습니다.':'선택한 모든 파일을 기존 방식대로 ZIP 1개에 묶어 저장합니다.';
   const btn=$('generateOutputBtn');
   if(btn){
     btn.disabled=!selected.length;
-    btn.textContent=!selected.length?'출력물을 하나 이상 선택해주세요':selected.length===1?'선택한 1종 생성 · 다운로드':`선택한 ${selected.length}종 ZIP 생성 · 다운로드`;
+    if(!selected.length)btn.textContent='출력물을 하나 이상 선택해주세요';
+    else if(!needsMode)btn.textContent='선택한 1종 생성 · 다운로드';
+    else if(mode==='individual')btn.textContent=selected.length===1?'모바일 카드 4종 개별 다운로드':`선택한 ${selected.length}종 개별 파일 생성 · 다운로드`;
+    else btn.textContent=selected.length===1?'모바일 카드 4종 ZIP 다운로드':`선택한 ${selected.length}종 ZIP 생성 · 다운로드`;
   }
 }
 
@@ -8077,6 +8111,70 @@ async function generateSingleSelectedOutput(type){
   const suffix=type==='pdf'?`보호자교육_${8+medicationPageCount()}P`:type==='summary'?'퇴원_1P_요약':type==='meds'?`복약_일정표_${medicationPageCount()}P`:type==='medcheck'?medicationCheckFileLabel():type==='staff'?'직원용_퇴원교육_1P':`체크카드_${type.toUpperCase().replace('D','D+')}`;const filename=`${hospitalName()}_${templateDisplayTitle(t)}_${suffix}_CARESTEP.pdf`.replace(/[\/:*?"<>|]/g,'_');await exportPdfElement(filename);recordPilotUsage(type,{fileCount:1});return true;
 }
 
+// v9.0.2 Hotfix 26 · generate multiple selected outputs as real individual files.
+// Chrome/Edge use the File System Access API so one folder permission saves all files
+// without the browser's automatic-download blocker. Other browsers fall back to
+// standard download links and may ask the user to allow multiple downloads.
+async function pickIndividualDownloadDirectory(){
+  if(typeof window.showDirectoryPicker!=='function')return null;
+  try{return await window.showDirectoryPicker({id:'carestep-selected-outputs',mode:'readwrite',startIn:'downloads'});}
+  catch(e){if(e?.name==='AbortError')return false;console.warn('Directory picker unavailable',e);return null;}
+}
+async function saveIndividualArtifact(blob,filename,directoryHandle){
+  if(!blob)return false;
+  const safe=safeFileName(filename);
+  if(directoryHandle){
+    const fileHandle=await directoryHandle.getFileHandle(safe,{create:true});
+    const writable=await fileHandle.createWritable();
+    await writable.write(blob);await writable.close();return true;
+  }
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=safe;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1800);
+  await new Promise(r=>setTimeout(r,260));
+  return true;
+}
+async function generateIndividualSelectedOutputs(selected){
+  const directoryHandle=await pickIndividualDownloadDirectory();
+  if(directoryHandle===false){toast('개별 파일 저장을 취소했습니다.');return false;}
+  if(!directoryHandle&&selected.length>1)toast('여러 파일 다운로드 허용 요청이 표시되면 허용해주세요.');
+  const btn=$('generateOutputBtn'),old=btn?.textContent,original=currentOutput;
+  if(btn){btn.disabled=true;btn.textContent='개별 파일 준비 중…';}
+  let count=0;
+  try{
+    const t=templates.find(x=>x.id===currentTemplateId)||templates[0];
+    const base=safeFileName(`${hospitalName()}_${caseInfo.patientName||templateDisplayTitle(t)}_${templateDisplayTitle(t)}`);
+    const savePdf=async(filename,renderFn)=>{
+      renderFn();await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+      const blob=await exportPdfElement(filename,{save:false,silent:true});
+      if(blob&&await saveIndividualArtifact(blob,filename,directoryHandle)){count++;if(btn)btn.textContent=`개별 파일 저장 중… ${count}`;}
+    };
+    for(const type of selected){
+      currentOutput=type;
+      if(type==='pdf')await savePdf(`${base}_보호자교육_${8+medicationPageCount()}P.pdf`,renderAdvancedPdf);
+      else if(type==='summary')await savePdf(`${base}_퇴원1P요약.pdf`,renderDischargeSummary);
+      else if(type==='meds')await savePdf(`${base}_복약일정표_${medicationPageCount()}P.pdf`,renderMedicationSheet);
+      else if(type==='medcheck')await savePdf(`${base}_${medicationCheckFileLabel()}.pdf`,renderMedicationCheckSheet);
+      else if(type==='staff')await savePdf(`${base}_직원용_퇴원교육.pdf`,renderStaffSheet);
+      else if(['d1','d3','d7','d14'].includes(type)){const day=Number(type.replace('d',''));await savePdf(`${base}_D+${day}_체크카드.pdf`,()=>renderCheckCard(day));}
+      else if(type==='kakao'||type==='sms'){
+        const label=type==='sms'?'문자':'카카오톡',blob=new Blob([currentMessage()],{type:'text/plain;charset=utf-8'});
+        if(await saveIndividualArtifact(blob,`${base}_${label}.txt`,directoryHandle)){count++;if(btn)btn.textContent=`개별 파일 저장 중… ${count}`;}
+      }
+      else if(type==='mobile'){
+        const day=Number($('mobileDaySelect')?.value||mobileDay||1),blob=await mobileCardPngBlob(day);
+        if(blob&&await saveIndividualArtifact(blob,`${base}_D+${day}_모바일카드_1080x1920.png`,directoryHandle)){count++;if(btn)btn.textContent=`개별 파일 저장 중… ${count}`;}
+      }
+      else if(type==='mobile4'){
+        for(const day of [1,3,7,14]){const blob=await mobileCardPngBlob(day);if(blob&&await saveIndividualArtifact(blob,`${base}_D+${day}_모바일카드_1080x1920.png`,directoryHandle)){count++;if(btn)btn.textContent=`개별 파일 저장 중… ${count}`;}}
+      }
+    }
+    setGeneratedCount(getGeneratedCount()+count);renderHospitalMeta();markRecentTemplate(currentTemplateId);recordPilotUsage('individual_batch',{fileCount:count,outputs:selected});
+    toast(`${count}개 파일을 압축 없이 개별 저장했습니다. 후속관리로 이어갑니다.`);scheduleBuilderFollowupHandoff();return true;
+  }catch(e){console.error(e);toast('개별 파일 생성 중 오류가 발생했습니다.');return false;}
+  finally{currentOutput=original;renderCurrentOutput();if(btn){btn.disabled=false;btn.textContent=old||'선택 출력물 생성';}updateSelectedOutputUi();}
+}
+
 async function generateSelectedOutputs(){
   readCaseInfoFromForm();
   if(!hospital.name){toast('먼저 병원정보에서 병원명을 저장해주세요.');go('settings');return;}
@@ -8085,8 +8183,11 @@ async function generateSelectedOutputs(){
   const medSelected=selected.filter(x=>x==='meds'||x==='medcheck');
   if(medSelected.length&&!validMedications().length){toast('복약 일정표/복약 체크표를 선택했습니다. 약 이름을 하나 이상 입력하거나 해당 항목을 선택 해제해주세요.');return;}
   if(selected.includes('medcheck')&&!medicationCheckMeta().valid){toast('복약 체크표를 만들려면 모든 약의 투약 기간(일수)을 입력해주세요.');return;}
-  if(selected.length===1){const ok=await generateSingleSelectedOutput(selected[0]);if(ok)scheduleBuilderFollowupHandoff();return;}
-  if(!saasAdvancedExportAllowed())return;
+  const batchMode=selectedBatchDownloadMode(),needsMode=batchModeNeeded(selected);
+  if(selected.length===1&&!needsMode){const ok=await generateSingleSelectedOutput(selected[0]);if(ok)scheduleBuilderFollowupHandoff();return;}
+  if(selected.length>1&&!saasAdvancedExportAllowed())return;
+  if(needsMode&&batchMode==='individual'){await generateIndividualSelectedOutputs(selected);return;}
+  if(selected.length===1&&selected[0]==='mobile4'){const ok=await generateSingleSelectedOutput('mobile4');if(ok)scheduleBuilderFollowupHandoff();return;}
   if(typeof JSZip==='undefined'){toast('ZIP 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');return;}
   const btn=$('generateOutputBtn'); const old=btn?.textContent; if(btn){btn.disabled=true;btn.textContent=`선택한 ${selected.length}종 생성 중…`;}
   const original=currentOutput;
@@ -8122,6 +8223,7 @@ $('sessionRestoreRetry')?.addEventListener('click',()=>saasBootstrap());
 $('sessionRestoreLogin')?.addEventListener('click',saasCancelRestoreAndLogin);
 
 $('generateOutputBtn').addEventListener('click',generateSelectedOutputs);
+document.querySelectorAll('input[name="batchDownloadMode"]').forEach(x=>x.addEventListener('change',updateSelectedOutputUi));
 $('secondaryOutputBtn').addEventListener('click',()=>{
   if(currentOutput==='kakao'||currentOutput==='sms') downloadText(); else printCurrent();
 });
@@ -8179,5 +8281,6 @@ operatorBootstrap();
 startMessagingAutoRefresh();
 
 </script>
+<!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
 </body>
 </html>
