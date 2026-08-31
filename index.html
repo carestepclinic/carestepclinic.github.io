@@ -30,6 +30,13 @@ button{cursor:pointer}
 .hidden{display:none!important}
 .login-shell{min-height:100vh;display:grid;place-items:center;padding:32px;background:linear-gradient(135deg,#eef4ff,#f8fafc 45%,#edf7f2)}
 .login-card{width:min(440px,100%);background:#fff;border:1px solid var(--line);border-radius:24px;padding:34px;box-shadow:var(--shadow)}
+/* v9.0.2 HOTFIX 23 · SESSION RESTORE UX */
+.session-restore-shell{min-height:100vh;display:grid;place-items:center;padding:32px;background:linear-gradient(135deg,#eef4ff,#f8fafc 45%,#edf7f2)}
+.session-restore-card{width:min(420px,calc(100vw - 28px));background:#fff;border:1px solid var(--line);border-radius:24px;padding:34px;box-shadow:var(--shadow);text-align:center}
+.session-restore-card .brand-mark{margin:0 auto 14px}.session-restore-card h2{font-size:21px;margin:0 0 8px}.session-restore-card p{margin:0;color:var(--muted);font-size:10.5px;line-height:1.65}
+.session-restore-spinner{width:30px;height:30px;margin:20px auto 14px;border:3px solid #e5ebf5;border-top-color:#1f5eff;border-radius:50%;animation:carestepSessionSpin .8s linear infinite}
+.session-restore-actions{display:flex;gap:8px;justify-content:center;margin-top:18px}.session-restore-actions .btn{min-width:120px}
+@keyframes carestepSessionSpin{to{transform:rotate(360deg)}}
 .brand-mark{width:54px;height:54px;border-radius:16px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;letter-spacing:-1px;margin-bottom:18px}
 .brand-mark.small{width:40px;height:40px;border-radius:12px;margin:0}
 .eyebrow{margin:0 0 7px;text-transform:uppercase;letter-spacing:.09em;font-size:12px;font-weight:800;color:var(--brand)}
@@ -647,6 +654,21 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
       <div class="case-reset-actions"><button id="caseResetContinue" class="btn btn-secondary" type="button">이어서 작성</button><button id="caseResetConfirm" class="btn btn-primary" type="button">새 환자로 초기화</button></div>
     </div>
   </div>
+
+  <!-- v9.0.2 HOTFIX 23 · valid session refreshes never flash the login form -->
+  <section id="sessionRestoreView" class="session-restore-shell hidden" aria-live="polite" aria-busy="true">
+    <div class="session-restore-card">
+      <div class="brand-mark">CS</div>
+      <p class="eyebrow">CARESTEP CLINIC</p>
+      <h2 id="sessionRestoreTitle">로그인 상태를 복원하고 있습니다</h2>
+      <div id="sessionRestoreSpinner" class="session-restore-spinner" aria-hidden="true"></div>
+      <p id="sessionRestoreMessage">이전 로그인 세션을 확인하는 중입니다. 새로고침 후 다시 로그인할 필요가 없습니다.</p>
+      <div id="sessionRestoreActions" class="session-restore-actions hidden">
+        <button id="sessionRestoreRetry" class="btn btn-primary" type="button">다시 연결</button>
+        <button id="sessionRestoreLogin" class="btn btn-secondary" type="button">로그인 화면</button>
+      </div>
+    </div>
+  </section>
 
   <section id="loginView" class="login-shell">
     <div class="login-card saas-login-card">
@@ -2814,8 +2836,10 @@ async function resetCategoryOverride(row){
 
 
 /* ========================= v6.3 MULTI-CLINIC FRONTEND ========================= */
+/* v9.0.2 HOTFIX 23 · SESSION RESTORE UX: refresh keeps valid session, avoids login flash, retries transient /saas/me failures, restores last screen. */
 const SAAS_SESSION_STORAGE_KEY='carestep_saas_session_v63';
 const SAAS_ENDPOINT_STORAGE_KEY='carestep_ai_endpoint_v62';
+const SAAS_LAST_VIEW_SESSION_KEY='carestep_last_view_v902'; // Hotfix 23 · refresh resumes the last non-operator screen
 const CARESTEP_DEFAULT_WORKER_URL='https://carestep-ai-api.kk04sdw.workers.dev'; // Pilot Ready Hotfix 16 · public endpoint, not a Secret
 const FOLLOWUP_CASE_NONCE_KEY='carestep_followup_case_nonce_v661';
 const CLINIC_HOSPITAL_STORAGE_PREFIX='carestep_hospital_clinic_';
@@ -2994,21 +3018,55 @@ async function saasAcceptInvite(){
     await saasFinishAuth(d);toast('병원 직원 계정으로 가입했습니다.');go('account');
   }catch(e){saasSetAuthStatus(e.message||'초대 가입 실패','error');}
 }
+function saasStoredLastView(){
+  const allowed=new Set(['dashboard','library','builder','followup','onboarding','settings','account','voice','pilot']);
+  let view='dashboard';try{view=String(sessionStorage.getItem(SAAS_LAST_VIEW_SESSION_KEY)||'dashboard');}catch{}
+  return allowed.has(view)?view:'dashboard';
+}
+function showSessionRestore(message='이전 로그인 세션을 확인하는 중입니다. 새로고침 후 다시 로그인할 필요가 없습니다.',error=false){
+  $('loginView')?.classList.add('hidden');$('appView')?.classList.add('hidden');$('sessionRestoreView')?.classList.remove('hidden');
+  if($('sessionRestoreTitle'))$('sessionRestoreTitle').textContent=error?'세션 연결을 확인해주세요':'로그인 상태를 복원하고 있습니다';
+  if($('sessionRestoreMessage'))$('sessionRestoreMessage').textContent=message;
+  $('sessionRestoreSpinner')?.classList.toggle('hidden',!!error);$('sessionRestoreActions')?.classList.toggle('hidden',!error);
+  if($('sessionRestoreView'))$('sessionRestoreView').setAttribute('aria-busy',error?'false':'true');
+}
+async function saasBootstrapMeOnce(timeoutMs=5000){
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
+  try{return await saasRequest('/saas/me',{method:'GET',signal:controller.signal});}
+  catch(e){if(e?.name==='AbortError')throw Object.assign(new Error('CARESTEP 서버 응답이 지연되고 있습니다.'),{transient:true});throw e;}
+  finally{clearTimeout(timer);}
+}
+function saasBootstrapRetryable(e){return !!(e?.transient||!e?.status||e.status===429||Number(e.status)>=500);}
 async function saasBootstrap(){
   const endpoint=CARESTEP_DEFAULT_WORKER_URL;
   try{localStorage.setItem(SAAS_ENDPOINT_STORAGE_KEY,endpoint);}catch{}
   if($('saasEndpoint'))$('saasEndpoint').value=endpoint;
   if(!saasToken){showLogin();return;}
+  showSessionRestore();
   try{
-    const d=await saasRequest('/saas/me',{method:'GET'});saasMe=d.me;saasSessionMeta=d.session||null;saasMode='auth';
-    showApp();applySaasPermissions();await saasRefreshAccount(false);hydrateAuthenticatedClinicLocalState();renderAll();applySaasPermissions();await handleBillingRedirect();await saasLoadCentralContent(true);await loadCategoryOverrides(true);await loadCalendarIntegrationConfig(true);voiceHydrateForm();await loadOnboardingStatus(false,true);
-  }catch{
-    saasToken='';saasMe=null;persistSaasSessionToken('');showLogin();
+    let d=null,lastError=null;
+    for(let attempt=0;attempt<2&&!d;attempt++){
+      try{d=await saasBootstrapMeOnce(attempt===0?5000:6500);}
+      catch(e){lastError=e;if(!saasBootstrapRetryable(e)||attempt===1)throw e;showSessionRestore('로그인 세션은 유지되어 있습니다. 서버 연결을 한 번 더 확인하고 있습니다…');await new Promise(r=>setTimeout(r,450));}
+    }
+    if(!d)throw lastError||new Error('세션을 확인하지 못했습니다.');
+    saasMe=d.me;saasSessionMeta=d.session||null;saasMode='auth';
+    showApp();applySaasPermissions();
+    const resumeView=saasStoredLastView();if(resumeView!=='dashboard'&&saasCanView(resumeView))go(resumeView);
+    await saasRefreshAccount(false);hydrateAuthenticatedClinicLocalState();renderAll();applySaasPermissions();
+    if(resumeView!=='dashboard'&&saasCanView(resumeView))go(resumeView);
+    await handleBillingRedirect();await saasLoadCentralContent(true);await loadCategoryOverrides(true);await loadCalendarIntegrationConfig(true);voiceHydrateForm();await loadOnboardingStatus(false,true);
+  }catch(e){
+    if(e?.status===401||e?.status===403){
+      saasToken='';saasMe=null;persistSaasSessionToken('');showLogin();saasSetAuthStatus('로그인 세션이 만료되었습니다. 다시 로그인해주세요.','error');return;
+    }
+    showSessionRestore('로그인 정보는 그대로 유지되어 있습니다. 네트워크 또는 서버 연결이 일시적으로 지연되고 있습니다. 다시 연결을 눌러주세요.',true);
   }
 }
+function saasCancelRestoreAndLogin(){saasToken='';saasMe=null;persistSaasSessionToken('');try{sessionStorage.removeItem(SAAS_LAST_VIEW_SESSION_KEY);}catch{}showLogin();saasSetAuthStatus('로그인 화면으로 전환했습니다.','');}
 async function saasLogout(){
   if(saasMode==='auth'&&saasToken){try{await saasRequest('/saas/logout',{method:'POST'});}catch{}}
-  saasToken='';saasMe=null;saasSessionMeta=null;saasSessions=[];saasDiagnostics=[];billingOverviewState=null;billingRedirectHandled=false;legalStatusState=null;legalDocsState=null;configBackupsState=[];clinicDeletionState=null;saasMode='auth';googleCalendarToken={accessToken:'',expiresAt:0};googleCalendarTokenClient=null;microsoftCalendarApp=null;microsoftCalendarAccount=null;calendarIntegrationConfig={googleClientId:'',microsoftClientId:'',microsoftTenant:'common',updatedAt:''};centralStudioItems=[];centralContentMeta={loaded:false,count:0,updatedAt:'',error:''};categoryOverrides={};syncPublishedStudioItems();applyCategoryOverrides();persistSaasSessionToken('');showLogin();saasSetAuthStatus('로그아웃되었습니다.','ok');
+  saasToken='';saasMe=null;saasSessionMeta=null;saasSessions=[];saasDiagnostics=[];billingOverviewState=null;billingRedirectHandled=false;legalStatusState=null;legalDocsState=null;configBackupsState=[];clinicDeletionState=null;saasMode='auth';googleCalendarToken={accessToken:'',expiresAt:0};googleCalendarTokenClient=null;microsoftCalendarApp=null;microsoftCalendarAccount=null;calendarIntegrationConfig={googleClientId:'',microsoftClientId:'',microsoftTenant:'common',updatedAt:''};centralStudioItems=[];centralContentMeta={loaded:false,count:0,updatedAt:'',error:''};categoryOverrides={};syncPublishedStudioItems();applyCategoryOverrides();persistSaasSessionToken('');try{sessionStorage.removeItem(SAAS_LAST_VIEW_SESSION_KEY);}catch{}showLogin();saasSetAuthStatus('로그아웃되었습니다.','ok');
 }
 function saasEnterDemo(){
   saasMode='demo';saasMe=null;saasSessionMeta=null;saasSessions=[];saasDiagnostics=[];billingOverviewState=null;billingRedirectHandled=false;legalStatusState=null;configBackupsState=[];clinicDeletionState=null;googleCalendarToken={accessToken:'',expiresAt:0};googleCalendarTokenClient=null;microsoftCalendarApp=null;microsoftCalendarAccount=null;calendarIntegrationConfig={googleClientId:'',microsoftClientId:'',microsoftTenant:'common',updatedAt:''};centralStudioItems=[];centralContentMeta={loaded:false,count:0,updatedAt:'',error:''};categoryOverrides={};syncPublishedStudioItems();applyCategoryOverrides();showApp();applySaasPermissions();renderSaasAccount();toast('로컬 데모로 입장했습니다.');
@@ -4039,8 +4097,8 @@ function toast(message){ const el=$('toast'); el.textContent=message; el.classLi
 function escapeHtml(v=''){ return String(v).replace(/[&<>'"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[s])); }
 function fillHospitalText(v=''){ return String(v).replaceAll('{{병원명}}', hospitalName()); }
 
-function showApp(){ $('loginView').classList.add('hidden'); $('appView').classList.remove('hidden'); renderAll(); applySaasPermissions(); renderSaasAccount(); setTimeout(()=>refreshDailyWorkflowIndicators(false),0); }
-function showLogin(){ $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
+function showApp(){ $('loginView').classList.add('hidden'); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.remove('hidden'); renderAll(); applySaasPermissions(); renderSaasAccount(); setTimeout(()=>refreshDailyWorkflowIndicators(false),0); }
+function showLogin(){ $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
 
 const SECONDARY_NAV_VIEWS=new Set(['onboarding','settings','account','voice','pilot']);
 function setManageNavOpen(open){
@@ -4053,6 +4111,7 @@ function toggleManageNav(){const group=$('navManageGroup');setManageNavOpen(!gro
 function go(view){
   if(currentCasePhase==='completed'&&(view==='library'||view==='builder'))beginNewCase(false,true);
   if(!saasCanView(view)){const featureByView={library:'library',builder:'builder',followup:'followupAutomation',voice:'customerVoice',pilot:'pilotAnalytics'};toast(featureByView[view]?saasFeatureMessage(featureByView[view]):'현재 계정 역할에서 사용할 수 없는 메뉴입니다.');view='dashboard';}
+  if(['dashboard','library','builder','followup','onboarding','settings','account','voice','pilot'].includes(view)){try{sessionStorage.setItem(SAAS_LAST_VIEW_SESSION_KEY,view);}catch{}}
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active-view'));
   document.querySelectorAll('.nav-item').forEach(v=>v.classList.remove('active'));
   $(view).classList.add('active-view');
@@ -7979,6 +8038,9 @@ async function generateSelectedOutputs(){
   }catch(e){console.error(e);toast('선택 출력물 생성 중 오류가 발생했습니다.');}
   finally{currentOutput=original;renderCurrentOutput();if(btn){btn.disabled=false;btn.textContent=old||'선택 출력물 생성';}updateSelectedOutputUi();}
 }
+
+$('sessionRestoreRetry')?.addEventListener('click',()=>saasBootstrap());
+$('sessionRestoreLogin')?.addEventListener('click',saasCancelRestoreAndLogin);
 
 $('generateOutputBtn').addEventListener('click',generateSelectedOutputs);
 $('secondaryOutputBtn').addEventListener('click',()=>{
