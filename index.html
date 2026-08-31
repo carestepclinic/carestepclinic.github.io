@@ -999,7 +999,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
     <main class="main">
       <header class="topbar">
         <div>
-          <p class="eyebrow">CARESTEP Clinic · v9.3.2 · HOTFIX 34 · SOLAPI OAUTH2 · KAKAO ALIMTALK · GUARDIAN RESPONSE · PATIENT JOURNEY</p>
+          <p class="eyebrow">CARESTEP Clinic · v9.3.3 · HOTFIX 35 · SOLAPI OAUTH2 · KAKAO ALIMTALK · GUARDIAN RESPONSE · PATIENT JOURNEY</p>
           <h2 id="viewTitle">대시보드</h2>
         </div>
         <div class="topbar-actions">
@@ -3049,22 +3049,26 @@ const CARESTEP_DEFAULT_WORKER_URL='https://carestep-ai-api.kk04sdw.workers.dev';
 const FOLLOWUP_CASE_NONCE_KEY='carestep_followup_case_nonce_v661';
 const CLINIC_HOSPITAL_STORAGE_PREFIX='carestep_hospital_clinic_';
 const CLINIC_WORKFLOW_STORAGE_PREFIX='carestep_workflow_clinic_';
+/* v9.3.3 HOTFIX 35 · REFRESH SESSION PERSISTENCE
+   Keep the opaque CARESTEP session token in both sessionStorage and localStorage.
+   The Worker remains the source of truth and expires sessions after 7 days.
+   Logout / invalid-session handling calls persistSaasSessionToken(''), which clears both stores. */
 function loadSaasSessionToken(){
   let token='';
   try{token=String(sessionStorage.getItem(SAAS_SESSION_STORAGE_KEY)||'').trim();}catch{}
   if(!token){
-    try{
-      const legacy=String(localStorage.getItem(SAAS_SESSION_STORAGE_KEY)||'').trim();
-      if(legacy){token=legacy;sessionStorage.setItem(SAAS_SESSION_STORAGE_KEY,legacy);}
-      localStorage.removeItem(SAAS_SESSION_STORAGE_KEY);
-    }catch{}
+    try{token=String(localStorage.getItem(SAAS_SESSION_STORAGE_KEY)||'').trim();}catch{}
+  }
+  if(token){
+    try{sessionStorage.setItem(SAAS_SESSION_STORAGE_KEY,token);}catch{}
+    try{localStorage.setItem(SAAS_SESSION_STORAGE_KEY,token);}catch{}
   }
   return token;
 }
 function persistSaasSessionToken(token=''){
   const value=String(token||'').trim();
   try{if(value)sessionStorage.setItem(SAAS_SESSION_STORAGE_KEY,value);else sessionStorage.removeItem(SAAS_SESSION_STORAGE_KEY);}catch{}
-  try{localStorage.removeItem(SAAS_SESSION_STORAGE_KEY);}catch{}
+  try{if(value)localStorage.setItem(SAAS_SESSION_STORAGE_KEY,value);else localStorage.removeItem(SAAS_SESSION_STORAGE_KEY);}catch{}
 }
 function clinicHospitalStorageKey(clinicId=''){const id=String(clinicId||saasMe?.clinic?.id||'').trim();return id?CLINIC_HOSPITAL_STORAGE_PREFIX+id:'carestep_hospital';}
 function clinicWorkflowStorageKey(clinicId=''){const id=String(clinicId||saasMe?.clinic?.id||'').trim();return id?CLINIC_WORKFLOW_STORAGE_PREFIX+id:'carestep_workflow';}
@@ -8717,6 +8721,6 @@ startMessagingAutoRefresh();
 </script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
 <!-- CARESTEP v9.1 · SOLAPI OAuth2 clinic-account messaging -->
-<!-- CARESTEP v9.3.2 · HOTFIX 34 · resilient patient reset + core/Kakao OAuth scope isolation -->
+<!-- CARESTEP v9.3.3 · HOTFIX 35 · refresh session persistence + HOTFIX 34 patient reset/OAuth isolation -->
 </body>
 </html>
