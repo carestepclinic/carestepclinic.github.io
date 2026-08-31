@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>CARESTEP Clinic v9.0.2 · Daily Workflow & UX Polish</title>
+  <title>CARESTEP Clinic v9.0.2 · Daily Workflow & UX Polish · Hotfix 25</title>
   <meta name="description" content="동물병원 보호자 교육자료 라이브러리 및 병원 맞춤 PDF 생성 MVP" />
   <style>
 :root {
@@ -3052,9 +3052,9 @@ async function saasBootstrap(){
     if(!d)throw lastError||new Error('세션을 확인하지 못했습니다.');
     saasMe=d.me;saasSessionMeta=d.session||null;saasMode='auth';
     showApp();applySaasPermissions();
-    const resumeView=saasStoredLastView();if(resumeView!=='dashboard'&&saasCanView(resumeView))go(resumeView);
+    const resumeView=saasStoredLastView();if(resumeView!=='dashboard'&&saasCanView(resumeView))go(resumeView,{historyMode:'replace'});
     await saasRefreshAccount(false);hydrateAuthenticatedClinicLocalState();renderAll();applySaasPermissions();
-    if(resumeView!=='dashboard'&&saasCanView(resumeView))go(resumeView);
+    if(resumeView!=='dashboard'&&saasCanView(resumeView))go(resumeView,{historyMode:'none'});
     await handleBillingRedirect();await saasLoadCentralContent(true);await loadCategoryOverrides(true);await loadCalendarIntegrationConfig(true);voiceHydrateForm();await loadOnboardingStatus(false,true);
   }catch(e){
     if(e?.status===401||e?.status===403){
@@ -3289,7 +3289,7 @@ async function handleBillingRedirect(){
     if(mode==='success'){const intentId=u.searchParams.get('intentId')||'',authKey=u.searchParams.get('authKey')||'',customerKey=u.searchParams.get('customerKey')||'';if(!authKey||!customerKey)throw new Error('카드 인증 결과를 확인하지 못했습니다.');const d=await saasRequest('/saas/payments/setup-complete',{method:'POST',body:JSON.stringify({intentId,authKey,customerKey})});billingOverviewState=d.overview||null;renderBillingOverview();toast(d.chargeResult?.paid?'카드 등록과 구독 결제가 완료되었습니다.':'정기결제 카드 등록이 완료되었습니다.');}
     else{toast(`카드 등록이 완료되지 않았습니다.${u.searchParams.get('message')?' '+u.searchParams.get('message'):''}`);}
   }catch(e){toast(e.message||'카드 등록 완료 처리에 실패했습니다.');}
-  finally{history.replaceState({},document.title,cleanBillingReturnUrl());await saasRefreshAccount(false);await loadBillingOverview(false);}
+  finally{history.replaceState(history.state&&typeof history.state==='object'?{...history.state}:{},document.title,cleanBillingReturnUrl());await saasRefreshAccount(false);await loadBillingOverview(false);}
 }
 async function scheduleBillingPlan(){
   const {code,cycle}=billingSelectedPlanInfo();if(!confirm(`${code} · ${cycle==='annual'?'연 결제':'월 결제'}로 변경 예약할까요?\n\n무료체험 중이면 체험 종료일, 유료 구독 중이면 다음 결제일부터 적용됩니다.`))return;const btn=$('billingSchedulePlan');
@@ -4097,8 +4097,65 @@ function toast(message){ const el=$('toast'); el.textContent=message; el.classLi
 function escapeHtml(v=''){ return String(v).replace(/[&<>'"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[s])); }
 function fillHospitalText(v=''){ return String(v).replaceAll('{{병원명}}', hospitalName()); }
 
-function showApp(){ $('loginView').classList.add('hidden'); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.remove('hidden'); renderAll(); applySaasPermissions(); renderSaasAccount(); setTimeout(()=>refreshDailyWorkflowIndicators(false),0); }
-function showLogin(){ $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
+function showApp(){ $('loginView').classList.add('hidden'); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.remove('hidden'); renderAll(); applySaasPermissions(); renderSaasAccount(); carestepInitHistory(carestepActiveView()); setTimeout(()=>refreshDailyWorkflowIndicators(false),0); }
+function showLogin(){ carestepResetHistoryForLogin(); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
+
+/* v9.0.2 HOTFIX 25 · IN-APP BROWSER BACK NAVIGATION
+   CARESTEP behaves like a single-page app, so browser Back should move through CARESTEP views
+   before it can leave the site. Active case work is additionally protected at the root guard. */
+const CARESTEP_HISTORY_STATE_KEY='__carestepNavV902';
+const CARESTEP_HISTORY_VIEWS=new Set(['dashboard','library','builder','followup','onboarding','settings','account','contentStudio','voice','pilot','admin']);
+let carestepHistoryApplying=false,carestepHistoryInitialized=false;
+function carestepActiveView(){return document.querySelector('.view.active-view')?.id||'dashboard';}
+function carestepHistorySafeView(view){return CARESTEP_HISTORY_VIEWS.has(String(view||''))?String(view):'dashboard';}
+function carestepHistoryState(view,guard=false){
+  const prev=history.state&&typeof history.state==='object'?history.state:{};
+  return {...prev,[CARESTEP_HISTORY_STATE_KEY]:true,carestepView:carestepHistorySafeView(view),carestepGuard:!!guard};
+}
+function carestepInitHistory(view='dashboard'){
+  if(carestepHistoryInitialized)return;
+  const safe=carestepHistorySafeView(view),state=history.state&&typeof history.state==='object'?history.state:{};
+  if(state?.[CARESTEP_HISTORY_STATE_KEY]){carestepHistoryInitialized=true;return;}
+  // Keep one same-document guard behind the current CARESTEP entry so a single Back press never drops out of the app.
+  history.replaceState({...state,[CARESTEP_HISTORY_STATE_KEY]:true,carestepView:'dashboard',carestepGuard:true},document.title,window.location.href);
+  history.pushState({[CARESTEP_HISTORY_STATE_KEY]:true,carestepView:safe,carestepGuard:false},document.title,window.location.href);
+  carestepHistoryInitialized=true;
+}
+function carestepRecordHistory(view,mode='push'){
+  if(carestepHistoryApplying||mode==='none'||$('appView')?.classList.contains('hidden'))return;
+  const safe=carestepHistorySafeView(view);
+  if(!carestepHistoryInitialized){carestepInitHistory(safe);return;}
+  const state=history.state&&typeof history.state==='object'?history.state:{};
+  if(state?.[CARESTEP_HISTORY_STATE_KEY]&&state.carestepView===safe&&!state.carestepGuard)return;
+  const next={...state,[CARESTEP_HISTORY_STATE_KEY]:true,carestepView:safe,carestepGuard:false};
+  if(mode==='replace')history.replaceState(next,document.title,window.location.href);
+  else history.pushState(next,document.title,window.location.href);
+}
+function carestepResetHistoryForLogin(){
+  carestepHistoryApplying=false;carestepHistoryInitialized=false;
+  const state=history.state&&typeof history.state==='object'?{...history.state}:{};
+  if(state?.[CARESTEP_HISTORY_STATE_KEY]){delete state[CARESTEP_HISTORY_STATE_KEY];delete state.carestepView;delete state.carestepGuard;try{history.replaceState(state,document.title,window.location.href);}catch{}}
+}
+function carestepApplyHistoryView(view){
+  const safe=carestepHistorySafeView(view);
+  carestepHistoryApplying=true;
+  try{go(saasCanView(safe)?safe:'dashboard',{historyMode:'none'});}finally{carestepHistoryApplying=false;}
+}
+window.addEventListener('popstate',event=>{
+  if(!carestepHistoryInitialized||$('appView')?.classList.contains('hidden'))return;
+  const state=event.state&&typeof event.state==='object'?event.state:{};
+  if(!state?.[CARESTEP_HISTORY_STATE_KEY])return;
+  if(state.carestepGuard){
+    carestepApplyHistoryView('dashboard');
+    // While a case is in progress, keep one protective entry so repeated Back presses cannot accidentally discard the session.
+    if(caseHasActiveWork()){
+      history.pushState({[CARESTEP_HISTORY_STATE_KEY]:true,carestepView:'dashboard',carestepGuard:false},document.title,window.location.href);
+      toast('진행 중인 케이스가 있어 사이트 이탈을 막았습니다. 작업은 그대로 유지되며 홈에서 이어갈 수 있습니다.');
+    }
+    return;
+  }
+  carestepApplyHistoryView(state.carestepView||'dashboard');
+});
 
 const SECONDARY_NAV_VIEWS=new Set(['onboarding','settings','account','voice','pilot']);
 function setManageNavOpen(open){
@@ -4108,7 +4165,7 @@ function setManageNavOpen(open){
 function syncSidebarNavGroup(view){if(SECONDARY_NAV_VIEWS.has(view))setManageNavOpen(true);}
 function toggleManageNav(){const group=$('navManageGroup');setManageNavOpen(!group?.classList.contains('open'));}
 
-function go(view){
+function go(view,options={}){
   if(currentCasePhase==='completed'&&(view==='library'||view==='builder'))beginNewCase(false,true);
   if(!saasCanView(view)){const featureByView={library:'library',builder:'builder',followup:'followupAutomation',voice:'customerVoice',pilot:'pilotAnalytics'};toast(featureByView[view]?saasFeatureMessage(featureByView[view]):'현재 계정 역할에서 사용할 수 없는 메뉴입니다.');view='dashboard';}
   if(['dashboard','library','builder','followup','onboarding','settings','account','voice','pilot'].includes(view)){try{sessionStorage.setItem(SAAS_LAST_VIEW_SESSION_KEY,view);}catch{}}
@@ -4130,6 +4187,7 @@ function go(view){
   if(view==='account'){let tab='my';try{tab=localStorage.getItem(ACCOUNT_TAB_STORAGE_KEY)||'my';}catch{}setAccountTab(tab);saasRefreshAccount(false);}
   if(view==='dashboard')setTimeout(()=>refreshDailyWorkflowIndicators(false),0);
   renderGlobalCaseBadge();
+  carestepRecordHistory(view,options.historyMode||'push');
 }
 
 function hospitalName(){ return hospital.name || '우리 병원'; }
