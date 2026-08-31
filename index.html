@@ -675,6 +675,181 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
 #outputFormatHint{margin:8px 0 0;font-size:8.8px;color:#6e7c91;line-height:1.45}
 @media(max-width:700px){.output-format-options{grid-template-columns:1fr}.output-format-head{display:block}.output-format-head>span{display:block;margin-top:3px}}
 </style>
+
+
+<style id="carestep-hotfix31-followup-report-readability">
+/* v9.0.2 Hotfix 31 · Follow-up + Operations Report readability
+   Screen-focused type scale: larger operational text without changing generated patient output layouts. */
+@media screen {
+  /* ===== Follow-up: page hierarchy ===== */
+  #followup .section-head h3{font-size:20px!important;line-height:1.25}
+  #followup .section-head>div>p,#followup .section-head .muted{font-size:12.5px!important;line-height:1.6}
+  #followup .followup-guide-top h3{font-size:20px!important;line-height:1.25}
+  #followup .followup-guide-top p{font-size:13px!important;line-height:1.65}
+  #followup .followup-guide-mode{font-size:12px!important}
+  #followup .followup-guide-step{min-height:72px;padding:11px 12px}
+  #followup .followup-guide-step b{font-size:13px!important;line-height:1.35}
+  #followup .followup-guide-step span{font-size:11.5px!important;line-height:1.45}
+  #followup .followup-guide-step .guide-num{font-size:11px!important;width:24px;height:24px}
+  #followup .followup-guide-step.done .guide-num{font-size:0!important}
+  #followup .followup-guide-step.done .guide-num::after{font-size:11px!important}
+  #followup .guide-step-head h4{font-size:16.5px!important;line-height:1.3}
+  #followup .guide-step-head p{font-size:12.5px!important;line-height:1.65}
+  #followup .guide-step-tools .btn{font-size:12px!important}
+  #followup .guide-summary-box span{font-size:11.5px!important;line-height:1.45}
+  #followup .guide-summary-box b{font-size:13.5px!important;line-height:1.35}
+  #followup .guide-callout{font-size:12px!important;line-height:1.65}
+  #followup .followup-guide-status{font-size:11.5px!important}
+  #followup .guide-final-row span{font-size:11px!important}
+  #followup .guide-final-row b{font-size:13px!important}
+  #followup .guide-advanced-toggle{font-size:11.5px!important}
+
+  /* ===== Follow-up: case/Journey/cards ===== */
+  #followup .followup-hero h3{font-size:20px!important;line-height:1.3}
+  #followup .followup-hero p{font-size:12.5px!important;line-height:1.65}
+  #followup .followup-settings{padding:15px}
+  #followup .followup-stage-toggle{font-size:12.5px!important;line-height:1.4;padding:10px}
+  #followup .followup-stage-toggle small{font-size:11px!important;line-height:1.4}
+  #followup .followup-stage-action{font-size:9.5px!important}
+  #followup .followup-settings-note{font-size:11.5px!important;line-height:1.65}
+  #followup .followup-kpi span{font-size:11px!important;line-height:1.4}
+  #followup .followup-kpi b{font-size:15px!important;line-height:1.25}
+  #followup .patient-journey-head h3{font-size:19px!important}
+  #followup .patient-journey-head p{font-size:12.5px!important;line-height:1.6}
+  #followup .journey-card b{font-size:13px!important;line-height:1.4}
+  #followup .journey-card small{font-size:11px!important;line-height:1.45}
+  #followup .journey-tag{font-size:10.5px!important;padding:4px 7px}
+  #followup .journey-active-banner,#followup .journey-empty,#followup .journey-privacy{font-size:11.5px!important;line-height:1.55}
+  #followup .followup-card{padding:15px}
+  #followup .followup-card-day{font-size:11.5px!important;padding:5px 9px}
+  #followup .followup-card-date{font-size:11.5px!important}
+  #followup .followup-card h4{font-size:15.5px!important;line-height:1.4;margin-top:10px}
+  #followup .followup-focus{font-size:12.5px!important;line-height:1.65;padding:11px 12px}
+  #followup .followup-message{font-size:12.5px!important;line-height:1.7;padding:11px}
+  #followup .followup-message-tabs button{font-size:11.5px!important;padding:7px 10px}
+  #followup .followup-message-editor-head b{font-size:12px!important}
+  #followup .followup-message-editor-head span{font-size:11px!important}
+  #followup .followup-message-editor{font-size:13.5px!important;line-height:1.7;min-height:170px;padding:12px 13px}
+  #followup .followup-message-edit-note{font-size:11.5px!important;line-height:1.6}
+  #followup .followup-preset-head b{font-size:13.5px!important}
+  #followup .followup-preset-head span,#followup .followup-preset-status{font-size:11.5px!important;line-height:1.6}
+  #followup .followup-preset-scope{font-size:10.5px!important}
+  #followup .followup-preset-controls .input,#followup .followup-preset-controls .btn{font-size:12px!important}
+  #followup .followup-lock,#followup .followup-privacy{font-size:11.5px!important;line-height:1.65}
+
+  /* ===== Follow-up: calendar / messaging ===== */
+  #followup .calendar-direct-head b{font-size:13.5px!important}
+  #followup .calendar-direct-head small{font-size:11.5px!important;line-height:1.45}
+  #followup .calendar-provider-title b{font-size:13px!important}
+  #followup .calendar-provider-status{font-size:11px!important}
+  #followup .calendar-provider p{font-size:11.5px!important;line-height:1.6}
+  #followup .calendar-provider-actions .btn{font-size:12px!important}
+  #followup .calendar-case-option,#followup .calendar-sync-result,#followup .calendar-direct-note{font-size:11.5px!important;line-height:1.6}
+  #followup .google-calendar-picker-head b{font-size:12.5px!important}
+  #followup .google-calendar-picker-head span,#followup .google-calendar-picker-note,#followup .google-calendar-choice{font-size:11px!important;line-height:1.5}
+  #followup .google-calendar-picker-row .input{font-size:13px!important}
+  #followup .google-calendar-picker-row .btn{font-size:11.5px!important}
+  #followup .followup-messaging-head h3{font-size:17px!important;line-height:1.3}
+  #followup .followup-messaging-head p{font-size:12px!important;line-height:1.6}
+  #followup .messaging-badge{font-size:11px!important}
+  #followup .messaging-card h4{font-size:14px!important}
+  #followup .messaging-card p{font-size:11.5px!important;line-height:1.6}
+  #followup .messaging-consent,#followup .messaging-platform,#followup .messaging-template-help,#followup .messaging-test-delivery{font-size:11.5px!important;line-height:1.6}
+  #followup .messaging-actions .btn{font-size:12px!important}
+  #followup .messaging-queue-head b{font-size:13px!important}
+  #followup .messaging-job-time{font-size:11.5px!important}
+  #followup .messaging-job-time small{font-size:10.5px!important}
+  #followup .messaging-job-main b{font-size:12.5px!important}
+  #followup .messaging-job-main span{font-size:11px!important;line-height:1.45}
+  #followup .messaging-status,#followup .work-message-status{font-size:10.5px!important}
+  #followup .messaging-empty,#followup .messaging-privacy{font-size:11.5px!important;line-height:1.6}
+
+  /* ===== Follow-up: operation workboard / analytics ===== */
+  #followup .followup-workboard-head h3,#followup .followup-analytics-head h3,#followup .followup-operation-head h3{font-size:17px!important;line-height:1.3}
+  #followup .followup-workboard-head p,#followup .followup-analytics-head p,#followup .followup-operation-head p{font-size:12px!important;line-height:1.6}
+  #followup .followup-workboard-actions .btn,#followup .followup-analytics-actions .btn{font-size:11.5px!important}
+  #followup .followup-analytics-actions .input{font-size:12.5px!important}
+  #followup .followup-workboard-tab{font-size:11.5px!important}
+  #followup .followup-work-empty{font-size:11.5px!important;line-height:1.55}
+  #followup .followup-work-when{font-size:11.5px!important}
+  #followup .followup-work-when small{font-size:10.5px!important}
+  #followup .followup-work-main b{font-size:12.5px!important;line-height:1.4}
+  #followup .followup-work-main span{font-size:11px!important;line-height:1.5}
+  #followup .followup-work-meta{font-size:10.5px!important;line-height:1.45}
+  #followup .followup-work-actions .btn{font-size:11px!important}
+  #followup .followup-workboard-foot{font-size:10.5px!important;line-height:1.55}
+  #followup .followup-outcome-choice,#followup .followup-editor-note,#followup .followup-escalation-box,#followup .followup-attention-banner,#followup .followup-resolution-meta{font-size:11px!important;line-height:1.55}
+  #followup .followup-editor-actions .btn{font-size:11.5px!important}
+  #followup .followup-operation-kpi span,#followup .analytics-kpi span{font-size:11px!important}
+  #followup .followup-operation-kpi b,#followup .analytics-kpi b{font-size:17px!important}
+  #followup .analytics-kpi small{font-size:10.5px!important;line-height:1.4}
+  #followup .analytics-card h4{font-size:14px!important;line-height:1.35}
+  #followup .analytics-card-note{font-size:11.5px!important;line-height:1.55}
+  #followup .analytics-bar-row,#followup .analytics-bar-row b,#followup .analytics-table,#followup .analytics-insight,#followup .analytics-empty,#followup .followup-analytics-foot,#followup .followup-analytics-lock{font-size:11.5px!important;line-height:1.55}
+
+  /* ===== Operations report: page hierarchy ===== */
+  #pilot>.section-head h3{font-size:21px!important;line-height:1.25}
+  #pilot>.section-head>div>p,#pilot>.section-head .muted{font-size:12.5px!important;line-height:1.6}
+  #pilot .monthly-report-toolbar .field-label{font-size:12px!important}
+  #pilot .monthly-report-toolbar .input{font-size:13px!important}
+  #pilot .monthly-report-status{font-size:11.5px!important;line-height:1.45;padding-bottom:7px}
+  #pilot .monthly-report-cover h4{font-size:22px!important;line-height:1.25;margin:3px 0 5px}
+  #pilot .monthly-report-cover p{font-size:12px!important;line-height:1.5}
+  #pilot .monthly-report-brand b{font-size:16px!important}
+  #pilot .monthly-report-brand span{font-size:10.5px!important;line-height:1.4}
+
+  /* KPI text gets the largest relative lift because the cards already have ample whitespace. */
+  #pilot .monthly-report-kpis span{font-size:11.5px!important;line-height:1.4;font-weight:700}
+  #pilot .monthly-report-kpis b{font-size:23px!important;line-height:1.2;margin-top:5px}
+  #pilot .monthly-report-kpis small{font-size:10.5px!important;line-height:1.45;margin-top:3px}
+  #pilot .monthly-report-value{font-size:12px!important;line-height:1.65;padding:12px 13px}
+  #pilot .monthly-report-compare h4{font-size:14.5px!important;line-height:1.3}
+  #pilot .monthly-comparison-item span{font-size:10.5px!important;line-height:1.4}
+  #pilot .monthly-comparison-item b{font-size:13.5px!important;line-height:1.3;margin-top:4px}
+  #pilot .monthly-comparison-item small{font-size:10px!important;line-height:1.35;margin-top:3px}
+  #pilot .monthly-report-card-head h4{font-size:14px!important;line-height:1.35;margin-bottom:9px}
+  #pilot .monthly-outcome-grid span{font-size:10.5px!important;line-height:1.4}
+  #pilot .monthly-outcome-grid b{font-size:15px!important;line-height:1.25}
+  #pilot .monthly-mini-table,#pilot .monthly-mini-table th,#pilot .monthly-mini-table td{font-size:11.5px!important;line-height:1.5}
+  #pilot .monthly-mini-table th,#pilot .monthly-mini-table td{padding:8px 6px}
+  #pilot .monthly-report-foot{font-size:10.5px!important;line-height:1.6}
+
+  /* Local pilot analytics beneath the monthly report */
+  #pilot .legacy-pilot-title h4{font-size:16.5px!important;line-height:1.3}
+  #pilot .legacy-pilot-title p{font-size:11.5px!important;line-height:1.6}
+  #pilot .pilot-setup-head h4,#pilot .pilot-card-head h4,#pilot .pilot-backup-panel h4{font-size:14.5px!important;line-height:1.35}
+  #pilot .pilot-setup-head p,#pilot .pilot-backup-panel p{font-size:11.5px!important;line-height:1.6}
+  #pilot .pilot-kpi span{font-size:11.5px!important;line-height:1.4}
+  #pilot .pilot-kpi strong{font-size:26px!important;line-height:1.15;margin:8px 0 4px}
+  #pilot .pilot-kpi small{font-size:10.5px!important;line-height:1.4}
+  #pilot .pilot-rank-row .rank{font-size:10.5px!important}
+  #pilot .pilot-rank-row b{font-size:12px!important;line-height:1.4}
+  #pilot .pilot-rank-row span{font-size:11px!important;line-height:1.4}
+  #pilot .pilot-feedback-item b,#pilot .pilot-feedback-item .stars{font-size:12px!important}
+  #pilot .pilot-feedback-item p{font-size:11px!important;line-height:1.55}
+  #pilot .pilot-feedback-item small{font-size:10px!important}
+  #pilot .pilot-privacy-list{font-size:11.5px!important;line-height:1.6}
+  #pilot .pilot-feedback-title b{font-size:12.5px!important}
+  #pilot .pilot-feedback-title span{font-size:10.5px!important}
+  #pilot .pilot-feedback-prompt textarea{font-size:12px!important;line-height:1.55}
+  #pilot .report-empty{font-size:11.5px!important;line-height:1.55}
+
+  /* Responsive safety after increasing type scale. */
+  @media(max-width:1180px){
+    #pilot .monthly-report-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+    #pilot .monthly-comparison-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+  @media(max-width:760px){
+    #followup .followup-guide-top h3,#pilot>.section-head h3{font-size:19px!important}
+    #followup .followup-cards,#pilot .monthly-report-grid{grid-template-columns:minmax(0,1fr)!important}
+    #followup .followup-current,#pilot .monthly-report-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+    #pilot .monthly-report-cover{display:block}
+    #pilot .monthly-report-brand{text-align:left;margin-top:10px}
+    #pilot .monthly-report-compare{grid-template-columns:minmax(0,1fr)}
+  }
+}
+</style>
+
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
