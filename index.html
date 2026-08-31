@@ -6971,10 +6971,9 @@ function renderCurrentOutput(){
   else if(currentOutput==='medcheck'){const meta=medicationCheckMeta();btn.textContent=`${medicationCheckLabel()} PDF 다운로드`;sec.textContent='인쇄 / PDF 저장';hint.textContent=meta.valid?`최장 ${meta.maxDays}일 처방 기준 · ${meta.pageCount}페이지 · 각 약은 입력한 투약일수까지만 시간별 체크칸을 표시합니다.`:'각 약의 투약 기간(일수)을 입력하면 처방기간에 맞춰 자동 생성됩니다.';renderMedicationCheckSheet();}
   else if(currentOutput==='kakao'||currentOutput==='sms'){btn.textContent=currentOutput==='sms'?'문자 문구 복사':'카카오톡 문구 복사';sec.textContent='TXT 다운로드';hint.textContent='보호자에게 바로 보낼 수 있는 안내문입니다.';renderMessageOutput(currentOutput);}
   else if(['d1','d3','d7','d14'].includes(currentOutput)){const day=Number(currentOutput.replace('d',''));btn.textContent=`D+${day} 체크카드 PDF 다운로드`;sec.textContent='인쇄 / PDF 저장';hint.textContent=`D+${day}${actualDateFor(day)?` · ${actualDateFor(day)}`:''}에 확인할 내용을 1페이지로 정리합니다.`;renderCheckCard(day);}
-  else if(currentOutput==='mobile'){readCaseInfoFromForm();mobileDay=Number($('mobileDaySelect')?.value||1);btn.textContent='1080×1920 PNG 다운로드';sec.textContent='화면 인쇄';hint.textContent=`D+${mobileDay}${actualDateFor(mobileDay)?` · ${actualDateFor(mobileDay)}`:''} 보호자 휴대폰 저장용 세로 이미지입니다.`;renderMobileCard(mobileDay);}
-  else if(currentOutput==='mobile4'){btn.textContent='D+1·3·7·14 모바일 4종 ZIP';sec.textContent='D+1 미리보기 인쇄';hint.textContent='D+1·3·7·14 모바일 카드를 1080×1920 PNG 4개로 생성해 ZIP으로 묶습니다.';renderMobileCard(1);}
+  else if(currentOutput==='mobile'){readCaseInfoFromForm();mobileDay=Number($('mobileDaySelect')?.value||1);btn.textContent='1080×1920 PNG 다운로드';sec.textContent='현재 카드 인쇄 / PDF 저장';hint.textContent=`D+${mobileDay}${actualDateFor(mobileDay)?` · ${actualDateFor(mobileDay)}`:''} 보호자 휴대폰 저장용 세로 이미지입니다.`;renderMobileCard(mobileDay);}
+  else if(currentOutput==='mobile4'){btn.textContent='D+1·3·7·14 모바일 4종 ZIP';sec.textContent='D+1 카드 인쇄 / PDF 저장';hint.textContent='D+1·3·7·14 모바일 카드를 1080×1920 PNG 4개로 생성해 ZIP으로 묶습니다.';renderMobileCard(1);}
   else if(currentOutput==='staff'){btn.textContent='직원용 1P PDF 다운로드';sec.textContent='인쇄 / PDF 저장';hint.textContent='직원이 60초 설명과 퇴원 전 8가지 확인을 같은 순서로 진행하는 1페이지 자료입니다.';renderStaffSheet();}
-  sec.textContent='현재 미리보기 인쇄 / 저장';
   updateSelectedOutputUi();
 }
 function renderBuilder(){ updateCaseDatePreview(); updateRecheckPreview(); updateClinicPresetStatus(); renderCurrentOutput(); updateReadiness(); renderGlobalCaseBadge(); }
@@ -7952,9 +7951,31 @@ function downloadText(){
   const blob=new Blob([currentMessage()],{type:'text/plain;charset=utf-8'}); const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download=`${hospitalName()}_${templateDisplayTitle(t)}_${currentOutput==='sms'?'문자':'카카오톡'}.txt`.replace(/[\/:*?"<>|]/g,'_');a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
+// v9.0.2 Hotfix 24 · Mobile preview print/save
+// The app-level @media print rule hides .app-shell, so window.print() cannot print
+// the phone preview that lives inside the app. Print the rendered card in an
+// isolated same-origin popup instead, preserving the exact current preview.
+function printMobilePreview(){
+  const card=$('activePhoneCard');
+  if(!card){toast('인쇄할 모바일 카드 미리보기가 없습니다.');return;}
+  const w=window.open('','','width=820,height=1080');
+  if(!w){toast('모바일 카드 인쇄를 위해 팝업을 허용해주세요.');return;}
+  const css=document.querySelector('style')?.innerHTML||'';
+  const day=currentOutput==='mobile4'?1:Number($('mobileDaySelect')?.value||mobileDay||1);
+  w.document.write(`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CARESTEP D+${day} 모바일 카드</title><style>${css}
+html,body{margin:0!important;padding:0!important;background:#fff!important;min-height:100%!important}
+body{display:block!important}
+.mobile-print-page{width:210mm;height:297mm;margin:0 auto;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff}
+.mobile-print-page .phone-card{flex:none;margin:0!important;box-shadow:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+@page{size:A4 portrait;margin:0}
+@media print{html,body{width:210mm!important;height:297mm!important;overflow:hidden!important}.mobile-print-page{width:210mm!important;height:297mm!important;display:flex!important}.mobile-print-page .phone-card{display:block!important;transform:scale(1.12);transform-origin:center center}}
+</style></head><body><main class="mobile-print-page">${card.outerHTML}</main></body></html>`);
+  w.document.close();
+  setTimeout(()=>{try{w.focus();w.print();}catch(e){console.error(e);toast('모바일 카드 인쇄창을 열지 못했습니다.');}},650);
+}
 function printCurrent(){
   if(currentOutput==='kakao'||currentOutput==='sms'){window.print();return;}
-  if(currentOutput==='mobile'||currentOutput==='mobile4'){window.print();return;}
+  if(currentOutput==='mobile'||currentOutput==='mobile4'){printMobilePreview();return;}
   const w=window.open('','','width=900,height=1000'); if(!w){toast('팝업을 허용해주세요.');return;}
   const css=document.querySelector('style')?.innerHTML||'';
   w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>CARESTEP</title><style>${css}body{background:#fff}.pdf-document{box-shadow:none;margin:0 auto}
