@@ -1,3 +1,5 @@
+/* v10.0-C · guardian-origin records */
+.timeline-event.home-origin .timeline-event-body{border-color:#bfe3d0;background:#fbfffd}.timeline-home-badge.guardian{background:#e4f7ed;color:#24704b}.timeline-event-marker.type-appetite,.timeline-event-marker.type-water{background:#e8f7ef;color:#28704c}.timeline-event-marker.type-vomiting,.timeline-event-marker.type-diarrhea{background:#fff0ee;color:#b64b42}.timeline-event-marker.type-medication{background:#edf0ff;color:#4c5fb5}
 .patient-crm-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:16px}
 .patient-crm-head h3{margin:3px 0 5px;font-size:22px;color:#17233c}.patient-crm-head p{margin:0;color:#6d7890;font-size:12px;line-height:1.55}
 .patient-crm-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
