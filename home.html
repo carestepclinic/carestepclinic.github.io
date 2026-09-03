@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="carestep-home-icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="carestep-home-icon-192.png">
-  <link rel="stylesheet" href="carestep-home.css?v=10.0-A">
+  <link rel="stylesheet" href="carestep-home.css?v=10.0-B">
   <title>Carestep Home</title>
 </head>
 <body>
@@ -50,10 +50,10 @@
           </div>
           <details class="home-legal">
             <summary>이용약관 및 개인정보 처리 안내 보기</summary>
-            <div><b>서비스 이용 안내</b><p>Carestep Home은 동물병원과 보호자를 연결해 반려동물 건강관리를 돕는 서비스이며, 진단·처방 또는 응급진료를 대신하지 않습니다.</p><b>개인정보 처리 안내</b><p>계정 생성, 본인 확인, 병원·환자 연결을 위해 휴대전화 번호, 보호자명, 환자 기본정보와 연결 이력을 암호화하여 처리합니다.</p></div>
+            <div><b>서비스 이용 안내</b><p>Carestep Home은 동물병원과 보호자를 연결해 반려동물 건강관리를 돕는 서비스이며, 진단·처방 또는 응급진료를 대신하지 않습니다.</p><b>개인정보 처리 안내</b><p>계정 생성, 본인 확인, 병원·환자 연결과 병원이 공개한 건강기록 제공을 위해 휴대전화 번호, 보호자명, 환자 기본정보, 건강기록 및 연결 이력을 암호화하여 처리합니다. 병원 내부 메모는 Carestep Home으로 제공되지 않습니다.</p></div>
           </details>
           <label class="home-check"><input id="inviteTerms" type="checkbox" required><span>Carestep Home 이용약관에 동의합니다.</span></label>
-          <label class="home-check"><input id="invitePrivacy" type="checkbox" required><span>개인정보 수집·이용 및 병원 환자 연결에 동의합니다.</span></label>
+          <label class="home-check"><input id="invitePrivacy" type="checkbox" required><span>개인정보 수집·이용, 병원 환자 연결 및 병원이 공개한 건강기록 제공에 동의합니다.</span></label>
           <div id="inviteStatus" class="home-status" role="status"></div>
           <button id="inviteSubmit" class="home-primary" type="submit">계정 만들고 환자 연결</button>
         </form>
@@ -74,12 +74,49 @@
 
       <section id="dashboardView" hidden>
         <div class="dashboard-head">
-          <div><div class="home-step">Carestep Home</div><h1><span id="homeUserName">보호자</span>님, 안녕하세요</h1><p>병원과 연결된 반려동물을 확인하세요.</p></div>
+          <div><div class="home-step">Carestep Home</div><h1><span id="homeUserName">보호자</span>님, 안녕하세요</h1><p>병원과 연결된 반려동물의 건강 기록을 확인하세요.</p></div>
           <button id="logoutButton" class="home-text-button" type="button">로그아웃</button>
         </div>
         <div class="connection-ready"><span aria-hidden="true">✓</span><div><b>병원 연결이 완료되었습니다</b><p>병원에서 등록한 환자와 안전하게 연결되었습니다.</p></div></div>
+        <section id="homeHealthConsent" class="health-consent-card" hidden>
+          <div class="home-step">건강기록 열람 동의</div>
+          <h2>병원이 공개한 건강기록을 연결할까요?</h2>
+          <p>체중, 예방접종, 심장사상충 예방, 병원 진료 및 Journey 완료 기록을 Carestep Home에서 확인할 수 있습니다. 병원 내부 메모는 전달되지 않습니다.</p>
+          <label class="home-check"><input id="homeHealthConsentCheck" type="checkbox"><span>병원이 보호자에게 공개한 반려동물 건강기록의 제공 및 처리에 동의합니다.</span></label>
+          <div id="homeHealthConsentStatus" class="home-status" role="status"></div>
+          <button id="homeHealthConsentSubmit" class="home-primary" type="button">동의하고 건강 기록 보기</button>
+        </section>
         <div id="homeConnections" class="connection-list"></div>
-        <div class="stage-note"><b>건강 기록 연결 준비 완료</b><p>현재는 계정·환자 연결 단계입니다. 병원 건강기록과 보호자 기록 기능은 다음 업데이트에서 이 화면에 이어집니다.</p></div>
+        <div class="stage-note"><b>병원이 공개한 기록만 표시됩니다</b><p>기록의 상세 해석이나 치료 판단이 필요하면 연결된 동물병원에 문의해주세요.</p></div>
+      </section>
+
+      <section id="patientView" hidden>
+        <div class="patient-view-head">
+          <button id="patientBack" class="home-back" type="button" aria-label="반려동물 목록으로 돌아가기">← 목록</button>
+          <button id="patientTimelineRefresh" class="home-text-button" type="button">새로고침</button>
+        </div>
+        <div class="patient-hero">
+          <div><div class="home-step">Hospital Health Timeline</div><h1><span id="patientName">반려동물</span> 건강 기록</h1><p id="patientMeta"></p></div>
+          <div class="patient-clinic"><span>연결 병원</span><b id="patientClinicName">동물병원</b></div>
+        </div>
+        <div id="patientTimelineLoading" class="patient-loading" aria-live="polite"></div>
+        <div id="patientTimelineBody" hidden>
+          <div class="patient-kpis">
+            <article><span>최근 체중</span><b id="patientLatestWeight">미입력</b></article>
+            <article><span>다음 일정</span><b id="patientNextDate">없음</b><small id="patientNextTitle">예정된 일정 없음</small></article>
+            <article><span>공개 기록</span><b id="patientRecordCount">0건</b></article>
+          </div>
+          <section class="patient-chart-card">
+            <div class="patient-section-title"><div><span>WEIGHT</span><h2>체중 변화</h2></div><small>병원 측정 기록</small></div>
+            <div id="patientWeightChart"></div>
+          </section>
+          <section class="patient-timeline-card">
+            <div class="patient-section-title"><div><span>TIMELINE</span><h2>병원 건강 기록</h2></div><small>최신순</small></div>
+            <div id="patientTimelineFilters" class="home-filters" aria-label="건강 기록 종류 필터"></div>
+            <div id="patientTimelineList" class="home-timeline-list"></div>
+          </section>
+          <div class="stage-note"><b>Carestep Home 안내</b><p>이 화면은 병원이 보호자에게 공개한 기록을 보여주며 진단·처방을 대신하지 않습니다. 응급상황이 의심되면 가까운 동물병원 진료를 우선하세요.</p></div>
+        </div>
       </section>
 
       <section id="errorView" class="home-card home-error" hidden>
@@ -87,9 +124,9 @@
       </section>
     </main>
 
-    <footer class="home-footer"><b>Carestep Home</b><span>응급상황이 의심되면 앱 기록보다 가까운 동물병원 진료를 우선하세요.</span><small>v10.0-A · Guardian Account Link</small></footer>
+    <footer class="home-footer"><b>Carestep Home</b><span>응급상황이 의심되면 앱 기록보다 가까운 동물병원 진료를 우선하세요.</span><small>v10.0-B · Hospital Health Timeline</small></footer>
   </div>
   <div id="offlineBar" class="offline-bar" hidden>오프라인 상태입니다. 연결되면 다시 시도해주세요.</div>
-  <script src="carestep-home.js?v=10.0-A"></script>
+  <script src="carestep-home.js?v=10.0-B"></script>
 </body>
 </html>
