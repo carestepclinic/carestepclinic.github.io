@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>CARESTEP Clinic v9.3.4 · Hotfix 36</title>
+  <title>CARESTEP Clinic v10.1-A · Partner Channel</title>
   <meta name="carestep-build" content="v9.3.4-HOTFIX36" />
   <meta name="description" content="동물병원 보호자 교육자료 라이브러리 및 병원 맞춤 PDF 생성 MVP" />
   <style>
@@ -884,7 +884,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
   <section id="loginView" class="login-shell">
     <div class="login-card saas-login-card">
       <div class="brand-mark">CS</div>
-      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.0-D · HOME FOLLOW-UP</p>
+      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.1-A · PARTNER CHANNEL</p>
       <h1>CARESTEP Clinic</h1>
       <p class="login-copy">병원별 계정과 직원 권한으로 CARESTEP을 시작합니다.</p>
 
@@ -1005,7 +1005,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
     <main class="main">
       <header class="topbar">
         <div>
-          <p class="eyebrow">CARESTEP Clinic · v10.0-D · HOME FOLLOW-UP · SOLAPI OAUTH2</p>
+          <p class="eyebrow">CARESTEP Clinic · v10.1-A · DIRECT/PARTNER SUBSCRIPTION</p>
           <h2 id="viewTitle">대시보드</h2>
         </div>
         <div class="topbar-actions">
@@ -1590,6 +1590,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
             <p class="muted" style="font-size:11px">일반 병원 계정에서는 숨겨진 CARESTEP 운영자 전용 기능입니다. 현재 브라우저 세션에서만 잠금해제됩니다.</p>
             <div class="operator-unlock-row"><input id="operatorHqKey" class="input" type="password" autocomplete="off" placeholder="CARESTEP_HQ_KEY" /><button id="operatorUnlockBtn" class="btn btn-primary" type="button">운영자 잠금해제</button><button id="operatorLockBtn" class="btn btn-ghost hidden" type="button">운영자 잠금</button></div>
             <div id="operatorStatusText" class="saas-cloud-note">운영자 전용 URL에서 HQ Key를 입력하면 메뉴가 표시됩니다.</div>
+            <div class="operator-unlock-row" style="margin-top:8px"><a class="btn btn-secondary" href="hq-partners.html" target="_blank" rel="noopener">HQ Partner Management 열기</a></div>
           </div>
         </div>
 
@@ -3465,9 +3466,9 @@ function saasCanView(view){
 function renderSubscriptionAccess(){
   const e=saasEntitlements(),auth=saasMode==='auth'&&saasMe;const banner=$('subscriptionBanner');if(!banner)return;
   if(!auth){banner.classList.add('hidden');if($('dashboardPlan'))$('dashboardPlan').textContent='DEMO';if($('dashboardPlanSub'))$('dashboardPlanSub').textContent='로컬 데모 권한';return;}
-  banner.classList.remove('hidden','blocked','warn');const plan=e?.plan?.displayName||saasMe.clinic.plan||'PILOT',sub=e?.subscription?.status||'active',pkgLimit=Number(e?.plan?.limits?.packagesMonthly)||0,msg=e?.messaging||{},msgUsed=Number(msg.usage?.used)||0,msgLimit=Number(msg.included)||0;
+  banner.classList.remove('hidden','blocked','warn');const plan=e?.plan?.displayName||saasMe.clinic.plan||'PILOT',sub=e?.subscription?.status||'active',pkgLimit=Number(e?.plan?.limits?.packagesMonthly)||0,msg=e?.messaging||{},msgUsed=Number(msg.usage?.used)||0,msgLimit=Number(msg.included)||0,channel=saasMe?.clinic?.subscriptionChannel||{channel:'direct'},channelLabel=channel.channel==='partner'?`Partner · ${channel.partnerName||channel.partnerCode||'제휴사'}`:'Direct';
   if(e?.accessBlocked)banner.classList.add('blocked');else if(sub==='trialing')banner.classList.add('warn');
-  if($('subscriptionBannerTitle'))$('subscriptionBannerTitle').textContent=e?.accessBlocked?`${plan} · 구독 사용 제한`:sub==='trialing'?`${plan} · 체험 구독`:`${plan} · ${sub}`;
+  if($('subscriptionBannerTitle'))$('subscriptionBannerTitle').textContent=e?.accessBlocked?`${channelLabel} · ${plan} · 구독 사용 제한`:sub==='trialing'?`${channelLabel} · ${plan} · 체험 구독`:`${channelLabel} · ${plan} · ${sub}`;
   if($('subscriptionBannerText')){const end=e?.subscription?.trialEndsAt||e?.subscription?.currentPeriodEnd||'';const endText=end?` · 사용기한 ${new Date(end).toLocaleDateString('ko-KR')}`:'';const blocked=e?.accessReason==='trial_expired'?'30일 무료체험이 종료되었습니다. BASIC, PRO 또는 ENTERPRISE 전환이 필요합니다.':e?.accessReason==='period_expired'?'현재 구독 사용기한이 종료되었습니다. 구독 갱신이 필요합니다.':'현재 구독 상태에서는 기능을 사용할 수 없습니다. HQ에서 구독 상태를 확인해주세요.';$('subscriptionBannerText').textContent=e?.accessBlocked?blocked:`이번 달 패키지 ${Number(e?.usage?.packages)||0}/${pkgLimit||'무제한'} · 자동발송 ${msgUsed}/${msgLimit||'무제한'}${msgLimit?` (${Math.round(msg.percent||0)}%)`:''} · 직원 ${e?.plan?.limits?.members||'무제한'}명 한도${endText}`;}
   if($('dashboardPlan'))$('dashboardPlan').textContent=plan;if($('dashboardPlanSub')){const end=e?.subscription?.trialEndsAt||e?.subscription?.currentPeriodEnd||'';$('dashboardPlanSub').textContent=`${sub} · 패키지 ${pkgLimit||'∞'} · 문자 ${msgLimit||'∞'}${end?' · ~ '+new Date(end).toLocaleDateString('ko-KR'):''}`;}
 }
@@ -3475,7 +3476,7 @@ function applySaasPermissions(){
   const role=saasMode==='demo'?'owner':saasMe?.role||'staff';
   document.querySelectorAll('.nav-item').forEach(n=>{const v=n.dataset.view;n.classList.toggle('saas-hidden',!saasCanView(v));});
   if($('saasRoleBadge'))$('saasRoleBadge').textContent=saasMode==='demo'?'LOCAL DEMO':saasRoleLabel(role);
-  if($('saasPlanPill'))$('saasPlanPill').textContent=saasMode==='demo'?'LOCAL · DEMO':`${saasMe?.entitlements?.plan?.displayName||saasMe?.clinic?.plan||'PILOT'} · ${saasMe?.entitlements?.subscription?.status||'active'} · ${role.toUpperCase()}`;
+  if($('saasPlanPill')){const ch=saasMe?.clinic?.subscriptionChannel;$('saasPlanPill').textContent=saasMode==='demo'?'LOCAL · DEMO':`${ch?.channel==='partner'?'PARTNER':'DIRECT'} · ${saasMe?.entitlements?.plan?.displayName||saasMe?.clinic?.plan||'PILOT'} · ${saasMe?.entitlements?.subscription?.status||'active'} · ${role.toUpperCase()}`;}
   const canManage=saasMode==='auth'&&['owner','admin'].includes(role)&&saasHasFeature('teamManagement');
   $('saasInviteControls')?.classList.toggle('saas-hidden',!canManage);
   renderSubscriptionAccess();
@@ -3616,15 +3617,15 @@ function billingMoney(v){return `${Number(v||0).toLocaleString('ko-KR')}원`;}
 function billingStatusLabel(v=''){return ({trialing:'무료체험',active:'정상',past_due:'결제 확인 필요',paused:'일시중지',canceled:'해지 완료'})[v]||v||'-';}
 function billingSelectedPlanInfo(){const code=$('billingPlanSelect')?.value||'PRO',cycle=$('billingCycleSelect')?.value||'monthly',p=billingOverviewState?.plans?.[code]||{},sub=billingOverviewState?.subscription||{};const sameCurrent=code===sub.planCode&&cycle===(sub.billingCycle||'monthly'),price=sameCurrent&&Number(sub.effectivePriceKrw)>0?Number(sub.effectivePriceKrw):(cycle==='annual'?Number(p.annualPriceKrw)||0:Number((sub.foundingActive&&p.foundingMonthlyPriceKrw)||p.monthlyPriceKrw)||0);return {code,cycle,price};}
 function renderBillingOverview(){
-  const d=billingOverviewState,auth=saasMode==='auth'&&saasMe,provider=d?.provider||{},sub=d?.subscription||{},method=d?.paymentMethod;
+  const d=billingOverviewState,auth=saasMode==='auth'&&saasMe,provider=d?.provider||{},sub=d?.subscription||{},method=d?.paymentMethod,channel=d?.channel||saasMe?.clinic?.subscriptionChannel||{channel:'direct',billingOwner:'carestep'};
   const badge=$('billingProviderBadge');if(badge){badge.className='billing-provider '+(provider.configured?'on':'warn');badge.textContent=provider.configured?'Toss Payments · 연결됨':'Toss Payments · 설정 필요';}
-  if($('billingManageLock'))$('billingManageLock').classList.toggle('hidden',!auth||!!d?.canManage);
+  if($('billingManageLock')){const lock=$('billingManageLock');lock.classList.toggle('hidden',!auth||!!d?.canManage);lock.textContent=channel.channel==='partner'&&channel.billingOwner==='partner'?`${channel.partnerName||'제휴사'}를 통해 구독 중입니다. 플랜·결제 변경은 제휴사 또는 CARESTEP HQ에 문의해주세요.`:'Owner/Admin 계정에서 결제수단과 구독을 변경할 수 있습니다.';}
   const controls=['billingPlanSelect','billingCycleSelect','billingSchedulePlan','billingRegisterCard','billingCancelSubscription','billingUndoCancel','billingRetryPayment'];controls.forEach(id=>{if($(id))$(id).disabled=!auth||!d?.canManage;});
   if(!auth||!d){if($('billingSubscriptionSummary'))$('billingSubscriptionSummary').textContent='로그인 후 결제·구독 정보를 확인합니다.';if($('accountUxNextPayment'))$('accountUxNextPayment').textContent='--';return;}
   if($('billingCurrentPlan'))$('billingCurrentPlan').textContent=`${sub.planCode||saasMe?.clinic?.plan||'-'} · ${sub.billingCycle==='annual'?'연':'월'}`;
   const next=sub.status==='trialing'?(sub.trialEndsAt||sub.currentPeriodEnd):(sub.nextPaymentAt||sub.currentPeriodEnd),nextLabel=next?billingDate(next):'-';if($('billingNextDate'))$('billingNextDate').textContent=nextLabel;if($('accountUxNextPayment'))$('accountUxNextPayment').textContent=nextLabel;
   if($('billingPaymentState'))$('billingPaymentState').textContent=billingStatusLabel(sub.status)+(sub.paymentGraceActive?' · 유예기간':'')+(sub.cancelAtPeriodEnd?' · 해지 예정':'');
-  const pending=sub.pendingPlanCode?` · 다음 ${sub.pendingPlanCode}/${sub.pendingBillingCycle==='annual'?'연':'월'} 예정`:'';$('billingSubscriptionSummary').textContent=`현재 ${sub.planCode||'-'} · ${billingStatusLabel(sub.status)}${pending}`;
+  const pending=sub.pendingPlanCode?` · 다음 ${sub.pendingPlanCode}/${sub.pendingBillingCycle==='annual'?'연':'월'} 예정`:'',channelLabel=channel.channel==='partner'?`Partner · ${channel.partnerName||channel.partnerCode||'제휴사'} · ${channel.billingOwner==='partner'?'제휴사 청구':'CARESTEP 청구'}`:'Direct · CARESTEP 청구';$('billingSubscriptionSummary').textContent=`${channelLabel} · 현재 ${sub.planCode||'-'} · ${billingStatusLabel(sub.status)}${pending}`;
   if($('billingPlanSelect')){const sel=$('billingPlanSelect'),wanted=sub.pendingPlanCode||(['BASIC','PRO','ENTERPRISE'].includes(sub.planCode)?sub.planCode:'PRO'),allPlans=d.plans||{},codes=['BASIC','PRO','ENTERPRISE'];sel.innerHTML=codes.filter(code=>allPlans[code]?.isActive||code===wanted||code===sub.planCode).map(code=>`<option value="${code}" ${allPlans[code]?.isActive?'':(code===wanted||code===sub.planCode?'':'disabled')}>${code}${allPlans[code]?.isActive?'':' · 신규 선택 중지'}</option>`).join('');sel.value=[...sel.options].some(o=>o.value===wanted)?wanted:([...sel.options].find(o=>!o.disabled)?.value||'PRO');}
   if($('billingCycleSelect'))$('billingCycleSelect').value=sub.pendingBillingCycle||sub.billingCycle||'monthly';
   const card=$('billingCardBox');if(card){card.innerHTML=method?`<div><b>${escapeHtml(method.issuerCode||'등록 카드')} · ${escapeHtml(method.maskedNumber||'카드 등록됨')}</b><span>${escapeHtml(method.cardType||'카드')} · ${escapeHtml(method.ownerType||'')} · 등록 ${escapeHtml(billingDate(method.registeredAt))}</span></div><span class="invoice-status paid">자동결제</span>`:`<div><b>등록된 카드 없음</b><span>유료 전환·자동결제를 사용하려면 카드를 등록해주세요.</span></div><span class="ux-state attention">확인 필요</span>`;}
@@ -9101,6 +9102,6 @@ carestepSafeCall('boot_messaging_refresh',()=>startMessagingAutoRefresh());
 <!-- CARESTEP v9.5.1 · species-specific vaccine/dose selectors · automatic due dates -->
 <!-- CARESTEP v9.5.2 · status shown only for recheck and Journey records -->
 <!-- CARESTEP v9.5.3 · multiple vaccines per visit · grouped timeline display -->
-<!-- CARESTEP v10.0-D · Carestep Home Journey follow-up delivery -->
+<!-- CARESTEP v10.1-A · Direct/Partner subscription foundation -->
 </body>
 </html>
