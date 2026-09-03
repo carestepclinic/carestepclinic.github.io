@@ -884,7 +884,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
   <section id="loginView" class="login-shell">
     <div class="login-card saas-login-card">
       <div class="brand-mark">CS</div>
-      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v9.4 · PATIENT CRM STAGE 1</p>
+      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v9.4.1 · BREED SEARCH</p>
       <h1>CARESTEP Clinic</h1>
       <p class="login-copy">병원별 계정과 직원 권한으로 CARESTEP을 시작합니다.</p>
 
@@ -1005,7 +1005,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
     <main class="main">
       <header class="topbar">
         <div>
-          <p class="eyebrow">CARESTEP Clinic · v9.4 · PATIENT CRM STAGE 1 · SESSION RESTORE · SOLAPI OAUTH2</p>
+          <p class="eyebrow">CARESTEP Clinic · v9.4.1 · PATIENT CRM · BREED SEARCH · SESSION RESTORE · SOLAPI OAUTH2</p>
           <h2 id="viewTitle">대시보드</h2>
         </div>
         <div class="topbar-actions">
@@ -1937,7 +1937,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
         <div class="span-2"><label class="field-label" for="crmPatientGuardian">보호자 *</label><select id="crmPatientGuardian" class="input" required></select></div>
         <div><label class="field-label" for="crmPatientName">환자명 *</label><input id="crmPatientName" class="input" maxlength="60" required autocomplete="off" placeholder="예: 뽀삐"></div>
         <div><label class="field-label" for="crmPatientSpecies">동물종</label><select id="crmPatientSpecies" class="input"><option value="dog">강아지</option><option value="cat">고양이</option><option value="other">기타</option></select></div>
-        <div><label class="field-label" for="crmPatientBreed">품종</label><input id="crmPatientBreed" class="input" maxlength="80" autocomplete="off" placeholder="예: 말티즈"></div>
+        <div class="patient-breed-field"><label class="field-label" for="crmPatientBreed">품종</label><div id="crmBreedCombobox" class="patient-breed-combobox"><input id="crmPatientBreed" class="input" maxlength="80" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="crmBreedDropdown" placeholder="품종명·약칭 검색"><button id="crmBreedClear" class="patient-breed-clear" type="button" aria-label="품종 지우기">×</button><div id="crmBreedDropdown" class="patient-breed-dropdown" role="listbox" hidden></div></div><p id="crmBreedHint" class="patient-breed-hint">강아지 품종을 검색하거나 직접 입력할 수 있습니다.</p></div>
         <div><label class="field-label" for="crmPatientSex">성별</label><select id="crmPatientSex" class="input"><option value="unknown">미확인</option><option value="male">수컷</option><option value="female">암컷</option></select></div>
         <div><label class="field-label" for="crmPatientBirthDate">생년월일</label><input id="crmPatientBirthDate" class="input" type="date"></div>
         <div><label class="field-label" for="crmPatientNeutered">중성화</label><select id="crmPatientNeutered" class="input"><option value="unknown">미확인</option><option value="yes">완료</option><option value="no">미완료</option></select></div>
@@ -9068,9 +9068,10 @@ carestepSafeCall('boot_messaging_refresh',()=>startMessagingAutoRefresh());
 
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
+<script src="patient-breeds.js"></script>
 <script src="patient-crm.js"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
 <!-- CARESTEP v9.1 · SOLAPI OAuth2 clinic-account messaging -->
-<!-- CARESTEP v9.4 · PATIENT CRM STAGE 1 · guardian/patient directory + builder handoff -->
+<!-- CARESTEP v9.4.1 · PATIENT CRM BREED SEARCH · species dictionary + aliases + recent -->
 </body>
 </html>
