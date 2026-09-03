@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="carestep-home-icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="carestep-home-icon-192.png">
-  <link rel="stylesheet" href="carestep-home.css?v=10.0-C">
+  <link rel="stylesheet" href="carestep-home.css?v=10.0-D">
   <title>Carestep Home</title>
 </head>
 <body>
@@ -50,10 +50,10 @@
           </div>
           <details class="home-legal">
             <summary>이용약관 및 개인정보 처리 안내 보기</summary>
-            <div><b>서비스 이용 안내</b><p>Carestep Home은 동물병원과 보호자를 연결해 반려동물 건강관리를 돕는 서비스이며, 진단·처방 또는 응급진료를 대신하지 않습니다.</p><b>개인정보 처리 안내</b><p>계정 생성, 본인 확인, 병원·환자 연결, 병원이 공개한 건강기록 제공과 보호자가 입력한 홈 기록의 병원 전달을 위해 휴대전화 번호, 보호자명, 환자 기본정보, 건강기록 및 연결 이력을 암호화하여 처리합니다. 병원 내부 메모는 Carestep Home으로 제공되지 않습니다.</p></div>
+            <div><b>서비스 이용 안내</b><p>Carestep Home은 동물병원과 보호자를 연결해 반려동물 건강관리를 돕는 서비스이며, 진단·처방 또는 응급진료를 대신하지 않습니다.</p><b>개인정보 처리 안내</b><p>계정 생성, 본인 확인, 병원·환자 연결, 병원이 공개한 건강기록과 후속관리 안내 제공, 보호자가 입력한 홈 기록과 후속관리 응답의 병원 전달을 위해 휴대전화 번호, 보호자명, 환자 기본정보, 건강기록·응답 및 연결 이력을 암호화하여 처리합니다. 병원 내부 메모는 Carestep Home으로 제공되지 않습니다.</p></div>
           </details>
           <label class="home-check"><input id="inviteTerms" type="checkbox" required><span>Carestep Home 이용약관에 동의합니다.</span></label>
-          <label class="home-check"><input id="invitePrivacy" type="checkbox" required><span>개인정보 수집·이용, 병원 환자 연결, 건강기록 제공 및 보호자 홈 기록의 연결 병원 전달에 동의합니다.</span></label>
+          <label class="home-check"><input id="invitePrivacy" type="checkbox" required><span>개인정보 수집·이용, 병원 환자 연결, 건강기록·후속관리 안내 제공 및 보호자 홈 기록·응답의 연결 병원 전달에 동의합니다.</span></label>
           <div id="inviteStatus" class="home-status" role="status"></div>
           <button id="inviteSubmit" class="home-primary" type="submit">계정 만들고 환자 연결</button>
         </form>
@@ -81,10 +81,16 @@
         <section id="homeHealthConsent" class="health-consent-card" hidden>
           <div class="home-step">건강기록 연결 동의</div>
           <h2>병원 기록과 홈 기록을 연결할까요?</h2>
-          <p>병원이 공개한 건강기록을 확인하고, 보호자가 입력한 체중·식욕·음수·구토·설사·투약 기록을 연결 병원과 공유할 수 있습니다. 병원 내부 메모는 전달되지 않습니다.</p>
-          <label class="home-check"><input id="homeHealthConsentCheck" type="checkbox"><span>병원 건강기록 제공과 보호자 홈 기록의 저장 및 연결 병원 전달에 동의합니다.</span></label>
+          <p>병원이 공개한 건강기록과 Journey 후속관리 안내를 확인하고, 보호자가 입력한 체중·식욕·음수·구토·설사·투약 기록과 후속관리 응답을 연결 병원과 공유할 수 있습니다. 병원 내부 메모는 전달되지 않습니다.</p>
+          <label class="home-check"><input id="homeHealthConsentCheck" type="checkbox"><span>병원 건강기록·후속관리 안내 제공과 보호자 홈 기록·응답의 저장 및 연결 병원 전달에 동의합니다.</span></label>
           <div id="homeHealthConsentStatus" class="home-status" role="status"></div>
           <button id="homeHealthConsentSubmit" class="home-primary" type="button">동의하고 건강 기록 보기</button>
+        </section>
+        <section id="homeFollowupSection" class="home-followup-section" hidden>
+          <div class="home-followup-heading"><div><div class="home-step">TODAY'S CARE</div><h2>오늘의 관리</h2><p>병원에서 보낸 Journey 단계별 안내를 확인하고 현재 상태를 알려주세요.</p></div><button id="homeFollowupRefresh" class="home-text-button" type="button">새로고침</button></div>
+          <div class="home-followup-kpis"><article><span>오늘</span><b id="homeFollowupToday">0</b></article><article class="attention"><span>미확인 지연</span><b id="homeFollowupOverdue">0</b></article><article><span>예정</span><b id="homeFollowupUpcoming">0</b></article><article><span>완료</span><b id="homeFollowupCompleted">0</b></article></div>
+          <div id="homeFollowupFilters" class="home-filters" aria-label="후속관리 필터"></div>
+          <div id="homeFollowupList" class="home-followup-list" aria-live="polite"></div>
         </section>
         <div id="homeConnections" class="connection-list"></div>
         <div class="stage-note"><b>연결된 건강 기록을 함께 확인합니다</b><p>병원이 공개한 기록과 보호자가 작성한 홈 기록이 환자별 타임라인에 표시됩니다. 상세 해석이나 치료 판단은 연결된 동물병원에 문의해주세요.</p></div>
@@ -142,10 +148,10 @@
       </section>
     </main>
 
-    <footer class="home-footer"><b>Carestep Home</b><span>응급상황이 의심되면 앱 기록보다 가까운 동물병원 진료를 우선하세요.</span><small>v10.0-C · Guardian Home Records</small></footer>
+    <footer class="home-footer"><b>Carestep Home</b><span>응급상황이 의심되면 앱 기록보다 가까운 동물병원 진료를 우선하세요.</span><small>v10.0-D · Follow-up Delivery</small></footer>
   </div>
   <div id="offlineBar" class="offline-bar" hidden>오프라인 상태입니다. 연결되면 다시 시도해주세요.</div>
-  <script src="date-input-guard.js?v=10.0-C"></script>
-  <script src="carestep-home.js?v=10.0-C"></script>
+  <script src="date-input-guard.js?v=10.0-D"></script>
+  <script src="carestep-home.js?v=10.0-D"></script>
 </body>
 </html>

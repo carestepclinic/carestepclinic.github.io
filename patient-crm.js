@@ -1,4 +1,4 @@
-/* CARESTEP Clinic v10.0-C · Patient CRM + guardian home records */
+/* CARESTEP Clinic v10.0-D · Patient CRM + Home follow-up delivery */
 (() => {
   'use strict';
   const $crm=id=>document.getElementById(id);
@@ -96,7 +96,7 @@
 
   function crmEnsureHomeDialog(){
     if($crm('crmHomeInviteDialog'))return;
-    document.body.insertAdjacentHTML('beforeend',`<dialog id="crmHomeInviteDialog" class="patient-crm-dialog"><div class="patient-crm-dialog-card home-invite-card"><div class="patient-crm-dialog-head"><div><p class="eyebrow">CARESTEP HOME · v10.0-C</p><h4 id="crmHomeInviteTitle">보호자 앱 연결</h4><p id="crmHomeInviteLead">1회용 초대 링크로 보호자 계정과 환자를 연결합니다.</p></div><button class="patient-crm-close" type="button" data-crm-dialog-close="crmHomeInviteDialog" aria-label="닫기">×</button></div><div id="crmHomeInviteBody" class="home-invite-body"></div><div id="crmHomeInviteStatus" class="patient-crm-status"></div><div class="patient-crm-dialog-actions"><button id="crmHomeInviteRevoke" class="btn btn-ghost hidden" type="button">현재 초대 취소</button><button class="btn btn-secondary" type="button" data-crm-dialog-close="crmHomeInviteDialog">닫기</button><button id="crmHomeInviteCopy" class="btn btn-primary hidden" type="button">초대 링크 복사</button></div></div></dialog>`);
+    document.body.insertAdjacentHTML('beforeend',`<dialog id="crmHomeInviteDialog" class="patient-crm-dialog"><div class="patient-crm-dialog-card home-invite-card"><div class="patient-crm-dialog-head"><div><p class="eyebrow">CARESTEP HOME · v10.0-D</p><h4 id="crmHomeInviteTitle">보호자 앱 연결</h4><p id="crmHomeInviteLead">1회용 초대 링크로 보호자 계정과 환자를 연결합니다.</p></div><button class="patient-crm-close" type="button" data-crm-dialog-close="crmHomeInviteDialog" aria-label="닫기">×</button></div><div id="crmHomeInviteBody" class="home-invite-body"></div><div id="crmHomeInviteStatus" class="patient-crm-status"></div><div class="patient-crm-dialog-actions"><button id="crmHomeInviteRevoke" class="btn btn-ghost hidden" type="button">현재 초대 취소</button><button class="btn btn-secondary" type="button" data-crm-dialog-close="crmHomeInviteDialog">닫기</button><button id="crmHomeInviteCopy" class="btn btn-primary hidden" type="button">초대 링크 복사</button></div></div></dialog>`);
     document.querySelectorAll('#crmHomeInviteDialog [data-crm-dialog-close]').forEach(b=>b.addEventListener('click',()=>crmDialog('crmHomeInviteDialog',false)));
   }
   function crmHomeInviteUrl(token){const url=new URL('home.html',window.location.href);url.search='';url.hash='';url.searchParams.set('invite',token);return url.href;}
