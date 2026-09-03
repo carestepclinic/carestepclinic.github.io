@@ -1,6 +1,6 @@
-/* Carestep Home v10.0-D.1 service worker · Web Push */
-const CACHE='carestep-home-v10.0-d-1-push';
-const ASSETS=['./home.html','./carestep-home.css?v=10.0-D.1','./carestep-home.js?v=10.0-D.1','./date-input-guard.js?v=10.0-D.1','./manifest.webmanifest','./carestep-home-icon.svg','./carestep-home-icon-192.png','./carestep-home-icon-512.png'];
+/* Carestep Home v10.0-D.2 service worker · Journey and preventive care Web Push */
+const CACHE='carestep-home-v10.0-d-2-preventive-push';
+const ASSETS=['./home.html','./carestep-home.css?v=10.0-D.2','./carestep-home.js?v=10.0-D.2','./date-input-guard.js?v=10.0-D.2','./manifest.webmanifest','./carestep-home-icon.svg','./carestep-home-icon-192.png','./carestep-home-icon-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(event.request.method!=='GET'||url.origin!==self.location.origin)return;if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).then(response=>{const copy=response.clone();caches.open(CACHE).then(cache=>cache.put('./home.html',copy));return response}).catch(()=>caches.match('./home.html')));return;}event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{if(response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy));}return response;})))});
