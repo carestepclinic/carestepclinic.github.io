@@ -853,7 +853,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
 }
 </style>
 
-  <link rel="stylesheet" href="patient-crm.css?v=9.4.3" />
+  <link rel="stylesheet" href="patient-crm.css?v=9.5" />
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -884,7 +884,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
   <section id="loginView" class="login-shell">
     <div class="login-card saas-login-card">
       <div class="brand-mark">CS</div>
-      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v9.4.3 · DATE INPUT GUARD</p>
+      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v9.5 · HEALTH TIMELINE</p>
       <h1>CARESTEP Clinic</h1>
       <p class="login-copy">병원별 계정과 직원 권한으로 CARESTEP을 시작합니다.</p>
 
@@ -1005,7 +1005,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
     <main class="main">
       <header class="topbar">
         <div>
-          <p class="eyebrow">CARESTEP Clinic · v9.4.3 · DATE INPUT GUARD · PATIENT CRM · SESSION RESTORE · SOLAPI OAUTH2</p>
+          <p class="eyebrow">CARESTEP Clinic · v9.5 · PATIENT HEALTH TIMELINE · SESSION RESTORE · SOLAPI OAUTH2</p>
           <h2 id="viewTitle">대시보드</h2>
         </div>
         <div class="topbar-actions">
@@ -1101,10 +1101,10 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
 
       <section id="patients" class="view">
         <div class="patient-crm-head">
-          <div><p class="eyebrow">PATIENT CRM · STAGE 1</p><h3>보호자 · 환자 관리</h3><p>보호자 한 명에 여러 환자를 연결하고, 등록된 환자를 자료 생성과 후속관리로 바로 불러옵니다.</p></div>
+          <div><p class="eyebrow">PATIENT CRM · STAGE 2</p><h3>보호자 · 환자 관리</h3><p>보호자와 환자를 연결하고, 체중·예방·진료·재진·Journey 기록을 환자별 건강 타임라인으로 누적합니다.</p></div>
           <div class="patient-crm-actions"><button id="patientCrmRefresh" class="btn btn-secondary" type="button">새로고침</button><button id="patientCrmNewGuardian" class="btn btn-secondary" type="button">+ 보호자 등록</button><button id="patientCrmNewPatient" class="btn btn-primary" type="button">+ 환자 등록</button></div>
         </div>
-        <div class="patient-crm-notice"><span>🔒</span><div><b>병원별 분리 · 암호화 저장</b><br>보호자명·연락처와 환자 식별정보는 환자 관리 목적으로만 저장됩니다. 복약 세부내용과 이번 퇴원지시는 기존처럼 자료 생성 화면에서만 사용합니다.</div></div>
+        <div class="patient-crm-notice"><span>🔒</span><div><b>병원별 분리 · 암호화 저장</b><br>보호자명·연락처, 환자 식별정보와 건강 타임라인 제목·메모는 병원별로 분리해 암호화 저장합니다. 체중·접종·사상충·진료·재진·Journey는 환자별 날짜순으로 누적됩니다.</div></div>
         <div class="patient-crm-kpis"><div class="patient-crm-kpi"><span>등록 보호자</span><b id="crmGuardianCount">0</b></div><div class="patient-crm-kpi"><span>등록 환자</span><b id="crmPatientCount">0</b></div><div class="patient-crm-kpi"><span>Carestep Home 연결</span><b id="crmHomeCount">0</b></div></div>
         <div class="patient-crm-layout">
           <div class="panel patient-crm-list-panel"><div class="patient-crm-search"><input id="patientCrmSearch" class="input" type="search" autocomplete="off" placeholder="환자명 · 보호자명 · 휴대전화 검색"><button id="patientCrmSearchClear" class="btn btn-ghost" type="button">지우기</button></div><div id="patientCrmResultMeta" class="patient-crm-result-meta">0명의 보호자</div><div id="patientCrmList" class="patient-crm-list"></div></div>
@@ -1946,6 +1946,24 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
         <div class="span-2"><label class="field-label" for="crmPatientNotes">관리 메모</label><textarea id="crmPatientNotes" class="input" maxlength="700" placeholder="자료 생성과 후속관리에 필요한 최소 메모"></textarea></div>
       </div>
       <div id="crmPatientStatus" class="patient-crm-status"></div><div class="patient-crm-dialog-actions"><button class="btn btn-ghost" type="button" data-crm-dialog-close="crmPatientDialog">취소</button><button id="crmPatientSave" class="btn btn-primary" type="submit">저장</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="crmTimelineDialog" class="patient-crm-dialog">
+    <form id="crmTimelineForm" class="patient-crm-dialog-card">
+      <input id="crmTimelineEventId" type="hidden"><input id="crmTimelinePatientId" type="hidden"><input id="crmTimelineJourneyId" type="hidden"><input id="crmTimelineSourceRef" type="hidden">
+      <div class="patient-crm-dialog-head"><div><p class="eyebrow">HEALTH TIMELINE</p><h4 id="crmTimelineDialogTitle">건강 기록 추가</h4><p>병원에서 확인한 체중·예방·진료·재진 기록을 환자별로 누적합니다.</p></div><button class="patient-crm-close" type="button" data-timeline-dialog-close aria-label="닫기">×</button></div>
+      <div class="patient-crm-form-grid">
+        <div><label class="field-label" for="crmTimelineType">기록 종류 *</label><select id="crmTimelineType" class="input" required><option value="weight">체중</option><option value="vaccination">예방접종</option><option value="heartworm">심장사상충 예방</option><option value="visit">병원 진료</option><option value="recheck">재진</option><option value="journey">Care Journey</option></select></div>
+        <div><label class="field-label" for="crmTimelineDate">기록일 *</label><input id="crmTimelineDate" class="input" type="date" min="1900-01-01" max="2099-12-31" required></div>
+        <div class="span-2"><label class="field-label" for="crmTimelineTitle">기록 제목 *</label><input id="crmTimelineTitle" class="input" maxlength="120" required autocomplete="off" placeholder="예: 종합백신 5차"></div>
+        <div id="crmTimelineWeightField"><label class="field-label" for="crmTimelineWeight">체중(kg) *</label><input id="crmTimelineWeight" class="input" type="number" min="0.01" max="200" step="0.01" inputmode="decimal" placeholder="4.80"></div>
+        <div id="crmTimelineDueField"><label class="field-label" for="crmTimelineNextDue">다음 예정일</label><input id="crmTimelineNextDue" class="input" type="date" min="1900-01-01" max="2099-12-31"></div>
+        <div><label class="field-label" for="crmTimelineStatus">상태</label><select id="crmTimelineStatus" class="input"><option value="completed">완료</option><option value="scheduled">예정</option><option value="active">진행 중</option><option value="canceled">취소</option></select></div>
+        <div><label class="field-label" for="crmTimelineSource">기록 출처</label><select id="crmTimelineSource" class="input"><option value="clinic">병원 기록</option><option value="system">자동 기록</option></select></div>
+        <div class="span-2"><label class="field-label" for="crmTimelineDetail">상세 메모</label><textarea id="crmTimelineDetail" class="input" maxlength="700" placeholder="백신명, 진료 요약, 다음 관리사항 등 필요한 최소 내용"></textarea></div>
+      </div>
+      <div id="crmTimelineStatusMessage" class="patient-crm-status error"></div><div class="patient-crm-dialog-actions"><button class="btn btn-ghost" type="button" data-timeline-dialog-close>취소</button><button id="crmTimelineSave" class="btn btn-primary" type="submit">저장</button></div>
     </form>
   </dialog>
 
@@ -8031,7 +8049,7 @@ function syncPatientJourneyBrowserToCurrentCase(force=false){
   const cat=$('patientJourneyCategory');if(cat)cat.value='all';
   return true;
 }
-function applyPatientJourney(id,opts={}){const j=patientJourneyById(id);if(!j)return false;if(!(j.stages||[]).length){if(!opts.silent)toast('이 Journey에는 적용할 D+ 단계가 없습니다. HQ에서 Journey 내용을 확인해주세요.');return false;}resetFollowupMessageEdits();activePatientJourney=j;activeJourneyStageSelection=[...new Set((j.stages||[]).map(x=>Number(x.day)).filter(d=>d>=1&&d<=365))].sort((a,b)=>a-b);sessionStorage.setItem(patientJourneySessionKey(),j.id);patientJourneySelectedId=j.id;if(opts.resetMessaging!==false)resetMessagingCaseState();saasRecordUsageEvent('patient_journey_apply',j.id,{stageCount:activeJourneyStageSelection.length,category:j.category||'',system:!!j.isSystem});ensureFollowupExecutionPlacement();renderPatientJourneyBuilder();renderFollowupCenter();renderFollowupGuide();if(opts.advance!==false)scrollToFollowupExecution();if(!opts.silent)toast(`${j.name}을 현재 케이스에 적용했습니다. 다음 단계에서 일정 등록을 진행하세요.`);renderGlobalCaseBadge();return true;}
+function applyPatientJourney(id,opts={}){const j=patientJourneyById(id);if(!j)return false;if(!(j.stages||[]).length){if(!opts.silent)toast('이 Journey에는 적용할 D+ 단계가 없습니다. HQ에서 Journey 내용을 확인해주세요.');return false;}resetFollowupMessageEdits();activePatientJourney=j;activeJourneyStageSelection=[...new Set((j.stages||[]).map(x=>Number(x.day)).filter(d=>d>=1&&d<=365))].sort((a,b)=>a-b);sessionStorage.setItem(patientJourneySessionKey(),j.id);patientJourneySelectedId=j.id;if(opts.resetMessaging!==false)resetMessagingCaseState();saasRecordUsageEvent('patient_journey_apply',j.id,{stageCount:activeJourneyStageSelection.length,category:j.category||'',system:!!j.isSystem});ensureFollowupExecutionPlacement();renderPatientJourneyBuilder();renderFollowupCenter();renderFollowupGuide();if(opts.advance!==false)scrollToFollowupExecution();if(!opts.silent){toast(`${j.name}을 현재 케이스에 적용했습니다. 다음 단계에서 일정 등록을 진행하세요.`);Promise.resolve(window.crmRecordJourneyApplied?.(j,{eventDate:caseInfo.dischargeDate||localTodayIso()})).catch(e=>console.warn('Journey timeline record failed',e));}renderGlobalCaseBadge();return true;}
 function clearActivePatientJourney(){resetFollowupMessageEdits();activePatientJourney=null;activeJourneyStageSelection=[];sessionStorage.removeItem(patientJourneySessionKey());renderPatientJourneyBuilder();renderFollowupCenter();toast('현재 케이스를 기본 D+1·3·7·14 후속관리로 전환했습니다.');}
 function blankPatientJourney(){return {id:'',name:'새 병원 Patient Journey',category:'기타',species:'dog,cat',description:'',stages:[{day:1,title:'초기 상태 확인',focus:'',checks:[''],redFlag:'',calendar:true,message:true},{day:7,title:'추세 확인',focus:'',checks:[''],redFlag:'',calendar:true,message:true,survey:false}]};}
 function openPatientJourneyEditor(j=null){if(!['owner','admin'].includes(saasMe?.role||'')){toast('Owner/Admin만 병원 Journey를 편집할 수 있습니다.');return;}patientJourneyEditorDraft=JSON.parse(JSON.stringify(j||blankPatientJourney()));renderPatientJourneyEditor();}
@@ -9068,11 +9086,13 @@ carestepSafeCall('boot_messaging_refresh',()=>startMessagingAutoRefresh());
 
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
-<script src="patient-breeds.js?v=9.4.3"></script>
-<script src="patient-crm.js?v=9.4.3"></script>
-<script src="date-input-guard.js?v=9.4.3"></script>
+<script src="patient-breeds.js?v=9.5"></script>
+<script src="patient-crm.js?v=9.5"></script>
+<script src="patient-timeline.js?v=9.5"></script>
+<script src="date-input-guard.js?v=9.5"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
 <!-- CARESTEP v9.1 · SOLAPI OAuth2 clinic-account messaging -->
 <!-- CARESTEP v9.4.3 · FOUR-DIGIT YEAR GUARD · all static and dynamic date inputs -->
+<!-- CARESTEP v9.5 · PATIENT HEALTH TIMELINE · weight/vaccination/heartworm/visit/recheck/journey -->
 </body>
 </html>
