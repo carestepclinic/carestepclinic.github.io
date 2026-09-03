@@ -884,7 +884,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
   <section id="loginView" class="login-shell">
     <div class="login-card saas-login-card">
       <div class="brand-mark">CS</div>
-      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.0-C · HOME RECORDS</p>
+      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.0-C.1 · VISIT WEIGHT</p>
       <h1>CARESTEP Clinic</h1>
       <p class="login-copy">병원별 계정과 직원 권한으로 CARESTEP을 시작합니다.</p>
 
@@ -1005,7 +1005,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
     <main class="main">
       <header class="topbar">
         <div>
-          <p class="eyebrow">CARESTEP Clinic · v10.0-C · GUARDIAN HOME RECORDS · SOLAPI OAUTH2</p>
+          <p class="eyebrow">CARESTEP Clinic · v10.0-C.1 · VISIT WEIGHT · SOLAPI OAUTH2</p>
           <h2 id="viewTitle">대시보드</h2>
         </div>
         <div class="topbar-actions">
@@ -1958,7 +1958,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
         <div><label class="field-label" for="crmTimelineDate">기록일 *</label><input id="crmTimelineDate" class="input" type="date" min="1900-01-01" max="2099-12-31" required></div>
         <div id="crmTimelineVaccineField" class="span-2" hidden><label class="field-label">진행한 백신 선택 *</label><div id="crmTimelineVaccineList" class="timeline-vaccine-list"></div><p id="crmTimelineVaccineHint" class="patient-breed-hint">같은 날 접종한 백신을 모두 선택하세요. 백신별 다음 예정일이 자동 계산됩니다.</p></div>
         <div id="crmTimelineTitleField" class="span-2"><label class="field-label" for="crmTimelineTitle">기록 제목 *</label><input id="crmTimelineTitle" class="input" maxlength="120" required autocomplete="off" placeholder="예: 병원 진료"></div>
-        <div id="crmTimelineWeightField"><label class="field-label" for="crmTimelineWeight">체중(kg) *</label><input id="crmTimelineWeight" class="input" type="number" min="0.01" max="200" step="0.01" inputmode="decimal" placeholder="4.80"></div>
+        <div id="crmTimelineWeightField"><label id="crmTimelineWeightLabel" class="field-label" for="crmTimelineWeight">체중(kg) *</label><input id="crmTimelineWeight" class="input" type="number" min="0.01" max="200" step="0.01" inputmode="decimal" placeholder="4.80"><p id="crmTimelineWeightHint" class="patient-breed-hint" hidden>선택 입력 · 저장하면 같은 날짜의 체중 기록도 자동으로 남습니다.</p></div>
         <div id="crmTimelineDueField"><label class="field-label" for="crmTimelineNextDue">다음 예정일</label><input id="crmTimelineNextDue" class="input" type="date" min="1900-01-01" max="2099-12-31"></div>
         <div id="crmTimelineStatusField"><label class="field-label" for="crmTimelineStatus">상태</label><select id="crmTimelineStatus" class="input"><option value="completed">완료</option><option value="scheduled">예정</option><option value="active">진행 중</option><option value="canceled">취소</option></select></div>
         <div><label class="field-label" for="crmTimelineSource">기록 출처</label><select id="crmTimelineSource" class="input"><option value="clinic">병원 기록</option><option value="system">자동 기록</option></select></div>
@@ -9091,7 +9091,7 @@ carestepSafeCall('boot_messaging_refresh',()=>startMessagingAutoRefresh());
 </script>
 <script src="patient-breeds.js?v=9.5.3"></script>
 <script src="patient-crm.js?v=10.0-C"></script>
-<script src="patient-timeline.js?v=10.0-C"></script>
+<script src="patient-timeline.js?v=10.0-C.1"></script>
 <script src="date-input-guard.js?v=9.5.3"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
 <!-- CARESTEP v9.1 · SOLAPI OAuth2 clinic-account messaging -->
@@ -9100,6 +9100,6 @@ carestepSafeCall('boot_messaging_refresh',()=>startMessagingAutoRefresh());
 <!-- CARESTEP v9.5.1 · species-specific vaccine/dose selectors · automatic due dates -->
 <!-- CARESTEP v9.5.2 · status shown only for recheck and Journey records -->
 <!-- CARESTEP v9.5.3 · multiple vaccines per visit · grouped timeline display -->
-<!-- CARESTEP v10.0-C · guardian home records + clinic timeline -->
+<!-- CARESTEP v10.0-C.1 · vaccination, heartworm, and visit weight capture -->
 </body>
 </html>
