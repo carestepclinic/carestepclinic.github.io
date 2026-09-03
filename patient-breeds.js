@@ -1,4 +1,4 @@
-/* CARESTEP Clinic v9.4.1 · Korean veterinary breed dictionary */
+/* CARESTEP Clinic v9.4.2 · Korean veterinary breed dictionary */
 (() => {
   'use strict';
   const breed=(name,en='',aliases=[])=>Object.freeze({name,en,aliases:Object.freeze(aliases)});

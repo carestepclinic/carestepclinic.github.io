@@ -1,4 +1,4 @@
-/* CARESTEP Clinic v9.4.1 · Patient CRM breed search */
+/* CARESTEP Clinic v9.4.2 · Patient CRM breed search cache hotfix */
 (() => {
   'use strict';
   const $crm=id=>document.getElementById(id);
