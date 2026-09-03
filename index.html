@@ -853,6 +853,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
 }
 </style>
 
+  <link rel="stylesheet" href="patient-crm.css" />
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -883,7 +884,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
   <section id="loginView" class="login-shell">
     <div class="login-card saas-login-card">
       <div class="brand-mark">CS</div>
-      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v9.3.5 · HOTFIX 37 · REGRESSION RECOVERY</p>
+      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v9.4 · PATIENT CRM STAGE 1</p>
       <h1>CARESTEP Clinic</h1>
       <p class="login-copy">병원별 계정과 직원 권한으로 CARESTEP을 시작합니다.</p>
 
@@ -955,6 +956,10 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
         </button>
 
         <div class="nav-section-label">주요 업무</div>
+        <button class="nav-item nav-main" data-view="patients">
+          <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20v-2.5A3.5 3.5 0 0 1 7.5 14h5a3.5 3.5 0 0 1 3.5 3.5V20"/><circle cx="10" cy="8" r="4"/><path d="M17 8h4M19 6v4"/></svg></span>
+          <span class="nav-copy"><b>보호자 · 환자</b><small>등록 · 검색 · 불러오기</small></span>
+        </button>
         <button class="nav-item nav-main" data-view="library">
           <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M8 4v13a3 3 0 0 0 3 3"/></svg></span>
           <span class="nav-copy"><b>자료실</b><small>교육자료 찾기</small></span>
@@ -1000,7 +1005,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
     <main class="main">
       <header class="topbar">
         <div>
-          <p class="eyebrow">CARESTEP Clinic · v9.3.5 · HOTFIX 37 · REGRESSION RECOVERY · SESSION RESTORE · PATIENT RESET · SOLAPI OAUTH2</p>
+          <p class="eyebrow">CARESTEP Clinic · v9.4 · PATIENT CRM STAGE 1 · SESSION RESTORE · SOLAPI OAUTH2</p>
           <h2 id="viewTitle">대시보드</h2>
         </div>
         <div class="topbar-actions">
@@ -1094,6 +1099,19 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
         <div id="quickCards" class="cards-grid"></div>
       </section>
 
+      <section id="patients" class="view">
+        <div class="patient-crm-head">
+          <div><p class="eyebrow">PATIENT CRM · STAGE 1</p><h3>보호자 · 환자 관리</h3><p>보호자 한 명에 여러 환자를 연결하고, 등록된 환자를 자료 생성과 후속관리로 바로 불러옵니다.</p></div>
+          <div class="patient-crm-actions"><button id="patientCrmRefresh" class="btn btn-secondary" type="button">새로고침</button><button id="patientCrmNewGuardian" class="btn btn-secondary" type="button">+ 보호자 등록</button><button id="patientCrmNewPatient" class="btn btn-primary" type="button">+ 환자 등록</button></div>
+        </div>
+        <div class="patient-crm-notice"><span>🔒</span><div><b>병원별 분리 · 암호화 저장</b><br>보호자명·연락처와 환자 식별정보는 환자 관리 목적으로만 저장됩니다. 복약 세부내용과 이번 퇴원지시는 기존처럼 자료 생성 화면에서만 사용합니다.</div></div>
+        <div class="patient-crm-kpis"><div class="patient-crm-kpi"><span>등록 보호자</span><b id="crmGuardianCount">0</b></div><div class="patient-crm-kpi"><span>등록 환자</span><b id="crmPatientCount">0</b></div><div class="patient-crm-kpi"><span>Carestep Home 연결</span><b id="crmHomeCount">0</b></div></div>
+        <div class="patient-crm-layout">
+          <div class="panel patient-crm-list-panel"><div class="patient-crm-search"><input id="patientCrmSearch" class="input" type="search" autocomplete="off" placeholder="환자명 · 보호자명 · 휴대전화 검색"><button id="patientCrmSearchClear" class="btn btn-ghost" type="button">지우기</button></div><div id="patientCrmResultMeta" class="patient-crm-result-meta">0명의 보호자</div><div id="patientCrmList" class="patient-crm-list"></div></div>
+          <div id="patientCrmDetail" class="panel patient-crm-detail"><div class="patient-crm-empty"><div><b>보호자를 선택하세요</b><span>왼쪽 목록에서 보호자를 선택하면 연결된 환자와 기본 정보를 확인할 수 있습니다.</span></div></div></div>
+        </div>
+      </section>
+
       <section id="library" class="view">
         <div class="section-head">
           <div><p class="eyebrow">Education Library</p><h3>보호자 교육자료</h3></div>
@@ -1136,7 +1154,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
             <div class="wizard-progress"><span id="wizardProgress"></span></div>
 
             <div class="wizard-pane active" data-wizard-pane="1">
-              <div class="wizard-pane-title"><div><h4>① 환자와 교육자료</h4><p>질환을 고르면 퇴원일/관리 시작일은 오늘로 자동 설정되고 D+ 날짜가 계산됩니다.</p></div><span class="privacy-badge">🔒 저장 안 함</span></div>
+              <div class="wizard-pane-title"><div><h4>① 환자와 교육자료</h4><p>등록 환자를 불러오거나 직접 입력한 뒤 교육자료를 선택하세요. D+ 날짜는 관리 시작일을 기준으로 계산됩니다.</p></div><span class="privacy-badge">🔒 선택 저장</span></div>
               <label class="field-label" for="templateSearch">교육자료 검색</label>
               <div class="template-search-wrap">
                 <div class="template-search-box">
@@ -1148,8 +1166,10 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
                 <div id="templateSelected" class="template-selected"></div>
                 <select id="templateSelect" class="input" style="display:none" tabindex="-1" aria-hidden="true"></select>
               </div>
+              <div class="crm-builder-picker"><span><b>등록 환자 불러오기</b><br>보호자·환자 CRM에서 선택하면 이름, 연락처, 최근 체중과 주요 질환을 다시 입력하지 않아도 됩니다.</span><button id="openPatientCrmPicker" class="btn btn-secondary" type="button">환자 검색</button></div>
+              <div id="crmBuilderSelection" class="crm-builder-selection hidden"></div>
               <div class="case-panel">
-                <div class="case-panel-head"><div><strong>이번 환자 정보 <span style="color:#7b8698;font-weight:600">(선택)</span></strong><div class="muted" style="font-size:10px;margin-top:2px">환자명·보호자명은 표시를 선택했을 때만 출력물에 들어갑니다.</div></div><span class="privacy-badge">🔒 서버 저장 안 함</span></div>
+                <div class="case-panel-head"><div><strong>이번 환자 정보 <span style="color:#7b8698;font-weight:600">(선택)</span></strong><div class="muted" style="font-size:10px;margin-top:2px">직접 입력한 값은 자동 저장되지 않으며, CRM 등록·수정을 실행한 정보만 암호화 저장됩니다.</div></div><span class="privacy-badge">🔒 CRM 등록 시 저장</span></div>
                 <div class="case-grid">
                   <div><label class="field-label" for="patientName">환자명</label><input id="patientName" class="input" autocomplete="off" placeholder="예: 코코" /></div>
                   <div><label class="field-label" for="guardianName">보호자명</label><input id="guardianName" class="input" autocomplete="off" placeholder="예: 김○○" /></div>
@@ -1259,7 +1279,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
               <span id="wizardStepLabel" class="wizard-step-label">1 / 5 · 환자</span>
               <button id="wizardNext" class="btn btn-primary" type="button">다음 →</button>
             </div>
-            <p class="fineprint">개별 환자의 투약·식사·운동·재검 계획은 담당 수의사의 지시가 우선합니다. 환자정보·개별 퇴원지시·복약정보는 현재 탭에서만 사용하며 저장하지 않습니다.</p>
+            <p class="fineprint">개별 환자의 투약·식사·운동·재검 계획은 담당 수의사의 지시가 우선합니다. CRM에 등록한 보호자·환자 기본정보만 암호화 저장하며, 개별 퇴원지시와 복약정보는 현재 자료 생성 과정에서만 사용합니다.</p>
           </div>
 
           <div class="preview-wrap">
@@ -1893,6 +1913,41 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
       </section>
     </main>
   </div>
+
+  <dialog id="crmGuardianDialog" class="patient-crm-dialog">
+    <form id="crmGuardianForm" class="patient-crm-dialog-card">
+      <input id="crmGuardianId" type="hidden">
+      <div class="patient-crm-dialog-head"><div><p class="eyebrow">GUARDIAN</p><h4 id="crmGuardianDialogTitle">새 보호자 등록</h4><p>보호자 한 명에 여러 환자를 연결할 수 있습니다.</p></div><button class="patient-crm-close" type="button" data-crm-dialog-close="crmGuardianDialog" aria-label="닫기">×</button></div>
+      <div class="patient-crm-form-grid">
+        <div><label class="field-label" for="crmGuardianName">보호자명 *</label><input id="crmGuardianName" class="input" maxlength="60" autocomplete="off" required placeholder="예: 김민수"></div>
+        <div><label class="field-label" for="crmGuardianPhone">휴대전화</label><input id="crmGuardianPhone" class="input" maxlength="20" inputmode="tel" autocomplete="off" placeholder="010-0000-0000"></div>
+        <div><label class="field-label" for="crmGuardianHomeStatus">Carestep Home 상태</label><select id="crmGuardianHomeStatus" class="input"><option value="not_invited">미연결</option><option value="invited">초대함</option><option value="linked">연결됨</option></select></div>
+        <div class="span-2"><label class="field-label" for="crmGuardianMemo">병원 메모</label><textarea id="crmGuardianMemo" class="input" maxlength="500" placeholder="보호자 응대에 필요한 최소 메모만 입력"></textarea></div>
+        <label class="patient-crm-consent span-2"><input id="crmGuardianConsent" type="checkbox"><span>보호자에게 개인정보 처리 내용을 안내했으며, 병원이 이 정보를 수집·이용할 적법한 근거를 확인했습니다. 선택정보는 입력하지 않아도 됩니다.</span></label>
+      </div>
+      <div id="crmGuardianStatus" class="patient-crm-status"></div><div class="patient-crm-dialog-actions"><button class="btn btn-ghost" type="button" data-crm-dialog-close="crmGuardianDialog">취소</button><button id="crmGuardianSave" class="btn btn-primary" type="submit">저장</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="crmPatientDialog" class="patient-crm-dialog">
+    <form id="crmPatientForm" class="patient-crm-dialog-card">
+      <input id="crmPatientId" type="hidden">
+      <div class="patient-crm-dialog-head"><div><p class="eyebrow">PATIENT</p><h4 id="crmPatientDialogTitle">새 환자 등록</h4><p>자료 생성과 후속관리에 필요한 최소 기본정보만 저장합니다.</p></div><button class="patient-crm-close" type="button" data-crm-dialog-close="crmPatientDialog" aria-label="닫기">×</button></div>
+      <div class="patient-crm-form-grid">
+        <div class="span-2"><label class="field-label" for="crmPatientGuardian">보호자 *</label><select id="crmPatientGuardian" class="input" required></select></div>
+        <div><label class="field-label" for="crmPatientName">환자명 *</label><input id="crmPatientName" class="input" maxlength="60" required autocomplete="off" placeholder="예: 뽀삐"></div>
+        <div><label class="field-label" for="crmPatientSpecies">동물종</label><select id="crmPatientSpecies" class="input"><option value="dog">강아지</option><option value="cat">고양이</option><option value="other">기타</option></select></div>
+        <div><label class="field-label" for="crmPatientBreed">품종</label><input id="crmPatientBreed" class="input" maxlength="80" autocomplete="off" placeholder="예: 말티즈"></div>
+        <div><label class="field-label" for="crmPatientSex">성별</label><select id="crmPatientSex" class="input"><option value="unknown">미확인</option><option value="male">수컷</option><option value="female">암컷</option></select></div>
+        <div><label class="field-label" for="crmPatientBirthDate">생년월일</label><input id="crmPatientBirthDate" class="input" type="date"></div>
+        <div><label class="field-label" for="crmPatientNeutered">중성화</label><select id="crmPatientNeutered" class="input"><option value="unknown">미확인</option><option value="yes">완료</option><option value="no">미완료</option></select></div>
+        <div><label class="field-label" for="crmPatientWeight">최근 체중(kg)</label><input id="crmPatientWeight" class="input" type="number" min="0.01" max="200" step="0.01" inputmode="decimal" placeholder="4.80"></div>
+        <div class="span-2"><label class="field-label" for="crmPatientConditions">주요 질환</label><input id="crmPatientConditions" class="input" maxlength="300" autocomplete="off" placeholder="예: 심장병 B2, 만성신장병 IRIS 2"></div>
+        <div class="span-2"><label class="field-label" for="crmPatientNotes">관리 메모</label><textarea id="crmPatientNotes" class="input" maxlength="700" placeholder="자료 생성과 후속관리에 필요한 최소 메모"></textarea></div>
+      </div>
+      <div id="crmPatientStatus" class="patient-crm-status"></div><div class="patient-crm-dialog-actions"><button class="btn btn-ghost" type="button" data-crm-dialog-close="crmPatientDialog">취소</button><button id="crmPatientSave" class="btn btn-primary" type="submit">저장</button></div>
+    </form>
+  </dialog>
 
 
   <div id="legalModal" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="legalModalTitle">
@@ -3340,7 +3395,7 @@ async function saasAcceptInvite(){
   }catch(e){saasSetAuthStatus(e.message||'초대 가입 실패','error');}
 }
 function saasStoredLastView(){
-  const allowed=new Set(['dashboard','library','builder','followup','onboarding','settings','account','voice','pilot']);
+  const allowed=new Set(['dashboard','patients','library','builder','followup','onboarding','settings','account','voice','pilot']);
   let view='dashboard';try{view=String(sessionStorage.getItem(SAAS_LAST_VIEW_SESSION_KEY)||'dashboard');}catch{}
   return allowed.has(view)?view:'dashboard';
 }
@@ -4442,7 +4497,7 @@ function showLogin(){ carestepResetHistoryForLogin(); $('sessionRestoreView')?.c
    CARESTEP behaves like a single-page app, so browser Back should move through CARESTEP views
    before it can leave the site. Active case work is additionally protected at the root guard. */
 const CARESTEP_HISTORY_STATE_KEY='__carestepNavV902';
-const CARESTEP_HISTORY_VIEWS=new Set(['dashboard','library','builder','followup','onboarding','settings','account','contentStudio','voice','pilot','admin']);
+const CARESTEP_HISTORY_VIEWS=new Set(['dashboard','patients','library','builder','followup','onboarding','settings','account','contentStudio','voice','pilot','admin']);
 let carestepHistoryApplying=false,carestepHistoryInitialized=false;
 function carestepActiveView(){return document.querySelector('.view.active-view')?.id||'dashboard';}
 function carestepHistorySafeView(view){return CARESTEP_HISTORY_VIEWS.has(String(view||''))?String(view):'dashboard';}
@@ -4506,15 +4561,16 @@ function toggleManageNav(){const group=$('navManageGroup');setManageNavOpen(!gro
 function go(view,options={}){
   if(currentCasePhase==='completed'&&(view==='library'||view==='builder'))beginNewCase(false,true);
   if(!saasCanView(view)){const featureByView={library:'library',builder:'builder',followup:'followupAutomation',voice:'customerVoice',pilot:'pilotAnalytics'};toast(featureByView[view]?saasFeatureMessage(featureByView[view]):'현재 계정 역할에서 사용할 수 없는 메뉴입니다.');view='dashboard';}
-  if(['dashboard','library','builder','followup','onboarding','settings','account','voice','pilot'].includes(view)){try{sessionStorage.setItem(SAAS_LAST_VIEW_SESSION_KEY,view);}catch{}}
+  if(['dashboard','patients','library','builder','followup','onboarding','settings','account','voice','pilot'].includes(view)){try{sessionStorage.setItem(SAAS_LAST_VIEW_SESSION_KEY,view);}catch{}}
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active-view'));
   document.querySelectorAll('.nav-item').forEach(v=>v.classList.remove('active'));
   $(view).classList.add('active-view');
   const nav=document.querySelector(`.nav-item[data-view="${view}"]`); if(nav) nav.classList.add('active');
   syncSidebarNavGroup(view);
-  const titles={dashboard:'홈',library:'자료실',builder:'자료 생성',followup:'후속관리',onboarding:'시작 설정',settings:'병원 설정',account:'계정 · 직원',contentStudio:'AI Content Studio',voice:'문의 · 요청',pilot:'운영 리포트',admin:'운영자 도구'};
+  const titles={dashboard:'홈',patients:'보호자 · 환자',library:'자료실',builder:'자료 생성',followup:'후속관리',onboarding:'시작 설정',settings:'병원 설정',account:'계정 · 직원',contentStudio:'AI Content Studio',voice:'문의 · 요청',pilot:'운영 리포트',admin:'운영자 도구'};
   $('viewTitle').textContent=titles[view]||'';
   if(view==='dashboard')setTimeout(()=>refreshClinicActionCenter(false),0);
+  if(view==='patients'&&typeof window.crmOpen==='function')setTimeout(()=>window.crmOpen(),0);
   if(view==='builder') renderBuilder();
   if(view==='followup'){followupGuideMode='setup';initFollowupGuidedLayout();ensureFollowupExecutionPlacement();renderFollowupCenter();renderFollowupWorkboard();renderFollowupAnalytics();renderFollowupCrm();if(saasMode==='auth'&&saasMe)setTimeout(()=>{loadPatientJourneys(false);loadMessagingSettings(false);loadMessagingJobs(false);if(guardianSurveyAllowed(false))loadGuardianSurveys(false);if(followupCrmAllowed(false))loadFollowupCrm(false);},0);if(googleCalendarToken.accessToken&&googleCalendarToken.expiresAt>Date.now()+60000)setTimeout(()=>loadGoogleFollowupWorkboard(false),0);}
   if(view==='settings'){ hydrateSettings(); hydrateWorkflowSettings(); }
@@ -8024,7 +8080,7 @@ function initFollowupGuidedLayout(){const root=$('followup');if(!root||$('follow
  root.classList.add('guide-mode-setup');renderFollowupGuide();}
 function renderFollowupGuide(){const root=$('followup'),shell=$('followupGuideShell');if(!root||!shell)return;readCaseInfoFromForm();const state=readFollowupGuideState();if(!followupGuideStep||followupGuideStep<1||followupGuideStep>5)followupGuideStep=state.step||1;root.classList.toggle('guide-mode-setup',followupGuideMode==='setup');root.classList.toggle('guide-mode-operation',followupGuideMode==='operation');$('followupGuideSetupMode')?.classList.toggle('active',followupGuideMode==='setup');$('followupGuideOperationMode')?.classList.toggle('active',followupGuideMode==='operation');const labels=[['환자·자료','관리 시작일 확인'],['Journey','질환별 흐름 적용'],['일정','캘린더 등록'],['문자','보호자 예약발송'],['완료','최종 확인']];const stepper=$('followupGuideStepper');if(stepper){stepper.innerHTML=labels.map((x,i)=>{const n=i+1,done=followupGuideStepComplete(n),skip=followupGuideStepSkipped(n),cls=n===followupGuideStep?'current':skip?'skipped':done?'done':'';return `<button class="followup-guide-step ${cls}" type="button" data-guide-step="${n}"><span class="guide-num">${n}</span><b>${x[0]}</b><span>${skip?'건너뜀':done?'완료':x[1]}</span></button>`;}).join('');stepper.querySelectorAll('[data-guide-step]').forEach(b=>b.addEventListener('click',()=>setFollowupGuideStep(Number(b.dataset.guideStep))));}
  for(let n=1;n<=5;n++)$(`followupGuideStep${n}Body`)?.classList.toggle('active',n===followupGuideStep);
- const t=templates.find(x=>x.id===currentTemplateId)||templates[0],caseReady=followupGuideCaseReady();const s1=$('followupGuideStep1Body');if(s1)s1.innerHTML=`<div class="guide-step-card"><div class="guide-step-head"><div><p class="eyebrow">STEP 1</p><h4>현재 환자와 퇴원자료를 확인하세요</h4><p>후속관리 날짜 계산에 관리 시작일이 필요합니다. 환자명은 선택사항이며 서버에 저장되지 않습니다.</p></div><div class="guide-step-tools"><button id="guideEditCase" class="btn btn-primary" type="button">퇴원정보 수정</button></div></div><div class="guide-case-summary"><div class="guide-summary-box ${caseInfo.patientName?'good':''}"><span>환자</span><b>${escapeHtml(caseInfo.patientName||'이름 미입력')}</b></div><div class="guide-summary-box good"><span>교육자료</span><b>${escapeHtml(templateDisplayTitle(t)||'자료 선택')}</b></div><div class="guide-summary-box ${caseReady?'good':'bad'}"><span>관리 시작일</span><b>${escapeHtml(caseInfo.dischargeDate||'입력 필요')}</b></div><div class="guide-summary-box ${caseInfo.procedure?'good':'warn'}"><span>진단·수술</span><b>${escapeHtml(caseInfo.procedure||'선택 입력')}</b></div></div><div class="guide-callout ${caseReady?'good':'warn'}">${caseReady?'✓ 날짜 계산 준비가 완료되었습니다. 다음 단계에서 질환별 Journey를 적용하세요.':'관리 시작일이 없으면 캘린더와 문자 예약일을 계산할 수 없습니다. “퇴원정보 수정”에서 날짜를 입력해주세요.'}</div></div>`;$('guideEditCase')?.addEventListener('click',()=>go('builder'));
+ const t=templates.find(x=>x.id===currentTemplateId)||templates[0],caseReady=followupGuideCaseReady();const s1=$('followupGuideStep1Body');if(s1)s1.innerHTML=`<div class="guide-step-card"><div class="guide-step-head"><div><p class="eyebrow">STEP 1</p><h4>현재 환자와 퇴원자료를 확인하세요</h4><p>후속관리 날짜 계산에 관리 시작일이 필요합니다. CRM에 등록한 기본정보만 저장되며, 이번 후속관리 입력값은 자동 저장되지 않습니다.</p></div><div class="guide-step-tools"><button id="guideEditCase" class="btn btn-primary" type="button">퇴원정보 수정</button></div></div><div class="guide-case-summary"><div class="guide-summary-box ${caseInfo.patientName?'good':''}"><span>환자</span><b>${escapeHtml(caseInfo.patientName||'이름 미입력')}</b></div><div class="guide-summary-box good"><span>교육자료</span><b>${escapeHtml(templateDisplayTitle(t)||'자료 선택')}</b></div><div class="guide-summary-box ${caseReady?'good':'bad'}"><span>관리 시작일</span><b>${escapeHtml(caseInfo.dischargeDate||'입력 필요')}</b></div><div class="guide-summary-box ${caseInfo.procedure?'good':'warn'}"><span>진단·수술</span><b>${escapeHtml(caseInfo.procedure||'선택 입력')}</b></div></div><div class="guide-callout ${caseReady?'good':'warn'}">${caseReady?'✓ 날짜 계산 준비가 완료되었습니다. 다음 단계에서 질환별 Journey를 적용하세요.':'관리 시작일이 없으면 캘린더와 문자 예약일을 계산할 수 없습니다. “퇴원정보 수정”에서 날짜를 입력해주세요.'}</div></div>`;$('guideEditCase')?.addEventListener('click',()=>go('builder'));
  const s2=$('followupGuideStep2Body');if(s2){let head=$('guideJourneyIntro');if(!head){head=document.createElement('div');head.id='guideJourneyIntro';head.className='guide-step-card';head.style.marginBottom='10px';s2.insertAdjacentElement('afterbegin',head);}const recommendedJourney=recommendedJourneyForCurrentTemplate();head.innerHTML=`<div class="guide-step-head"><div><p class="eyebrow">STEP 2</p><h4>${activePatientJourney?'Journey가 적용되었습니다':'질환에 맞는 Journey를 선택하세요'}</h4><p>${activePatientJourney?`현재 <b>${escapeHtml(activePatientJourney.name)}</b>의 D+ 흐름이 이 케이스에 적용되어 있습니다.`:recommendedJourney?`현재 교육자료와 연결된 추천 Journey는 <b>${escapeHtml(recommendedJourney.name)}</b>입니다. 내용을 확인한 뒤 바로 적용할 수 있습니다.`:'왼쪽에서 질환을 검색한 뒤 상세 화면의 “현재 케이스에 적용” 버튼을 누르세요.'}</p></div><div class="guide-step-tools">${!activePatientJourney&&recommendedJourney?'<button id="guideApplyRecommendedJourney" class="btn btn-primary" type="button">추천 Journey 적용</button>':''}<button id="guideJourneyAdvanced" class="btn btn-secondary guide-advanced-toggle" type="button">고급 설정</button></div></div>`;$('guideApplyRecommendedJourney')?.addEventListener('click',()=>applyPatientJourney(recommendedJourney.id));$('guideJourneyAdvanced')?.addEventListener('click',()=>{const p=$('patientJourneyPanel');p?.classList.toggle('guide-show-advanced');$('guideJourneyAdvanced').textContent=p?.classList.contains('guide-show-advanced')?'고급 설정 닫기':'고급 설정';});}
  const s3=$('followupGuideStep3Body');if(s3){let tools=$('guideCalendarIntro');if(!tools){tools=document.createElement('div');tools.id='guideCalendarIntro';tools.className='guide-step-card';tools.style.marginBottom='10px';s3.insertAdjacentElement('afterbegin',tools);}const calDone=followupGuideStepComplete(3),count=followupCalendarStages().length;tools.innerHTML=`<div class="guide-step-head"><div><p class="eyebrow">STEP 3</p><h4>후속관리 일정을 캘린더에 등록하세요</h4><p>${count?`현재 Journey에서 캘린더 업무 ${count}건이 예정되어 있습니다.`:'현재 Journey에는 캘린더 업무 단계가 없습니다.'}</p></div><div class="guide-step-tools"><button id="guideCalendarAdvanced" class="btn btn-secondary guide-advanced-toggle" type="button">고급 설정</button></div></div><div class="guide-callout ${calDone?'good':''}">${state.calendarDone?'✓ 현재 케이스의 캘린더 등록을 완료했습니다.':state.calendarSkipped?'캘린더 등록을 건너뛰었습니다. 필요하면 언제든 이 단계로 돌아와 등록할 수 있습니다.':'Google Calendar 또는 Outlook을 연결하고 “선택 일정 바로 등록”을 누르세요.'}</div>`;$('guideCalendarAdvanced')?.addEventListener('click',()=>{s3.classList.toggle('guide-show-advanced');$('guideCalendarAdvanced').textContent=s3.classList.contains('guide-show-advanced')?'고급 설정 닫기':'고급 설정';});}
  const s4=$('followupGuideStep4Body');if(s4){let tools=$('guideMessagingIntro');if(!tools){tools=document.createElement('div');tools.id='guideMessagingIntro';tools.className='guide-step-card';tools.style.marginBottom='10px';s4.insertAdjacentElement('afterbegin',tools);}const msgDone=followupGuideStepComplete(4),count=followupMessagingStages().length;tools.innerHTML=`<div class="guide-step-head"><div><p class="eyebrow">STEP 4</p><h4>보호자 자동발송을 예약하세요</h4><p>보호자 번호 입력 → 동의 확인 → 발송방식 선택 → 예약 버튼 순서만 따라가면 됩니다. 현재 발송 예정 단계는 ${count}건입니다.</p></div><div class="guide-step-tools"><button id="guideMessagingAdmin" class="btn btn-secondary guide-advanced-toggle" type="button">관리자 설정</button></div></div><div class="guide-callout ${msgDone?'good':''}">${state.messagesDone?'✓ 현재 케이스의 보호자 자동발송 예약을 완료했습니다.':state.messagesSkipped?'보호자 자동발송을 건너뛰었습니다.':'아래 “현재 케이스 예약” 카드만 입력하면 됩니다. 발신번호·SOLAPI 설정은 관리자 설정에 숨겨두었습니다.'}</div>`;$('guideMessagingAdmin')?.addEventListener('click',()=>{s4.classList.toggle('guide-show-admin');$('guideMessagingAdmin').textContent=s4.classList.contains('guide-show-admin')?'관리자 설정 닫기':'관리자 설정';});}
@@ -8269,7 +8325,7 @@ async function downloadDischargePackage(){
     if(selected.mobileall){for(const day of [1,3,7,14]){const blob=await mobileCardPngBlob(day);if(blob){followFolder.file(`${base}_D+${day}_모바일카드_1080x1920.png`,blob);count++;}}}
     if(selected.calendar){followFolder.file(`${base}_재진일정.ics`,makeRecheckIcs());count++;}
     if(selected.followup){followFolder.file(`${base}_후속관리자동알림.ics`,makeFollowupIcs());followFolder.file(`${base}_D+후속관리_발송문구.txt`,makeFollowupMessagePack());count+=2;}
-    const info=`CARESTEP DISCHARGE & FOLLOW-UP 패키지\n병원: ${hospitalName()}\n자료: ${t.title}\n환자: ${caseInfo.patientName||'미표시'}\n퇴원일: ${caseInfo.dischargeDate||'미입력'}\n재진: ${recheckLabel()}\n생성 파일: ${count}개\n\n00_퇴원당일: 보호자에게 오늘 전달할 자료\n01_후속관리: D+ 카드·모바일 카드·재진 캘린더·자동알림\n\n환자정보와 복약정보는 CARESTEP 서버에 저장되지 않습니다.`;
+    const info=`CARESTEP DISCHARGE & FOLLOW-UP 패키지\n병원: ${hospitalName()}\n자료: ${t.title}\n환자: ${caseInfo.patientName||'미표시'}\n퇴원일: ${caseInfo.dischargeDate||'미입력'}\n재진: ${recheckLabel()}\n생성 파일: ${count}개\n\n00_퇴원당일: 보호자에게 오늘 전달할 자료\n01_후속관리: D+ 카드·모바일 카드·재진 캘린더·자동알림\n\nCRM에 등록한 보호자·환자 기본정보 외에 이번 복약·퇴원지시는 서버에 추가 저장되지 않습니다.`;
     zip.file('00_README.txt',info);
     const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${base}_퇴원_후속관리패키지_CARESTEP.zip`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
@@ -8938,7 +8994,7 @@ async function generateSelectedOutputs(){
         for(const day of [1,3,7,14]){const blob=format==='pdf'?await mobileCardPdfBlob(day):await mobileCardPngBlob(day),ext=format==='pdf'?'pdf':'png';if(blob){(format==='pdf'?pdfFolder:imgFolder).file(`${base}_D+${day}_모바일카드.${ext}`,blob);count++;}}
       }
     }
-    zip.file('00_README.txt' ,`CARESTEP 선택 출력물\n병원: ${hospitalName()}\n자료: ${t.title}\n퇴원/관리 시작일: ${caseInfo.dischargeDate||'-'}\n선택 항목: ${selected.map(outputLabel).join(', ')}\n생성 파일: ${count}개\n\n환자정보와 복약정보는 CARESTEP 서버에 저장되지 않습니다.`);
+    zip.file('00_README.txt' ,`CARESTEP 선택 출력물\n병원: ${hospitalName()}\n자료: ${t.title}\n퇴원/관리 시작일: ${caseInfo.dischargeDate||'-'}\n선택 항목: ${selected.map(outputLabel).join(', ')}\n생성 파일: ${count}개\n\nCRM에 등록한 보호자·환자 기본정보 외에 이번 복약·퇴원지시는 서버에 추가 저장되지 않습니다.`);
     const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${base}_선택출력물_${selected.length}종_CARESTEP.zip`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
     setGeneratedCount(getGeneratedCount()+count);renderHospitalMeta();markRecentTemplate(currentTemplateId);recordPilotUsage('individual_batch',{fileCount:count,outputs:selected});toast(`선택한 ${selected.length}종에서 ${count}개 파일을 생성했습니다. 후속관리로 이어갑니다.`);scheduleBuilderFollowupHandoff();
@@ -9012,8 +9068,9 @@ carestepSafeCall('boot_messaging_refresh',()=>startMessagingAutoRefresh());
 
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
+<script src="patient-crm.js"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
 <!-- CARESTEP v9.1 · SOLAPI OAuth2 clinic-account messaging -->
-<!-- CARESTEP v9.3.5 · HOTFIX 37 · REGRESSION RECOVERY · regression recovery · boot isolation + critical actions + restored feline urinary content -->
+<!-- CARESTEP v9.4 · PATIENT CRM STAGE 1 · guardian/patient directory + builder handoff -->
 </body>
 </html>
