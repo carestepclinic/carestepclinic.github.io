@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Carestep Home">
+  <rect width="512" height="512" rx="116" fill="#1859d8"/>
+  <path d="M146 243 256 151l110 92v120a32 32 0 0 1-32 32H178a32 32 0 0 1-32-32V243Z" fill="#fff" opacity=".96"/>
+  <circle cx="218" cy="267" r="25" fill="#1859d8"/>
+  <circle cx="294" cy="267" r="25" fill="#1859d8"/>
+  <circle cx="184" cy="317" r="21" fill="#1859d8"/>
+  <circle cx="328" cy="317" r="21" fill="#1859d8"/>
+  <path d="M256 296c-38 0-66 32-66 64 0 25 21 37 43 27 15-7 31-7 46 0 22 10 43-2 43-27 0-32-28-64-66-64Z" fill="#1859d8"/>
+</svg>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#1859d8">
+  <meta name="description" content="동물병원과 연결되는 반려동물 건강관리 앱 Carestep Home">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Carestep Home">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="carestep-home-icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="carestep-home-icon-192.png">
+  <link rel="stylesheet" href="carestep-home.css?v=10.0-A">
+  <title>Carestep Home</title>
+</head>
+<body>
+  <div class="home-shell">
+    <header class="home-header">
+      <a class="home-brand" href="home.html" aria-label="Carestep Home 홈">
+        <span class="home-logo" aria-hidden="true">C</span>
+        <span><b>Carestep Home</b><small>병원 밖에서도 이어지는 건강관리</small></span>
+      </a>
+      <button id="installApp" class="home-install" type="button" hidden>앱으로 설치</button>
+    </header>
+
+    <main class="home-main">
+      <section id="loadingView" class="home-card home-loading" aria-live="polite">
+        <span class="home-spinner" aria-hidden="true"></span>
+        <h1>Carestep Home을 준비하고 있어요</h1>
+        <p>연결 정보를 안전하게 확인하는 중입니다.</p>
+      </section>
+
+      <section id="inviteView" class="home-card" hidden>
+        <div class="home-step">병원 초대 · 계정 연결</div>
+        <h1><span id="inviteGuardianName">보호자</span>님,<br>반려동물 건강관리를 연결하세요</h1>
+        <p id="inviteLead" class="home-lead">병원에서 보낸 초대 정보를 확인해주세요.</p>
+        <div id="inviteClinic" class="clinic-chip"></div>
+        <div id="invitePatients" class="invite-pets"></div>
+        <form id="inviteForm" class="home-form">
+          <div class="home-field">
+            <label for="inviteLast4">병원에 등록된 휴대전화 끝 4자리</label>
+            <input id="inviteLast4" type="text" inputmode="numeric" autocomplete="one-time-code" minlength="4" maxlength="4" pattern="[0-9]{4}" placeholder="0000" required>
+            <small id="invitePhoneHint">병원에 등록된 번호와 일치해야 합니다.</small>
+          </div>
+          <div class="home-field">
+            <label for="invitePassword">Carestep Home 비밀번호</label>
+            <input id="invitePassword" type="password" autocomplete="new-password" minlength="8" maxlength="72" placeholder="영문+숫자 8자 이상" required>
+            <small>이미 계정이 있다면 기존 비밀번호를 입력해주세요.</small>
+          </div>
+          <details class="home-legal">
+            <summary>이용약관 및 개인정보 처리 안내 보기</summary>
+            <div><b>서비스 이용 안내</b><p>Carestep Home은 동물병원과 보호자를 연결해 반려동물 건강관리를 돕는 서비스이며, 진단·처방 또는 응급진료를 대신하지 않습니다.</p><b>개인정보 처리 안내</b><p>계정 생성, 본인 확인, 병원·환자 연결을 위해 휴대전화 번호, 보호자명, 환자 기본정보와 연결 이력을 암호화하여 처리합니다.</p></div>
+          </details>
+          <label class="home-check"><input id="inviteTerms" type="checkbox" required><span>Carestep Home 이용약관에 동의합니다.</span></label>
+          <label class="home-check"><input id="invitePrivacy" type="checkbox" required><span>개인정보 수집·이용 및 병원 환자 연결에 동의합니다.</span></label>
+          <div id="inviteStatus" class="home-status" role="status"></div>
+          <button id="inviteSubmit" class="home-primary" type="submit">계정 만들고 환자 연결</button>
+        </form>
+      </section>
+
+      <section id="loginView" class="home-card home-login" hidden>
+        <div class="home-step">Carestep Home 로그인</div>
+        <h1>우리 아이의 건강 연결을<br>계속 확인하세요</h1>
+        <p class="home-lead">병원 초대로 생성한 계정으로 로그인합니다.</p>
+        <form id="loginForm" class="home-form">
+          <div class="home-field"><label for="loginPhone">휴대전화 번호</label><input id="loginPhone" type="tel" inputmode="tel" autocomplete="username" maxlength="20" placeholder="010-0000-0000" required></div>
+          <div class="home-field"><label for="loginPassword">비밀번호</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" maxlength="72" placeholder="비밀번호" required></div>
+          <div id="loginStatus" class="home-status" role="status"></div>
+          <button id="loginSubmit" class="home-primary" type="submit">로그인</button>
+        </form>
+        <p class="home-help">아직 계정이 없다면 이용 중인 동물병원에서 Carestep Home 초대 링크를 받아주세요.</p>
+      </section>
+
+      <section id="dashboardView" hidden>
+        <div class="dashboard-head">
+          <div><div class="home-step">Carestep Home</div><h1><span id="homeUserName">보호자</span>님, 안녕하세요</h1><p>병원과 연결된 반려동물을 확인하세요.</p></div>
+          <button id="logoutButton" class="home-text-button" type="button">로그아웃</button>
+        </div>
+        <div class="connection-ready"><span aria-hidden="true">✓</span><div><b>병원 연결이 완료되었습니다</b><p>병원에서 등록한 환자와 안전하게 연결되었습니다.</p></div></div>
+        <div id="homeConnections" class="connection-list"></div>
+        <div class="stage-note"><b>건강 기록 연결 준비 완료</b><p>현재는 계정·환자 연결 단계입니다. 병원 건강기록과 보호자 기록 기능은 다음 업데이트에서 이 화면에 이어집니다.</p></div>
+      </section>
+
+      <section id="errorView" class="home-card home-error" hidden>
+        <div class="error-icon" aria-hidden="true">!</div><h1>연결 정보를 확인할 수 없습니다</h1><p id="errorMessage">병원에 새 초대 링크를 요청해주세요.</p><a class="home-primary home-link-button" href="home.html">로그인 화면으로 이동</a>
+      </section>
+    </main>
+
+    <footer class="home-footer"><b>Carestep Home</b><span>응급상황이 의심되면 앱 기록보다 가까운 동물병원 진료를 우선하세요.</span><small>v10.0-A · Guardian Account Link</small></footer>
+  </div>
+  <div id="offlineBar" class="offline-bar" hidden>오프라인 상태입니다. 연결되면 다시 시도해주세요.</div>
+  <script src="carestep-home.js?v=10.0-A"></script>
+</body>
+</html>

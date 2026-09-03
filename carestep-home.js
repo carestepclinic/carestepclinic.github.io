@@ -1,0 +1,31 @@
+/* Carestep Home PWA v10.0-A · guardian account and patient connection */
+(() => {
+  'use strict';
+  const API='https://carestep-ai-api.kk04sdw.workers.dev';
+  const SESSION_KEY='carestep_home_session_v1';
+  const $=id=>document.getElementById(id);
+  const state={token:localStorage.getItem(SESSION_KEY)||'',inviteToken:new URLSearchParams(location.search).get('invite')||'',installPrompt:null};
+  const views=['loadingView','inviteView','loginView','dashboardView','errorView'];
+  const esc=v=>String(v??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
+  const speciesLabel=v=>({dog:'강아지',cat:'고양이',other:'반려동물'})[v]||'반려동물';
+  const sexLabel=v=>({male:'수컷',female:'암컷',unknown:'성별 미확인'})[v]||'성별 미확인';
+  function show(id){for(const key of views){const el=$(key);if(el)el.hidden=key!==id;}window.scrollTo({top:0,behavior:'smooth'});}
+  function status(id,text='',kind=''){const el=$(id);if(!el)return;el.textContent=text;el.className='home-status '+kind;}
+  async function api(path,opt={}){const headers={'Content-Type':'application/json',...(opt.headers||{})};if(opt.auth!==false&&state.token)headers.Authorization='Bearer '+state.token;let response;try{response=await fetch(API+path,{...opt,headers});}catch{throw new Error(navigator.onLine?'서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.':'인터넷 연결을 확인해주세요.');}let data={};try{data=await response.json();}catch{}if(!response.ok)throw Object.assign(new Error(data.error||'요청을 처리하지 못했습니다.'),{status:response.status});return data;}
+  function patientHtml(p){return `<div class="invite-pet"><span class="pet-avatar ${p.species==='cat'?'cat':''}">${p.species==='cat'?'CAT':'PET'}</span><span><b>${esc(p.name||'이름 미입력')}</b><span>${esc([speciesLabel(p.species),p.breed].filter(Boolean).join(' · '))}</span></span></div>`;}
+  async function loadInvite(){show('loadingView');try{const data=await api('/home/invite/'+encodeURIComponent(state.inviteToken),{method:'GET',auth:false});const invite=data.invite;$('inviteGuardianName').textContent=invite.guardianName||'보호자';$('inviteLead').textContent=`${invite.clinicName}에서 ${(invite.patients||[]).length}마리의 연결을 보냈습니다.`;$('inviteClinic').textContent='🏥 '+invite.clinicName;$('invitePatients').innerHTML=(invite.patients||[]).map(patientHtml).join('');$('invitePhoneHint').textContent=`${invite.phoneHint}로 표시되는 병원 등록 번호의 끝 4자리를 입력해주세요.`;show('inviteView');}catch(e){showError(e.message);}}
+  async function acceptInvite(event){event.preventDefault();status('inviteStatus');const button=$('inviteSubmit');button.disabled=true;button.textContent='안전하게 연결하는 중…';try{const data=await api('/home/invite/'+encodeURIComponent(state.inviteToken),{method:'POST',auth:false,body:JSON.stringify({phoneLast4:$('inviteLast4').value,password:$('invitePassword').value,termsAccepted:$('inviteTerms').checked,privacyAccepted:$('invitePrivacy').checked})});state.token=data.session.token;localStorage.setItem(SESSION_KEY,state.token);history.replaceState({},'',location.pathname);renderHome(data.home);show('dashboardView');}catch(e){status('inviteStatus',e.message,'error');}finally{button.disabled=false;button.textContent='계정 만들고 환자 연결';}}
+  async function login(event){event.preventDefault();status('loginStatus');const button=$('loginSubmit');button.disabled=true;button.textContent='로그인 중…';try{const data=await api('/home/login',{method:'POST',auth:false,body:JSON.stringify({phone:$('loginPhone').value,password:$('loginPassword').value})});state.token=data.session.token;localStorage.setItem(SESSION_KEY,state.token);renderHome(data.home);show('dashboardView');}catch(e){status('loginStatus',e.message,'error');}finally{button.disabled=false;button.textContent='로그인';}}
+  function renderHome(home){$('homeUserName').textContent=home?.user?.displayName||'보호자';const connections=home?.connections||[];$('homeConnections').innerHTML=connections.length?connections.map(c=>`<article class="connection-clinic"><div class="connection-clinic-head"><div><span>연결 병원</span><b>${esc(c.clinicName)}</b></div><small>연결됨</small></div><div class="connection-pets">${(c.patients||[]).map(p=>`<div class="connection-pet"><span class="pet-avatar ${p.species==='cat'?'cat':''}">${p.species==='cat'?'CAT':'PET'}</span><span><b>${esc(p.name)}</b><small>${esc([speciesLabel(p.species),p.breed,sexLabel(p.sex)].filter(Boolean).join(' · '))}</small></span></div>`).join('')}</div></article>`).join(''):'<div class="stage-note"><b>연결된 환자가 없습니다</b><p>병원에 환자 연결 상태를 확인해주세요.</p></div>';}
+  async function restore(){if(!state.token){show('loginView');return;}show('loadingView');try{const data=await api('/home/me',{method:'GET'});renderHome(data.home);show('dashboardView');}catch(e){if(e.status===401){state.token='';localStorage.removeItem(SESSION_KEY);show('loginView');}else showError(e.message);}}
+  function showError(message){$('errorMessage').textContent=message||'병원에 새 초대 링크를 요청해주세요.';show('errorView');}
+  async function logout(){const token=state.token;state.token='';localStorage.removeItem(SESSION_KEY);try{if(token){state.token=token;await api('/home/logout',{method:'POST'});}}catch{}finally{state.token='';show('loginView');}}
+  function onlineStatus(){const offline=!navigator.onLine;$('offlineBar').hidden=!offline;}
+  function bindInstall(){window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();state.installPrompt=e;$('installApp').hidden=false;});$('installApp').addEventListener('click',async()=>{if(!state.installPrompt)return;state.installPrompt.prompt();await state.installPrompt.userChoice;state.installPrompt=null;$('installApp').hidden=true;});window.addEventListener('appinstalled',()=>{$('installApp').hidden=true;state.installPrompt=null;});}
+  async function init(){
+    $('inviteForm').addEventListener('submit',acceptInvite);$('loginForm').addEventListener('submit',login);$('logoutButton').addEventListener('click',logout);window.addEventListener('online',onlineStatus);window.addEventListener('offline',onlineStatus);onlineStatus();bindInstall();
+    if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    if(state.inviteToken)await loadInvite();else await restore();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();

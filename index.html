@@ -853,7 +853,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
 }
 </style>
 
-  <link rel="stylesheet" href="patient-crm.css?v=9.5.3" />
+  <link rel="stylesheet" href="patient-crm.css?v=10.0-A" />
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -884,7 +884,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
   <section id="loginView" class="login-shell">
     <div class="login-card saas-login-card">
       <div class="brand-mark">CS</div>
-      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v9.5.3 · MULTI-VACCINE</p>
+      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.0-A · HOME PWA</p>
       <h1>CARESTEP Clinic</h1>
       <p class="login-copy">병원별 계정과 직원 권한으로 CARESTEP을 시작합니다.</p>
 
@@ -1005,7 +1005,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
     <main class="main">
       <header class="topbar">
         <div>
-          <p class="eyebrow">CARESTEP Clinic · v9.5.3 · MULTI-VACCINE TIMELINE · SOLAPI OAUTH2</p>
+          <p class="eyebrow">CARESTEP Clinic · v10.0-A · CARESTEP HOME PWA · SOLAPI OAUTH2</p>
           <h2 id="viewTitle">대시보드</h2>
         </div>
         <div class="topbar-actions">
@@ -1921,7 +1921,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
       <div class="patient-crm-form-grid">
         <div><label class="field-label" for="crmGuardianName">보호자명 *</label><input id="crmGuardianName" class="input" maxlength="60" autocomplete="off" required placeholder="예: 김민수"></div>
         <div><label class="field-label" for="crmGuardianPhone">휴대전화</label><input id="crmGuardianPhone" class="input" maxlength="20" inputmode="tel" autocomplete="off" placeholder="010-0000-0000"></div>
-        <div><label class="field-label" for="crmGuardianHomeStatus">Carestep Home 상태</label><select id="crmGuardianHomeStatus" class="input"><option value="not_invited">미연결</option><option value="invited">초대함</option><option value="linked">연결됨</option></select></div>
+        <div><label class="field-label" for="crmGuardianHomeStatus">Carestep Home 상태</label><select id="crmGuardianHomeStatus" class="input" disabled><option value="not_invited">미연결 · 자동 관리</option><option value="invited">초대함 · 자동 관리</option><option value="linked">연결됨 · 자동 관리</option></select></div>
         <div class="span-2"><label class="field-label" for="crmGuardianMemo">병원 메모</label><textarea id="crmGuardianMemo" class="input" maxlength="500" placeholder="보호자 응대에 필요한 최소 메모만 입력"></textarea></div>
         <label class="patient-crm-consent span-2"><input id="crmGuardianConsent" type="checkbox"><span>보호자에게 개인정보 처리 내용을 안내했으며, 병원이 이 정보를 수집·이용할 적법한 근거를 확인했습니다. 선택정보는 입력하지 않아도 됩니다.</span></label>
       </div>
@@ -9088,7 +9088,7 @@ carestepSafeCall('boot_messaging_refresh',()=>startMessagingAutoRefresh());
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
 <script src="patient-breeds.js?v=9.5.3"></script>
-<script src="patient-crm.js?v=9.5.3"></script>
+<script src="patient-crm.js?v=10.0-A"></script>
 <script src="patient-timeline.js?v=9.5.3"></script>
 <script src="date-input-guard.js?v=9.5.3"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
@@ -9098,5 +9098,6 @@ carestepSafeCall('boot_messaging_refresh',()=>startMessagingAutoRefresh());
 <!-- CARESTEP v9.5.1 · species-specific vaccine/dose selectors · automatic due dates -->
 <!-- CARESTEP v9.5.2 · status shown only for recheck and Journey records -->
 <!-- CARESTEP v9.5.3 · multiple vaccines per visit · grouped timeline display -->
+<!-- CARESTEP v10.0-A · PWA guardian account · one-time invite · clinic-patient connection -->
 </body>
 </html>

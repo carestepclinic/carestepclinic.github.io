@@ -1,0 +1,17 @@
+{
+  "name": "Carestep Home",
+  "short_name": "Carestep",
+  "description": "동물병원과 연결되는 반려동물 건강관리 앱",
+  "id": "./home.html",
+  "start_url": "./home.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#eef3fa",
+  "theme_color": "#1859d8",
+  "lang": "ko-KR",
+  "icons": [
+    {"src":"carestep-home-icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"carestep-home-icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
