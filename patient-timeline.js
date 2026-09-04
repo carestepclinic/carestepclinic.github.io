@@ -1,4 +1,4 @@
-/* CARESTEP Clinic v10.2-D · Clinical Protocol Settings */
+/* CARESTEP Clinic v10.3-A · Patient Workspace Quick Record */
 (() => {
   'use strict';
   const $=id=>document.getElementById(id);
@@ -61,6 +61,7 @@
   async function cancelHomeFollowup(id){const item=state.homeFollowups.find(x=>x.id===id);if(!item||!confirm(`D+${item.stageDay} “${item.title}” 앱 후속관리를 취소할까요?`))return;try{await api(`/saas/patients/${encodeURIComponent(state.patient.id)}/home-followups/${encodeURIComponent(id)}`,{method:'DELETE'});await load();if(typeof toast==='function')toast('Carestep Home 후속관리를 취소했습니다.');}catch(e){if(typeof toast==='function')toast(e.message||'앱 후속관리를 취소하지 못했습니다.');}}
   async function loadProtocol(){if(state.protocolLoaded||isDemo())return state.protocol;try{const d=await api('/saas/clinical-protocols');state.protocol=d.protocol||DEFAULT_PROTOCOL;}catch(e){state.protocol=DEFAULT_PROTOCOL;console.warn('Clinical protocol load failed',e);}state.protocolLoaded=true;return state.protocol;}
   function open(patient,guardian){if(!patient)return;state.patient=patient;state.guardian=guardian;state.filter='all';loadProtocol().then(load);setTimeout(()=>$('crmPatientTimelineMount')?.scrollIntoView({behavior:'smooth',block:'start'}),30);}
+  async function openNew(patient,guardian){if(!patient)return;state.patient=patient;state.guardian=guardian;state.filter='all';await loadProtocol();await load();openDialog();}
   function doseLabel(value){return value==='booster'?'Booster':`${value}차`;}
   function vaccineRows(){return VACCINES[state.patient?.species]||[];}
   function vaccineInterval(vaccine,dose){const species=state.patient?.species==='cat'?'cat':'dog',rule=state.protocol?.vaccines?.[species]?.[vaccine?.code]||DEFAULT_PROTOCOL.vaccines?.[species]?.[vaccine?.code]||{primary:28,booster:365};let phase='booster';if(species==='dog'&&vaccine?.code==='dhppl'&&['1','2','3','4','5'].includes(dose))phase='primary';else if(species==='dog'&&['corona','kennel','influenza'].includes(vaccine?.code)&&dose==='1')phase='primary';else if(species==='cat'&&vaccine?.code==='fvrcp'&&['1','2'].includes(dose))phase='primary';else if(species==='cat'&&vaccine?.code==='felv'&&dose==='1')phase='primary';return Number(rule[phase])||DEFAULT_PROTOCOL.vaccines[species][vaccine.code][phase];}
@@ -88,6 +89,6 @@
     if(state.patient?.id===patientId)await load();return out;
   }
   function bind(){$('crmTimelineForm')?.addEventListener('submit',save);$('crmTimelineType')?.addEventListener('change',fieldVisibility);$('crmTimelineHomeVisible')?.addEventListener('change',syncHomeVisibility);$('crmTimelineDate')?.addEventListener('change',()=>{const type=$('crmTimelineType')?.value;if(type==='vaccination')syncVaccineFields();if(type==='heartworm')$('crmTimelineNextDue').value=addDays($('crmTimelineDate').value,Number(state.protocol?.heartworm?.interval)||28);});document.querySelectorAll('[data-timeline-dialog-close]').forEach(b=>b.addEventListener('click',closeDialog));window.addEventListener('carestep:clinical-protocol-updated',e=>{state.protocol=e.detail?.protocol||DEFAULT_PROTOCOL;state.protocolLoaded=true;});}
-  window.crmTimelineMount=mount;window.crmTimelineOpen=open;window.crmTimelineReload=load;window.crmRecordJourneyCompleted=recordJourneyCompleted;
+  window.crmTimelineMount=mount;window.crmTimelineOpen=open;window.crmTimelineNew=openNew;window.crmTimelineReload=load;window.crmRecordJourneyCompleted=recordJourneyCompleted;
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
 })();
