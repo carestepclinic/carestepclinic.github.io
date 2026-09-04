@@ -6,8 +6,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>CARESTEP Clinic v10.3-B · 업무 중심 홈</title>
-  <meta name="carestep-build" content="v10.3-B-work-first-dashboard" />
+  <title>CARESTEP Clinic v10.3-C · 통합 카테고리</title>
+  <meta name="carestep-build" content="v10.3-C-unified-category-system" />
   <meta name="description" content="동물병원 보호자 교육자료 라이브러리 및 병원 맞춤 PDF 생성 MVP" />
   <style>
 :root {
@@ -405,6 +405,10 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
   #patientJourneyDetail .journey-stage-preview-row{grid-template-columns:52px minmax(0,1fr);gap:10px}
   #patientJourneyDetail .journey-stage-preview-row > .journey-card-tags{grid-column:2;justify-content:flex-start;margin-top:2px}
 }
+</style>
+<style id="carestep-v10-3-c-category-system">
+.library-filter-block{margin:12px 0;padding:13px 14px;border:1px solid #e1e8f2;border-radius:14px;background:#fbfcff}.library-filter-label{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:9px}.library-filter-label b{font-size:11px;color:#1c2a43}.library-filter-label span,.library-result-meta{font-size:9px;color:#77849a}.purpose-filter-row,.filter-row{display:flex;gap:7px;flex-wrap:wrap}.purpose-chip{border:1px solid #dbe3ef;background:#fff;border-radius:10px;padding:9px 12px;font-size:10px;font-weight:850;color:#536177;cursor:pointer}.purpose-chip:hover,.purpose-chip.active{border-color:#1f5eff;background:#eef4ff;color:#1f5eff}.purpose-chip.journey-link{margin-left:auto;background:#16233c;color:#fff;border-color:#16233c}.library-result-meta{margin:10px 2px;font-weight:750}.resource-top>span:first-child{display:flex;gap:5px;align-items:center;flex-wrap:wrap}.purpose-badge{display:inline-flex;padding:4px 7px;border-radius:999px;background:#eef2f7;color:#56657a;font-size:8px;font-weight:900}.purpose-badge.procedure{background:#fff2e8;color:#ad5d18}.purpose-badge.discharge{background:#eef4ff;color:#245fd4}.purpose-badge.education{background:#ecf8f1;color:#18734b}.purpose-badge.clinic{background:#f1edff;color:#6843bf}
+@media(max-width:700px){.library-filter-label{align-items:flex-start;flex-direction:column}.purpose-chip.journey-link{margin-left:0}.purpose-filter-row .purpose-chip{flex:1 1 calc(50% - 7px)}}
 </style>
 <style id="carestep-v10-3-b-work-dashboard">
 .legacy-dashboard-block{display:none!important}.work-first-dashboard{margin:18px 0;padding:20px;border:1px solid #dfe7f3;border-radius:20px;background:#fff;box-shadow:0 12px 32px rgba(31,94,255,.06)}.work-first-head,.work-first-section-head{display:flex;justify-content:space-between;gap:16px;align-items:center}.work-first-head h3{margin:2px 0 4px;font-size:20px}.work-first-head p,.work-first-section-head span{margin:0;color:#748197;font-size:10px}.work-first-kpis{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin:16px 0}.work-first-kpi{appearance:none;text-align:left;border:1px solid #e0e7f1;border-radius:14px;background:#f8faff;padding:12px;cursor:pointer;color:#59677d;min-height:92px}.work-first-kpi:hover,.work-first-kpi.active{border-color:#1f5eff;background:#eef4ff;box-shadow:0 0 0 2px rgba(31,94,255,.08)}.work-first-kpi.alert b{color:#d94841}.work-first-kpi.warn b{color:#b56a00}.work-first-kpi span,.work-first-kpi small{display:block;font-size:9px;font-weight:800}.work-first-kpi b{display:block;margin:5px 0 2px;font-size:24px;color:#16233c}.work-first-kpi small{color:#8a96a8;font-weight:650}.work-first-content{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:14px}.work-first-content>div,.recent-patients{border:1px solid #e4eaf3;border-radius:15px;padding:14px;background:#fbfcff}.work-first-list,.work-recent-list{display:grid;gap:8px;margin-top:10px}.work-first-row{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px;border:1px solid #e3e9f2;border-radius:12px;background:#fff}.work-first-row.urgent{border-color:#f0c7c4;background:#fffafa}.work-first-row.warn{border-color:#ecd7ae}.work-first-when b,.work-first-main b{display:block;color:#17233a;font-size:11px}.work-first-when span,.work-first-main span{display:block;margin-top:3px;color:#77849a;font-size:9px}.work-first-actions{display:flex;gap:6px;align-items:center}.work-first-actions .btn{padding:7px 9px;font-size:9px}.work-recent-patient{display:flex;width:100%;justify-content:space-between;gap:8px;text-align:left;border:1px solid #e3e9f2;border-radius:11px;background:#fff;padding:10px;cursor:pointer}.work-recent-patient:hover{border-color:#1f5eff}.work-recent-patient b,.work-recent-patient span{display:block}.work-recent-patient b{font-size:11px;color:#17233a}.work-recent-patient span,.work-recent-patient em{font-size:9px;color:#7a8799;font-style:normal}.work-recent-all{width:100%;margin-top:10px}.work-dashboard-details{margin-top:14px}.work-dashboard-details>summary{cursor:pointer;list-style:none}.work-dashboard-details>summary::-webkit-details-marker{display:none}.operations-settings-panel{margin-bottom:14px}.operations-settings-panel>details{margin-top:10px}.dashboard-secondary-note,.stats-grid,.pilot-onboarding-banner,.recent-panel,.pilot-glance,#dashboard>.section-head,#dashboard>#quickCards{display:none!important}
@@ -879,7 +883,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
 @media(max-width:600px){.schedule-board{padding:14px}.schedule-board-head{display:block}.schedule-board-head .btn{margin-top:10px;width:100%}.schedule-board-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.schedule-board-row{grid-template-columns:1fr}.schedule-board-main>b,.schedule-board-main>span{white-space:normal}.schedule-board-filters{width:100%}.schedule-board-filters .input{flex:1;min-width:0}.care-inbox-head{display:block}.care-inbox-filters{margin-top:8px}.care-inbox-row{grid-template-columns:1fr}.care-inbox-actions .btn{flex:1}}
 </style>
 
-  <link rel="stylesheet" href="patient-crm.css?v=10.3-B" />
+  <link rel="stylesheet" href="patient-crm.css?v=10.3-C" />
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -910,7 +914,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
   <section id="loginView" class="login-shell">
     <div class="login-card saas-login-card">
       <div class="brand-mark">CS</div>
-      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.3-B</p>
+      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.3-C</p>
       <h1>CARESTEP Clinic</h1>
       <p class="login-copy">병원별 계정과 직원 권한으로 CARESTEP을 시작합니다.</p>
 
@@ -1031,7 +1035,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
     <main class="main">
       <header class="topbar">
         <div>
-          <p class="eyebrow">CARESTEP Clinic · v10.3-B · WORK-FIRST DASHBOARD</p>
+          <p class="eyebrow">CARESTEP Clinic · v10.3-C · UNIFIED CATEGORY SYSTEM</p>
           <h2 id="viewTitle">대시보드</h2>
         </div>
         <div class="topbar-actions">
@@ -1158,7 +1162,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
 
       <section id="patients" class="view">
         <div class="patient-crm-head">
-          <div><p class="eyebrow">PATIENT WORKSPACE · v10.3-B</p><h3>보호자 · 환자 통합 작업공간</h3><p>환자 한 명을 선택해 기본정보, 오늘 진료, 예방 일정, Journey, Home, 후속관리와 상담 요청을 한 화면에서 확인합니다.</p></div>
+          <div><p class="eyebrow">PATIENT WORKSPACE · v10.3-C</p><h3>보호자 · 환자 통합 작업공간</h3><p>환자 한 명을 선택해 기본정보, 오늘 진료, 예방 일정, Journey, Home, 후속관리와 상담 요청을 한 화면에서 확인합니다.</p></div>
           <div class="patient-crm-actions"><button id="patientCrmRefresh" class="btn btn-secondary" type="button">새로고침</button><button id="patientCrmNewGuardian" class="btn btn-secondary" type="button">+ 보호자 등록</button><button id="patientCrmNewPatient" class="btn btn-primary" type="button">+ 환자 등록</button></div>
         </div>
         <div class="patient-crm-notice"><span>🔒</span><div><b>병원별 분리 · 암호화 저장</b><br>보호자명·연락처, 환자 식별정보와 건강 타임라인 제목·메모는 병원별로 분리해 암호화 저장합니다. 체중·접종·사상충·병원 진료·Journey는 환자별 날짜순으로 누적됩니다.</div></div>
@@ -1171,25 +1175,13 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
 
       <section id="library" class="view">
         <div class="section-head">
-          <div><p class="eyebrow">Education Library</p><h3>보호자 교육자료</h3></div>
-          <input id="searchInput" class="input search" placeholder="질환 또는 수술명 검색" />
+          <div><p class="eyebrow">PURPOSE-FIRST LIBRARY</p><h3>보호자 자료실</h3><p class="muted">자료 목적을 먼저 고른 뒤 진료 카테고리로 좁혀보세요.</p></div>
+          <input id="searchInput" class="input search" placeholder="질환·수술·퇴원관리 검색" />
         </div>
         <div class="workflow-next-note"><b>다음 할 일</b><span>교육자료를 찾은 뒤 카드의 <strong>“이 자료로 만들기 →”</strong>를 누르면 새 환자 자료 생성으로 이어집니다.</span></div>
-        <div class="filter-row">
-          <button class="chip active" data-filter="전체">전체</button>
-          <button class="chip" data-filter="수술">수술·회복</button>
-          <button class="chip" data-filter="내과">내과·만성질환</button>
-          <button class="chip" data-filter="안과">안과</button>
-          <button class="chip" data-filter="피부과">피부·알레르기</button>
-          <button class="chip" data-filter="비뇨기">비뇨기·신장</button>
-          <button class="chip" data-filter="치과">치과·구강</button>
-          <button class="chip" data-filter="신경">신경</button>
-          <button class="chip" data-filter="종양">종양·항암</button>
-          <button class="chip" data-filter="응급">응급·증상</button>
-          <button class="chip" data-filter="노령">노령·삶의질</button>
-          <button class="chip" data-filter="예방">예방·건강관리</button>
-          <button class="chip" data-filter="기타">기타</button>
-        </div>
+        <div class="library-filter-block"><div class="library-filter-label"><b>1. 자료 목적</b><span>서로 다른 용도의 자료가 한 목록에 섞이지 않습니다.</span></div><div class="purpose-filter-row"><button class="purpose-chip active" type="button" data-purpose="all">전체 자료</button><button class="purpose-chip" type="button" data-purpose="education">질환 교육</button><button class="purpose-chip" type="button" data-purpose="procedure">수술·시술 안내</button><button class="purpose-chip" type="button" data-purpose="discharge">입원·퇴원관리</button><button class="purpose-chip" type="button" data-purpose="clinic">병원 직접 제작</button><button class="purpose-chip journey-link" type="button" data-go="followup">Patient Journey →</button></div></div>
+        <div class="library-filter-block"><div class="library-filter-label"><b>2. 진료 카테고리</b><span id="libraryFilterSummary">전체 목적 · 전체 카테고리</span></div><div class="filter-row"><button class="chip active" data-filter="전체">전체</button><button class="chip" data-filter="수술시술">수술·시술</button><button class="chip" data-filter="입원퇴원">입원·퇴원</button><button class="chip" data-filter="만성질환">만성질환</button><button class="chip" data-filter="예방관리">예방관리</button><button class="chip" data-filter="재활생활">재활·생활관리</button><button class="chip" data-filter="종양중증">종양·중증관리</button><button class="chip" data-filter="고양이특화">고양이 특화</button><button class="chip" data-filter="병원제작">병원 직접 제작</button></div></div>
+        <div id="libraryResultMeta" class="library-result-meta">자료를 분류하는 중입니다.</div>
         <div id="libraryGrid" class="cards-grid"></div>
       </section>
 
@@ -1893,7 +1885,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
       <section id="settings" class="view">
         <div class="panel operations-settings-panel">
           <p class="eyebrow">OPERATIONS SETTINGS</p><h3>운영 상태·연동 진단</h3><p class="muted">일상 업무에는 표시하지 않습니다. 배포, 자동화와 외부 연동을 점검할 때만 펼쳐보세요.</p>
-          <details id="careOpsDetails" class="care-ops-details"><summary>배포·자동화 상태 <span>문제가 있을 때 펼쳐서 확인</span></summary><div id="careAutomationStatus" class="care-automation-status" aria-live="polite">자동화 실행 상태를 확인하는 중입니다.</div><div id="careDeploymentStatus" class="care-deployment-status" aria-live="polite"><div><b id="careDeploymentTitle">v10.3-B 배포 상태 확인 중</b><span id="careDeploymentDetail">Clinic patch · Worker build · Database 버전을 비교합니다.</span></div><button id="refreshDeploymentStatus" class="btn btn-ghost" type="button">배포 상태 확인</button></div></details>
+          <details id="careOpsDetails" class="care-ops-details"><summary>배포·자동화 상태 <span>문제가 있을 때 펼쳐서 확인</span></summary><div id="careAutomationStatus" class="care-automation-status" aria-live="polite">자동화 실행 상태를 확인하는 중입니다.</div><div id="careDeploymentStatus" class="care-deployment-status" aria-live="polite"><div><b id="careDeploymentTitle">v10.3-C 배포 상태 확인 중</b><span id="careDeploymentDetail">Clinic patch · Worker build · Database 버전을 비교합니다.</span></div><button id="refreshDeploymentStatus" class="btn btn-ghost" type="button">배포 상태 확인</button></div></details>
           <details id="clinicSystemDetails" class="service-status care-system-details" aria-label="시스템 상태"><summary>외부 연동 진단</summary><div class="service-status-head"><b>시스템 상태</b><button id="retryProductionChecks" class="btn btn-ghost" type="button">상태 다시 확인</button></div><div class="service-status-grid"><div class="service-pill"><span>CARESTEP</span><b><i id="statusCarestepDot" class="service-dot"></i><em id="statusCarestepText" style="font-style:normal">확인 중</em></b></div><div class="service-pill"><span>SOLAPI</span><b><i id="statusSolapiDot" class="service-dot"></i><em id="statusSolapiText" style="font-style:normal">확인 중</em></b></div><div class="service-pill"><span>Google Calendar</span><b><i id="statusGoogleDot" class="service-dot"></i><em id="statusGoogleText" style="font-style:normal">확인 중</em></b></div><div class="service-pill"><span>발신번호</span><b><i id="statusSenderDot" class="service-dot"></i><em id="statusSenderText" style="font-style:normal">확인 중</em></b></div></div><div id="productionErrorBox" class="production-error hidden"></div><div class="recovery-note">연동 문제가 있으면 원인을 표시하고 바로 해당 설정 또는 후속관리 화면으로 이동할 수 있습니다.</div></details>
         </div>
         <div class="panel settings-panel">
@@ -1973,7 +1965,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
         <div class="panel operator-category-panel">
           <div class="category-manager-toolbar">
             <input id="categoryManagerSearch" class="input" placeholder="자료명 검색 · 예: 알레르기, 아토피" />
-            <select id="categoryManagerFilter" class="input"><option value="전체">전체 분류</option><option value="수술">수술·회복</option><option value="내과">내과·만성질환</option><option value="안과">안과</option><option value="피부과">피부·알레르기</option><option value="비뇨기">비뇨기·신장</option><option value="치과">치과·구강</option><option value="신경">신경</option><option value="종양">종양·항암</option><option value="응급">응급·증상</option><option value="노령">노령·삶의질</option><option value="예방">예방·건강관리</option><option value="기타">기타</option></select>
+            <select id="categoryManagerFilter" class="input"><option value="전체">전체 분류</option><option value="수술시술">수술·시술</option><option value="입원퇴원">입원·퇴원</option><option value="만성질환">만성질환</option><option value="예방관리">예방관리</option><option value="재활생활">재활·생활관리</option><option value="종양중증">종양·중증관리</option><option value="고양이특화">고양이 특화</option><option value="병원제작">병원 직접 제작</option></select>
           </div>
           <div id="categoryManagerNote" class="category-manager-note">예: 알레르기·아토피 자료를 찾아 <b>피부·알레르기</b>로 변경 후 저장할 수 있습니다.</div>
           <div class="admin-table-wrap">
@@ -3255,11 +3247,27 @@ const templates = [
 
 
 /* ================= v6.5.2 OPERATOR MODE · CATEGORY MANAGER ================= */
-const CATEGORY_CODES=['수술','내과','안과','피부과','비뇨기','치과','신경','종양','응급','노령','예방','기타'];
-const CATEGORY_LABELS={전체:'전체',수술:'수술·회복',내과:'내과·만성질환',안과:'안과',피부과:'피부·알레르기',비뇨기:'비뇨기·신장',치과:'치과·구강',신경:'신경',종양:'종양·항암',응급:'응급·증상',노령:'노령·삶의질',예방:'예방·건강관리',기타:'기타'};
+const CATEGORY_CODES=['수술시술','입원퇴원','만성질환','예방관리','재활생활','종양중증','고양이특화','병원제작'];
+const CATEGORY_LABELS={전체:'전체',수술시술:'수술·시술',입원퇴원:'입원·퇴원',만성질환:'만성질환',예방관리:'예방관리',재활생활:'재활·생활관리',종양중증:'종양·중증관리',고양이특화:'고양이 특화',병원제작:'병원 직접 제작'};
+const LEGACY_CATEGORY_MAP={수술:'수술시술',시술:'수술시술',질환:'만성질환',내과:'만성질환',안과:'수술시술',피부과:'만성질환',비뇨기:'만성질환',치과:'수술시술',신경:'만성질환',종양:'종양중증',응급:'입원퇴원',입원:'입원퇴원',퇴원관리:'입원퇴원',노령:'재활생활',예방:'예방관리',고양이:'고양이특화',기타:'입원퇴원'};
+const PURPOSE_LABELS={all:'전체 목적',education:'질환 교육',procedure:'수술·시술 안내',discharge:'입원·퇴원관리',clinic:'병원 직접 제작'};
 const OPERATOR_HQ_KEY_STORAGE='carestep_operator_hq_key_v651';
 const OPERATOR_QUERY=new URLSearchParams(location.search).get('operator')==='1';
-const templateBaseCategories=new Map(templates.map(t=>[t.id,t.category]));
+function inferUnifiedCategory(item={},raw=''){
+  const direct=String(raw||item.category||'').trim();if(CATEGORY_CODES.includes(direct))return direct;
+  const text=`${item.id||''} ${item.title||item.name||''} ${item.short||''} ${item.description||''} ${direct}`.toLowerCase();
+  if(item._studio&&!item._studioCentral)return '병원제작';
+  if(/고양이|feline|\bfic\b|flutd|전발치|백혈병|요도폐색/.test(text))return '고양이특화';
+  if(/항암|종양|암\b|종괴|완화|유선|비장/.test(text))return '종양중증';
+  if(/접종|백신|사상충|건강검진|예방|중성화 전|수술 전 검사/.test(text))return '예방관리';
+  if(/재활|운동|체중|노령|인지|삶의.?질|보행/.test(text))return '재활생활';
+  if(/수술|절제|중성화|골절|십자인대|슬개골|고관절|디스크|스케일링|발치|치과|안과|이물/.test(text))return '수술시술';
+  if(/퇴원|입원|췌장염|구토|설사|응급|회복/.test(text))return '입원퇴원';
+  if(/신장|심장|당뇨|경련|발작|피부|알레르|만성|내과|비뇨기|신경/.test(text))return '만성질환';
+  return LEGACY_CATEGORY_MAP[direct]||'입원퇴원';
+}
+function templatePurpose(t={}){if(t._studio&&!t._studioCentral)return 'clinic';const text=`${t.id||''} ${t.title||''} ${t.short||''}`.toLowerCase(),category=inferUnifiedCategory(t,t.category);if(category==='수술시술'||/수술|시술|절제|발치|스케일링|중성화/.test(text))return 'procedure';if(category==='입원퇴원'||/퇴원|입원|회복관리/.test(text))return 'discharge';return 'education';}
+const templateBaseCategories=new Map(templates.map(t=>[t.id,inferUnifiedCategory(t,t.category)]));
 let categoryOverrides={};
 let operatorUnlocked=false;
 function categoryLabel(code='기타'){return CATEGORY_LABELS[code]||code||'기타';}
@@ -3267,10 +3275,11 @@ function categoryOptions(selected=''){return CATEGORY_CODES.map(c=>`<option valu
 function operatorHqKey(){return String(sessionStorage.getItem(OPERATOR_HQ_KEY_STORAGE)||'').trim();}
 function applyCategoryOverrides(){
   templates.forEach(t=>{
-    if(!templateBaseCategories.has(t.id))templateBaseCategories.set(t.id,t.category||'기타');
-    t.category=categoryOverrides[t.id]||templateBaseCategories.get(t.id)||t.category||'기타';
+    if(!templateBaseCategories.has(t.id))templateBaseCategories.set(t.id,inferUnifiedCategory(t,t.category));
+    t.category=inferUnifiedCategory(t,categoryOverrides[t.id]||templateBaseCategories.get(t.id)||t.category);
   });
 }
+applyCategoryOverrides();
 function applyOperatorUi(){
   document.querySelectorAll('.operator-only').forEach(el=>el.classList.toggle('hidden',!operatorUnlocked));
   const panel=$('operatorUnlockPanel');if(panel)panel.classList.toggle('hidden',!(OPERATOR_QUERY||operatorUnlocked));
@@ -3881,7 +3890,7 @@ const defaultHospital = {
   name: '', director: '', phone: '', address: '', website: '', logo: '', license: 'CS-2026-DEMO-001'
 };
 let hospital = loadHospital();
-let currentFilter = '전체';
+let currentFilter = '전체',currentPurpose='all';
 let currentTemplateId = 'pancreatitis';
 let currentOutput = 'pdf';
 let caseInfo = { patientName:'', guardianName:'', dischargeDate:'', includeNames:false, procedure:'', medication:'', feeding:'', activity:'', protection:'', extra:'', recheckMode:'14', recheckManual:'' }; // 환자별 정보와 개별 퇴원지시는 메모리에만 유지하며 저장하지 않습니다.
@@ -4061,7 +4070,7 @@ async function refreshDailyWorkflowIndicators(force=false){
   await Promise.allSettled(jobs);updateDailyWorkflowIndicators();
 }
 
-const CARESTEP_CLIENT_VERSION='10.3-B';
+const CARESTEP_CLIENT_VERSION='10.3-C';
 const CLINICAL_PROTOCOL_DEFAULTS={vaccines:{dog:{dhppl:{primary:14,booster:365},corona:{primary:14,booster:365},kennel:{primary:14,booster:365},rabies:{primary:365,booster:365},influenza:{primary:14,booster:365}},cat:{fvrcp:{primary:28,booster:365},felv:{primary:28,booster:365},rabies:{primary:365,booster:365}}},heartworm:{interval:28}};
 let clinicalProtocolState=JSON.parse(JSON.stringify(CLINICAL_PROTOCOL_DEFAULTS)),clinicalProtocolVersion=0;
 function clinicalProtocolValue(path,obj=clinicalProtocolState){const p=String(path).split('.');return p[0]==='heartworm'?obj.heartworm?.interval:obj.vaccines?.[p[0]]?.[p[1]]?.[p[2]];}
@@ -4868,8 +4877,9 @@ function renderHospitalMeta(){
 }
 
 function cardTemplate(t){
+  const purpose=templatePurpose(t);
   return `<article class="resource-card" data-title="${escapeHtml(t.title)}" data-category="${t.category}">
-    <div class="resource-top"><span class="category">${escapeHtml(categoryLabel(t.category))}</span><span class="status-live">● 사용 가능</span></div>
+    <div class="resource-top"><span><span class="purpose-badge ${escapeHtml(purpose)}">${escapeHtml(PURPOSE_LABELS[purpose])}</span><span class="category">${escapeHtml(categoryLabel(t.category))}</span></span><span class="status-live">● 사용 가능</span></div>
     <h4>${escapeHtml(templateDisplayTitle(t))}</h4>
     ${templateDisplayShort(t)?`<p>${escapeHtml(templateDisplayShort(t))}</p>`:''}
     <div class="resource-includes"><span>8–9P PDF</span><span>복약표</span><span>카톡·문자</span><span>D+1·3·7·14</span></div>
@@ -4889,6 +4899,8 @@ function renderLibrary(){
   }else{
     data=templates.filter(t=>currentFilter==='전체'||t.category===currentFilter);
   }
+  if(currentPurpose!=='all')data=data.filter(t=>templatePurpose(t)===currentPurpose);
+  const summary=`${PURPOSE_LABELS[currentPurpose]||PURPOSE_LABELS.all} · ${categoryLabel(currentFilter)}`;if($('libraryFilterSummary'))$('libraryFilterSummary').textContent=summary;if($('libraryResultMeta'))$('libraryResultMeta').textContent=`${summary} · ${data.length}개 자료`;
   $('libraryGrid').innerHTML=data.map(cardTemplate).join('') || '<div class="panel">검색 결과가 없습니다.</div>';
   bindBuilderButtons();
 }
@@ -4896,6 +4908,14 @@ function bindBuilderButtons(){document.querySelectorAll('.open-builder').forEach
 
 function templateSearchAliases(category=''){
   const map={
+    '수술시술':'수술 시술 중성화 정형외과 복강수술 치과 안과 회복',
+    '입원퇴원':'입원 퇴원 췌장염 구토 설사 요도폐색 회복 관리',
+    '만성질환':'만성 질환 신장 심장 당뇨 경련 내과 관리',
+    '예방관리':'예방 접종 백신 심장사상충 건강검진 수술전검사',
+    '재활생활':'재활 생활 체중 운동 노령 인지 보행',
+    '종양중증':'종양 중증 항암 수술 완화 관리',
+    '고양이특화':'고양이 FIC FLUTD 전발치 백혈병 요도폐색',
+    '병원제작':'병원 직접 제작 커스텀',
     '수술':'수술 회복 수술후 수술 후 퇴원',
     '내과':'내과 만성질환 만성 질환 관리',
     '안과':'안과 눈 안구 결막 각막 눈물 시력',
@@ -7995,7 +8015,7 @@ function renderServerFollowupState(){const el=$('followupServerState');if(!el)re
 async function saveServerFollowupState(extra={},silent=true){const payload=serverFollowupCorePayload(extra);if(!payload.patientId||!payload.startDate||saasMode!=='auth'||!saasToken){renderServerFollowupState();return null;}serverFollowupStateStatus='saving';renderServerFollowupState();try{if(serverFollowupState)await acquireMultiStaffLock('followup_case',followupCaseNonce,silent);const d=await saasRequest(`/saas/followup/cases/${encodeURIComponent(followupCaseNonce)}`,{method:'PUT',body:JSON.stringify(payload)});serverFollowupState=d.case||null;if(serverFollowupState?.calendar?.provider){const cal=serverFollowupState.calendar,days=Object.keys(cal.events||{}).map(Number).filter(Boolean);writeFollowupCalendarSyncState({provider:cal.provider,calendarId:cal.calendarId||'',calendarName:cal.calendarName||'',days});if(cal.provider==='outlook'){const om=outlookFollowupEventMap();sessionStorage.setItem(om.key,JSON.stringify(cal.events||{}));}}serverFollowupStateStatus=serverFollowupState?.operation?.status==='partial'?'error':'saved';renderServerFollowupState();await loadFollowupSafety(true);return serverFollowupState;}catch(e){serverFollowupStateStatus='error';renderServerFollowupState();if(!silent)toast(e.message||'서버 통합 상태를 저장하지 못했습니다.');return null;}}
 async function loadServerFollowupState(silent=true){const linked=window.crmCurrentPatient?.()||{};if(!linked.patientId||saasMode!=='auth'||!saasToken){serverFollowupState=null;followupSafetyState=null;renderServerFollowupState();renderFollowupSafety();return null;}try{const d=await saasRequest(`/saas/followup/cases/${encodeURIComponent(followupCaseNonce)}`,{method:'GET'});serverFollowupState=d.case||null;if(serverFollowupState?.calendar?.provider){const cal=serverFollowupState.calendar,days=Object.keys(cal.events||{}).map(Number).filter(Boolean);writeFollowupCalendarSyncState({provider:cal.provider,calendarId:cal.calendarId||'',calendarName:cal.calendarName||'',days});if(cal.provider==='outlook'){const om=outlookFollowupEventMap();sessionStorage.setItem(om.key,JSON.stringify(cal.events||{}));}}serverFollowupStateStatus=serverFollowupState?.operation?.status==='partial'?'error':'saved';renderServerFollowupState();await loadFollowupSafety(true);return serverFollowupState;}catch(e){if(/찾지 못했습니다/.test(String(e?.message||''))){serverFollowupState=null;followupSafetyState=null;serverFollowupStateStatus='idle';renderServerFollowupState();renderFollowupSafety();return null;}serverFollowupStateStatus='error';renderServerFollowupState();if(!silent)toast(e.message||'서버 통합 상태를 불러오지 못했습니다.');return null;}}
 function queueServerFollowupState(extra={}){if(serverFollowupStateTimer)clearTimeout(serverFollowupStateTimer);serverFollowupStateTimer=setTimeout(()=>{serverFollowupStateTimer=null;saveServerFollowupState(extra,true);},500);}
-/* ================= v10.3-B · DELIVERY RECOVERY CENTER ================= */
+/* ================= v10.3-C · DELIVERY RECOVERY CENTER ================= */
 function unifiedHomeStagesPayload(){return followupSelectedStages().map(day=>{const d=followupStageData(day);return {day,title:d.title||`D+${day} 후속관리`,message:followupStageMessage(day,'kakao'),card:{journey:currentJourneyLabel(),focus:d.focus||'',checks:(d.items||[]).slice(0,6),redFlags:(d.redFlags||[]).slice(0,4),recheck:caseInfo.recheckMode?recheckLabel():'',hospitalPhone:hospital.phone||''}};});}
 function unifiedFollowupHasDelivery(){const x=serverFollowupState;if(!x)return false;return Number(x.home?.total)>0||Number(x.messages?.scheduled)>0||['synced','pending','reconnect','failed'].includes(x.calendar?.status);}
 async function completeUnifiedFollowupOperation(id,payload){if(!id)return null;const d=await saasRequest(`/saas/followup/change-ops/${encodeURIComponent(id)}/complete`,{method:'POST',body:JSON.stringify(payload||{})});serverFollowupState=d.case||serverFollowupState;serverFollowupStateStatus=d.operation?.status==='partial'?'error':'saved';renderServerFollowupState();return d;}
@@ -8012,7 +8032,7 @@ function followupCalendarDescription(day){return `${followupStageMessage(day,'ka
 async function ensureGoogleCalendarToken(forcePrompt=false){if(!calendarIntegrationConfig.googleClientId)throw new Error('HQ에서 Google OAuth Client ID를 먼저 설정해주세요.');if(googleCalendarToken.accessToken&&googleCalendarToken.expiresAt>Date.now()+60000&&!forcePrompt)return googleCalendarToken.accessToken;await loadExternalScript('https://accounts.google.com/gsi/client',()=>!!window.google?.accounts?.oauth2);return new Promise((resolve,reject)=>{try{googleCalendarTokenClient=google.accounts.oauth2.initTokenClient({client_id:calendarIntegrationConfig.googleClientId,scope:'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.calendarlist.readonly https://www.googleapis.com/auth/calendar.app.created',callback:(resp)=>{if(resp?.error){reject(new Error(resp.error_description||resp.error));return;}if(!resp?.access_token){reject(new Error('Google Calendar 권한을 받지 못했습니다.'));return;}googleCalendarToken={accessToken:resp.access_token,expiresAt:Date.now()+(Number(resp.expires_in)||3600)*1000};renderCalendarIntegrationStatus();renderGoogleCalendarPicker();resolve(resp.access_token);},error_callback:(err)=>reject(new Error(err?.message||'Google 로그인 창이 닫혔거나 인증에 실패했습니다.'))});googleCalendarTokenClient.requestAccessToken({prompt:forcePrompt?'consent':''});}catch(e){reject(e);}});}
 async function connectGoogleCalendar(){try{await ensureGoogleCalendarToken(true);await loadGoogleCalendarList(false);$('calendarSyncResult').textContent=`Google Calendar 연결 완료 · ${selectedGoogleCalendarName()}에 이후 환자 일정이 자동 등록됩니다.`;toast('Google Calendar가 연결되었습니다. 이후 환자는 자동 등록됩니다.');await loadGoogleFollowupWorkboard(false);const pending=readFollowupCalendarSyncState(),guide=readFollowupGuideState();if(pending.provider==='google'&&pending.days.length&&!guide.calendarDone)await syncGoogleFollowup({auto:true,advance:false,reason:'reconnected'});else if(followupGuideStep===3)await maybeAutoSyncFollowupCalendar();}catch(e){$('calendarSyncResult').textContent=e.message;toast(e.message);}}
 async function deleteGoogleFollowupEvent(token,day,calendarId=selectedGoogleCalendarId()){const url=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId||'primary')}/events/${encodeURIComponent(googleFollowupEventId(day))}`;const r=await fetch(url,{method:'DELETE',headers:{Authorization:`Bearer ${token}`}});if(!r.ok&&r.status!==404&&r.status!==410){let d={};try{d=await r.json()}catch{}throw new Error(d?.error?.message||`Google Calendar 삭제 HTTP ${r.status}`);}return true;}
-async function upsertGoogleFollowupEvent(token,day,calendarId=selectedGoogleCalendarId()){const p=followupCalendarDateParts(day);if(!p)throw new Error('관리 시작일을 확인해주세요.');const eventId=googleFollowupEventId(day),base=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,privateProps={carestep:'followup',carestep_case:String(followupCaseNonce),carestep_day:String(day),carestep_status:'pending',carestep_version:'10.3-B',carestep_journey:activePatientJourney?.id||''},body={id:eventId,summary:followupCalendarSummary(day),description:followupCalendarDescription(day),start:{dateTime:p.googleStart,timeZone:'Asia/Seoul'},end:{dateTime:p.googleEnd,timeZone:'Asia/Seoul'},reminders:{useDefault:false,overrides:[{method:'popup',minutes:Math.max(0,Number(followupSettings().alarmMinutes)||0)}]},extendedProperties:{private:privateProps}};let r=await fetch(base,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify(body)});if(r.status===409){let existing={};try{const er=await fetch(`${base}/${encodeURIComponent(eventId)}`,{headers:{Authorization:`Bearer ${token}`}});if(er.ok)existing=await er.json();}catch{}const ep=existing?.extendedProperties?.private||{};body.extendedProperties.private={...privateProps,...ep,carestep:'followup',carestep_case:String(followupCaseNonce),carestep_day:String(day),carestep_version:'10.3-B',carestep_journey:activePatientJourney?.id||'',carestep_status:ep.carestep_status||'pending'};r=await fetch(`${base}/${encodeURIComponent(eventId)}`,{method:'PUT',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify(body)});}let data={};try{data=await r.json()}catch{}if(!r.ok)throw new Error(data?.error?.message||`Google Calendar HTTP ${r.status}`);return data;}
+async function upsertGoogleFollowupEvent(token,day,calendarId=selectedGoogleCalendarId()){const p=followupCalendarDateParts(day);if(!p)throw new Error('관리 시작일을 확인해주세요.');const eventId=googleFollowupEventId(day),base=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,privateProps={carestep:'followup',carestep_case:String(followupCaseNonce),carestep_day:String(day),carestep_status:'pending',carestep_version:'10.3-C',carestep_journey:activePatientJourney?.id||''},body={id:eventId,summary:followupCalendarSummary(day),description:followupCalendarDescription(day),start:{dateTime:p.googleStart,timeZone:'Asia/Seoul'},end:{dateTime:p.googleEnd,timeZone:'Asia/Seoul'},reminders:{useDefault:false,overrides:[{method:'popup',minutes:Math.max(0,Number(followupSettings().alarmMinutes)||0)}]},extendedProperties:{private:privateProps}};let r=await fetch(base,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify(body)});if(r.status===409){let existing={};try{const er=await fetch(`${base}/${encodeURIComponent(eventId)}`,{headers:{Authorization:`Bearer ${token}`}});if(er.ok)existing=await er.json();}catch{}const ep=existing?.extendedProperties?.private||{};body.extendedProperties.private={...privateProps,...ep,carestep:'followup',carestep_case:String(followupCaseNonce),carestep_day:String(day),carestep_version:'10.3-C',carestep_journey:activePatientJourney?.id||'',carestep_status:ep.carestep_status||'pending'};r=await fetch(`${base}/${encodeURIComponent(eventId)}`,{method:'PUT',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify(body)});}let data={};try{data=await r.json()}catch{}if(!r.ok)throw new Error(data?.error?.message||`Google Calendar HTTP ${r.status}`);return data;}
 async function syncGoogleFollowup(options={}){const auto=!!options.auto,advance=options.advance!==false;if(!followupCalendarSyncReady()){if(!auto)toast('로그인·관리 시작일·후속관리 단계를 먼저 확인해주세요.');return false;}const btn=$('syncGoogleCalendar'),old=btn?.textContent;try{followupCalendarAutoStatus=auto?'syncing':followupCalendarAutoStatus;if(btn){btn.disabled=true;btn.textContent=auto?'자동 동기화 중…':'동기화 중…';}readCaseInfoFromForm();const token=await ensureGoogleCalendarToken(false),stages=followupCalendarStages(),currentCalendarId=selectedGoogleCalendarId(),previous=readFollowupCalendarSyncState(),oldDays=previous.provider==='google'?previous.days:[],oldCalendarId=previous.calendarId||currentCalendarId,removed=oldDays.filter(day=>oldCalendarId!==currentCalendarId||!stages.includes(day));let switchedRemoved=0;if(previous.provider==='outlook'&&previous.days.length){const outlookToken=await microsoftAccessToken(false);for(const day of previous.days)await deleteOutlookFollowupEvent(outlookToken,day);switchedRemoved=previous.days.length;}for(const day of removed)await deleteGoogleFollowupEvent(token,day,oldCalendarId);for(const day of stages)await upsertGoogleFollowupEvent(token,day,currentCalendarId);writeFollowupCalendarSyncState({provider:'google',calendarId:currentCalendarId,calendarName:selectedGoogleCalendarName(),days:stages});await saveServerFollowupState({calendar:{provider:'google',calendarId:currentCalendarId,calendarName:selectedGoogleCalendarName(),status:'synced',events:serverCalendarEventMap('google'),error:''}},true);const removedCount=removed.length+switchedRemoved;followupCalendarAutoStatus='success';$('calendarSyncResult').textContent=`✓ ${selectedGoogleCalendarName()} 동기화 완료 · ${stages.length}건 유지${removedCount?` · ${removedCount}건 취소`:''}`;saasRecordUsageEvent('calendar_direct_sync',activePatientJourney?`journey:${activePatientJourney.id}`:currentTemplateId,{provider:'google',mode:auto?'automatic':'manual',eventCount:stages.length,removedCount,reason:options.reason||'',journeyId:activePatientJourney?.id||''});toast(`${selectedGoogleCalendarName()} 일정을 동기화했습니다.${removedCount?` 이전·제외 일정 ${removedCount}건은 취소했습니다.`:''}`);markFollowupGuideCalendar(true);await loadGoogleFollowupWorkboard(false);if(advance)setFollowupGuideStep(4,true);return true;}catch(e){followupCalendarAutoStatus='error';const failedState=readFollowupCalendarSyncState(),failedProvider=btn?.id==='syncOutlookCalendar'?'outlook':failedState.provider||'google';await saveServerFollowupState({calendar:{provider:failedProvider,calendarId:failedState.calendarId,calendarName:failedState.calendarName,status:'failed',events:serverCalendarEventMap(failedProvider),error:String(e.message||'calendar sync failed').slice(0,500)}},true);$('calendarSyncResult').textContent=`자동 동기화 실패 · 다시 등록·갱신을 눌러주세요: ${e.message}`;toast(auto?'캘린더 자동 동기화에 실패했습니다. 다시 등록·갱신을 눌러주세요.':e.message);return false;}finally{if(btn){btn.disabled=false;btn.textContent=old||'다시 등록·갱신';}renderCalendarIntegrationStatus();}}
 async function ensureMicrosoftCalendarApp(){if(!calendarIntegrationConfig.microsoftClientId)throw new Error('HQ에서 Microsoft Application Client ID를 먼저 설정해주세요.');await loadExternalScript('https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js',()=>!!window.msal?.PublicClientApplication);const tenant=calendarIntegrationConfig.microsoftTenant||'common';if(!microsoftCalendarApp){microsoftCalendarApp=new msal.PublicClientApplication({auth:{clientId:calendarIntegrationConfig.microsoftClientId,authority:`https://login.microsoftonline.com/${encodeURIComponent(tenant)}`,redirectUri:calendarAppRedirectUri()},cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false}});const accounts=microsoftCalendarApp.getAllAccounts();microsoftCalendarAccount=accounts[0]||null;}return microsoftCalendarApp;}
 async function microsoftAccessToken(interactive=true){const app=await ensureMicrosoftCalendarApp(),scopes=['Calendars.ReadWrite'];if(!microsoftCalendarAccount&&interactive){const login=await app.loginPopup({scopes,prompt:'select_account'});microsoftCalendarAccount=login.account||null;}if(!microsoftCalendarAccount)throw new Error('Outlook 계정을 먼저 연결해주세요.');try{return (await app.acquireTokenSilent({scopes,account:microsoftCalendarAccount})).accessToken;}catch(e){if(!interactive)throw e;const out=await app.acquireTokenPopup({scopes,account:microsoftCalendarAccount});return out.accessToken;}}
@@ -8362,7 +8382,7 @@ function setFollowupGuideStep(n,force=false){
   if(n===3)setTimeout(()=>maybeAutoSyncFollowupCalendar(),0);
 }
 function setFollowupGuideMode(mode){followupGuideMode=mode==='operation'?'operation':'setup';renderFollowupGuide();}
- function initFollowupGuidedLayout(){const root=$('followup');if(!root||$('followupGuideShell'))return;const initialGuideState=readFollowupGuideState();followupGuideStep=initialGuideState.step||1;followupGuideMode='setup';const plan=$('followupPlanLock'),journey=$('patientJourneyPanel'),grid=root.querySelector('.followup-grid'),messaging=root.querySelector('.followup-messaging'),workboard=root.querySelector('.followup-workboard'),crm=$('followupCrmPanel'),survey=root.querySelector('.guardian-survey-panel'),analytics=root.querySelector('.followup-analytics');if(!plan||!journey||!grid||!messaging)return;const shell=document.createElement('div');shell.id='followupGuideShell';shell.className='followup-guide-shell';shell.innerHTML=`<div class="followup-guide-top"><div><p class="eyebrow">GUIDED FOLLOW-UP WORKFLOW · v10.3-B</p><h3>위에서 아래로 따라가는 후속관리 설정</h3><p>환자정보 확인 → Journey 적용 → 캘린더 자동 등록 → 선택 문자 → 최종 확인 순서로 진행합니다. Home 연결 환자는 완료 시 앱에 D+ 관리가 자동 등록됩니다.</p></div><div class="followup-guide-mode-tabs"><button id="followupGuideSetupMode" class="followup-guide-mode active" type="button">설정 가이드</button><button id="followupGuideOperationMode" class="followup-guide-mode" type="button">운영 대시보드</button></div></div><div id="followupGuideStepper" class="followup-guide-stepper"></div><div id="followupGuideNav" class="followup-guide-nav"><div class="followup-guide-nav-left"><button id="followupGuideBack" class="btn btn-secondary" type="button">← 이전</button><span id="followupGuideStatus" class="followup-guide-status"></span></div><div class="followup-guide-nav-right"><button id="followupGuideSkip" class="btn btn-ghost hidden" type="button"></button><button id="followupGuideNext" class="btn btn-primary guide-primary-next" type="button">다음 →</button></div></div><div class="followup-guide-content"><section id="followupGuideStep1Body" class="followup-guide-body"></section><section id="followupGuideStep2Body" class="followup-guide-body"></section><section id="followupGuideStep3Body" class="followup-guide-body"></section><section id="followupGuideStep4Body" class="followup-guide-body"></section><section id="followupGuideStep5Body" class="followup-guide-body"></section></div>`;plan.insertAdjacentElement('afterend',shell);
+ function initFollowupGuidedLayout(){const root=$('followup');if(!root||$('followupGuideShell'))return;const initialGuideState=readFollowupGuideState();followupGuideStep=initialGuideState.step||1;followupGuideMode='setup';const plan=$('followupPlanLock'),journey=$('patientJourneyPanel'),grid=root.querySelector('.followup-grid'),messaging=root.querySelector('.followup-messaging'),workboard=root.querySelector('.followup-workboard'),crm=$('followupCrmPanel'),survey=root.querySelector('.guardian-survey-panel'),analytics=root.querySelector('.followup-analytics');if(!plan||!journey||!grid||!messaging)return;const shell=document.createElement('div');shell.id='followupGuideShell';shell.className='followup-guide-shell';shell.innerHTML=`<div class="followup-guide-top"><div><p class="eyebrow">GUIDED FOLLOW-UP WORKFLOW · v10.3-C</p><h3>위에서 아래로 따라가는 후속관리 설정</h3><p>환자정보 확인 → Journey 적용 → 캘린더 자동 등록 → 선택 문자 → 최종 확인 순서로 진행합니다. Home 연결 환자는 완료 시 앱에 D+ 관리가 자동 등록됩니다.</p></div><div class="followup-guide-mode-tabs"><button id="followupGuideSetupMode" class="followup-guide-mode active" type="button">설정 가이드</button><button id="followupGuideOperationMode" class="followup-guide-mode" type="button">운영 대시보드</button></div></div><div id="followupGuideStepper" class="followup-guide-stepper"></div><div id="followupGuideNav" class="followup-guide-nav"><div class="followup-guide-nav-left"><button id="followupGuideBack" class="btn btn-secondary" type="button">← 이전</button><span id="followupGuideStatus" class="followup-guide-status"></span></div><div class="followup-guide-nav-right"><button id="followupGuideSkip" class="btn btn-ghost hidden" type="button"></button><button id="followupGuideNext" class="btn btn-primary guide-primary-next" type="button">다음 →</button></div></div><div class="followup-guide-content"><section id="followupGuideStep1Body" class="followup-guide-body"></section><section id="followupGuideStep2Body" class="followup-guide-body"></section><section id="followupGuideStep3Body" class="followup-guide-body"></section><section id="followupGuideStep4Body" class="followup-guide-body"></section><section id="followupGuideStep5Body" class="followup-guide-body"></section></div>`;plan.insertAdjacentElement('afterend',shell);
  const operation=document.createElement('div');operation.id='followupOperationShell';operation.className='followup-operation-shell';operation.innerHTML=`<div class="followup-operation-overview"><div class="followup-operation-head"><div><p class="eyebrow">DAILY FOLLOW-UP OPERATIONS · v9.0</p><h3>오늘 필요한 후속관리만 확인</h3><p>설정이 끝난 뒤에는 오늘 업무, 확인 필요한 보호자 응답, 발송 실패, CRM 검토 대상을 중심으로 운영합니다.</p></div><button id="followupOperationBackToSetup" class="btn btn-secondary" type="button">현재 케이스 설정 보기</button></div><div class="followup-operation-kpis"><div class="followup-operation-kpi"><span>오늘 업무</span><b id="guideOpToday">0</b></div><div class="followup-operation-kpi alert"><span>확인 필요</span><b id="guideOpAttention">0</b></div><div class="followup-operation-kpi"><span>예약/처리중 문자</span><b id="guideOpMessages">0</b></div><div class="followup-operation-kpi"><span>활성 CRM</span><b id="guideOpCrm">0</b></div></div></div>`;shell.insertAdjacentElement('afterend',operation);
  $('followupGuideStep2Body').appendChild(journey);$('followupGuideStep3Body').appendChild(grid);$('followupGuideStep4Body').appendChild(messaging);[workboard,crm,survey,analytics].filter(Boolean).forEach(x=>operation.appendChild(x));
  $('followupGuideSetupMode')?.addEventListener('click',()=>setFollowupGuideMode('setup'));$('followupGuideOperationMode')?.addEventListener('click',()=>setFollowupGuideMode('operation'));$('followupOperationBackToSetup')?.addEventListener('click',()=>setFollowupGuideMode('setup'));
@@ -8734,6 +8754,7 @@ $('navManageToggle')?.addEventListener('click',toggleManageNav);
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
 $('searchInput').addEventListener('input',renderLibrary);
 document.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active')); b.classList.add('active'); currentFilter=b.dataset.filter; renderLibrary();}));
+document.querySelectorAll('[data-purpose]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-purpose]').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentPurpose=b.dataset.purpose||'all';renderLibrary();}));
 $('templateSelect').addEventListener('change',e=>switchCaseTemplate(e.target.value,{preserveIdentity:true,notify:true}));
 $('templateSearch')?.addEventListener('input',renderTemplateSearch);
 $('templateSearch')?.addEventListener('focus',renderTemplateSearch);
@@ -9385,8 +9406,8 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
 <script src="patient-breeds.js?v=9.5.3"></script>
-<script src="patient-crm.js?v=10.3-B"></script>
-<script src="patient-timeline.js?v=10.3-B"></script>
+<script src="patient-crm.js?v=10.3-C"></script>
+<script src="patient-timeline.js?v=10.3-C"></script>
 <script src="date-input-guard.js?v=9.5.3"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
 <!-- CARESTEP v9.1 · SOLAPI OAuth2 clinic-account messaging -->
@@ -9395,6 +9416,6 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <!-- CARESTEP v9.5.1 · species-specific vaccine/dose selectors · automatic due dates -->
 <!-- CARESTEP v9.5.2 · status shown only for recheck and Journey records -->
 <!-- CARESTEP v9.5.3 · multiple vaccines per visit · grouped timeline display -->
-<!-- CARESTEP v10.3-B · Clinical Protocol Settings -->
+<!-- CARESTEP v10.3-C · Clinical Protocol Settings -->
 </body>
 </html>
