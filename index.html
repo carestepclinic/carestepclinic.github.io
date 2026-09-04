@@ -6,8 +6,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>CARESTEP Clinic v10.1-H · Partner Clinical API</title>
-  <meta name="carestep-build" content="v10.1-H-partner-clinical-api" />
+  <title>CARESTEP Clinic v10.1-I · Guardian Response Correction</title>
+  <meta name="carestep-build" content="v10.1-I-guardian-response-correction" />
   <meta name="description" content="동물병원 보호자 교육자료 라이브러리 및 병원 맞춤 PDF 생성 MVP" />
   <style>
 :root {
@@ -866,7 +866,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
 @media(max-width:600px){.schedule-board{padding:14px}.schedule-board-head{display:block}.schedule-board-head .btn{margin-top:10px;width:100%}.schedule-board-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.schedule-board-row{grid-template-columns:1fr}.schedule-board-main>b,.schedule-board-main>span{white-space:normal}.schedule-board-filters{width:100%}.schedule-board-filters .input{flex:1;min-width:0}.care-inbox-head{display:block}.care-inbox-filters{margin-top:8px}.care-inbox-row{grid-template-columns:1fr}.care-inbox-actions .btn{flex:1}}
 </style>
 
-  <link rel="stylesheet" href="patient-crm.css?v=10.1-H" />
+  <link rel="stylesheet" href="patient-crm.css?v=10.1-I" />
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -897,7 +897,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
   <section id="loginView" class="login-shell">
     <div class="login-card saas-login-card">
       <div class="brand-mark">CS</div>
-      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.1-H · PARTNER CLINICAL API</p>
+      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.1-I · RESPONSE CORRECTION</p>
       <h1>CARESTEP Clinic</h1>
       <p class="login-copy">병원별 계정과 직원 권한으로 CARESTEP을 시작합니다.</p>
 
@@ -1018,7 +1018,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
     <main class="main">
       <header class="topbar">
         <div>
-          <p class="eyebrow">CARESTEP Clinic · v10.1-H · PARTNER CLINICAL API</p>
+          <p class="eyebrow">CARESTEP Clinic · v10.1-I · RESPONSE CORRECTION</p>
           <h2 id="viewTitle">대시보드</h2>
         </div>
         <div class="topbar-actions">
@@ -1085,7 +1085,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
             <div class="schedule-board-kpi"><span>오늘 일정</span><b id="scheduleTodayCount">0</b></div>
             <div class="schedule-board-kpi"><span>예정</span><b id="scheduleUpcomingCount">0</b></div>
             <div class="schedule-board-kpi"><span>전송·열람</span><b id="scheduleDeliveredCount">0</b></div>
-            <div class="schedule-board-kpi"><span>응답 완료</span><b id="scheduleCompletedCount">0</b></div>
+            <div class="schedule-board-kpi"><span>보호자 응답 완료</span><b id="scheduleCompletedCount">0</b></div>
             <div class="schedule-board-kpi alert"><span>확인 필요</span><b id="scheduleAttentionCount">0</b></div>
           </div>
           <div class="schedule-board-toolbar">
@@ -3988,7 +3988,7 @@ let followupScheduleRows=[],careOperationsActions=[],careAutomationRuns=[],follo
 function scheduleIsoShift(iso,days){const d=new Date(String(iso||'')+'T00:00:00Z');if(Number.isNaN(d.getTime()))return '';d.setUTCDate(d.getUTCDate()+Number(days||0));return d.toISOString().slice(0,10);}
 function scheduleBoardQueryRange(){const today=localTodayIso(),d=new Date(today+'T00:00:00Z'),from=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),1)).toISOString().slice(0,10),to=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+2,0)).toISOString().slice(0,10);return {today,from,to};}
 function scheduleBoardPeriodRows(){const {today}=scheduleBoardQueryRange(),month=today.slice(0,7),weekEnd=scheduleIsoShift(today,6);if(followupScheduleView==='today')return followupScheduleRows.filter(x=>x.dueDate===today);if(followupScheduleView==='month')return followupScheduleRows.filter(x=>String(x.dueDate||'').startsWith(month));return followupScheduleRows.filter(x=>x.dueDate>=today&&x.dueDate<=weekEnd);}
-function scheduleBoardStatusLabel(status){return ({scheduled:'예정',sent:'푸시 전송',seen:'보호자 열람',completed:'응답 완료',attention:'병원 상담 필요',failed:'푸시 실패',overdue:'기한 경과'})[status]||'예정';}
+function scheduleBoardStatusLabel(status){return ({scheduled:'예정',sent:'푸시 전송',seen:'보호자 열람',completed:'보호자 응답 완료',attention:'병원 상담 필요',failed:'푸시 실패',overdue:'기한 경과'})[status]||'예정';}
 function scheduleBoardChannelLabel(channel){return ({home:'HOME',mms:'MMS',sms:'LMS',kakao:'알림톡',vaccination:'접종',heartworm:'사상충',visit:'병원 진료'})[channel]||String(channel||'').toUpperCase();}
 function scheduleBoardRowsFiltered(){return scheduleBoardPeriodRows().filter(x=>followupScheduleStatus==='all'||x.operationalStatus===followupScheduleStatus).filter(x=>followupScheduleChannel==='all'||x.sourceChannel===followupScheduleChannel||x.external?.channel===followupScheduleChannel);}
 function scheduleBoardDateLabel(iso){const d=new Date(String(iso||'')+'T00:00:00Z');if(Number.isNaN(d.getTime()))return iso||'-';return d.toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short',timeZone:'UTC'});}
@@ -9217,7 +9217,7 @@ carestepSafeCall('boot_messaging_refresh',()=>startMessagingAutoRefresh());
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
 <script src="patient-breeds.js?v=9.5.3"></script>
-<script src="patient-crm.js?v=10.1-H"></script>
+<script src="patient-crm.js?v=10.1-I"></script>
 <script src="patient-timeline.js?v=10.0-D"></script>
 <script src="date-input-guard.js?v=9.5.3"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
@@ -9227,6 +9227,6 @@ carestepSafeCall('boot_messaging_refresh',()=>startMessagingAutoRefresh());
 <!-- CARESTEP v9.5.1 · species-specific vaccine/dose selectors · automatic due dates -->
 <!-- CARESTEP v9.5.2 · status shown only for recheck and Journey records -->
 <!-- CARESTEP v9.5.3 · multiple vaccines per visit · grouped timeline display -->
-<!-- CARESTEP v10.1-H · Partner Clinical API -->
+<!-- CARESTEP v10.1-I · Guardian Response Correction -->
 </body>
 </html>
