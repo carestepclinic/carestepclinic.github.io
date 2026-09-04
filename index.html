@@ -6,8 +6,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>CARESTEP Clinic v10.1-F · Preventive Recall Center</title>
-  <meta name="carestep-build" content="v10.1-F-preventive-recall-center" />
+  <title>CARESTEP Clinic v10.1-G · Home Consultation Reply</title>
+  <meta name="carestep-build" content="v10.1-G-home-consultation-reply" />
   <meta name="description" content="동물병원 보호자 교육자료 라이브러리 및 병원 맞춤 PDF 생성 MVP" />
   <style>
 :root {
@@ -861,11 +861,12 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
 .schedule-board-list{display:grid;gap:8px}.schedule-board-row{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:12px;align-items:center;border:1px solid #e1e7ef;border-radius:13px;padding:11px 12px;background:#fff}.schedule-board-row.today{border-color:#b9ccff;background:#f8fbff}.schedule-board-row.attention,.schedule-board-row.failed{border-color:#efc9c2;background:#fffafa}.schedule-board-when b{display:block;font-size:12px;color:#26354c}.schedule-board-when span{display:block;margin-top:3px;font-size:10px;color:#778398}.schedule-board-main{min-width:0}.schedule-board-main>b{display:block;font-size:13px;color:#26354c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.schedule-board-main>span{display:block;margin-top:4px;font-size:10.5px;color:#718096;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.schedule-board-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.schedule-badge{display:inline-flex;align-items:center;border-radius:999px;background:#eef3fa;color:#56657b;padding:4px 7px;font-size:9.5px;font-weight:850}.schedule-badge.home{background:#e8f0ff;color:#1e57d8}.schedule-badge.mms{background:#efeaff;color:#6740c2}.schedule-badge.lms{background:#fff0dd;color:#a76000}.schedule-badge.kakao{background:#fff5c7;color:#795e00}.schedule-badge.done{background:#e5f6ed;color:#19704d}.schedule-badge.warn{background:#ffe9e4;color:#aa352a}.schedule-board-row .btn{font-size:10.5px;padding:8px 10px}.schedule-board-empty{padding:24px 16px;border:1px dashed #d9e2ef;border-radius:13px;text-align:center;color:#748197;font-size:11px;line-height:1.6}.schedule-board-loading{opacity:.65;pointer-events:none}
 .care-automation-status{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0;padding:10px 12px;border-radius:12px;background:#f6f8fc;color:#647188;font-size:10.5px}.care-automation-status .ok{color:#19704d}.care-automation-status .bad{color:#b33e32}.care-operations-inbox{display:grid;gap:7px;margin:0 0 14px}.care-inbox-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid #efc9c2;background:#fffafa;border-radius:12px;padding:10px 12px}.care-inbox-row b{display:block;font-size:12px;color:#8e3028}.care-inbox-row span{display:block;margin-top:3px;font-size:10px;color:#727f93}.care-inbox-actions{display:flex;gap:6px;flex-wrap:wrap}.schedule-badge.vaccination{background:#e7f5ed;color:#166b48}.schedule-badge.heartworm{background:#fff1df;color:#9b5a00}.schedule-badge.visit{background:#e9f0ff;color:#2558b8}
 .care-inbox-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:14px 0 8px}.care-inbox-head b{display:block;font-size:13px;color:#27364d}.care-inbox-head>div>span{display:block;margin-top:3px;color:#768398;font-size:10px}.care-inbox-filters{display:flex;gap:5px;flex-wrap:wrap}.care-inbox-filter{border:1px solid #dce4ef;background:#fff;color:#59677c;border-radius:999px;padding:6px 9px;font:inherit;font-size:9.5px;font-weight:850;cursor:pointer}.care-inbox-filter.active{border-color:#1f5eff;background:#1f5eff;color:#fff}.care-inbox-filter em{font-style:normal;opacity:.8}.care-inbox-row.priority-urgent{border-left:4px solid #c83e32}.care-inbox-row.priority-high{border-left:4px solid #e58a16}.care-inbox-meta{display:flex!important;gap:5px;align-items:center;flex-wrap:wrap}.care-priority,.care-sla,.care-source{display:inline-flex!important;margin:0!important;border-radius:999px;padding:3px 6px;font-size:8.5px!important;font-weight:900}.care-priority.urgent,.care-sla.breached{background:#ffe3df;color:#a93128}.care-priority.high{background:#fff0d8;color:#9a5b00}.care-priority.normal{background:#edf2f8;color:#5e6d82}.care-sla{background:#eef4ff;color:#2856a8}.care-source.vaccination{background:#e7f5ed;color:#166b48}.care-source.heartworm{background:#fff1df;color:#9b5a00}.care-inbox-row .btn[data-care-snooze],.care-inbox-row .btn[data-preventive-snooze]{background:#fff9ec;border-color:#ecdcae;color:#7d601d}
+.care-consult-dialog{width:min(620px,calc(100% - 24px));max-height:90vh;padding:0;border:0;border-radius:20px;background:#fff;box-shadow:0 24px 80px rgba(13,25,49,.28)}.care-consult-dialog::backdrop{background:rgba(12,22,40,.62)}.care-consult-card{display:flex;flex-direction:column;max-height:90vh}.care-consult-head{display:flex;justify-content:space-between;gap:14px;padding:18px 20px;border-bottom:1px solid #e6ebf2}.care-consult-head h3{margin:2px 0 4px;font-size:18px}.care-consult-head p{margin:0;color:#6e7c91;font-size:10px}.care-consult-close{width:34px;height:34px;border:0;border-radius:10px;background:#eff3f8;color:#657389;font-size:20px}.care-consult-thread{display:grid;gap:9px;min-height:150px;max-height:330px;overflow:auto;padding:16px 20px;background:#f6f8fc}.care-consult-message{max-width:82%;padding:10px 12px;border-radius:13px 13px 13px 3px;background:#fff;border:1px solid #e0e6ef}.care-consult-message.clinic{justify-self:end;border-color:#c9d9fb;border-radius:13px 13px 3px 13px;background:#eaf1ff}.care-consult-message b,.care-consult-message span,.care-consult-message small{display:block}.care-consult-message b{font-size:9px;color:#53657d}.care-consult-message span{margin-top:4px;font-size:11px;line-height:1.6;white-space:pre-wrap}.care-consult-message small{margin-top:5px;color:#8995a7;font-size:8px}.care-consult-compose{padding:16px 20px}.care-consult-compose label>b{display:block;margin-bottom:7px;font-size:10px}.care-consult-compose textarea{width:100%;min-height:100px;padding:12px;border:1px solid #d8e0ec;border-radius:12px;font:inherit;font-size:11px;line-height:1.55;resize:vertical}.care-consult-options{display:flex;align-items:flex-start;gap:7px;margin-top:9px;color:#586980;font-size:9px}.care-consult-status{min-height:18px;margin-top:7px;color:#b33e32;font-size:9px}.care-consult-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}@media(max-width:600px){.care-consult-thread{padding:13px}.care-consult-compose{padding:14px}.care-consult-message{max-width:92%}}
 @media(max-width:900px){.schedule-board-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.schedule-board-toolbar{align-items:flex-start;flex-direction:column}.schedule-board-row{grid-template-columns:76px minmax(0,1fr)}.schedule-board-row>.btn{grid-column:1/-1;width:100%}}
 @media(max-width:600px){.schedule-board{padding:14px}.schedule-board-head{display:block}.schedule-board-head .btn{margin-top:10px;width:100%}.schedule-board-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.schedule-board-row{grid-template-columns:1fr}.schedule-board-main>b,.schedule-board-main>span{white-space:normal}.schedule-board-filters{width:100%}.schedule-board-filters .input{flex:1;min-width:0}.care-inbox-head{display:block}.care-inbox-filters{margin-top:8px}.care-inbox-row{grid-template-columns:1fr}.care-inbox-actions .btn{flex:1}}
 </style>
 
-  <link rel="stylesheet" href="patient-crm.css?v=10.1-F" />
+  <link rel="stylesheet" href="patient-crm.css?v=10.1-G" />
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -896,7 +897,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
   <section id="loginView" class="login-shell">
     <div class="login-card saas-login-card">
       <div class="brand-mark">CS</div>
-      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.1-F · PREVENTIVE RECALL CENTER</p>
+      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.1-G · HOME CONSULTATION REPLY</p>
       <h1>CARESTEP Clinic</h1>
       <p class="login-copy">병원별 계정과 직원 권한으로 CARESTEP을 시작합니다.</p>
 
@@ -1017,7 +1018,7 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
     <main class="main">
       <header class="topbar">
         <div>
-          <p class="eyebrow">CARESTEP Clinic · v10.1-F · PREVENTIVE RECALL CENTER</p>
+          <p class="eyebrow">CARESTEP Clinic · v10.1-G · HOME CONSULTATION REPLY</p>
           <h2 id="viewTitle">대시보드</h2>
         </div>
         <div class="topbar-actions">
@@ -1998,6 +1999,20 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
       </div>
       <div id="crmTimelineStatusMessage" class="patient-crm-status error"></div><div class="patient-crm-dialog-actions"><button class="btn btn-ghost" type="button" data-timeline-dialog-close>취소</button><button id="crmTimelineSave" class="btn btn-primary" type="submit">저장</button></div>
     </form>
+  </dialog>
+
+  <dialog id="careConsultDialog" class="care-consult-dialog">
+    <div class="care-consult-card">
+      <div class="care-consult-head"><div><p class="eyebrow">CARESTEP HOME · CONSULTATION</p><h3 id="careConsultTitle">보호자 상담 답변</h3><p id="careConsultMeta">상담 내용을 불러오는 중입니다.</p></div><button id="careConsultClose" class="care-consult-close" type="button" aria-label="닫기">×</button></div>
+      <div id="careConsultThread" class="care-consult-thread" aria-live="polite"><div class="schedule-board-empty">상담 대화를 불러오는 중입니다.</div></div>
+      <form id="careConsultForm" class="care-consult-compose">
+        <label for="careConsultMessage"><b>보호자에게 보낼 답변</b></label>
+        <textarea id="careConsultMessage" maxlength="1000" placeholder="예: 상태 확인했습니다. 오늘은 식사량과 구토 횟수를 관찰해주시고, 증상이 반복되면 바로 병원으로 연락해주세요." required></textarea>
+        <label class="care-consult-options"><input id="careConsultResolve" type="checkbox" checked><span>답변 전송 후 이 상담 업무를 완료 처리합니다.</span></label>
+        <div id="careConsultStatus" class="care-consult-status" role="status"></div>
+        <div class="care-consult-actions"><button id="careConsultCancel" class="btn btn-secondary" type="button">취소</button><button id="careConsultSend" class="btn btn-primary" type="submit">답변 보내기</button></div>
+      </form>
+    </div>
   </dialog>
 
 
@@ -3989,12 +4004,13 @@ function renderCareOperationsInbox(){
   const rows=careOperationRows();if(!rows.length){box.innerHTML=`<div class="schedule-board-empty">${all.length?'선택한 조건에 해당하는 업무가 없습니다.':'현재 처리 대기 중인 상담·미열람·전송 실패·예방 리콜 업무가 없습니다.'}</div>`;return;}
   box.innerHTML=rows.slice(0,50).map(x=>{
     const preventive=['vaccination','heartworm'].includes(x.sourceType),reason=x.sourceType==='vaccination'?'예방접종 예정일이 지났습니다.':x.sourceType==='heartworm'?'심장사상충 예방 예정일이 지났습니다.':x.responseCode==='concern'?'보호자가 상담 필요로 응답했습니다.':x.operationalStatus==='failed'?'앱 또는 외부 발송에 실패했습니다.':'예정일이 지났지만 아직 보호자가 열람하지 않았습니다.',doing=x.action?.status==='in_progress',priority=x.action?.priority||'normal',priorityLabel=priority==='urgent'?'긴급':priority==='high'?'우선':'일반',sla=careOperationSlaText(x.action);
-    return `<article class="care-inbox-row priority-${escapeHtml(priority)}"><div><b>${escapeHtml(x.patientName||'환자명 미확인')} · ${escapeHtml(x.title||'후속관리')}</b><span>${escapeHtml(scheduleBoardDateLabel(x.dueDate))} · 보호자 ${escapeHtml(x.guardianName||'미확인')} · ${escapeHtml(reason)}${x.action?.assignee?` · 담당 ${escapeHtml(x.action.assignee)}`:''}</span><span class="care-inbox-meta"><em class="care-priority ${escapeHtml(priority)}">${escapeHtml(priorityLabel)}</em>${preventive?`<em class="care-source ${escapeHtml(x.sourceType)}">${escapeHtml(scheduleBoardChannelLabel(x.sourceType))}</em>`:''}${sla?`<em class="care-sla ${x.action?.breached?'breached':''}">${escapeHtml(sla)}</em>`:''}</span></div><div class="care-inbox-actions">${x.sourceType==='home'&&!doing?`<button class="btn btn-secondary" type="button" data-care-action="in_progress" data-care-id="${escapeHtml(x.id)}">담당 시작</button>`:''}${x.sourceType==='home'&&doing?`<button class="btn btn-secondary" type="button" data-care-snooze="60" data-care-id="${escapeHtml(x.id)}">1시간 보류</button>`:''}${x.sourceType==='home'?`<button class="btn btn-primary" type="button" data-care-action="resolved" data-care-id="${escapeHtml(x.id)}">처리 완료</button>`:''}${preventive&&!doing?`<button class="btn btn-secondary" type="button" data-preventive-action="in_progress" data-event-id="${escapeHtml(x.eventId||'')}">리콜 담당</button>`:''}${preventive&&doing?`<button class="btn btn-secondary" type="button" data-preventive-snooze="1" data-event-id="${escapeHtml(x.eventId||'')}">1일 보류</button>`:''}${preventive?`<button class="btn btn-primary" type="button" data-preventive-action="resolved" data-event-id="${escapeHtml(x.eventId||'')}">리콜 완료</button>`:''}${x.sourceType==='message'?`<button class="btn btn-primary" type="button" data-care-message="${escapeHtml(x.id)}">발송 처리</button>`:''}<button class="btn btn-secondary" type="button" data-care-patient="${escapeHtml(x.patientId)}" data-care-guardian="${escapeHtml(x.guardianId)}">환자 보기</button></div></article>`;
+    return `<article class="care-inbox-row priority-${escapeHtml(priority)}"><div><b>${escapeHtml(x.patientName||'환자명 미확인')} · ${escapeHtml(x.title||'후속관리')}</b><span>${escapeHtml(scheduleBoardDateLabel(x.dueDate))} · 보호자 ${escapeHtml(x.guardianName||'미확인')} · ${escapeHtml(reason)}${x.responseNote?` · “${escapeHtml(String(x.responseNote).slice(0,120))}”`:''}${x.action?.assignee?` · 담당 ${escapeHtml(x.action.assignee)}`:''}</span><span class="care-inbox-meta"><em class="care-priority ${escapeHtml(priority)}">${escapeHtml(priorityLabel)}</em>${preventive?`<em class="care-source ${escapeHtml(x.sourceType)}">${escapeHtml(scheduleBoardChannelLabel(x.sourceType))}</em>`:''}${sla?`<em class="care-sla ${x.action?.breached?'breached':''}">${escapeHtml(sla)}</em>`:''}</span></div><div class="care-inbox-actions">${x.sourceType==='home'&&x.responseCode==='concern'?`<button class="btn btn-primary" type="button" data-care-consult="${escapeHtml(x.id)}">답변 보내기</button>`:''}${x.sourceType==='home'&&!doing?`<button class="btn btn-secondary" type="button" data-care-action="in_progress" data-care-id="${escapeHtml(x.id)}">담당 시작</button>`:''}${x.sourceType==='home'&&doing?`<button class="btn btn-secondary" type="button" data-care-snooze="60" data-care-id="${escapeHtml(x.id)}">1시간 보류</button>`:''}${x.sourceType==='home'?`<button class="btn btn-secondary" type="button" data-care-action="resolved" data-care-id="${escapeHtml(x.id)}">처리 완료</button>`:''}${preventive&&!doing?`<button class="btn btn-secondary" type="button" data-preventive-action="in_progress" data-event-id="${escapeHtml(x.eventId||'')}">리콜 담당</button>`:''}${preventive&&doing?`<button class="btn btn-secondary" type="button" data-preventive-snooze="1" data-event-id="${escapeHtml(x.eventId||'')}">1일 보류</button>`:''}${preventive?`<button class="btn btn-primary" type="button" data-preventive-action="resolved" data-event-id="${escapeHtml(x.eventId||'')}">리콜 완료</button>`:''}${x.sourceType==='message'?`<button class="btn btn-primary" type="button" data-care-message="${escapeHtml(x.id)}">발송 처리</button>`:''}<button class="btn btn-secondary" type="button" data-care-patient="${escapeHtml(x.patientId)}" data-care-guardian="${escapeHtml(x.guardianId)}">환자 보기</button></div></article>`;
   }).join('');
   box.querySelectorAll('[data-care-action]').forEach(b=>b.onclick=()=>updateCareOperationAction(b.dataset.careId,b.dataset.careAction));
   box.querySelectorAll('[data-care-snooze]').forEach(b=>b.onclick=()=>updateCareOperationAction(b.dataset.careId,'snoozed',Number(b.dataset.careSnooze)||60));
   box.querySelectorAll('[data-preventive-action]').forEach(b=>b.onclick=()=>updatePreventiveRecall(b.dataset.eventId,b.dataset.preventiveAction));
   box.querySelectorAll('[data-preventive-snooze]').forEach(b=>b.onclick=()=>updatePreventiveRecall(b.dataset.eventId,'snoozed',Number(b.dataset.preventiveSnooze)||1));
+  box.querySelectorAll('[data-care-consult]').forEach(b=>b.onclick=()=>openCareConsultReply(b.dataset.careConsult));
   box.querySelectorAll('[data-care-message]').forEach(b=>b.onclick=()=>openActionCenterTarget('message'));
   box.querySelectorAll('[data-care-patient]').forEach(b=>b.onclick=()=>window.crmOpenPatientRecord?.(b.dataset.careGuardian,b.dataset.carePatient));
 }
@@ -4005,6 +4021,16 @@ async function updatePreventiveRecall(eventId,status,snoozeDays=0){
   const note=status==='resolved'?(prompt('리콜 결과 또는 메모를 입력해주세요. (선택)')||''):'';if(status==='resolved'&&!confirm('이 예방 리콜을 완료로 표시할까요?'))return;
   const body={status,note,assignee:careOperationActor(),outcome:status==='resolved'?'recall_completed':''};if(status==='snoozed')body.snoozedUntil=new Date(Date.now()+Math.max(1,snoozeDays)*86400000).toISOString();
   try{await saasRequest(`/saas/preventive-events/${encodeURIComponent(eventId)}/recall`,{method:'PATCH',body:JSON.stringify(body)});toast(status==='resolved'?'예방 리콜을 완료했습니다.':status==='snoozed'?'예방 리콜을 1일 보류했습니다.':'예방 리콜 담당자로 지정했습니다.');await loadFollowupScheduleBoard(false);}catch(e){toast(e.message||'예방 리콜 상태를 변경하지 못했습니다.');await loadFollowupScheduleBoard(false);}
+}
+let careConsultCurrentId='';
+function careConsultClose(){const dialog=$('careConsultDialog');careConsultCurrentId='';if(typeof dialog?.close==='function'&&dialog.open)dialog.close();else dialog?.removeAttribute('open');}
+function renderCareConsultThread(items=[]){const box=$('careConsultThread');if(!box)return;box.innerHTML=items.length?items.map(m=>`<article class="care-consult-message ${m.senderType==='clinic'?'clinic':'guardian'}"><b>${escapeHtml(m.senderType==='clinic'?(m.senderName||'병원'):'보호자')}</b><span>${escapeHtml(m.message||'')}</span><small>${escapeHtml(m.createdAt?new Date(m.createdAt).toLocaleString('ko-KR'):'')}</small></article>`).join(''):'<div class="schedule-board-empty">아직 표시할 상담 메시지가 없습니다.</div>';box.scrollTop=box.scrollHeight;}
+async function openCareConsultReply(id){
+  const item=(careOperationsActions||[]).find(x=>x.id===id),dialog=$('careConsultDialog');if(!item||!dialog)return;careConsultCurrentId=id;$('careConsultTitle').textContent=`${item.patientName||'환자'} 보호자 상담`;$('careConsultMeta').textContent=`보호자 ${item.guardianName||'미확인'} · ${item.title||'후속관리'}`;$('careConsultThread').innerHTML='<div class="schedule-board-empty">상담 대화를 불러오는 중입니다.</div>';$('careConsultMessage').value='';$('careConsultResolve').checked=true;$('careConsultStatus').textContent='';$('careConsultSend').disabled=true;if(typeof dialog.showModal==='function'){if(!dialog.open)dialog.showModal();}else dialog.setAttribute('open','');
+  try{await saasRequest(`/saas/home-followups/${encodeURIComponent(id)}/action`,{method:'PATCH',body:JSON.stringify({status:'in_progress',assignee:careOperationActor()})});const data=await saasRequest(`/saas/home-followups/${encodeURIComponent(id)}/consultation`);if(careConsultCurrentId!==id)return;renderCareConsultThread(data.items||[]);$('careConsultSend').disabled=false;await saasRequest(`/saas/home-followups/${encodeURIComponent(id)}/consultation/read`,{method:'POST',body:'{}'}).catch(()=>{});}catch(e){if(careConsultCurrentId===id){$('careConsultThread').innerHTML=`<div class="schedule-board-empty">${escapeHtml(e.message||'상담 대화를 불러오지 못했습니다.')}</div>`;$('careConsultStatus').textContent='다른 직원이 처리 중이면 업무함을 새로고침해주세요.';}}
+}
+async function submitCareConsultReply(event){
+  event.preventDefault();const id=careConsultCurrentId,message=$('careConsultMessage').value.trim(),button=$('careConsultSend'),out=$('careConsultStatus');if(!id)return;if(!message){out.textContent='보호자에게 보낼 답변을 입력해주세요.';return;}button.disabled=true;button.textContent='전송 중…';out.textContent='';try{const data=await saasRequest(`/saas/home-followups/${encodeURIComponent(id)}/consultation/reply`,{method:'POST',body:JSON.stringify({message,resolve:$('careConsultResolve').checked})}),sent=Number(data.push?.sent)||0,failed=Number(data.push?.failed)||0;careConsultClose();toast(sent?`보호자에게 답변과 앱 푸시를 보냈습니다.${failed?` (${failed}대 실패)`:''}`:'답변을 저장했습니다. 보호자가 Carestep Home에서 확인할 수 있습니다.');await loadFollowupScheduleBoard(false);renderClinicActionCenter();}catch(e){out.textContent=e.message||'답변을 보내지 못했습니다.';}finally{button.disabled=false;button.textContent='답변 보내기';}
 }
 function renderFollowupScheduleBoard(){
   const board=$('followupScheduleBoard'),list=$('followupScheduleList');if(!board||!list)return;board.classList.toggle('schedule-board-loading',followupScheduleLoading);document.querySelectorAll('[data-schedule-view]').forEach(b=>b.classList.toggle('active',b.dataset.scheduleView===followupScheduleView));
@@ -9122,6 +9148,10 @@ async function generateSelectedOutputs(){
 
 $('sessionRestoreRetry')?.addEventListener('click',()=>saasBootstrap());
 $('sessionRestoreLogin')?.addEventListener('click',saasCancelRestoreAndLogin);
+$('careConsultForm')?.addEventListener('submit',submitCareConsultReply);
+$('careConsultClose')?.addEventListener('click',careConsultClose);
+$('careConsultCancel')?.addEventListener('click',careConsultClose);
+$('careConsultDialog')?.addEventListener('cancel',event=>{event.preventDefault();careConsultClose();});
 
 $('generateOutputBtn').addEventListener('click',generateSelectedOutputs);
 document.querySelectorAll('input[name="batchDownloadMode"]').forEach(x=>x.addEventListener('change',()=>{clearPreparedIndividualArtifacts();updateSelectedOutputUi();}));
@@ -9187,7 +9217,7 @@ carestepSafeCall('boot_messaging_refresh',()=>startMessagingAutoRefresh());
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
 <script src="patient-breeds.js?v=9.5.3"></script>
-<script src="patient-crm.js?v=10.1-F"></script>
+<script src="patient-crm.js?v=10.1-G"></script>
 <script src="patient-timeline.js?v=10.0-D"></script>
 <script src="date-input-guard.js?v=9.5.3"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
@@ -9197,6 +9227,6 @@ carestepSafeCall('boot_messaging_refresh',()=>startMessagingAutoRefresh());
 <!-- CARESTEP v9.5.1 · species-specific vaccine/dose selectors · automatic due dates -->
 <!-- CARESTEP v9.5.2 · status shown only for recheck and Journey records -->
 <!-- CARESTEP v9.5.3 · multiple vaccines per visit · grouped timeline display -->
-<!-- CARESTEP v10.1-F · Preventive Recall Center -->
+<!-- CARESTEP v10.1-G · Home Consultation Reply -->
 </body>
 </html>

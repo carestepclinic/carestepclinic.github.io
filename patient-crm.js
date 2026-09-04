@@ -1,4 +1,4 @@
-/* CARESTEP Clinic v10.1-F · Patient CRM + Preventive Recall Center */
+/* CARESTEP Clinic v10.1-G · Patient CRM + Home Consultation Reply */
 (() => {
   'use strict';
   const $crm=id=>document.getElementById(id);
