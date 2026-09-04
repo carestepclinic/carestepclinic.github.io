@@ -1,4 +1,4 @@
-/* CARESTEP Clinic v10.1-D.1 · Patient CRM + Operations Reliability */
+/* CARESTEP Clinic v10.1-E · Patient CRM + Smart Operations Inbox */
 (() => {
   'use strict';
   const $crm=id=>document.getElementById(id);
