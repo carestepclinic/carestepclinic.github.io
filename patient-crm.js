@@ -1,9 +1,10 @@
-/* CARESTEP Clinic v10.6-B · Patient Search 2.0 + Patient Workspace */
+/* CARESTEP Clinic v10.6-B.2 · Encrypted Indexed Patient Search */
 (() => {
   'use strict';
   const $crm=id=>document.getElementById(id);
   const crmState={rows:[],patients:[],selectedGuardian:null,selectedPatientId:'',query:'',active:'active',sort:'recent',page:1,pageSize:30,pagination:{page:1,total:0,totalPages:1},loading:false,workspace:null,workspaceLoading:false,dialogScrollY:0,dirty:false,metrics:{guardians:0,patients:0,activePatients:0,inactivePatients:0,homeLinked:0},demoGuardians:[]};
-  let activeCrmPatient=null,crmSearchTimer=null,crmBreedItems=[],crmBreedActive=-1;
+  let activeCrmPatient=null,crmSearchTimer=null,crmSearchAbort=null,crmBreedItems=[],crmBreedActive=-1;
+  const crmSearchCache=new Map(),CRM_SEARCH_CACHE_MS=30000;
   const CRM_RECENT_BREEDS_KEY='carestep_crm_recent_breeds_v1';
   const CRM_RECENT_PATIENTS_KEY='carestep_crm_recent_patients_v2';
 
@@ -60,14 +61,18 @@
 
   async function crmLoad(showToast=false){
     if(!crmAuthReady(false)){crmRenderSignedOut();return;}
+    const normalized=String(crmState.query||'').normalize('NFKC').replace(/[^0-9a-zA-Z가-힣]/g,'');
+    if(normalized&&normalized.length<2){crmState.rows=[];crmState.patients=[];crmState.pagination={page:1,pageSize:crmState.pageSize,total:0,totalPages:1};crmState.loading=false;crmRenderList('검색어를 두 글자 이상 입력해주세요.');return;}
+    if(crmSearchAbort)crmSearchAbort.abort();crmSearchAbort=new AbortController();
     crmState.loading=true;crmRenderList();
     try{
       const params=new URLSearchParams({q:crmState.query,page:String(crmState.page),pageSize:String(crmState.pageSize),active:crmState.active,sort:crmState.sort});
-      const d=await crmApi('/saas/patient-directory?'+params.toString(),{method:'GET'});
+      const cacheKey=params.toString(),cached=crmSearchCache.get(cacheKey);let d;
+      if(!showToast&&cached&&Date.now()-cached.at<CRM_SEARCH_CACHE_MS)d=cached.data;else{d=await crmApi('/saas/patient-directory?'+cacheKey,{method:'GET',signal:crmSearchAbort.signal});crmSearchCache.set(cacheKey,{at:Date.now(),data:d});}
       crmState.rows=d.guardians||[];crmState.patients=d.patients||[];crmState.pagination=d.pagination||{page:1,total:crmState.patients.length,totalPages:1};crmState.page=crmState.pagination.page||1;crmState.metrics=d.metrics||{guardians:0,patients:0,activePatients:0,inactivePatients:0,homeLinked:0};crmRenderMetrics();crmRenderRecent();crmRenderList();
       if(crmState.selectedGuardian){const still=crmState.rows.find(x=>x.id===crmState.selectedGuardian.id);if(still)await crmSelectGuardian(still.id,false);else{crmState.selectedGuardian=null;crmRenderDetail();}}
       if(showToast&&typeof toast==='function')toast('보호자·환자 목록을 새로 불러왔습니다.');
-    }catch(e){crmState.rows=[];crmState.patients=[];crmRenderList(e.message||'목록을 불러오지 못했습니다.');if(showToast&&typeof toast==='function')toast(e.message||'목록을 불러오지 못했습니다.');}
+    }catch(e){if(e?.name==='AbortError')return;crmState.rows=[];crmState.patients=[];crmRenderList(e.message||'목록을 불러오지 못했습니다.');if(showToast&&typeof toast==='function')toast(e.message||'목록을 불러오지 못했습니다.');}
     finally{crmState.loading=false;crmRenderList();}
   }
   function crmRenderSignedOut(){const list=$crm('patientCrmList'),detail=$crm('patientCrmDetail');if(list)list.innerHTML='<div class="patient-crm-empty"><div><b>병원 계정 로그인이 필요합니다</b><span>병원별로 분리된 보호자·환자 정보를 안전하게 관리하려면 로그인해주세요.</span></div></div>';if(detail)detail.innerHTML='<div class="patient-crm-empty"><div><b>환자 CRM</b><span>로그인 후 보호자와 환자를 등록하고 기존 자료 생성에 연결할 수 있습니다.</span></div></div>';}
@@ -162,7 +167,7 @@
   }
   function crmBind(){
     $crm('patientCrmRefresh')?.addEventListener('click',()=>crmLoad(true));$crm('patientCrmNewGuardian')?.addEventListener('click',()=>crmOpenGuardian());$crm('patientCrmNewPatient')?.addEventListener('click',()=>crmOpenPatient(null,crmState.selectedGuardian?.id||''));
-    $crm('patientCrmSearch')?.addEventListener('input',e=>{clearTimeout(crmSearchTimer);crmState.query=e.target.value.trim();crmState.page=1;crmSearchTimer=setTimeout(()=>crmLoad(false),300);});$crm('patientCrmSearchClear')?.addEventListener('click',()=>{crmState.query='';crmState.page=1;$crm('patientCrmSearch').value='';crmLoad(false);});$crm('patientCrmActive')?.addEventListener('change',e=>{crmState.active=e.target.value;crmState.page=1;crmLoad(false);});$crm('patientCrmSort')?.addEventListener('change',e=>{crmState.sort=e.target.value;crmState.page=1;crmLoad(false);});
+    $crm('patientCrmSearch')?.addEventListener('input',e=>{clearTimeout(crmSearchTimer);crmState.query=e.target.value.trim();crmState.page=1;crmSearchTimer=setTimeout(()=>crmLoad(false),350);});$crm('patientCrmSearchClear')?.addEventListener('click',()=>{crmState.query='';crmState.page=1;$crm('patientCrmSearch').value='';crmLoad(false);});$crm('patientCrmActive')?.addEventListener('change',e=>{crmState.active=e.target.value;crmState.page=1;crmLoad(false);});$crm('patientCrmSort')?.addEventListener('change',e=>{crmState.sort=e.target.value;crmState.page=1;crmLoad(false);});
     $crm('crmGuardianForm')?.addEventListener('submit',crmSaveGuardian);$crm('crmGuardianForm')?.addEventListener('input',()=>crmState.dirty=true);$crm('crmGuardianPhone')?.addEventListener('input',e=>{const at=e.target.selectionStart;e.target.value=crmFormatPhone(e.target.value);try{e.target.setSelectionRange(at,at)}catch{}});$crm('crmPatientForm')?.addEventListener('submit',crmSavePatient);$crm('crmPatientForm')?.addEventListener('input',()=>crmState.dirty=true);document.querySelectorAll('[data-crm-dialog-close]').forEach(b=>b.addEventListener('click',()=>crmDialog(b.dataset.crmDialogClose,false)));
     $crm('crmPatientBreed')?.addEventListener('focus',crmBreedRender);$crm('crmPatientBreed')?.addEventListener('input',()=>{crmBreedPaintHint();crmBreedRender();});$crm('crmPatientBreed')?.addEventListener('keydown',crmBreedOnKeydown);$crm('crmPatientSpecies')?.addEventListener('change',crmBreedSpeciesChanged);$crm('crmBreedClear')?.addEventListener('click',()=>{const input=$crm('crmPatientBreed');if(input){input.value='';input.focus();crmBreedPaintHint();crmBreedRender();}});document.addEventListener('click',e=>{if(!e.target.closest('#crmBreedCombobox'))crmBreedOpen(false);});
     $crm('openPatientCrmPicker')?.addEventListener('click',crmOpenPicker);
