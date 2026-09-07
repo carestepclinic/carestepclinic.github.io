@@ -4203,7 +4203,7 @@ async function efSyncUpsertGuardian(env,cid,row,now){
   const name=clean(row.name||row.displayName||row.display_name,60)||'보호자';
   const phone=patientPhone(row.phone||row.mobilePhone||row.mobile_phone_normalized||row.mobile_phone||'');
   const sourceHash=clean(row.sourceHash||row.source_hash,100);
-  let map=await efSyncGetGuardianMap(env,cid,externalId),guardian=null,mode='reused';
+  let map=await efSyncGetGuardianMap(env,cid,externalId),guardian=null,mode='reused';const hadMap=!!map;
   if(map){
     guardian=await env.DB.prepare(`SELECT id FROM care_guardians WHERE id=?1 AND clinic_id=?2`).bind(map.carestep_guardian_id,cid).first();
     mode=map.link_mode||'reused';
@@ -4228,7 +4228,7 @@ async function efSyncUpsertGuardian(env,cid,row,now){
   await env.DB.prepare(`INSERT INTO efriends_sync_guardian_map(clinic_id,external_guardian_id,carestep_guardian_id,link_mode,source_hash,last_seen_at)
     VALUES(?1,?2,?3,?4,?5,?6) ON CONFLICT(clinic_id,external_guardian_id) DO UPDATE SET carestep_guardian_id=excluded.carestep_guardian_id,link_mode=excluded.link_mode,source_hash=excluded.source_hash,last_seen_at=excluded.last_seen_at`)
     .bind(cid,externalId,guardian.id,mode,sourceHash,now).run();
-  return {externalId,id:guardian.id,mode};
+  return {externalId,id:guardian.id,mode,action:hadMap?'updated':mode};
 }
 
 async function efSyncUpsertPatient(env,cid,row,now){
@@ -4299,7 +4299,6 @@ async function efSyncUpsertEvent(env,cid,row,now){
   if(existing){
     await env.DB.prepare(`UPDATE care_patient_events SET event_type=?1,event_date=?2,title_cipher=?3,detail_cipher=?4,numeric_value=?5,unit=?6,next_due_date=?7,status='completed',source='clinic',journey_id='',updated_by='efriends-sync',updated_at=?8 WHERE id=?9 AND clinic_id=?10 AND patient_id=?11`)
       .bind(type,date,await patientDataEncrypt(env,title),await patientDataEncrypt(env,detail),value,type==='weight'?'kg':'',nextDueDate,now,existing.id,cid,patientId).run();
-    await env.DB.prepare(`INSERT INTO care_patient_event_home(event_id,clinic_id,patient_id,home_visible,home_note_cipher,updated_by,updated_at) VALUES(?1,?2,?3,0,'','efriends-sync',?4) ON CONFLICT(event_id) DO UPDATE SET home_visible=0,updated_by='efriends-sync',updated_at=excluded.updated_at`).bind(existing.id,cid,patientId,now).run();
     await env.DB.prepare(`INSERT INTO efriends_sync_event_state(clinic_id,carestep_patient_id,source_ref,source_hash,last_seen_at) VALUES(?1,?2,?3,?4,?5) ON CONFLICT(clinic_id,carestep_patient_id,source_ref) DO UPDATE SET source_hash=excluded.source_hash,last_seen_at=excluded.last_seen_at`).bind(cid,patientId,sourceRef,sourceHash,now).run();
     return {patientId,action:'updated',type};
   }
@@ -4318,7 +4317,7 @@ async function efSyncBatch(request,env){
   const guardians=Array.isArray(b.guardians)?b.guardians:[],patients=Array.isArray(b.patients)?b.patients:[],events=Array.isArray(b.events)?b.events:[];
   if(guardians.length>EFSYNC_MAX_GUARDIANS||patients.length>EFSYNC_MAX_PATIENTS||events.length>EFSYNC_MAX_EVENTS)throw Object.assign(new Error('배치 크기가 너무 큽니다.'),{statusCode:413});
   const now=new Date().toISOString(),out={guardiansCreated:0,guardiansReused:0,guardiansUpdated:0,patientsCreated:0,patientsReused:0,patientsUpdated:0,eventsCreated:0,eventsUpdated:0,eventsDeduped:0,errors:[]};
-  for(const r of guardians){try{const x=await efSyncUpsertGuardian(env,cid,r,now);if(x.mode==='created')out.guardiansCreated++;else out.guardiansReused++;}catch(e){out.errors.push({kind:'guardian',externalId:r.externalGuardianId||r.external_guardian_id||'',error:clean(e.message,300)})}}
+  for(const r of guardians){try{const x=await efSyncUpsertGuardian(env,cid,r,now);if(x.action==='created')out.guardiansCreated++;else if(x.action==='updated')out.guardiansUpdated++;else out.guardiansReused++;}catch(e){out.errors.push({kind:'guardian',externalId:r.externalGuardianId||r.external_guardian_id||'',error:clean(e.message,300)})}}
   for(const r of patients){try{const before=await efSyncGetPatientMap(env,cid,clean(r.externalPatientId||r.external_patient_id,120));const x=await efSyncUpsertPatient(env,cid,r,now);if(!before&&x.mode==='created')out.patientsCreated++;else if(!before)out.patientsReused++;else out.patientsUpdated++;}catch(e){out.errors.push({kind:'patient',externalId:r.externalPatientId||r.external_patient_id||'',error:clean(e.message,300)})}}
   const weightPatients=new Set();
   for(const r of events){try{const x=await efSyncUpsertEvent(env,cid,r,now);if(x.action==='created')out.eventsCreated++;else if(x.action==='updated')out.eventsUpdated++;else out.eventsDeduped++;if(x.type==='weight')weightPatients.add(x.patientId)}catch(e){out.errors.push({kind:'event',externalId:r.externalPatientId||r.external_patient_id||'',sourceRef:r.sourceRef||r.source_ref||'',error:clean(e.message,300)})}}
