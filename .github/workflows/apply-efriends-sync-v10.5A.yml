@@ -1,0 +1,70 @@
+name: Apply eFriends Sync v10.5-A
+
+on:
+  push:
+    branches:
+      - feature/efriends-sync-v10.5-a
+    paths:
+      - .github/workflows/apply-efriends-sync-v10.5A.yml
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/efriends-sync-v10.5-a
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Patch worker.txt
+        env:
+          EFSYNC_BLOCK_GZ_B64: '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'
+        run: |
+          python - <<'PY'
+          import os, gzip, base64
+          from pathlib import Path
+
+          worker_path = Path('worker.txt')
+          text = worker_path.read_text(encoding='utf-8')
+          block = gzip.decompress(base64.b64decode(os.environ['EFSYNC_BLOCK_GZ_B64'])).decode('utf-8')
+
+          block_marker = '/* CARESTEP v10.5-A · eFriends Continuous Sync integration block'
+          if block_marker not in text:
+              anchor = '\nexport default {'
+              if anchor not in text:
+                  raise SystemExit('export default anchor not found')
+              text = text.replace(anchor, '\n\n' + block.rstrip() + '\n\nexport default {', 1)
+
+          route_marker = "if(url.pathname.startsWith('/efriends/v1/'))"
+          if route_marker not in text:
+              anchor = '    // v10.0-D.1 Carestep Home account, timeline, follow-up delivery, and Web Push routes.'
+              if anchor not in text:
+                  raise SystemExit('Carestep Home route anchor not found')
+              route = "    // v10.5-A eFriends server Sync API. Uses dedicated server key, not a clinic user session.\n    if(url.pathname.startsWith('/efriends/v1/')) return handleEfriendsSyncRequest(request,env,url);\n\n"
+              text = text.replace(anchor, route + anchor, 1)
+
+          text = text.replace("const CARESTEP_VERSION='10.1-G';", "const CARESTEP_VERSION='10.5-A';", 1)
+          worker_path.write_text(text, encoding='utf-8')
+          PY
+      - name: Syntax check
+        run: |
+          cp worker.txt /tmp/carestep-worker.mjs
+          node --check /tmp/carestep-worker.mjs
+          grep -q "handleEfriendsSyncRequest" worker.txt
+          grep -q "'/efriends/v1/sync-batch'" worker.txt
+      - name: Commit integrated worker on feature branch
+        run: |
+          if git diff --quiet -- worker.txt; then
+            echo 'worker.txt already integrated'
+            exit 0
+          fi
+          git config user.name 'CARESTEP Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add worker.txt
+          git commit -m 'feat: integrate eFriends continuous sync API v10.5-A'
+          git push origin HEAD:feature/efriends-sync-v10.5-a
