@@ -1,4 +1,4 @@
-/* CARESTEP Clinic v10.6-B.2 · Encrypted Indexed Patient Search */
+/* CARESTEP Clinic v10.6-C · Preventive Schedule Workspace */
 (() => {
   'use strict';
   const $crm=id=>document.getElementById(id);
