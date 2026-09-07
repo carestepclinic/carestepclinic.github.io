@@ -6,8 +6,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>CARESTEP Clinic v10.6-A · EMR 동기화 관리센터</title>
-  <meta name="carestep-build" content="v10.6-A-emr-sync-center" />
+  <title>CARESTEP Clinic v10.6-B · 환자 검색 2.0</title>
+  <meta name="carestep-build" content="v10.6-B-patient-search-2" />
   <meta name="description" content="동물병원 보호자 교육자료 라이브러리 및 병원 맞춤 PDF 생성 MVP" />
   <style>
 :root {
@@ -919,6 +919,9 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
 </style>
 
   <link rel="stylesheet" href="patient-crm.css?v=10.4-G" />
+<style id="carestep-v106b-patient-search">
+.patient-search-toolbar{display:grid;grid-template-columns:minmax(260px,1fr) 150px 170px;gap:8px;margin-bottom:9px}.patient-search-toolbar .patient-crm-search{margin:0}.patient-search-recent{margin:0 0 10px;padding:10px;border:1px solid #dde6f2;border-radius:12px;background:#f8faff}.patient-search-recent-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px}.patient-search-recent-head b{font-size:10px;color:#33445d}.patient-search-recent-head span{font-size:8.5px;color:#7a879a}.patient-search-recent-list{display:flex;gap:6px;overflow:auto;padding-bottom:2px}.patient-search-recent-item{display:flex;align-items:center;gap:5px;flex:0 0 auto;border:1px solid #dce5f2;border-radius:999px;background:#fff;padding:6px 7px 6px 9px;color:#34445d;cursor:pointer}.patient-search-recent-item b{font-size:9.5px}.patient-search-recent-item span{font-size:8px;color:#77859a}.patient-search-pin{border:0;background:transparent;color:#8793a5;padding:0 2px;cursor:pointer}.patient-search-pin.on{color:#1f5eff}.patient-search-result{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:11px;border:1px solid #e0e7f1;border-radius:12px;background:#fff;text-align:left;cursor:pointer}.patient-search-result:hover,.patient-search-result.active{border-color:#1f5eff;background:#f6f9ff}.patient-search-result.inactive{opacity:.68}.patient-search-result-copy b,.patient-search-result-copy span,.patient-search-result-copy small{display:block}.patient-search-result-copy b{font-size:11px;color:#1d2b42}.patient-search-result-copy span{margin-top:3px;font-size:9px;color:#5f6f85}.patient-search-result-copy small{margin-top:3px;font-size:8.5px;color:#8793a4}.patient-search-result-side{text-align:right}.patient-search-result-side b,.patient-search-result-side span{display:block}.patient-search-result-side b{font-size:8.5px;color:#2257b5}.patient-search-result-side span{margin-top:4px;font-size:8px;color:#7b8798}.patient-search-pagination{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px}.patient-search-pagination span{font-size:9px;color:#6f7d91}.patient-search-pagination div{display:flex;gap:6px}.patient-search-pagination .btn{padding:7px 10px;font-size:9px}@media(max-width:780px){.patient-search-toolbar{grid-template-columns:1fr 1fr}.patient-search-toolbar .patient-crm-search{grid-column:1/-1}.patient-search-result{grid-template-columns:34px minmax(0,1fr)}.patient-search-result-side{grid-column:2;text-align:left;display:flex;gap:7px}}
+</style>
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -949,7 +952,7 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
   <section id="loginView" class="login-shell">
     <div class="login-card saas-login-card">
       <div class="brand-mark">CS</div>
-      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.6-A</p>
+      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.6-B</p>
       <h1>CARESTEP Clinic</h1>
       <p class="login-copy">병원별 계정과 직원 권한으로 CARESTEP을 시작합니다.</p>
 
@@ -1211,13 +1214,13 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
 
       <section id="patients" class="view">
         <div class="patient-crm-head">
-          <div><p class="eyebrow">PATIENT WORKSPACE · v10.4-G</p><h3>보호자 · 환자 통합 작업공간</h3><p>환자 한 명을 선택해 기본정보, 오늘 진료, 예방 일정, Journey, Home, 후속관리와 상담 요청을 한 화면에서 확인합니다.</p></div>
+          <div><p class="eyebrow">PATIENT SEARCH 2.0 · v10.6-B</p><h3>보호자 · 환자 통합 작업공간</h3><p>환자명·보호자·전화번호·eFriends 번호·품종·생년월일을 한 번에 검색하고 동명이인을 안전하게 구분합니다.</p></div>
           <div class="patient-crm-actions"><button id="patientCrmRefresh" class="btn btn-secondary" type="button">새로고침</button><button id="patientCrmNewGuardian" class="btn btn-secondary" type="button">+ 보호자 등록</button><button id="patientCrmNewPatient" class="btn btn-primary" type="button">+ 환자 등록</button></div>
         </div>
         <div class="patient-crm-notice"><span>🔒</span><div><b>병원별 분리 · 암호화 저장</b><br>보호자명·연락처, 환자 식별정보와 건강 타임라인 제목·메모는 병원별로 분리해 암호화 저장합니다. 체중·접종·사상충·병원 진료·Journey는 환자별 날짜순으로 누적됩니다.</div></div>
         <div class="patient-crm-kpis"><div class="patient-crm-kpi"><span>등록 보호자</span><b id="crmGuardianCount">0</b></div><div class="patient-crm-kpi"><span>등록 환자</span><b id="crmPatientCount">0</b></div><div class="patient-crm-kpi"><span>Carestep Home 연결</span><b id="crmHomeCount">0</b></div></div>
         <div class="patient-crm-layout">
-          <div class="panel patient-crm-list-panel"><div class="patient-crm-search"><input id="patientCrmSearch" class="input" type="search" autocomplete="off" placeholder="환자명 · 보호자명 · 휴대전화 검색"><button id="patientCrmSearchClear" class="btn btn-ghost" type="button">지우기</button></div><div id="patientCrmResultMeta" class="patient-crm-result-meta">0명의 보호자</div><div id="patientCrmList" class="patient-crm-list"></div></div>
+          <div class="panel patient-crm-list-panel"><div class="patient-search-toolbar"><div class="patient-crm-search"><input id="patientCrmSearch" class="input" type="search" autocomplete="off" placeholder="환자·보호자·전화 뒤 4자리·eFriends 번호·품종·생년월일"><button id="patientCrmSearchClear" class="btn btn-ghost" type="button">지우기</button></div><select id="patientCrmActive" class="input" aria-label="환자 상태"><option value="active">활성 환자</option><option value="inactive">비활성 환자</option><option value="all">전체 환자</option></select><select id="patientCrmSort" class="input" aria-label="정렬"><option value="recent">최근 진료순</option><option value="name">가나다순</option></select></div><div id="patientCrmRecent" class="patient-search-recent"></div><div id="patientCrmResultMeta" class="patient-crm-result-meta">환자를 불러오는 중입니다.</div><div id="patientCrmList" class="patient-crm-list"></div><div id="patientCrmPagination" class="patient-search-pagination"></div></div>
           <div id="patientCrmDetail" class="panel patient-crm-detail"><div class="patient-crm-empty"><div><b>보호자를 선택하세요</b><span>왼쪽 목록에서 보호자를 선택하면 연결된 환자와 기본 정보를 확인할 수 있습니다.</span></div></div></div>
         </div>
       </section>
@@ -4187,7 +4190,7 @@ async function refreshDailyWorkflowIndicators(force=false){
   await Promise.allSettled(jobs);updateDailyWorkflowIndicators();
 }
 
-const CARESTEP_CLIENT_VERSION='10.6-A';
+const CARESTEP_CLIENT_VERSION='10.6-B';
 function careUiState(value){const raw=String(value||'scheduled').toLowerCase();if(['completed','resolved','sent','delivered','synced','seen','closed','canceled','cancelled','replaced','paid','succeeded'].includes(raw))return {key:'completed',label:'완료'};if(['attention','failed','error','reconnect','expired','overdue','needs_action','permission_missing','past_due'].includes(raw))return {key:'attention',label:'확인 필요'};if(['active','in_progress','sending','processing','awaiting_client','partial','provider_pending','checking','retrying','requested'].includes(raw))return {key:'active',label:'진행 중'};return {key:'scheduled',label:'예정'};}
 function careTechnicalDetails(rows=[]){const items=rows.filter(x=>x&&x[1]!==undefined&&x[1]!==null&&String(x[1]).trim()!=='');return items.length?`<details class="care-tech-details"><summary>상세 보기</summary>${items.map(x=>`<div><span>${escapeHtml(x[0])}</span><b>${escapeHtml(x[1])}</b></div>`).join('')}</details>`:'';}
 function enhanceResponsiveTables(root=document){root.querySelectorAll('.admin-table').forEach(table=>{const labels=[...table.querySelectorAll('thead th')].map(x=>x.textContent.trim());table.querySelectorAll('tbody tr').forEach(row=>[...row.children].forEach((cell,i)=>cell.dataset.label=labels[i]||'항목'));});}
@@ -4276,7 +4279,7 @@ function renderEmrSyncCenter(){
   badge.className=`emr-sync-badge ${state.code||''}`;badge.textContent=state.label||'확인 필요';reason.textContent=state.reason||'상태 설명이 없습니다.';
   if($('emrLastBackup'))$('emrLastBackup').textContent=emrDate(backup.modifiedAt);if($('emrBackupMeta'))$('emrBackupMeta').textContent=backup.name?`${backup.name} · ${emrBytes(backup.sizeBytes)}`:'Windows Agent 업데이트 후 표시됩니다.';
   if($('emrLastSuccess'))$('emrLastSuccess').textContent=emrDate(last.finishedAt);if($('emrLastSuccessMeta'))$('emrLastSuccessMeta').textContent=last.mode?`${last.mode==='reconcile'?'전체 대조':'증분 동기화'} · ${last.status||''}`:'완료 기록 없음';
-  if($('emrNextRun'))$('emrNextRun').textContent=emrDate(agent.nextExpectedAt);if($('emrAgentMeta'))$('emrAgentMeta').textContent=agent.version?`Agent v${agent.version} · ${agent.intervalMinutes||15}분 간격`:'v10.6-A Windows Agent 설치 필요';
+  if($('emrNextRun'))$('emrNextRun').textContent=emrDate(agent.nextExpectedAt);if($('emrAgentMeta'))$('emrAgentMeta').textContent=agent.version?`Agent v${agent.version} · ${agent.intervalMinutes||15}분 간격`:'v10.6-B Windows Agent 설치 필요';
   const countItems=[['보호자',counts.guardians],['환자',counts.patients],['진료',counts.visits],['체중',counts.weights],['접종',counts.vaccinations],['사상충',counts.heartworm]];if(countGrid)countGrid.innerHTML=countItems.map(x=>`<div class="emr-sync-stat"><span>${x[0]}</span><b>${Number(x[1]||0).toLocaleString('ko-KR')}</b><small>eFriends 원본</small></div>`).join('');
   const changeItems=[['보호자 생성',changes.guardiansCreated],['환자 생성',changes.patientsCreated],['환자 수정',changes.patientsUpdated],['기록 생성',changes.eventsCreated],['기록 수정',changes.eventsUpdated],['중복 처리',changes.eventsDeduped]];if(changeGrid)changeGrid.innerHTML=changeItems.map(x=>`<div class="emr-sync-stat"><span>${x[0]}</span><b>${Number(x[1]||0).toLocaleString('ko-KR')}</b><small>최근 성공 실행</small></div>`).join('');
   const failures=Array.isArray(d.failures)?d.failures:[];if(errors)errors.innerHTML=failures.length?failures.map(x=>`<div class="emr-sync-error"><b>${escapeHtml(x.externalId?`외부 환자 ${x.externalId}`:'동기화 실행 오류')}</b><br>${escapeHtml(x.message||'원인을 확인해주세요.')} · ${escapeHtml(emrDate(x.finishedAt||x.startedAt))}</div>`).join(''):'<div class="emr-sync-empty">최근 기록된 동기화 실패가 없습니다.</div>';
@@ -9609,7 +9612,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
 <script src="patient-breeds.js?v=9.5.3"></script>
-<script src="patient-crm.js?v=10.4-G"></script>
+<script src="patient-crm.js?v=10.6-B"></script>
 <script src="patient-timeline.js?v=10.4-G"></script>
 <script src="date-input-guard.js?v=9.5.3"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
