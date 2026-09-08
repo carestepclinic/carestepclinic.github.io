@@ -1,5 +1,10 @@
 # Production source audit — 2026-09-08
 
+> Historical A.2 / PR #4 evidence. On the corrective branch, see
+> [A.2.1 corrective design and current test results](worker-a2-1-corrective.md).
+> To reproduce the original A.2 review, use the tool from commit `94cbdff`;
+> the current tool targets A.2.1. PR #4 itself remains unchanged.
+
 ## Current regression gate: blocked
 
 The exact hash is verified, but the new offline review gate reports **10 PASS /

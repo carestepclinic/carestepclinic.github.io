@@ -5,8 +5,8 @@
 // CARESTEP Clinic v9.1 · Production Launch · Governance · Resilience
 const OPENAI_URL = 'https://api.openai.com/v1/responses';
 
-const CARESTEP_VERSION='10.7-A.2';
-const CARESTEP_BUILD='10.7-A.2';
+const CARESTEP_VERSION='10.7-A.2.1';
+const CARESTEP_BUILD='10.7-A.2.1';
 const CARESTEP_CLIENT_BUILDS={clinic:'10.7-A',home:'10.1-J',hq:'10.4-G',homeCache:'carestep-home-v10-1-j-production-operations'};
 const CARESTEP_CLIENT_PATCHES={clinic:'10.7-A',home:'10.1-J',hq:'10.4-G'};
 const HOME_TERMS_VERSION='2026-09-03-home-v1.0';
@@ -295,7 +295,6 @@ const SAAS_SCHEMA_STATEMENTS=[
 `CREATE TABLE IF NOT EXISTS care_followup_change_ops(id TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,case_id TEXT NOT NULL,case_key TEXT NOT NULL,request_key TEXT NOT NULL,action TEXT NOT NULL,reason TEXT NOT NULL DEFAULT '',status TEXT NOT NULL DEFAULT 'processing',target_start_date TEXT NOT NULL DEFAULT '',target_journey_id TEXT NOT NULL DEFAULT '',target_stage_days_json TEXT NOT NULL DEFAULT '[]',calendar_status TEXT NOT NULL DEFAULT 'not_required',home_status TEXT NOT NULL DEFAULT 'not_required',message_status TEXT NOT NULL DEFAULT 'not_required',home_changed_count INTEGER NOT NULL DEFAULT 0,home_canceled_count INTEGER NOT NULL DEFAULT 0,message_canceled_count INTEGER NOT NULL DEFAULT 0,error_json TEXT NOT NULL DEFAULT '{}',actor_user_id TEXT NOT NULL,created_at TEXT NOT NULL,updated_at TEXT NOT NULL,completed_at TEXT NOT NULL DEFAULT '',UNIQUE(clinic_id,request_key))`,
 `CREATE INDEX IF NOT EXISTS idx_care_followup_change_ops_case ON care_followup_change_ops(clinic_id,case_key,created_at DESC)`,
 `CREATE INDEX IF NOT EXISTS idx_care_followup_change_ops_status ON care_followup_change_ops(status,updated_at DESC)`,
-`CREATE TRIGGER IF NOT EXISTS trg_care_followup_cases_patient_delete AFTER DELETE ON care_patients BEGIN DELETE FROM care_followup_cases WHERE clinic_id=OLD.clinic_id AND patient_id=OLD.id; END`,
 `CREATE TRIGGER IF NOT EXISTS trg_care_followup_cases_audit_delete AFTER DELETE ON care_followup_cases BEGIN DELETE FROM care_followup_case_audit WHERE clinic_id=OLD.clinic_id AND case_id=OLD.id; END`,
 `CREATE TRIGGER IF NOT EXISTS trg_care_followup_change_ops_case_delete AFTER DELETE ON care_followup_cases BEGIN DELETE FROM care_followup_change_ops WHERE clinic_id=OLD.clinic_id AND case_id=OLD.id; END`,
 `CREATE TABLE IF NOT EXISTS care_guardians(id TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,name_cipher TEXT NOT NULL,phone_cipher TEXT DEFAULT '',phone_hash TEXT DEFAULT '',phone_last4 TEXT DEFAULT '',memo_cipher TEXT DEFAULT '',home_status TEXT NOT NULL DEFAULT 'not_invited',consent_at TEXT NOT NULL,created_by TEXT NOT NULL,created_at TEXT NOT NULL,updated_by TEXT NOT NULL,updated_at TEXT NOT NULL)`,
@@ -305,6 +304,7 @@ const SAAS_SCHEMA_STATEMENTS=[
 `CREATE INDEX IF NOT EXISTS idx_care_patients_clinic ON care_patients(clinic_id,updated_at DESC)`,
 `CREATE INDEX IF NOT EXISTS idx_care_patients_guardian ON care_patients(clinic_id,guardian_id,updated_at DESC)`,
 `CREATE INDEX IF NOT EXISTS idx_care_patients_name ON care_patients(clinic_id,name_hash)`,
+`CREATE TRIGGER IF NOT EXISTS trg_care_followup_cases_patient_delete AFTER DELETE ON care_patients BEGIN DELETE FROM care_followup_cases WHERE clinic_id=OLD.clinic_id AND patient_id=OLD.id; END`,
 `CREATE TABLE IF NOT EXISTS care_patient_events(id TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,patient_id TEXT NOT NULL,event_type TEXT NOT NULL,event_date TEXT NOT NULL,title_cipher TEXT DEFAULT '',detail_cipher TEXT DEFAULT '',numeric_value REAL DEFAULT NULL,unit TEXT NOT NULL DEFAULT '',next_due_date TEXT DEFAULT '',status TEXT NOT NULL DEFAULT 'completed',source TEXT NOT NULL DEFAULT 'clinic',journey_id TEXT DEFAULT '',source_ref TEXT DEFAULT '',created_by TEXT NOT NULL,created_at TEXT NOT NULL,updated_by TEXT NOT NULL,updated_at TEXT NOT NULL)`,
 `CREATE INDEX IF NOT EXISTS idx_care_patient_events_patient ON care_patient_events(clinic_id,patient_id,event_date DESC,created_at DESC)`,
 `CREATE INDEX IF NOT EXISTS idx_care_patient_events_type ON care_patient_events(clinic_id,event_type,event_date DESC)`,
@@ -338,7 +338,6 @@ const SAAS_SCHEMA_STATEMENTS=[
 `CREATE TABLE IF NOT EXISTS care_home_consult_messages(id TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,guardian_id TEXT NOT NULL,patient_id TEXT NOT NULL,followup_id TEXT NOT NULL,sender_type TEXT NOT NULL,sender_id TEXT NOT NULL,sender_name_cipher TEXT NOT NULL DEFAULT '',message_cipher TEXT NOT NULL,source_ref TEXT NOT NULL DEFAULT '',read_at TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL)`,
 `CREATE INDEX IF NOT EXISTS idx_care_home_consult_messages_followup ON care_home_consult_messages(clinic_id,followup_id,created_at)`,
 `CREATE INDEX IF NOT EXISTS idx_care_home_consult_messages_unread ON care_home_consult_messages(clinic_id,guardian_id,sender_type,read_at,created_at DESC)`,
-`CREATE INDEX IF NOT EXISTS idx_care_home_followups_consult_status ON care_home_followups(clinic_id,consult_status,consult_updated_at DESC)`,
 `CREATE UNIQUE INDEX IF NOT EXISTS idx_care_home_consult_messages_source ON care_home_consult_messages(clinic_id,source_ref) WHERE source_ref<>''`,
 `CREATE TABLE IF NOT EXISTS care_home_consult_push_deliveries(id TEXT PRIMARY KEY,message_id TEXT NOT NULL,subscription_id TEXT NOT NULL,home_user_id TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'pending',response_status INTEGER NOT NULL DEFAULT 0,last_error TEXT NOT NULL DEFAULT '',attempted_at TEXT NOT NULL DEFAULT '',sent_at TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL,updated_at TEXT NOT NULL,UNIQUE(message_id,subscription_id))`,
 `CREATE INDEX IF NOT EXISTS idx_care_home_consult_push_message ON care_home_consult_push_deliveries(message_id,status,updated_at DESC)`,
@@ -4518,7 +4517,7 @@ async function runHomePreventivePushCycle(env){
  * eFriends source access stays on the hospital server and is read-only.
  * Missing source rows are never auto-deleted from CARESTEP.
  */
-const EFSYNC_VERSION='10.7-A.2';
+const EFSYNC_VERSION='10.7-A.2.1';
 const EFSYNC_SEARCH_INDEX_VERSION='10.6-B.2';
 const EFSYNC_RETRY_LIMIT=3;
 const EFSYNC_MAX_GUARDIANS=100;
@@ -4574,6 +4573,13 @@ async function efSyncEnsureSchema(env){
       carestep_id TEXT DEFAULT '',source_hash TEXT DEFAULT '',status TEXT NOT NULL DEFAULT 'seen',run_id TEXT DEFAULT '',
       last_seen_at TEXT NOT NULL,last_success_at TEXT DEFAULT '',last_error TEXT DEFAULT '')`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_efsync_ledger_clinic_status ON efriends_sync_ledger(clinic_id,status,last_seen_at DESC)`),
+    // A.2.1: keep legacy ledger untouched; only new observations enter the clinic-scoped ledger.
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS efriends_sync_ledger_v2(
+      record_key TEXT NOT NULL,clinic_id TEXT NOT NULL,entity_kind TEXT NOT NULL,external_id TEXT DEFAULT '',source_ref TEXT DEFAULT '',
+      carestep_id TEXT DEFAULT '',source_hash TEXT DEFAULT '',status TEXT NOT NULL DEFAULT 'seen',run_id TEXT DEFAULT '',
+      last_seen_at TEXT NOT NULL,last_success_at TEXT DEFAULT '',last_error TEXT DEFAULT '',PRIMARY KEY(clinic_id,record_key))`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_efsync_ledger_v2_clinic_status ON efriends_sync_ledger_v2(clinic_id,status,last_seen_at DESC)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_efsync_ledger_v2_clinic_seen ON efriends_sync_ledger_v2(clinic_id,last_seen_at DESC)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS efriends_sync_failures(
       id TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,kind TEXT NOT NULL,external_id TEXT DEFAULT '',source_ref TEXT DEFAULT '',
       payload_cipher TEXT DEFAULT '',payload_hash TEXT DEFAULT '',attempt_count INTEGER NOT NULL DEFAULT 1,status TEXT NOT NULL DEFAULT 'retry',
@@ -4609,7 +4615,7 @@ async function efSyncGetPatientMap(env,cid,externalId){return env.DB.prepare(`SE
 function efSyncRecordKey(kind,row={}){const externalId=clean(row.externalGuardianId||row.external_guardian_id||row.externalPatientId||row.external_patient_id||row.externalId||'',120),sourceRef=clean(row.sourceRef||row.source_ref||'',240);return `${kind}:${externalId}:${sourceRef}`}
 async function efSyncLedgerMark(env,cid,kind,row,status,now,carestepId='',runId='',error=''){
   const externalId=clean(row.externalGuardianId||row.external_guardian_id||row.externalPatientId||row.external_patient_id||row.externalId||'',120),sourceRef=clean(row.sourceRef||row.source_ref||'',240),sourceHash=clean(row.sourceHash||row.source_hash||'',100),key=efSyncRecordKey(kind,row);
-  await env.DB.prepare(`INSERT INTO efriends_sync_ledger(record_key,clinic_id,entity_kind,external_id,source_ref,carestep_id,source_hash,status,run_id,last_seen_at,last_success_at,last_error) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12) ON CONFLICT(record_key) DO UPDATE SET carestep_id=excluded.carestep_id,source_hash=excluded.source_hash,status=excluded.status,run_id=excluded.run_id,last_seen_at=excluded.last_seen_at,last_success_at=CASE WHEN excluded.status='synced' THEN excluded.last_success_at ELSE efriends_sync_ledger.last_success_at END,last_error=excluded.last_error`).bind(key,cid,kind,externalId,sourceRef,clean(carestepId,180),sourceHash,status,clean(runId,180),now,status==='synced'?now:'',clean(error,500)).run();
+  await env.DB.prepare(`INSERT INTO efriends_sync_ledger_v2(record_key,clinic_id,entity_kind,external_id,source_ref,carestep_id,source_hash,status,run_id,last_seen_at,last_success_at,last_error) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12) ON CONFLICT(clinic_id,record_key) DO UPDATE SET carestep_id=excluded.carestep_id,source_hash=excluded.source_hash,status=excluded.status,run_id=excluded.run_id,last_seen_at=excluded.last_seen_at,last_success_at=CASE WHEN excluded.status='synced' THEN excluded.last_success_at ELSE efriends_sync_ledger_v2.last_success_at END,last_error=excluded.last_error`).bind(key,cid,kind,externalId,sourceRef,clean(carestepId,180),sourceHash,status,clean(runId,180),now,status==='synced'?now:'',clean(error,500)).run();
 }
 async function efSyncQuarantineRow(env,cid,kind,row,conflictType,candidateIds,now){
   const externalId=clean(row.externalGuardianId||row.external_guardian_id||row.externalPatientId||row.external_patient_id||'',120);if(!externalId)return;
@@ -4816,7 +4822,7 @@ async function saasEmrSyncStatus(env,s){
     env.DB.prepare(`SELECT * FROM efriends_sync_reconcile WHERE clinic_id=?1 ORDER BY created_at DESC LIMIT 1`).bind(cid).first(),
     env.DB.prepare(`SELECT status,COUNT(*) n FROM efriends_sync_failures WHERE clinic_id=?1 AND status IN('retry','dead_letter') GROUP BY status`).bind(cid).all(),
     env.DB.prepare(`SELECT status,COUNT(*) n FROM efriends_sync_quarantine WHERE clinic_id=?1 AND status='pending' GROUP BY status`).bind(cid).all(),
-    env.DB.prepare(`SELECT last_seen_at FROM efriends_sync_ledger WHERE clinic_id=?1 ORDER BY last_seen_at DESC LIMIT 1`).bind(cid).first(),
+    env.DB.prepare(`SELECT last_seen_at FROM efriends_sync_ledger_v2 WHERE clinic_id=?1 ORDER BY last_seen_at DESC LIMIT 1`).bind(cid).first(),
     env.DB.prepare(`SELECT entity_kind,external_id,conflict_type,updated_at FROM efriends_sync_quarantine WHERE clinic_id=?1 AND status='pending' ORDER BY updated_at DESC LIMIT 10`).bind(cid).all()
   ]);
   const parse=x=>{try{return JSON.parse(x||'{}')}catch{return {}}},source=parse(lastSuccess?.detail_json),heartbeatDetail=parse(heartbeat?.detail_json),reconcileDetail=parse(reconcile?.detail_json),q={retry:0,deadLetter:0,quarantine:0};for(const r of (queueCounts.results||[])){if(r.status==='retry')q.retry=Number(r.n)||0;if(r.status==='dead_letter')q.deadLetter=Number(r.n)||0}q.quarantine=Number(quarantineCounts.results?.[0]?.n)||0;
