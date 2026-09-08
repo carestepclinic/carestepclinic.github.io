@@ -1,46 +1,48 @@
 # CARESTEP production source of truth
 
-**Worker deployment is blocked: `worker.txt` is still v10.5-A.** The reported
-production Worker is v10.7-A.2. Copying the current repository Worker into
-Cloudflare would roll back production behavior.
+> **Regression gate BLOCKED (2026-09-08):** source identity passes, but offline
+> SQLite tests reproduce cross-clinic ledger overwrite and old-schema upgrade
+> failure (`consult_status`). Keep Draft; do not merge or deploy. See
+> [the candidate review](docs/worker-a2-candidate-review.md). Static CI success
+> does not override these failures.
 
-| Component | Production version reported on 2026-09-08 | Repository status |
+The verified Cloudflare Worker v10.7-A.2 source has now been restored to the
+repository **on the draft branch only**. Production has not been changed.
+
+| Component | Production version reported on 2026-09-08 | Repository draft status |
 | --- | --- | --- |
-| Clinic UI | v10.7-A | Preserved from main |
-| Cloudflare Worker | v10.7-A.2 | Exact source hash verified; replacement blocked by two regression failures |
-| Windows eFriends Agent | v10.7-A.4 | Installed on hospital server; source not restored here |
+| Clinic UI | v10.7-A | Preserved from `main` |
+| Cloudflare Worker | v10.7-A.2 | `worker.txt` synchronized to the verified deployed source on this branch |
+| Windows eFriends Agent | v10.7-A.4 | Hospital installation unchanged |
+
+Source identity is pinned to SHA-256:
+
+`9f54ddd87f542e749cf0c070a292d7d56e11e0409895fc34d929740e4dbc21a7`
+
+The audit copy `incoming/worker-v10.7-A.2.txt` is retained only for provenance
+and byte-for-byte verification. **It is not a production deployment target.**
+The repository root `worker.txt` is the deployment source after review and an
+explicitly approved merge.
 
 See [the source audit and deployment gates](docs/production-source-of-truth.md).
-The supplied A.2 source now matches the expected raw SHA-256. Its ledger clinic
-isolation and upgrade ordering checks fail; see the
-[candidate review](docs/worker-a2-candidate-review.md). The user's replacement
-gate requires both identity and regression checks to pass, so `worker.txt`
-remains unchanged. The supplied `incoming/` file is local review material and
-has not been added to Git.
-PR #2 is a validation archive, not a production merge source. Historical
-`README_HOTFIX*` and `README_DEPLOY_HOTFIX37.txt` instructions are historical
-only and must not be used for the next production deployment.
+PR #2 remains a validation archive, not a production merge source. Historical
+`README_HOTFIX*` and `README_DEPLOY_HOTFIX37.txt` instructions must not be used
+as the next Worker deployment source.
 
-Before considering a Worker deployment, run with Node.js 24:
+Before any future Worker deployment, run with Node.js 24:
 
 ```sh
 node tools/verify-worker-source.mjs
 node --test tools/verify-worker-source.test.mjs
-```
-
-The first command still fails for the unchanged root Worker. To reproduce the
-candidate regression gate, also run:
-
-```sh
 node --experimental-vm-modules tools/review-worker-candidate.mjs incoming/worker-v10.7-A.2.txt
 ```
 
-It exits 1 for the two reproduced failures. It uses only in-memory SQLite and
-the pinned main Git blob; it never connects to production. A passing hash check
-establishes source identity against the archived
-release hash; it does not replace regression review or production smoke tests.
-It cannot prevent someone from manually bypassing the check in Cloudflare.
+The branch CI also downloads the pinned GitHub raw audit copy, verifies its
+SHA-256, compares it with `origin/main`, checks regression markers, named
+functions and schema preservation, and syntax-checks the Worker.
 
-**Manual production deployment required**, after source restoration, review,
-and merge approval. Do not deploy, merge, reinstall the Agent, change scheduled
-tasks, or run FullReconcile as part of this preparation.
+**No automatic production deployment is authorized by these checks.** Keep the
+current hospital environment unchanged until this Draft PR is reviewed, merged
+with explicit approval, and the separate manual production deployment gate is
+approved. Do not run a D1 migration, reinstall the Agent, change scheduled
+tasks, or run FullReconcile as part of repository hygiene.

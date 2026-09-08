@@ -2,12 +2,16 @@
 
 ## Decision
 
-**Identity PASS; regression gate FAIL; worker.txt replacement withheld.**
-The user explicitly required both checks to pass before replacement. No edit
-was made to the supplied original or root Worker. No merge, Cloudflare deploy,
-D1 migration, FullReconcile, or Windows Agent change occurred.
+**Identity PASS; regression gate FAIL; replacement not approved by this review.**
+The user required both checks to pass. This review initially left root Worker
+unchanged. Concurrent remote commit `c44aeb95c1f31f3877fb1d03c6a422b6aa0fdc29`
+already restored it and added static CI while these tests were running. That
+remote work was preserved during branch integration, not reverted or force-pushed.
+Root Worker therefore contains the exact A.2 source, but it has **not passed**
+this regression gate. No main merge, Cloudflare deploy, production D1 migration,
+FullReconcile, or Windows Agent change occurred.
 
-Source: user-supplied `incoming/worker-v10.7-A.2.txt` (local, not committed).
+Source: user-supplied `incoming/worker-v10.7-A.2.txt` (provenance committed separately in `a56ea76`).
 Length: 933790 bytes. Raw SHA-256, without newline normalization:
 
 `9f54ddd87f542e749cf0c070a292d7d56e11e0409895fc34d929740e4dbc21a7`
@@ -116,10 +120,12 @@ node tools/verify-worker-source.mjs
 
 The review gate must exit nonzero until its isolation and upgrade tests pass.
 Latest run: **10 PASS / 2 FAIL** (ledger isolation and upgrade ordering), with
-exit code 1. The unchanged source-identity unit tests pass **3/3**. Candidate
+exit code 1. Before branch integration, source-identity unit tests passed **3/3**; after
+restoration they pass **2 with 1 expected skip**. Candidate
 and baseline compile as ES modules; the candidate's raw hash still matches.
-The existing root source guard still fails because root worker.txt remains
-v10.5-A. Its original unit tests remain intact. Source syntax is compiled in
+After integrating the concurrent restoration, the root source guard passes
+identity verification. Its original unit tests remain intact (the stale-source
+test now skips). This does not override the failing behavioral checks. Source syntax is compiled in
 an isolated VM with no fetch or external imports; tests use in-memory SQLite
 and synthetic values only. No production secrets or records are read.
 
