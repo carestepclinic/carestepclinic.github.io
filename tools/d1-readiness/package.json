@@ -1,0 +1,15 @@
+{
+  "name": "carestep-isolated-d1-readiness",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node readiness.mjs"
+  },
+  "devDependencies": {
+    "miniflare": "4.20260730.0"
+  },
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=24"
+  }
+}

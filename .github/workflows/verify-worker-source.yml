@@ -145,3 +145,11 @@ jobs:
       - name: P1 behavioral regressions and migration idempotency (offline SQLite)
         shell: bash
         run: node --experimental-vm-modules tools/review-worker-candidate.mjs worker.txt
+
+      - name: Install pinned local D1 test runtime
+        run: |
+          npm install --global pnpm@11.19.0 --ignore-scripts
+          pnpm --dir tools/d1-readiness install --frozen-lockfile --ignore-scripts
+
+      - name: Local workerd D1 readiness (no remote bindings)
+        run: node tools/d1-readiness/readiness.mjs

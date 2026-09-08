@@ -157,3 +157,11 @@ normal status/reconcile, the next scheduled sync, retry/deadLetter/quarantine,
 and v2 ledger visibility. Keep Clinic UI/Windows Agent versions independent.
 Complete the non-destructive Home/HQ/CRM/payment smoke plan and verify no
 unexpected legacy-table writes by any other still-running A.2 Worker.
+
+## Isolated local D1 readiness follow-up
+
+The unchanged Worker was subsequently exercised in local Miniflare/workerd D1,
+including nonempty sync and real retry processing. See
+[Production readiness evidence](worker-a2-1-production-readiness.md) for the
+13 additional scenarios, isolation controls, rollback rehearsal and manual gates.
+This supplements the 19 SQLite regressions; it does not authorize deployment.
