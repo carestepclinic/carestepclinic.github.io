@@ -1,0 +1,106 @@
+name: Verify v10.7-A.2.1 corrective hotfix
+
+on:
+  push:
+    branches:
+      - fix/v10.7-a2-regression-p1
+  pull_request:
+    branches:
+      - fix/v10.7-worker-source-of-truth
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: github.event_name == 'pull_request' || startsWith(github.event.head_commit.message, 'fix: correct A.2.1 P1 regressions')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify exact A.2 audit source remains unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_A2='9f54ddd87f542e749cf0c070a292d7d56e11e0409895fc34d929740e4dbc21a7'
+          ACTUAL="$(sha256sum incoming/worker-v10.7-A.2.txt | awk '{print $1}')"
+          test "$ACTUAL" = "$EXPECTED_A2"
+          git fetch origin fix/v10.7-worker-source-of-truth
+          git show origin/fix/v10.7-worker-source-of-truth:incoming/worker-v10.7-A.2.txt >/tmp/base-a2.txt
+          cmp -s incoming/worker-v10.7-A.2.txt /tmp/base-a2.txt
+
+      - name: Verify A.2.1 candidate identity and version
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED="$(tr -d '\r\n' < tools/worker-a2-1.sha256)"
+          ACTUAL="$(sha256sum worker.txt | awk '{print $1}')"
+          echo "worker_sha256=$ACTUAL"
+          test "$ACTUAL" = "$EXPECTED"
+          test "$ACTUAL" != '9f54ddd87f542e749cf0c070a292d7d56e11e0409895fc34d929740e4dbc21a7'
+          grep -Fq "const CARESTEP_VERSION='10.7-A.2.1';" worker.txt
+          grep -Fq "const CARESTEP_BUILD='10.7-A.2.1';" worker.txt
+          grep -Fq "const EFSYNC_VERSION='10.7-A.2.1';" worker.txt
+
+      - name: JavaScript syntax
+        run: |
+          cp worker.txt /tmp/worker.mjs
+          node --check /tmp/worker.mjs
+          node --check tools/review-worker-candidate.mjs
+
+      - name: Behavioral regression gate
+        env:
+          CARESTEP_REVIEW_MODE: corrective
+        run: node --experimental-vm-modules tools/review-worker-candidate.mjs worker.txt
+
+      - name: Static product and eFriends regression markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            'TOSS' 'SOLAPI' 'kakao_pf_id' 'carestep-home' 'HQ' 'billing' 'subscription'
+            'password' 'AES-GCM' 'care_guardians' 'care_patients' 'care_patient_events'
+            '/efriends/v1/health' '/efriends/v1/status' '/efriends/v1/runs'
+            '/efriends/v1/sync-batch' '/efriends/v1/reconcile' '/efriends/v1/checkpoint'
+            'retry' 'dead_letter' 'quarantine' 'ledger' 'clinic_id'
+            'sourceEligibleVaccinations' 'sourceEligibleHeartworm'
+          )
+          for marker in "${required[@]}"; do grep -Fqi -- "$marker" worker.txt; done
+
+      - name: Named function and schema preservation from A.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show origin/fix/v10.7-worker-source-of-truth:worker.txt >/tmp/base-worker.txt
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          base=Path('/tmp/base-worker.txt').read_text(encoding='utf-8')
+          cand=Path('worker.txt').read_text(encoding='utf-8')
+          fn=re.compile(r'(?m)^\s*(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(')
+          tb=re.compile(r'CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+([A-Za-z0-9_]+)',re.I)
+          removed_fn=sorted(set(fn.findall(base))-set(fn.findall(cand)))
+          removed_tb=sorted(set(tb.findall(base))-set(tb.findall(cand)))
+          print('removed_functions=',removed_fn)
+          print('removed_tables=',removed_tb)
+          assert not removed_fn
+          assert not removed_tb
+          PY
+
+      - name: Corrective migration safety markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'CREATE TABLE IF NOT EXISTS efriends_sync_ledger_v2' worker.txt
+          grep -Fq 'PRIMARY KEY(clinic_id,record_key)' worker.txt
+          grep -Fq 'INSERT OR IGNORE INTO efriends_sync_ledger_v2' worker.txt
+          grep -Fq "SAAS_SCHEMA_STATEMENTS.filter(x=>!x.includes('CREATE INDEX IF NOT EXISTS idx_care_home_followups_consult_status'))" worker.txt
+          if grep -Eq 'DROP[[:space:]]+(TABLE|INDEX)[[:space:]]+.*efriends_sync_ledger|DELETE[[:space:]]+FROM[[:space:]]+efriends_sync_ledger' worker.txt; then exit 1; fi
+
+      - name: Existing verifier unit tests
+        run: node --test tools/verify-worker-source.test.mjs
+
+      - name: Diff hygiene
+        run: git diff --check origin/fix/v10.7-worker-source-of-truth...HEAD
