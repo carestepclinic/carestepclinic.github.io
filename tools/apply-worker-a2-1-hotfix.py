@@ -31,13 +31,15 @@ text = replace_once(text, "const CARESTEP_VERSION='10.7-A.2';", f"const CARESTEP
 text = replace_once(text, "const CARESTEP_BUILD='10.7-A.2';", f"const CARESTEP_BUILD='{TARGET}';", 'CARESTEP_BUILD')
 text = replace_once(text, "const EFSYNC_VERSION='10.7-A.2';", f"const EFSYNC_VERSION='{TARGET}';", 'EFSYNC_VERSION')
 
-# P1-2: the main-era care_home_followups table does not yet have consult_status /
-# consult_updated_at. Defer only this dependent index until after ALTERs below.
+# P1-2: make schema bootstrap safe for both a truly fresh DB and an old DB.
+# All CREATE TABLE statements are materialized first so triggers/indexes cannot
+# reference tables that appear later in SAAS_SCHEMA_STATEMENTS. The consult
+# index is deferred further because old care_home_followups needs ALTERs first.
 old_bootstrap = "  await env.DB.batch(SAAS_SCHEMA_STATEMENTS.map(x=>env.DB.prepare(x)));"
-new_bootstrap = "  const saasBootstrapStatements=SAAS_SCHEMA_STATEMENTS.filter(x=>!x.includes('CREATE INDEX IF NOT EXISTS idx_care_home_followups_consult_status'));\n  await env.DB.batch(saasBootstrapStatements.map(x=>env.DB.prepare(x)));"
-text = replace_once(text, old_bootstrap, new_bootstrap, 'deferred consult index bootstrap')
+new_bootstrap = "  const saasTableStatements=SAAS_SCHEMA_STATEMENTS.filter(x=>/^\\s*CREATE TABLE IF NOT EXISTS /i.test(x));\n  const saasPostTableStatements=SAAS_SCHEMA_STATEMENTS.filter(x=>!/^\\s*CREATE TABLE IF NOT EXISTS /i.test(x)&&!x.includes('CREATE INDEX IF NOT EXISTS idx_care_home_followups_consult_status'));\n  await env.DB.batch([...saasTableStatements,...saasPostTableStatements].map(x=>env.DB.prepare(x)));"
+text = replace_once(text, old_bootstrap, new_bootstrap, 'ordered schema bootstrap')
 
-# P1-1: preserve the deployed v1 ledger for audit/rollback evidence, but move all
+# P1-1: preserve the deployed v1 ledger for audit/backward evidence, but move all
 # A.2.1 runtime state to an additive clinic-scoped v2 ledger.
 ledger_index = "    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_efsync_ledger_clinic_status ON efriends_sync_ledger(clinic_id,status,last_seen_at DESC)`),"
 ledger_v2 = ledger_index + "\n    env.DB.prepare(`CREATE TABLE IF NOT EXISTS efriends_sync_ledger_v2(\n      clinic_id TEXT NOT NULL,record_key TEXT NOT NULL,entity_kind TEXT NOT NULL,external_id TEXT DEFAULT '',source_ref TEXT DEFAULT '',\n      carestep_id TEXT DEFAULT '',source_hash TEXT DEFAULT '',status TEXT NOT NULL DEFAULT 'seen',run_id TEXT DEFAULT '',\n      last_seen_at TEXT NOT NULL,last_success_at TEXT DEFAULT '',last_error TEXT DEFAULT '',\n      PRIMARY KEY(clinic_id,record_key))`),\n    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_efsync_ledger_v2_clinic_status ON efriends_sync_ledger_v2(clinic_id,status,last_seen_at DESC)`),"
@@ -83,6 +85,7 @@ identity_new = """await check(correctiveMode ? 'corrective SHA differs from A.2 
 });"""
 review = review[:identity.start()] + identity_new + review[identity.end():]
 review = replace_once(review, "  assert.equal(body.version, '10.7-A.2');", "  assert.equal(body.version, expectedVersion);", 'health expected version')
+review = replace_once(review, "    const rows = sql.prepare('SELECT clinic_id,carestep_id FROM efriends_sync_ledger ORDER BY clinic_id').all();", "    const ledgerTable = correctiveMode ? 'efriends_sync_ledger_v2' : 'efriends_sync_ledger';\n    const rows = sql.prepare(`SELECT clinic_id,carestep_id FROM ${ledgerTable} ORDER BY clinic_id`).all();", 'ledger isolation table')
 
 extra_anchor = "console.log(JSON.stringify({ baseRef, sha256: createHash('sha256').update(bytes).digest('hex'), namedFunctions: { before: names(base).length, after: names(source).length, changed: changed.length, unchanged: names(base).length - changed.length }, results, passed: results.filter(r => r.pass).length, failed: results.filter(r => !r.pass).length }, null, 2));"
 extra_checks = r"""if (correctiveMode) {
@@ -146,12 +149,14 @@ external IDs/sourceRefs in different clinics from sharing one ledger row.
 Rollback note: the v1 table remains intact, but A.2 code will not see ledger state written only to v2 after
 an A.2.1 rollout. Ledger is operational sync metadata; patient/guardian/event data is not migrated by this hotfix.
 
-## P1-2 — existing-schema upgrade ordering
+## P1-2 — schema initialization and existing-schema upgrade ordering
 
-`idx_care_home_followups_consult_status` is excluded from the initial schema batch. `ensureSaasDb` first
-inspects and ALTERs `care_home_followups` to guarantee `consult_status` and `consult_updated_at`, then creates
-the dependent index in the existing post-ALTER index batch. Fresh databases and main-era upgrade databases
-therefore use the same final schema without a destructive migration.
+`ensureSaasDb` now materializes all `CREATE TABLE IF NOT EXISTS` statements before indexes/triggers so a fresh
+D1 does not depend on incidental statement ordering. `idx_care_home_followups_consult_status` is additionally
+excluded from the initial non-table batch. The function then inspects and ALTERs `care_home_followups` to
+guarantee `consult_status` and `consult_updated_at`, and only then creates the dependent index in the existing
+post-ALTER index batch. Fresh databases and main-era upgrade databases therefore converge on the same final
+schema without a destructive migration.
 
 ## Safety
 
