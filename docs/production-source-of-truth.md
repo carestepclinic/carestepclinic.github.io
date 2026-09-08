@@ -1,5 +1,19 @@
 # Production source audit — 2026-09-08
 
+## Current follow-up: source verified, regression gate failed
+
+The user supplied `incoming/worker-v10.7-A.2.txt`. Its raw SHA-256 exactly
+matches the archived A.2 hash and both Worker version constants are 10.7-A.2.
+Source recovery is no longer the blocker. Offline review reproduced a
+cross-clinic ledger collision and an existing-schema upgrade ordering error.
+Per the user's explicit condition, root `worker.txt` was not replaced.
+See [candidate review and reproducible checks](worker-a2-candidate-review.md).
+Draft PR #4 remains unmerged and production is unchanged.
+
+The sections below preserve the **initial audit**, before the source was
+provided. Its source-recovery status and follow-up requirements are superseded
+by the candidate review above; its production baseline remains reference data.
+
 ## Status: blocked on exact Worker source
 
 This branch starts from fetched `origin/main` at
