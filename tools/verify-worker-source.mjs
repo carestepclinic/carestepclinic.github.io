@@ -6,9 +6,9 @@ import { resolve } from 'node:path';
 // Immutable A.2 audit artifact. Never repin this to a corrective source.
 export const EXPECTED_A2_SHA256 =
   '9f54ddd87f542e749cf0c070a292d7d56e11e0409895fc34d929740e4dbc21a7';
-// Independently reviewed A.2.1 corrective delta; see docs/worker-a2-1-corrective.md.
+// Independently reviewed A.2.2 corrective delta; see docs/worker-a2-1-corrective.md.
 export const EXPECTED_WORKER_SHA256 =
-  '66403079610f63123e5c7c653f32e8b468011a3a00fda4beab670ed25fbb4624';
+  '677e602440017e1ff781524e8da04b00044939ade6d66a4065cdfa0dbbdcc3c9';
 
 export function verifyWorkerSource(bytes) {
   const hash = value => createHash('sha256').update(value).digest('hex');
@@ -24,10 +24,10 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const result = verifyWorkerSource(readFileSync(new URL('../worker.txt', import.meta.url)));
     console.log(JSON.stringify(result, null, 2));
     if (!result.ok) {
-      console.error('BLOCKED: worker.txt does not match the reviewed v10.7-A.2.1 corrective source. Do not deploy. See docs/worker-a2-1-corrective.md.');
+      console.error('BLOCKED: worker.txt does not match the reviewed v10.7-A.2.2 corrective source. Do not deploy. See docs/worker-a2-1-corrective.md.');
       process.exitCode = 1;
     } else {
-      console.log('Reviewed A.2.1 corrective source hash matched. Manual production deployment gates still apply.');
+      console.log('Reviewed A.2.2 corrective source hash matched. Manual production deployment gates still apply.');
     }
   } catch (error) {
     console.error(`BLOCKED: unable to verify Worker source: ${error.message}`);

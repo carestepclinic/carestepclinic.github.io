@@ -1,16 +1,20 @@
 # CARESTEP production source of truth
 
-This is the **v10.7-A.2.1 corrective branch** for the two reproduced P1 defects.
+This is the **v10.7-A.2.2 corrective branch** for three reproduced P1 defects:
+clinic ledger isolation, schema ordering and missing followup assignment columns.
 It is stacked on PR #4; PR #4 remains Draft/BLOCKED and the deployed Worker
-remains A.2. No production action has been performed.
+remains A.2. This corrective change and its tests did not access Production.
 
 | Component | Production | This corrective branch |
 | --- | --- | --- |
 | Clinic UI | v10.7-A | Unchanged |
-| Worker | v10.7-A.2 | v10.7-A.2.1 corrective candidate |
+| Worker | v10.7-A.2 | v10.7-A.2.2 corrective candidate |
 | Windows eFriends Agent | v10.7-A.4 | Unchanged |
 
 See [corrective design, migration and tests](docs/worker-a2-1-corrective.md).
+The [assignment contract and new identity](docs/worker-a2-2-assignment-contract.md)
+supersede the A.2.1 candidate and its prior approval hash. Local validation is
+**50 PASS / 0 FAIL** (19 regression + 13 D1 readiness + 14 assignment + 4 verifier).
 The [A.2 source audit](docs/production-source-of-truth.md) and
 [A.2 failure report](docs/worker-a2-candidate-review.md) remain historical
 evidence for the immutable source preserved in PR #4.

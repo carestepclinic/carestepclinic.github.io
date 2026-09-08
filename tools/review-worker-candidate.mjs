@@ -16,7 +16,7 @@ const bytes = readFileSync(resolve(process.argv[2]));
 const source = bytes.toString('utf8');
 const auditBytes = readFileSync(new URL('../incoming/worker-v10.7-A.2.txt', import.meta.url));
 const auditSource = auditBytes.toString('utf8').replace(/\r\n/g, '\n');
-const targetVersion = '10.7-A.2.1';
+const targetVersion = '10.7-A.2.2';
 const baseRef = '26395b304c94ea40a016c44b2e815da828e91c75';
 const base = execFileSync(process.env.CARESTEP_GIT || 'git', ['show', `${baseRef}:worker.txt`], { cwd: root, encoding: 'utf8', maxBuffer: 5e6 });
 const names = text => [...new Set([...text.matchAll(/^(?:async )?function\s+(\w+)\s*\(/gm)].map(m => m[1]))];
@@ -70,10 +70,11 @@ await check('independent A.2 audit hash and corrective source/version identities
 const baseline = await load(base);
 const candidate = await load(source);
 const audit = await load(auditSource);
-await check('only the three P1 ledger functions differ from exact A.2', () => {
+await check('only four existing P1 functions differ from exact A.2; assignment helper added', () => {
   const changedFromA2 = names(auditSource).filter(name => !candidate[name] || audit[name].toString() !== candidate[name].toString().replace(/\r\n/g, '\n'));
-  assert.deepEqual(changedFromA2.sort(), ['efSyncEnsureSchema', 'efSyncLedgerMark', 'saasEmrSyncStatus'].sort());
-  assert.deepEqual(names(source).sort(), names(auditSource).sort());
+  assert.deepEqual(changedFromA2.sort(), ['efSyncEnsureSchema', 'efSyncLedgerMark', 'saasEmrSyncStatus', 'ensureSaasDb'].sort());
+  assert.deepEqual(names(auditSource).filter(name => !names(source).includes(name)), []);
+  assert.deepEqual(names(source).filter(name => !names(auditSource).includes(name)), ['ensureFollowupCaseAssignmentSchema']);
 });
 await check('all main and A.2 schema table declarations retained', () => {
   const tables = text => new Set([...text.matchAll(/CREATE TABLE IF NOT EXISTS (\w+)/g)].map(m => m[1]));

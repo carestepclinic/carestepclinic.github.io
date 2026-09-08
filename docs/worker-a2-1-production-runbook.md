@@ -1,28 +1,35 @@
-# CARESTEP v10.7-A.2.1 Production Runbook — 실행 비승인 초안
+# CARESTEP v10.7-A.2.2 Production Runbook — 실행 비승인 초안
 
 ## 현재 판정과 범위
 
-**문서 작성 완료 / Production 실행 BLOCKED(승인·대상·권한 미확인).**
-2026-09-08 현재 Production read-only 조회도 수행하지 않았다. 이 문서는
+**A.2.2 로컬 검증 완료 / Production 실행 BLOCKED(새 계약·drift·실행 승인 미확정).**
+이번 A.2.2 수정 작업에서는 Production에 접속하지 않았다. 앞선 A.2.1 일부 read-only
+조회와 승인은 이 후보의 실행 승인으로 재사용하지 않는다. 이 문서는
 배포·조회·백업·복원·smoke test의 실행 승인이 아니다. 모든 SQL은 검토용
 주석 상태이며 원격 명령 예시는 비활성 수동 초안이다. 실행 스크립트는 제공하지 않는다.
 
 | 기준 | 확인 상태 |
 | --- | --- |
 | 브랜치 | `fix/v10.7-a2-regression-p1`, 시작 working tree clean |
-| 문서 작업 시작 HEAD | `4ee65287b53de0238bc41a740dc071b8b628321b` |
-| Worker 버전 | CARESTEP_VERSION / CARESTEP_BUILD / EFSYNC_VERSION 모두 `10.7-A.2.1` |
-| Worker SHA-256 | `66403079610f63123e5c7c653f32e8b468011a3a00fda4beab670ed25fbb4624` |
+| A.2.2 수정 시작 HEAD | `9a5c3ec216915090a43b4c80204c677bcdca6395` |
+| Worker 버전 | CARESTEP_VERSION / CARESTEP_BUILD / EFSYNC_VERSION 모두 `10.7-A.2.2` |
+| Worker SHA-256 | `677e602440017e1ff781524e8da04b00044939ade6d66a4065cdfa0dbbdcc3c9` |
 | immutable A.2 SHA-256 | `9f54ddd87f542e749cf0c070a292d7d56e11e0409895fc34d929740e4dbc21a7` |
 | PR #5 | Draft, base `fix/v10.7-worker-source-of-truth`; base 변경 금지 |
 | PR #4 | Draft/BLOCKED, head `94cbdff853c0421719b6f808782a29ca8eaf3c42`; 변경 금지 |
-| 검증 | regression 19 + local workerd/D1 13 + verifier 4 = 36 PASS / 0 FAIL |
+| 검증 | regression 19 + local workerd/D1 13 + assignment D1 14 + verifier 4 = 50 PASS / 0 FAIL |
 | 확인하지 않은 항목 | 실제 계정/Worker/DB 연결, 실제 schema drift, 용량, 권한, 백업, 복구시간, writer 통제, live 연동 |
 
-이 작업은 Worker와 기존 테스트를 변경하지 않는다. 이전 검증 환경·시나리오는
+이 작업은 담당자 컬럼 계약을 보완하여 Worker 버전과 해시를 변경했다. 이전 검증 환경·시나리오는
 [readiness 증거](worker-a2-1-production-readiness.md), P1 설계는
 [corrective 문서](worker-a2-1-corrective.md)에 있다. 로컬 D1 성공은 live 용량·권한·데이터의 증명이 아니다.
 승인자는 아래 미확인 항목을 해소하기 전 배포에 서명하면 안 된다.
+
+기존 A.2.1 SHA-256은
+`66403079610f63123e5c7c653f32e8b468011a3a00fda4beab670ed25fbb4624`이다.
+현재 후보와 혼동하지 않는다. [A.2.2 계약·검증·숫자 전용 SQL 제안](worker-a2-2-assignment-contract.md)을
+먼저 검토한다. Production의 추가 컬럼 2개가 후보와 같은지는 미확인이다.
+SQL 07–32 자동 재개와 기존 외부 도구·allowlist 수정은 금지한다.
 
 이번 작업에서 금지하고 실행하지 않은 항목: main push/merge, PR Ready/merge,
 Worker deploy, Production DDL/DML/migration/FullReconcile, Agent·Secret·binding·환경변수·Cron 변경,
@@ -70,6 +77,17 @@ Wrangler execute에 SQL을 안전하게 검증해 주는 dry-run이 있다고 �
 efSyncEnsureSchema, efSyncLedgerMark, saasEmrSyncStatus. 아래 명세는 P1 대상과 직접 의존성이다.
 다른 객체가 불필요하다는 뜻이 아니다. 전체 Production schema를 고정 소스의 table/column/index/trigger
 선언 및 기존 migration 상태와 대조하고 예상하지 못한 차이는 별도 검토한다.
+
+### care_followup_cases 담당자 계약
+
+`assignee_user_id`, `vet_user_id` 모두 `TEXT NOT NULL DEFAULT ''`, PK=0이다.
+빈 문자열은 미배정이며 기존 INSERT가 생략해도 성공해야 한다. 전체 컬럼은 26개이며
+컬럼 위치는 통과 기준이 아니다. FK·담당자 index는 새로 요구하지 않는다.
+테이블 생성 이후 누락 컬럼만 additive 보완한다. 기존 정의 불일치는
+`FOLLOWUP_ASSIGNMENT_SCHEMA_CONTRACT_MISMATCH`로 BLOCK하며 재정의·삭제·데이터 복사는 금지한다.
+후속 preflight는 두 컬럼의 존재·계약 boolean을 새로 승인받아 확인해야 한다.
+기존 정의가 호환되면 두 컬럼의 ALTER는 없어야 하며, post-check에서도 계약을 확인한다.
+메타데이터 검사는 임의의 기존 CHECK/FK/UNIQUE 제약까지 보증하지 않으므로 별도 drift 검토가 필요하다.
 
 ### ledger 전체 컬럼
 
@@ -225,7 +243,9 @@ count로 확장 검토하는 계획을 별도 승인받고, 결손 시 예상 DM
 
 공통 판정: PASS=승인된 기대 상태 일치, WARN=알려진 pre-upgrade 결손/legacy 한계(서면 수용 필요),
 BLOCK=대상·권한 미확인, 오정의, 예상 밖 결손/변화, 시간·용량 예산 초과, 개인정보 출력 위험.
-실제 Production 결과는 전부 NOT RUN이다. 쿼리의 timeout도 재시도/권한확대 사유가 아니다.
+이번 A.2.2 작업의 Production 실행은 전부 NOT RUN이다. 앞선 A.2.1 결과는 제한된
+기록에서 별도 검토하며 새 후보에 대한 승인으로 간주하지 않는다.
+쿼리의 timeout도 재시도/권한확대 사유가 아니다.
 
 ## 백업·복구 절차 초안 — 현재 미실행
 
@@ -258,7 +278,7 @@ export 문법은 [공식 Wrangler D1 명령](https://developers.cloudflare.com/d
 검토한 초안이다. 선택한 고정 CLI 버전의 옵션을 비운영에서 확인한 뒤만 사용한다.
 백업 실패/불완전/시점 불명/복구권한 불명/복구시험 실패 시 즉시 중단한다.
 
-복구 우선순위는 **A.2.1 유지 + 영향 경로 격리 + 증거 보존 + forward-fix**다.
+복구 우선순위는 **A.2.2 유지 + 영향 경로 격리 + 증거 보존 + forward-fix**다.
 이미 승인·시험된 ingress 제한 또는 유지보수 통제가 있는지 확인하되 존재한다고 가정하지 않는다.
 Agent/Cron/Secret을 임의 변경하는 해결책은 제시하지 않는다. 통제 수단이 없으면 배포 전에 BLOCK.
 장애 시 F 승인을 받아 영향 경로만 제한하고 정상 서비스의 범위를 명시한다. 전체 DB 복원은
@@ -272,7 +292,7 @@ forward-fix는 원인 재현, 영향 범위 확인, 기존 행 보존, 별도 �
 ## 적용 순서와 단계별 gate — 모두 미래 승인 대상
 
 결론은 **조건부 D1 먼저, Worker 나중**이다. v2 신규 테이블/컬럼/index는 A.2의 기존 schema를
-제거하지 않으며 A.2.1은 v2를 요구하므로 schema post-check를 먼저 하는 편이 낫다.
+제거하지 않으며 A.2.2은 v2를 요구하므로 schema post-check를 먼저 하는 편이 낫다.
 그러나 A.2 writer가 계속 쓰는 전환 구간은 안전하지 않다. writer 통제 및 정확한 Production
 drift 기반 DDL-only artifact가 아직 없으므로 **실제 실행 계획은 BLOCKED**다.
 Worker-first lazy bootstrap이나 임의의 전체 ensureSaasDb 실행으로 우회하지 않는다.
@@ -285,7 +305,7 @@ flowchart TD
   D --> E[preflight SQL와 DDL artifact 검토]
   E --> F[D1 additive 보완]
   F --> G[schema 및 legacy post-check]
-  G --> H[D 승인 후 A.2.1 Worker 배포]
+  G --> H[D 승인 후 A.2.2 Worker 배포]
   H --> I[승인된 health와 S smoke]
   I --> J[clinic 격리 확인과 관찰]
   J --> K{완료 기준 충족}
@@ -308,7 +328,7 @@ flowchart TD
 | 5 preflight | DB 담당자+검토자, R/M | 통제 구간 Q1–Q7 재대조, 정확한 DDL plan hash 검토 | 예상 drift만 존재·baseline 확정 | 미예상 차이 BLOCK / DDL artifact 격리 재현 후 6 |
 | 6 D1 보완 | DB 담당자, M | 승인된 결손 컬럼→index, v2→index, 필요한 trigger만 수동 적용 | 단계별 성공·실행된 객체 목록 | batch 실패/통제 상실 즉시 BLOCK / 모두 성공 후 7 |
 | 7 schema post-check | 독립 검토자, R | Q1–Q6 및 승인된 보존 검증 | v1 불변, v2 신규 시 0행, 기대 PK/정의 | count 변화·자동복사·오정의 BLOCK / PASS 후 8 |
-| 8 Worker 배포 | 배포 담당자, D | 고정 artifact hash·설정 diff 확인, 선택한 배포 경로 수동 실행 | 10.7-A.2.1, binding/Secret/Cron 변경 없음 | SHA/설정 불일치 BLOCK / 배포 식별 증거 후 9 |
+| 8 Worker 배포 | 배포 담당자, D | 고정 artifact hash·설정 diff 확인, 선택한 배포 경로 수동 실행 | 10.7-A.2.2, binding/Secret/Cron 변경 없음 | SHA/설정 불일치 BLOCK / 배포 식별 증거 후 9 |
 | 9 health | 운영자, 승인된 R health | 정확한 eFriends health만, 원문 저장 금지 | HTTP 200·version 일치·대상 clinic 일치 boolean | 실패 BLOCK / D1 연결은 별도 Q 검사 후 10 |
 | 10 최소 smoke | 테스트 담당자, 개별 S | 아래 분류에서 승인된 항목만 | 결과/부작용 없는 집계 증거 | 외부 요청·예상 밖 쓰기 BLOCK / PASS 후 11 |
 | 11 clinic isolation | DB 담당자, R/S | 합성 검사 또는 승인된 정상 관측의 scoped 집계 | A/B 서로 변경 없음, 기대 lastSeen | 혼선 BLOCK / scoped PASS 후 12 |
@@ -353,22 +373,24 @@ clinic 간 혼선, 예상 밖 외부 요청, 개인정보 노출 가능성, CI/r
 writer 통제 불능, 미검토 bootstrap DML, RTO/RPO·관찰 창·임계치 미정.
 
 중단 시 운영자: 원인/시각/단계/영향 범위를 민감정보 없이 기록 → 승인된 영향 경로 제한으로
-새 쓰기 확대를 막음 → A.2.1·v1·v2 및 백업 증거 보존 → F 책임자가 forward-fix/복구 검토.
+새 쓰기 확대를 막음 → A.2.2·v1·v2 및 백업 증거 보존 → F 책임자가 forward-fix/복구 검토.
 DDL 일부 성공을 자동 DROP하거나 v1을 재작성하지 않는다. 통제·복구가 불가능하면 중단 상태를
 선언하고 재승인을 기다린다. 단순 A.2 코드 revert나 무조건 전체 백업 restore는 안전 대안이 아니다.
 
 ## 문서 작성 단계의 검증과 다음 승인
 
 문서 검토에서 비활성 SQL/placeholder, 민감정보 미포함, Production 실행 표현 없음,
-Worker byte identity를 확인한다. 기존 36개 검사를 재실행하고 새 문서 commit의 CI까지 확인한다.
+Worker byte identity를 확인한다. 기존 36개 검사와 새 14개 담당자 검사를 실행하고 최종 commit의 CI까지 확인한다.
 실제 Production 조회·변경·백업은 수행하지 않는다.
 
-이번 문서 검증 결과: 기존 36개 검사 모두 PASS, verifier identity PASS. 문서의 32개 조회 SQL은
-후보 schema를 만든 로컬 메모리 SQLite에서 query_only를 켠 후 모두 실행 가능함을 확인했다.
-이는 SQL 구문·로컬 호환성 검사이며 remote D1 권한이나 실제 Production 결과의 증명이 아니다.
-32개 SQL 확인은 기존 테스트 총계 36에 더하지 않는다.
+현재 A.2.2 검증 결과: 50 PASS / 0 FAIL, verifier identity PASS.
+문서의 기존 32개 조회 SQL 구문 검증은 A.2.1 당시의 역사적 로컬 증거이며,
+이번에 Production이나 기존 도구를 실행한 것이 아니다. remote D1 권한 또는 실제 결과의 증명도 아니다.
+SQL 구문 확인은 50개 테스트 총계에 더하지 않는다.
 
-다음으로 요청할 수 있는 승인은 **특정 대상의 R read-only preflight만**이다.
+다음으로 요청할 수 있는 승인은 **새 담당자 계약을 숫자로 확인하는 최소 R 조회만**이다.
+새 SQL·고정 도구/allowlist·오프라인 fixture를 별도 검토한 뒤 승인받는다.
+기존 24-column fixture를 그대로 재실행하거나 SQL 07–32를 자동 재개하지 않는다.
 대상은 제한된 기록으로 대조하고, read-only 기술 보장/SQL 목록/담당자/시간/출력 정책이
 확정되어야 한다. R 승인만으로 B/M/D/S/F는 허용되지 않는다.
 서명 항목은 [별도 승인 체크리스트](worker-a2-1-production-approval-checklist.md)에 있다.

@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node readiness.mjs"
+    "test": "node readiness.mjs && node assignment-contract.mjs"
   },
   "devDependencies": {
     "miniflare": "4.20260730.0"

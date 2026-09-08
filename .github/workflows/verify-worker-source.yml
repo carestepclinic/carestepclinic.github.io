@@ -1,4 +1,4 @@
-name: Verify v10.7-A.2.1 corrective Worker
+name: Verify v10.7-A.2.2 corrective Worker
 
 on:
   push:
@@ -153,3 +153,6 @@ jobs:
 
       - name: Local workerd D1 readiness (no remote bindings)
         run: node tools/d1-readiness/readiness.mjs
+
+      - name: Local assignment schema contract (fresh, legacy, partial, drift)
+        run: node tools/d1-readiness/assignment-contract.mjs

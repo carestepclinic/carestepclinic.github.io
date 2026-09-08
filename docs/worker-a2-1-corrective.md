@@ -1,4 +1,4 @@
-# Worker v10.7-A.2.1 — P1 corrective delta
+# Worker v10.7-A.2.2 — P1 corrective delta
 
 ## Scope and identities
 
@@ -10,10 +10,10 @@ branch, metadata and immutable A.2 source are not changed by this work.
 | Artifact | Version | SHA-256 (Git/LF bytes) |
 | --- | --- | --- |
 | `incoming/worker-v10.7-A.2.txt` | Exact deployed A.2 audit | `9f54ddd87f542e749cf0c070a292d7d56e11e0409895fc34d929740e4dbc21a7` |
-| `worker.txt` on corrective branch | 10.7-A.2.1 | `66403079610f63123e5c7c653f32e8b468011a3a00fda4beab670ed25fbb4624` |
+| `worker.txt` on corrective branch | 10.7-A.2.2 | `677e602440017e1ff781524e8da04b00044939ade6d66a4065cdfa0dbbdcc3c9` |
 
-CARESTEP_VERSION, CARESTEP_BUILD and EFSYNC_VERSION are 10.7-A.2.1.
-Clinic UI remains 10.7-A, Windows Agent remains 10.7-A.4. A.2.1 is a
+CARESTEP_VERSION, CARESTEP_BUILD and EFSYNC_VERSION are 10.7-A.2.2.
+Clinic UI remains 10.7-A, Windows Agent remains 10.7-A.4. A.2.2 is a
 corrective candidate, **not the version currently deployed to production**.
 No merge to main, deployment, production D1 migration, FullReconcile, Windows
 change, or production data operation is performed here.
@@ -33,7 +33,7 @@ or legacy ledger UPDATE in this corrective migration.
 
 All runtime ledger access in this Worker is accounted for:
 
-| Caller | A.2.1 behavior |
+| Caller | A.2.2 behavior |
 | --- | --- |
 | efSyncEnsureSchema | Retains legacy DDL; adds v2 table and indexes |
 | efSyncLedgerMark | Writes v2; ON CONFLICT(clinic_id,record_key) |
@@ -88,10 +88,23 @@ added or changed. This ordering adjustment is necessary for the requested
 fresh DB case, within the same initialization P1 scope.
 
 Actual initializer tests cover a fresh empty database, pinned main-era schema,
-the full main-era initializer followed by A.2.1, and repeated initialization
+the full main-era initializer followed by A.2.2, and repeated initialization
 using a newly loaded Worker module to bypass the warm-instance readiness flag.
 Already-present columns/indexes remain intact. No production schema is queried
 or changed by these tests.
+
+## P1-3: followup assignment schema contract
+
+The A.2/A.2.1 Worker used `assignee_user_id` and `vet_user_id` without creating
+them. A.2.2 guarantees both as `TEXT NOT NULL DEFAULT ''`, with no new FK/index.
+Fresh bootstrap includes them. A post-table helper adds only missing columns,
+rejects incompatible existing definitions without rewriting them, and checks
+the final metadata. Existing rows and PKs are preserved; compatible columns
+are a no-op. See [contract, source rationale and 14 local D1 cases](worker-a2-2-assignment-contract.md).
+
+The superseded A.2.1 candidate hash was
+`66403079610f63123e5c7c653f32e8b468011a3a00fda4beab670ed25fbb4624`.
+It remains historical evidence; its prior approvals do not apply to A.2.2.
 
 ## Verification
 
@@ -120,20 +133,22 @@ Latest local behavioral result: **19 PASS / 0 FAIL**, including:
 - eFriends health/auth/status/runs/finish/empty sync-batch; reconcile
   eligible counts/missing/extras; checkpoint/resume; quarantine; retry/dead-letter.
 - No existing named functions or schema table declarations removed.
-- Only **3 of 610 A.2 named function bodies** differ: efSyncEnsureSchema,
-  efSyncLedgerMark, saasEmrSyncStatus. All other 607 are unchanged.
+- Only **4 of 610 A.2 named function bodies** differ: efSyncEnsureSchema,
+  efSyncLedgerMark, saasEmrSyncStatus and ensureSaasDb. The other 606 are
+  unchanged; ensureFollowupCaseAssignmentSchema is one new helper.
 - Toss, Billing, Subscription, SOLAPI, Kakao, Home, HQ, Auth, Encryption,
   Patient CRM and remaining eFriends functions/routes are preserved.
 
 Additional local checks: `node --check` passes for the Worker (temporary .mjs
 copy) and all three verification modules; source-verifier unit tests pass
 **4/4 with no skips**; root hash verification returns ok=true; git diff --check
-passes. The Worker delta against PR #4 is **13 inserted / 7 deleted lines**.
+passes. Local workerd/D1 readiness adds 13 checks and the new assignment suite
+adds 14: **50 PASS / 0 FAIL** including regression 19 and verifier 4.
 
 The A.2 retry policy is unchanged: third total failure enters dead_letter
 (two retries after an initial failure). No Agent or vaccination eligibility
 logic is changed. The existing A.2 regression report remains historical evidence;
-it is not the result for A.2.1.
+it is not the result for A.2.2.
 
 CI on this corrective branch verifies both distinct identities, syntax,
 function/table preservation, markers, verifier unit tests and the behavioral
@@ -152,7 +167,7 @@ it to source does not execute a production migration now. Review legacy ledger
 retention and backups before that deployment. Do not run FullReconcile to fill
 v2. Let the unchanged A.4 scheduled Agent provide normal observations.
 
-After approved deployment, check health version 10.7-A.2.1, expected clinic,
+After approved deployment, check health version 10.7-A.2.2, expected clinic,
 normal status/reconcile, the next scheduled sync, retry/deadLetter/quarantine,
 and v2 ledger visibility. Keep Clinic UI/Windows Agent versions independent.
 Complete the non-destructive Home/HQ/CRM/payment smoke plan and verify no
@@ -160,8 +175,9 @@ unexpected legacy-table writes by any other still-running A.2 Worker.
 
 ## Isolated local D1 readiness follow-up
 
-The unchanged Worker was subsequently exercised in local Miniflare/workerd D1,
+The earlier A.2.1 candidate was exercised in local Miniflare/workerd D1,
 including nonempty sync and real retry processing. See
 [Production readiness evidence](worker-a2-1-production-readiness.md) for the
 13 additional scenarios, isolation controls, rollback rehearsal and manual gates.
+Those 13 cases were rerun on A.2.2 alongside the new 14 assignment cases.
 This supplements the 19 SQLite regressions; it does not authorize deployment.

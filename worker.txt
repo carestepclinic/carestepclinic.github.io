@@ -5,8 +5,8 @@
 // CARESTEP Clinic v9.1 · Production Launch · Governance · Resilience
 const OPENAI_URL = 'https://api.openai.com/v1/responses';
 
-const CARESTEP_VERSION='10.7-A.2.1';
-const CARESTEP_BUILD='10.7-A.2.1';
+const CARESTEP_VERSION='10.7-A.2.2';
+const CARESTEP_BUILD='10.7-A.2.2';
 const CARESTEP_CLIENT_BUILDS={clinic:'10.7-A',home:'10.1-J',hq:'10.4-G',homeCache:'carestep-home-v10-1-j-production-operations'};
 const CARESTEP_CLIENT_PATCHES={clinic:'10.7-A',home:'10.1-J',hq:'10.4-G'};
 const HOME_TERMS_VERSION='2026-09-03-home-v1.0';
@@ -286,7 +286,7 @@ const SAAS_SCHEMA_STATEMENTS=[
 `CREATE INDEX IF NOT EXISTS idx_followup_crm_outcomes_journey ON followup_crm_outcomes(clinic_id,journey_id,occurred_at DESC)`,
 `CREATE TABLE IF NOT EXISTS followup_crm_case_reviews(clinic_id TEXT NOT NULL,case_key TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'active',manual_priority TEXT NOT NULL DEFAULT '',reviewed_at TEXT DEFAULT '',reviewed_by TEXT DEFAULT '',updated_at TEXT NOT NULL,PRIMARY KEY(clinic_id,case_key))`,
 `CREATE INDEX IF NOT EXISTS idx_followup_crm_reviews_status ON followup_crm_case_reviews(clinic_id,status,updated_at DESC)`,
-`CREATE TABLE IF NOT EXISTS care_followup_cases(id TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,case_key TEXT NOT NULL,message_case_key TEXT NOT NULL DEFAULT '',patient_id TEXT NOT NULL,guardian_id TEXT NOT NULL,journey_id TEXT NOT NULL DEFAULT '',journey_version INTEGER NOT NULL DEFAULT 0,template_id TEXT NOT NULL DEFAULT '',start_date TEXT NOT NULL,stage_days_json TEXT NOT NULL DEFAULT '[]',status TEXT NOT NULL DEFAULT 'draft',revision INTEGER NOT NULL DEFAULT 1,calendar_provider TEXT NOT NULL DEFAULT '',calendar_id TEXT NOT NULL DEFAULT '',calendar_name TEXT NOT NULL DEFAULT '',calendar_status TEXT NOT NULL DEFAULT 'not_started',calendar_events_json TEXT NOT NULL DEFAULT '{}',calendar_error TEXT NOT NULL DEFAULT '',calendar_synced_at TEXT NOT NULL DEFAULT '',created_by TEXT NOT NULL,updated_by TEXT NOT NULL,created_at TEXT NOT NULL,updated_at TEXT NOT NULL,UNIQUE(clinic_id,case_key))`,
+`CREATE TABLE IF NOT EXISTS care_followup_cases(id TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,case_key TEXT NOT NULL,message_case_key TEXT NOT NULL DEFAULT '',patient_id TEXT NOT NULL,guardian_id TEXT NOT NULL,assignee_user_id TEXT NOT NULL DEFAULT '',vet_user_id TEXT NOT NULL DEFAULT '',journey_id TEXT NOT NULL DEFAULT '',journey_version INTEGER NOT NULL DEFAULT 0,template_id TEXT NOT NULL DEFAULT '',start_date TEXT NOT NULL,stage_days_json TEXT NOT NULL DEFAULT '[]',status TEXT NOT NULL DEFAULT 'draft',revision INTEGER NOT NULL DEFAULT 1,calendar_provider TEXT NOT NULL DEFAULT '',calendar_id TEXT NOT NULL DEFAULT '',calendar_name TEXT NOT NULL DEFAULT '',calendar_status TEXT NOT NULL DEFAULT 'not_started',calendar_events_json TEXT NOT NULL DEFAULT '{}',calendar_error TEXT NOT NULL DEFAULT '',calendar_synced_at TEXT NOT NULL DEFAULT '',created_by TEXT NOT NULL,updated_by TEXT NOT NULL,created_at TEXT NOT NULL,updated_at TEXT NOT NULL,UNIQUE(clinic_id,case_key))`,
 `CREATE INDEX IF NOT EXISTS idx_care_followup_cases_patient ON care_followup_cases(clinic_id,patient_id,updated_at DESC)`,
 `CREATE INDEX IF NOT EXISTS idx_care_followup_cases_status ON care_followup_cases(clinic_id,status,updated_at DESC)`,
 `CREATE INDEX IF NOT EXISTS idx_care_followup_cases_message_key ON care_followup_cases(clinic_id,message_case_key)`,
@@ -1376,10 +1376,29 @@ function overageLineItems(rows=[]){return rows.map(x=>({type:'message_overage',m
 async function markOveragePaid(env,orderId,approvedAt){await env.DB.prepare(`UPDATE messaging_overage_settlements SET status='paid',settled_at=?1,updated_at=?1 WHERE invoice_order_id=?2 AND status='attached'`).bind(approvedAt,orderId).run();}
 async function releaseOverageAttachment(env,orderId){await env.DB.prepare(`UPDATE messaging_overage_settlements SET status='pending',invoice_order_id='',updated_at=?1 WHERE invoice_order_id=?2 AND status='attached'`).bind(new Date().toISOString(),orderId).run();}
 async function overageSettlementRowsForClinic(env,clinicId,limit=18){const r=await env.DB.prepare(`SELECT * FROM messaging_overage_settlements WHERE clinic_id=?1 ORDER BY usage_month DESC LIMIT ?2`).bind(clinicId,Math.max(1,Math.min(36,Number(limit)||18))).all();return (r.results||[]).map(x=>({month:x.usage_month,planCode:x.plan_code,included:Number(x.included_messages)||0,used:Number(x.used_messages)||0,overageCount:Number(x.overage_count)||0,unitPriceKrw:Number(x.unit_price_krw)||0,amountKrw:Number(x.amount_krw)||0,status:x.status,invoiceOrderId:x.invoice_order_id||'',settledAt:x.settled_at||''}));}
+async function ensureFollowupCaseAssignmentSchema(env){
+  const columns=['assignee_user_id','vet_user_id'];
+  const reject=()=>{throw Object.assign(new Error('FOLLOWUP_ASSIGNMENT_SCHEMA_CONTRACT_MISMATCH'),{status:503,code:'FOLLOWUP_ASSIGNMENT_SCHEMA_CONTRACT_MISMATCH'});};
+  const compatible=column=>{
+    let value=String(column.dflt_value??'').trim();
+    while(value.startsWith('(')&&value.endsWith(')'))value=value.slice(1,-1).trim();
+    return String(column.type).trim().toUpperCase()==='TEXT'&&Number(column.notnull)===1&&Number(column.pk)===0&&value==="''";
+  };
+  const before=(await env.DB.prepare('PRAGMA table_info(care_followup_cases)').all()).results||[];
+  if(!before.length)reject();
+  // Reject incompatible existing definitions before adding either missing column.
+  for(const name of columns){const column=before.find(x=>x.name===name);if(column&&!compatible(column))reject();}
+  const missing=columns.filter(name=>!before.some(x=>x.name===name));
+  if(missing.length)await env.DB.batch(missing.map(name=>env.DB.prepare("ALTER TABLE care_followup_cases ADD COLUMN "+name+" TEXT NOT NULL DEFAULT ''")));
+  const after=(await env.DB.prepare('PRAGMA table_info(care_followup_cases)').all()).results||[];
+  for(const name of columns){const column=after.find(x=>x.name===name);if(!column||!compatible(column))reject();}
+}
+
 async function ensureSaasDb(env){
   if(!env.DB) throw new Error('Cloudflare D1 binding DB가 설정되지 않았습니다.');
   if(saasDbReady)return;
   await env.DB.batch(SAAS_SCHEMA_STATEMENTS.map(x=>env.DB.prepare(x)));
+  await ensureFollowupCaseAssignmentSchema(env);
   const clinicCols=await env.DB.prepare('PRAGMA table_info(clinics)').all();
   const names=new Set((clinicCols.results||[]).map(x=>x.name));
   const alters=[];
@@ -4517,7 +4536,7 @@ async function runHomePreventivePushCycle(env){
  * eFriends source access stays on the hospital server and is read-only.
  * Missing source rows are never auto-deleted from CARESTEP.
  */
-const EFSYNC_VERSION='10.7-A.2.1';
+const EFSYNC_VERSION='10.7-A.2.2';
 const EFSYNC_SEARCH_INDEX_VERSION='10.6-B.2';
 const EFSYNC_RETRY_LIMIT=3;
 const EFSYNC_MAX_GUARDIANS=100;

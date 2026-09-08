@@ -1,4 +1,15 @@
-# v10.7-A.2.1 isolated D1 readiness evidence
+# Isolated D1 readiness: current A.2.2 and historical A.2.1
+
+The current candidate is **10.7-A.2.2**, SHA-256
+`677e602440017e1ff781524e8da04b00044939ade6d66a4065cdfa0dbbdcc3c9`.
+Its [assignment contract validation](worker-a2-2-assignment-contract.md) adds
+14 independent local D1 scenarios. The existing 36 checks were rerun and pass:
+**50 PASS / 0 FAIL** combined. Production migration/deploy remains BLOCKED;
+old A.2.1 approvals do not authorize this new candidate.
+
+The sections below retain the original **A.2.1 historical evidence**. Their
+36 checks did not cover the newly identified assignment-column contract.
+Statements about unchanged Worker bytes describe that earlier follow-up only.
 
 ## Decision
 
