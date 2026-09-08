@@ -96,7 +96,9 @@ jobs:
           grep -Fq 'CREATE TABLE IF NOT EXISTS efriends_sync_ledger_v2' worker.txt
           grep -Fq 'PRIMARY KEY(clinic_id,record_key)' worker.txt
           grep -Fq 'INSERT OR IGNORE INTO efriends_sync_ledger_v2' worker.txt
-          grep -Fq "SAAS_SCHEMA_STATEMENTS.filter(x=>!x.includes('CREATE INDEX IF NOT EXISTS idx_care_home_followups_consult_status'))" worker.txt
+          grep -Fq 'const saasTableStatements=SAAS_SCHEMA_STATEMENTS.filter' worker.txt
+          grep -Fq "const saasPostTableStatements=SAAS_SCHEMA_STATEMENTS.filter" worker.txt
+          grep -Fq "idx_care_home_followups_consult_status" worker.txt
           if grep -Eq 'DROP[[:space:]]+(TABLE|INDEX)[[:space:]]+.*efriends_sync_ledger|DELETE[[:space:]]+FROM[[:space:]]+efriends_sync_ledger' worker.txt; then exit 1; fi
 
       - name: Existing verifier unit tests
