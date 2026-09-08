@@ -1,0 +1,104 @@
+name: Verify v10.7-A.2 Worker source
+
+on:
+  push:
+    branches:
+      - fix/v10.7-worker-source-of-truth
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  verify-worker-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download exact raw incoming Worker and verify SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED='9f54ddd87f542e749cf0c070a292d7d56e11e0409895fc34d929740e4dbc21a7'
+          RAW_URL="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/incoming/worker-v10.7-A.2.txt"
+          curl -fsSL --retry 3 --retry-delay 1 "$RAW_URL" -o /tmp/worker-v10.7-A.2.raw.txt
+          ACTUAL="$(sha256sum /tmp/worker-v10.7-A.2.raw.txt | awk '{print $1}')"
+          echo "raw_sha256=$ACTUAL"
+          test "$ACTUAL" = "$EXPECTED"
+          cmp -s /tmp/worker-v10.7-A.2.raw.txt incoming/worker-v10.7-A.2.txt
+          grep -Fq "const CARESTEP_VERSION='10.7-A.2';" /tmp/worker-v10.7-A.2.raw.txt
+          grep -Fq "const CARESTEP_BUILD='10.7-A.2';" /tmp/worker-v10.7-A.2.raw.txt
+
+      - name: Exact diff summary against origin/main worker.txt
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git show origin/main:worker.txt > /tmp/main-worker.txt
+          cp incoming/worker-v10.7-A.2.txt /tmp/a2-worker.txt
+          echo '--- byte counts ---'
+          wc -c /tmp/main-worker.txt /tmp/a2-worker.txt
+          echo '--- line counts ---'
+          wc -l /tmp/main-worker.txt /tmp/a2-worker.txt
+          echo '--- diff numstat ---'
+          git diff --no-index --numstat -- /tmp/main-worker.txt /tmp/a2-worker.txt || true
+          echo '--- diff stat ---'
+          git diff --no-index --stat -- /tmp/main-worker.txt /tmp/a2-worker.txt || true
+          echo '--- version lines ---'
+          grep -n "CARESTEP_VERSION\|CARESTEP_BUILD\|EFSYNC_VERSION" /tmp/main-worker.txt | head -20 || true
+          grep -n "CARESTEP_VERSION\|CARESTEP_BUILD\|EFSYNC_VERSION" /tmp/a2-worker.txt | head -20 || true
+
+      - name: Static regression markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          F=incoming/worker-v10.7-A.2.txt
+          required=(
+            'TOSS'
+            'SOLAPI'
+            'kakao_pf_id'
+            'carestep-home'
+            'HQ'
+            'billing'
+            'subscription'
+            'password'
+            'AES-GCM'
+            'care_guardians'
+            'care_patients'
+            'care_patient_events'
+            '/efriends/v1/health'
+            '/efriends/v1/status'
+            '/efriends/v1/runs'
+            '/efriends/v1/sync-batch'
+            '/efriends/v1/reconcile'
+            '/efriends/v1/checkpoint'
+            'retry'
+            'dead_letter'
+            'quarantine'
+            'ledger'
+            'clinic_id'
+            'sourceEligibleVaccinations'
+            'sourceEligibleHeartworm'
+          )
+          for marker in "${required[@]}"; do
+            grep -Fqi -- "$marker" "$F" || { echo "MISSING marker: $marker"; exit 1; }
+            echo "PASS marker: $marker"
+          done
+
+      - name: JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp incoming/worker-v10.7-A.2.txt /tmp/worker.mjs
+          node --check /tmp/worker.mjs
+
+      - name: Existing source verifier tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tools/verify-worker-source.test.mjs
