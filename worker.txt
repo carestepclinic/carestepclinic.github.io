@@ -5,8 +5,8 @@
 // CARESTEP Clinic v9.1 · Production Launch · Governance · Resilience
 const OPENAI_URL = 'https://api.openai.com/v1/responses';
 
-const CARESTEP_VERSION='10.7-A.2';
-const CARESTEP_BUILD='10.7-A.2';
+const CARESTEP_VERSION='10.7-A.2.1';
+const CARESTEP_BUILD='10.7-A.2.1';
 const CARESTEP_CLIENT_BUILDS={clinic:'10.7-A',home:'10.1-J',hq:'10.4-G',homeCache:'carestep-home-v10-1-j-production-operations'};
 const CARESTEP_CLIENT_PATCHES={clinic:'10.7-A',home:'10.1-J',hq:'10.4-G'};
 const HOME_TERMS_VERSION='2026-09-03-home-v1.0';
@@ -1380,7 +1380,9 @@ async function overageSettlementRowsForClinic(env,clinicId,limit=18){const r=awa
 async function ensureSaasDb(env){
   if(!env.DB) throw new Error('Cloudflare D1 binding DB가 설정되지 않았습니다.');
   if(saasDbReady)return;
-  await env.DB.batch(SAAS_SCHEMA_STATEMENTS.map(x=>env.DB.prepare(x)));
+  const saasTableStatements=SAAS_SCHEMA_STATEMENTS.filter(x=>/^\s*CREATE TABLE IF NOT EXISTS /i.test(x));
+  const saasPostTableStatements=SAAS_SCHEMA_STATEMENTS.filter(x=>!/^\s*CREATE TABLE IF NOT EXISTS /i.test(x)&&!x.includes('CREATE INDEX IF NOT EXISTS idx_care_home_followups_consult_status'));
+  await env.DB.batch([...saasTableStatements,...saasPostTableStatements].map(x=>env.DB.prepare(x)));
   const clinicCols=await env.DB.prepare('PRAGMA table_info(clinics)').all();
   const names=new Set((clinicCols.results||[]).map(x=>x.name));
   const alters=[];
@@ -4518,7 +4520,7 @@ async function runHomePreventivePushCycle(env){
  * eFriends source access stays on the hospital server and is read-only.
  * Missing source rows are never auto-deleted from CARESTEP.
  */
-const EFSYNC_VERSION='10.7-A.2';
+const EFSYNC_VERSION='10.7-A.2.1';
 const EFSYNC_SEARCH_INDEX_VERSION='10.6-B.2';
 const EFSYNC_RETRY_LIMIT=3;
 const EFSYNC_MAX_GUARDIANS=100;
@@ -4574,6 +4576,12 @@ async function efSyncEnsureSchema(env){
       carestep_id TEXT DEFAULT '',source_hash TEXT DEFAULT '',status TEXT NOT NULL DEFAULT 'seen',run_id TEXT DEFAULT '',
       last_seen_at TEXT NOT NULL,last_success_at TEXT DEFAULT '',last_error TEXT DEFAULT '')`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_efsync_ledger_clinic_status ON efriends_sync_ledger(clinic_id,status,last_seen_at DESC)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS efriends_sync_ledger_v2(
+      clinic_id TEXT NOT NULL,record_key TEXT NOT NULL,entity_kind TEXT NOT NULL,external_id TEXT DEFAULT '',source_ref TEXT DEFAULT '',
+      carestep_id TEXT DEFAULT '',source_hash TEXT DEFAULT '',status TEXT NOT NULL DEFAULT 'seen',run_id TEXT DEFAULT '',
+      last_seen_at TEXT NOT NULL,last_success_at TEXT DEFAULT '',last_error TEXT DEFAULT '',
+      PRIMARY KEY(clinic_id,record_key))`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_efsync_ledger_v2_clinic_status ON efriends_sync_ledger_v2(clinic_id,status,last_seen_at DESC)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS efriends_sync_failures(
       id TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,kind TEXT NOT NULL,external_id TEXT DEFAULT '',source_ref TEXT DEFAULT '',
       payload_cipher TEXT DEFAULT '',payload_hash TEXT DEFAULT '',attempt_count INTEGER NOT NULL DEFAULT 1,status TEXT NOT NULL DEFAULT 'retry',
@@ -4598,6 +4606,8 @@ async function efSyncEnsureSchema(env){
       differences INTEGER NOT NULL DEFAULT 0,detail_json TEXT DEFAULT '{}',created_at TEXT NOT NULL)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_efsync_reconcile_clinic ON efriends_sync_reconcile(clinic_id,created_at DESC)`)
   ]);
+  await env.DB.prepare(`INSERT OR IGNORE INTO efriends_sync_ledger_v2(clinic_id,record_key,entity_kind,external_id,source_ref,carestep_id,source_hash,status,run_id,last_seen_at,last_success_at,last_error)
+    SELECT clinic_id,record_key,entity_kind,external_id,source_ref,carestep_id,source_hash,status,run_id,last_seen_at,last_success_at,last_error FROM efriends_sync_ledger`).run();
   const patientCols=await env.DB.prepare('PRAGMA table_info(care_patients)').all(),patientNames=new Set((patientCols.results||[]).map(x=>x.name));
   if(!patientNames.has('active'))await env.DB.prepare("ALTER TABLE care_patients ADD COLUMN active INTEGER NOT NULL DEFAULT 1").run();
   await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_care_patients_active_updated ON care_patients(clinic_id,active,updated_at DESC)`).run();
@@ -4609,7 +4619,7 @@ async function efSyncGetPatientMap(env,cid,externalId){return env.DB.prepare(`SE
 function efSyncRecordKey(kind,row={}){const externalId=clean(row.externalGuardianId||row.external_guardian_id||row.externalPatientId||row.external_patient_id||row.externalId||'',120),sourceRef=clean(row.sourceRef||row.source_ref||'',240);return `${kind}:${externalId}:${sourceRef}`}
 async function efSyncLedgerMark(env,cid,kind,row,status,now,carestepId='',runId='',error=''){
   const externalId=clean(row.externalGuardianId||row.external_guardian_id||row.externalPatientId||row.external_patient_id||row.externalId||'',120),sourceRef=clean(row.sourceRef||row.source_ref||'',240),sourceHash=clean(row.sourceHash||row.source_hash||'',100),key=efSyncRecordKey(kind,row);
-  await env.DB.prepare(`INSERT INTO efriends_sync_ledger(record_key,clinic_id,entity_kind,external_id,source_ref,carestep_id,source_hash,status,run_id,last_seen_at,last_success_at,last_error) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12) ON CONFLICT(record_key) DO UPDATE SET carestep_id=excluded.carestep_id,source_hash=excluded.source_hash,status=excluded.status,run_id=excluded.run_id,last_seen_at=excluded.last_seen_at,last_success_at=CASE WHEN excluded.status='synced' THEN excluded.last_success_at ELSE efriends_sync_ledger.last_success_at END,last_error=excluded.last_error`).bind(key,cid,kind,externalId,sourceRef,clean(carestepId,180),sourceHash,status,clean(runId,180),now,status==='synced'?now:'',clean(error,500)).run();
+  await env.DB.prepare(`INSERT INTO efriends_sync_ledger_v2(clinic_id,record_key,entity_kind,external_id,source_ref,carestep_id,source_hash,status,run_id,last_seen_at,last_success_at,last_error) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12) ON CONFLICT(clinic_id,record_key) DO UPDATE SET carestep_id=excluded.carestep_id,source_hash=excluded.source_hash,status=excluded.status,run_id=excluded.run_id,last_seen_at=excluded.last_seen_at,last_success_at=CASE WHEN excluded.status='synced' THEN excluded.last_success_at ELSE efriends_sync_ledger_v2.last_success_at END,last_error=excluded.last_error`).bind(cid,key,kind,externalId,sourceRef,clean(carestepId,180),sourceHash,status,clean(runId,180),now,status==='synced'?now:'',clean(error,500)).run();
 }
 async function efSyncQuarantineRow(env,cid,kind,row,conflictType,candidateIds,now){
   const externalId=clean(row.externalGuardianId||row.external_guardian_id||row.externalPatientId||row.external_patient_id||'',120);if(!externalId)return;
@@ -4816,7 +4826,7 @@ async function saasEmrSyncStatus(env,s){
     env.DB.prepare(`SELECT * FROM efriends_sync_reconcile WHERE clinic_id=?1 ORDER BY created_at DESC LIMIT 1`).bind(cid).first(),
     env.DB.prepare(`SELECT status,COUNT(*) n FROM efriends_sync_failures WHERE clinic_id=?1 AND status IN('retry','dead_letter') GROUP BY status`).bind(cid).all(),
     env.DB.prepare(`SELECT status,COUNT(*) n FROM efriends_sync_quarantine WHERE clinic_id=?1 AND status='pending' GROUP BY status`).bind(cid).all(),
-    env.DB.prepare(`SELECT last_seen_at FROM efriends_sync_ledger WHERE clinic_id=?1 ORDER BY last_seen_at DESC LIMIT 1`).bind(cid).first(),
+    env.DB.prepare(`SELECT last_seen_at FROM efriends_sync_ledger_v2 WHERE clinic_id=?1 ORDER BY last_seen_at DESC LIMIT 1`).bind(cid).first(),
     env.DB.prepare(`SELECT entity_kind,external_id,conflict_type,updated_at FROM efriends_sync_quarantine WHERE clinic_id=?1 AND status='pending' ORDER BY updated_at DESC LIMIT 10`).bind(cid).all()
   ]);
   const parse=x=>{try{return JSON.parse(x||'{}')}catch{return {}}},source=parse(lastSuccess?.detail_json),heartbeatDetail=parse(heartbeat?.detail_json),reconcileDetail=parse(reconcile?.detail_json),q={retry:0,deadLetter:0,quarantine:0};for(const r of (queueCounts.results||[])){if(r.status==='retry')q.retry=Number(r.n)||0;if(r.status==='dead_letter')q.deadLetter=Number(r.n)||0}q.quarantine=Number(quarantineCounts.results?.[0]?.n)||0;

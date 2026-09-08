@@ -14,6 +14,8 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 if (!process.argv[2]) throw new Error('Supply the candidate Worker path; worker.txt is never replaced by this tool.');
 const bytes = readFileSync(resolve(process.argv[2]));
 const source = bytes.toString('utf8');
+const correctiveMode = process.env.CARESTEP_REVIEW_MODE === 'corrective';
+const expectedVersion = correctiveMode ? '10.7-A.2.1' : '10.7-A.2';
 const baseRef = '26395b304c94ea40a016c44b2e815da828e91c75';
 const base = execFileSync(process.env.CARESTEP_GIT || 'git', ['show', `${baseRef}:worker.txt`], { cwd: root, encoding: 'utf8', maxBuffer: 5e6 });
 const names = text => [...new Set([...text.matchAll(/^(?:async )?function\s+(\w+)\s*\(/gm)].map(m => m[1]))];
@@ -59,9 +61,11 @@ async function check(name, fn) {
   try { await fn(); results.push({ name, pass: true }); }
   catch (error) { results.push({ name, pass: false, error: error.message }); }
 }
-await check('exact raw SHA-256 and component versions', () => {
-  assert.equal(createHash('sha256').update(bytes).digest('hex'), EXPECTED_WORKER_SHA256);
-  for (const name of ['CARESTEP_VERSION', 'EFSYNC_VERSION']) assert.match(source, new RegExp(`const ${name}='10\\.7-A\\.2'`));
+await check(correctiveMode ? 'corrective SHA differs from A.2 and component versions are A.2.1' : 'exact raw SHA-256 and component versions', () => {
+  const actualSha = createHash('sha256').update(bytes).digest('hex');
+  if (correctiveMode) assert.notEqual(actualSha, EXPECTED_WORKER_SHA256); else assert.equal(actualSha, EXPECTED_WORKER_SHA256);
+  const escapedVersion = expectedVersion.replace(/\./g, '\\.');
+  for (const name of ['CARESTEP_VERSION', 'CARESTEP_BUILD', 'EFSYNC_VERSION']) assert.match(source, new RegExp(`const ${name}='${escapedVersion}'`));
 });
 const baseline = await load(base);
 const candidate = await load(source);
@@ -85,7 +89,7 @@ await check('health rejects missing auth; valid auth returns A.2', async () => {
   assert.equal((await candidate.handleEfriendsSyncRequest(new Request(url), env)).status, 401);
   const response = await candidate.handleEfriendsSyncRequest(new Request(url, { headers: { Authorization: `Bearer ${env.EFRIENDS_SYNC_API_KEY}` } }), env);
   const body = await response.json();
-  assert.equal(body.version, '10.7-A.2');
+  assert.equal(body.version, expectedVersion);
   assert.equal(body.db, true); // Binding-presence check only, not proof of D1 connectivity.
 });
 await check('HQ master auth retained and missing credentials rejected', async () => {
@@ -144,7 +148,8 @@ await check('ledger isolates the same external ID across two clinics', async () 
   const { api, sql, env } = await fixture();
   try {
     for (const clinic of ['clinic-A', 'clinic-B']) await api.efSyncLedgerMark(env, clinic, 'patient', { externalPatientId: 'same-id' }, 'synced', '2026-09-08T00:00:00Z', `${clinic}-patient`, `${clinic}-run`);
-    const rows = sql.prepare('SELECT clinic_id,carestep_id FROM efriends_sync_ledger ORDER BY clinic_id').all();
+    const ledgerTable = correctiveMode ? 'efriends_sync_ledger_v2' : 'efriends_sync_ledger';
+    const rows = sql.prepare(`SELECT clinic_id,carestep_id FROM ${ledgerTable} ORDER BY clinic_id`).all();
     assert.equal(rows.length, 2, `Expected two isolated rows; actual ${JSON.stringify(rows)}`);
     assert.equal(rows[0].carestep_id, 'clinic-A-patient');
   } finally { sql.close(); }
@@ -157,5 +162,39 @@ await check('ensureSaasDb upgrades the main schema without an ordering error', a
     await freshCandidate.ensureSaasDb({ DB });
   } finally { sql.close(); }
 });
+if (correctiveMode) {
+  await check('fresh schema initialization creates consult columns and dependent index', async () => {
+    const { sql, DB } = database();
+    try {
+      const freshCandidate = await load(source);
+      await freshCandidate.ensureSaasDb({ DB });
+      const cols = sql.prepare("PRAGMA table_info(care_home_followups)").all().map(x => x.name);
+      assert.ok(cols.includes('consult_status'));
+      assert.ok(cols.includes('consult_updated_at'));
+      assert.equal(sql.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='index' AND name='idx_care_home_followups_consult_status'").get().n, 1);
+    } finally { sql.close(); }
+  });
+  await check('legacy ledger rows migrate additively and remain preserved', async () => {
+    const api = await load(source);
+    const { sql, DB } = database();
+    try {
+      sql.exec('CREATE TABLE care_patients(id TEXT, clinic_id TEXT, active INTEGER, updated_at TEXT)');
+      sql.exec('CREATE TABLE care_patient_events(clinic_id TEXT, event_type TEXT, source_ref TEXT)');
+      sql.exec("CREATE TABLE efriends_sync_ledger(record_key TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,entity_kind TEXT NOT NULL,external_id TEXT DEFAULT '',source_ref TEXT DEFAULT '',carestep_id TEXT DEFAULT '',source_hash TEXT DEFAULT '',status TEXT NOT NULL DEFAULT 'seen',run_id TEXT DEFAULT '',last_seen_at TEXT NOT NULL,last_success_at TEXT DEFAULT '',last_error TEXT DEFAULT '')");
+      sql.exec("INSERT INTO efriends_sync_ledger VALUES('patient:same-id:','clinic-A','patient','same-id','','clinic-A-patient','','synced','clinic-A-run','2026-09-08T00:00:00Z','2026-09-08T00:00:00Z','')");
+      const env = { DB, EFRIENDS_SYNC_CLINIC_ID: 'clinic-A', CARESTEP_PATIENT_DATA_KEY: 'offline-fixture-key-never-used-in-production' };
+      await api.efSyncEnsureSchema(env);
+      assert.equal(sql.prepare('SELECT COUNT(*) n FROM efriends_sync_ledger').get().n, 1);
+      const copied = sql.prepare("SELECT clinic_id,carestep_id FROM efriends_sync_ledger_v2 WHERE clinic_id='clinic-A'").get();
+      assert.equal(copied.carestep_id, 'clinic-A-patient');
+      await api.efSyncLedgerMark(env, 'clinic-B', 'patient', { externalPatientId: 'same-id' }, 'synced', '2026-09-08T00:01:00Z', 'clinic-B-patient', 'clinic-B-run');
+      const rows = sql.prepare('SELECT clinic_id,carestep_id FROM efriends_sync_ledger_v2 ORDER BY clinic_id').all();
+      assert.equal(rows.length, 2);
+      assert.equal(rows[0].carestep_id, 'clinic-A-patient');
+      assert.equal(rows[1].carestep_id, 'clinic-B-patient');
+      assert.equal(sql.prepare('SELECT COUNT(*) n FROM efriends_sync_ledger').get().n, 1);
+    } finally { sql.close(); }
+  });
+}
 console.log(JSON.stringify({ baseRef, sha256: createHash('sha256').update(bytes).digest('hex'), namedFunctions: { before: names(base).length, after: names(source).length, changed: changed.length, unchanged: names(base).length - changed.length }, results, passed: results.filter(r => r.pass).length, failed: results.filter(r => !r.pass).length }, null, 2));
 if (results.some(result => !result.pass)) process.exitCode = 1;
