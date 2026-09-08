@@ -6,8 +6,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>CARESTEP Clinic v10.6-C · 예방일정·임상기록 개선</title>
-  <meta name="carestep-build" content="v10.6-C-preventive-clinical-timeline" />
+  <title>CARESTEP Clinic v10.7-A · 데이터 정합성·안정화</title>
+  <meta name="carestep-build" content="v10.7-A-data-integrity-stabilization" />
   <meta name="description" content="동물병원 보호자 교육자료 라이브러리 및 병원 맞춤 PDF 생성 MVP" />
   <style>
 :root {
@@ -952,7 +952,7 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
   <section id="loginView" class="login-shell">
     <div class="login-card saas-login-card">
       <div class="brand-mark">CS</div>
-      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.6-C</p>
+      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.7-A</p>
       <h1>CARESTEP Clinic</h1>
       <p class="login-copy">병원별 계정과 직원 권한으로 CARESTEP을 시작합니다.</p>
 
@@ -1214,7 +1214,7 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
 
       <section id="patients" class="view">
         <div class="patient-crm-head">
-          <div><p class="eyebrow">PATIENT SEARCH 2.0 · v10.6-C</p><h3>보호자 · 환자 통합 작업공간</h3><p>환자명·보호자·전화번호·eFriends 번호·품종·생년월일을 암호화 색인으로 빠르게 검색하고 예방 일정을 함께 확인합니다.</p></div>
+          <div><p class="eyebrow">PATIENT SEARCH 2.0 · v10.7-A</p><h3>보호자 · 환자 통합 작업공간</h3><p>환자명·보호자·전화번호·eFriends 번호·품종·생년월일을 암호화 색인으로 빠르게 검색하고 예방 일정을 함께 확인합니다.</p></div>
           <div class="patient-crm-actions"><button id="patientCrmRefresh" class="btn btn-secondary" type="button">새로고침</button><button id="patientCrmNewGuardian" class="btn btn-secondary" type="button">+ 보호자 등록</button><button id="patientCrmNewPatient" class="btn btn-primary" type="button">+ 환자 등록</button></div>
         </div>
         <div class="patient-crm-notice"><span>🔒</span><div><b>병원별 분리 · 암호화 저장</b><br>보호자명·연락처, 환자 식별정보와 건강 타임라인 제목·메모는 병원별로 분리해 암호화 저장합니다. 체중·접종·사상충·병원 진료·Journey는 환자별 날짜순으로 누적됩니다.</div></div>
@@ -1954,12 +1954,13 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
           <div id="settingsPartnerNotice" class="settings-partner-notice hidden"><b>EMR·Partner API는 HQ 승인 후 사용합니다.</b><span>계약 전에는 별도 설정이 필요하지 않습니다. 계약 후 HQ에서 Partner 연결과 전용 API Key를 발급하세요.</span></div>
         </div>
         <section id="emrSyncCenter" class="panel emr-sync-center" aria-labelledby="emrSyncTitle">
-          <div class="emr-sync-head"><div><p class="eyebrow">EMR SYNC CENTER · v10.6-A</p><h3 id="emrSyncTitle">eFriends 동기화 관리센터</h3><p>Windows 서버의 자동 동기화와 CARESTEP 반영 상태를 원장·관리자가 한눈에 확인합니다.</p></div><div class="emr-sync-actions"><span id="emrSyncBadge" class="emr-sync-badge">확인 전</span><button id="refreshEmrSync" class="btn btn-secondary" type="button">상태 새로고침</button></div></div>
+          <div class="emr-sync-head"><div><p class="eyebrow">EMR SYNC CENTER · v10.7-A</p><h3 id="emrSyncTitle">eFriends 동기화 관리센터</h3><p>Windows 서버의 자동 동기화와 CARESTEP 반영 상태를 원장·관리자가 한눈에 확인합니다.</p></div><div class="emr-sync-actions"><span id="emrSyncBadge" class="emr-sync-badge">확인 전</span><button id="refreshEmrSync" class="btn btn-secondary" type="button">상태 새로고침</button></div></div>
           <div id="emrSyncReason" class="emr-sync-reason">동기화 상태를 불러오는 중입니다.</div>
           <div class="emr-sync-time-grid"><div class="emr-sync-stat"><span>마지막 백업</span><b id="emrLastBackup">--</b><small id="emrBackupMeta">확인 전</small></div><div class="emr-sync-stat"><span>마지막 동기화 성공</span><b id="emrLastSuccess">--</b><small id="emrLastSuccessMeta">확인 전</small></div><div class="emr-sync-stat"><span>다음 자동 확인 예정</span><b id="emrNextRun">--</b><small id="emrAgentMeta">Windows Agent 확인 전</small></div></div>
           <div class="emr-sync-section"><h4>eFriends 원본 데이터</h4><div id="emrCountGrid" class="emr-sync-count-grid"></div></div>
           <div class="emr-sync-section"><h4>최근 동기화 처리 결과</h4><div id="emrChangeGrid" class="emr-sync-change-grid"></div></div>
-          <div class="emr-sync-section"><h4>오류 환자·실패 원인</h4><div id="emrSyncErrors" class="emr-sync-errors"></div></div>
+          <div class="emr-sync-section"><h4>데이터 정합성</h4><div id="emrIntegrityGrid" class="emr-sync-change-grid"></div></div>
+          <div class="emr-sync-section"><h4>오류·확인 필요</h4><div id="emrSyncErrors" class="emr-sync-errors"></div></div>
           <details class="emr-sync-guide"><summary>관리자용 일시중지·재시도 안내</summary><div class="emr-sync-guide-body"><div class="emr-sync-command"><code>schtasks /Change /TN "CARESTEP eFriends Sync" /DISABLE</code><button class="btn btn-ghost" type="button" data-emr-copy="pause">일시중지 명령 복사</button></div><div class="emr-sync-command"><code>schtasks /Run /TN "CARESTEP eFriends Sync"</code><button class="btn btn-ghost" type="button" data-emr-copy="retry">즉시 확인 명령 복사</button></div><div class="emr-sync-command"><code>schtasks /Change /TN "CARESTEP eFriends Sync" /ENABLE</code><button class="btn btn-ghost" type="button" data-emr-copy="resume">자동실행 명령 복사</button></div></div></details>
           <div class="emr-sync-private">환자명·보호자명·전화번호는 이 상태 화면에 표시하거나 별도로 저장하지 않습니다. 오류에는 외부 환자번호와 기술 원인만 표시합니다.</div>
         </section>
@@ -4190,7 +4191,7 @@ async function refreshDailyWorkflowIndicators(force=false){
   await Promise.allSettled(jobs);updateDailyWorkflowIndicators();
 }
 
-const CARESTEP_CLIENT_VERSION='10.6-B.1';
+const CARESTEP_CLIENT_VERSION='10.7-A';
 function careUiState(value){const raw=String(value||'scheduled').toLowerCase();if(['completed','resolved','sent','delivered','synced','seen','closed','canceled','cancelled','replaced','paid','succeeded'].includes(raw))return {key:'completed',label:'완료'};if(['attention','failed','error','reconnect','expired','overdue','needs_action','permission_missing','past_due'].includes(raw))return {key:'attention',label:'확인 필요'};if(['active','in_progress','sending','processing','awaiting_client','partial','provider_pending','checking','retrying','requested'].includes(raw))return {key:'active',label:'진행 중'};return {key:'scheduled',label:'예정'};}
 function careTechnicalDetails(rows=[]){const items=rows.filter(x=>x&&x[1]!==undefined&&x[1]!==null&&String(x[1]).trim()!=='');return items.length?`<details class="care-tech-details"><summary>상세 보기</summary>${items.map(x=>`<div><span>${escapeHtml(x[0])}</span><b>${escapeHtml(x[1])}</b></div>`).join('')}</details>`:'';}
 function enhanceResponsiveTables(root=document){root.querySelectorAll('.admin-table').forEach(table=>{const labels=[...table.querySelectorAll('thead th')].map(x=>x.textContent.trim());table.querySelectorAll('tbody tr').forEach(row=>[...row.children].forEach((cell,i)=>cell.dataset.label=labels[i]||'항목'));});}
@@ -4275,14 +4276,15 @@ function renderEmrSyncCenter(){
   const badge=$('emrSyncBadge'),reason=$('emrSyncReason'),countGrid=$('emrCountGrid'),changeGrid=$('emrChangeGrid'),errors=$('emrSyncErrors');if(!badge||!reason)return;
   if(emrSyncLoading){badge.className='emr-sync-badge';badge.textContent='확인 중';reason.textContent='Windows Agent와 최근 동기화 상태를 확인하고 있습니다.';return;}
   if(!emrSyncState){badge.className='emr-sync-badge stopped';badge.textContent='확인 필요';reason.textContent=saasMode==='auth'?'동기화 상태를 불러오지 못했습니다. Worker와 관리자 권한을 확인해주세요.':'병원 계정으로 로그인하면 EMR 동기화 상태를 확인할 수 있습니다.';return;}
-  const d=emrSyncState,state=d.state||{},backup=d.backup||{},agent=d.agent||{},last=d.lastSuccess||{},counts=d.counts||{},changes=d.changes||{};
+  const d=emrSyncState,state=d.state||{},backup=d.backup||{},agent=d.agent||{},last=d.lastSuccess||{},counts=d.counts||{},changes=d.changes||{},integrity=d.integrity||{};
   badge.className=`emr-sync-badge ${state.code||''}`;badge.textContent=state.label||'확인 필요';reason.textContent=state.reason||'상태 설명이 없습니다.';
   if($('emrLastBackup'))$('emrLastBackup').textContent=emrDate(backup.modifiedAt);if($('emrBackupMeta'))$('emrBackupMeta').textContent=backup.name?`${backup.name} · ${emrBytes(backup.sizeBytes)}`:'Windows Agent 업데이트 후 표시됩니다.';
   if($('emrLastSuccess'))$('emrLastSuccess').textContent=emrDate(last.finishedAt);if($('emrLastSuccessMeta'))$('emrLastSuccessMeta').textContent=last.mode?`${last.mode==='reconcile'?'전체 대조':'증분 동기화'} · ${last.status||''}`:'완료 기록 없음';
-  if($('emrNextRun'))$('emrNextRun').textContent=emrDate(agent.nextExpectedAt);if($('emrAgentMeta'))$('emrAgentMeta').textContent=agent.version?`Agent v${agent.version} · ${agent.intervalMinutes||15}분 간격`:'v10.6-B Windows Agent 설치 필요';
+  if($('emrNextRun'))$('emrNextRun').textContent=emrDate(agent.nextExpectedAt);if($('emrAgentMeta'))$('emrAgentMeta').textContent=agent.version?`Agent v${agent.version} · ${agent.intervalMinutes||15}분 간격`:'v10.7-A Windows Agent 설치 필요';
   const countItems=[['보호자',counts.guardians],['환자',counts.patients],['진료',counts.visits],['체중',counts.weights],['접종',counts.vaccinations],['사상충',counts.heartworm]];if(countGrid)countGrid.innerHTML=countItems.map(x=>`<div class="emr-sync-stat"><span>${x[0]}</span><b>${Number(x[1]||0).toLocaleString('ko-KR')}</b><small>eFriends 원본</small></div>`).join('');
   const changeItems=[['보호자 생성',changes.guardiansCreated],['환자 생성',changes.patientsCreated],['환자 수정',changes.patientsUpdated],['기록 생성',changes.eventsCreated],['기록 수정',changes.eventsUpdated],['중복 처리',changes.eventsDeduped]];if(changeGrid)changeGrid.innerHTML=changeItems.map(x=>`<div class="emr-sync-stat"><span>${x[0]}</span><b>${Number(x[1]||0).toLocaleString('ko-KR')}</b><small>최근 성공 실행</small></div>`).join('');
-  const failures=Array.isArray(d.failures)?d.failures:[];if(errors)errors.innerHTML=failures.length?failures.map(x=>`<div class="emr-sync-error"><b>${escapeHtml(x.externalId?`외부 환자 ${x.externalId}`:'동기화 실행 오류')}</b><br>${escapeHtml(x.message||'원인을 확인해주세요.')} · ${escapeHtml(emrDate(x.finishedAt||x.startedAt))}</div>`).join(''):'<div class="emr-sync-empty">최근 기록된 동기화 실패가 없습니다.</div>';
+  const integrityGrid=$('emrIntegrityGrid'),integrityItems=[['자동 재시도',integrity.retry,'다음 실행에서 재처리'],['Dead Letter',integrity.deadLetter,'3회 실패 · 확인 필요'],['매칭 확인',integrity.quarantine,'자동 병합 차단'],['정합성 차이',integrity.differences,integrity.reconcileAt?`대조 ${emrDate(integrity.reconcileAt)}`:'대조 전']];if(integrityGrid)integrityGrid.innerHTML=integrityItems.map(x=>`<div class="emr-sync-stat"><span>${x[0]}</span><b>${Number(x[1]||0).toLocaleString('ko-KR')}</b><small>${escapeHtml(x[2])}</small></div>`).join('');
+  const failures=Array.isArray(d.failures)?d.failures:[],quarantine=Array.isArray(d.quarantine)?d.quarantine:[],items=[...quarantine.map(x=>({externalId:x.externalId,message:`${x.kind==='guardian'?'보호자':'환자'} 매칭 확인 필요 · ${x.conflictType}`,when:x.updatedAt})),...failures.map(x=>({externalId:x.externalId,message:x.message,when:x.finishedAt||x.startedAt}))];if(errors)errors.innerHTML=items.length?items.map(x=>`<div class="emr-sync-error"><b>${escapeHtml(x.externalId?`외부 ID ${x.externalId}`:'동기화 실행 오류')}</b><br>${escapeHtml(x.message||'원인을 확인해주세요.')} · ${escapeHtml(emrDate(x.when))}</div>`).join(''):'<div class="emr-sync-empty">최근 기록된 동기화 실패나 매칭 확인 항목이 없습니다.</div>';
 }
 async function loadEmrSyncStatus(showToast=false){if(saasMode!=='auth'||!saasMe||!['owner','admin'].includes(saasMe.role||'')){emrSyncState=null;renderEmrSyncCenter();return false;}emrSyncLoading=true;renderEmrSyncCenter();try{emrSyncState=await saasRequest('/saas/emr-sync-status');if(showToast)toast('EMR 동기화 상태를 새로고침했습니다.');return true;}catch(e){emrSyncState=null;if(showToast)toast(e.message||'EMR 동기화 상태를 불러오지 못했습니다.');return false;}finally{emrSyncLoading=false;renderEmrSyncCenter();}}
 async function copyEmrCommand(kind){const commands={pause:'schtasks /Change /TN "CARESTEP eFriends Sync" /DISABLE',retry:'schtasks /Run /TN "CARESTEP eFriends Sync"',resume:'schtasks /Change /TN "CARESTEP eFriends Sync" /ENABLE'},value=commands[kind]||'';if(!value)return;try{await navigator.clipboard.writeText(value);toast('PowerShell 명령을 복사했습니다.');}catch{toast('명령을 복사하지 못했습니다.');}}
@@ -9612,8 +9614,8 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
 <script src="patient-breeds.js?v=9.5.3"></script>
-<script src="patient-crm.js?v=10.6-C"></script>
-<script src="patient-timeline.js?v=10.6-C"></script>
+<script src="patient-crm.js?v=10.7-A"></script>
+<script src="patient-timeline.js?v=10.7-A"></script>
 <script src="date-input-guard.js?v=9.5.3"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
 <!-- CARESTEP v9.1 · SOLAPI OAuth2 clinic-account messaging -->
