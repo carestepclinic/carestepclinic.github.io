@@ -53,6 +53,34 @@ jobs:
           grep -n "CARESTEP_VERSION\|CARESTEP_BUILD\|EFSYNC_VERSION" /tmp/main-worker.txt | head -20 || true
           grep -n "CARESTEP_VERSION\|CARESTEP_BUILD\|EFSYNC_VERSION" /tmp/a2-worker.txt | head -20 || true
 
+      - name: Function and schema regression inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          main = Path('/tmp/main-worker.txt').read_text(encoding='utf-8')
+          a2 = Path('/tmp/a2-worker.txt').read_text(encoding='utf-8')
+          fn_re = re.compile(r'(?m)^\s*(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(')
+          table_re = re.compile(r'CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+([A-Za-z0-9_]+)', re.I)
+          main_fn, a2_fn = set(fn_re.findall(main)), set(fn_re.findall(a2))
+          removed_fn = sorted(main_fn - a2_fn)
+          added_fn = sorted(a2_fn - main_fn)
+          print(f'main_functions={len(main_fn)} a2_functions={len(a2_fn)}')
+          print('removed_functions=' + (','.join(removed_fn) if removed_fn else '<none>'))
+          print('added_functions=' + (','.join(added_fn) if added_fn else '<none>'))
+          if removed_fn:
+              raise SystemExit('Existing named functions were removed')
+          main_tables, a2_tables = set(table_re.findall(main)), set(table_re.findall(a2))
+          removed_tables = sorted(main_tables - a2_tables)
+          added_tables = sorted(a2_tables - main_tables)
+          print('removed_schema_tables=' + (','.join(removed_tables) if removed_tables else '<none>'))
+          print('added_schema_tables=' + (','.join(added_tables) if added_tables else '<none>'))
+          if removed_tables:
+              raise SystemExit('Existing CREATE TABLE schema identifiers were removed')
+          PY
+
       - name: Static regression markers
         shell: bash
         run: |
