@@ -1,4 +1,4 @@
-name: Verify v10.7-A.2.2 corrective Worker
+name: Verify v10.7-A.2.3 corrective Worker
 
 on:
   push:
@@ -156,3 +156,6 @@ jobs:
 
       - name: Local assignment schema contract (fresh, legacy, partial, drift)
         run: node tools/d1-readiness/assignment-contract.mjs
+
+      - name: Local preventive cleanup trigger contract (no-op, drift, delete, merge, isolation)
+        run: node tools/d1-readiness/preventive-trigger-contract.mjs

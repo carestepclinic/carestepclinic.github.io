@@ -1,4 +1,4 @@
-# A.2.2 followup assignment schema contract
+# Followup assignment contract — introduced A.2.2, current A.2.3
 
 Production migration/deployment remains BLOCKED. This change and its tests did not access Production.
 Branch: fix/v10.7-a2-regression-p1. PR #5 stays Draft, base fix/v10.7-worker-source-of-truth.
@@ -12,12 +12,12 @@ and legacy initialization never guaranteed them. A fresh DB can initialize succe
 yet fail assignment UPDATE with a missing-column error. Legacy databases can have the same gap.
 The previous 36 checks did not exercise this schema contract.
 
-Source inventory in the current Worker: bootstrap at line 289; the new helper
-at line 1379 and its ensureSaasDb call at line 1401; patientWorkspace reads at
-line 4012; followupSafetyState at line 4175; the sole assignment UPDATE in
-putFollowupAssignment at line 4176. The existing INSERT statements name their
-columns explicitly (lines 3366, 4026 and 4166) and omit both assignment columns.
-User and clinic membership conventions are at lines 218-219. SELECTs feeding the two
+Source inventory in the current Worker: care_followup_cases bootstrap in
+SAAS_SCHEMA_STATEMENTS; ensureFollowupCaseAssignmentSchema called by ensureSaasDb;
+patientWorkspace and followupSafetyState read assignments; putFollowupAssignment
+contains the sole assignment UPDATE. Existing case INSERT statements name their
+columns explicitly and omit both assignment columns. The users and clinic_members
+declarations establish the user/membership conventions. SELECTs feeding the two
 read paths retrieve full case rows, then expose assignments with empty fallbacks.
 
 Both columns now have TEXT NOT NULL DEFAULT '', pk=0. Empty string is unassigned.
@@ -58,11 +58,14 @@ retry startup or silently relax the contract.
 No separate formal release-version policy exists in the repository. The source-of-truth
 policy requires distinct reviewed identity, and the Production Runbook requires a separate
 version/hash for forward fixes. Although A.2.1 was never deployed, its hash already identifies
-a reviewed/preflighted candidate. Therefore this new candidate is 10.7-A.2.2 in
-CARESTEP_VERSION, CARESTEP_BUILD and EFSYNC_VERSION. UI and Windows Agent remain unchanged.
+a reviewed/preflighted candidate. The assignment fix was therefore introduced as
+10.7-A.2.2. The subsequent preventive cleanup contract uses the same reasoning for
+10.7-A.2.3 in all three constants. UI and Windows Agent remain unchanged.
 
 - Superseded A.2.1 candidate: 66403079610f63123e5c7c653f32e8b468011a3a00fda4beab670ed25fbb4624.
-- New A.2.2 candidate: 677e602440017e1ff781524e8da04b00044939ade6d66a4065cdfa0dbbdcc3c9.
+- Preserved undeployed A.2.2 candidate: 677e602440017e1ff781524e8da04b00044939ade6d66a4065cdfa0dbbdcc3c9,
+  commit c3ca52b186e5075fd712b233cf935b064a46e75c.
+- Current A.2.3 candidate: 57c1076d2026e2d5d3a2632690d873041533d229847c3d3afc26bf850ca3076a.
 - Immutable incoming A.2: 9f54ddd87f542e749cf0c070a292d7d56e11e0409895fc34d929740e4dbc21a7.
 
 Old Worker approvals/hashes are not approval for this candidate. Existing external Phase 1
@@ -85,21 +88,24 @@ This verifies persistence, not a live authenticated assignment endpoint or provi
 
 The proposed numeric query below was also checked separately in an in-memory
 SQLite database with query_only enabled after synthetic schema creation. It
-returned 26,1,1,1,1. This documentation check is not added to the 50-test total.
+returned 26,1,1,1,1. This historical documentation check is not added to the test total.
 
 Existing regression 19 + local D1 13 + verifier 4 remain passing: 36 preserved.
-Combined: 50 PASS / 0 FAIL. Hash/syntax/inventory/diff checks are separate gates.
-All 610 original A.2 functions and existing tables remain; one helper is added.
+The original combined result was 50 PASS / 0 FAIL. A.2.3 reruns all 50 and adds
+40 preventive trigger cases: **90 PASS / 0 FAIL**. Hash/syntax/inventory/diff checks
+are separate gates. All 610 original A.2 functions and existing tables remain;
+there are now three added helpers across the stacked corrective delta.
 Four existing A.2 bodies differ: the three prior ledger functions and ensureSaasDb.
 Toss, SOLAPI, Kakao, Home/HQ/Auth/Encryption/CRM business functions retain the prior behavior.
-CI runs both isolated D1 suites and the existing checks for the final pushed commit.
+CI runs all three isolated D1 suites and the existing checks for the final pushed commit.
 A deliberate egress probe in the old suite is denied locally; no external request is sent.
 
-## Minimal Production proposal — NOT executed or approved
+## Numeric contract query — historical proposal, subsequently confirmed
 
-The actual extra Production columns are still unconfirmed; source-derived candidates are
-not a substitute for a scoped metadata check. Proposed query below returns only numbers.
-Expected result for precisely this 26-column contract: 26,1,1,1,1.
+The operator subsequently confirmed the Production result **26,1,1,1,1** through
+the separately approved A.2.2 assignment tool. Thus both extra columns and their
+contracts are confirmed; the A.2.3 code task does not requery Production. The SQL
+below is retained as the original design evidence, not new execution approval.
 A zero match can also mean unrecognized but equivalent default spelling: BLOCK for review,
 not permission to rewrite an existing column. Extra constraints/indexes require separate review.
 
@@ -130,16 +136,24 @@ FROM checked;
 ```
 
 No name, default value, schema SQL or actual row data is returned. Only metadata is read.
-The proposal is not part of any existing approved allowlist. A new pinned tool/allowlist
-and offline fixtures must be reviewed and separately authorized before Production execution.
+The separately reviewed external assignment tool/allowlist and its logs remain
+unchanged. Its previous execution approval does not authorize reruns or A.2.3 rollout.
 
 ## Where preflight resumes
 
 Do not automatically resume SQL 07–32 or rerun prior tools.
-After reviewing this commit and green CI, separately approve a numeric contract query.
-If the two Production columns match, update the future preflight fixture to the full 26-column
-contract with position-independent comparison. If they differ, retain BLOCK and review the
-existing definition; do not remove/replace columns to satisfy the validator.
+The assignment numeric check is already complete. Future metadata fixtures must
+retain all 26 columns and compare by name. Newly discovered drift still blocks;
+do not remove/replace columns to satisfy a validator.
+
+The operator also confirmed the preventive cleanup trigger with one separately
+approved read-only definition query and zero writes. Its creation provenance in
+Git remains unknown. A.2.3 preserves compatible instances as no-op, creates missing
+instances and blocks mismatches without replacement; see the
+[new trigger contract](worker-a2-3-preventive-trigger-contract.md).
+Next prepare a new A.2.3 Phase 1C tool with 16 indexes and 8 triggers, offline-review
+its new hashes and allowlist, then obtain separate execution approval. This task
+does not create that tool or change any existing tool/log.
 
 Next remaining gates include consult defaults, SQL 07 index/trigger definitions, consult index
 details and page/space estimates, ledger preservation and aggregate checks as explicitly approved.

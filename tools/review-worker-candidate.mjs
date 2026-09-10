@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
-import { EXPECTED_WORKER_SHA256, EXPECTED_A2_SHA256 } from './verify-worker-source.mjs';
+import { EXPECTED_WORKER_SHA256, EXPECTED_A2_SHA256, EXPECTED_A22_SHA256 } from './verify-worker-source.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 if (!process.argv[2]) throw new Error('Supply the candidate Worker path; worker.txt is never replaced by this tool.');
@@ -16,7 +16,9 @@ const bytes = readFileSync(resolve(process.argv[2]));
 const source = bytes.toString('utf8');
 const auditBytes = readFileSync(new URL('../incoming/worker-v10.7-A.2.txt', import.meta.url));
 const auditSource = auditBytes.toString('utf8').replace(/\r\n/g, '\n');
-const targetVersion = '10.7-A.2.2';
+const targetVersion = '10.7-A.2.3';
+const a22Ref = 'c3ca52b186e5075fd712b233cf935b064a46e75c';
+const a22Source = execFileSync(process.env.CARESTEP_GIT || 'git', ['show', `${a22Ref}:worker.txt`], { cwd: root, encoding: 'utf8', maxBuffer: 5e6 }).replace(/\r\n/g, '\n');
 const baseRef = '26395b304c94ea40a016c44b2e815da828e91c75';
 const base = execFileSync(process.env.CARESTEP_GIT || 'git', ['show', `${baseRef}:worker.txt`], { cwd: root, encoding: 'utf8', maxBuffer: 5e6 });
 const names = text => [...new Set([...text.matchAll(/^(?:async )?function\s+(\w+)\s*\(/gm)].map(m => m[1]))];
@@ -64,17 +66,20 @@ async function check(name, fn) {
 }
 await check('independent A.2 audit hash and corrective source/version identities', () => {
   assert.equal(createHash('sha256').update(auditSource).digest('hex'), EXPECTED_A2_SHA256);
+  assert.equal(createHash('sha256').update(a22Source).digest('hex'), EXPECTED_A22_SHA256);
   assert.equal(createHash('sha256').update(source.replace(/\r\n/g, '\n')).digest('hex'), EXPECTED_WORKER_SHA256);
   for (const name of ['CARESTEP_VERSION', 'CARESTEP_BUILD', 'EFSYNC_VERSION']) assert.ok(source.includes(`const ${name}='${targetVersion}';`));
 });
 const baseline = await load(base);
 const candidate = await load(source);
 const audit = await load(auditSource);
-await check('only four existing P1 functions differ from exact A.2; assignment helper added', () => {
+const a22 = await load(a22Source);
+await check('four existing functions differ from A.2; only initializer differs from A.2.2', () => {
   const changedFromA2 = names(auditSource).filter(name => !candidate[name] || audit[name].toString() !== candidate[name].toString().replace(/\r\n/g, '\n'));
   assert.deepEqual(changedFromA2.sort(), ['efSyncEnsureSchema', 'efSyncLedgerMark', 'saasEmrSyncStatus', 'ensureSaasDb'].sort());
   assert.deepEqual(names(auditSource).filter(name => !names(source).includes(name)), []);
-  assert.deepEqual(names(source).filter(name => !names(auditSource).includes(name)), ['ensureFollowupCaseAssignmentSchema']);
+  assert.deepEqual(names(source).filter(name => !names(auditSource).includes(name)).sort(), ['ensureFollowupCaseAssignmentSchema', 'preventivePushDeleteTriggerMatches', 'ensurePreventivePushDeleteTriggerSchema'].sort());
+  assert.deepEqual(names(a22Source).filter(name => !candidate[name] || a22[name].toString() !== candidate[name].toString().replace(/\r\n/g, '\n')), ['ensureSaasDb']);
 });
 await check('all main and A.2 schema table declarations retained', () => {
   const tables = text => new Set([...text.matchAll(/CREATE TABLE IF NOT EXISTS (\w+)/g)].map(m => m[1]));

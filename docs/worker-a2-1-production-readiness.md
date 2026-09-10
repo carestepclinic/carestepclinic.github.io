@@ -1,11 +1,33 @@
-# Isolated D1 readiness: current A.2.2 and historical A.2.1
+# Isolated D1 readiness: current A.2.3 and historical A.2.1
 
-The current candidate is **10.7-A.2.2**, SHA-256
+The current candidate is **10.7-A.2.3**, SHA-256
+`57c1076d2026e2d5d3a2632690d873041533d229847c3d3afc26bf850ca3076a`.
+Its [preventive trigger contract](worker-a2-3-preventive-trigger-contract.md) adds
+40 independent local D1 scenarios. All earlier 50 checks were rerun and pass:
+**90 PASS / 0 FAIL** (19 regression + 13 readiness + 14 assignment + 40 trigger + 4 verifier).
+Production migration/deploy remains BLOCKED; old approvals do not authorize this candidate.
+
+A.2.2 remains an undeployed review candidate at commit
+`c3ca52b186e5075fd712b233cf935b064a46e75c`, SHA-256
 `677e602440017e1ff781524e8da04b00044939ade6d66a4065cdfa0dbbdcc3c9`.
-Its [assignment contract validation](worker-a2-2-assignment-contract.md) adds
-14 independent local D1 scenarios. The existing 36 checks were rerun and pass:
-**50 PASS / 0 FAIL** combined. Production migration/deploy remains BLOCKED;
-old A.2.1 approvals do not authorize this new candidate.
+The [14 assignment cases](worker-a2-2-assignment-contract.md), v2 isolation,
+consult ordering, row/PK preservation and rollback rehearsal remain passing.
+New D1 cases prove fresh/legacy trigger creation, canonical and equivalent no-op,
+drift BLOCK without replacement, patient delete/merge/isolation and cold idempotency.
+
+The operator previously confirmed the Production assignment contract and cleanup
+trigger. The trigger-definition check was one approved read-only query with zero
+writes; its Git creation provenance remains unknown. The A.2.3 code/tests made
+zero Production requests. No existing external preflight tool or log was changed.
+The current Production trigger is no-op if its confirmed contract remains intact;
+missing instances get additive creation and mismatches BLOCK without DROP.
+
+Next prepare a separately reviewed A.2.3 Phase 1C tool with **16 scoped indexes
+and 8 scoped triggers**, then obtain fresh execution approval. Remaining index,
+consult-default and capacity checks are not already certified. SQL 07–32,
+migration, deployment and smoke do not resume automatically. Reproduce the new
+test with `node tools/d1-readiness/preventive-trigger-contract.mjs` after installing
+the same locked local runtime described below.
 
 The sections below retain the original **A.2.1 historical evidence**. Their
 36 checks did not cover the newly identified assignment-column contract.
