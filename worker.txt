@@ -5,8 +5,8 @@
 // CARESTEP Clinic v9.1 · Production Launch · Governance · Resilience
 const OPENAI_URL = 'https://api.openai.com/v1/responses';
 
-const CARESTEP_VERSION='10.7-A.2';
-const CARESTEP_BUILD='10.7-A.2';
+const CARESTEP_VERSION='10.7-A.2.3';
+const CARESTEP_BUILD='10.7-A.2.3';
 const CARESTEP_CLIENT_BUILDS={clinic:'10.7-A',home:'10.1-J',hq:'10.4-G',homeCache:'carestep-home-v10-1-j-production-operations'};
 const CARESTEP_CLIENT_PATCHES={clinic:'10.7-A',home:'10.1-J',hq:'10.4-G'};
 const HOME_TERMS_VERSION='2026-09-03-home-v1.0';
@@ -286,7 +286,7 @@ const SAAS_SCHEMA_STATEMENTS=[
 `CREATE INDEX IF NOT EXISTS idx_followup_crm_outcomes_journey ON followup_crm_outcomes(clinic_id,journey_id,occurred_at DESC)`,
 `CREATE TABLE IF NOT EXISTS followup_crm_case_reviews(clinic_id TEXT NOT NULL,case_key TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'active',manual_priority TEXT NOT NULL DEFAULT '',reviewed_at TEXT DEFAULT '',reviewed_by TEXT DEFAULT '',updated_at TEXT NOT NULL,PRIMARY KEY(clinic_id,case_key))`,
 `CREATE INDEX IF NOT EXISTS idx_followup_crm_reviews_status ON followup_crm_case_reviews(clinic_id,status,updated_at DESC)`,
-`CREATE TABLE IF NOT EXISTS care_followup_cases(id TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,case_key TEXT NOT NULL,message_case_key TEXT NOT NULL DEFAULT '',patient_id TEXT NOT NULL,guardian_id TEXT NOT NULL,journey_id TEXT NOT NULL DEFAULT '',journey_version INTEGER NOT NULL DEFAULT 0,template_id TEXT NOT NULL DEFAULT '',start_date TEXT NOT NULL,stage_days_json TEXT NOT NULL DEFAULT '[]',status TEXT NOT NULL DEFAULT 'draft',revision INTEGER NOT NULL DEFAULT 1,calendar_provider TEXT NOT NULL DEFAULT '',calendar_id TEXT NOT NULL DEFAULT '',calendar_name TEXT NOT NULL DEFAULT '',calendar_status TEXT NOT NULL DEFAULT 'not_started',calendar_events_json TEXT NOT NULL DEFAULT '{}',calendar_error TEXT NOT NULL DEFAULT '',calendar_synced_at TEXT NOT NULL DEFAULT '',created_by TEXT NOT NULL,updated_by TEXT NOT NULL,created_at TEXT NOT NULL,updated_at TEXT NOT NULL,UNIQUE(clinic_id,case_key))`,
+`CREATE TABLE IF NOT EXISTS care_followup_cases(id TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,case_key TEXT NOT NULL,message_case_key TEXT NOT NULL DEFAULT '',patient_id TEXT NOT NULL,guardian_id TEXT NOT NULL,assignee_user_id TEXT NOT NULL DEFAULT '',vet_user_id TEXT NOT NULL DEFAULT '',journey_id TEXT NOT NULL DEFAULT '',journey_version INTEGER NOT NULL DEFAULT 0,template_id TEXT NOT NULL DEFAULT '',start_date TEXT NOT NULL,stage_days_json TEXT NOT NULL DEFAULT '[]',status TEXT NOT NULL DEFAULT 'draft',revision INTEGER NOT NULL DEFAULT 1,calendar_provider TEXT NOT NULL DEFAULT '',calendar_id TEXT NOT NULL DEFAULT '',calendar_name TEXT NOT NULL DEFAULT '',calendar_status TEXT NOT NULL DEFAULT 'not_started',calendar_events_json TEXT NOT NULL DEFAULT '{}',calendar_error TEXT NOT NULL DEFAULT '',calendar_synced_at TEXT NOT NULL DEFAULT '',created_by TEXT NOT NULL,updated_by TEXT NOT NULL,created_at TEXT NOT NULL,updated_at TEXT NOT NULL,UNIQUE(clinic_id,case_key))`,
 `CREATE INDEX IF NOT EXISTS idx_care_followup_cases_patient ON care_followup_cases(clinic_id,patient_id,updated_at DESC)`,
 `CREATE INDEX IF NOT EXISTS idx_care_followup_cases_status ON care_followup_cases(clinic_id,status,updated_at DESC)`,
 `CREATE INDEX IF NOT EXISTS idx_care_followup_cases_message_key ON care_followup_cases(clinic_id,message_case_key)`,
@@ -295,7 +295,6 @@ const SAAS_SCHEMA_STATEMENTS=[
 `CREATE TABLE IF NOT EXISTS care_followup_change_ops(id TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,case_id TEXT NOT NULL,case_key TEXT NOT NULL,request_key TEXT NOT NULL,action TEXT NOT NULL,reason TEXT NOT NULL DEFAULT '',status TEXT NOT NULL DEFAULT 'processing',target_start_date TEXT NOT NULL DEFAULT '',target_journey_id TEXT NOT NULL DEFAULT '',target_stage_days_json TEXT NOT NULL DEFAULT '[]',calendar_status TEXT NOT NULL DEFAULT 'not_required',home_status TEXT NOT NULL DEFAULT 'not_required',message_status TEXT NOT NULL DEFAULT 'not_required',home_changed_count INTEGER NOT NULL DEFAULT 0,home_canceled_count INTEGER NOT NULL DEFAULT 0,message_canceled_count INTEGER NOT NULL DEFAULT 0,error_json TEXT NOT NULL DEFAULT '{}',actor_user_id TEXT NOT NULL,created_at TEXT NOT NULL,updated_at TEXT NOT NULL,completed_at TEXT NOT NULL DEFAULT '',UNIQUE(clinic_id,request_key))`,
 `CREATE INDEX IF NOT EXISTS idx_care_followup_change_ops_case ON care_followup_change_ops(clinic_id,case_key,created_at DESC)`,
 `CREATE INDEX IF NOT EXISTS idx_care_followup_change_ops_status ON care_followup_change_ops(status,updated_at DESC)`,
-`CREATE TRIGGER IF NOT EXISTS trg_care_followup_cases_patient_delete AFTER DELETE ON care_patients BEGIN DELETE FROM care_followup_cases WHERE clinic_id=OLD.clinic_id AND patient_id=OLD.id; END`,
 `CREATE TRIGGER IF NOT EXISTS trg_care_followup_cases_audit_delete AFTER DELETE ON care_followup_cases BEGIN DELETE FROM care_followup_case_audit WHERE clinic_id=OLD.clinic_id AND case_id=OLD.id; END`,
 `CREATE TRIGGER IF NOT EXISTS trg_care_followup_change_ops_case_delete AFTER DELETE ON care_followup_cases BEGIN DELETE FROM care_followup_change_ops WHERE clinic_id=OLD.clinic_id AND case_id=OLD.id; END`,
 `CREATE TABLE IF NOT EXISTS care_guardians(id TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,name_cipher TEXT NOT NULL,phone_cipher TEXT DEFAULT '',phone_hash TEXT DEFAULT '',phone_last4 TEXT DEFAULT '',memo_cipher TEXT DEFAULT '',home_status TEXT NOT NULL DEFAULT 'not_invited',consent_at TEXT NOT NULL,created_by TEXT NOT NULL,created_at TEXT NOT NULL,updated_by TEXT NOT NULL,updated_at TEXT NOT NULL)`,
@@ -305,6 +304,7 @@ const SAAS_SCHEMA_STATEMENTS=[
 `CREATE INDEX IF NOT EXISTS idx_care_patients_clinic ON care_patients(clinic_id,updated_at DESC)`,
 `CREATE INDEX IF NOT EXISTS idx_care_patients_guardian ON care_patients(clinic_id,guardian_id,updated_at DESC)`,
 `CREATE INDEX IF NOT EXISTS idx_care_patients_name ON care_patients(clinic_id,name_hash)`,
+`CREATE TRIGGER IF NOT EXISTS trg_care_followup_cases_patient_delete AFTER DELETE ON care_patients BEGIN DELETE FROM care_followup_cases WHERE clinic_id=OLD.clinic_id AND patient_id=OLD.id; END`,
 `CREATE TABLE IF NOT EXISTS care_patient_events(id TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,patient_id TEXT NOT NULL,event_type TEXT NOT NULL,event_date TEXT NOT NULL,title_cipher TEXT DEFAULT '',detail_cipher TEXT DEFAULT '',numeric_value REAL DEFAULT NULL,unit TEXT NOT NULL DEFAULT '',next_due_date TEXT DEFAULT '',status TEXT NOT NULL DEFAULT 'completed',source TEXT NOT NULL DEFAULT 'clinic',journey_id TEXT DEFAULT '',source_ref TEXT DEFAULT '',created_by TEXT NOT NULL,created_at TEXT NOT NULL,updated_by TEXT NOT NULL,updated_at TEXT NOT NULL)`,
 `CREATE INDEX IF NOT EXISTS idx_care_patient_events_patient ON care_patient_events(clinic_id,patient_id,event_date DESC,created_at DESC)`,
 `CREATE INDEX IF NOT EXISTS idx_care_patient_events_type ON care_patient_events(clinic_id,event_type,event_date DESC)`,
@@ -338,7 +338,6 @@ const SAAS_SCHEMA_STATEMENTS=[
 `CREATE TABLE IF NOT EXISTS care_home_consult_messages(id TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,guardian_id TEXT NOT NULL,patient_id TEXT NOT NULL,followup_id TEXT NOT NULL,sender_type TEXT NOT NULL,sender_id TEXT NOT NULL,sender_name_cipher TEXT NOT NULL DEFAULT '',message_cipher TEXT NOT NULL,source_ref TEXT NOT NULL DEFAULT '',read_at TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL)`,
 `CREATE INDEX IF NOT EXISTS idx_care_home_consult_messages_followup ON care_home_consult_messages(clinic_id,followup_id,created_at)`,
 `CREATE INDEX IF NOT EXISTS idx_care_home_consult_messages_unread ON care_home_consult_messages(clinic_id,guardian_id,sender_type,read_at,created_at DESC)`,
-`CREATE INDEX IF NOT EXISTS idx_care_home_followups_consult_status ON care_home_followups(clinic_id,consult_status,consult_updated_at DESC)`,
 `CREATE UNIQUE INDEX IF NOT EXISTS idx_care_home_consult_messages_source ON care_home_consult_messages(clinic_id,source_ref) WHERE source_ref<>''`,
 `CREATE TABLE IF NOT EXISTS care_home_consult_push_deliveries(id TEXT PRIMARY KEY,message_id TEXT NOT NULL,subscription_id TEXT NOT NULL,home_user_id TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'pending',response_status INTEGER NOT NULL DEFAULT 0,last_error TEXT NOT NULL DEFAULT '',attempted_at TEXT NOT NULL DEFAULT '',sent_at TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL,updated_at TEXT NOT NULL,UNIQUE(message_id,subscription_id))`,
 `CREATE INDEX IF NOT EXISTS idx_care_home_consult_push_message ON care_home_consult_push_deliveries(message_id,status,updated_at DESC)`,
@@ -1377,10 +1376,116 @@ function overageLineItems(rows=[]){return rows.map(x=>({type:'message_overage',m
 async function markOveragePaid(env,orderId,approvedAt){await env.DB.prepare(`UPDATE messaging_overage_settlements SET status='paid',settled_at=?1,updated_at=?1 WHERE invoice_order_id=?2 AND status='attached'`).bind(approvedAt,orderId).run();}
 async function releaseOverageAttachment(env,orderId){await env.DB.prepare(`UPDATE messaging_overage_settlements SET status='pending',invoice_order_id='',updated_at=?1 WHERE invoice_order_id=?2 AND status='attached'`).bind(new Date().toISOString(),orderId).run();}
 async function overageSettlementRowsForClinic(env,clinicId,limit=18){const r=await env.DB.prepare(`SELECT * FROM messaging_overage_settlements WHERE clinic_id=?1 ORDER BY usage_month DESC LIMIT ?2`).bind(clinicId,Math.max(1,Math.min(36,Number(limit)||18))).all();return (r.results||[]).map(x=>({month:x.usage_month,planCode:x.plan_code,included:Number(x.included_messages)||0,used:Number(x.used_messages)||0,overageCount:Number(x.overage_count)||0,unitPriceKrw:Number(x.unit_price_krw)||0,amountKrw:Number(x.amount_krw)||0,status:x.status,invoiceOrderId:x.invoice_order_id||'',settledAt:x.settled_at||''}));}
+const PREVENTIVE_PUSH_DELETE_TRIGGER_SQL='CREATE TRIGGER IF NOT EXISTS trg_care_home_preventive_push_patient_delete AFTER DELETE ON care_patients BEGIN DELETE FROM care_home_preventive_push_deliveries WHERE patient_id = OLD.id; END';
+function preventivePushDeleteTriggerMatches(sql){
+  // Parse the entire narrow contract, not substring matches or stripped punctuation.
+  if(typeof sql!=='string'||sql.length>16384)return false;
+  const tick=String.fromCharCode(96),tokens=[];
+  const lexer=new RegExp('[ \\t\\r\\n\\f]+|"(?:[^"]|"")*"|'+tick+'(?:[^'+tick+']|'+tick+tick+')*'+tick+'|\\[[^\\]]*\\]|[A-Za-z_][A-Za-z0-9_]*|==|[=.;()]','y');
+  let offset=0;
+  while(offset<sql.length){
+    lexer.lastIndex=offset;const match=lexer.exec(sql);if(!match)return false;
+    offset=lexer.lastIndex;const raw=match[0];if(/^[ \t\r\n\f]+$/.test(raw))continue;
+    const quote=raw[0],quoted=quote==='"'||quote===tick||quote==='[';
+    const value=quoted?raw.slice(1,-1).split(quote+quote).join(quote):raw;
+    tokens.push({kind:quoted?'id':/^[A-Za-z_]/.test(raw)?'word':'punct',value:value.toLowerCase()});
+  }
+  let at=0;
+  const take=(value,kind='word')=>{
+    const token=tokens[at];
+    if(!token||token.value!==value||(kind==='id'?!['id','word'].includes(token.kind):token.kind!==kind))throw 0;
+    at++;
+  };
+  const peek=value=>tokens[at]?.value===value;
+  const unwrap=list=>{
+    while(list[0]?.value==='('&&list.at(-1)?.value===')'){
+      let depth=0,whole=true;
+      for(let i=0;i<list.length;i++){if(list[i].value==='(')depth++;if(list[i].value===')')depth--;if(depth<0||depth===0&&i<list.length-1){whole=false;break;}}
+      if(!whole||depth!==0)break;
+      list=list.slice(1,-1);
+    }
+    return list;
+  };
+  const operand=list=>{
+    const part=unwrap(list),identifier=(t,value)=>t&&['word','id'].includes(t.kind)&&t.value===value;
+    if(part.length===1&&identifier(part[0],'patient_id'))return 'patient';
+    if(part.length===3&&part[1].kind==='punct'&&part[1].value==='.'){
+      if(identifier(part[0],'old')&&identifier(part[2],'id'))return 'old';
+      if(identifier(part[0],'care_home_preventive_push_deliveries')&&identifier(part[2],'patient_id'))return 'patient';
+    }
+    return '';
+  };
+  try{
+    take('create');take('trigger');
+    if(peek('if')){take('if');take('not');take('exists');}
+    take('trg_care_home_preventive_push_patient_delete','id');
+    take('after');take('delete');take('on');take('care_patients','id');
+    if(peek('for')){take('for');take('each');take('row');}
+    take('begin');take('delete');take('from');take('care_home_preventive_push_deliveries','id');take('where');
+    const start=at;while(at<tokens.length&&!peek(';'))at++;
+    const predicate=unwrap(tokens.slice(start,at)),equal=predicate.map((t,i)=>t.kind==='punct'&&['=','=='].includes(t.value)?i:-1).filter(i=>i>=0);
+    if(equal.length!==1)return false;
+    const left=operand(predicate.slice(0,equal[0])),right=operand(predicate.slice(equal[0]+1));
+    if(!((left==='patient'&&right==='old')||(left==='old'&&right==='patient')))return false;
+    take(';','punct');take('end');if(peek(';'))take(';','punct');
+    return at===tokens.length;
+  }catch{return false;}
+}
+async function ensurePreventivePushDeleteTriggerSchema(env,inspectOnly=false){
+  const code='PREVENTIVE_PUSH_DELETE_TRIGGER_CONTRACT_MISMATCH';
+  const reject=()=>{throw Object.assign(new Error(code),{status:503,code});};
+  try{
+    const read=async()=>{
+      const rows=(await env.DB.prepare("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name=?1 COLLATE NOCASE").bind('trg_care_home_preventive_push_patient_delete').all()).results||[];
+      if(rows.length>1)reject();
+      const row=rows[0];
+      if(row&&(row.type!=='trigger'||String(row.tbl_name).toLowerCase()!=='care_patients'||!preventivePushDeleteTriggerMatches(row.sql)))reject();
+      return row;
+    };
+    const before=await read();
+    const tables=(await env.DB.prepare("SELECT type,name FROM sqlite_master WHERE name COLLATE NOCASE IN ('care_patients','care_home_preventive_push_deliveries')").all()).results||[];
+    for(const table of ['care_patients','care_home_preventive_push_deliveries']){
+      const found=tables.filter(row=>String(row.name).toLowerCase()===table);
+      if(!found.length){if(!inspectOnly)reject();continue;}
+      if(found.length!==1||found[0].type!=='table')reject();
+      const columns=(await env.DB.prepare('PRAGMA table_info('+table+')').all()).results||[];
+      const name=table==='care_patients'?'id':'patient_id',column=columns.find(row=>String(row.name).toLowerCase()===name);
+      if(!column||String(column.type).trim().toUpperCase()!=='TEXT')reject();
+      // patient_id-only cleanup relies on the existing global patient primary key.
+      if(table==='care_patients'&&(Number(column.pk)!==1||columns.filter(row=>Number(row.pk)>0).length!==1))reject();
+    }
+    // Fresh databases may lack tables before bootstrap, but never when creating a trigger.
+    if(inspectOnly)return;
+    if(!before)await env.DB.prepare(PREVENTIVE_PUSH_DELETE_TRIGGER_SQL).run();
+    if(!await read())reject();
+  }catch{reject();}
+}
+
+async function ensureFollowupCaseAssignmentSchema(env){
+  const columns=['assignee_user_id','vet_user_id'];
+  const reject=()=>{throw Object.assign(new Error('FOLLOWUP_ASSIGNMENT_SCHEMA_CONTRACT_MISMATCH'),{status:503,code:'FOLLOWUP_ASSIGNMENT_SCHEMA_CONTRACT_MISMATCH'});};
+  const compatible=column=>{
+    let value=String(column.dflt_value??'').trim();
+    while(value.startsWith('(')&&value.endsWith(')'))value=value.slice(1,-1).trim();
+    return String(column.type).trim().toUpperCase()==='TEXT'&&Number(column.notnull)===1&&Number(column.pk)===0&&value==="''";
+  };
+  const before=(await env.DB.prepare('PRAGMA table_info(care_followup_cases)').all()).results||[];
+  if(!before.length)reject();
+  // Reject incompatible existing definitions before adding either missing column.
+  for(const name of columns){const column=before.find(x=>x.name===name);if(column&&!compatible(column))reject();}
+  const missing=columns.filter(name=>!before.some(x=>x.name===name));
+  if(missing.length)await env.DB.batch(missing.map(name=>env.DB.prepare("ALTER TABLE care_followup_cases ADD COLUMN "+name+" TEXT NOT NULL DEFAULT ''")));
+  const after=(await env.DB.prepare('PRAGMA table_info(care_followup_cases)').all()).results||[];
+  for(const name of columns){const column=after.find(x=>x.name===name);if(!column||!compatible(column))reject();}
+}
+
 async function ensureSaasDb(env){
   if(!env.DB) throw new Error('Cloudflare D1 binding DB가 설정되지 않았습니다.');
   if(saasDbReady)return;
+  await ensurePreventivePushDeleteTriggerSchema(env,true);
   await env.DB.batch(SAAS_SCHEMA_STATEMENTS.map(x=>env.DB.prepare(x)));
+  await ensurePreventivePushDeleteTriggerSchema(env);
+  await ensureFollowupCaseAssignmentSchema(env);
   const clinicCols=await env.DB.prepare('PRAGMA table_info(clinics)').all();
   const names=new Set((clinicCols.results||[]).map(x=>x.name));
   const alters=[];
@@ -4518,7 +4623,7 @@ async function runHomePreventivePushCycle(env){
  * eFriends source access stays on the hospital server and is read-only.
  * Missing source rows are never auto-deleted from CARESTEP.
  */
-const EFSYNC_VERSION='10.7-A.2';
+const EFSYNC_VERSION='10.7-A.2.3';
 const EFSYNC_SEARCH_INDEX_VERSION='10.6-B.2';
 const EFSYNC_RETRY_LIMIT=3;
 const EFSYNC_MAX_GUARDIANS=100;
@@ -4574,6 +4679,13 @@ async function efSyncEnsureSchema(env){
       carestep_id TEXT DEFAULT '',source_hash TEXT DEFAULT '',status TEXT NOT NULL DEFAULT 'seen',run_id TEXT DEFAULT '',
       last_seen_at TEXT NOT NULL,last_success_at TEXT DEFAULT '',last_error TEXT DEFAULT '')`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_efsync_ledger_clinic_status ON efriends_sync_ledger(clinic_id,status,last_seen_at DESC)`),
+    // A.2.1: keep legacy ledger untouched; only new observations enter the clinic-scoped ledger.
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS efriends_sync_ledger_v2(
+      record_key TEXT NOT NULL,clinic_id TEXT NOT NULL,entity_kind TEXT NOT NULL,external_id TEXT DEFAULT '',source_ref TEXT DEFAULT '',
+      carestep_id TEXT DEFAULT '',source_hash TEXT DEFAULT '',status TEXT NOT NULL DEFAULT 'seen',run_id TEXT DEFAULT '',
+      last_seen_at TEXT NOT NULL,last_success_at TEXT DEFAULT '',last_error TEXT DEFAULT '',PRIMARY KEY(clinic_id,record_key))`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_efsync_ledger_v2_clinic_status ON efriends_sync_ledger_v2(clinic_id,status,last_seen_at DESC)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_efsync_ledger_v2_clinic_seen ON efriends_sync_ledger_v2(clinic_id,last_seen_at DESC)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS efriends_sync_failures(
       id TEXT PRIMARY KEY,clinic_id TEXT NOT NULL,kind TEXT NOT NULL,external_id TEXT DEFAULT '',source_ref TEXT DEFAULT '',
       payload_cipher TEXT DEFAULT '',payload_hash TEXT DEFAULT '',attempt_count INTEGER NOT NULL DEFAULT 1,status TEXT NOT NULL DEFAULT 'retry',
@@ -4609,7 +4721,7 @@ async function efSyncGetPatientMap(env,cid,externalId){return env.DB.prepare(`SE
 function efSyncRecordKey(kind,row={}){const externalId=clean(row.externalGuardianId||row.external_guardian_id||row.externalPatientId||row.external_patient_id||row.externalId||'',120),sourceRef=clean(row.sourceRef||row.source_ref||'',240);return `${kind}:${externalId}:${sourceRef}`}
 async function efSyncLedgerMark(env,cid,kind,row,status,now,carestepId='',runId='',error=''){
   const externalId=clean(row.externalGuardianId||row.external_guardian_id||row.externalPatientId||row.external_patient_id||row.externalId||'',120),sourceRef=clean(row.sourceRef||row.source_ref||'',240),sourceHash=clean(row.sourceHash||row.source_hash||'',100),key=efSyncRecordKey(kind,row);
-  await env.DB.prepare(`INSERT INTO efriends_sync_ledger(record_key,clinic_id,entity_kind,external_id,source_ref,carestep_id,source_hash,status,run_id,last_seen_at,last_success_at,last_error) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12) ON CONFLICT(record_key) DO UPDATE SET carestep_id=excluded.carestep_id,source_hash=excluded.source_hash,status=excluded.status,run_id=excluded.run_id,last_seen_at=excluded.last_seen_at,last_success_at=CASE WHEN excluded.status='synced' THEN excluded.last_success_at ELSE efriends_sync_ledger.last_success_at END,last_error=excluded.last_error`).bind(key,cid,kind,externalId,sourceRef,clean(carestepId,180),sourceHash,status,clean(runId,180),now,status==='synced'?now:'',clean(error,500)).run();
+  await env.DB.prepare(`INSERT INTO efriends_sync_ledger_v2(record_key,clinic_id,entity_kind,external_id,source_ref,carestep_id,source_hash,status,run_id,last_seen_at,last_success_at,last_error) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12) ON CONFLICT(clinic_id,record_key) DO UPDATE SET carestep_id=excluded.carestep_id,source_hash=excluded.source_hash,status=excluded.status,run_id=excluded.run_id,last_seen_at=excluded.last_seen_at,last_success_at=CASE WHEN excluded.status='synced' THEN excluded.last_success_at ELSE efriends_sync_ledger_v2.last_success_at END,last_error=excluded.last_error`).bind(key,cid,kind,externalId,sourceRef,clean(carestepId,180),sourceHash,status,clean(runId,180),now,status==='synced'?now:'',clean(error,500)).run();
 }
 async function efSyncQuarantineRow(env,cid,kind,row,conflictType,candidateIds,now){
   const externalId=clean(row.externalGuardianId||row.external_guardian_id||row.externalPatientId||row.external_patient_id||'',120);if(!externalId)return;
@@ -4816,7 +4928,7 @@ async function saasEmrSyncStatus(env,s){
     env.DB.prepare(`SELECT * FROM efriends_sync_reconcile WHERE clinic_id=?1 ORDER BY created_at DESC LIMIT 1`).bind(cid).first(),
     env.DB.prepare(`SELECT status,COUNT(*) n FROM efriends_sync_failures WHERE clinic_id=?1 AND status IN('retry','dead_letter') GROUP BY status`).bind(cid).all(),
     env.DB.prepare(`SELECT status,COUNT(*) n FROM efriends_sync_quarantine WHERE clinic_id=?1 AND status='pending' GROUP BY status`).bind(cid).all(),
-    env.DB.prepare(`SELECT last_seen_at FROM efriends_sync_ledger WHERE clinic_id=?1 ORDER BY last_seen_at DESC LIMIT 1`).bind(cid).first(),
+    env.DB.prepare(`SELECT last_seen_at FROM efriends_sync_ledger_v2 WHERE clinic_id=?1 ORDER BY last_seen_at DESC LIMIT 1`).bind(cid).first(),
     env.DB.prepare(`SELECT entity_kind,external_id,conflict_type,updated_at FROM efriends_sync_quarantine WHERE clinic_id=?1 AND status='pending' ORDER BY updated_at DESC LIMIT 10`).bind(cid).all()
   ]);
   const parse=x=>{try{return JSON.parse(x||'{}')}catch{return {}}},source=parse(lastSuccess?.detail_json),heartbeatDetail=parse(heartbeat?.detail_json),reconcileDetail=parse(reconcile?.detail_json),q={retry:0,deadLetter:0,quarantine:0};for(const r of (queueCounts.results||[])){if(r.status==='retry')q.retry=Number(r.n)||0;if(r.status==='dead_letter')q.deadLetter=Number(r.n)||0}q.quarantine=Number(quarantineCounts.results?.[0]?.n)||0;

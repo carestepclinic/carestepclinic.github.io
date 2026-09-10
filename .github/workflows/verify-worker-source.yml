@@ -1,11 +1,12 @@
-name: Verify v10.7-A.2 Worker source
+name: Verify v10.7-A.2.3 corrective Worker
 
 on:
   push:
     branches:
-      - fix/v10.7-worker-source-of-truth
+      - fix/v10.7-a2-regression-p1
   pull_request:
     branches:
+      - fix/v10.7-worker-source-of-truth
       - main
 
 permissions:
@@ -20,12 +21,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Use Node.js 24 for in-memory SQLite regression checks
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
       - name: Download exact raw incoming Worker and verify SHA-256
         shell: bash
         run: |
           set -euo pipefail
           EXPECTED='9f54ddd87f542e749cf0c070a292d7d56e11e0409895fc34d929740e4dbc21a7'
-          RAW_URL="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/incoming/worker-v10.7-A.2.txt"
+          RAW_URL="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/a56ea76a8036e01deb2f3527e64bd3c7821b5503/incoming/worker-v10.7-A.2.txt"
           curl -fsSL --retry 3 --retry-delay 1 "$RAW_URL" -o /tmp/worker-v10.7-A.2.raw.txt
           ACTUAL="$(sha256sum /tmp/worker-v10.7-A.2.raw.txt | awk '{print $1}')"
           echo "raw_sha256=$ACTUAL"
@@ -38,9 +44,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin main
-          git show origin/main:worker.txt > /tmp/main-worker.txt
-          cp incoming/worker-v10.7-A.2.txt /tmp/a2-worker.txt
+          git show 26395b304c94ea40a016c44b2e815da828e91c75:worker.txt > /tmp/main-worker.txt
+          cp worker.txt /tmp/a2-worker.txt
           echo '--- byte counts ---'
           wc -c /tmp/main-worker.txt /tmp/a2-worker.txt
           echo '--- line counts ---'
@@ -85,7 +90,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          F=incoming/worker-v10.7-A.2.txt
+          F=worker.txt
           required=(
             'TOSS'
             'SOLAPI'
@@ -122,7 +127,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cp incoming/worker-v10.7-A.2.txt /tmp/worker.mjs
+          cp worker.txt /tmp/worker.mjs
           node --check /tmp/worker.mjs
 
       - name: Existing source verifier tests
@@ -131,9 +136,26 @@ jobs:
           set -euo pipefail
           node --test tools/verify-worker-source.test.mjs
 
-      - name: Verify canonical root Worker after synchronization
+      - name: Verify distinct corrective root Worker identity
         shell: bash
         run: |
           set -euo pipefail
-          cmp -s worker.txt incoming/worker-v10.7-A.2.txt
           node tools/verify-worker-source.mjs
+
+      - name: P1 behavioral regressions and migration idempotency (offline SQLite)
+        shell: bash
+        run: node --experimental-vm-modules tools/review-worker-candidate.mjs worker.txt
+
+      - name: Install pinned local D1 test runtime
+        run: |
+          npm install --global pnpm@11.19.0 --ignore-scripts
+          pnpm --dir tools/d1-readiness install --frozen-lockfile --ignore-scripts
+
+      - name: Local workerd D1 readiness (no remote bindings)
+        run: node tools/d1-readiness/readiness.mjs
+
+      - name: Local assignment schema contract (fresh, legacy, partial, drift)
+        run: node tools/d1-readiness/assignment-contract.mjs
+
+      - name: Local preventive cleanup trigger contract (no-op, drift, delete, merge, isolation)
+        run: node tools/d1-readiness/preventive-trigger-contract.mjs
