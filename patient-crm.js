@@ -2,7 +2,27 @@
 (() => {
   'use strict';
   const $crm=id=>document.getElementById(id);
-  const crmState={rows:[],patients:[],selectedGuardian:null,selectedPatientId:'',query:'',active:'active',sort:'recent',page:1,pageSize:30,pagination:{page:1,total:0,totalPages:1},loading:false,workspace:null,workspaceLoading:false,dialogScrollY:0,dirty:false,metrics:{guardians:0,patients:0,activePatients:0,inactivePatients:0,homeLinked:0},demoGuardians:[]};
+  const crmState={rows:[],patients:[],selectedGuardian:null,selectedPatientId:'',query:'',active:'active',sort:'recent',page:1,pageSize:30,pagination:{page:1,total:0,totalPages:1},loading:false,error:'',loaded:false,hint:'',workspace:null,workspaceLoading:false,dialogScrollY:0,dirty:false,metrics:{guardians:0,patients:0,activePatients:0,inactivePatients:0,homeLinked:0},demoGuardians:[]};
+  let crmLoadRevision=0,crmPending=null,crmGuardianRevision=0,crmGuardianPending=null,crmGuardianAbort=null,crmWorkspaceRevision=0,crmScope=crmScopeKey();
+  function crmScopeKey(){
+    if(typeof saasMode!=='undefined'&&saasMode==='demo')return 'demo';
+    if(typeof saasMode==='undefined'||saasMode!=='auth'||typeof saasMe==='undefined'||!saasMe?.clinic?.id||!saasMe?.user?.id)return '';
+    return JSON.stringify([saasMe.clinic.id,saasMe.user.id]);
+  }
+  function crmSyncScope(){
+    const scope=crmScopeKey();
+    if(scope!==crmScope){
+      crmScope=scope;crmLoadRevision++;crmGuardianRevision++;crmWorkspaceRevision++;
+      crmSearchAbort?.abort();crmGuardianAbort?.abort();crmSearchAbort=null;crmGuardianAbort=null;
+      crmPending=null;crmGuardianPending=null;crmSearchCache.clear();
+      Object.assign(crmState,{rows:[],patients:[],selectedGuardian:null,selectedPatientId:'',workspace:null,workspaceLoading:false,loading:false,loaded:false,error:'',hint:'',page:1,pagination:{page:1,total:0,totalPages:1}});
+    }
+    return scope;
+  }
+  function crmScopeCurrent(scope){
+    if(scope&&scope===crmScopeKey())return true;
+    crmSyncScope();crmRenderMetrics();crmRenderList();crmRenderDetail();if(!crmScope)crmRenderSignedOut();return false;
+  }
   let activeCrmPatient=null,crmSearchTimer=null,crmSearchAbort=null,crmBreedItems=[],crmBreedActive=-1;
   const crmSearchCache=new Map(),CRM_SEARCH_CACHE_MS=30000;
   const CRM_RECENT_BREEDS_KEY='carestep_crm_recent_breeds_v1';
@@ -59,39 +79,78 @@
     throw new Error('로컬 데모에서 지원하지 않는 요청입니다.');
   }
 
-  async function crmLoad(showToast=false){
-    if(!crmAuthReady(false)){crmRenderSignedOut();return;}
+  function crmLoad(showToast=false){
+    const scope=crmSyncScope();
+    if(!scope||!crmAuthReady(false)){crmRenderMetrics();crmRenderSignedOut();return Promise.resolve();}
+    const params=new URLSearchParams({q:crmState.query,page:String(crmState.page),pageSize:String(crmState.pageSize),active:crmState.active,sort:crmState.sort});
+    const requestKey=scope+':'+params.toString();
+    if(!showToast&&crmPending?.key===requestKey)return crmPending.promise;
+    const revision=++crmLoadRevision;
+    crmSearchAbort?.abort();crmPending=null;
+    crmGuardianRevision++;crmGuardianAbort?.abort();crmGuardianPending=null;
     const normalized=String(crmState.query||'').normalize('NFKC').replace(/[^0-9a-zA-Z가-힣]/g,'');
-    if(normalized&&normalized.length<2){crmState.rows=[];crmState.patients=[];crmState.pagination={page:1,pageSize:crmState.pageSize,total:0,totalPages:1};crmState.loading=false;crmRenderList('검색어를 두 글자 이상 입력해주세요.');return;}
-    if(crmSearchAbort)crmSearchAbort.abort();crmSearchAbort=new AbortController();
-    crmState.loading=true;crmRenderList();
-    try{
-      const params=new URLSearchParams({q:crmState.query,page:String(crmState.page),pageSize:String(crmState.pageSize),active:crmState.active,sort:crmState.sort});
-      const cacheKey=params.toString(),cached=crmSearchCache.get(cacheKey);let d;
-      if(!showToast&&cached&&Date.now()-cached.at<CRM_SEARCH_CACHE_MS)d=cached.data;else{d=await crmApi('/saas/patient-directory?'+cacheKey,{method:'GET',signal:crmSearchAbort.signal});crmSearchCache.set(cacheKey,{at:Date.now(),data:d});}
-      crmState.rows=d.guardians||[];crmState.patients=d.patients||[];crmState.pagination=d.pagination||{page:1,total:crmState.patients.length,totalPages:1};crmState.page=crmState.pagination.page||1;crmState.metrics=d.metrics||{guardians:0,patients:0,activePatients:0,inactivePatients:0,homeLinked:0};crmRenderMetrics();crmRenderRecent();crmRenderList();
-      if(crmState.selectedGuardian){const still=crmState.rows.find(x=>x.id===crmState.selectedGuardian.id);if(still)await crmSelectGuardian(still.id,false);else{crmState.selectedGuardian=null;crmRenderDetail();}}
-      if(showToast&&typeof toast==='function')toast('보호자·환자 목록을 새로 불러왔습니다.');
-    }catch(e){if(e?.name==='AbortError')return;crmState.rows=[];crmState.patients=[];crmRenderList(e.message||'목록을 불러오지 못했습니다.');if(showToast&&typeof toast==='function')toast(e.message||'목록을 불러오지 못했습니다.');}
-    finally{crmState.loading=false;crmRenderList();}
+    if(normalized&&normalized.length<2){crmState.loading=false;crmState.error='';crmState.hint='검색어를 두 글자 이상 입력해주세요.';crmState.rows=[];crmState.patients=[];crmState.loaded=false;crmRenderMetrics();crmRenderList();return Promise.resolve();}
+    const controller=new AbortController();crmSearchAbort=controller;
+    crmState.loading=true;crmState.error='';crmState.hint='';crmRenderMetrics();crmRenderList();
+    const pending={key:requestKey,promise:null};crmPending=pending;
+    pending.promise=Promise.resolve().then(async()=>{
+      try{
+        if(revision!==crmLoadRevision||!crmScopeCurrent(scope))return;
+        const cached=crmSearchCache.get(requestKey);
+        const d=!showToast&&cached&&Date.now()-cached.at<CRM_SEARCH_CACHE_MS?cached.data:await crmApi('/saas/patient-directory?'+params.toString(),{method:'GET',signal:controller.signal});
+        if(revision!==crmLoadRevision||!crmScopeCurrent(scope))return;
+        if(!d||d.ok!==true||!Array.isArray(d.patients)||!Array.isArray(d.guardians)||!d.pagination||!d.metrics)throw new Error('DIRECTORY_RESPONSE_INVALID');
+        crmSearchCache.set(requestKey,{at:Date.now(),data:d});
+        crmState.rows=d.guardians;crmState.patients=d.patients;crmState.pagination=d.pagination;crmState.page=d.pagination.page||1;crmState.metrics=d.metrics;
+        crmState.loaded=true;crmState.loading=false;crmRenderMetrics();crmRenderRecent();crmRenderList();
+        if(crmState.selectedGuardian){const still=crmState.rows.find(x=>x.id===crmState.selectedGuardian.id);if(still)void crmSelectGuardian(still.id,false);else{crmState.selectedGuardian=null;crmState.selectedPatientId='';crmState.workspace=null;crmState.workspaceLoading=false;crmWorkspaceRevision++;crmRenderDetail();}}
+        if(showToast&&typeof toast==='function')toast('보호자·환자 목록을 새로 불러왔습니다.');
+      }catch(e){
+        if(revision!==crmLoadRevision||!crmScopeCurrent(scope)||e?.name==='AbortError')return;
+        crmState.error='목록을 불러오지 못했습니다. 연결 상태를 확인한 뒤 새로고침해주세요.';crmState.rows=[];crmState.patients=[];crmState.loaded=false;
+        if(showToast&&typeof toast==='function')toast(crmState.error);
+      }finally{
+        if(revision===crmLoadRevision&&crmScopeCurrent(scope)){crmState.loading=false;crmRenderMetrics();crmRenderList();}
+        if(crmPending===pending)crmPending=null;if(crmSearchAbort===controller)crmSearchAbort=null;
+      }
+    });
+    return pending.promise;
   }
   function crmRenderSignedOut(){const list=$crm('patientCrmList'),detail=$crm('patientCrmDetail');if(list)list.innerHTML='<div class="patient-crm-empty"><div><b>병원 계정 로그인이 필요합니다</b><span>병원별로 분리된 보호자·환자 정보를 안전하게 관리하려면 로그인해주세요.</span></div></div>';if(detail)detail.innerHTML='<div class="patient-crm-empty"><div><b>환자 CRM</b><span>로그인 후 보호자와 환자를 등록하고 기존 자료 생성에 연결할 수 있습니다.</span></div></div>';}
-  function crmRenderMetrics(){if($crm('crmGuardianCount'))$crm('crmGuardianCount').textContent=crmState.metrics.guardians||0;if($crm('crmPatientCount'))$crm('crmPatientCount').textContent=crmState.metrics.patients||0;if($crm('crmHomeCount'))$crm('crmHomeCount').textContent=crmState.metrics.homeLinked||0;}
+  function crmRenderMetrics(){if($crm('crmGuardianCount'))$crm('crmGuardianCount').textContent=crmState.loading||!crmState.loaded||crmState.error?'—':crmState.metrics.guardians||0;if($crm('crmPatientCount'))$crm('crmPatientCount').textContent=crmState.loading||!crmState.loaded||crmState.error?'—':crmState.metrics.patients||0;if($crm('crmHomeCount'))$crm('crmHomeCount').textContent=crmState.loading||!crmState.loaded||crmState.error?'—':crmState.metrics.homeLinked||0;}
   function crmRenderRecent(){const el=$crm('patientCrmRecent');if(!el)return;const items=crmRecentPatients();el.innerHTML=`<div class="patient-search-recent-head"><b>최근 검색·고정 환자</b><span>핀을 누르면 목록 앞에 계속 유지됩니다.</span></div><div class="patient-search-recent-list">${items.length?items.map(x=>`<button class="patient-search-recent-item" type="button" data-crm-recent-patient="${crmEscape(x.patientId)}" data-crm-recent-guardian="${crmEscape(x.guardianId)}"><b>${crmEscape(x.name)}</b><span>${crmEscape(x.breed||'품종 미입력')} · ${crmEscape(x.guardianName||'보호자 미입력')}</span><i class="patient-search-pin ${x.pinned?'on':''}" data-crm-pin="${crmEscape(x.patientId)}" aria-label="고정">${x.pinned?'●':'○'}</i></button>`).join(''):'<span class="patient-crm-result-meta">선택한 환자가 여기에 표시됩니다.</span>'}</div>`;el.querySelectorAll('[data-crm-recent-patient]').forEach(b=>b.addEventListener('click',e=>{if(e.target.closest('[data-crm-pin]'))return;crmOpenPatientRecord(b.dataset.crmRecentGuardian,b.dataset.crmRecentPatient);}));el.querySelectorAll('[data-crm-pin]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();crmTogglePatientPin(b.dataset.crmPin);}));}
-  function crmRenderList(error=''){
-    const list=$crm('patientCrmList'),meta=$crm('patientCrmResultMeta');if(!list)return;
-    const pg=crmState.pagination||{};if(meta)meta.textContent=crmState.loading?'불러오는 중…':`검색 결과 ${pg.total||0}마리 · ${pg.page||1}/${pg.totalPages||1}페이지${crmState.active==='active'?` · 활성 ${crmState.metrics.activePatients||0}마리`:crmState.active==='inactive'?` · 비활성 ${crmState.metrics.inactivePatients||0}마리`:''}`;
+  function crmRenderList(error=crmState.error){
+    const list=$crm('patientCrmList'),meta=$crm('patientCrmResultMeta');if(!list)return;crmRenderPagination();list.setAttribute('aria-busy',String(crmState.loading));
+    const pg=crmState.pagination||{};if(meta)meta.textContent=crmState.error?'불러오기 실패':crmState.hint?'검색어 확인':crmState.loading?'불러오는 중…':!crmState.loaded?'목록 조회 준비 중':`검색 결과 ${pg.total||0}마리 · ${pg.page||1}/${pg.totalPages||1}페이지${crmState.active==='active'?` · 활성 ${crmState.metrics.activePatients||0}마리`:crmState.active==='inactive'?` · 비활성 ${crmState.metrics.inactivePatients||0}마리`:''}`;
     if(crmState.loading){list.innerHTML='<div class="patient-crm-empty"><div><b>목록을 불러오는 중입니다</b><span>잠시만 기다려주세요.</span></div></div>';return;}
+    if(crmState.hint){list.innerHTML='<div class="patient-crm-empty"><div><b>'+crmEscape(crmState.hint)+'</b></div></div>';return;}
     if(error){list.innerHTML=`<div class="patient-crm-empty"><div><b>목록을 불러오지 못했습니다</b><span>${crmEscape(error)}</span></div></div>`;return;}
+    if(!crmState.loaded){list.innerHTML='<div class="patient-crm-empty"><div><b>목록 조회를 준비하고 있습니다</b></div></div>';return;}
     if(!crmState.patients.length){list.innerHTML='<div class="patient-crm-empty"><div><b>조건에 맞는 환자가 없습니다</b><span>검색어 또는 활성·비활성 필터를 변경해보세요.</span></div></div>';crmRenderPagination();return;}
     list.innerHTML=crmState.patients.map(p=>`<button class="patient-search-result ${p.active===false?'inactive':''} ${crmState.selectedPatientId===p.id?'active':''}" type="button" data-crm-patient="${crmEscape(p.id)}" data-crm-guardian="${crmEscape(p.guardianId)}"><span class="patient-crm-avatar">${crmEscape((p.name||'?').slice(0,1))}</span><span class="patient-search-result-copy"><b>${crmEscape(p.name||'이름 미입력')} ${p.active===false?'· 비활성':''}</b><span>${crmEscape(p.breed||crmSpeciesLabel(p.species))} · ${crmEscape(p.birthDate?crmDateLabel(p.birthDate):'생년월일 미입력')} · 보호자 ${crmEscape(p.guardianName||'미입력')}</span><small>${crmEscape(p.guardianPhoneLast4?'전화 끝 '+p.guardianPhoneLast4:'전화번호 미입력')}${p.externalPatientId?` · eFriends ${crmEscape(p.externalPatientId)}`:''}</small></span><span class="patient-search-result-side"><b>${p.lastVisitAt?crmEscape(crmDateLabel(p.lastVisitAt)):'진료일 없음'}</b><span>${crmEscape(p.guardianHomeStatus==='linked'?'Home 연결':'Clinic')}</span></span></button>`).join('');
     list.querySelectorAll('[data-crm-patient]').forEach(b=>b.addEventListener('click',async()=>{crmState.selectedPatientId=b.dataset.crmPatient;const p=crmState.patients.find(x=>x.id===b.dataset.crmPatient),g={id:b.dataset.crmGuardian,name:p?.guardianName||'',phone:p?.guardianPhone||''};if(p)crmRememberPatient(p,g);await crmSelectGuardian(b.dataset.crmGuardian);}));crmRenderPagination();
   }
-  function crmRenderPagination(){const el=$crm('patientCrmPagination');if(!el)return;const p=crmState.pagination||{};el.innerHTML=`<span>${p.total||0}마리 중 ${p.total?((p.page-1)*crmState.pageSize+1):0}–${Math.min((p.page||1)*crmState.pageSize,p.total||0)}</span><div><button class="btn btn-ghost" type="button" data-crm-page="prev" ${p.hasPrevious?'':'disabled'}>이전</button><button class="btn btn-secondary" type="button" data-crm-page="next" ${p.hasNext?'':'disabled'}>다음</button></div>`;el.querySelector('[data-crm-page="prev"]')?.addEventListener('click',()=>{if(p.hasPrevious){crmState.page--;crmLoad(false)}});el.querySelector('[data-crm-page="next"]')?.addEventListener('click',()=>{if(p.hasNext){crmState.page++;crmLoad(false)}});}
+  function crmRenderPagination(){const el=$crm('patientCrmPagination');if(!el)return;if(crmState.loading||crmState.error||!crmState.loaded){el.innerHTML='';return;}const p=crmState.pagination||{};el.innerHTML=`<span>${p.total||0}마리 중 ${p.total?((p.page-1)*crmState.pageSize+1):0}–${Math.min((p.page||1)*crmState.pageSize,p.total||0)}</span><div><button class="btn btn-ghost" type="button" data-crm-page="prev" ${p.hasPrevious?'':'disabled'}>이전</button><button class="btn btn-secondary" type="button" data-crm-page="next" ${p.hasNext?'':'disabled'}>다음</button></div>`;el.querySelector('[data-crm-page="prev"]')?.addEventListener('click',()=>{if(p.hasPrevious){crmState.page--;crmLoad(false)}});el.querySelector('[data-crm-page="next"]')?.addEventListener('click',()=>{if(p.hasNext){crmState.page++;crmLoad(false)}});}
   async function crmSelectGuardian(id,paint=true){
     if(crmState.dirty&&!confirm('저장하지 않은 내용이 있습니다. 변경사항을 버리고 다른 보호자로 이동할까요?'))return;
-    try{const d=await crmApi('/saas/guardians/'+encodeURIComponent(id),{method:'GET'});crmState.selectedGuardian={...d.guardian,patients:d.patients||[]};const selected=(d.patients||[]).find(x=>x.id===crmState.selectedPatientId);if(!selected){crmState.selectedPatientId='';crmState.workspace=null;crmState.workspaceLoading=false;}if(paint)crmRenderList();crmRenderDetail();if(selected&&crmState.workspace?.patient?.id!==selected.id&&!crmState.workspaceLoading)crmLoadWorkspace(selected,crmState.selectedGuardian);}
-    catch(e){if(typeof toast==='function')toast(e.message||'보호자 정보를 불러오지 못했습니다.');}
+    const scope=crmSyncScope();if(!scope||!crmAuthReady(false))return;
+    const key=scope+':'+id;
+    if(crmGuardianPending?.key===key){crmGuardianPending.paint=crmGuardianPending.paint||paint;return crmGuardianPending.promise;}
+    const revision=++crmGuardianRevision;crmGuardianAbort?.abort();
+    const controller=new AbortController();crmGuardianAbort=controller;crmWorkspaceRevision++;crmState.workspaceLoading=false;
+    const pending={key,paint,promise:null};crmGuardianPending=pending;
+    pending.promise=(async()=>{
+      try{
+        const d=await crmApi('/saas/guardians/'+encodeURIComponent(id),{method:'GET',signal:controller.signal});
+        if(revision!==crmGuardianRevision||!crmScopeCurrent(scope))return;
+        if(!d||d.ok!==true||d.guardian?.id!==id||!Array.isArray(d.patients))throw new Error('GUARDIAN_RESPONSE_INVALID');
+        crmState.selectedGuardian={...d.guardian,patients:d.patients};const selected=d.patients.find(x=>x.id===crmState.selectedPatientId);
+        if(!selected){crmState.selectedPatientId='';crmState.workspace=null;crmState.workspaceLoading=false;}
+        if(pending.paint)crmRenderList();crmRenderDetail();if(selected&&crmState.workspace?.patient?.id!==selected.id&&!crmState.workspaceLoading)void crmLoadWorkspace(selected,crmState.selectedGuardian);
+      }catch(e){if(revision===crmGuardianRevision&&crmScopeCurrent(scope)&&e?.name!=='AbortError'&&typeof toast==='function')toast('보호자 정보를 불러오지 못했습니다. 다시 선택해주세요.');}
+      finally{if(crmGuardianPending===pending)crmGuardianPending=null;if(crmGuardianAbort===controller)crmGuardianAbort=null;}
+    })();
+    return pending.promise;
   }
   function crmWorkspaceStatus(v){v=String(v||'').toLowerCase();if(['completed','resolved','sent','delivered','synced','seen','closed','canceled','cancelled','replaced'].includes(v))return '완료';if(['attention','failed','error','reconnect','expired','overdue','needs_action'].includes(v))return '확인 필요';if(['active','in_progress','sending','processing','awaiting_client','partial','provider_pending','checking','retrying'].includes(v))return '진행 중';return '예정';}
   function crmWorkspaceDate(v){return v?crmDateLabel(v):'일정 없음';}
@@ -102,7 +161,16 @@
     mount.innerHTML=`<section class="patient-workspace"><div class="patient-workspace-mobile-context"><b>${crmEscape(p.name||'환자')}</b><span>오늘 ${d.today?.visits?.length||0}건 · 상담 ${consultCount}건</span></div><div class="patient-workspace-head"><div><p class="eyebrow">PATIENT WORKSPACE · v10.7-A</p><h4>${crmEscape(p.name||'환자')} 통합 작업공간</h4><p>${crmEscape(g.name||'보호자')} · ${crmEscape(g.phone||'전화번호 미입력')} · ${crmEscape(crmSpeciesLabel(p.species))}${p.breed?` · ${crmEscape(p.breed)}`:''} · eFriends ${crmEscape(efLabel)}${efTime?` · ${crmEscape(efTime)}`:''}</p></div><div class="patient-workspace-head-actions"><button class="btn btn-secondary" type="button" data-workspace-refresh>새로고침</button><button class="btn btn-ghost" type="button" data-workspace-close>닫기</button></div></div><div class="patient-workspace-alert ${consultCount?'show':''}">${consultCount?`보호자 상담 요청 ${consultCount}건이 처리 대기 중입니다.`:'현재 처리 대기 중인 보호자 상담이 없습니다.'}</div><div class="patient-workspace-kpis"><div><span>오늘 진료</span><b>${d.today?.visits?.length||0}건</b><small>${d.today?.visits?.[0]?.title?crmEscape(d.today.visits[0].title):'오늘 기록 없음'}</small></div><div><span>최근 체중</span><b>${d.recentWeight?`${crmEscape(d.recentWeight.value)}kg`:'미입력'}</b><small>${d.recentWeight?.date?crmWorkspaceDate(d.recentWeight.date):'측정일 없음'}</small></div><div><span>다음 예방 일정</span><b>${next?crmWorkspaceDate(next.nextDueDate):'없음'}</b><small>${next?crmEscape(next.title):'예정된 접종·사상충 없음'}</small></div><div><span>Carestep Home</span><b>${d.home?.status==='linked'?'연결됨':d.home?.status==='invited'?'초대함':'미연결'}</b><small>예정 ${d.home?.scheduled||0}건 · 상담 ${d.home?.attention||0}건</small></div></div><section class="patient-workspace-fast-record"><div><b>빠른 기록</b><span>기록 종류를 선택하면 필요한 항목만 바로 열립니다.</span></div><div class="patient-workspace-fast-buttons"><button type="button" data-workspace-quick="vaccination"><b>접종</b><small>백신·차수·체중·예정일</small></button><button type="button" data-workspace-quick="heartworm"><b>사상충</b><small>체중·28일 예정</small></button><button type="button" data-workspace-quick="visit"><b>병원 진료</b><small>진료·체중·다음 일정</small></button><button type="button" data-workspace-quick="weight"><b>체중</b><small>측정값 바로 기록</small></button><button type="button" data-workspace-quick="note"><b>메모</b><small>간단한 임상 메모</small></button></div></section><div class="patient-workspace-quick"><button class="btn btn-primary" type="button" data-workspace-material>자료 생성</button><button class="btn btn-secondary" type="button" data-workspace-timeline>전체 타임라인</button><button class="btn btn-secondary" type="button" data-workspace-followup>후속관리</button></div><div class="patient-workspace-grid"><article><div class="patient-workspace-section-head"><b>진행 중인 Journey</b><span>${d.journeys?.length||0}건</span></div>${crmWorkspaceList(d.journeys,'진행 중인 Journey가 없습니다.',x=>`<div class="patient-workspace-row"><div><b>${crmEscape(x.journeyName||'기본 후속관리')}</b><span>${crmWorkspaceDate(x.startDate)} 시작 · Calendar ${crmEscape(crmWorkspaceStatus(x.calendarStatus))}</span></div><em>${crmEscape(crmWorkspaceStatus(x.status))}</em></div>`)}</article><article><div class="patient-workspace-section-head"><b>예정된 접종·사상충</b><span>${d.preventive?.length||0}건</span></div>${crmWorkspaceList(d.preventive,'예정된 예방 일정이 없습니다.',x=>`<div class="patient-workspace-row"><div><b>${crmEscape(x.title)}</b><span>${crmWorkspaceDate(x.nextDueDate)}</span></div><em>${x.type==='vaccination'?'접종':'사상충'}</em></div>`)}</article><article><div class="patient-workspace-section-head"><b>예약된 후속관리</b><span>${d.followups?.length||0}건</span></div>${crmWorkspaceList(d.followups,'예약된 후속관리가 없습니다.',x=>`<div class="patient-workspace-row"><div><b>D+${Number(x.stageDay)||0} · ${crmEscape(x.title)}</b><span>${crmWorkspaceDate(x.dueDate)}${x.journeyName?` · ${crmEscape(x.journeyName)}`:''}</span></div><em>${crmEscape(crmWorkspaceStatus(x.status))}</em></div>`)}</article><article class="${consultCount?'patient-workspace-consult':''}"><div class="patient-workspace-section-head"><b>보호자 상담 요청</b><span>${consultCount}건</span></div>${crmWorkspaceList(d.consultations,'처리할 상담 요청이 없습니다.',x=>`<button class="patient-workspace-row consult" type="button" data-workspace-consult="${crmEscape(x.id)}"><div><b>${crmEscape(x.title||'병원 상담 필요')}</b><span>${crmEscape(x.note||'보호자가 상담을 요청했습니다.')}${x.assignee?` · 담당 ${crmEscape(x.assignee)}`:''}</span></div><em>답변하기</em></button>`)}</article></div></section>`;
     mount.querySelector('[data-workspace-refresh]')?.addEventListener('click',()=>crmLoadWorkspace(p,g,true));mount.querySelector('[data-workspace-close]')?.addEventListener('click',()=>{crmState.selectedPatientId='';crmState.workspace=null;crmRenderDetail();});mount.querySelector('[data-workspace-material]')?.addEventListener('click',()=>crmUsePatient(p,g));mount.querySelectorAll('[data-workspace-quick]').forEach(b=>b.addEventListener('click',()=>window.crmTimelineQuick?.(p,g,b.dataset.workspaceQuick)));mount.querySelector('[data-workspace-timeline]')?.addEventListener('click',()=>window.crmTimelineOpen?.(p,g));mount.querySelector('[data-workspace-followup]')?.addEventListener('click',()=>{crmUsePatient(p,g);setTimeout(()=>{go('followup');window.crmSyncFollowupPhone?.({force:true});},30);});mount.querySelectorAll('[data-workspace-consult]').forEach(b=>b.addEventListener('click',()=>window.openCareConsultReply?window.openCareConsultReply(b.dataset.workspaceConsult):typeof openCareConsultReply==='function'&&openCareConsultReply(b.dataset.workspaceConsult)));
   }
-  async function crmLoadWorkspace(p,g,showToast=false){if(!p||!g)return;crmState.selectedPatientId=p.id;crmState.workspaceLoading=true;crmState.workspace=null;crmRenderDetail();try{crmState.workspace=await crmApi(`/saas/patients/${encodeURIComponent(p.id)}/workspace`,{method:'GET'});if(showToast&&typeof toast==='function')toast(`${p.name} 환자 작업공간을 새로고침했습니다.`);}catch(e){if(typeof toast==='function')toast(e.message||'환자 작업공간을 불러오지 못했습니다.');}finally{crmState.workspaceLoading=false;crmRenderDetail();}}
+  async function crmLoadWorkspace(p,g,showToast=false){
+    if(!p||!g)return;const scope=crmSyncScope();if(!scope)return;const revision=++crmWorkspaceRevision;
+    crmState.selectedPatientId=p.id;crmState.workspaceLoading=true;crmState.workspace=null;crmRenderDetail();
+    try{const d=await crmApi(`/saas/patients/${encodeURIComponent(p.id)}/workspace`,{method:'GET'});
+      if(revision!==crmWorkspaceRevision||!crmScopeCurrent(scope)||crmState.selectedPatientId!==p.id)return;
+      if(!d||d.ok!==true||d.patient?.id!==p.id)throw new Error('WORKSPACE_RESPONSE_INVALID');
+      crmState.workspace=d;if(showToast&&typeof toast==='function')toast(`${p.name} 환자 작업공간을 새로고침했습니다.`);
+    }catch(e){if(revision===crmWorkspaceRevision&&crmScopeCurrent(scope)&&typeof toast==='function')toast('환자 작업공간을 불러오지 못했습니다. 다시 선택해주세요.');}
+    finally{if(revision===crmWorkspaceRevision&&crmScopeCurrent(scope)){crmState.workspaceLoading=false;crmRenderDetail();}}
+  }
   function crmRenderDetail(){
     const box=$crm('patientCrmDetail'),g=crmState.selectedGuardian;if(!box)return;
     if(!g){box.innerHTML='<div class="patient-crm-empty"><div><b>보호자를 선택하세요</b><span>왼쪽 목록에서 보호자를 선택하면 연결된 환자와 기본 정보를 확인할 수 있습니다.</span></div></div>';return;}

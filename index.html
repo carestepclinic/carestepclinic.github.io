@@ -1218,7 +1218,7 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
           <div class="patient-crm-actions"><button id="patientCrmRefresh" class="btn btn-secondary" type="button">새로고침</button><button id="patientCrmNewGuardian" class="btn btn-secondary" type="button">+ 보호자 등록</button><button id="patientCrmNewPatient" class="btn btn-primary" type="button">+ 환자 등록</button></div>
         </div>
         <div class="patient-crm-notice"><span>🔒</span><div><b>병원별 분리 · 암호화 저장</b><br>보호자명·연락처, 환자 식별정보와 건강 타임라인 제목·메모는 병원별로 분리해 암호화 저장합니다. 체중·접종·사상충·병원 진료·Journey는 환자별 날짜순으로 누적됩니다.</div></div>
-        <div class="patient-crm-kpis"><div class="patient-crm-kpi"><span>등록 보호자</span><b id="crmGuardianCount">0</b></div><div class="patient-crm-kpi"><span>등록 환자</span><b id="crmPatientCount">0</b></div><div class="patient-crm-kpi"><span>Carestep Home 연결</span><b id="crmHomeCount">0</b></div></div>
+        <div class="patient-crm-kpis"><div class="patient-crm-kpi"><span>등록 보호자</span><b id="crmGuardianCount">—</b></div><div class="patient-crm-kpi"><span>등록 환자</span><b id="crmPatientCount">—</b></div><div class="patient-crm-kpi"><span>Carestep Home 연결</span><b id="crmHomeCount">—</b></div></div>
         <div class="patient-crm-layout">
           <div class="panel patient-crm-list-panel"><div class="patient-search-toolbar"><div class="patient-crm-search"><input id="patientCrmSearch" class="input" type="search" autocomplete="off" placeholder="환자·보호자·전화 뒤 4자리·eFriends 번호·품종·생년월일"><button id="patientCrmSearchClear" class="btn btn-ghost" type="button">지우기</button></div><select id="patientCrmActive" class="input" aria-label="환자 상태"><option value="active">활성 환자</option><option value="inactive">비활성 환자</option><option value="all">전체 환자</option></select><select id="patientCrmSort" class="input" aria-label="정렬"><option value="recent">최근 진료순</option><option value="name">가나다순</option></select></div><div id="patientCrmRecent" class="patient-search-recent"></div><div id="patientCrmResultMeta" class="patient-crm-result-meta">환자를 불러오는 중입니다.</div><div id="patientCrmList" class="patient-crm-list"></div><div id="patientCrmPagination" class="patient-search-pagination"></div></div>
           <div id="patientCrmDetail" class="panel patient-crm-detail"><div class="patient-crm-empty"><div><b>보호자를 선택하세요</b><span>왼쪽 목록에서 보호자를 선택하면 연결된 환자와 기본 정보를 확인할 수 있습니다.</span></div></div></div>
@@ -9614,7 +9614,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
 <script src="patient-breeds.js?v=9.5.3"></script>
-<script src="patient-crm.js?v=10.7-A"></script>
+<script src="patient-crm.js?v=pd-latency-r02"></script>
 <script src="patient-timeline.js?v=10.7-A"></script>
 <script src="date-input-guard.js?v=9.5.3"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
