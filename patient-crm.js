@@ -1,19 +1,15 @@
 /* CARESTEP Clinic v10.7-A · Data Integrity Workspace */
 (() => {
   'use strict';
-  if(!window.CarestepStabilization?.asset('crm','bundle-r16')){const notice=document.createElement('div');notice.setAttribute('role','alert');notice.textContent='화면과 프로그램 버전이 다릅니다. 새로고침 후 다시 확인해주세요.';(document.body||document.documentElement).prepend(notice);return;}
+  if(!window.CarestepStabilization?.asset('crm','bundle-r19')){const notice=document.createElement('div');notice.setAttribute('role','alert');notice.textContent='화면과 프로그램 버전이 다릅니다. 새로고침 후 다시 확인해주세요.';(document.body||document.documentElement).prepend(notice);return;}
   const $crm=id=>document.getElementById(id);
   const crmState={rows:[],patients:[],selectedGuardian:null,selectedPatientId:'',query:'',active:'active',sort:'recent',page:1,pageSize:30,pagination:{page:1,total:0,totalPages:1},loading:false,error:'',loaded:false,hint:'',workspace:null,workspaceLoading:false,dialogScrollY:0,dirty:false,metrics:{guardians:0,patients:0,activePatients:0,inactivePatients:0,homeLinked:0},demoGuardians:[]};
   let crmLoadRevision=0,crmPending=null,crmGuardianRevision=0,crmGuardianPending=null,crmGuardianAbort=null,crmWorkspaceRevision=0,crmScope=crmScopeKey();
-  function crmScopeKey(){
-    if(typeof saasMode!=='undefined'&&saasMode==='demo')return 'demo';
-    if(typeof saasMode==='undefined'||saasMode!=='auth'||typeof saasMe==='undefined'||!saasMe?.clinic?.id||!saasMe?.user?.id)return '';
-    return JSON.stringify([saasMe.clinic.id,saasMe.user.id]);
-  }
+  function crmScopeKey(){if(typeof saasMode!=='undefined'&&saasMode==='demo')return 'demo';if(typeof saasMode==='undefined'||saasMode!=='auth'||typeof saasMe==='undefined')return '';const clinic=crmCanonicalId(saasMe?.clinic?.id),user=crmCanonicalId(saasMe?.user?.id);return clinic&&user?JSON.stringify([clinic,user]):'';}
   function crmSyncScope(){
     const scope=crmScopeKey();
     if(scope!==crmScope){
-      crmScope=scope;crmLoadRevision++;crmGuardianRevision++;crmWorkspaceRevision++;
+      crmScope=scope;if(scope)setTimeout(()=>window.dispatchEvent(new Event('r61-auth-ready')),0);activeCrmPatient=null;crmLoadRevision++;crmGuardianRevision++;crmWorkspaceRevision++;
       crmSearchAbort?.abort();crmGuardianAbort?.abort();crmSearchAbort=null;crmGuardianAbort=null;
       crmPending=null;crmGuardianPending=null;crmSearchCache.clear();
       Object.assign(crmState,{rows:[],patients:[],selectedGuardian:null,selectedPatientId:'',workspace:null,workspaceLoading:false,loading:false,loaded:false,error:'',hint:'',page:1,pagination:{page:1,total:0,totalPages:1}});
@@ -35,10 +31,16 @@
   function crmSpeciesLabel(v){return ({dog:'강아지',cat:'고양이',other:'기타'})[v]||'기타';}
   function crmSexLabel(v){return ({male:'수컷',female:'암컷',unknown:'미확인'})[v]||'미확인';}
   function crmNeuterLabel(v){return ({yes:'중성화',no:'미중성화',unknown:'미확인'})[v]||'미확인';}
-  function crmRecentPatients(){try{const v=JSON.parse(localStorage.getItem(CRM_RECENT_PATIENTS_KEY)||'[]');return Array.isArray(v)?v.slice(0,12):[];}catch{return [];}}
-  function crmSaveRecentPatients(items){try{localStorage.setItem(CRM_RECENT_PATIENTS_KEY,JSON.stringify(items.slice(0,12)));}catch{}}
-  function crmRememberPatient(p,g,pinned=false){if(!p?.id||!g?.id)return;const old=crmRecentPatients(),before=old.find(x=>x.patientId===p.id),item={patientId:p.id,guardianId:g.id,name:p.name||'환자',guardianName:g.name||'',breed:p.breed||crmSpeciesLabel(p.species),birthDate:p.birthDate||'',externalPatientId:p.externalPatientId||'',pinned:pinned||!!before?.pinned,touchedAt:new Date().toISOString()};crmSaveRecentPatients([item,...old.filter(x=>x.patientId!==p.id)].sort((a,b)=>Number(!!b.pinned)-Number(!!a.pinned)||String(b.touchedAt).localeCompare(String(a.touchedAt))));crmRenderRecent();}
-  function crmTogglePatientPin(patientId){const items=crmRecentPatients(),x=items.find(r=>r.patientId===patientId);if(!x)return;x.pinned=!x.pinned;crmSaveRecentPatients(items.sort((a,b)=>Number(!!b.pinned)-Number(!!a.pinned)||String(b.touchedAt).localeCompare(String(a.touchedAt))));crmRenderRecent();}
+
+  function crmCanonicalId(v){return typeof v==='string'&&v.trim()?v.trim():typeof v==='number'&&Number.isSafeInteger(v)&&v>=0?String(v):'';}
+  function crmRecentKey(){const scope=crmScopeKey();return scope?'carestep_crm_recent_patients_v3:'+scope:'';}
+  function crmRemoveRecent(patientId){crmSaveRecentPatients(crmRecentPatients().filter(x=>x.patientId!==crmCanonicalId(patientId)));crmRenderRecent();}
+  function crmClearPatientSelection(){crmWorkspaceRevision++;crmGuardianRevision++;crmGuardianAbort?.abort();activeCrmPatient=null;Object.assign(crmState,{selectedGuardian:null,selectedPatientId:'',workspace:null,workspaceLoading:false,dirty:false});crmRenderDetail();}
+
+  function crmRecentPatients(){const key=crmRecentKey();if(!key)return [];try{const d=JSON.parse(localStorage.getItem(key)||'null');if(!d||d.version!==3||d.scope!==crmScopeKey()||!Array.isArray(d.items))return [];return d.items.filter(x=>x&&crmCanonicalId(x.patientId)&&crmCanonicalId(x.guardianId)).slice(0,12).map(x=>({...x,patientId:crmCanonicalId(x.patientId),guardianId:crmCanonicalId(x.guardianId)}));}catch{return [];}}
+  function crmSaveRecentPatients(items){const key=crmRecentKey();if(!key)return;try{localStorage.setItem(key,JSON.stringify({version:3,scope:crmScopeKey(),items:items.slice(0,12)}));}catch{}}
+  function crmRememberPatient(p,g,pinned=false){const patientId=crmCanonicalId(p?.id),guardianId=crmCanonicalId(g?.id);if(!patientId||!guardianId)return;const old=crmRecentPatients(),before=old.find(x=>x.patientId===patientId),item={patientId,guardianId,name:p.name||'환자',guardianName:g.name||'',breed:p.breed||crmSpeciesLabel(p.species),birthDate:p.birthDate||'',externalPatientId:p.externalPatientId||'',pinned:pinned||!!before?.pinned,touchedAt:new Date().toISOString()};crmSaveRecentPatients([item,...old.filter(x=>x.patientId!==patientId)].sort((a,b)=>Number(!!b.pinned)-Number(!!a.pinned)||String(b.touchedAt).localeCompare(String(a.touchedAt))));crmRenderRecent();}
+  function crmTogglePatientPin(patientId){patientId=crmCanonicalId(patientId);const items=crmRecentPatients(),x=items.find(r=>r.patientId===patientId);if(!x)return;x.pinned=!x.pinned;crmSaveRecentPatients(items.sort((a,b)=>Number(!!b.pinned)-Number(!!a.pinned)||String(b.touchedAt).localeCompare(String(a.touchedAt))));crmRenderRecent();}
   function crmBreedNormalize(v=''){return String(v).toLocaleLowerCase('ko-KR').normalize('NFKC').replace(/[\s._'’\-\/()]+/g,'');}
   function crmBreedInitials(v=''){const first=0xAC00,last=0xD7A3,initials='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';return [...String(v)].map(ch=>{const code=ch.charCodeAt(0);return code>=first&&code<=last?initials[Math.floor((code-first)/588)]:ch;}).join('');}
   function crmBreedDictionary(species=$crm('crmPatientSpecies')?.value||'dog'){return Array.isArray(window.CARESTEP_BREEDS?.[species])?window.CARESTEP_BREEDS[species]:[];}
@@ -119,7 +121,7 @@
   }
   function crmRenderSignedOut(){const list=$crm('patientCrmList'),detail=$crm('patientCrmDetail');if(list)list.innerHTML='<div class="patient-crm-empty"><div><b>병원 계정 로그인이 필요합니다</b><span>병원별로 분리된 보호자·환자 정보를 안전하게 관리하려면 로그인해주세요.</span></div></div>';if(detail)detail.innerHTML='<div class="patient-crm-empty"><div><b>환자 CRM</b><span>로그인 후 보호자와 환자를 등록하고 기존 자료 생성에 연결할 수 있습니다.</span></div></div>';}
   function crmRenderMetrics(){if($crm('crmGuardianCount'))$crm('crmGuardianCount').textContent=crmState.loading||!crmState.loaded||crmState.error?'—':crmState.metrics.guardians||0;if($crm('crmPatientCount'))$crm('crmPatientCount').textContent=crmState.loading||!crmState.loaded||crmState.error?'—':crmState.metrics.patients||0;if($crm('crmHomeCount'))$crm('crmHomeCount').textContent=crmState.loading||!crmState.loaded||crmState.error?'—':crmState.metrics.homeLinked||0;}
-  function crmRenderRecent(){const el=$crm('patientCrmRecent');if(!el)return;const items=crmRecentPatients();el.innerHTML=`<div class="patient-search-recent-head"><b>최근 검색·고정 환자</b><span>핀을 누르면 목록 앞에 계속 유지됩니다.</span></div><div class="patient-search-recent-list">${items.length?items.map(x=>`<button class="patient-search-recent-item" type="button" data-crm-recent-patient="${crmEscape(x.patientId)}" data-crm-recent-guardian="${crmEscape(x.guardianId)}"><b>${crmEscape(x.name)}</b><span>${crmEscape(x.breed||'품종 미입력')} · ${crmEscape(x.guardianName||'보호자 미입력')}</span><i class="patient-search-pin ${x.pinned?'on':''}" data-crm-pin="${crmEscape(x.patientId)}" aria-label="고정">${x.pinned?'●':'○'}</i></button>`).join(''):'<span class="patient-crm-result-meta">선택한 환자가 여기에 표시됩니다.</span>'}</div>`;el.querySelectorAll('[data-crm-recent-patient]').forEach(b=>b.addEventListener('click',e=>{if(e.target.closest('[data-crm-pin]'))return;crmOpenPatientRecord(b.dataset.crmRecentGuardian,b.dataset.crmRecentPatient);}));el.querySelectorAll('[data-crm-pin]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();crmTogglePatientPin(b.dataset.crmPin);}));}
+  function crmRenderRecent(){const el=$crm('patientCrmRecent');if(!el)return;const scope=crmScopeKey(),items=crmRecentPatients();let legacy=false;try{legacy=!!localStorage.getItem(CRM_RECENT_PATIENTS_KEY);}catch{}el.innerHTML='<div class="patient-search-recent-head"><b>최근 검색·고정 환자</b></div>'+(legacy?'<p role="status">이전 공용 기록은 병원을 확인할 수 없습니다. 현재 병원에서 다시 검색해 선택해주세요.</p>':'')+'<div class="patient-search-recent-list">'+items.map(x=>'<span class="patient-search-recent-item"><button type="button" data-recent-open="'+crmEscape(x.patientId)+'"><b>'+crmEscape(x.name||'환자')+'</b><span>'+crmEscape(x.guardianName||'보호자 미입력')+'</span></button><button type="button" data-recent-pin="'+crmEscape(x.patientId)+'" aria-label="고정 변경">'+(x.pinned?'고정됨':'고정')+'</button><button type="button" data-recent-remove="'+crmEscape(x.patientId)+'" aria-label="최근 기록 삭제">삭제</button></span>').join('')+(items.length?'':'<span>선택한 환자가 여기에 표시됩니다.</span>')+'</div>';el.querySelectorAll('[data-recent-open]').forEach(b=>b.addEventListener('click',()=>{if(scope!==crmScopeKey()){crmRenderRecent();return;}const x=items.find(x=>x.patientId===b.dataset.recentOpen);if(x)void crmOpenPatientRecord(x.guardianId,x.patientId);}));el.querySelectorAll('[data-recent-pin]').forEach(b=>b.addEventListener('click',()=>{if(scope===crmScopeKey())crmTogglePatientPin(b.dataset.recentPin);}));el.querySelectorAll('[data-recent-remove]').forEach(b=>b.addEventListener('click',()=>{if(scope===crmScopeKey())crmRemoveRecent(b.dataset.recentRemove);}));}
   function crmRenderList(error=crmState.error){
     const list=$crm('patientCrmList'),meta=$crm('patientCrmResultMeta');if(!list)return;crmRenderPagination();list.setAttribute('aria-busy',String(crmState.loading));
     const pg=crmState.pagination||{};if(meta)meta.textContent=crmState.error?'불러오기 실패':crmState.hint?'검색어 확인':crmState.loading?'불러오는 중…':!crmState.loaded?'목록 조회 준비 중':`검색 결과 ${pg.total||0}마리 · ${pg.page||1}/${pg.totalPages||1}페이지${crmState.active==='active'?` · 활성 ${crmState.metrics.activePatients||0}마리`:crmState.active==='inactive'?` · 비활성 ${crmState.metrics.inactivePatients||0}마리`:''}`;
@@ -144,8 +146,8 @@
       try{
         const d=await crmApi('/saas/guardians/'+encodeURIComponent(id),{method:'GET',signal:controller.signal});
         if(revision!==crmGuardianRevision||!crmScopeCurrent(scope))return;
-        if(!d||d.ok!==true||d.guardian?.id!==id||!Array.isArray(d.patients))throw new Error('GUARDIAN_RESPONSE_INVALID');
-        crmState.selectedGuardian={...d.guardian,patients:d.patients};const selected=d.patients.find(x=>x.id===crmState.selectedPatientId);
+        if(!d||d.ok!==true||crmCanonicalId(d.guardian?.id)!==crmCanonicalId(id)||!Array.isArray(d.patients))throw new Error('GUARDIAN_RESPONSE_INVALID');
+        crmState.selectedGuardian={...d.guardian,patients:d.patients};const selected=d.patients.find(x=>crmCanonicalId(x.id)===crmCanonicalId(crmState.selectedPatientId));
         if(!selected){crmState.selectedPatientId='';crmState.workspace=null;crmState.workspaceLoading=false;}
         if(pending.paint)crmRenderList();crmRenderDetail();if(selected&&crmState.workspace?.patient?.id!==selected.id&&!crmState.workspaceLoading)void crmLoadWorkspace(selected,crmState.selectedGuardian);
       }catch(e){if(revision===crmGuardianRevision&&crmScopeCurrent(scope)&&e?.name!=='AbortError'&&typeof toast==='function')toast('보호자 정보를 불러오지 못했습니다. 다시 선택해주세요.');}
@@ -224,15 +226,18 @@
   function crmPaintBuilderSelection(){const el=$crm('crmBuilderSelection');if(!el)return;if(!activeCrmPatient){el.classList.add('hidden');el.innerHTML='';return;}const {patient,guardian}=activeCrmPatient;el.classList.remove('hidden');el.innerHTML=`<span><b>CRM 환자 연결됨</b> · ${crmEscape(patient.name)} / 보호자 ${crmEscape(guardian.name)}${patient.latestWeightKg?` / ${crmEscape(patient.latestWeightKg)}kg`:''}</span><button type="button" id="crmBuilderUnlink">연결 해제</button>`;$crm('crmBuilderUnlink')?.addEventListener('click',()=>{activeCrmPatient=null;if(caseInfo){delete caseInfo.patientId;delete caseInfo.guardianId;delete caseInfo.latestWeightKg;}crmPaintBuilderSelection();toast('CRM 연결만 해제했습니다. 현재 입력값은 유지됩니다.');});}
   function crmOpenPicker(){go('patients');setTimeout(()=>{$crm('patientCrmSearch')?.focus();},50);}
   function crmOpen(){crmRenderMetrics();crmRenderRecent();crmRenderDetail();crmLoad(false);}
-  async function crmOpenPatientRecord(guardianId,patientId){
-    if(!guardianId||!patientId)return false;go('patients');crmState.selectedPatientId=patientId;await crmSelectGuardian(guardianId);const p=crmState.selectedGuardian?.patients?.find(x=>x.id===patientId);if(!p){if(typeof toast==='function')toast('환자 정보를 찾지 못했습니다.');return false;}crmRememberPatient(p,crmState.selectedGuardian);setTimeout(()=>{const card=document.querySelector('.guardian-patient-card.selected');card?.scrollIntoView({behavior:'smooth',block:'center'});},80);return true;
-  }
+  function crmFindCurrentRecent(patientId,guardianId,scope){if(!crmScopeCurrent(scope))return null;const rows=Array.isArray(crmState.patients)?crmState.patients:[];const matches=rows.filter(x=>crmCanonicalId(x.id)===patientId&&crmCanonicalId(x.guardianId||x.guardian_id)===guardianId);return matches.length===1?matches[0]:null;}
+async function crmOpenPatientRecord(guardianId,patientId){patientId=crmCanonicalId(patientId);guardianId=crmCanonicalId(guardianId);if(!patientId||!guardianId)return false;if(crmState.dirty&&!confirm('저장하지 않은 변경을 버리고 이동할까요?'))return false;const scope=crmSyncScope();if(!scope||!crmAuthReady(false))return false;const revision=++crmWorkspaceRevision;crmGuardianRevision++;crmGuardianAbort?.abort();go('patients');crmState.selectedPatientId=patientId;crmState.selectedGuardian=null;crmState.workspace=null;crmState.workspaceLoading=true;crmRenderDetail();try{const d=await crmApi('/saas/patients/'+encodeURIComponent(patientId)+'/workspace',{method:'GET'});if(revision!==crmWorkspaceRevision||!crmScopeCurrent(scope))return false;if(!d||d.ok!==true||crmCanonicalId(d.patient?.id)!==patientId||crmCanonicalId(d.guardian?.id)!==guardianId)throw Error('PATIENT_RELATION_UNCONFIRMED');const p=d.patient,g=d.guardian;if(p.isActive===false||p.isActive===0||p.status==='inactive'){toast('비활성 환자입니다. 현재 병원 검색에서 상태를 확인하거나 최근 기록을 삭제해주세요.');return false;}crmState.selectedPatientId=p.id;crmState.selectedGuardian={...g,patients:[p]};crmState.workspace=d;crmState.dirty=false;crmRememberPatient(p,g);crmRenderList();return true;}catch{if(revision===crmWorkspaceRevision&&crmScopeCurrent(scope)){const match=crmFindCurrentRecent(patientId,guardianId,scope);toast(match?'현재 목록에서 같은 환자를 찾았지만 상세 연결이 확인되지 않았습니다. 자동으로 다시 조회하지 않습니다.':'현재 병원 목록에서도 환자를 찾지 못했습니다. 최근 기록의 삭제 버튼으로 제거해주세요.');}return false;}finally{if(revision===crmWorkspaceRevision&&crmScopeCurrent(scope)){crmState.workspaceLoading=false;crmRenderDetail();}}}
   async function crmQuickRecordFor(guardianId,patientId,type='weight'){
-    if(!guardianId||!patientId)return false;if(!crmState.rows.length)await crmLoad(false);
-    let guardian=crmState.rows.find(x=>x.id===guardianId),patient=guardian?.patients?.find(x=>x.id===patientId);
-    if(!guardian||!patient){await crmLoad(false);guardian=crmState.rows.find(x=>x.id===guardianId);patient=guardian?.patients?.find(x=>x.id===patientId);}
-    if(!guardian||!patient){if(typeof toast==='function')toast('빠른 기록에 연결된 환자를 찾지 못했습니다.');return false;}
-    window.crmTimelineQuick?.(patient,guardian,type);return true;
+    if(!await crmOpenPatientRecord(guardianId,patientId))return false;
+    return crmOpenConfirmedQuick(guardianId,patientId,type);
+  }
+  async function crmOpenConfirmedQuick(guardianId,patientId,type){
+    if(!['weight','vaccination','heartworm','visit'].includes(type))return false;
+    const w=crmState.workspace;
+    if(!w||crmCanonicalId(w.patient?.id)!==crmCanonicalId(patientId)||crmCanonicalId(w.guardian?.id)!==crmCanonicalId(guardianId))return false;
+    if(typeof window.crmTimelineQuick!=='function')return false;
+    await window.crmTimelineQuick(w.patient,w.guardian,type);return true;
   }
   function crmBind(){
     $crm('patientCrmRefresh')?.addEventListener('click',()=>crmLoad(true));$crm('patientCrmNewGuardian')?.addEventListener('click',()=>crmOpenGuardian());$crm('patientCrmNewPatient')?.addEventListener('click',()=>crmOpenPatient(null,crmState.selectedGuardian?.id||''));
@@ -244,6 +249,6 @@
     window.addEventListener('carestep:consultation-updated',()=>{const p=crmState.selectedGuardian?.patients?.find(x=>x.id===crmState.selectedPatientId);if(p)crmLoadWorkspace(p,crmState.selectedGuardian);});
     crmPaintBuilderSelection();
   }
-  window.crmOpen=crmOpen;window.crmLoad=crmLoad;window.crmUsePatient=crmUsePatient;window.crmOpenPatientRecord=crmOpenPatientRecord;window.crmQuickRecordFor=crmQuickRecordFor;window.crmSyncFollowupPhone=crmSyncFollowupPhone;window.crmApiRequest=crmApi;window.crmCurrentPatient=()=>activeCrmPatient;window.crmUnifiedSearchItems=()=>crmState.rows.flatMap(g=>(g.patients||[]).map(p=>({type:'patient',id:p.id,guardianId:g.id,title:p.name||'환자',meta:`보호자 ${g.name||''} · ${String(g.phone||'').replace(/\D/g,'').slice(-4)||'번호 없음'} · ${p.breed||crmSpeciesLabel(p.species)}`,search:`${p.name||''} ${g.name||''} ${String(g.phone||'').replace(/\D/g,'').slice(-4)} ${p.breed||''} ${p.mainConditions||''}`})));
+  window.crmWorkspaceSelection=()=>crmState.workspace?{patientId:crmState.workspace.patient.id,guardianId:crmState.workspace.guardian.id}:null;window.crmOpenConfirmedQuick=crmOpenConfirmedQuick;window.crmOpen=crmOpen;window.crmLoad=crmLoad;window.crmUsePatient=crmUsePatient;window.crmOpenPatientRecord=crmOpenPatientRecord;window.crmQuickRecordFor=crmQuickRecordFor;window.crmSyncFollowupPhone=crmSyncFollowupPhone;window.crmApiRequest=crmApi;window.crmCurrentPatient=()=>{crmSyncScope();return activeCrmPatient;};window.crmClearPatientSelection=crmClearPatientSelection;window.crmUnifiedSearchItems=()=>crmState.rows.flatMap(g=>(g.patients||[]).map(p=>({type:'patient',id:p.id,guardianId:g.id,title:p.name||'환자',meta:`보호자 ${g.name||''} · ${String(g.phone||'').replace(/\D/g,'').slice(-4)||'번호 없음'} · ${p.breed||crmSpeciesLabel(p.species)}`,search:`${p.name||''} ${g.name||''} ${String(g.phone||'').replace(/\D/g,'').slice(-4)} ${p.breed||''} ${p.mainConditions||''}`})));
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',crmBind);else crmBind();
 })();
