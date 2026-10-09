@@ -32,6 +32,7 @@
   const labels={preventive_auto_delivery:'접종·사상충 자동 발송',followup_auto_completion:'최종확인 후 자동 완료·초기화',guardian_material_delivery:'보호자 자료 즉시 송부',efriends_home_visible_default:'공개 분류된 신규 eFriends 기록 Home 표시'};
   for(const [key,value] of Object.entries(cfg.flags)){const l=el('label'),c=el('input');c.type='checkbox';c.checked=value;inputs[key]=c;l.append(c,document.createTextNode(labels[key]));l.style.display='block';body.append(l);}
   body.append(el('p','단계별 승인 후 기능을 켭니다. 자료 송부와 자동 알림은 별도 운영 승인 전까지 OFF를 유지하세요.'));
+  if(cfg.flags.followup_auto_completion===true)button(body,'실제 후속관리 단계 확인',()=>window.r83OpenRequiredStages());
   button(body,'예방관리 대상 먼저 확인',preventivePreview);
   const external=el('input');external.type='checkbox';external.checked=cfg.policy.enabled===true;const l=el('label',' 병원 외부 LMS 발송 허용 (보호자별 별도 동의 필요)');l.prepend(external);body.append(l);
   const channels={};for(const [key,label] of [['lms','LMS'],['kakao','알림톡'],['mms','MMS']]){const c=el('input');c.type='checkbox';c.checked=(cfg.policy.channels||['lms']).includes(key);channels[key]=c;const l=el('label',' '+label);l.prepend(c);body.append(l);}
