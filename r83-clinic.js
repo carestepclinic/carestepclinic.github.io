@@ -38,7 +38,7 @@
   if(pending.get(k)?.uncertain)throw Error('CONFIRMATION_RESULT_UNCONFIRMED_READ_ONLY_CHECK_REQUIRED');
   const key=pending.get(k)?.key||'r83_'+deps.nonce();pending.set(k,{key,uncertain:false});busy.add(identityKey);
   try{
-   const d=await deps.request('/saas/followup/cases/'+encodeURIComponent(s.case.caseKey)+'/required-stages',{method:'POST',body:JSON.stringify({patientId:s.case.patientId,stageDay,expectedRevision:s.case.revision,contractSHA256:s.contractSHA256,idempotencyKey:key,confirmed:true,finalConfirmation:stageDay===s.requiredStages.at(-1)})});
+   const d=await deps.request('/saas/followup/cases/'+encodeURIComponent(s.case.caseKey)+'/required-stages',{method:'POST',...(stageDay===s.requiredStages.at(-1)?{redirect:'error'}:{}),body:JSON.stringify({patientId:s.case.patientId,stageDay,expectedRevision:s.case.revision,contractSHA256:s.contractSHA256,idempotencyKey:key,confirmed:true,finalConfirmation:stageDay===s.requiredStages.at(-1)})});
    if(!sameSelection(s,deps))throw Error('PATIENT_OR_CLINIC_CHANGED');
    if(stageDay===s.requiredStages.at(-1)){
     if(!confirmed(d,s,key))throw Error('COMPLETION_RECEIPT_UNCONFIRMED');
