@@ -1,7 +1,7 @@
 /* R61 integrated Clinic controls. All server actions require existing session. */
 (()=>{'use strict';
  const el=(tag,text)=>{const n=document.createElement(tag);if(text)n.textContent=text;return n;};
- const api=(path,body)=>saasRequest('/saas/r61'+path,body===undefined?{}:{method:'POST',body:JSON.stringify(body)});
+ const api=(path,body,opt={})=>saasRequest('/saas/r61'+path,body===undefined?opt:{...opt,method:'POST',body:JSON.stringify(body)});
  const selection=()=>window.crmWorkspaceSelection?.()||window.crmCurrentPatient?.()||{};
  window.r61TaskStillActive=async x=>{
   await loadFollowupScheduleBoard(false);
@@ -10,17 +10,47 @@
  };
  function dialog(title){const d=el('dialog'),h=el('h2',title),body=el('div'),close=el('button','닫기');d.append(h,body,close);close.onclick=()=>d.close();d.addEventListener('close',()=>d.remove());document.body.append(d);d.style.cssText='max-width:720px;width:90%;max-height:85vh;overflow:auto;padding:24px;border-radius:14px';d.showModal();return {d,body};}
  function button(parent,label,action){const b=el('button',label);b.type='button';b.className='btn btn-secondary';parent.append(b);b.onclick=async()=>{b.disabled=true;try{await action();}catch{alert('처리하지 못했습니다. 권한·선택 대상과 저장 상태를 확인해주세요. 자동 재시도하지 않습니다.');}finally{b.disabled=false;}};return b;}
+ const materialScopeKeys=['clinicId','userId','sessionId','patientId','guardianId','materialId','materialRevision','channel'];
+ const materialReceiptKeys=['deliveryId','clinicId','patientId','guardianId','materialId','materialRevision','channel','status','createdAt'];
+ const materialId=x=>typeof x==='string'&&/^[A-Za-z0-9_-]{1,180}$/.test(x);
+ const materialCanon=v=>JSON.stringify(Object.fromEntries(Object.keys(v).sort().map(k=>[k,v[k]])));
+ const materialHash=async text=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text))),x=>x.toString(16).padStart(2,'0')).join('');
+ function materialScope(mid,revision){
+  const s=selection();if(typeof saasMode==='undefined'||saasMode!=='auth'||typeof saasToken!=='string'||!saasToken||typeof saasMe==='undefined'||typeof saasSessionMeta==='undefined')throw Error('MATERIAL_LOGIN_REQUIRED');
+  const q={clinicId:saasMe?.clinic?.id,userId:saasMe?.user?.id,sessionId:saasSessionMeta?.id,patientId:s.patientId,guardianId:s.guardianId,materialId:mid,materialRevision:revision,channel:'home'};
+  for(const k of ['clinicId','userId','sessionId','patientId','guardianId','materialId'])if(!materialId(q[k]))throw Error('MATERIAL_SCOPE_MISSING');
+  if(!Number.isSafeInteger(revision)||revision<1)throw Error('MATERIAL_REVISION_INVALID');return q;
+ }
+ function materialSame(a,b){if(!a||!b||materialScopeKeys.some(k=>a[k]!==b[k]))throw Error('MATERIAL_SCOPE_CHANGED');}
+ async function materialVerify(d,p){
+  if(d?.ok!==true||d.previewId!==p.previewId||!materialId(d.deliveryId)||!d.receipt||Object.keys(d.receipt).sort().join(',')!==[...materialReceiptKeys].sort().join(','))throw Error('MATERIAL_RECEIPT_UNCONFIRMED');
+  materialSame(d.scope,p.scope);for(const k of ['clinicId','patientId','guardianId','materialId','materialRevision','channel'])if(d.receipt[k]!==p.scope[k])throw Error('MATERIAL_RECEIPT_SCOPE');
+  if(d.receipt.deliveryId!==d.deliveryId||d.receipt.status!=='sent'||typeof d.receipt.createdAt!=='string'||!Number.isFinite(Date.parse(d.receipt.createdAt))||d.receiptSHA256!==await materialHash(materialCanon(d.receipt)))throw Error('MATERIAL_RECEIPT_UNCONFIRMED');return d;
+ }
  async function materials(){
-  const s=selection();if(!s.patientId){alert('환자 작업공간에서 환자를 먼저 선택해주세요.');return;}
-  const {body}=dialog('보호자 자료 보내기'),list=await api('/materials?patientId='+encodeURIComponent(s.patientId)),select=el('select'),channel=el('select'),preview=el('pre');
-  preview.style.whiteSpace='pre-wrap';for(const m of list.materials){const o=el('option',m.title);o.value=m.id;select.append(o);}
-  for(const [value,label] of [['home','Carestep Home'],['lms','LMS'],['kakao','알림톡 — 승인된 전용 템플릿 필요'],['mms','MMS — 승인된 이미지 필요']]){const o=el('option',label);o.value=value;channel.append(o);}
-  body.append(el('p','환자·보호자를 미리보기에서 확인한 뒤 전송을 확정하세요. 내부 자료는 표시하지 않습니다.'),select,channel,preview);
-  let p=null;
-  select.onchange=channel.onchange=()=>{p=null;preview.textContent='선택이 바뀌었습니다. 다시 미리보기해주세요.';};
-  button(body,'미리보기',async()=>{p=await api('/preview',{patientId:s.patientId,materialId:select.value,channel:channel.value});preview.textContent=p.patientName+' / 보호자 '+p.guardianName+'\n'+'채널: '+p.channel+'\n'+p.title+'\n\n'+p.text+(p.duplicateWarning?'\n\n주의: 이전 발송 기록이 있습니다.':'');});
-  button(body,'확인 후 발송',async()=>{if(!p){alert('미리보기를 먼저 확인해주세요.');return;}if(!confirm(p.duplicateWarning?'중복 발송 기록이 있습니다. 같은 보호자에게 다시 보내시겠습니까?':'표시된 환자·보호자와 자료를 확인했으며 발송하시겠습니까?'))return;const d=await api('/deliver',{previewId:p.previewId,confirmed:true,duplicateAcknowledged:!!p.duplicateWarning});preview.textContent='처리 결과: '+d.status;p=null;});
-  button(body,'발송·열람 이력',async()=>{const d=await api('/deliveries?patientId='+encodeURIComponent(s.patientId));preview.textContent=d.deliveries.map(x=>[x.created_at,x.kind,x.channel,x.status,x.viewed_at?'열람 확인':'열람 미확인'].join(' · ')).join('\n')||'발송 이력이 없습니다.';});
+  const selected=selection();if(!materialId(selected.patientId)||!materialId(selected.guardianId)){alert('환자 작업공간에서 연결된 환자·보호자를 먼저 선택해주세요.');return;}
+  const {body}=dialog('보호자에게 보내기 · CARESTEP Home'),info=el('p'),select=el('select'),preview=el('pre');preview.style.whiteSpace='pre-wrap';body.append(info,select,preview);
+  let p=null,busy=false,enabled=false,uncertain=null;const base=materialScope('scope-check',1);
+  const cfg=await api('/config');materialSame(materialScope('scope-check',1),base);enabled=cfg?.ok===true&&cfg.flags?.guardian_material_delivery===true;
+  info.textContent=enabled?'CARESTEP Home 자료함에만 게시합니다. 문자·알림톡·푸시·외부 링크 안내는 보내지 않습니다.':'보호자 자료 송부 준비 중 · 기능 OFF';
+  const current=()=>{const m=list.materials.find(x=>x.id===select.value);if(!m)throw Error('MATERIAL_NOT_SELECTED');return materialScope(m.id,m.revision);};
+  const key=q=>'carestep_r107_material_attempt:'+JSON.stringify(materialScopeKeys.map(k=>q[k]));
+  const readAttempt=q=>{const raw=sessionStorage.getItem(key(q));if(!raw)return null;const x=JSON.parse(raw);if(!['pending','unconfirmed','sent'].includes(x.state)||!materialId(x.previewId))throw Error('MATERIAL_ATTEMPT_INVALID');return x;};
+  const pendingKey='carestep_r107_material_unconfirmed';
+  const readPending=()=>{const raw=sessionStorage.getItem(pendingKey);if(!raw)return null;const x=JSON.parse(raw);if(!['pending','unconfirmed'].includes(x.state)||!materialId(x.previewId)||!x.scope||materialScopeKeys.some(k=>!Object.hasOwn(x.scope,k)))throw Error('MATERIAL_ATTEMPT_INVALID');return x;};
+  const reserve=(q,value)=>{const raw=JSON.stringify(value);sessionStorage.setItem(key(q),raw);if(sessionStorage.getItem(key(q))!==raw)throw Error('MATERIAL_RESERVATION_UNCONFIRMED');if(value.state==='sent'){const pending=readPending();if(pending&&pending.previewId!==value.previewId)throw Error('MATERIAL_PENDING_SCOPE');sessionStorage.removeItem(pendingKey);if(sessionStorage.getItem(pendingKey)!==null)throw Error('MATERIAL_RESERVATION_UNCONFIRMED');}else{const pending=JSON.stringify({...value,scope:q});sessionStorage.setItem(pendingKey,pending);if(sessionStorage.getItem(pendingKey)!==pending)throw Error('MATERIAL_RESERVATION_UNCONFIRMED');}};
+  const send=el('button','보호자에게 보내기'),make=el('button','미리보기'),recover=el('button','기존 송부 결과 확인'),historyButton=el('button','발송·열람 이력');for(const b of [make,send,recover,historyButton]){b.type='button';b.className='btn btn-secondary';body.append(b);}send.disabled=make.disabled=!enabled;
+  const list=enabled?await api('/materials?patientId='+encodeURIComponent(base.patientId)):{materials:[]};materialSame(materialScope('scope-check',1),base);
+  if(!Array.isArray(list.materials))throw Error('MATERIAL_LIST_UNCONFIRMED');for(const m of list.materials){if(!materialId(m.id)||!Number.isSafeInteger(m.revision)||m.revision<1)throw Error('MATERIAL_LIST_INVALID');const o=el('option',m.title);o.value=m.id;select.append(o);}
+  function controls(){send.disabled=!enabled||busy||!!uncertain||!p;make.disabled=!enabled||busy||!!uncertain;select.disabled=busy||!!uncertain;recover.disabled=busy||!uncertain;}
+  function restore(){p=null;uncertain=readPending();if(uncertain&&list.materials.some(m=>m.id===uncertain.scope.materialId))select.value=uncertain.scope.materialId;if(!uncertain&&list.materials.length){const saved=readAttempt(current());if(saved&&saved.state!=='sent')uncertain={...saved,scope:current()};}if(uncertain)preview.textContent='송부 결과 미확정입니다. 원래 환자·자료의 기존 결과만 확인하세요. 새 미리보기·재송부는 차단됩니다.';controls();}
+  select.onchange=()=>{if(busy||uncertain)return;restore();};restore();
+  make.onclick=async()=>{if(busy||uncertain||!enabled)return;busy=true;controls();try{const pending=readPending();if(pending){uncertain=pending;throw Error('MATERIAL_ATTEMPT_UNCONFIRMED');}const q=current();const d=await api('/preview',{patientId:q.patientId,materialId:q.materialId,channel:'home',scope:q});materialSame(current(),q);if(d?.ok!==true||!materialId(d.previewId)||d.homeOnly!==true)throw Error('MATERIAL_PREVIEW_INVALID');materialSame(d.scope,q);p=d;preview.textContent=d.patientName+' / 보호자 '+d.guardianName+'\n자료: '+d.title+'\nCARESTEP Home 게시\n\n'+d.text+(d.duplicateWarning?'\n기존 송부가 있습니다. 다시 게시하려면 명시적 중복 확인이 필요합니다.':'');}catch{p=null;alert('선택 대상과 미리보기를 확인하지 못했습니다. 송부하지 않습니다.');}finally{busy=false;controls();}};
+  send.onclick=async()=>{if(busy||uncertain||!enabled||!p)return;busy=true;controls();let reserved=false;const fixed=p;try{const pending=readPending();if(pending){uncertain=pending;throw Error('MATERIAL_ATTEMPT_UNCONFIRMED');}materialSame(current(),fixed.scope);const warning=fixed.duplicateWarning?'\n기존 송부가 있습니다. 같은 자료를 다시 게시하는 것을 승인합니까?':'';if(!confirm('환자: '+fixed.patientName+'\n보호자: '+fixed.guardianName+'\n자료: '+fixed.title+'\n채널: CARESTEP Home 게시'+warning))return;materialSame(current(),fixed.scope);const old=readAttempt(fixed.scope);if(old&&old.state!=='sent')throw Error('MATERIAL_ATTEMPT_UNCONFIRMED');reserve(fixed.scope,{state:'pending',previewId:fixed.previewId});reserved=true;uncertain={state:'pending',previewId:fixed.previewId,scope:fixed.scope};
+   const d=await api('/deliver',{previewId:fixed.previewId,confirmed:true,duplicateAcknowledged:fixed.duplicateWarning===true,channel:'home',scope:fixed.scope},{redirect:'error'});materialSame(current(),fixed.scope);await materialVerify(d,fixed);materialSame(current(),fixed.scope);reserve(fixed.scope,{state:'sent',previewId:fixed.previewId,deliveryId:d.deliveryId});uncertain=null;p=null;preview.textContent='전송 완료 · CARESTEP Home 게시\nDelivery ID: '+d.deliveryId;
+  }catch{p=null;if(reserved){try{reserve(fixed.scope,{state:'unconfirmed',previewId:fixed.previewId});}catch{}uncertain={state:'unconfirmed',previewId:fixed.previewId,scope:fixed.scope};preview.textContent='송부 결과 미확정 · 재송부 금지. 기존 결과 확인만 진행해주세요.';}else alert('환자·보호자·병원·로그인 상태가 바뀌었거나 저장 증거를 준비하지 못했습니다. 송부하지 않습니다.');}finally{busy=false;controls();}};
+  recover.onclick=async()=>{if(busy||!uncertain)return;busy=true;controls();try{const q=current(),saved=readAttempt(q);if(!saved||saved.state==='sent')throw Error('MATERIAL_NO_PENDING_ATTEMPT');materialSame(q,uncertain.scope||q);const expected={previewId:saved.previewId,scope:q};const d=await api('/delivery-receipt?previewId='+encodeURIComponent(saved.previewId),undefined,{redirect:'error'});materialSame(current(),q);await materialVerify(d,expected);materialSame(current(),q);reserve(q,{state:'sent',previewId:saved.previewId,deliveryId:d.deliveryId});uncertain=null;p=null;preview.textContent='전송 완료 · 기존 CARESTEP Home 게시 확인\nDelivery ID: '+d.deliveryId;}catch{preview.textContent='기존 송부 결과를 확정하지 못했습니다. 재송부하지 말고 별도 판정을 요청해주세요.';}finally{busy=false;controls();}};
+  historyButton.onclick=async()=>{if(busy)return;try{const q=current();const d=await api('/deliveries?patientId='+encodeURIComponent(q.patientId));materialSame(current(),q);if(d?.ok!==true||!Array.isArray(d.deliveries))throw Error('HISTORY');preview.textContent=d.deliveries.map(x=>[x.deliveryId||x.id,x.created_at,x.channel,x.status,x.viewed_at?'열람 확인':'열람 미확인'].join(' · ')).join('\n')||'발송 이력이 없습니다.';}catch{alert('송부 이력을 확인하지 못했습니다.');}};
  }
  async function preventivePreview(){
   const {body}=dialog('예방관리 발송 예정 미리보기'),date=el('input');date.type='date';date.value=new Date(Date.now()+32400000).toISOString().slice(0,10);body.append(date,el('p','조회만 수행합니다. 실제 발송은 하지 않습니다. 외부 채널은 병원 설정·보호자 동의·전송 직전 적격성 확인이 필요합니다.'));
