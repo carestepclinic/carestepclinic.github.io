@@ -29,7 +29,7 @@
   function r113ClearPDF(){for(const url of r113PDFURLs)URL.revokeObjectURL(url);r113PDFURLs.clear();for(const frame of document.querySelectorAll('[data-r113-pdf]'))frame.remove();}
   async function r113PDFMaterials(mount){
     try{const d=await api('/home/r113/materials',{method:'GET',redirect:'error'});if(d.ok!==true||!Array.isArray(d.materials))throw Error('PDF_LIST_INVALID');
-      for(const m of d.materials){const card=document.createElement('article'),label=document.createElement('p');label.textContent='PDF 원본 · '+m.filename;card.append(label);
+      for(const m of d.materials){if(typeof m?.deliveryId!=='string'||!(/^[A-Za-z0-9_-]{1,180}$/).test(m.deliveryId)||typeof m.assetId!=='string'||!(/^[A-Za-z0-9_-]{1,180}$/).test(m.assetId)||Object.hasOwn(m,'delivery')&&m.delivery===null||Object.hasOwn(m,'deliveryReceipt')&&m.deliveryReceipt===null)continue;const card=document.createElement('article'),label=document.createElement('p');label.textContent='PDF 원본 · '+m.filename;card.append(label);
         for(const download of [false,true]){const button=document.createElement('button');button.textContent=download?'PDF 다운로드':'PDF 보기';card.append(button);let activeURL=null;
           button.onclick=async()=>{if(button.disabled)return;button.disabled=true;const token=state.token;try{const endpoint=API+'/home/r113/materials/'+encodeURIComponent(m.deliveryId)+'/pdf'+(download?'?download=1':'');const r=await fetch(endpoint,{method:'GET',redirect:'error',headers:{Authorization:'Bearer '+token},cache:'no-store'});
             if(state.token!==token||!token||r.redirected||r.url!==endpoint||r.status!==200||r.headers.get('Content-Type')!=='application/pdf'||r.headers.get('Cache-Control')!=='private, no-store')throw Error('PDF_ACCESS_DENIED');
