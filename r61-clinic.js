@@ -88,7 +88,7 @@
 
  // R113 PDF controller has no file-picker or arbitrary upload input.
  function pdfController({scope,request,storage}){
-  let busy=false,pending=storage.getItem('carestep_r113_pdf_pending')!==null,generated=null,asset=null,sent=false;
+  let busy=false,pending=storage.getItem('carestep_r113_pdf_pending')!==null,generated=null,asset=null,sent=false,verdict=null;
   const fixedScope=()=>{const s=scope(),q=materialScopeKeys.reduce((o,k)=>(o[k]=s?.[k],o),{});for(const k of ['clinicId','userId','sessionId','patientId','guardianId','materialId'])if(!materialId(q[k]))throw Error('PDF_SCOPE_MISSING');if(!Number.isSafeInteger(q.materialRevision)||q.materialRevision<1||q.channel!=='home')throw Error('PDF_SCOPE_INVALID');return q;};
   const match=q=>{materialSame(fixedScope(),q);};
   const verify=async(d,q,status)=>{
@@ -104,15 +104,33 @@
    if(d?.assetId!==id)throw Error('PDF_ASSET_ID_MISMATCH');
    if(!generated)generated={q,hash:d?.receipt?.sha256,blob:{size:d?.receipt?.byteSize}};
    const ready=await verify(d,q,'ready');match(q);asset=ready;
-   if(d.delivery===null&&d.deliveryReceipt===null)return {asset:ready,delivery:null};
+   if(d.delivery===null&&d.deliveryReceipt===null)return {state:'READY_UNSENT',asset:ready,delivery:null};
    if(d.delivery?.status!=='attached'||!materialId(d.delivery.delivery_id)||d.deliveryReceipt?.deliveryId!==d.delivery.delivery_id)throw Error('PDF_DELIVERY_UNCONFIRMED');
-   const delivery=await verify(d.deliveryReceipt,q,'sent');match(q);return {asset:ready,delivery};
+   const delivery=await verify(d.deliveryReceipt,q,'sent');match(q);return {state:'SENT',asset:ready,delivery};
+  };
+  const lookup=async(id,recovery=false)=>{
+   if(busy)return null;busy=true;const reserved=storage.getItem('carestep_r113_pdf_pending');
+   try{
+    const q=fixedScope(),saved=reserved===null?null:JSON.parse(reserved);verdict='UNCONFIRMED';sent=false;asset=null;
+    if(saved){
+     if(!['upload','attach'].includes(saved.kind)||await materialHash(materialCanon(q))!==saved.scopeDigest)throw Error('PDF_SCOPE_CHANGED');
+     if(saved.kind==='attach'){if(id&&id!==saved.assetId)throw Error('PDF_PENDING_OTHER_ASSET');id=saved.assetId;}
+     else if(!recovery)throw Error('PDF_PENDING_OTHER_ASSET');
+     generated={q,hash:saved.pdfSHA256,blob:{size:saved.byteSize}};
+     if(saved.kind==='upload'){const d=await request('/saas/r113/pdf-assets?idempotencyKey='+encodeURIComponent(saved.attempt),{method:'GET',redirect:'error'});match(q);await verify(d,q,'ready');match(q);id=d.assetId;}
+    }else{if(!id)throw Error('PDF_ASSET_ID_INVALID');generated=null;}
+    const result=await readAsset(id,q);match(q);
+    // Clear only the exact pending record tied to this verified asset/scope.
+    if(storage.getItem('carestep_r113_pdf_pending')!==reserved)throw Error('PDF_RESERVATION_CHANGED');
+    if(saved)clear();pending=false;verdict=result.state;sent=result.state==='SENT';
+    return result.delivery||result.asset;
+   }catch(e){asset=null;sent=false;verdict='UNCONFIRMED';pending=storage.getItem('carestep_r113_pdf_pending')!==null;throw e;}finally{busy=false;}
   };
   return {
-   state:()=>({busy,pending,sent,assetId:asset?.assetId||null}),
-   load:async id=>{if(busy||pending||sent)throw Error('PDF_ATTEMPT_LOCKED');busy=true;try{const q=fixedScope();generated=null;asset=null;const result=await readAsset(id,q);match(q);if(result.delivery){sent=true;return result.delivery;}return result.asset;}finally{busy=false;}},
+   state:()=>({busy,pending,sent,status:sent?'SENT':verdict,assetId:asset?.assetId||null}),
+   load:async id=>lookup(id),
    prepare:async(makeBlob,kind)=>{if(busy||pending||sent)throw Error('PDF_ATTEMPT_LOCKED');busy=true;try{const q=fixedScope(),blob=await makeBlob();match(q);if(!(blob instanceof Blob)||blob.type!=='application/pdf'||!blob.size||blob.size>10485760||new TextDecoder().decode(await blob.slice(0,5).arrayBuffer())!=='%PDF-')throw Error('PDF_GENERATION_INVALID');generated={blob,hash:Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer())),x=>x.toString(16).padStart(2,'0')).join(''),q,kind};return blob;}finally{busy=false;}},
-   upload:async confirmed=>{if(busy||pending||sent||!generated)return null;if(confirmed!==true)throw Error('PDF_HOME_CONFIRMATION_REQUIRED');busy=true;try{match(generated.q);const attempt=crypto.randomUUID();reserve({kind:'upload',attempt,scopeDigest:await materialHash(materialCanon(generated.q)),pdfSHA256:generated.hash,byteSize:generated.blob.size});const form=new FormData();form.append('metadata',JSON.stringify({scope:generated.q,idempotencyKey:attempt,generatedBy:generated.kind}));form.append('pdf',generated.blob,'carestep-material.pdf');const d=await request('/saas/r113/pdf-assets',{method:'POST',body:form,redirect:'error'});match(generated.q);asset=await verify(d,generated.q,'ready');match(generated.q);clear();return asset;}finally{busy=false;}},
+   upload:async confirmed=>{if(busy||pending||sent||!generated)return null;if(confirmed!==true)throw Error('PDF_HOME_CONFIRMATION_REQUIRED');busy=true;try{match(generated.q);const attempt=crypto.randomUUID();reserve({kind:'upload',attempt,scopeDigest:await materialHash(materialCanon(generated.q)),pdfSHA256:generated.hash,byteSize:generated.blob.size});const form=new FormData();form.append('metadata',JSON.stringify({scope:generated.q,idempotencyKey:attempt,generatedBy:generated.kind}));form.append('pdf',generated.blob,'carestep-material.pdf');const d=await request('/saas/r113/pdf-assets',{method:'POST',body:form,redirect:'error'});match(generated.q);asset=await verify(d,generated.q,'ready');match(generated.q);clear();verdict='READY_UNSENT';return asset;}finally{busy=false;}},
    attach:async confirmed=>{if(busy||pending||sent||!asset)return null;if(confirmed!==true)throw Error('PDF_HOME_CONFIRMATION_REQUIRED');busy=true;try{
     const q=generated.q;match(q);const cfg=await request('/saas/r113/pdf-config',{method:'GET',redirect:'error'});match(q);if(cfg?.ok!==true||cfg.pdfEnabled!==true||cfg.guardianMaterialEnabled!==true)throw Error('PDF_FEATURE_OFF');
     const before=await readAsset(asset.assetId,q);match(q);if(before.delivery){sent=true;return before.delivery;}
@@ -121,7 +139,7 @@
     const after=await readAsset(asset.assetId,q);match(q);if(!after.delivery||after.delivery.deliveryId!==result.deliveryId||after.delivery.receiptSHA256!==result.receiptSHA256||materialCanon(after.delivery.receipt)!==materialCanon(result.receipt))throw Error('PDF_DELIVERY_UNCONFIRMED');
     clear();sent=true;return result;
    }finally{busy=false;}},
-   recover:async()=>{if(busy||!pending)return null;busy=true;try{const saved=JSON.parse(storage.getItem('carestep_r113_pdf_pending'));if(!['upload','attach'].includes(saved.kind))throw Error('PDF_MANUAL_ADJUDICATION_REQUIRED');const q=fixedScope();if(await materialHash(materialCanon(q))!==saved.scopeDigest)throw Error('PDF_SCOPE_CHANGED');generated={q,hash:saved.pdfSHA256,blob:{size:saved.byteSize}};const path=saved.kind==='upload'?'/saas/r113/pdf-assets?idempotencyKey='+encodeURIComponent(saved.attempt):'/saas/r113/pdf-assets/'+encodeURIComponent(saved.assetId);const d=await request(path,{method:'GET',redirect:'error'});match(q);asset=await verify(d,q,'ready');if(saved.kind==='attach'){if(d.delivery===null&&d.deliveryReceipt===null)return asset;if(d.delivery?.status!=='attached'||d.delivery.delivery_id!==d.deliveryReceipt?.deliveryId)throw Error('PDF_DELIVERY_UNCONFIRMED');const result=await verify(d.deliveryReceipt,q,'sent');match(q);clear();sent=true;return result;}clear();return asset;}finally{busy=false;}},
+   recover:async id=>lookup(id||asset?.assetId,true),
    revoke:async confirmed=>{if(busy||pending||!asset||confirmed!==true)return null;busy=true;try{match(generated.q);reserve({kind:'revoke',assetId:asset.assetId});const d=await request('/saas/r113/pdf-assets/'+encodeURIComponent(asset.assetId),{method:'DELETE',redirect:'error'});match(generated.q);if(d?.ok!==true||d.assetId!==asset.assetId||d.accessRevoked!==true||!['deleted','delete_pending'].includes(d.status))throw Error('PDF_REVOKE_UNCONFIRMED');clear();asset=null;sent=true;return d;}finally{busy=false;}}
   };
  }
@@ -129,7 +147,7 @@
   if(opt.redirect!=='error')throw Error('PDF_REDIRECT_GUARD');const endpoint=saasEndpoint()+path;
   if(typeof saasMode==='undefined'||saasMode!=='auth'||!saasToken)throw Error('PDF_LOGIN_REQUIRED');
   const response=await fetch(endpoint,{...opt,headers:{...(opt.headers||{}),Authorization:'Bearer '+saasToken},cache:'no-store'});
-  if(response.redirected||response.url!==endpoint||!response.ok)throw Error('PDF_RESPONSE_UNCONFIRMED');const d=await response.json();if(d.ok!==true)throw Error('PDF_RESPONSE_UNCONFIRMED');return d;
+  if(response.redirected||response.url!==endpoint||(opt.method==='GET'?response.status!==200:!response.ok))throw Error('PDF_RESPONSE_UNCONFIRMED');const d=await response.json();if(d.ok!==true)throw Error('PDF_RESPONSE_UNCONFIRMED');return d;
  }
  async function privatePDF(){
   const {body,d}=dialog('PDF 원본 · 비공개 CARESTEP Home'),info=el('p');body.append(info);
@@ -141,12 +159,16 @@
   const control=pdfController({scope:current,request:pdfRequest,storage:sessionStorage});let blobURL=null;
   d.addEventListener('close',()=>{if(blobURL)URL.revokeObjectURL(blobURL);});
   const existingAsset=el('input');existingAsset.placeholder='기존 PDF Asset ID';existingAsset.setAttribute('aria-label','기존 PDF Asset ID');body.append(existingAsset);
-  button(body,'기존 PDF 저장 결과 확인',async()=>{const result=await control.load(existingAsset.value.trim());info.textContent=result.deliveryId?'전송 완료 · 기존 receipt 확인 · Delivery ID: '+result.deliveryId:'PDF 저장 receipt 확인 · 송부 가능 · Asset ID: '+result.assetId;});
+  let send;
+  const controls=()=>{const s=control.state();if(send)send.disabled=s.busy||s.pending||s.sent||s.status!=='READY_UNSENT'||!s.assetId;};
+  const showLookup=async query=>{if(send)send.disabled=true;try{const result=await query();if(result)info.textContent=control.state().status==='READY_UNSENT'?'PDF 저장 완료 · CARESTEP Home 미송부':'전송 완료 · 기존 receipt 확인 · Delivery ID: '+result.deliveryId;}catch(e){info.textContent='조회 결과 미확정 · 송부 차단. 자동 재시도하지 않습니다.';throw e;}finally{controls();}};
+  button(body,'기존 PDF 저장 결과 확인',()=>showLookup(()=>control.load(existingAsset.value.trim())));
   button(body,'앱 PDF 생성·미리보기',async()=>{if(blobURL)URL.revokeObjectURL(blobURL);const blob=await control.prepare(async()=>{if(typeof html2pdf==='undefined')throw Error('PDF_GENERATOR_UNAVAILABLE');const m=list.materials.find(x=>x.id===pick.value);if(m?.kind!==kind.value)throw Error('PDF_GENERATOR_MATERIAL_MISMATCH');const desc=documentOutputDescriptor(kind.value==='medication'?'meds':'pdf');desc.render();if(document.getElementById('pdfDocument')?.dataset.r61Patient!==current().patientId)throw Error('PDF_PATIENT_CHANGED');return exportPdfElement('carestep-material.pdf',{save:false,silent:true});},kind.value);blobURL=URL.createObjectURL(blob);viewer.src=blobURL;info.textContent='앱에서 생성한 PDF 원본을 확인하세요. 아직 서버에 저장하지 않았습니다.';});
-  button(body,'Home 송부 확인 후 PDF 저장',async()=>{if(!confirm('현재 선택 환자·연결 보호자에게 이 자료를 CARESTEP Home으로 게시하기 위해 PDF 원본을 비공개 저장합니까?'))return;info.textContent='PDF 저장 중 · 응답 미확정이면 재전송하지 않습니다.';let a;try{a=await control.upload(true);}catch(e){info.textContent='PDF 저장 결과 미확정 · 새 저장/송부 금지. 기존 결과 조회 또는 별도 판정이 필요합니다.';throw e;}if(a)info.textContent='PDF 저장 receipt 확인 · Asset ID: '+a.assetId;});
-  button(body,'보호자에게 PDF 보내기 · Home',async()=>{if(!confirm('현재 선택 환자·연결 보호자·자료 제목과 PDF 미리보기를 확인했습니다. Home에 게시합니까? 외부 메시지는 보내지 않습니다.'))return;info.textContent='Home 게시 중 · 성공 receipt 확인 전에는 전송 완료가 아닙니다.';let result;try{result=await control.attach(true);}catch(e){info.textContent='Home 게시 결과 미확정 · 재송부 금지. 기존 receipt만 조회하세요.';throw e;}if(result)info.textContent='전송 완료 · Delivery ID: '+result.deliveryId;});
+  button(body,'Home 송부 확인 후 PDF 저장',async()=>{if(!confirm('현재 선택 환자·연결 보호자에게 이 자료를 CARESTEP Home으로 게시하기 위해 PDF 원본을 비공개 저장합니까?'))return;info.textContent='PDF 저장 중 · 응답 미확정이면 재전송하지 않습니다.';let a;try{a=await control.upload(true);}catch(e){info.textContent='PDF 저장 결과 미확정 · 새 저장/송부 금지. 기존 결과 조회 또는 별도 판정이 필요합니다.';throw e;}if(a)info.textContent='PDF 저장 receipt 확인 · Asset ID: '+a.assetId;controls();});
+  send=el('button','보호자에게 PDF 보내기 · Home');send.type='button';send.className='btn btn-secondary';body.append(send);controls();
+  send.onclick=async()=>{if(send.disabled)return;send.disabled=true;try{if(!confirm('현재 선택 환자·연결 보호자·자료 제목과 PDF 미리보기를 확인했습니다. Home에 게시합니까? 외부 메시지는 보내지 않습니다.'))return;info.textContent='Home 게시 중 · 성공 receipt 확인 전에는 전송 완료가 아닙니다.';const result=await control.attach(true);if(result)info.textContent='전송 완료 · Delivery ID: '+result.deliveryId;}catch{info.textContent='Home 게시 결과 미확정 · 재송부 금지. 기존 receipt만 조회하세요.';alert('처리하지 못했습니다. 권한·선택 대상과 저장 상태를 확인해주세요. 자동 재시도하지 않습니다.');}finally{controls();}};
   button(body,'해당 PDF 송부 철회',async()=>{const result=await control.revoke(confirm('PDF 접근을 철회합니까? 기존 텍스트·후속관리 기록은 보존합니다.'));if(result)info.textContent='접근 철회 완료 · '+result.status;});
-  button(body,'미확정 저장·송부 결과 조회',async()=>{const result=await control.recover();if(result)info.textContent=result.deliveryId?'전송 완료 · 기존 receipt 확인':control.state().pending?'PDF 저장 확인 · 이전 송부 결과는 미확정이므로 재송부하지 않습니다.':'PDF 저장 receipt 확인 · 송부 가능';});
+  button(body,'미확정 저장·송부 결과 조회',()=>showLookup(()=>control.recover(existingAsset.value.trim())));
  }
  window.r113PDFController=pdfController;
 
