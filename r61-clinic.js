@@ -439,28 +439,68 @@
         }
         ;
     }
+    const preventiveReasons = {
+        DUE_TODAY: '예정일 당일', 'DUE_BEFORE-7': '접종 7일 전', 'DUE_BEFORE-3': '사상충 3일 전',
+        FEATURE_OFF: '자동발송 꺼짐', ALREADY_CLAIMED_NO_REPEAT: '이미 처리한 일정 · 중복 발송 제외',
+        PREVENTIVE_CONSENT_REQUIRED: '보호자 예방문자 동의 미등록', EXTERNAL_POLICY_DISABLED: '병원 외부 발송 허용 꺼짐',
+        LMS_CHANNEL_DISABLED: 'LMS 채널 미선택', HOME_PUSH_UNAVAILABLE: 'Home 푸시 사용 불가',
+        CLINIC_MESSAGING_DISABLED: '병원 문자 자동발송 설정 꺼짐', SENDER_NUMBER_REQUIRED: '발신번호 설정 필요',
+        SOLAPI_CONNECTION_REQUIRED: 'SOLAPI 연결 필요', MESSAGING_FEATURE_UNAVAILABLE: '문자 발송 이용 권한 확인 필요',
+        CLINIC_NOT_ACTIVE: '병원 활성·승인 상태 확인 필요', PREVENTIVE_MESSAGING_NOT_READY: '문자 발송 준비 상태 확인 필요',
+        PREVENTIVE_LMS_POLICY_REQUIRED: '외부 발송 허용과 LMS 채널을 함께 선택해주세요.',
+        PREVENTIVE_CHANNEL_INVALID: '예방관리 발송 방식을 다시 선택해주세요.'
+    };
+    const preventiveReason = code => preventiveReasons[code] || '발송 조건 확인 필요';
+    function settingsSession() {
+        if (typeof saasMode === 'undefined' || saasMode !== 'auth' || typeof saasMe === 'undefined' || typeof saasSessionMeta === 'undefined')
+            throw Error('SESSION_CHANGED');
+        const values = [saasMe?.clinic?.id, saasMe?.user?.id, saasSessionMeta?.id];
+        if (values.some(x => !materialId(x))) throw Error('SESSION_CHANGED');
+        return JSON.stringify(values);
+    }
     async function preventivePreview() {
-        const {body} = dialog('예방관리 발송 예정 미리보기')
-          , date = el('input');
+        const session = settingsSession();
+        const {body} = dialog('예방관리 발송 예정 미리보기'), date = el('input');
         date.type = 'date';
         date.value = new Date(Date.now() + 32400000).toISOString().slice(0, 10);
-        body.append(date, el('p', '조회만 수행합니다. 실제 발송은 하지 않습니다. 외부 채널은 병원 설정·보호자 동의·전송 직전 적격성 확인이 필요합니다.'));
+        body.append(date, el('p', '접종은 7일 전·당일, 사상충은 3일 전·당일에 안내합니다. 날짜는 한국시간 기준입니다. 저장된 설정으로 조회하며 실제 문자는 보내지 않습니다.'));
         const rows = el('section');
         body.append(rows);
         button(body, '예정 대상 조회', async () => {
-            const d = await api('/preventive/preview?date=' + encodeURIComponent(date.value));
-            rows.replaceChildren();
-            for (const x of d.targets) {
-                rows.append(el('p', [x.patientName, '보호자 ' + x.guardianName, x.dueDate, x.stage, '우선 채널: ' + (x.primaryChannel || 'Home 사용 불가'), '외부 후보: ' + (x.externalCandidates.join(', ') || '차단'), '사유: ' + x.reason.join(', '), x.featureEnabled ? '기능 ON' : '기능 OFF'].join(' · ')));
+            try {
+                if (settingsSession() !== session) throw Error('SESSION_CHANGED');
+                const d = await api('/preventive/preview?date=' + encodeURIComponent(date.value), undefined, {redirect: 'error'});
+                if (settingsSession() !== session) throw Error('SESSION_CHANGED');
+                if (d?.ok !== true || !Array.isArray(d.targets)) throw Error('PREVIEW');
+                rows.replaceChildren();
+                rows.append(el('p', '발송 방식: ' + (d.mode === 'lms' ? '문자(LMS)' : 'Home 푸시 우선 · 불가 시 허용된 외부 채널')));
+                for (const x of d.targets) {
+                    const card = el('article');
+                    card.style.cssText = 'border:1px solid #dbe3ed;border-radius:10px;padding:12px;margin:10px 0';
+                    card.append(el('strong', x.patientName + ' · 보호자 ' + x.guardianName),
+                        el('p', x.dueDate + ' · ' + (x.eligible ? '현재 조건상 발송 대상' : '현재 발송 제외')),
+                        el('p', '채널: ' + (x.primaryChannel === 'lms' ? '문자(LMS)' : x.primaryChannel === 'home' ? 'Home 푸시' : x.externalCandidates?.join(', ') || '없음')),
+                        el('p', (x.reason || []).map(preventiveReason).join(' · ')));
+                    if (x.message) {
+                        const message = el('p', x.message);
+                        message.style.cssText = 'white-space:pre-wrap;background:#f3f6fa;padding:12px;border-radius:8px';
+                        card.append(message);
+                    }
+                    rows.append(card);
+                }
+                if (!d.targets.length) rows.append(el('p', '해당 날짜의 발송 예정 대상이 없습니다.'));
+                if (d.excludedCount) rows.append(el('p', '접종 종류·날짜 등을 확인해야 하는 기록 ' + d.excludedCount + '건은 대상 계산에서 제외했습니다.'));
+                rows.append(el('p', '실제 발송 직전에 일정·동의·병원 설정을 다시 확인합니다. 발송 이력의 sent는 SOLAPI 접수를 뜻하며 보호자 수신 완료와 다릅니다.'));
+            } catch (e) {
+                rows.replaceChildren(el('p', e?.message === 'SESSION_CHANGED' ? '로그인 또는 병원이 바뀌었습니다. 창을 다시 열어주세요.' : '대상을 조회하지 못했습니다. 병원 설정과 예방 일정 기록을 확인해주세요.'));
             }
-            if (!d.targets.length)
-                rows.append(el('p', '해당 날짜의 발송 예정 대상이 없습니다.'));
-        }
-        );
+        });
     }
     async function settings() {
-        const cfg = await api('/config')
-          , {body} = dialog('후속 기능 설정')
+        const session = settingsSession();
+        const cfg = await api('/config');
+        if (settingsSession() !== session) throw Error('SESSION_CHANGED');
+        const {body} = dialog('후속 기능 설정')
           , inputs = {};
         const labels = {
             preventive_auto_delivery: '접종·사상충 자동 발송',
@@ -478,14 +518,36 @@
             l.style.display = 'block';
             body.append(l);
         }
-        body.append(el('p', '단계별 승인 후 기능을 켭니다. 자료 송부와 자동 알림은 별도 운영 승인 전까지 OFF를 유지하세요.'));
+        body.append(el('p', '접종·사상충 자동발송을 켜면 저장된 예정일과 보호자 동의를 기준으로 정기 발송합니다. 먼저 대상과 문구를 확인해주세요.'));
+        const preventiveMode = el('select');
+        preventiveMode.id = 'r61PreventiveChannel';
+        for (const [value,label] of [['home-first', 'Home 푸시 우선 · 불가 시 외부 채널'], ['lms', '문자(LMS)로 발송']]) {
+            const option = el('option', label); option.value = value; preventiveMode.append(option);
+        }
+        preventiveMode.value = cfg.policy.preventiveChannel || 'home-first';
+        const modeLabel = el('label', '접종·사상충 안내 방식 ');
+        modeLabel.style.cssText = 'display:block;margin:14px 0';
+        modeLabel.append(preventiveMode); body.append(modeLabel);
+        body.append(el('p', '접종 7일 전·당일 / 사상충 3일 전·당일. 같은 환자의 같은 예정일·회차는 한 번만 처리하며, 지난 예정일을 소급 발송하지 않습니다.'));
+        if (cfg.preventive?.reasons?.length)
+            body.append(el('p', '문자 준비: ' + cfg.preventive.reasons.map(preventiveReason).join(' · ')));
+        const saveInfo = el('p'); saveInfo.setAttribute('role', 'status'); body.append(saveInfo);
+        button(body, '선택 보호자의 예방문자 동의 기록', async () => {
+            const selected = selection();
+            if (!selected.patientId || !selected.guardianId) {saveInfo.textContent = '먼저 환자 작업공간에서 환자·보호자를 선택해주세요.'; return;}
+            if (!confirm('선택한 보호자의 접종·사상충 예방 문자 수신 동의를 실제로 확인했습니까?')) return;
+            if (settingsSession() !== session || selection().patientId !== selected.patientId || selection().guardianId !== selected.guardianId) throw Error('SESSION_CHANGED');
+            const saved = await api('/consent', {patientId: selected.patientId, purpose: 'preventive', confirmed: true, explicitConsentRecorded: true}, {redirect: 'error'});
+            if (settingsSession() !== session || saved?.ok !== true) throw Error('CONSENT_UNCONFIRMED');
+            saveInfo.textContent = '선택한 보호자의 예방문자 동의를 저장했습니다. 예정 대상 조회에서 확인해주세요.';
+        });
         if (cfg.flags.followup_auto_completion === true)
             button(body, '실제 후속관리 단계 확인', () => window.r83OpenRequiredStages());
         button(body, '예방관리 대상 먼저 확인', preventivePreview);
         const external = el('input');
         external.type = 'checkbox';
         external.checked = cfg.policy.enabled === true;
-        const l = el('label', ' 병원 외부 LMS 발송 허용 (보호자별 별도 동의 필요)');
+        const l = el('label', ' 병원 외부 발송 허용 (보호자별 별도 동의 필요)');
         l.prepend(external);
         body.append(l);
         const channels = {};
@@ -512,23 +574,34 @@
         image.placeholder = '공개 승인 MMS 이미지 ID';
         body.append(image, el('p', '알림톡은 실제 승인 템플릿과 안내문구 변수 한 개를 서버에서 재확인합니다. MMS 이미지는 환자정보가 없는 보호자 공개용으로 검토해야 합니다.'));
         button(body, '설정 저장', async () => {
-            await saasRequest('/saas/r61/config', {
-                method: 'PUT',
-                body: JSON.stringify({
-                    flags: Object.fromEntries(Object.entries(inputs).map( ([k,v]) => [k, v.checked])),
-                    policy: {
-                        ...cfg.policy,
-                        enabled: external.checked,
+            try {
+                if (settingsSession() !== session) throw Error('SESSION_CHANGED');
+                const enabled = inputs.preventive_auto_delivery.checked;
+                if (enabled && preventiveMode.value === 'lms' && (!external.checked || !channels.lms.checked)) {
+                    saveInfo.textContent = '문자 자동발송에는 병원 외부 발송 허용과 LMS 채널을 모두 선택해주세요.';
+                    return;
+                }
+                if (enabled && (!cfg.flags.preventive_auto_delivery || preventiveMode.value !== (cfg.policy.preventiveChannel || 'home-first')) &&
+                    !confirm('접종 7일 전·당일, 사상충 3일 전·당일의 대상에게 정기 안내를 시작합니다. 문자 발송에는 SOLAPI 요금이 발생합니다. 저장하시겠습니까?')) return;
+                const changes = Object.fromEntries(Object.entries(inputs).filter(([k,v]) => v.checked !== cfg.flags[k]).map(([k,v]) => [k,v.checked]));
+                const saved = await saasRequest('/saas/r61/config', {
+                    method: 'PUT', redirect: 'error',
+                    body: JSON.stringify({flags: changes, policy: {
+                        ...cfg.policy, enabled: external.checked, preventiveChannel: preventiveMode.value,
                         channels: Object.keys(channels).filter(k => channels[k].checked),
-                        templateBindings: Object.fromEntries(Object.entries(bindings).filter( ([k,v]) => v.value.trim()).map( ([k,v]) => [k, v.value.trim()])),
+                        templateBindings: Object.fromEntries(Object.entries(bindings).filter(([k,v]) => v.value.trim()).map(([k,v]) => [k,v.value.trim()])),
                         imageId: image.value.trim(),
                         imagePublicApproved: !!image.value.trim() && confirm('MMS 이미지가 개인정보 없는 보호자 공개용임을 확인했습니까?')
-                    }
-                })
-            });
-            alert('설정을 저장했습니다.');
-        }
-        );
+                    }})
+                });
+                if (settingsSession() !== session || saved?.ok !== true || !saved.flags || !saved.policy) throw Error('CONFIG_UNCONFIRMED');
+                Object.assign(cfg, saved);
+                saveInfo.textContent = saved.flags.preventive_auto_delivery ? '설정 저장 완료 · 자동발송 켜짐. 예정 대상 조회에서 확인해주세요.' : '설정 저장 완료 · 자동발송 꺼짐. 발송 없이 대상을 미리 확인할 수 있습니다.';
+            } catch (e) {
+                const code = Object.keys(preventiveReasons).find(k => String(e?.message || '').includes(k));
+                saveInfo.textContent = code ? preventiveReason(code) : '설정 저장 결과를 확인하지 못했습니다. 창을 다시 열어 현재 설정을 확인해주세요.';
+            }
+        });
         button(body, '선택 보호자의 외부 발송 동의 기록', async () => {
             const s = selection();
             if (!s.patientId)
