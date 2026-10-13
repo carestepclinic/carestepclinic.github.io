@@ -58,6 +58,62 @@
     const materialReceiptKeys = ['deliveryId', 'clinicId', 'patientId', 'guardianId', 'materialId', 'materialRevision', 'channel', 'status', 'createdAt'];
     const materialKinds = [['advanced', '고급 보호자 자료'], ['medication', '복약 체크표'], ['discharge', '퇴원 안내'], ['disease', '질환 안내'], ['postoperative', '수술 후 관리'], ['results', '검사 결과 설명'], ['guardian', '기타 보호자 공개 자료']];
     const materialKindLabel = kind => materialKinds.find(([value]) => value === kind)?.[1] || '';
+    const materialDraftSources = Object.freeze({advanced: 'pdf', medication: 'medcheck', discharge: 'summary'});
+    const materialDraftError = code => ({
+        PDF_PATIENT_CHANGED: '환자 선택이 달라졌습니다. 창을 닫고 대상 환자에서 다시 열어주세요.',
+        PDF_MEDICATION_REQUIRED: '복약정보에 약 이름을 먼저 입력해주세요.',
+        PDF_MEDICATION_DURATION_REQUIRED: '각 약의 투약 기간을 1~90일의 일수로 입력해주세요.',
+        PDF_MEDICATION_START_DATE_REQUIRED: '환자 정보의 퇴원일/관리 시작일을 확인해주세요. 날짜를 임의로 지정하지 않습니다.',
+        PDF_DRAFT_SOURCE_UNAVAILABLE: '이 유형은 자동 초안 생성기가 없습니다. 제목과 본문을 직접 작성한 뒤 공개 내용을 미리보기해주세요.'
+    }[code] || '초안을 만들지 못했습니다. 선택 환자와 입력 내용을 확인해주세요.');
+    function renderMaterialDraftPDF(kind, patientId) {
+        const source = materialDraftSources[kind];
+        if (!source)
+            throw Error('PDF_DRAFT_SOURCE_UNAVAILABLE');
+        const samePatient = () => {
+            if (!patientId || selection().patientId !== patientId || window.crmCurrentPatient?.()?.patientId !== patientId)
+                throw Error('PDF_PATIENT_CHANGED');
+        };
+        samePatient();
+        if (typeof documentOutputDescriptor !== 'function')
+            throw Error('PDF_GENERATOR_UNAVAILABLE');
+        const desc = documentOutputDescriptor(source);
+        const doc = document.getElementById('pdfDocument');
+        if (!doc || typeof desc?.render !== 'function')
+            throw Error('PDF_GENERATOR_UNAVAILABLE');
+        // Never reuse the last visible PDF, including another patient's or kind's output.
+        doc.replaceChildren();
+        delete doc.dataset.r61Patient;
+        delete doc.dataset.r61MaterialKind;
+        try {
+            if (kind === 'medication') {
+                if (typeof readCaseInfoFromForm !== 'function' || typeof medicationCheckMeta !== 'function')
+                    throw Error('PDF_GENERATOR_UNAVAILABLE');
+                readCaseInfoFromForm();
+                const meta = medicationCheckMeta();
+                if (!meta.meds.length)
+                    throw Error('PDF_MEDICATION_REQUIRED');
+                if (!meta.valid)
+                    throw Error('PDF_MEDICATION_DURATION_REQUIRED');
+                const date = typeof caseInfo === 'undefined' ? '' : caseInfo.dischargeDate;
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '') || !Number.isFinite(Date.parse(date + 'T00:00:00Z')) || new Date(date + 'T00:00:00Z').toISOString().slice(0, 10) !== date)
+                    throw Error('PDF_MEDICATION_START_DATE_REQUIRED');
+            }
+            desc.render();
+            samePatient();
+            if (doc.classList.contains('hidden') || !doc.querySelector('.pdf-page') || !doc.innerText.trim())
+                throw Error('PDF_GENERATOR_UNAVAILABLE');
+            doc.dataset.r61Patient = patientId;
+            doc.dataset.r61MaterialKind = kind;
+            return doc;
+        } catch (e) {
+            doc.replaceChildren();
+            doc.classList.add('hidden');
+            delete doc.dataset.r61Patient;
+            delete doc.dataset.r61MaterialKind;
+            throw e;
+        }
+    }
     const materialId = x => typeof x === 'string' && /^[A-Za-z0-9_-]{1,180}$/.test(x);
     const materialCanon = v => JSON.stringify(Object.fromEntries(Object.keys(v).sort().map(k => [k, v[k]])));
     const materialHash = async text => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))), x => x.toString(16).padStart(2, '0')).join('');
@@ -560,7 +616,7 @@
         );
     }
     async function approveMaterial() {
-        const subject = selection();
+        const subject = {...selection()};
         const {body} = dialog('보호자 공개 자료 등록·승인')
           , kind = el('select')
           , title = el('input')
@@ -594,36 +650,67 @@
             kind.append(o);
         }
         body.append(kind, title, text, el('p', subject.patientId ? '이 자료는 현재 선택한 환자·보호자에게만 사용할 수 있습니다.' : '공통 자료 등록입니다. 특정 환자 정보는 포함하지 마세요.'));
-        button(body, '현재 보호자 PDF 내용을 승인 초안으로 가져오기', async () => {
-            if (!subject.patientId)
-                throw Error('PATIENT_REQUIRED');
-            const doc = document.getElementById('pdfDocument');
-            if (!doc || doc.classList.contains('hidden') || !doc.querySelector('.pdf-page')) {
-                alert('자료 화면에서 보호자 PDF를 먼저 생성해주세요. 직원 체크리스트는 가져오지 않습니다.');
-                return;
-            }
+        const sourceInfo = el('p'), preview = el('pre');
+        body.append(sourceInfo);
+        const drafts = new Map();
+        let selectedKind = kind.value, reviewed = null;
+        const draftValue = () => JSON.stringify([kind.value, title.value, text.value]);
+        const sameSubject = () => {
             const active = selection();
-            if (active.patientId !== subject.patientId || doc.dataset.r61Patient !== subject.patientId)
-                throw Error('PATIENT_CHANGED');
-            title.value = title.value.trim() || materialKindLabel(kind.value);
-            text.value = doc.innerText;
-            preview.textContent = '가져온 내용을 검토하고 현재 환자의 자료인지 확인한 뒤 다시 미리보기해주세요.';
-        }
-        );
-        const preview = el('pre');
+            if (['patientId', 'guardianId'].some(k => active[k] !== subject[k]))
+                throw Error('PDF_PATIENT_CHANGED');
+        };
+        const importDraft = button(body, '선택 유형으로 초안 새로 만들기', async () => {
+            try {
+                sameSubject();
+                if (text.value.trim() && !confirm('현재 유형의 본문을 새로 생성한 초안으로 바꿀까요?'))
+                    return;
+                const doc = renderMaterialDraftPDF(kind.value, subject.patientId);
+                sameSubject();
+                title.value = title.value.trim() || materialKindLabel(kind.value);
+                text.value = doc.innerText;
+                reviewed = null;
+                preview.textContent = '선택 유형의 새 초안입니다. 환자·처방·내용을 검토한 뒤 공개 내용 미리보기를 눌러주세요.';
+            } catch (e) {
+                reviewed = null;
+                preview.textContent = materialDraftError(e.message) + ' [' + e.message + ']';
+            }
+        });
+        const updateSource = () => {
+            importDraft.disabled = !subject.patientId || !materialDraftSources[kind.value];
+            sourceInfo.textContent = !subject.patientId ? '자동 초안은 환자를 선택한 뒤 사용할 수 있습니다.' : materialDraftSources[kind.value]
+                ? (kind.value === 'medication' ? '현재 환자의 약·투약 기간·관리 시작일로 복약 체크표를 새로 생성합니다.' : materialKindLabel(kind.value) + ' 생성기를 실행해 새 초안을 가져옵니다.')
+                : materialDraftError('PDF_DRAFT_SOURCE_UNAVAILABLE');
+        };
+        kind.onchange = () => {
+            drafts.set(selectedKind, {title: title.value, text: text.value});
+            selectedKind = kind.value;
+            const draft = drafts.get(selectedKind);
+            title.value = draft?.title || materialKindLabel(selectedKind);
+            text.value = draft?.text || '';
+            reviewed = null;
+            preview.textContent = '';
+            updateSource();
+        };
+        title.oninput = text.oninput = () => { reviewed = null; };
+        updateSource();
         preview.style.whiteSpace = 'pre-wrap';
         body.append(preview);
         button(body, '공개 내용 미리보기', async () => {
+            sameSubject();
             preview.textContent = title.value + '\n\n' + text.value;
+            reviewed = draftValue();
         }
         );
         button(body, '관리자 공개 승인 후 등록', async () => {
-            if (preview.textContent !== title.value + '\n\n' + text.value) {
+            sameSubject();
+            if (!title.value.trim() || !text.value.trim() || reviewed !== draftValue()) {
                 alert('현재 내용을 미리보기해주세요.');
                 return;
             }
             if (!confirm('내부 직원용 내용이 없으며 보호자 공개를 승인합니까?'))
                 return;
+            sameSubject();
             await api('/materials', {
                 patientId: subject.patientId || undefined,
                 kind: kind.value,
@@ -1279,13 +1366,7 @@
                 if (m?.kind !== kind.value)
                     throw Error('PDF_GENERATOR_MATERIAL_MISMATCH');
                 if (kind.value === 'advanced' || kind.value === 'medication') {
-                    if (typeof documentOutputDescriptor !== 'function')
-                        throw Error('PDF_GENERATOR_UNAVAILABLE');
-                    const desc = documentOutputDescriptor(kind.value === 'medication' ? 'meds' : 'pdf');
-                    desc.render();
-                    const doc = document.getElementById('pdfDocument');
-                    if (doc)
-                        doc.dataset.r61MaterialKind = kind.value;
+                    renderMaterialDraftPDF(kind.value, current().patientId);
                 } else
                     renderApprovedMaterialPDF(m, current().patientId);
                 if (document.getElementById('pdfDocument')?.dataset.r61Patient !== current().patientId)
