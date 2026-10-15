@@ -941,6 +941,41 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
 <style id="carestep-v106b-patient-search">
 .patient-search-toolbar{display:grid;grid-template-columns:minmax(260px,1fr) 150px 170px;gap:8px;margin-bottom:9px}.patient-search-toolbar .patient-crm-search{margin:0}.patient-search-recent{margin:0 0 10px;padding:10px;border:1px solid #dde6f2;border-radius:12px;background:#f8faff}.patient-search-recent-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px}.patient-search-recent-head b{font-size:10px;color:#33445d}.patient-search-recent-head span{font-size:8.5px;color:#7a879a}.patient-search-recent-list{display:flex;gap:6px;overflow:auto;padding-bottom:2px}.patient-search-recent-item{display:flex;align-items:center;gap:5px;flex:0 0 auto;border:1px solid #dce5f2;border-radius:999px;background:#fff;padding:6px 7px 6px 9px;color:#34445d;cursor:pointer}.patient-search-recent-item b{font-size:9.5px}.patient-search-recent-item span{font-size:8px;color:#77859a}.patient-search-pin{border:0;background:transparent;color:#8793a5;padding:0 2px;cursor:pointer}.patient-search-pin.on{color:#1f5eff}.patient-search-result{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:11px;border:1px solid #e0e7f1;border-radius:12px;background:#fff;text-align:left;cursor:pointer}.patient-search-result:hover,.patient-search-result.active{border-color:#1f5eff;background:#f6f9ff}.patient-search-result.inactive{opacity:.68}.patient-search-result-copy b,.patient-search-result-copy span,.patient-search-result-copy small{display:block}.patient-search-result-copy b{font-size:11px;color:#1d2b42}.patient-search-result-copy span{margin-top:3px;font-size:9px;color:#5f6f85}.patient-search-result-copy small{margin-top:3px;font-size:8.5px;color:#8793a4}.patient-search-result-side{text-align:right}.patient-search-result-side b,.patient-search-result-side span{display:block}.patient-search-result-side b{font-size:8.5px;color:#2257b5}.patient-search-result-side span{margin-top:4px;font-size:8px;color:#7b8798}.patient-search-pagination{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px}.patient-search-pagination span{font-size:9px;color:#6f7d91}.patient-search-pagination div{display:flex;gap:6px}.patient-search-pagination .btn{padding:7px 10px;font-size:9px}@media(max-width:780px){.patient-search-toolbar{grid-template-columns:1fr 1fr}.patient-search-toolbar .patient-crm-search{grid-column:1/-1}.patient-search-result{grid-template-columns:34px minmax(0,1fr)}.patient-search-result-side{grid-column:2;text-align:left;display:flex;gap:7px}}
 </style>
+<style id="r61-workspace-theme">
+/* Shared Clinic surfaces: reuse the home palette, spacing and type scale. */
+#r61-patient-context{position:sticky;top:12px;z-index:80;display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;margin:0 0 16px;padding:12px 16px;border:1px solid #dfe7f3;border-radius:16px;background:linear-gradient(135deg,#f7faff,#fff);box-shadow:0 6px 20px rgba(31,94,255,.05);font-size:10px;color:#748197}
+#r61-patient-context[hidden]{display:none}
+#r61-patient-context>strong{font-size:12px;color:#17233a;letter-spacing:-.2px}
+#r61-patient-context>span{flex:1;min-width:180px;line-height:1.6}
+#r61-patient-context .btn{padding:8px 10px;font-size:9px;white-space:nowrap}
+#r61-patient-context .btn:disabled{opacity:.45;cursor:not-allowed}
+#r61-today-overview{margin:18px 0;padding:20px;border:1px solid #dfe7f3;border-radius:20px;background:#fff;box-shadow:0 12px 32px rgba(31,94,255,.06)}
+#r61-today-overview .work-first-head{margin-bottom:16px}
+#r61-today-overview .eyebrow{font-size:9px;color:#748197;margin:0 0 5px;font-weight:900;letter-spacing:.09em}
+#r61-today-overview h3{font-size:20px;color:#17233a;letter-spacing:-.4px}
+#r61-today-overview .work-first-head .btn{padding:10px 14px;font-size:10px;white-space:nowrap}
+.r61-overview-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.r61-work-card{border:1px solid #e0e7f1;border-radius:14px;padding:14px;margin:10px 0;background:#f8faff;color:#59677d;font-size:11px;line-height:1.65}
+.r61-work-card>strong{display:block;color:#17233a;font-size:12px;line-height:1.5}
+.r61-work-card>p{margin:8px 0 12px}
+.r61-overview-grid>.r61-work-card{display:flex;flex-direction:column;align-items:flex-start;min-width:0;margin:0}
+.r61-overview-grid>.r61-work-card>.btn{margin-top:auto;padding:8px 10px;font-size:9px}
+.r61-overview-grid>.r61-work-card>.btn+.btn{margin-top:6px}
+.r61-overview-grid>.r61-work-card>p{font-size:10px;color:#748197}
+.r61-overview-grid>.r61-work-card>small{font-size:9px;color:#8a96a8}
+.r61-overview-note{grid-column:1/-1;margin-top:2px;color:#8a96a8;font-size:9px}
+#r61-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:18px 0;padding:14px 16px;background:#fff;border:1px solid #dfe7f3;border-radius:16px}
+#r61-controls .btn{padding:9px 11px;font-size:10px}
+#r61-controls summary{cursor:pointer;color:#59677d;font-size:10px;font-weight:800;padding:8px}
+#r65-manual-controls{padding:16px!important;margin:14px 0!important;border:1px solid #dfe7f3!important;border-radius:16px!important;background:#f8faff;color:#748197;font-size:10px;line-height:1.65}
+#r65-manual-controls>p:first-child{margin-top:0;color:#59677d}
+#r65-manual-controls button{font-family:inherit;font-size:10px;font-weight:800;padding:8px 11px;margin:0 6px 6px 0;border:1px solid #dfe7f3;border-radius:10px;background:#fff;color:#17233a;cursor:pointer}
+#r65-manual-controls button:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:1100px){.r61-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){#r61-today-overview{padding:14px}#r61-today-overview h3{font-size:17px}#r61-today-overview .work-first-head{gap:10px;flex-wrap:wrap}.r61-overview-grid{grid-template-columns:1fr}#r61-patient-context{top:6px;padding:12px;gap:8px}#r61-patient-context>span{flex-basis:100%;min-width:0}#r61-patient-context .btn{flex:1}#r61-controls{padding:12px}#r61-controls .btn{flex:1 1 auto}}
+@media print{#r61-patient-context,#r61-today-overview,#r61-controls,#r65-manual-controls{display:none!important}}
+
+</style>
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>

@@ -1685,8 +1685,8 @@
     async function openWorkspaceComposer(kind){if(window.crmPrepareMaterialPatient&&!await window.crmPrepareMaterialPatient())return;return sendMaterial(kind);}
     function mountPatientContext(){
         if(document.getElementById('r61-patient-context'))return;
-        const root=el('section'),who=el('strong'),hint=el('span');root.id='r61-patient-context';root.setAttribute('aria-label','현재 선택 환자');root.style.cssText='position:sticky;top:0;z-index:40;background:#fff;border:1px solid #cbd5e1;border-radius:10px;padding:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0';root.append(who,hint);
-        const send=button(root,'자료 만들기·보내기',()=>openWorkspaceComposer()),history=button(root,'자료 이력',materialHistory);button(root,'환자 선택·변경',choosePatient);
+        const root=el('section'),who=el('strong'),hint=el('span');root.id='r61-patient-context';root.setAttribute('aria-label','현재 선택 환자');root.append(who,hint);
+        const send=button(root,'자료 만들기·보내기',()=>openWorkspaceComposer()),history=button(root,'자료 이력',materialHistory);send.className='btn btn-primary';button(root,'환자 선택·변경',choosePatient);
         (document.querySelector('main')||document.body).prepend(root);let last='';
         const paint=()=>{syncDraftSession();const c=window.crmMaterialContext?.()||selection(),session=currentDraftSession(),key=JSON.stringify([session,c?.patientId,c?.guardianId,c?.patient?.name,c?.guardian?.name,c?.homeStatus]);if(key===last)return;last=key;
             root.hidden=!session;const ready=!!session&&materialId(c?.patientId)&&materialId(c?.guardianId);send.disabled=history.disabled=!ready;
@@ -1698,7 +1698,7 @@
     }
     function mountTodayOverview(){
         const dashboard=document.getElementById('dashboard');if(!dashboard||document.getElementById('r61-today-overview'))return;
-        const box=el('section'),rows=el('div');box.id='r61-today-overview';box.style.cssText='padding:16px;border:1px solid #cbd5e1;border-radius:12px;margin:12px 0;background:#fff';box.append(el('h3','오늘 확인할 업무'),el('p','발송 결과 · 일정 충돌 · 작성 중인 자료 · 연동 상태'),rows);dashboard.prepend(box);
+        const box=el('section'),rows=el('div');box.id='r61-today-overview';rows.className='r61-overview-grid';const head=el('div'),copy=el('div'),eyebrow=el('p','TODAY OVERVIEW');head.className='work-first-head';eyebrow.className='eyebrow';copy.append(eyebrow,el('h3','오늘 확인할 업무'),el('p','발송 결과 · 일정 충돌 · 작성 중인 자료 · 연동 상태'));head.append(copy);box.append(head,rows);const anchor=document.getElementById('roleWorkspaceBanner');if(anchor)anchor.insertAdjacentElement('afterend',box);else dashboard.prepend(box);
         let loaded='',loading=false;const active=()=>dashboard.classList.contains('active-view');
         const drafts=()=>{const list=allComposerDrafts(),card=workCard(rows);card.append(el('strong','작성 중인 자료 '+list.length+'건'),el('p','이 브라우저 탭의 초안입니다. 로그아웃하면 복원되지 않습니다.'));
             for(const row of list.slice(0,8))button(card,(row.patientName||'환자')+' · '+row.title,async()=>{const ok=await window.crmOpenPatientRecord?.(row.base.guardianId,row.base.patientId);if(ok)await openWorkspaceComposer(row.kind);});};
@@ -1710,10 +1710,10 @@
                 const conflict=workCard(rows);conflict.append(el('strong',results?'확인이 필요한 예방 이력 '+Number(results.excludedCount||0)+'건':'예방 일정 조회 필요'));button(conflict,'충돌 일정 확인·수정',preventiveReview);
                 const integrations=workCard(rows),sync=out[1].status==='fulfilled'&&out[1].value?.ok===true?out[1].value:null,google=out[2].status==='fulfilled'&&out[2].value?.ok===true?out[2].value:null;
                 const h=sync?.heartbeat,age=Date.now()-Date.parse(h?.last_seen_at),late=!Number.isFinite(age)||age>Math.max(35,(Number(h?.interval_minutes)||15)*2+5)*60000;
-                integrations.append(el('strong','연동 확인'),el('p',google?(google.connected?(google.calendarId?'Google 정상':'Google 캘린더 선택 필요'):'Google 연결 확인 필요'):'Google 조회 미확인'),el('p',sync?(h&&!late&&h.status!=='failed'?'eFriends 응답 정상':'eFriends 서버 PC 확인 필요'):'eFriends 조회 미확인'));button(integrations,'연동 상태 확인',integrationStatus);drafts();rows.append(el('small','확인 시각 '+workTime(new Date().toISOString())+' · 자동 재발송 없음'));
+                integrations.append(el('strong','연동 확인'),el('p',google?(google.connected?(google.calendarId?'Google 정상':'Google 캘린더 선택 필요'):'Google 연결 확인 필요'):'Google 조회 미확인'),el('p',sync?(h&&!late&&h.status!=='failed'?'eFriends 응답 정상':'eFriends 서버 PC 확인 필요'):'eFriends 조회 미확인'));button(integrations,'연동 상태 확인',integrationStatus);drafts();const note=el('small','확인 시각 '+workTime(new Date().toISOString())+' · 자동 재발송 없음');note.className='r61-overview-note';rows.append(note);
             }catch{rows.replaceChildren(el('p','업무 요약을 조회하지 못했습니다. 새로고침으로 확인해주세요.'));}finally{loading=false;}
         };
-        button(box,'오늘 업무 새로고침',()=>load(true));new MutationObserver(()=>{void load();}).observe(dashboard,{attributes:true,attributeFilter:['class']});window.addEventListener('r61-auth-ready',()=>{loaded='';void load();});void load();
+        button(head,'오늘 업무 새로고침',()=>load(true));new MutationObserver(()=>{void load();}).observe(dashboard,{attributes:true,attributeFilter:['class']});window.addEventListener('r61-auth-ready',()=>{loaded='';void load();});void load();
     }
 
     let materialComposerOpen = false;
@@ -1865,7 +1865,7 @@
     const resultLabels={accepted:'문자·외부 채널 접수',home:'Home 알림 접수',failed:'실패',blocked:'차단',unconfirmed:'결과 미확정',canceled:'취소',claimed:'처리 중'};
     const workErrorCode=e=>/^[A-Z][A-Z0-9_]{1,80}$/.test(e?.code||e?.message||'')?(e.code||e.message):'RESULT_UNCONFIRMED';
     const resultReason=code=>({PROVIDER_RESULT_UNCONFIRMED:'사업자 접수 여부를 확인하지 못했습니다.',RECORD_CHANGED_REFRESH:'다른 작업에서 기록이 변경됐습니다. 목록을 다시 조회해주세요.',DUE_BEFORE_RECORD:'예정일은 해당 진료 기록일보다 빠를 수 없습니다.',DATE_INVALID:'올바른 날짜를 선택해주세요.',RECORD_NOT_EDITABLE:'종류나 원본 기록 확인이 필요합니다.'})[code]||preventiveReasons[code]||code||'별도 사유 없음';
-    function workCard(parent){const card=el('article');card.style.cssText='border:1px solid #dbe3ed;border-radius:10px;padding:12px;margin:10px 0';parent.append(card);return card;}
+    function workCard(parent){const card=el('article');card.className='r61-work-card';parent.append(card);return card;}
     const workAdmin=()=>{if(!['owner','admin'].includes(saasMe?.role)){alert('관리자 계정에서 확인·설정할 수 있습니다.');return false;}return true;};
     async function preventiveResults(){
         if(!workAdmin())return;
@@ -1950,7 +1950,7 @@
             return;
         const bar = el('section');
         bar.id = 'r61-controls';
-        bar.style.cssText = 'padding:12px;display:flex;gap:8px;flex-wrap:wrap';
+        
         bar.setAttribute('aria-label', '후속 기능');
         button(bar, '보호자 자료 보내기', ()=>openWorkspaceComposer()).dataset.r61NeedsPatient='1';
         button(bar, '자료 송부 이력', materialHistory).dataset.r61NeedsPatient='1';
