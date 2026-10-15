@@ -22,7 +22,7 @@
   }
   request.onclick=async()=>{if(identity()!==current||busy||pending)return;busy=true;request.disabled=true;try{const out=await api('',{idempotencyKey:key,mode:'delta'});if(identity()!==current)return;ownRequest=out.request.id;status.textContent=(out.reused?'기존 요청: ':'요청됨 · ')+(labels[out.request.state]||'상태 확인 필요');busy=false;await refresh(true);}catch{status.textContent='요청 결과 미확정. 상태를 새로고침해 확인하십시오. 자동 재전송하지 않습니다.';}finally{busy=false;}};
   check.onclick=()=>refresh(true);
-  (document.querySelector('main')||document.body).append(panel);
+  (document.getElementById('r61-sync-slot')||document.querySelector('main')||document.body).append(panel);
   if(pending&&['queued','claimed','running'].includes(pending.state)){timer=setTimeout(()=>{if(identity()===current&&!document.hidden)refresh(true);},15000);}
  }
  window.R65ManualSync={refresh};
