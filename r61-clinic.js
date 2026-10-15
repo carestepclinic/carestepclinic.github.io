@@ -1693,7 +1693,8 @@
         const newOption = el('option', admin() ? '새 자료 작성' : '기존 승인 자료를 선택해주세요'); newOption.value = ''; pick.append(newOption);
         for (const m of list.materials) { const o = el('option', m.title); o.value = m.id; pick.append(o); }
         for (const [value, label] of materialKinds) { const o = el('option', label); o.value=value; kind.append(o); }
-        field('자료', pick); field('자료 종류', kind); field('제목', title); field('보호자에게 보여줄 내용', text);
+        field('자료', pick); field('자료 종류', kind); field('자료 목록에 표시할 제목', title); field('보호자에게 보여줄 내용', text);
+        const formatInfo=el('p');body.append(formatInfo);
         title.maxLength=120; text.maxLength=20000; text.rows=10;
         const draft = () => ({kind:kind.value,title:title.value,text:text.value});
         const signature = () => JSON.stringify(draft());
@@ -1710,8 +1711,10 @@
             for (const b of extraButtons) b.disabled=uiBusy||s.busy;
             pick.disabled=locked||s.hasMaterial;
             kind.disabled=title.disabled=text.disabled=locked||s.hasMaterial||!!existing||!admin();
+            text.readOnly=!!materialDraftSources[kind.value];
+            formatInfo.textContent=text.readOnly?'원래 자료 서식으로 생성합니다. 본문 수정은 자료 생성 화면의 환자·처방·개별지시에서 해주세요. 목록 제목을 바꿔도 PDF 서식은 유지됩니다.':'제목과 본문을 직접 작성할 수 있습니다.';
             buttons.draft.disabled=locked||s.hasMaterial||!!existing||!admin()||!materialDraftSources[kind.value];
-            buttons.preview.disabled=locked||s.sent||!!s.assetId||!title.value.trim()||!text.value.trim();
+            buttons.preview.disabled=locked||s.sent||!!s.assetId||!title.value.trim()||(!materialDraftSources[kind.value]&&!text.value.trim())||(!admin()&&!existing);
             reviewed.disabled=locked||s.sent;
             buttons.send.disabled=locked||s.sent||!reviewed.checked||(!s.assetId && (!previewBlob||previewSignature!==signature()));
             buttons.send.textContent=s.sent?'전송 완료':s.assetId?'저장된 PDF 보내기':'보호자에게 보내기';
@@ -1727,7 +1730,7 @@
             const b=el('button',label); b.type='button'; b.className='btn btn-secondary'; parent.append(b); buttons[key]=b;
             b.onclick=async()=>{if(b.disabled||uiBusy)return;uiBusy=true;controls();try{guard();await fn();guard();}catch(e){
                 const s=flow.state(), code=pdfErrorCode(e);
-                info.textContent=code==='HOME_GUARDIAN_NOT_LINKED'?'보호자를 CARESTEP Home에 먼저 연결해주세요. 자료는 다시 등록하지 않고 이어서 보낼 수 있습니다.':
+                info.textContent=code==='MATERIAL_ORIGINAL_SOURCE_CHANGED'?'기존 자료와 현재 입력 내용이 다릅니다. 관리자가 새 자료를 작성하거나 기존 PDF 결과를 조회해주세요.':code==='HOME_GUARDIAN_NOT_LINKED'?'보호자를 CARESTEP Home에 먼저 연결해주세요. 자료는 다시 등록하지 않고 이어서 보낼 수 있습니다.':
                     (s.pending||s.registrationPending?'결과 확인이 필요합니다. 아래 결과 조회를 눌러주세요. ':'처리를 완료하지 못했습니다. ')+code;
             }finally{uiBusy=false;controls();}};
         };
@@ -1735,20 +1738,38 @@
             if(text.value.trim()&&!confirm('현재 내용을 새 초안으로 바꿀까요?'))return;
             const doc=renderMaterialDraftPDF(kind.value,base.patientId);guard();
             title.value=materialKindLabel(kind.value);text.value=doc.innerText;revokePreview();
-            richDraft={signature:signature(),node:doc.cloneNode(true)};
-            info.textContent='초안을 확인·수정한 뒤 PDF 미리보기를 눌러주세요.';
+            richDraft={kind:kind.value,text:text.value,node:doc.cloneNode(true)};
+            info.textContent='원래 서식의 초안을 불러왔습니다. PDF 미리보기에서 내용을 확인해주세요.';
         });
         action('preview','PDF 미리보기',async()=>{
             revokePreview();
-            const before=signature(), m=draft();
+            const m=draft();
             if(typeof exportPdfElement!=='function'||!window.html2pdf)throw Error('PDF_GENERATOR_UNAVAILABLE');
-            let doc;
-            if(richDraft?.signature===before){doc=document.getElementById('pdfDocument');doc.replaceChildren(...[...richDraft.node.childNodes].map(n=>n.cloneNode(true)));doc.classList.remove('hidden');doc.dataset.r61Patient=base.patientId;doc.dataset.r61MaterialKind=m.kind;}
-            else doc=renderApprovedMaterialPDF(m,base.patientId);
+            let doc, refreshed=false;
+            if(materialDraftSources[m.kind]){
+                // Rich output must never fall back to the plain-text template.
+                // A display-title edit does not invalidate the original page markup.
+                if(richDraft?.kind===m.kind && richDraft.text===m.text){
+                    doc=document.getElementById('pdfDocument');
+                    doc.replaceChildren(...[...richDraft.node.childNodes].map(n=>n.cloneNode(true)));
+                    doc.classList.remove('hidden');doc.dataset.r61Patient=base.patientId;doc.dataset.r61MaterialKind=m.kind;
+                }else{
+                    doc=renderMaterialDraftPDF(m.kind,base.patientId);guard();
+                    const generatedText=doc.innerText;
+                    if(existing && generatedText!==existing.text){
+                        if(flow.state().hasMaterial||!admin())throw Error('MATERIAL_ORIGINAL_SOURCE_CHANGED');
+                        if(!confirm('현재 입력으로 만든 PDF 내용이 기존 등록 자료와 다릅니다. 기존 자료는 유지하고 새 자료로 준비할까요?'))return;
+                        flow.reset();existing=null;pick.value='';refreshed=true;
+                    }
+                    text.value=generatedText;
+                    richDraft={kind:m.kind,text:generatedText,node:doc.cloneNode(true)};
+                }
+            }else doc=renderApprovedMaterialPDF(m,base.patientId);
+            const before=signature();
             const blob=await exportPdfElement('carestep-material.pdf',{save:false,silent:true});guard();
             if(before!==signature()||!(blob instanceof Blob)||blob.type!=='application/pdf'||!blob.size||blob.size>10485760||new TextDecoder().decode(await blob.slice(0,5).arrayBuffer())!=='%PDF-')throw Error('PDF_GENERATION_INVALID');
             guard();previewBlob=blob;previewSignature=before;blobURL=URL.createObjectURL(blob);viewer.src=blobURL;viewer.hidden=false;
-            info.textContent='이 PDF가 보호자에게 전달됩니다. 아직 등록·저장·송부하지 않았습니다.';
+            info.textContent=(refreshed?'현재 입력으로 새 자료를 준비했습니다. ':'')+'이 PDF가 보호자에게 전달됩니다. 아직 등록·저장·송부하지 않았습니다.';
         });
         viewer.title='보호자에게 보낼 PDF 미리보기';viewer.style.cssText='width:100%;height:360px;border:1px solid #ddd;margin-top:12px';viewer.hidden=true;body.append(viewer);
         const reviewLabel=el('label');reviewed.type='checkbox';reviewLabel.style.cssText='display:block;margin:16px 0';reviewLabel.append(reviewed,document.createTextNode(' 환자·보호자와 공개할 내용을 확인했습니다.'));body.append(reviewLabel);

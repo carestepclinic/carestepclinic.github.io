@@ -67,16 +67,16 @@ class Element {
  all(){return this.children.flatMap(n=>[n,...n.all()]);}
  cloneNode(deep){const n=new Element(this.tagName);n._text=this._text;n.className=this.className;n.dataset={...this.dataset};if(deep)n.append(...this.children.map(c=>c.cloneNode(true)));return n;}
 }
-function domFixture({existing=false,loseUpload=false}={}){
+function domFixture({existing=false,loseUpload=false,existingMaterial=approved,approveCopy=true,generatorFails=false}={}){
  const body=new Element('body'),pdf=new Element('div');body.append(pdf);
- const storageData=new Map(),requests=[],exported=[];let rows=existing?[approved]:[],asset=null,delivery=null;
+ const storageData=new Map(),requests=[],exported=[],exportedMarkup=[],generatedTypes=[];let rows=existing?[existingMaterial]:[],asset=null,delivery=null;
  const current={patientId:'patient-a',guardianId:'guardian-a'};
  const doc={body,readyState:'loading',createElement:t=>new Element(t),createTextNode:t=>{const n=new Element('text');n.textContent=t;return n;},getElementById:id=>id==='pdfDocument'?pdf:null,addEventListener:()=>{}};
  const hash=s=>webcrypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(x=>Buffer.from(x).toString('hex'));
  const canonical=v=>JSON.stringify(Object.fromEntries(Object.keys(v).sort().map(k=>[k,v[k]])));
  const assetResult=()=>({...asset,delivery:delivery?{status:'attached',delivery_id:delivery.deliveryId}:null,deliveryReceipt:delivery});
- const ctx={document:doc,crypto:webcrypto,Blob,FormData,URL,URLSearchParams,TextEncoder,TextDecoder,console,MutationObserver:class{},saasMode:'auth',saasToken:'synthetic-token',saasMe:{clinic:{id:'clinic-a'},user:{id:'user-a'},role:'owner'},saasSessionMeta:{id:'session-a'},saasEndpoint:()=> 'https://synthetic.invalid',sessionStorage:{getItem:k=>storageData.get(k)??null,setItem:(k,v)=>storageData.set(k,v),removeItem:k=>storageData.delete(k)},confirm:()=>true,alert:()=>{},
- exportPdfElement:async(name,opt)=>{assert.equal(opt.save,false);exported.push(pdf.innerText);return new Blob(['%PDF-'+pdf.innerText],{type:'application/pdf'});},
+ const ctx={document:doc,crypto:webcrypto,Blob,FormData,URL,URLSearchParams,TextEncoder,TextDecoder,console,MutationObserver:class{},saasMode:'auth',saasToken:'synthetic-token',saasMe:{clinic:{id:'clinic-a'},user:{id:'user-a'},role:'owner'},saasSessionMeta:{id:'session-a'},saasEndpoint:()=> 'https://synthetic.invalid',sessionStorage:{getItem:k=>storageData.get(k)??null,setItem:(k,v)=>storageData.set(k,v),removeItem:k=>storageData.delete(k)},confirm:()=>approveCopy,alert:()=>{},
+ exportPdfElement:async(name,opt)=>{assert.equal(opt.save,false);exported.push(pdf.innerText);exportedMarkup.push(pdf.all().map(n=>[n.tagName,n.className||'',n.textContent]));return new Blob(['%PDF-'+pdf.innerText],{type:'application/pdf'});},
  fetch:async(url,o)=>{
   requests.push({url,...o});const p=new URL(url);let d;
   if(p.pathname.endsWith('/pdf-config'))d={ok:true,pdfEnabled:true,guardianMaterialEnabled:true};
@@ -95,11 +95,19 @@ function domFixture({existing=false,loseUpload=false}={}){
   return {ok:true,status:o.method==='POST'?201:200,redirected:false,url,json:async()=>d};
  }};
  ctx.window={crmWorkspaceSelection:()=>current,crmCurrentPatient:()=>current,html2pdf:()=>{}};
+ ctx.documentOutputDescriptor=type=>({render:()=>{
+  generatedTypes.push(type);if(generatorFails)throw Error('PDF_GENERATOR_UNAVAILABLE');
+  pdf.replaceChildren();pdf.classList.remove('hidden');
+  const first=new Element('section');first.className='pdf-page';first.append(Object.assign(new Element('h1'),{textContent:'Original '+type}));
+  if(type==='medcheck'){const table=new Element('table');table.className='med-check-table';table.append(Object.assign(new Element('td'),{textContent:'08:00 □'}));first.append(table);}
+  pdf.append(first);if(type==='pdf'){const second=new Element('section');second.className='pdf-page';second.textContent='Original second page';pdf.append(second);}
+ }});
+ ctx.readCaseInfoFromForm=()=>{};ctx.medicationCheckMeta=()=>({meds:[{name:'Synthetic med'}],valid:true});ctx.caseInfo={dischargeDate:'2026-01-01'};
  vm.createContext(ctx);vm.runInContext(source.replace('    window.r113PDFController = pdfController;','    window.r113PDFController = pdfController; window.testComposer = sendMaterial;'),ctx);
  const find=(tag,text)=>body.all().find(x=>x.tagName===tag&&(!text||x.textContent===text));
  const click=async text=>{const b=find('button',text);assert.ok(b,text);assert.equal(b.disabled,false,text+' enabled');await b.onclick();};
- const fill=async()=>{const inputs=body.all().filter(n=>n.tagName==='input');inputs[0].value='Reviewed title';find('textarea').value='Reviewed public body';inputs[0].oninput();await click('PDF 미리보기');};
- return {ctx,body,pdf,find,click,fill,requests,exported,current,storageData,open:()=>ctx.window.testComposer()};
+ const fill=async()=>{const kind=body.all().filter(n=>n.tagName==='select')[1];kind.value='guardian';kind.onchange();const inputs=body.all().filter(n=>n.tagName==='input');inputs[0].value='Reviewed title';find('textarea').value='Reviewed public body';inputs[0].oninput();await click('PDF 미리보기');};
+ return {ctx,body,pdf,find,click,fill,requests,exported,exportedMarkup,generatedTypes,current,storageData,open:()=>ctx.window.testComposer()};
 }
 test('DOM: new draft preview is local, one final click uses real upload/attach receipts',async()=>{
  const f=domFixture();await f.open();await f.fill();assert.ok(f.requests.every(r=>r.method==='GET'));assert.equal(f.find('button','보호자에게 보내기').disabled,true);
@@ -110,3 +118,10 @@ test('DOM: new draft preview is local, one final click uses real upload/attach r
 test('DOM: editing after preview invalidates checkbox and sending',async()=>{const f=domFixture();await f.open();await f.fill();const check=f.body.all().find(n=>n.type==='checkbox');check.checked=true;check.onchange();f.find('textarea').value='changed';f.find('textarea').oninput();assert.equal(check.checked,false);assert.equal(f.find('button','보호자에게 보내기').disabled,true);assert.ok(f.requests.every(r=>r.method==='GET'));});
 test('DOM: upload response loss stops attach and enables result recovery',async()=>{const f=domFixture({loseUpload:true});await f.open();await f.fill();const check=f.body.all().find(n=>n.type==='checkbox');check.checked=true;check.onchange();await f.click('보호자에게 보내기');assert.equal(f.requests.filter(r=>r.url.endsWith('/attach')).length,0);assert.equal(f.find('button','보호자에게 보내기').disabled,true);assert.equal(f.find('button','중단된 저장·송부 결과 조회').disabled,false);assert.ok(f.body.textContent.includes('결과 확인이 필요'));});
 test('DOM: patient change after preview stops all final requests',async()=>{const f=domFixture();await f.open();await f.fill();const check=f.body.all().find(n=>n.type==='checkbox');check.checked=true;check.onchange();f.current.patientId='other';const before=f.requests.length;await f.click('보호자에게 보내기');assert.equal(f.requests.length,before);assert.ok(f.body.textContent.includes('MATERIAL_SCOPE_CHANGED'));});
+test('DOM: advanced PDF retains original multiple pages without draft-import prerequisite',async()=>{const f=domFixture();await f.open();await f.click('PDF 미리보기');assert.deepEqual(f.generatedTypes,['pdf']);assert.equal(f.exportedMarkup[0].filter(n=>n[1]==='pdf-page').length,2);assert.ok(f.requests.every(r=>r.method==='GET'));assert.equal(f.find('textarea').readOnly,true);});
+test('DOM: medication PDF retains table and checkbox markup',async()=>{const f=domFixture();await f.open();const k=f.body.all().filter(n=>n.tagName==='select')[1];k.value='medication';k.onchange();await f.click('PDF 미리보기');assert.deepEqual(f.generatedTypes,['medcheck']);assert.ok(f.exportedMarkup[0].some(n=>n[0]==='table'&&n[1]==='med-check-table'));assert.ok(f.exported[0].includes('08:00 □'));});
+test('DOM: changing list title after draft import preserves original pages',async()=>{const f=domFixture();await f.open();await f.click('선택 유형의 초안 불러오기');const title=f.body.all().find(n=>n.tagName==='input');title.value='Custom display title';title.oninput();await f.click('PDF 미리보기');assert.deepEqual(f.generatedTypes,['pdf']);assert.equal(f.exportedMarkup[0].filter(n=>n[1]==='pdf-page').length,2);assert.equal(title.value,'Custom display title');});
+test('DOM: existing medication uses generator and preserves matching approved identity',async()=>{const m={...approved,kind:'medication',text:'Original medcheck08:00 □'};const f=domFixture({existing:true,existingMaterial:m});await f.open();const pick=f.body.all().find(n=>n.tagName==='select');pick.value=m.id;pick.onchange();await f.click('PDF 미리보기');assert.deepEqual(f.generatedTypes,['medcheck']);assert.ok(f.exportedMarkup[0].some(n=>n[0]==='table'));const check=f.body.all().find(n=>n.type==='checkbox');check.checked=true;check.onchange();await f.click('보호자에게 보내기');assert.equal(f.requests.filter(r=>r.method==='POST'&&r.url.endsWith('/materials')).length,0);assert.ok(f.body.textContent.includes('전송 완료'));});
+test('DOM: changed original source requires copy confirmation and never overwrites old material',async()=>{const f=domFixture({existing:true});await f.open();const pick=f.body.all().find(n=>n.tagName==='select');pick.value=approved.id;pick.onchange();await f.click('PDF 미리보기');assert.equal(pick.value,'');assert.ok(f.body.textContent.includes('새 자료를 준비'));assert.ok(f.requests.every(r=>r.method==='GET'));});
+test('DOM: declined source change cannot generate or send another PDF',async()=>{const f=domFixture({existing:true,approveCopy:false});await f.open();const pick=f.body.all().find(n=>n.tagName==='select');pick.value=approved.id;pick.onchange();await f.click('PDF 미리보기');assert.equal(f.exported.length,0);assert.equal(f.find('button','보호자에게 보내기').disabled,true);assert.equal(pick.value,approved.id);});
+test('DOM: generator failure never falls back to plain text PDF',async()=>{const f=domFixture({generatorFails:true});await f.open();await f.click('PDF 미리보기');assert.equal(f.exported.length,0);assert.equal(f.find('button','보호자에게 보내기').disabled,true);assert.ok(f.requests.every(r=>r.method==='GET'));});
