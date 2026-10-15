@@ -147,7 +147,24 @@ test('output send opens the checked medication PDF directly and preserves all cl
  const f=domFixture({topicOutput:true});f.ctx.currentTemplateId='dental';f.ctx.caseInfo.procedure='스케일링';f.ctx.medications=[{name:'Synthetic med',duration:7}];const before=JSON.stringify([f.ctx.caseInfo,f.ctx.medications]);
  await f.openBuilder();assert.equal(JSON.stringify([f.ctx.caseInfo,f.ctx.medications]),before);assert.equal(f.ctx.currentTemplateId,'dental');assert.deepEqual(f.generatedTypes,['medcheck']);assert.ok(f.exportedMarkup[0].some(n=>n[1]==='med-check-table'));assert.match(f.body.textContent,/교육자료: 스케일링/);
  const panels=f.body.all().filter(n=>n.className==='r61-composer-panel');assert.deepEqual(panels.map(n=>n.hidden),[true,false,true]);assert.equal(f.body.all().find(n=>n.className==='r61-topic-panel').hidden,true);assert.ok(f.requests.every(r=>r.method==='GET'));assert.equal(f.find('button','Home에 게시하기').disabled,true);
- await reviewBuilder(f);await f.click('Home에 게시하기');const post=f.requests.find(r=>r.url.endsWith('/pdf-assets')&&r.method==='POST');assert.equal(await post.body.get('pdf').text(),'%PDF-'+f.exported[0]);assert.equal(f.exported.length,1);assert.match(f.body.textContent,/복약 체크표_2026-01-01 · Home 게시 완료/);
+ await reviewBuilder(f);await f.click('Home에 게시하기');const post=f.requests.find(r=>r.url.endsWith('/pdf-assets')&&r.method==='POST');assert.equal(await post.body.get('pdf').text(),'%PDF-'+f.exported[0]);assert.equal(f.exported.length,1);assert.match(f.body.textContent,/복약 체크표 · 스케일링·발치 후 관리_2026-01-01 · Home 게시 완료/);
+});
+test('all output kinds register the actual education title rather than the free-text diagnosis',async()=>{
+ for(const [type,label] of [['pdf','고급 보호자 자료'],['summary','퇴원 안내'],['medcheck','복약 체크표']]){
+  const f=domFixture({topicOutput:true});f.ctx.selectedOutputTypes=()=>[type];f.ctx.currentTemplateId='dental';f.ctx.caseInfo.procedure='췌장염';
+  await f.openBuilder();await reviewBuilder(f);await f.click('Home에 게시하기');
+  const material=JSON.parse(f.requests.find(r=>r.url.endsWith('/materials')&&r.method==='POST').body);
+  assert.equal(material.title,label+' · 스케일링·발치 후 관리_2026-01-01');assert.ok(f.exported[0].includes('스케일링·발치 후 관리'));
+ }
+});
+test('long education titles fit registration limits and preserve kind, Unicode and date',async()=>{
+ const f=domFixture();f.ctx.templates[0].title='질환🩺'.repeat(50);await f.openBuilder();await reviewBuilder(f);await f.click('Home에 게시하기');
+ const material=JSON.parse(f.requests.find(r=>r.url.endsWith('/materials')&&r.method==='POST').body);
+ assert.ok(material.title.length<=120);assert.ok(material.title.startsWith('복약 체크표 · 질환🩺'));assert.ok(material.title.endsWith('…_2026-01-01'));assert.equal(material.title.isWellFormed(),true);
+});
+test('changing education after preview blocks posting an outdated disease title',async()=>{
+ const f=domFixture();await f.openBuilder();await reviewBuilder(f);f.ctx.currentTemplateId='dental';const count=f.requests.length;
+ await f.click('Home에 게시하기');assert.equal(f.requests.length,count);assert.match(f.body.textContent,/교육자료 또는 진단·처방 입력이 바뀌었습니다/);
 });
 test('output queue posts supported selections one at a time and does not resend completed items',async()=>{
  const f=domFixture();f.ctx.selectedOutputTypes=()=>['medcheck','summary','staff','sms'];await f.openBuilder();assert.match(f.body.textContent,/이번 Home 전송에서 제외: staff · sms/);await reviewBuilder(f);await f.click('Home에 게시하기');

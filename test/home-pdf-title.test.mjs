@@ -15,3 +15,8 @@ test('filename preserves Korean and removes unsafe characters',()=>{const f=fixt
 
 test('dated title is shown unchanged and downloaded with send date',async()=>{const title='복약체크표 2026-10-15',f=fixture(title);await f.c.r113PDFMaterials(f.mount);const card=f.mount.children[0];assert.equal(card.children[0].textContent,title);await card.children[2].onclick();assert.equal(f.downloads[0],title+'.pdf');});
 test('long Korean filename retains date suffix',()=>{const f=fixture('');const name=f.c.r113PDFFilename({title:'자료'.repeat(100)+' 2026-10-15'});assert.ok(name.endsWith(' 2026-10-15.pdf'));assert.ok(name.length<=124);});
+test('education topic stays visible, searchable and included in the downloaded filename',async()=>{
+ const title='복약 체크표 · 스케일링·발치 후 관리_2026-10-15',f=fixture(title);await f.c.r113PDFMaterials(f.mount);
+ const card=f.mount.children[0];assert.equal(card.children[0].textContent,title);assert.ok(card.dataset.search.includes('스케일링'));assert.ok(card.dataset.search.includes('발치'));
+ await card.children[2].onclick();assert.equal(f.downloads[0],title+'.pdf');
+});

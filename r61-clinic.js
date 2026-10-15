@@ -1688,6 +1688,14 @@
         if(typeof setWizardStep==='function')setWizardStep(typeof currentWizardStep==='number'?currentWizardStep:1);
     }
     const builderMaterialKinds=Object.freeze({pdf:'advanced',summary:'discharge',medcheck:'medication'});
+    function builderMaterialTitle(kind,source){
+        const topic=String(source.title||'').replace(/\s+/g,' ').trim();
+        const prefix=materialKindLabel(kind)+(topic?' · ':''),suffix=/^\d{4}-\d{2}-\d{2}$/.test(source.dischargeDate)?'_'+source.dischargeDate:'';
+        const limit=120-prefix.length-suffix.length;
+        // Keep the source education identifiable without dropping the material kind or date.
+        const label=topic.length>limit?topic.slice(0,limit-1).replace(/[\uD800-\uDBFF]$/,'')+'…':topic;
+        return prefix+label+suffix;
+    }
     let builderMaterialQueue=null;
     function builderMaterialGuard(queue){
         materialSame(queue.base,materialScope('scope-check',1));
@@ -1783,7 +1791,7 @@
         if(typeof readCaseInfoFromForm==='function')readCaseInfoFromForm();
         const rows=typeof templates==='undefined'?[]:templates,id=typeof currentTemplateId==='undefined'?'':currentTemplateId;
         const template=rows.find(t=>t.id===id),data=typeof caseInfo==='undefined'?{}:caseInfo;
-        return {id:template?.id||'',title:template?.title||'',procedure:String(data.procedure||''),topic:JSON.stringify([template?.id||'',data.procedure||'']),
+        return {id:template?.id||'',title:template?.title||'',dischargeDate:String(data.dischargeDate||''),procedure:String(data.procedure||''),topic:JSON.stringify([template?.id||'',data.procedure||'']),
             signature:JSON.stringify([template||null,data,typeof medications==='undefined'?[]:medications,typeof activePatientJourney==='undefined'?null:activePatientJourney,typeof activeJourneyStageSelection==='undefined'?[]:activeJourneyStageSelection,typeof hospital==='undefined'?null:hospital])};
     }
     function materialTemplateMatches(query){
@@ -1859,7 +1867,7 @@
         let existing = builder?.item.existing||null, previewBlob = null, previewSignature = null, richDraft = null, draftKind=materialKinds.some(([k])=>k===initialKind)?initialKind:(recentDraft?.kind||'advanced');
         kind.value=draftKind;
         const persistDraft=()=>{if(builder)return;if(!existing&&title.value.trim()){const saved=saveComposerDraft(base,{kind:draftKind,title:title.value,text:text.value,sourceTemplateId:materialDraftSources[draftKind]?materialSourceContext().id:'',sourceTemplateTitle:materialDraftSources[draftKind]?materialSourceContext().title:''},richDraft);if(saved)draftStatus.textContent=saved.stored?'이 탭에 초안 저장됨 · '+workTime(saved.updatedAt):'현재 화면에 임시보관 중 · 브라우저 저장 공간을 확인해주세요.';}};
-        const restoreDraft=()=>{if(builder){title.value=builder.item.draft?.title||materialKindLabel(draftKind)+'_'+(typeof caseInfo==='undefined'?'':caseInfo.dischargeDate||'');text.value=builder.item.draft?.text||'';return;}const saved=readComposerDraft(base,draftKind);title.value=saved?.title||materialKindLabel(draftKind);text.value=saved?.text||'';richDraft=saved?.rich||null;if(materialDraftSources[draftKind]&&(!saved?.sourceTemplateId||saved.sourceTemplateId!==materialSourceContext().id)){richDraft=null;text.value='';}draftStatus.textContent=saved?'저장된 초안을 불러왔습니다.':'초안은 입력할 때 이 탭에 자동 저장됩니다.';};
+        const restoreDraft=()=>{if(builder){title.value=builder.item.draft?.title||builderMaterialTitle(draftKind,builder.queue.source);text.value=builder.item.draft?.text||'';return;}const saved=readComposerDraft(base,draftKind);title.value=saved?.title||materialKindLabel(draftKind);text.value=saved?.text||'';richDraft=saved?.rich||null;if(materialDraftSources[draftKind]&&(!saved?.sourceTemplateId||saved.sourceTemplateId!==materialSourceContext().id)){richDraft=null;text.value='';}draftStatus.textContent=saved?'저장된 초안을 불러왔습니다.':'초안은 입력할 때 이 탭에 자동 저장됩니다.';};
         d.addEventListener('close',()=>{if(!flow.state().sent)persistDraft();});
         const buttons = {}, extraButtons = [...helpNavigation];
         const flow = materialDeliveryFlow({scope:guard,request:pdfRequest,storage:sessionStorage,canApprove:admin,
