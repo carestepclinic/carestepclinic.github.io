@@ -449,7 +449,8 @@
         SOLAPI_CONNECTION_REQUIRED: 'SOLAPI 연결 필요', MESSAGING_FEATURE_UNAVAILABLE: '문자 발송 이용 권한 확인 필요',
         CLINIC_NOT_ACTIVE: '병원 활성·승인 상태 확인 필요', PREVENTIVE_MESSAGING_NOT_READY: '문자 발송 준비 상태 확인 필요',
         PREVENTIVE_LMS_POLICY_REQUIRED: '외부 발송 허용과 LMS 채널을 함께 선택해주세요.',
-        PREVENTIVE_CHANNEL_INVALID: '예방관리 발송 방식을 다시 선택해주세요.'
+        PREVENTIVE_CHANNEL_INVALID: '예방관리 발송 방식을 다시 선택해주세요.',
+        VACCINE_IDENTITY_REQUIRED: '접종 종류 확인 필요', PREVENTIVE_RECORD_REVIEW_REQUIRED: '예방 기록 날짜·일정 충돌 확인 필요'
     };
     const preventiveReason = code => preventiveReasons[code] || '발송 조건 확인 필요';
     function settingsSession() {
@@ -467,6 +468,8 @@
         body.append(date, el('p', '접종은 7일 전·당일, 사상충은 3일 전·당일에 안내합니다. 날짜는 한국시간 기준입니다. 저장된 설정으로 조회하며 실제 문자는 보내지 않습니다.'));
         const rows = el('section');
         body.append(rows);
+        button(body, '충돌 일정 확인·수정', preventiveReview);
+        button(body, '실제 발송 결과', preventiveResults);
         button(body, '예정 대상 조회', async () => {
             try {
                 if (settingsSession() !== session) throw Error('SESSION_CHANGED');
@@ -1686,6 +1689,8 @@
         } catch (e) { info.textContent = '자료를 열지 못했습니다 · ' + pdfErrorCode(e); button(body, '기존 텍스트 자료 보내기', materials); return; }
         const patient = home.patients.find(p => p.id === base.patientId);
         body.prepend(el('p', patient.name + ' · 보호자 ' + home.guardian.name));
+        button(body,'이 환자의 자료 송부 이력',materialHistory);
+        body.append(el('p','① 자료 종류·제목 → ② PDF 미리보기 → ③ 내용 확인 후 보내기 · 제목 뒤에 게시일이 자동 표시됩니다.'));
         body.append(el('p', '내용 확인 후 한 번 보내면 자료 등록과 PDF 저장을 함께 처리합니다. CARESTEP Home 자료함에 게시하며 문자·알림톡은 발송하지 않습니다.'));
         const pick = el('select'), kind = el('select'), title = el('input'), text = el('textarea'), reviewed = el('input'), viewer = el('iframe');
         const admin = () => ['owner', 'admin'].includes(saasMe?.role);
@@ -1722,7 +1727,7 @@
         };
         const show = () => {
             const s=flow.state();
-            if(s.sent) info.textContent='전송 완료 · CARESTEP Home · Delivery ID: '+s.deliveryId;
+            if(s.sent) info.textContent='Home 게시 완료 · 자료 송부 이력에서 확인할 수 있습니다. · Delivery ID: '+s.deliveryId;
             else if(s.status==='READY_UNSENT') info.textContent='저장된 PDF를 확인했습니다. 공개 내용을 확인한 뒤 보내기를 누르면 이어서 송부합니다.';
             else if(s.hasMaterial) info.textContent='등록된 자료를 확인했습니다. PDF 미리보기 후 보내기를 누르면 이어서 처리합니다.';
         };
@@ -1794,6 +1799,85 @@
         controls();
     }
 
+    const workTime = value => {const d=new Date(value);return value&&Number.isFinite(d.getTime())?d.toLocaleString('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}):'기록 없음';};
+    const deliveryLabel = x => x.status==='sent'?(x.channel==='home'?'Home 게시 완료':x.provider_id?'발송 사업자 접수 완료':'결과 미확정'):({failed:'발송 실패',blocked:'조건 불충족 · 발송 차단',unconfirmed:'결과 미확정',claimed:'처리 중 · 결과 확인 필요',canceled:'발송 취소'})[x.status]||'상태 확인 필요';
+    const resultLabels={accepted:'문자·외부 채널 접수',home:'Home 알림 접수',failed:'실패',blocked:'차단',unconfirmed:'결과 미확정',canceled:'취소',claimed:'처리 중'};
+    const workErrorCode=e=>/^[A-Z][A-Z0-9_]{1,80}$/.test(e?.code||e?.message||'')?(e.code||e.message):'RESULT_UNCONFIRMED';
+    const resultReason=code=>({PROVIDER_RESULT_UNCONFIRMED:'사업자 접수 여부를 확인하지 못했습니다.',RECORD_CHANGED_REFRESH:'다른 작업에서 기록이 변경됐습니다. 목록을 다시 조회해주세요.',DUE_BEFORE_RECORD:'예정일은 해당 진료 기록일보다 빠를 수 없습니다.',DATE_INVALID:'올바른 날짜를 선택해주세요.',RECORD_NOT_EDITABLE:'종류나 원본 기록 확인이 필요합니다.'})[code]||preventiveReasons[code]||code||'별도 사유 없음';
+    function workCard(parent){const card=el('article');card.style.cssText='border:1px solid #dbe3ed;border-radius:10px;padding:12px;margin:10px 0';parent.append(card);return card;}
+    const workAdmin=()=>{if(!['owner','admin'].includes(saasMe?.role)){alert('관리자 계정에서 확인·설정할 수 있습니다.');return false;}return true;};
+    async function preventiveResults(){
+        if(!workAdmin())return;
+        const session=settingsSession(),{body}=dialog('예방문자 발송 결과'),date=el('input'),rows=el('section');date.type='date';date.value=new Date(Date.now()+32400000).toISOString().slice(0,10);
+        body.append(el('p','선택한 한국시간 날짜의 실제 발송 시도입니다. 작업 정상 종료와 문자 접수 성공은 다릅니다.'),date);
+        const load=async()=>{rows.replaceChildren(el('p','결과 확인 중…'));try{
+            if(settingsSession()!==session)throw Error('SESSION_CHANGED');const d=await api('/preventive/results?date='+encodeURIComponent(date.value),undefined,{redirect:'error'});if(settingsSession()!==session)throw Error('SESSION_CHANGED');
+            if(d?.ok!==true||!d.counts||!Array.isArray(d.deliveries))throw Error('RESULT_INVALID');rows.replaceChildren();
+            const cron=d.cron;rows.append(el('p',cron?'공통 자동작업: '+(({ok:'정상 종료',running:'실행 중',failed:'실패'})[cron.status]||'상태 확인 필요')+' · 시작 '+workTime(cron.startedAt)+(cron.status==='running'?'':' · 종료 '+workTime(cron.completedAt)):'공통 자동작업 실행 기록 없음'));
+            rows.append(el('strong',Object.entries(resultLabels).map(([k,v])=>v+' '+Number(d.counts[k]||0)+'건').join(' · ')));
+            rows.append(el('p','현재 저장 기록으로 계산한 제외 이력 '+Number(d.excludedCount||0)+'건'+(Object.entries(d.excludedReasons||{}).length?' · '+Object.entries(d.excludedReasons).map(([k,v])=>preventiveReason(k)+' '+v+'건').join(' · '):'')+' (당시 실행 시점의 제외 이력 스냅샷은 아닙니다.)'));
+            rows.append(el('p','접수는 보호자의 수신 완료를 뜻하지 않습니다. 결과 미확정 건은 재발송하지 말고 사업자 이력과 대조해주세요.'));
+            const filter=el('select');for(const [key,label] of [['all','전체'],...Object.entries(resultLabels)]){const o=el('option',label);o.value=key;filter.append(o);}filter.value='all';rows.append(filter);const list=el('section');rows.append(list);
+            const render=()=>{list.replaceChildren();for(const x of d.deliveries.filter(x=>filter.value==='all'||x.category===filter.value)){const card=workCard(list);card.append(el('strong',x.patientName+' · 보호자 '+x.guardianName),el('p',(resultLabels[x.category]||'결과 확인 필요')+' · '+(x.channel||'채널 미정')+' · '+workTime(x.attemptedAt)),el('p','예정일 '+x.dueDate+' · '+resultReason(x.reason)));}if(!list.children.length)list.append(el('p','표시할 발송 기록이 없습니다.'));};filter.onchange=render;render();
+            if(d.total>d.deliveries.length)rows.append(el('p','집계는 전체 '+d.total+'건이며 상세는 최근 '+d.deliveries.length+'건입니다.'));
+        }catch(e){rows.replaceChildren(el('p',e.message==='SESSION_CHANGED'?'로그인 또는 병원이 바뀌었습니다. 창을 다시 열어주세요.':'발송 결과를 조회하지 못했습니다. 새로고침으로 다시 확인해주세요.'));}};
+        button(body,'결과 새로고침',load);button(body,'예정·제외 대상 확인',preventivePreview);button(body,'충돌 일정 확인·수정',preventiveReview);body.append(rows);await load();
+    }
+    async function preventiveReview(){
+        if(!workAdmin())return;
+        const session=settingsSession(),{body}=dialog('예방 일정 확인·수정'),rows=el('section');let page=0;
+        body.append(el('p','환자·보호자와 원본 기록을 확인한 뒤 잘못된 예정일만 수정하세요. 다른 기록은 유지되며 문자는 발송하지 않습니다.'),el('p','eFriends 원본이 변경되면 다음 동기화에 반영될 수 있으므로 원본 차트의 잘못된 날짜도 함께 정정해주세요.'));
+        const load=async()=>{rows.replaceChildren(el('p','확인할 일정 조회 중…'));try{
+            if(settingsSession()!==session)throw Error('SESSION_CHANGED');const d=await api('/preventive/review?page='+page,undefined,{redirect:'error'});if(settingsSession()!==session)throw Error('SESSION_CHANGED');if(d?.ok!==true||!Array.isArray(d.groups))throw Error('REVIEW_INVALID');rows.replaceChildren();
+            rows.append(el('p','확인할 항목 '+d.totalGroups+'개 · 제외된 이력 '+d.excludedCount+'건. 최신 충돌 기록과 날짜 오류 기록을 표시합니다.'));
+            for(const g of d.groups){const card=workCard(rows);card.append(el('strong',g.patientName+' · 보호자 '+g.guardianName),el('p',(g.type==='heartworm'?'심장사상충':g.identity||'접종 종류 확인 필요')+' · 최신 기록 '+g.latestDate+' · 제외 이력 '+g.excludedRecords+'건'));
+                for(const r of g.records){const line=el('div'),info=el('p'),input=el('input');input.type='date';input.setAttribute('aria-label',g.patientName+' '+r.eventDate+' 기록의 새 예정일');input.value=r.nextDueDate;input.disabled=!r.canEdit;line.append(el('p','기록일 '+r.eventDate+' · 기존 예정일 '+(r.nextDueDate||'없음')),el('small','원본: '+(r.sourceRef||'직접 입력 / 출처 미기록')),input,info);card.append(line);
+                    const save=button(line,'이 기록의 예정일 저장',async()=>{
+                        if(settingsSession()!==session){info.textContent='로그인이 바뀌었습니다. 다시 조회해주세요.';return;}
+                        if(!input.value){info.textContent='예정일을 선택해주세요.';return;}
+                        if(input.value===r.nextDueDate){info.textContent='변경 사항이 없습니다.';return;}
+                        if(!confirm(g.patientName+' · 보호자 '+g.guardianName+'\n기록일 '+r.eventDate+'\n예정일 '+(r.nextDueDate||'없음')+' → '+input.value+'\n이 기록만 수정할까요?'))return;
+                        input.disabled=true;
+                        try{if(settingsSession()!==session)throw Error('SESSION_CHANGED');const out=await api('/preventive/correct-date',{patientId:g.patientId,guardianId:g.guardianId,eventId:r.eventId,version:r.version,nextDueDate:input.value,confirmed:true},{redirect:'error'});if(settingsSession()!==session)throw Error('SESSION_CHANGED');if(out?.ok!==true||out.eventId!==r.eventId||out.nextDueDate!==input.value)throw Error('RESULT_UNCONFIRMED');await load();}
+                        catch(e){info.textContent='저장 결과 확인 필요 · '+resultReason(workErrorCode(e))+' 목록을 새로 조회한 뒤 확인해주세요. 자동 재시도하지 않습니다.';line.dataset.unconfirmed='1';}
+                    });save.disabled=!r.canEdit;const original=save.onclick;save.onclick=async()=>{await original();if(line.dataset.unconfirmed==='1')save.disabled=true;};
+                    if(!r.canEdit)info.textContent='종류 또는 기록일이 불명확합니다. 원본 차트에서 확인해주세요.';
+                }
+            }
+            if(!d.groups.length)rows.append(el('p','확인할 충돌 일정이 없습니다.'));
+            if(page>0)button(rows,'이전 항목',async()=>{page--;await load();});if(d.hasMore)button(rows,'다음 항목',async()=>{page++;await load();});
+        }catch(e){rows.replaceChildren(el('p',e.message==='SESSION_CHANGED'?'로그인이 바뀌었습니다. 창을 다시 열어주세요.':'일정을 조회하지 못했습니다. 다시 조회해주세요.'));}};
+        button(body,'목록 새로고침',load);body.append(rows);await load();
+    }
+    function renderMaterialHistoryRows(parent,rows){
+        for(const x of rows.filter(x=>['material','pdf-material'].includes(x.kind))){const card=workCard(parent);card.append(el('strong',x.title||'제목 확인 필요'),el('p',(materialKindLabel(x.materialKind)||'보호자 자료')+' · '+deliveryLabel(x)),el('p','게시/접수 '+workTime(x.sent_at||x.created_at)),el('p','열기 요청 '+workTime(x.lastViewAt||x.viewed_at)+' · 다운로드 요청 '+workTime(x.lastDownloadAt)));
+            const more=el('details');more.append(el('summary','상세 정보'),el('p','송부 ID: '+(x.deliveryId||x.id)),el('p',resultReason(x.failure_code)));card.append(more);
+        }
+        if(!parent.children.length)parent.append(el('p','자료 송부 이력이 없습니다.'));
+    }
+    async function materialHistory(){
+        let base;try{base=materialScope('scope-check',1);}catch{alert('환자 작업공간에서 환자·보호자를 먼저 선택해주세요.');return;}const {d,body}=dialog('선택 환자 자료 송부 이력'),rows=el('section');
+        const guard=()=>{materialSame(base,materialScope('scope-check',1));};
+        body.append(el('p','최근 송부 기록 100건 중 자료 이력입니다. 자료별 게시 상태와 열기·다운로드 요청 기록입니다. 실제로 내용을 읽었거나 파일 저장을 마쳤다는 확인은 아닙니다.'));
+        button(body,'새 자료 보내기',async()=>{guard();d.close();await sendMaterial();});
+        const load=async()=>{rows.replaceChildren(el('p','자료 이력 확인 중…'));try{guard();const out=await api('/deliveries?patientId='+encodeURIComponent(base.patientId),undefined,{redirect:'error'});guard();if(out?.ok!==true||!Array.isArray(out.deliveries))throw Error('HISTORY_INVALID');rows.replaceChildren();renderMaterialHistoryRows(rows,out.deliveries);}catch{rows.replaceChildren(el('p','선택 환자 또는 로그인을 확인한 뒤 다시 조회해주세요.'));}};
+        button(body,'이력 새로고침',load);body.append(rows);await load();
+    }
+    async function integrationStatus(){
+        if(!workAdmin())return;
+        const session=settingsSession(),{body}=dialog('Google · eFriends 연동 상태'),rows=el('section');
+        const load=async()=>{if(settingsSession()!==session){rows.replaceChildren(el('p','로그인이 바뀌었습니다. 다시 열어주세요.'));return;}rows.replaceChildren(el('p','연동 상태 확인 중…'));const responses=await Promise.allSettled([saasRequest('/saas/google-calendar/status',{method:'GET',redirect:'error'}),api('/operations/integrations',undefined,{redirect:'error'}),saasRequest('/saas/r65/manual-sync',{method:'GET',redirect:'error'})]);
+            if(settingsSession()!==session){rows.replaceChildren(el('p','로그인이 바뀌었습니다. 다시 열어주세요.'));return;}rows.replaceChildren();
+            const google=responses[0].status==='fulfilled'?responses[0].value:null,g=workCard(rows);g.append(el('strong','Google Calendar'));
+            g.append(el('p',google?.ok===true?(google.connected===true?'계정 연결됨 · '+(google.calendarId?'캘린더 선택됨: '+(google.calendarName||'CARESTEP 후속관리'):'캘린더 선택 필요'):({reconnect_required:'재인증 필요',disconnected:'계정 연결 필요'})[google.status]||'연결 상태 확인 필요'):'연결 상태를 조회하지 못했습니다.'));
+            button(g,'캘린더 설정 위치 보기',()=>{const node=document.getElementById('googleCalendarStatus');if(node){node.scrollIntoView({block:'center'});body.closest('dialog')?.close();}else g.append(el('p','후속관리 설정의 캘린더 단계에서 연결·선택할 수 있습니다.'));});
+            const sync=responses[1].status==='fulfilled'?responses[1].value:null,manual=responses[2].status==='fulfilled'?responses[2].value:null,e=workCard(rows);e.append(el('strong','eFriends 동기화'));
+            if(sync?.ok===true){const h=sync.heartbeat,last=sync.lastSuccess,age=h?Date.now()-Date.parse(h.last_seen_at):Infinity,late=!Number.isFinite(age)||age>Math.max(35,(Number(h?.interval_minutes)||15)*2+5)*60000;e.append(el('p',!h?'서버 PC 연결 기록 없음':h.status==='failed'?'서버 PC 동기화 오류':late?'서버 PC 응답 지연 · 연결 확인 필요':h.status==='syncing'?'동기화 처리 중':'서버 PC 응답 확인'),el('p','마지막 응답 '+workTime(h?.last_seen_at)+' · 다음 예정 '+workTime(h?.next_expected_at)),el('p','최근 반영 완료 '+workTime(last?.finished_at)+(last?.status==='completed_with_errors'?' · 일부 오류 있음':'')),el('p',last?'최근 반영: 신규 '+Number(last.events_created||0)+'건 · 수정 '+Number(last.events_updated||0)+'건 · 오류 '+Number(last.errors||0)+'건':'반영 완료 기록 없음'));}else e.append(el('p','동기화 상태를 조회하지 못했습니다.'));
+            e.append(el('p',manual?.ok===true?(manual.enabled&&manual.agentVerified?'수동 최신 백업 반영 사용 가능 · 15분 자동 동기화 유지':'수동 반영 비활성 · 설치/승인 상태 확인 필요'):'수동 반영 상태 미확인'));
+            button(e,'수동 반영 위치 보기',async()=>{await window.R65ManualSync?.refresh(true);document.getElementById('r65-manual-controls')?.scrollIntoView({block:'center'});body.closest('dialog')?.close();});
+        };button(body,'연동 상태 새로고침',load);body.append(rows);await load();
+    }
+
     function mount() {
         if (document.getElementById('r61-controls'))
             return;
@@ -1802,8 +1886,13 @@
         bar.style.cssText = 'padding:12px;display:flex;gap:8px;flex-wrap:wrap';
         bar.setAttribute('aria-label', '후속 기능');
         button(bar, '보호자 자료 보내기', sendMaterial);
-        button(bar, '보호자 공개 자료 관리', approveMaterial);
-        button(bar, '후속 기능 설정', settings);
+        button(bar, '자료 송부 이력', materialHistory);
+        button(bar, '예방문자 발송 결과', preventiveResults);
+        button(bar, '예방 일정 확인·수정', preventiveReview);
+        button(bar, '연동 상태', integrationStatus);
+        const management=el('details');management.append(el('summary','관리·설정'));bar.append(management);
+        button(management, '보호자 공개 자료 관리', approveMaterial);
+        button(management, '후속 기능 설정', settings);
         button(bar, '예방관리 발송 예정 미리보기', preventivePreview);
         (document.querySelector('main') || document.body).append(bar);
         window.r61RenderTimeline = async (mount, patientId) => {
@@ -1817,10 +1906,9 @@
                 const d = await api('/deliveries?patientId=' + encodeURIComponent(patientId));
                 if (!panel.isConnected || mount.dataset.r61Patient !== rev)
                     return;
-                for (const x of d.deliveries)
-                    panel.append(el('p', [x.created_at, x.kind, x.channel, x.status, x.viewed_at ? '열람 확인' : '열람 미확인'].join(' · ')));
-                if (!d.deliveries.length)
-                    panel.append(el('p', '발송 이력이 없습니다.'));
+                const list=el('section');panel.append(list);renderMaterialHistoryRows(list,d.deliveries);
+                panel.append(el('p','열기·다운로드 요청 기록이며 실제 읽기 완료를 뜻하지 않습니다.'));
+                button(panel,'전체 자료 이력·새 자료 보내기',materialHistory);
             } catch {
                 if (panel.isConnected)
                     panel.append(el('p', '발송 이력을 확인하지 못했습니다.'));
@@ -1828,6 +1916,7 @@
         }
         ;
         window.r61OpenMaterials = sendMaterial;
+        window.r61OpenMaterialHistory = materialHistory;
         window.r61ApproveMaterial = approveMaterial;
         const observer = new MutationObserver( () => {
             for (const panel of document.querySelectorAll('.patient-workspace-head'))
