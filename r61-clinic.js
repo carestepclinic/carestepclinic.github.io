@@ -1670,7 +1670,7 @@
     function syncDraftSession(){const next=currentDraftSession();if(next!==draftSession){composerDrafts.clear();try{for(let i=sessionStorage.length-1;i>=0;i--){const k=sessionStorage.key(i);if(k?.startsWith(draftPrefix)){const v=JSON.parse(sessionStorage.getItem(k));if(!next||v.session!==next)sessionStorage.removeItem(k);}}}catch{}draftSession=next;}return next;}
     function draftKey(base,kind){return draftPrefix+JSON.stringify([base.clinicId,base.userId,base.sessionId,base.patientId,base.guardianId,kind]);}
     function saveComposerDraft(base,value,rich=null){const session=syncDraftSession();if(!session||session!==JSON.stringify([base.clinicId,base.userId,base.sessionId]))return;const kind=value.kind;if(!materialKinds.some(([k])=>k===kind))return;const key=draftKey(base,kind),context=window.crmMaterialContext?.()||{};
-        const row={session,base:{...base},kind,title:String(value.title||'').slice(0,120),text:String(value.text||'').slice(0,20000),patientName:context.patient?.name||'환자',guardianName:context.guardian?.name||'보호자',updatedAt:new Date().toISOString()};
+        const row={session,base:{...base},kind,sourceTemplateId:value.sourceTemplateId||'',sourceTemplateTitle:value.sourceTemplateTitle||'',title:String(value.title||'').slice(0,120),text:String(value.text||'').slice(0,20000),patientName:context.patient?.name||'환자',guardianName:context.guardian?.name||'보호자',updatedAt:new Date().toISOString()};
         composerDrafts.set(key,{...row,rich});let stored=false;try{sessionStorage.setItem(key,JSON.stringify(row));stored=true;}catch{}draftChanged();return {...row,stored};
     }
     function readComposerDraft(base,kind){const session=syncDraftSession(),key=draftKey(base,kind);let row=composerDrafts.get(key);if(!row){try{row=JSON.parse(sessionStorage.getItem(key)||'null');}catch{}}
@@ -1679,7 +1679,7 @@
     }
     function deleteComposerDraft(base,kind){const key=draftKey(base,kind);composerDrafts.delete(key);try{sessionStorage.removeItem(key);}catch{}draftChanged();}
     function allComposerDrafts(){const session=syncDraftSession(),rows=new Map();try{for(let i=0;i<sessionStorage.length;i++){const key=sessionStorage.key(i);if(!key?.startsWith(draftPrefix))continue;const row=JSON.parse(sessionStorage.getItem(key));if(row?.session===session&&(row.text?.trim()||row.title!==materialKindLabel(row.kind)))rows.set(key,row);}}catch{}for(const [key,row] of composerDrafts)if(row.session===session&&(row.text?.trim()||row.title!==materialKindLabel(row.kind)))rows.set(key,row);return [...rows.values()].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));}
-    function materialHelp(code){return ({HOME_GUARDIAN_NOT_LINKED:'보호자 Home 연결이 필요합니다.',PDF_ALREADY_POSTED:'이 자료는 이미 Home에 게시되어 있습니다. 기존 자료 이력을 확인해주세요.',PDF_PENDING_OTHER_ASSET:'앞서 저장한 PDF의 결과 확인이 필요합니다.',PDF_ASSET_UNAVAILABLE:'저장된 PDF를 확인하지 못했습니다. 자료 이력과 중단된 결과를 조회해주세요.',MATERIAL_SCOPE_CHANGED:'선택한 환자 또는 보호자가 바뀌었습니다. 현재 창을 닫고 다시 열어주세요.',PDF_PATIENT_CHANGED:'자료 생성 화면의 환자가 다릅니다. 선택 환자의 자료 생성 화면에서 내용을 확인해주세요.',PDF_FEATURE_OFF:'PDF 송부 기능이 꺼져 있습니다. 관리자 설정을 확인해주세요.',MATERIAL_LOGIN_REQUIRED:'로그인 후 환자를 선택해주세요.',PDF_MEDICATION_REQUIRED:'약 이름과 복약 정보를 입력한 뒤 미리보기를 눌러주세요.',PDF_MEDICATION_DURATION_REQUIRED:'각 약의 투약 기간을 확인해주세요.',MATERIAL_ORIGINAL_SOURCE_CHANGED:'등록 자료와 현재 입력 내용이 다릅니다. 새 자료 작성 또는 기존 자료 이력을 선택해주세요.'})[code]||'처리 결과를 확인하지 못했습니다. 결과 조회 후 이어서 진행해주세요.';}
+    function materialHelp(code){return ({HOME_GUARDIAN_NOT_LINKED:'보호자 Home 연결이 필요합니다.',PDF_ALREADY_POSTED:'이 자료는 이미 Home에 게시되어 있습니다. 기존 자료 이력을 확인해주세요.',PDF_PENDING_OTHER_ASSET:'앞서 저장한 PDF의 결과 확인이 필요합니다.',PDF_ASSET_UNAVAILABLE:'저장된 PDF를 확인하지 못했습니다. 자료 이력과 중단된 결과를 조회해주세요.',MATERIAL_TEMPLATE_REQUIRED:'이번 진료에 맞는 질환·시술 교육자료를 선택하거나 확인해주세요.',MATERIAL_SOURCE_CHANGED:'교육자료 또는 진단·처방 입력이 바뀌었습니다. 현재 내용을 확인하고 PDF 미리보기를 다시 만들어주세요.',MATERIAL_SCOPE_CHANGED:'선택한 환자 또는 보호자가 바뀌었습니다. 현재 창을 닫고 다시 열어주세요.',PDF_PATIENT_CHANGED:'자료 생성 화면의 환자가 다릅니다. 선택 환자의 자료 생성 화면에서 내용을 확인해주세요.',PDF_FEATURE_OFF:'PDF 송부 기능이 꺼져 있습니다. 관리자 설정을 확인해주세요.',MATERIAL_LOGIN_REQUIRED:'로그인 후 환자를 선택해주세요.',PDF_MEDICATION_REQUIRED:'약 이름과 복약 정보를 입력한 뒤 미리보기를 눌러주세요.',PDF_MEDICATION_DURATION_REQUIRED:'각 약의 투약 기간을 확인해주세요.',MATERIAL_ORIGINAL_SOURCE_CHANGED:'등록 자료와 현재 입력 내용이 다릅니다. 새 자료 작성 또는 기존 자료 이력을 선택해주세요.'})[code]||'처리 결과를 확인하지 못했습니다. 결과 조회 후 이어서 진행해주세요.';}
     async function showHomeConnection(){const c=selection();if(!materialId(c.patientId)||!materialId(c.guardianId))return choosePatient();await window.crmOpenPatientRecord?.(c.guardianId,c.patientId);const target=document.querySelector('[data-crm-home-invite]');target?.scrollIntoView({block:'center'});target?.focus();}
     function choosePatient(){if(typeof go==='function')go('patients');document.getElementById('patientCrmSearch')?.focus();}
     async function openWorkspaceComposer(kind){if(window.crmPrepareMaterialPatient&&!await window.crmPrepareMaterialPatient())return;return sendMaterial(kind);}
@@ -1752,6 +1752,20 @@
     }
 
 
+    // Bind cached pages and final publication to the actual education source and clinical inputs.
+    function materialSourceContext(){
+        if(typeof readCaseInfoFromForm==='function')readCaseInfoFromForm();
+        const rows=typeof templates==='undefined'?[]:templates,id=typeof currentTemplateId==='undefined'?'':currentTemplateId;
+        const template=rows.find(t=>t.id===id),data=typeof caseInfo==='undefined'?{}:caseInfo;
+        return {id:template?.id||'',title:template?.title||'',procedure:String(data.procedure||''),topic:JSON.stringify([template?.id||'',data.procedure||'']),
+            signature:JSON.stringify([template||null,data,typeof medications==='undefined'?[]:medications,typeof activePatientJourney==='undefined'?null:activePatientJourney,typeof activeJourneyStageSelection==='undefined'?[]:activeJourneyStageSelection])};
+    }
+    function materialTemplateMatches(query){
+        if(!query.trim())return [];
+        if(typeof templateSearchMatches==='function')return templateSearchMatches(query,{limit:12});
+        const q=query.trim().toLowerCase();return (typeof templates==='undefined'?[]:templates).filter(t=>String(t.title||'').toLowerCase().includes(q)).slice(0,12);
+    }
+
     let materialComposerOpen = false;
     async function sendMaterial(initialKind) {
         if (materialComposerOpen) return;
@@ -1762,8 +1776,8 @@
         const {body, d} = dialog('보호자 자료 만들기');d.className='r61-composer';d.style.border='1px solid #dfe7f3';d.style.boxShadow='0 24px 80px rgba(23,35,58,.18)';
         const info = el('p', '자료와 보호자 연결을 확인하고 있습니다.');
         info.setAttribute('role', 'status'); info.setAttribute('aria-live', 'polite'); body.append(info);
-        let blobURL = null, uiBusy = false;
-        const guard = () => { if (!d.isConnected) throw Error('MATERIAL_DIALOG_CLOSED'); materialSame(base, materialScope('scope-check', 1)); return base; };
+        let blobURL = null, uiBusy = false, previewSourceSignature=null;
+        const guard = () => { if (!d.isConnected) throw Error('MATERIAL_DIALOG_CLOSED'); materialSame(base, materialScope('scope-check', 1));if(previewSourceSignature&&previewSourceSignature!==materialSourceContext().signature)throw Error('MATERIAL_SOURCE_CHANGED'); return base; };
         d.addEventListener('close', () => { materialComposerOpen = false; if (blobURL) URL.revokeObjectURL(blobURL); });
         // Keep the current operation visible until its result has been recorded.
         d.addEventListener('cancel', e => { if (uiBusy) e.preventDefault(); });
@@ -1788,7 +1802,26 @@
         const newOption = el('option', admin() ? '새 자료 작성' : '기존 승인 자료를 선택해주세요'); newOption.value = ''; pick.append(newOption);
         for (const m of list.materials) { const o = el('option', m.title); o.value = m.id; pick.append(o); }
         for (const [value, label] of materialKinds) { const o = el('option', label); o.value=value; kind.append(o); }
-        field('자료', pick); field('자료 종류', kind); field('자료 목록에 표시할 제목', title); field('보호자에게 보여줄 내용', text);
+        field('작성 방식 · 기존 등록 자료', pick); field('자료 종류', kind); field('자료 목록에 표시할 제목', title);
+        const topicPanel=el('section'),topicCurrent=el('strong'),topicProcedure=el('p'),topicHint=el('p'),topicSearch=el('input'),topicResults=el('div');
+        topicPanel.className='r61-topic-panel';topicPanel.setAttribute('aria-label','질환·시술 교육자료 선택');topicSearch.type='search';topicSearch.placeholder='질환·시술 검색 · 예: 스케일링, 방광염';topicSearch.setAttribute('aria-label','질환·시술 교육자료 검색');topicResults.className='r61-topic-results';
+        topicPanel.append(topicCurrent,topicProcedure,topicHint,topicSearch,topicResults);writePanel.append(topicPanel);let confirmedTopic='';
+        const confirmTopic=button(topicPanel,'현재 교육자료 확인',()=>{guard();const source=materialSourceContext();if(!source.id)return;confirmedTopic=source.topic;controls();});
+        const topicReady=()=>{if(!materialDraftSources[kind.value])return true;const source=materialSourceContext();return !!source.id&&confirmedTopic===source.topic;};
+        const searchTopics=()=>{topicResults.replaceChildren();const q=topicSearch.value.trim();if(!q)return;const matches=materialTemplateMatches(q);if(!matches.length)topicResults.append(el('p','검색 결과가 없습니다. 다른 질환명이나 시술명으로 검색해주세요.'));for(const template of matches){const b=button(topicResults,template.title,async()=>{
+            guard();const state=flow.state();if(uiBusy||state.busy||state.pending||state.hasMaterial||existing)return;
+            const before=materialSourceContext();
+            if(template.id!==before.id){
+                if(!confirm('교육자료를 “'+template.title+'”로 변경할까요? 환자명·보호자명·관리 시작일과 입력한 진단/수술은 유지합니다. 이전 자료의 개별지시·복약·후속관리 설정은 초기화되므로 다시 확인해주세요.'))return;
+                guard();if(typeof switchCaseTemplate!=='function'||!switchCaseTemplate(template.id,{preserveIdentity:true,notify:false}))throw Error('MATERIAL_TEMPLATE_REQUIRED');
+                const procedureField=document.getElementById('caseProcedure');if(procedureField)procedureField.value=before.procedure;if(typeof caseInfo!=='undefined')caseInfo.procedure=before.procedure;
+                if(typeof readCaseInfoFromForm==='function')readCaseInfoFromForm();
+            }
+            revokePreview();flow.reset();richDraft=null;text.value='';confirmedTopic=materialSourceContext().topic;topicSearch.value='';topicResults.replaceChildren();persistDraft();info.textContent='교육자료를 선택했습니다. 개별지시·복약을 확인한 뒤 새 PDF를 미리보기해주세요.';controls();
+        });b.dataset.materialTopic=template.id;}};
+        topicSearch.oninput=searchTopics;
+
+        field('보호자에게 보여줄 내용', text);
         const formatInfo=el('p');writePanel.append(formatInfo);
         title.maxLength=120; text.maxLength=20000; text.rows=10;
         const draft = () => ({kind:kind.value,title:title.value,text:text.value});
@@ -1796,61 +1829,64 @@
         const recentDraft=allComposerDrafts().find(x=>x.base?.patientId===base.patientId&&x.base?.guardianId===base.guardianId);
         let existing = null, previewBlob = null, previewSignature = null, richDraft = null, draftKind=materialKinds.some(([k])=>k===initialKind)?initialKind:(recentDraft?.kind||'advanced');
         kind.value=draftKind;
-        const persistDraft=()=>{if(!existing&&title.value.trim()){const saved=saveComposerDraft(base,{kind:draftKind,title:title.value,text:text.value},richDraft);if(saved)draftStatus.textContent=saved.stored?'이 탭에 초안 저장됨 · '+workTime(saved.updatedAt):'현재 화면에 임시보관 중 · 브라우저 저장 공간을 확인해주세요.';}};
-        const restoreDraft=()=>{const saved=readComposerDraft(base,draftKind);title.value=saved?.title||materialKindLabel(draftKind);text.value=saved?.text||'';richDraft=saved?.rich||null;draftStatus.textContent=saved?'저장된 초안을 불러왔습니다.':'초안은 입력할 때 이 탭에 자동 저장됩니다.';};
+        const persistDraft=()=>{if(!existing&&title.value.trim()){const saved=saveComposerDraft(base,{kind:draftKind,title:title.value,text:text.value,sourceTemplateId:materialDraftSources[draftKind]?materialSourceContext().id:'',sourceTemplateTitle:materialDraftSources[draftKind]?materialSourceContext().title:''},richDraft);if(saved)draftStatus.textContent=saved.stored?'이 탭에 초안 저장됨 · '+workTime(saved.updatedAt):'현재 화면에 임시보관 중 · 브라우저 저장 공간을 확인해주세요.';}};
+        const restoreDraft=()=>{const saved=readComposerDraft(base,draftKind);title.value=saved?.title||materialKindLabel(draftKind);text.value=saved?.text||'';richDraft=saved?.rich||null;if(materialDraftSources[draftKind]&&(!saved?.sourceTemplateId||saved.sourceTemplateId!==materialSourceContext().id)){richDraft=null;text.value='';}draftStatus.textContent=saved?'저장된 초안을 불러왔습니다.':'초안은 입력할 때 이 탭에 자동 저장됩니다.';};
         d.addEventListener('close',()=>{if(!flow.state().sent)persistDraft();});
         const buttons = {}, extraButtons = [];
         const flow = materialDeliveryFlow({scope:guard,request:pdfRequest,storage:sessionStorage,canApprove:admin,
             onMaterial: m => { existing=m; if (![...pick.options].some(o=>o.value===m.id)) { const o=el('option',m.title);o.value=m.id;pick.append(o); } pick.value=m.id;kind.value=m.kind; title.value=m.title; text.value=m.text; },
             onProgress: message => { info.textContent=message; controls(); }
         });
-        const revokePreview = () => { if (blobURL) URL.revokeObjectURL(blobURL); blobURL=null; viewer.removeAttribute('src'); viewer.hidden=true; previewBlob=null; previewSignature=null; reviewed.checked=false;stage=1; };
+        const revokePreview = () => { if (blobURL) URL.revokeObjectURL(blobURL); blobURL=null; viewer.removeAttribute('src'); viewer.hidden=true; previewBlob=null; previewSignature=null;previewSourceSignature=null; reviewed.checked=false;stage=1; };
         const controls = () => {
             const s=flow.state(), locked=uiBusy||s.busy||s.pending||s.registrationPending;
+            const source=materialSourceContext();if(previewSourceSignature&&previewSourceSignature!==source.signature){revokePreview();richDraft=null;confirmedTopic='';info.textContent=materialHelp('MATERIAL_SOURCE_CHANGED');}
+            topicPanel.hidden=!materialDraftSources[kind.value];topicCurrent.textContent='현재 교육자료 · '+(source.title||'선택 필요');topicProcedure.textContent='입력한 진단/수술 · '+(source.procedure||'미입력');topicHint.textContent=topicReady()?'교육자료를 확인했습니다. 제목·본문·회복 일정은 이 교육자료를 기준으로 생성합니다.':'진단/수술을 입력해도 교육자료는 자동으로 바뀌지 않습니다. 이번 진료에 맞는 교육자료를 검색하거나 현재 자료를 확인해주세요.';topicSearch.disabled=locked||s.hasMaterial||!!existing;confirmTopic.disabled=locked||!source.id;confirmTopic.textContent=topicReady()?'교육자료 확인됨':'현재 교육자료 확인';for(const b of topicResults.children)b.disabled=locked||s.hasMaterial||!!existing;
             close.disabled=uiBusy;
             for (const b of extraButtons) b.disabled=uiBusy||s.busy;
             pick.disabled=locked||s.hasMaterial;
             kind.disabled=title.disabled=text.disabled=locked||s.hasMaterial||!!existing||!admin();
             text.readOnly=!!materialDraftSources[kind.value];
             formatInfo.textContent=text.readOnly?'원래 자료 서식으로 생성합니다. 본문 수정은 자료 생성 화면의 환자·처방·개별지시에서 해주세요. 목록 제목을 바꿔도 PDF 서식은 유지됩니다.':'제목과 본문을 직접 작성할 수 있습니다.';
-            buttons.draft.disabled=locked||s.hasMaterial||!!existing||!admin()||!materialDraftSources[kind.value];
-            buttons.preview.disabled=locked||s.sent||!!s.assetId||!title.value.trim()||(!materialDraftSources[kind.value]&&!text.value.trim())||(!admin()&&!existing);
+            buttons.draft.disabled=!topicReady()||locked||s.hasMaterial||!!existing||!admin()||!materialDraftSources[kind.value];
+            buttons.preview.disabled=!topicReady()||locked||s.sent||!!s.assetId||!title.value.trim()||(!materialDraftSources[kind.value]&&!text.value.trim())||(!admin()&&!existing);
             reviewed.disabled=locked||s.sent;
-            buttons.send.disabled=locked||s.sent||stage!==3||!reviewed.checked||(!s.assetId && (!previewBlob||previewSignature!==signature()));
+            buttons.send.disabled=(!s.assetId&&!topicReady())||locked||s.sent||stage!==3||!reviewed.checked||(!s.assetId && (!previewBlob||previewSignature!==signature()));
             buttons.send.textContent=s.sent?'Home 게시 완료':s.assetId?'저장된 PDF Home에 게시':'Home에 게시하기';
             buttons.recover.disabled=uiBusy||s.busy||!(s.registrationPending||s.hasRecovery);
-            if(s.assetId&&stage===1)stage=2;writePanel.hidden=s.sent||stage!==1;previewPanel.hidden=s.sent||stage!==2;publishPanel.hidden=s.sent||stage!==3;steps.forEach((n,i)=>n.setAttribute('aria-current',!s.sent&&i===stage-1?'step':'false'));nextStep.disabled=locked||!reviewed.checked||(!previewBlob&&!s.assetId);previousStep.disabled=locked||s.sent;editStep.disabled=locked||s.sent||s.hasMaterial||!!s.assetId;buttons.draft.hidden=!materialDraftSources[kind.value]||!!existing;publishSummary.textContent=patient.name+' · 보호자 '+home.guardian.name+' · '+title.value;draftStatus.hidden=s.sent;buttons.preview.className='btn btn-primary r61-primary';buttons.send.className='btn btn-primary r61-primary';
+            if(s.assetId&&stage===1)stage=2;writePanel.hidden=s.sent||stage!==1;previewPanel.hidden=s.sent||stage!==2;publishPanel.hidden=s.sent||stage!==3;steps.forEach((n,i)=>n.setAttribute('aria-current',!s.sent&&i===stage-1?'step':'false'));nextStep.disabled=locked||!reviewed.checked||(!previewBlob&&!s.assetId);previousStep.disabled=locked||s.sent;editStep.disabled=locked||s.sent||s.hasMaterial||!!s.assetId;buttons.draft.hidden=!materialDraftSources[kind.value]||!!existing;publishSummary.textContent=patient.name+' · 보호자 '+home.guardian.name+' · '+title.value+(s.assetId&&!previewSourceSignature?' · 저장된 PDF 원본 기준 · 현재 입력 변경은 반영되지 않습니다.':materialDraftSources[kind.value]?' · 교육자료: '+source.title+' · 진단/수술: '+(source.procedure||'미입력'):'');draftStatus.hidden=s.sent;buttons.preview.className='btn btn-primary r61-primary';buttons.send.className='btn btn-primary r61-primary';
         };
         const show = () => {
             const s=flow.state();
             if(s.sent){deleteComposerDraft(base,kind.value);info.textContent=title.value+' · Home 게시 완료 · 문자·푸시는 발송하지 않았습니다. · Delivery ID: '+s.deliveryId;afterSend.hidden=false;steps.forEach(n=>n.setAttribute('aria-current','false'));}
-            else if(s.status==='READY_UNSENT') info.textContent='저장된 PDF를 확인했습니다. 공개 내용을 확인한 뒤 보내기를 누르면 이어서 송부합니다.';
+            else if(s.status==='READY_UNSENT') info.textContent='저장된 PDF는 현재 교육자료·입력값을 바꿔도 변경되지 않습니다. 기존 PDF 조회에서 원본을 확인한 뒤 게시해주세요.';
             else if(s.hasMaterial) info.textContent='등록된 자료를 확인했습니다. PDF 미리보기 후 보내기를 누르면 이어서 처리합니다.';
         };
         const action = (key,label,fn,parent=writePanel) => {
             const b=el('button',label); b.type='button'; b.className='btn btn-secondary'; parent.append(b); buttons[key]=b;
-            b.onclick=async()=>{if(b.disabled||uiBusy)return;uiBusy=true;controls();try{guard();await fn();guard();}catch(e){
+            b.onclick=async()=>{if(b.disabled||uiBusy)return;uiBusy=true;try{if(key==='recover')revokePreview();guard();controls();await fn();guard();}catch(e){
                 const s=flow.state(), code=pdfErrorCode(e);
                 info.textContent=materialHelp(code)+' '+(s.pending||s.registrationPending?'중단된 결과 조회 버튼으로 확인해주세요. ':'')+'('+code+')';
                 if(s.pending||s.registrationPending||code==='PDF_PENDING_OTHER_ASSET')more.open=true;
             }finally{uiBusy=false;controls();}};
         };
         action('draft','선택 유형의 초안 불러오기',async()=>{
+            if(!topicReady())throw Error('MATERIAL_TEMPLATE_REQUIRED');
             if(text.value.trim()&&!confirm('현재 내용을 새 초안으로 바꿀까요?'))return;
             const doc=renderMaterialDraftPDF(kind.value,base.patientId);guard();
             if(!title.value.trim())title.value=materialKindLabel(kind.value);text.value=doc.innerText;revokePreview();
-            richDraft={kind:kind.value,text:text.value,node:doc.cloneNode(true)};persistDraft();
+            richDraft={kind:kind.value,text:text.value,sourceSignature:materialSourceContext().signature,node:doc.cloneNode(true)};persistDraft();
             info.textContent='원래 서식의 초안을 불러왔습니다. PDF 미리보기에서 내용을 확인해주세요.';
         });
         action('preview','PDF 미리보기',async()=>{
             revokePreview();
-            const m=draft();
+            const m=draft();if(!topicReady())throw Error('MATERIAL_TEMPLATE_REQUIRED');const sourceBefore=materialDraftSources[m.kind]?materialSourceContext().signature:null;
             if(typeof exportPdfElement!=='function'||!window.html2pdf)throw Error('PDF_GENERATOR_UNAVAILABLE');
             let doc, refreshed=false;
             if(materialDraftSources[m.kind]){
                 // Rich output must never fall back to the plain-text template.
                 // A display-title edit does not invalidate the original page markup.
-                if(richDraft?.kind===m.kind && richDraft.text===m.text){
+                if(richDraft?.kind===m.kind && richDraft.text===m.text && richDraft.sourceSignature===sourceBefore){
                     doc=document.getElementById('pdfDocument');
                     doc.replaceChildren(...[...richDraft.node.childNodes].map(n=>n.cloneNode(true)));
                     doc.classList.remove('hidden');doc.dataset.r61Patient=base.patientId;doc.dataset.r61MaterialKind=m.kind;
@@ -1863,18 +1899,18 @@
                         flow.reset();existing=null;pick.value='';refreshed=true;
                     }
                     text.value=generatedText;
-                    richDraft={kind:m.kind,text:generatedText,node:doc.cloneNode(true)};
+                    richDraft={kind:m.kind,text:generatedText,sourceSignature:materialSourceContext().signature,node:doc.cloneNode(true)};
                 }
             }else doc=renderApprovedMaterialPDF(m,base.patientId);
             const before=signature();
             const blob=await exportPdfElement('carestep-material.pdf',{save:false,silent:true});guard();
             if(before!==signature()||!(blob instanceof Blob)||blob.type!=='application/pdf'||!blob.size||blob.size>10485760||new TextDecoder().decode(await blob.slice(0,5).arrayBuffer())!=='%PDF-')throw Error('PDF_GENERATION_INVALID');
-            guard();persistDraft();previewBlob=blob;previewSignature=before;blobURL=URL.createObjectURL(blob);viewer.src=blobURL;viewer.hidden=false;stage=2;
+            guard();if(sourceBefore&&sourceBefore!==materialSourceContext().signature)throw Error('MATERIAL_SOURCE_CHANGED');previewSourceSignature=sourceBefore;persistDraft();previewBlob=blob;previewSignature=before;blobURL=URL.createObjectURL(blob);viewer.src=blobURL;viewer.hidden=false;stage=2;
             info.textContent=(refreshed?'현재 입력으로 새 자료를 준비했습니다. ':'')+'이 PDF가 보호자에게 전달됩니다. 아직 등록·저장·송부하지 않았습니다.';
         });
         viewer.title='보호자에게 보낼 PDF 미리보기';viewer.style.cssText='width:100%;height:360px;border:1px solid #ddd;margin-top:12px';viewer.hidden=true;previewPanel.append(viewer);
         const reviewLabel=el('label');reviewed.type='checkbox';reviewLabel.style.cssText='display:block;margin:16px 0';reviewLabel.append(reviewed,document.createTextNode(' 환자·보호자와 공개할 내용을 확인했습니다.'));previewPanel.append(reviewLabel);
-        reviewed.onchange=controls;const editStep=button(previewPanel,'내용 수정',()=>{stage=1;controls();title.focus?.();}),nextStep=button(previewPanel,'확인 후 게시 단계로',()=>{guard();if(!reviewed.checked||(!previewBlob&&!flow.state().assetId))return;stage=3;controls();previousStep.focus?.();});nextStep.className='btn btn-primary r61-primary';const previousStep=button(publishPanel,'미리보기로 돌아가기',()=>{stage=2;controls();reviewed.focus?.();});
+        reviewed.onchange=controls;const editStep=button(previewPanel,'내용 수정',()=>{revokePreview();controls();title.focus?.();}),nextStep=button(previewPanel,'확인 후 게시 단계로',()=>{try{guard();}catch(e){revokePreview();confirmedTopic='';info.textContent=materialHelp(pdfErrorCode(e));controls();return;}if(!reviewed.checked||(!previewBlob&&!flow.state().assetId))return;stage=3;controls();previousStep.focus?.();});nextStep.className='btn btn-primary r61-primary';const previousStep=button(publishPanel,'미리보기로 돌아가기',()=>{stage=2;controls();reviewed.focus?.();});
         action('send','Home에 게시하기',async()=>{
             if(!reviewed.checked)throw Error('MATERIAL_PUBLIC_REVIEW_REQUIRED');
             const s=flow.state();if(!s.assetId&&previewSignature!==signature())throw Error('MATERIAL_PUBLIC_REVIEW_REQUIRED');
@@ -1894,7 +1930,7 @@
         body.append(el('small','초안은 같은 로그인·같은 브라우저 탭에서 환자와 자료 종류별로 보존됩니다. 미리보기와 송부 전에는 내용을 다시 확인해주세요.'));
         info.textContent=home.guardian.homeStatus==='linked'?'자료 종류를 선택해 내용을 준비해주세요.':'보호자의 Home 연결이 필요합니다. 연결 후 이 화면에서 보낼 수 있습니다.';
         if(flow.state().registrationPending||flow.state().pending){more.open=true;info.textContent='이전에 중단된 요청이 있습니다. 결과 조회로 먼저 확인해주세요.';}
-        controls();
+        topicSearch.value=materialSourceContext().procedure;searchTopics();controls();
     }
 
     const workTime = value => {const d=new Date(value);return value&&Number.isFinite(d.getTime())?d.toLocaleString('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}):'기록 없음';};
