@@ -998,6 +998,7 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
 #r61-sync-slot #r65-manual-controls{margin:14px 0 0!important}
 .r61-composer{color:#17233a}.r61-composer>div>p{font-size:13px;line-height:1.6}.r61-composer>div>small{display:block;margin:12px 0;font-size:11px;line-height:1.6;color:#748197}.r61-composer::backdrop{background:rgba(23,35,58,.32)}.r61-composer h2{font-size:20px;letter-spacing:-.4px}
 .r61-composer [hidden]{display:none!important}
+.builder-home-send{background:#eef4ff}.builder-home-send small{font-size:11px;line-height:1.5;color:#748197}.r61-composer.r61-builder-send .r61-stepper{grid-template-columns:repeat(2,1fr)}.r61-output-queue{list-style:none;padding:0;display:grid;gap:6px;font-size:12px}.r61-output-queue li{padding:10px;border:1px solid #dfe7f3;border-radius:10px;background:#f7f9fd}.r61-output-queue [aria-current=step]{border-color:#9bb6ff;background:#eef4ff}.r61-output-context{padding:12px;border-radius:12px;background:#eef4ff;font-size:12px;line-height:1.6}
 .r61-composer .r61-stepper{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0;margin:16px 0;list-style:none}
 .r61-stepper li{padding:10px;border-radius:10px;background:#f4f6fb;color:#7b879a;font-size:11px;font-weight:850;text-align:center}
 .r61-stepper li[aria-current=step]{background:#1f5eff;color:#fff}
@@ -1459,7 +1460,8 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
               <div id="mobileDayControl" class="mobile-day-control hidden"><label class="field-label" for="mobileDaySelect">모바일 카드 시점</label><select id="mobileDaySelect" class="input"><option value="1">D+1</option><option value="3">D+3</option><option value="7">D+7</option><option value="14">D+14</option></select></div>
               <div class="info-box"><strong>병원정보 자동 반영</strong><span>병원명 · 로고 · 대표원장 · 대표전화 · 주소 · 홈페이지 · 라이선스 번호</span></div>
               <div class="output-actions"><button id="generateOutputBtn" class="btn btn-primary">선택한 1종 생성</button><button id="secondaryOutputBtn" class="btn btn-secondary">현재 미리보기 인쇄 / 저장</button></div>
-              <div class="builder-followup-handoff"><b>다음 단계 · 후속관리</b><span>출력물을 생성하면 자동으로 후속관리로 이동합니다. 필요하면 아래 버튼으로 바로 이동할 수도 있습니다. 현재 환자정보와 질환 선택은 그대로 전달됩니다.</span><button id="continueToFollowupBtn" class="btn btn-primary" type="button">현재 정보로 후속관리 계속 →</button></div>
+              <div class="builder-followup-handoff builder-home-send"><b>보호자 자료 전송</b><span>선택한 고급 보호자 자료·퇴원 요약·복약체크표를 PDF로 확인한 뒤 Home 자료함에 게시합니다. 다운로드 없이 바로 보낼 수 있습니다.</span><button id="sendBuilderMaterialsBtn" class="btn btn-primary" type="button">보호자 자료 전송</button><small>문자·푸시는 발송하지 않습니다. 다른 출력물은 위 다운로드 기능을 이용해주세요.</small></div>
+              <div class="builder-followup-handoff"><b>다음 단계 · 후속관리</b><span>출력·전송을 마친 뒤 아래 버튼으로 이동하세요. 현재 환자정보와 질환·복약 입력은 그대로 유지됩니다.</span><button id="continueToFollowupBtn" class="btn btn-primary" type="button">현재 정보로 후속관리 계속 →</button></div>
               <p id="outputHint" class="output-hint">여러 출력물은 개별 파일 또는 ZIP으로 받을 수 있습니다. 파란 테두리는 현재 미리보기 항목입니다.</p>
               <button class="btn btn-ghost btn-block" data-go="settings">병원정보 수정</button>
             </div>
@@ -9084,7 +9086,7 @@ async function handoffCurrentCaseToFollowup(autoApplyJourney=true){
   else toast('현재 환자정보를 후속관리로 전달했습니다. 연결된 Journey를 확인해주세요.');
   return true;
 }
-function scheduleBuilderFollowupHandoff(){currentCasePhase='generated';renderGlobalCaseBadge();setTimeout(()=>{handoffCurrentCaseToFollowup(true);},450);}
+function markBuilderOutputGenerated(){currentCasePhase='generated';renderGlobalCaseBadge();}
 
 function safeFileName(s){return String(s||'CARESTEP').replace(/[\\/:*?"<>|]/g,'_');}
 async function addRenderedPdfToZip(zip,filename,renderFn){
@@ -9134,8 +9136,8 @@ async function downloadDischargePackage(){
     const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${base}_퇴원_후속관리패키지_CARESTEP.zip`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
     setGeneratedCount(getGeneratedCount()+count);renderHospitalMeta();markRecentTemplate(currentTemplateId);const elapsed=stopWorkflowTimer();recordWorkflowTiming(elapsed);const pilotEventId=recordPilotUsage('package',{elapsedMs:elapsed,fileCount:count,outputs:Object.keys(selected).filter(k=>selected[k])});if(saasMe?.entitlements?.usage)saasMe.entitlements.usage.packages=(Number(saasMe.entitlements.usage.packages)||0)+1;renderSubscriptionAccess();showPilotFeedback(pilotEventId);
-    if($('completionPanel'))$('completionPanel').classList.add('show');if($('completionText'))$('completionText').textContent=`${count}개 파일 · ${formatElapsed(elapsed)} 만에 생성했습니다. 현재 환자·질환·퇴원정보를 그대로 후속관리로 넘깁니다.`;
-    toast(`퇴원·후속관리 패키지 ${count}종을 ${formatElapsed(elapsed)} 만에 생성했습니다. 후속관리로 이어갑니다.`);scheduleBuilderFollowupHandoff();
+    if($('completionPanel'))$('completionPanel').classList.add('show');if($('completionText'))$('completionText').textContent=`${count}개 파일 · ${formatElapsed(elapsed)} 만에 생성했습니다. 출력·전송 후 후속관리 버튼으로 계속할 수 있습니다.`;
+    toast(`퇴원·후속관리 패키지 ${count}종을 ${formatElapsed(elapsed)} 만에 생성했습니다. 출력 화면에서 보호자 전송을 계속할 수 있습니다.`);markBuilderOutputGenerated();
   }catch(e){console.error(e);toast('퇴원·후속관리 패키지 생성 중 오류가 발생했습니다.');}
   finally{currentOutput=original;renderCurrentOutput();if(btn){btn.disabled=false;btn.textContent='퇴원·후속관리 패키지 ZIP 생성';}}
 }
@@ -9789,7 +9791,7 @@ async function generateIndividualSelectedOutputs(selected){
     }
     renderPreparedIndividualArtifacts();
     setGeneratedCount(getGeneratedCount()+count);renderHospitalMeta();markRecentTemplate(currentTemplateId);recordPilotUsage('individual_batch',{fileCount:count,outputs:selected});
-    toast(`${count}개 ${format==='png'?'이미지/텍스트':'PDF/텍스트'} 파일을 준비했습니다. 아래에서 다운로드하세요.`);return true;
+    markBuilderOutputGenerated();toast(`${count}개 ${format==='png'?'이미지/텍스트':'PDF/텍스트'} 파일을 준비했습니다. 아래에서 다운로드하세요.`);return true;
   }catch(e){console.error(e);clearPreparedIndividualArtifacts();toast('개별 파일 생성 중 오류가 발생했습니다.');return false;}
   finally{currentOutput=original;renderCurrentOutput();if(btn){btn.disabled=false;btn.textContent=old||'선택 출력물 생성';}updateSelectedOutputUi();}
 }
@@ -9803,7 +9805,7 @@ async function generateSelectedOutputs(){
   if(medSelected.length&&!validMedications().length){toast('복약 일정표/복약 체크표를 선택했습니다. 약 이름을 하나 이상 입력하거나 해당 항목을 선택 해제해주세요.');return;}
   if(selected.includes('medcheck')&&!medicationCheckMeta().valid){toast('복약 체크표를 만들려면 모든 약의 투약 기간(일수)을 입력해주세요.');return;}
   const batchMode=selectedBatchDownloadMode(),needsMode=batchModeNeeded(selected);
-  if(selected.length===1&&!needsMode){const ok=await generateSingleSelectedOutput(selected[0]);if(ok)scheduleBuilderFollowupHandoff();return;}
+  if(selected.length===1&&!needsMode){const ok=await generateSingleSelectedOutput(selected[0]);if(ok)markBuilderOutputGenerated();return;}
   if(selected.length>1&&!saasAdvancedExportAllowed())return;
   if(needsMode&&batchMode==='individual'){await generateIndividualSelectedOutputs(selected);return;}
   if(typeof JSZip==='undefined'){toast('ZIP 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');return;}
@@ -9836,7 +9838,7 @@ async function generateSelectedOutputs(){
     zip.file('00_README.txt' ,`CARESTEP 선택 출력물\n병원: ${hospitalName()}\n자료: ${t.title}\n퇴원/관리 시작일: ${caseInfo.dischargeDate||'-'}\n선택 항목: ${selected.map(outputLabel).join(', ')}\n생성 파일: ${count}개\n\nCRM에 등록한 보호자·환자 기본정보 외에 이번 복약·퇴원지시는 서버에 추가 저장되지 않습니다.`);
     const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${base}_선택출력물_${selected.length}종_CARESTEP.zip`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
-    setGeneratedCount(getGeneratedCount()+count);renderHospitalMeta();markRecentTemplate(currentTemplateId);recordPilotUsage('individual_batch',{fileCount:count,outputs:selected});toast(`선택한 ${selected.length}종에서 ${count}개 파일을 생성했습니다. 후속관리로 이어갑니다.`);scheduleBuilderFollowupHandoff();
+    setGeneratedCount(getGeneratedCount()+count);renderHospitalMeta();markRecentTemplate(currentTemplateId);recordPilotUsage('individual_batch',{fileCount:count,outputs:selected});toast(`선택한 ${selected.length}종에서 ${count}개 파일을 생성했습니다. 출력 화면에서 보호자 전송을 계속할 수 있습니다.`);markBuilderOutputGenerated();
   }catch(e){console.error(e);toast('선택 출력물 생성 중 오류가 발생했습니다.');}
   finally{currentOutput=original;renderCurrentOutput();if(btn){btn.disabled=false;btn.textContent=old||'선택 출력물 생성';}updateSelectedOutputUi();}
 }
