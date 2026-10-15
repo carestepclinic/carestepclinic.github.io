@@ -29,8 +29,9 @@
   function r113ClearPDF(){for(const url of r113PDFURLs)URL.revokeObjectURL(url);r113PDFURLs.clear();for(const frame of document.querySelectorAll('[data-r113-pdf]'))frame.remove();}
   function r113PDFTitle(m){return typeof m.title==='string'&&m.title.trim()?m.title:(m.filename||'보호자 안내자료');}
   function r113PDFFilename(m){
-    const stem=String(r113PDFTitle(m)).replace(/[\x00-\x1f\x7f-\x9f<>:"/\\|?*\u202a-\u202e\u2066-\u2069]/g,'_').trim().replace(/[ .]+$/g,'').replace(/\.pdf$/i,'').slice(0,120);
-    return (stem&&!/^\.+$/.test(stem)?stem:'carestep-material')+'.pdf';
+    const stem=String(r113PDFTitle(m)).replace(/[\x00-\x1f\x7f-\x9f<>:"/\\|?*\u202a-\u202e\u2066-\u2069]/g,'_').trim().replace(/[ .]+$/g,'').replace(/\.pdf$/i,'');
+    const date=stem.match(/ \d{4}-\d{2}-\d{2}$/)?.[0]||'';
+    return (stem&&!/^\.+$/.test(stem)?(date?stem.slice(0,-11).slice(0,109)+date:stem.slice(0,120)):'carestep-material')+'.pdf';
   }
   async function r113PDFMaterials(mount){
     try{const d=await api('/home/r113/materials',{method:'GET',redirect:'error'});if(d.ok!==true||!Array.isArray(d.materials))throw Error('PDF_LIST_INVALID');
