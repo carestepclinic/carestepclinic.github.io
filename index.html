@@ -1011,6 +1011,30 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
 @media(max-width:700px){.r61-stepper li{padding:8px 4px;font-size:10px}.r61-composer-panel{padding:10px}.work-first-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 
 </style>
+<style id="carestep-workspace-consistency">
+/* Shared Clinic work surfaces follow the original blue-and-white home. */
+.r61-dialog{box-sizing:border-box;width:min(760px,calc(100vw - 32px));max-height:calc(100dvh - 48px);padding:24px;border:1px solid #dfe7f3;border-radius:20px;background:#fff;color:#17233a;box-shadow:0 24px 80px rgba(23,35,58,.18);overflow:hidden;font:inherit;font-size:14px;line-height:1.6}
+.r61-dialog[open]{display:flex;flex-direction:column;gap:16px}.r61-dialog::backdrop{background:rgba(23,35,58,.32)}
+.r61-dialog>h2{flex:none;margin:0;padding:0 76px 0 0;font-size:20px;line-height:1.4;letter-spacing:-.4px}
+.r61-dialog-body{min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 4px 4px 0;scrollbar-gutter:stable}
+.r61-dialog>.r61-dialog-close.btn{position:absolute;right:20px;top:18px;margin:0}
+.r61-dialog .btn{min-height:40px;border-radius:11px;padding:9px 13px;font-size:13px;line-height:1.4;white-space:normal;margin:6px 6px 0 0}
+.r61-dialog .btn-secondary{border:1px solid #dfe7f3;background:#fff;color:#27364c}.r61-dialog .btn-primary{border:1px solid #1f5eff;background:#1f5eff;color:#fff}
+.r61-dialog .btn-danger{border:1px solid #efc9c2;background:#fff5f4;color:#a93128}.r61-dialog .btn:disabled{opacity:.5;cursor:not-allowed}
+.r61-dialog input:not([type=checkbox]):not([type=radio]),.r61-dialog select,.r61-dialog textarea{max-width:100%;box-sizing:border-box;min-height:40px;padding:9px 11px;font:inherit;font-size:13px;border:1px solid #dfe7f3;border-radius:10px;color:#17233a;background:#fff}
+.r61-dialog p{font-size:13px;line-height:1.65;overflow-wrap:anywhere}.r61-dialog .r61-work-card{font-size:13px;background:#f8faff}.r61-dialog .r61-work-card>strong{font-size:14px}
+.r61-dialog summary{cursor:pointer;min-height:32px;padding:6px 0;color:#52637b;font-weight:700}.r61-dialog :focus-visible,#builder .builder-case-context :focus-visible,#builder .builder-edit-return :focus-visible{outline:3px solid #9bb8ff;outline-offset:3px}
+.r61-dialog .r61-queue-summary{font-size:16px;font-weight:800;color:#244a91;margin:16px 0 8px}.r61-output-queue li[data-state=done]{border-color:#bde3cf;background:#effaf4;color:#216a4b}.r61-output-queue li[data-state=pending]{border-color:#edd49c;background:#fff8e9;color:#8a5d12}.r61-output-queue li[data-state=current]{border-color:#b9ceff;background:#f0f5ff}
+.r61-edit-actions{margin:12px 0;padding:10px 12px;border:1px solid #dfe7f3;border-radius:12px;background:#fff}.r61-edit-actions summary{font-size:13px}.r61-after-send{padding-top:12px;border-top:1px solid #e8edf5}
+.builder-case-context{position:sticky;top:0;z-index:8;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 14px;margin:14px 0;padding:14px;border:1px solid #cfddf6;border-radius:14px;background:#f5f8ff;box-shadow:0 5px 16px rgba(31,94,255,.04)}
+.builder-case-context>div{min-width:0}.builder-case-context span{display:block;font-size:11px;color:#64748b}.builder-case-context strong{display:block;margin-top:3px;font-size:13px;line-height:1.5;overflow-wrap:anywhere;color:#17233a}.builder-case-context .builder-context-topic{grid-column:1/-1;grid-row:2}.builder-case-context .btn{grid-column:2;grid-row:1;align-self:center;margin:0!important;font-size:12px!important;min-height:40px}
+body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
+.builder-edit-return{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;margin:12px 0;border:1px solid #dfe7f3;border-radius:12px;background:#fff;font-size:12px;color:#52637b}.builder-edit-return[hidden]{display:none}.builder-edit-return .btn{flex:none}
+#builder .builder-delivery-options{border:1px solid #d4e0f6;border-radius:16px;overflow:hidden;margin:14px 0;background:#fff}#builder .builder-delivery-options .builder-home-send{margin:0;padding:16px;border:0;border-radius:0;background:#f1f6ff}#builder .builder-home-send b{font-size:14px}#builder .builder-home-send span{font-size:12px;line-height:1.6}#builder .builder-home-send .btn{min-height:44px;font-size:14px!important}
+.builder-save-options{padding:14px 16px;border-top:1px solid #dfe7f3}.builder-save-options>b{font-size:13px;color:#344760}.builder-save-options small{display:block;font-size:11px;color:#64748b;line-height:1.6}#builder .builder-save-options .output-actions{margin:10px 0}.builder-save-options .btn{min-height:40px;font-size:12px!important}#builder .builder-next-work{margin-top:20px;border-color:#e1e7f0;background:#f8faff}.builder-next-work .btn{background:#fff;color:#31496b;border:1px solid #d8e2f0}
+@media(max-width:700px){.r61-dialog{width:calc(100vw - 16px);max-height:calc(100dvh - 20px);padding:18px 14px;border-radius:16px}.r61-dialog>h2{font-size:18px;padding-right:72px}.r61-dialog>.r61-dialog-close.btn{top:12px;right:12px}.r61-dialog .btn{min-height:44px;font-size:13px}.r61-dialog input:not([type=checkbox]):not([type=radio]),.r61-dialog select,.r61-dialog textarea{font-size:16px;min-height:44px}.r61-dialog .r61-stepper li{font-size:12px}.builder-case-context{top:8px;padding:12px}.builder-edit-return{align-items:stretch;flex-direction:column}.builder-edit-return .btn{min-height:44px}.builder-save-options .output-actions{grid-template-columns:1fr}}
+@media print{.builder-case-context,.builder-edit-return{display:none!important}}
+</style>
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -1335,6 +1359,13 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
               <h3>2분 퇴원자료 만들기</h3>
               <p class="muted">환자 → 개별지시 → 복약 → 재진 → 출력의 5단계만 따라가세요.</p>
             </div>
+            <section class="builder-case-context" aria-label="현재 작성 중인 자료">
+              <div><span>환자</span><strong id="builderContextPatient">환자명 미입력</strong></div>
+              <div class="builder-context-topic"><span>선택 교육자료</span><strong id="builderContextEducation">선택 필요</strong></div>
+              <div><span>입력한 진단·수술</span><strong id="builderContextProcedure">미입력</strong></div>
+              <button id="builderChangeEducation" class="btn btn-secondary" type="button">교육자료 변경</button>
+            </section>
+            <div id="builderEditReturn" class="builder-edit-return" hidden><span>수정 후 출력으로 돌아가 PDF를 다시 확인해주세요.</span><button id="builderReturnToOutput" class="btn btn-secondary" type="button">수정 후 출력으로</button></div>
             <div class="wizard-steps" id="wizardSteps">
               <button class="wizard-step active" type="button" data-wizard-step="1"><b>1</b><span>환자</span></button>
               <button class="wizard-step" type="button" data-wizard-step="2"><b>2</b><span>퇴원지시</span></button>
@@ -1416,7 +1447,7 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
             </div>
 
             <div class="wizard-pane output-section-compact" data-wizard-pane="5">
-              <div class="wizard-pane-title"><div><h4>⑤ 확인하고 출력 → 후속관리</h4><p>출력 완료 후 현재 환자·질환·퇴원일·개별지시를 그대로 후속관리로 넘깁니다.</p></div></div>
+              <div class="wizard-pane-title"><div><h4>⑤ 자료 확인·게시·저장</h4><p>자료를 확인한 뒤 Home에 게시하거나 파일로 저장하세요. 후속관리는 아래 버튼으로 이어갈 수 있습니다.</p></div></div>
               <div id="readinessPanel" class="readiness-panel"></div>
               <label class="field-label">출력물 선택 · 미리보기 · 다운로드</label>
               <div id="outputChooser" class="output-chooser">
@@ -1436,7 +1467,7 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
               </div>
               <div id="selectedOutputSummary" class="output-selection-summary"><b>1개 선택</b> · 체크박스로 여러 출력물을 선택하고, 미리보기 버튼으로 화면을 전환하세요.</div>
               <div id="outputFormatMode" class="output-format-mode" aria-label="출력 파일 형식">
-                <div class="output-format-head"><b>출력 파일 형식</b><span>보호자 전송은 이미지가 더 편리합니다.</span></div>
+                <div class="output-format-head"><b>저장할 파일 형식</b><span>파일 저장에 적용됩니다. Home에는 PDF로 게시합니다.</span></div>
                 <div class="output-format-options">
                   <label><input type="radio" name="outputFileFormat" value="png" checked><span><b>이미지 (PNG)</b><small>보호자 카톡·문자 전송 권장 · 여러 페이지는 페이지별 PNG</small></span></label>
                   <label><input type="radio" name="outputFileFormat" value="pdf"><span><b>PDF</b><small>인쇄·문서 보관 권장 · 여러 페이지는 PDF 1개</small></span></label>
@@ -1459,9 +1490,11 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
               </div>
               <div id="mobileDayControl" class="mobile-day-control hidden"><label class="field-label" for="mobileDaySelect">모바일 카드 시점</label><select id="mobileDaySelect" class="input"><option value="1">D+1</option><option value="3">D+3</option><option value="7">D+7</option><option value="14">D+14</option></select></div>
               <div class="info-box"><strong>병원정보 자동 반영</strong><span>병원명 · 로고 · 대표원장 · 대표전화 · 주소 · 홈페이지 · 라이선스 번호</span></div>
-              <div class="output-actions"><button id="generateOutputBtn" class="btn btn-primary">선택한 1종 생성</button><button id="secondaryOutputBtn" class="btn btn-secondary">현재 미리보기 인쇄 / 저장</button></div>
-              <div class="builder-followup-handoff builder-home-send"><b>보호자 자료 전송</b><span>선택한 고급 보호자 자료·퇴원 요약·복약체크표를 PDF로 확인한 뒤 Home 자료함에 게시합니다. 다운로드 없이 바로 보낼 수 있습니다.</span><button id="sendBuilderMaterialsBtn" class="btn btn-primary" type="button">보호자 자료 전송</button><small>문자·푸시는 발송하지 않습니다. 다른 출력물은 위 다운로드 기능을 이용해주세요.</small></div>
-              <div class="builder-followup-handoff"><b>다음 단계 · 후속관리</b><span>출력·전송을 마친 뒤 아래 버튼으로 이동하세요. 현재 환자정보와 질환·복약 입력은 그대로 유지됩니다.</span><button id="continueToFollowupBtn" class="btn btn-primary" type="button">현재 정보로 후속관리 계속 →</button></div>
+              <section class="builder-delivery-options" aria-label="자료 게시와 저장">
+                <div class="builder-followup-handoff builder-home-send"><b>보호자에게 전달하기</b><span>선택한 고급 보호자 자료·퇴원 요약·복약 체크표를 PDF로 확인한 뒤 Home 자료함에 게시합니다.</span><button id="sendBuilderMaterialsBtn" class="btn btn-primary" type="button">보호자 Home에 게시</button><small>문자·푸시는 발송하지 않습니다.</small></div>
+                <div class="builder-save-options"><b>파일로 저장하거나 인쇄하기</b><div class="output-actions"><button id="generateOutputBtn" class="btn btn-secondary">선택한 자료 생성 · 다운로드</button><button id="secondaryOutputBtn" class="btn btn-secondary">인쇄 / PDF 저장</button></div><small>선택한 출력 형식에 따라 PDF·이미지·문구를 저장합니다.</small></div>
+              </section>
+              <div class="builder-followup-handoff builder-next-work"><b>다음 업무 · 후속관리</b><span>출력·게시를 마친 뒤 이동하세요. 현재 환자정보와 질환·복약 입력을 이어서 사용합니다.</span><button id="continueToFollowupBtn" class="btn btn-secondary" type="button">현재 정보로 후속관리 계속 →</button></div>
               <p id="outputHint" class="output-hint">여러 출력물은 개별 파일 또는 ZIP으로 받을 수 있습니다. 파란 테두리는 현재 미리보기 항목입니다.</p>
               <button class="btn btn-ghost btn-block" data-go="settings">병원정보 수정</button>
             </div>
@@ -4728,6 +4761,7 @@ function readCaseInfoFromForm(){
   caseInfo.recheckMode = $('recheckMode')?.value || '';
   caseInfo.recheckManual = $('recheckManual')?.value || '';
   readMedicationRowsFromForm();
+  renderBuilderContext();
 }
 
 function blankMedication(){ return {name:'',dose:'',frequency:'',times:'',meal:'식사와 무관',duration:'',note:''}; }
@@ -8258,6 +8292,20 @@ function renderCurrentOutput(){
 function renderBuilder(){ updateCaseDatePreview(); updateRecheckPreview(); updateClinicPresetStatus(); renderCurrentOutput(); updateReadiness(); renderGlobalCaseBadge(); }
 
 
+var builderEditReturnKey=null;
+function builderEditPatientKey(){const p=window.crmCurrentPatient?.();return JSON.stringify([p?.patientId||'',p?.guardianId||'',typeof saasSessionMeta==='undefined'?'':saasSessionMeta?.id||'']);}
+function renderBuilderContext(){
+  const topic=templates.find(t=>t.id===currentTemplateId);
+  for(const [id,value] of [['builderContextPatient',caseInfo.patientName||'환자명 미입력'],['builderContextEducation',topic?.title||'선택 필요'],['builderContextProcedure',caseInfo.procedure||'미입력']]){const n=$(id);if(n&&n.textContent!==value)n.textContent=value;}
+  if(builderEditReturnKey&&builderEditReturnKey!==builderEditPatientKey())builderEditReturnKey=null;
+  const banner=$('builderEditReturn');if(banner)banner.hidden=!builderEditReturnKey||currentWizardStep===5;
+}
+function beginBuilderEdit(target){
+  const routes={patient:[1,'patientName'],education:[1,'templateSearch'],instructions:[2,'caseProcedure'],medication:[3,'medicationRows'],recheck:[4,'recheckMode']},route=routes[target];if(!route)return;
+  readCaseInfoFromForm();builderEditReturnKey=builderEditPatientKey();go('builder');setWizardStep(route[0]);renderBuilderContext();
+  const field=$(route[1]);if(field){const input=target==='medication'?field.querySelector('input'):field;input?.focus({preventScroll:true});field.scrollIntoView({block:'center',behavior:'smooth'});}
+}
+function returnToBuilderOutput(){readCaseInfoFromForm();builderEditReturnKey=null;setWizardStep(5);}
 function wizardStepName(step){return ({1:'환자',2:'퇴원지시',3:'복약',4:'재진',5:'출력'})[step]||'';}
 function setWizardStep(step){
   currentWizardStep=Math.max(1,Math.min(5,Number(step)||1));
@@ -8267,7 +8315,8 @@ function setWizardStep(step){
   if($('wizardStepLabel')) $('wizardStepLabel').textContent=`${currentWizardStep} / 5 · ${wizardStepName(currentWizardStep)}`;
   if($('wizardPrev')) $('wizardPrev').disabled=currentWizardStep===1;
   if($('wizardNext')) { const nextLabels={1:'다음: 퇴원지시 →',2:'다음: 복약 입력 →',3:'다음: 재진 일정 →',4:'다음: 출력 확인 →'}; $('wizardNext').textContent=nextLabels[currentWizardStep]||'다음 →'; $('wizardNext').disabled=currentWizardStep===5; $('wizardNext').style.visibility=currentWizardStep===5?'hidden':'visible'; }
-  if(currentWizardStep===5){readCaseInfoFromForm();updateReadiness();renderCurrentOutput();}
+  if(currentWizardStep===5){builderEditReturnKey=null;readCaseInfoFromForm();updateReadiness();renderCurrentOutput();}
+  renderBuilderContext();
   const controls=document.querySelector('.builder-controls'); if(controls) controls.scrollTo({top:0,behavior:'smooth'});
 }
 function careTextMatches(t,keywords){
@@ -9262,6 +9311,8 @@ document.querySelectorAll('[data-preview-output]').forEach(btn=>btn.addEventList
 document.querySelectorAll('[data-wizard-step]').forEach(btn=>btn.addEventListener('click',()=>setWizardStep(Number(btn.dataset.wizardStep))));
 $('wizardPrev')?.addEventListener('click',()=>setWizardStep(currentWizardStep-1));
 $('wizardNext')?.addEventListener('click',()=>setWizardStep(currentWizardStep+1));
+$('builderChangeEducation')?.addEventListener('click',()=>beginBuilderEdit('education'));
+$('builderReturnToOutput')?.addEventListener('click',returnToBuilderOutput);
 $('applyTemplateDraft')?.addEventListener('click',applyTemplateDraft);
 $('applyClinicPreset')?.addEventListener('click',applyClinicPreset);
 $('saveClinicPreset')?.addEventListener('click',saveClinicPreset);

@@ -24,7 +24,7 @@
     if(!mount.isConnected)(document.getElementById('dashboardView')||document.body).append(mount);
     r113ClearPDF();mount.replaceChildren();const h=document.createElement('h2');h.textContent='병원에서 보낸 안내자료';mount.append(h);
     const controls=document.createElement('div'),search=document.createElement('input'),kind=document.createElement('select'),order=document.createElement('select'),list=document.createElement('section'),empty=document.createElement('p');
-    controls.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin:12px 0';search.type='search';search.placeholder='자료 제목·환자명 검색';search.setAttribute('aria-label','자료 제목·환자명 검색');
+    controls.className='home-material-controls';list.className='home-material-list';empty.className='home-material-empty';empty.setAttribute('role','status');search.type='search';search.placeholder='질환·자료 제목·환자명 검색';search.setAttribute('aria-label','질환·자료 제목·환자명 검색');
     kind.setAttribute('aria-label','자료 종류');order.setAttribute('aria-label','게시일 정렬');
     for(const [value,label] of [['all','모든 자료'],...Object.entries(homeMaterialKinds)]){const o=document.createElement('option');o.value=value;o.textContent=label;kind.append(o);}
     for(const [value,label] of [['newest','최근 게시순'],['oldest','오래된 게시순']]){const o=document.createElement('option');o.value=value;o.textContent=label;order.append(o);}
@@ -34,7 +34,7 @@
     search.oninput=kind.onchange=order.onchange=filter;
     const refresh=document.createElement('button');refresh.textContent='자료함 새로고침';refresh.onclick=()=>r61Materials();controls.append(refresh);
     try{const d=await api('/home/r61/materials',{method:'GET',redirect:'error'});if(!current())return;
-      for(const m of d.materials||[]){const card=document.createElement('article'),b=document.createElement('button');b.textContent=m.title;b.onclick=async()=>{if(!current())return;const p=document.createElement('pre');p.style.whiteSpace='pre-wrap';p.textContent=m.text;card.append(p);b.disabled=true;try{await api('/home/r61/materials',{method:'POST',redirect:'error',body:JSON.stringify({grantId:m.id})});}catch{const n=document.createElement('p');n.textContent='열람 기록을 저장하지 못했습니다.';card.append(n);}};card.append(b);homeMaterialMeta(card,m);list.append(card);}
+      for(const m of d.materials||[]){const card=document.createElement('article'),b=document.createElement('button'),actions=document.createElement('div');card.append(homeMaterialHeader(m));homeMaterialMeta(card,m);actions.className='home-material-actions';b.textContent='자료 보기';b.onclick=async()=>{if(!current())return;const p=document.createElement('pre');p.className='home-material-text';p.style.whiteSpace='pre-wrap';p.textContent=m.text;card.append(p);b.disabled=true;try{await api('/home/r61/materials',{method:'POST',redirect:'error',body:JSON.stringify({grantId:m.id})});}catch{const n=document.createElement('p');n.textContent='열람 기록을 저장하지 못했습니다.';card.append(n);}};actions.append(b);card.append(actions);list.append(card);}
     }catch{if(current()){const p=document.createElement('p');p.textContent='텍스트 자료를 불러오지 못했습니다. 자료함 새로고침으로 확인해주세요.';list.append(p);}}
     if(!current())return;await r113PDFMaterials(list);if(current())filter();
   }
@@ -48,15 +48,25 @@
     return (stem&&!/^\.+$/.test(stem)?(date?stem.slice(0,-11).slice(0,109)+date:stem.slice(0,120)):'carestep-material')+'.pdf';
   }
   const homeMaterialKinds={advanced:'고급 보호자 자료',medication:'복약 체크표',discharge:'퇴원 안내',disease:'질환 안내',postoperative:'수술 후 관리',results:'검사 결과 설명',guardian:'기타 안내자료'};
+  function homeMaterialTitleParts(m){
+    const original=r113PDFTitle(m),kind=homeMaterialKinds[m.kind]||'안내자료',prefix=kind+' · ';
+    // Only split the exact Clinic-generated convention; historical titles stay intact.
+    const topic=original.startsWith(prefix)&&/_\d{4}-\d{2}-\d{2}$/.test(original)?original.slice(prefix.length,-11).trim():'';
+    return {original,kind,title:topic||original};
+  }
+  function homeMaterialHeader(m){
+    const parts=homeMaterialTitleParts(m),head=document.createElement('header'),label=document.createElement('span'),title=document.createElement('h3');
+    head.className='home-material-header';label.className='home-material-kind';label.textContent=parts.kind;title.textContent=parts.title;title.title=parts.original;head.append(label,title);return head;
+  }
   function homeMaterialMeta(card,m){
     const context=typeof patientContext==='function'?patientContext(m.patientId):null,name=context?.patient?.name||'';
     card.dataset.materialCard='1';card.dataset.kind=m.kind||'guardian';card.dataset.sentAt=m.sentAt||'';card.dataset.search=(r113PDFTitle(m)+' '+name).toLocaleLowerCase('ko-KR');
-    const meta=document.createElement('p'),d=new Date(m.sentAt);meta.textContent=[name,homeMaterialKinds[m.kind]||'안내자료',m.sentAt&&Number.isFinite(d.getTime())?'게시 '+d.toLocaleString('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}):'게시일 미기록'].filter(Boolean).join(' · ');card.append(meta);
+    card.className='home-material-card';const meta=document.createElement('p'),d=new Date(m.sentAt);meta.className='home-material-meta';meta.textContent=[name,m.sentAt&&Number.isFinite(d.getTime())?'게시 '+d.toLocaleString('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}):'게시일 미기록'].filter(Boolean).join(' · ');card.append(meta);
   }
   async function r113PDFMaterials(mount){
     const tokenAtLoad=state.token;try{const d=await api('/home/r113/materials',{method:'GET',redirect:'error'});if(state.token!==tokenAtLoad)return;if(d.ok!==true||!Array.isArray(d.materials))throw Error('PDF_LIST_INVALID');
-      for(const m of d.materials){if(typeof m?.deliveryId!=='string'||!(/^[A-Za-z0-9_-]{1,180}$/).test(m.deliveryId)||typeof m.assetId!=='string'||!(/^[A-Za-z0-9_-]{1,180}$/).test(m.assetId)||Object.hasOwn(m,'delivery')&&m.delivery===null||Object.hasOwn(m,'deliveryReceipt')&&m.deliveryReceipt===null)continue;const card=document.createElement('article'),label=document.createElement('p');label.textContent=r113PDFTitle(m);card.append(label);
-        for(const download of [false,true]){const button=document.createElement('button');button.textContent=download?'PDF 다운로드':'PDF 보기';card.append(button);let activeURL=null;
+      for(const m of d.materials){if(typeof m?.deliveryId!=='string'||!(/^[A-Za-z0-9_-]{1,180}$/).test(m.deliveryId)||typeof m.assetId!=='string'||!(/^[A-Za-z0-9_-]{1,180}$/).test(m.assetId)||Object.hasOwn(m,'delivery')&&m.delivery===null||Object.hasOwn(m,'deliveryReceipt')&&m.deliveryReceipt===null)continue;const card=document.createElement('article'),actions=document.createElement('div');card.append(homeMaterialHeader(m));homeMaterialMeta(card,m);actions.className='home-material-actions';card.append(actions);
+        for(const download of [false,true]){const button=document.createElement('button');button.textContent=download?'PDF 다운로드':'PDF 보기';actions.append(button);let activeURL=null;
           button.onclick=async()=>{if(button.disabled)return;button.disabled=true;const token=state.token,externalViewer=!download&&(isIos()||/Android/i.test(navigator.userAgent)||isStandalone());let previewWindow=null;if(externalViewer){previewWindow=window.open('about:blank','_blank');if(previewWindow){try{previewWindow.opener=null;previewWindow.document.title=r113PDFTitle(m);previewWindow.document.body.textContent='PDF를 안전하게 확인하는 중입니다.';}catch{}}}try{const endpoint=API+'/home/r113/materials/'+encodeURIComponent(m.deliveryId)+'/pdf'+(download?'?download=1':'');const r=await fetch(endpoint,{method:'GET',redirect:'error',headers:{Authorization:'Bearer '+token},cache:'no-store'});
             if(state.token!==token||!token||r.redirected||r.url!==endpoint||r.status!==200||r.headers.get('Content-Type')!=='application/pdf'||r.headers.get('Cache-Control')!=='private, no-store')throw Error('PDF_ACCESS_DENIED');
             const blob=await r.blob();if(state.token!==token||blob.size!==m.byteSize)throw Error('PDF_BODY_UNCONFIRMED');const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer())),x=>x.toString(16).padStart(2,'0')).join('');if(hash!==m.sha256)throw Error('PDF_BODY_UNCONFIRMED');
@@ -66,7 +76,7 @@
             else{const frame=document.createElement('iframe'),close=document.createElement('button');frame.src=activeURL;frame.title=r113PDFTitle(m);frame.dataset.r113Pdf='1';close.textContent='PDF 닫기';close.onclick=()=>{frame.remove();close.remove();URL.revokeObjectURL(activeURL);r113PDFURLs.delete(activeURL);activeURL=null;};card.append(frame,close);}
           }catch{if(previewWindow&&!previewWindow.closed)previewWindow.close();const p=document.createElement('p');p.textContent='열람 권한이 없거나 철회·삭제된 PDF입니다. 자동 재시도하지 않습니다.';card.append(p);}finally{button.disabled=false;}};
           window.addEventListener('pagehide',()=>{if(activeURL)URL.revokeObjectURL(activeURL);});
-        }homeMaterialMeta(card,m);mount.append(card);
+        }mount.append(card);
       }
     }catch{const p=document.createElement('p');p.textContent='PDF 자료를 조회하지 못했습니다.';mount.append(p);}
   }

@@ -4,19 +4,26 @@ import vm from 'node:vm';
 import {webcrypto} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 const source=readFileSync(new URL('../carestep-home.js',import.meta.url),'utf8');
-function fixture(title){
- const downloads=[];class Node{constructor(tag){this.tag=tag;this.children=[];this.dataset={};}append(...n){this.children.push(...n);}click(){downloads.push(this.download);}}
- const c={state:{token:'synthetic-session'},API:'https://synthetic.invalid',crypto:webcrypto,URL:{createObjectURL:()=> 'blob:synthetic',revokeObjectURL:()=>{}},navigator:{userAgent:'synthetic'},isIos:()=>false,isStandalone:()=>false,document:{createElement:t=>new Node(t)},window:{addEventListener:()=>{}},r113PDFURLs:new Set(),api:async()=>({ok:true,materials:[{deliveryId:'delivery-a',assetId:'asset-a',filename:'carestep-material.pdf',title,byteSize:5,sha256:Buffer.from(await webcrypto.subtle.digest('SHA-256',new TextEncoder().encode('%PDF-'))).toString('hex')}]}),fetch:async url=>({status:200,url,redirected:false,headers:new Headers({'Content-Type':'application/pdf','Cache-Control':'private, no-store'}),blob:async()=>new Blob(['%PDF-'])})};
+function fixture(title,kind){
+ const downloads=[];class Node{constructor(tag){this.tag=tag;this.children=[];this.dataset={};}append(...n){this.children.push(...n);}click(){downloads.push(this.download);}all(){return [this,...this.children.flatMap(n=>n.all())];}}
+ const c={state:{token:'synthetic-session'},API:'https://synthetic.invalid',crypto:webcrypto,URL:{createObjectURL:()=> 'blob:synthetic',revokeObjectURL:()=>{}},navigator:{userAgent:'synthetic'},isIos:()=>false,isStandalone:()=>false,document:{createElement:t=>new Node(t)},window:{addEventListener:()=>{}},r113PDFURLs:new Set(),api:async()=>({ok:true,materials:[{deliveryId:'delivery-a',assetId:'asset-a',filename:'carestep-material.pdf',title,kind,byteSize:5,sha256:Buffer.from(await webcrypto.subtle.digest('SHA-256',new TextEncoder().encode('%PDF-'))).toString('hex')}]}),fetch:async url=>({status:200,url,redirected:false,headers:new Headers({'Content-Type':'application/pdf','Cache-Control':'private, no-store'}),blob:async()=>new Blob(['%PDF-'])})};
  vm.createContext(c);vm.runInContext(source.slice(source.indexOf('  function r113PDFTitle('),source.indexOf('  async function api(')),c);return {c,mount:new Node('section'),downloads};
 }
-for(const title of ['고급자료 10.15','복약체크표 10.15','<img src=x onerror=alert(1)>'])test('Home title and download: '+title,async()=>{const f=fixture(title);await f.c.r113PDFMaterials(f.mount);const card=f.mount.children[0];assert.equal(card.children[0].textContent,title);assert.equal(card.children[0].innerHTML,undefined);await card.children[2].onclick();assert.equal(f.downloads[0],f.c.r113PDFFilename({title}));});
-test('older API without title remains readable',async()=>{const f=fixture(undefined);await f.c.r113PDFMaterials(f.mount);assert.equal(f.mount.children[0].children[0].textContent,'carestep-material.pdf');});
+for(const title of ['고급자료 10.15','복약체크표 10.15','<img src=x onerror=alert(1)>'])test('Home title and download: '+title,async()=>{const f=fixture(title);await f.c.r113PDFMaterials(f.mount);const card=f.mount.children[0];assert.equal(card.all().find(n=>n.tag==='h3').textContent,title);assert.equal(card.all().find(n=>n.tag==='h3').innerHTML,undefined);await card.all().find(n=>n.textContent==='PDF 다운로드').onclick();assert.equal(f.downloads[0],f.c.r113PDFFilename({title}));});
+test('older API without title remains readable',async()=>{const f=fixture(undefined);await f.c.r113PDFMaterials(f.mount);assert.equal(f.mount.children[0].all().find(n=>n.tag==='h3').textContent,'carestep-material.pdf');});
 test('filename preserves Korean and removes unsafe characters',()=>{const f=fixture('');assert.equal(f.c.r113PDFFilename({title:'복약체크표 10.15.pdf'}),'복약체크표 10.15.pdf');assert.doesNotMatch(f.c.r113PDFFilename({title:'../자료\r\n"/\\:?'}),/[\r\n"/\\:?]/);});
 
-test('dated title is shown unchanged and downloaded with send date',async()=>{const title='복약체크표 2026-10-15',f=fixture(title);await f.c.r113PDFMaterials(f.mount);const card=f.mount.children[0];assert.equal(card.children[0].textContent,title);await card.children[2].onclick();assert.equal(f.downloads[0],title+'.pdf');});
+test('dated title is shown unchanged and downloaded with send date',async()=>{const title='복약체크표 2026-10-15',f=fixture(title);await f.c.r113PDFMaterials(f.mount);const card=f.mount.children[0];assert.equal(card.all().find(n=>n.tag==='h3').textContent,title);await card.all().find(n=>n.textContent==='PDF 다운로드').onclick();assert.equal(f.downloads[0],title+'.pdf');});
 test('long Korean filename retains date suffix',()=>{const f=fixture('');const name=f.c.r113PDFFilename({title:'자료'.repeat(100)+' 2026-10-15'});assert.ok(name.endsWith(' 2026-10-15.pdf'));assert.ok(name.length<=124);});
 test('education topic stays visible, searchable and included in the downloaded filename',async()=>{
- const title='복약 체크표 · 스케일링·발치 후 관리_2026-10-15',f=fixture(title);await f.c.r113PDFMaterials(f.mount);
- const card=f.mount.children[0];assert.equal(card.children[0].textContent,title);assert.ok(card.dataset.search.includes('스케일링'));assert.ok(card.dataset.search.includes('발치'));
- await card.children[2].onclick();assert.equal(f.downloads[0],title+'.pdf');
+ const title='복약 체크표 · 스케일링·발치 후 관리_2026-10-15',f=fixture(title,'medication');await f.c.r113PDFMaterials(f.mount);
+ const card=f.mount.children[0];assert.equal(card.all().find(n=>n.tag==='h3').textContent,'스케일링·발치 후 관리');assert.equal(card.all().find(n=>n.tag==='span').textContent,'복약 체크표');assert.ok(card.dataset.search.includes('스케일링'));assert.ok(card.dataset.search.includes('발치'));
+ await card.all().find(n=>n.textContent==='PDF 다운로드').onclick();assert.equal(f.downloads[0],title+'.pdf');
+});
+test('historical or mismatched material titles are never guessed from another kind',()=>{
+ const f=fixture('');for(const title of ['복약 체크표_2026-10-15','직접 입력한 제목 · 내용','고급 보호자 자료 · 췌장염_2026-10-15','복약 체크표 · _2026-10-15'])assert.equal(f.c.homeMaterialTitleParts({title,kind:'medication'}).title,title);
+});
+test('source date is not presented as the publication date',()=>{
+ const f=fixture(''),card=f.mount;f.c.homeMaterialMeta(card,{kind:'medication',title:'복약 체크표 · 검수 질환_2026-10-01',sentAt:'2026-10-15T01:00:00Z'});
+ assert.match(card.children[0].textContent,/게시 2026.*10.*15.*10:00/);assert.doesNotMatch(card.children[0].textContent,/2026-10-01/);
 });
