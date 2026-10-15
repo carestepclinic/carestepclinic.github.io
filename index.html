@@ -1294,7 +1294,7 @@ body[data-carestep-role="staff"] .work-first-kpi[data-work-filter="delivery"],bo
                   <div><label class="field-label" for="patientName">환자명</label><input id="patientName" class="input" autocomplete="off" placeholder="예: 코코" /></div>
                   <div><label class="field-label" for="guardianName">보호자명</label><input id="guardianName" class="input" autocomplete="off" placeholder="예: 김○○" /></div>
                   <div class="span-2"><label class="field-label" for="dischargeDate">퇴원일 / 관리 시작일</label><input id="dischargeDate" class="input" type="date" min="1900-01-01" max="2099-12-31" autocomplete="off" /></div>
-                  <div class="span-2"><label class="case-toggle"><input id="includePatientNames" type="checkbox" /> <span>보호자 PDF 첫 페이지와 복약 일정표 첫 페이지에 환자명·보호자명을 표시합니다.</span></label></div>
+                  <div class="span-2"><label class="case-toggle"><input id="includePatientNames" type="checkbox" checked /> <span>보호자 PDF 첫 페이지와 복약 일정표 첫 페이지에 환자명·보호자명을 표시합니다.</span></label></div>
                 </div>
                 <div id="caseDatePreview" class="case-date-preview"></div>
                 <div class="case-actions"><button id="clearCaseInfo" class="btn btn-ghost" type="button">환자정보 지우기</button></div>
@@ -4036,7 +4036,7 @@ let hospital = loadHospital();
 let currentFilter = '전체',currentPurpose='all';
 let currentTemplateId = 'pancreatitis';
 let currentOutput = 'pdf';
-let caseInfo = { patientName:'', guardianName:'', dischargeDate:'', includeNames:false, procedure:'', medication:'', feeding:'', activity:'', protection:'', extra:'', recheckMode:'14', recheckManual:'' }; // 환자별 정보와 개별 퇴원지시는 메모리에만 유지하며 저장하지 않습니다.
+let caseInfo = { patientName:'', guardianName:'', dischargeDate:'', includeNames:true, procedure:'', medication:'', feeding:'', activity:'', protection:'', extra:'', recheckMode:'14', recheckManual:'' }; // 환자별 정보와 개별 퇴원지시는 메모리에만 유지하며 저장하지 않습니다.
 let medications = [{name:'',dose:'',frequency:'',times:'',meal:'식사와 무관',duration:'',note:''}]; // 복약정보도 메모리에만 유지합니다.
 let mobileDay = 1;
 let currentWizardStep = 1;
@@ -4169,9 +4169,9 @@ function criticalFallbackPatientReset(){
   [()=>resetIndividualOutputSelection(),()=>clearPreparedIndividualArtifacts(),()=>resetFollowupCaseNonce(),()=>resetMessagingCaseState(),()=>resetFollowupMessageEdits()].forEach(fn=>{try{fn();}catch(e){console.warn('[CARESTEP reset fallback]',e);}});
   activePatientJourney=null;activeJourneyStageSelection=[];patientJourneySelectedId='';patientJourneyBrowserSyncKey='';try{sessionStorage.removeItem(patientJourneySessionKey());}catch{}
   if(typeof followupGuideStep!=='undefined')followupGuideStep=1;if(typeof followupGuideMode!=='undefined')followupGuideMode='setup';
-  caseInfo={patientName:'',guardianName:'',dischargeDate:today,includeNames:false,procedure:'',medication:'',feeding:'',activity:'',protection:'',extra:'',recheckMode:'14',recheckManual:''};try{medications=[blankMedication()];}catch{medications=[];}
+  caseInfo={patientName:'',guardianName:'',dischargeDate:today,includeNames:true,procedure:'',medication:'',feeding:'',activity:'',protection:'',extra:'',recheckMode:'14',recheckManual:''};try{medications=[blankMedication()];}catch{medications=[];}
   const values={patientName:'',guardianName:'',dischargeDate:today,caseProcedure:'',caseMedication:'',caseFeeding:'',caseActivity:'',caseProtection:'',caseExtra:'',recheckManual:'',recheckMode:'14',messagingRecipientPhone:''};Object.entries(values).forEach(([id,v])=>{const el=$(id);if(el)el.value=v;});
-  if($('includePatientNames'))$('includePatientNames').checked=false;if($('messagingConsent'))$('messagingConsent').checked=false;currentCasePhase='editing';currentWizardStep=1;
+  if($('includePatientNames'))$('includePatientNames').checked=true;if($('messagingConsent'))$('messagingConsent').checked=false;currentCasePhase='editing';currentWizardStep=1;
   carestepSafeCall('reset_med_rows',()=>renderMedicationRows());carestepSafeCall('reset_med_preview',()=>updateMedicationPreview());carestepSafeCall('reset_builder',()=>renderBuilder());carestepSafeCall('reset_output',()=>renderCurrentOutput());carestepSafeCall('reset_readiness',()=>updateReadiness());carestepSafeCall('reset_case_badge',()=>renderGlobalCaseBadge());carestepSafeCall('reset_daily',()=>updateDailyWorkflowIndicators());return true;
 }
 function forceNewCaseReset(templateId='',destination='library'){
@@ -4954,7 +4954,7 @@ function updateCaseDatePreview(){
   el.innerHTML=days.map(day=>`<div class="case-date-chip"><b>D+${day}</b>${actualDateFor(day)||'퇴원일 입력 시 자동 계산'}</div>`).join('');
 }
 function clearCaseInfo(){
-  caseInfo={patientName:'',guardianName:'',dischargeDate:'',includeNames:false,procedure:'',medication:'',feeding:'',activity:'',protection:'',extra:'',recheckMode:'14',recheckManual:''};
+  caseInfo={patientName:'',guardianName:'',dischargeDate:'',includeNames:true,procedure:'',medication:'',feeding:'',activity:'',protection:'',extra:'',recheckMode:'14',recheckManual:''};
   medications=[blankMedication()];
   renderMedicationRows();
   updateMedicationPreview();
@@ -4962,7 +4962,7 @@ function clearCaseInfo(){
   if($('guardianName')) $('guardianName').value='';
   if($('dischargeDate')) $('dischargeDate').value=localTodayIso();
   caseInfo.dischargeDate=localTodayIso();
-  if($('includePatientNames')) $('includePatientNames').checked=false;
+  if($('includePatientNames')) $('includePatientNames').checked=true;
   ['caseProcedure','caseMedication','caseFeeding','caseActivity','caseProtection','caseExtra','recheckManual'].forEach(id=>{if($(id)) $(id).value='';});
   if($('recheckMode')) $('recheckMode').value='14';
   updateCaseDatePreview(); updateRecheckPreview(); renderBuilder();
