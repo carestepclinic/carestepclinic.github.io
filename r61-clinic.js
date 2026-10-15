@@ -1540,6 +1540,239 @@
     }
     window.r113PDFController = pdfController;
 
+    // One user confirmation; existing server endpoints and PDF receipts remain authoritative.
+    function materialDeliveryFlow({scope, request, storage, canApprove, onMaterial=()=>{}, onProgress=()=>{}, controllerFactory=pdfController}) {
+        const base = {...scope()}, key = 'carestep_material_registration_pending';
+        let busy = false, selected = null;
+        const guard = () => materialSame(base, scope());
+        const read = path => request(path, {method: 'GET', redirect: 'error'});
+        const list = async () => {
+            guard();
+            const d = await read('/saas/r61/materials?patientId=' + encodeURIComponent(base.patientId));
+            guard();
+            if (d?.ok !== true || !Array.isArray(d.materials)) throw Error('MATERIAL_LIST_UNCONFIRMED');
+            return d.materials;
+        };
+        const content = m => JSON.stringify([m.kind, m.title, m.text]);
+        const bind = m => {
+            if (!materialId(m?.id) || !Number.isSafeInteger(m.revision) || m.revision < 1 || !materialKinds.some(([k]) => k === m.kind) || typeof m.title !== 'string' || typeof m.text !== 'string') throw Error('MATERIAL_RESPONSE_UNCONFIRMED');
+            selected = {...m};
+            onMaterial(selected);
+        };
+        let recoveryList = [];
+        const control = controllerFactory({
+            scope: () => { guard(); if (!selected) throw Error('MATERIAL_SELECTION_REQUIRED'); return {...base, materialId: selected.id, materialRevision: selected.revision}; },
+            lookupScope: () => { guard(); return base; }, request, storage,
+            selectMaterial: r => {
+                const matches = recoveryList.filter(m => m.id === r.materialId && m.revision === r.materialRevision);
+                if (matches.length !== 1) throw Error('MATERIAL_SELECTION_REQUIRED');
+                bind(matches[0]);
+            }
+        });
+        const recoverRegistration = async () => {
+            const raw = storage.getItem(key);
+            if (raw === null) return false;
+            const p = JSON.parse(raw);
+            guard();
+            if (p.scopeDigest !== await materialHash(materialCanon(base)) || !Array.isArray(p.beforeIds)) throw Error('MATERIAL_SCOPE_CHANGED');
+            const rows = await list(), matches = [];
+            for (const m of rows) if (!p.beforeIds.includes(m.id) && (!p.id || p.id === m.id) && await materialHash(content(m)) === p.contentHash) matches.push(m);
+            guard();
+            if (matches.length !== 1) throw Error('MATERIAL_REGISTRATION_UNCONFIRMED');
+            if (storage.getItem(key) !== raw) throw Error('MATERIAL_REGISTRATION_UNCONFIRMED');
+            bind(matches[0]);
+            storage.removeItem(key);
+            if (storage.getItem(key) !== null) throw Error('MATERIAL_REGISTRATION_UNCONFIRMED');
+            return true;
+        };
+        return {
+            state: () => ({...control.state(), busy: busy || control.state().busy, registrationPending: storage.getItem(key) !== null, hasMaterial: !!selected}),
+            reset: () => {
+                if (busy || storage.getItem(key) !== null) throw Error('MATERIAL_ATTEMPT_LOCKED');
+                control.invalidate(); selected = null;
+            },
+            recover: async () => {
+                if (busy) return;
+                busy = true;
+                try {
+                    guard();
+                    if (await recoverRegistration()) return {registrationRecovered: true};
+                    recoveryList = await list();
+                    return await control.recover();
+                } finally { busy = false; }
+            },
+            send: async ({draft, blob, existing, confirmed}) => {
+                if (busy) return;
+                busy = true;
+                // Snapshot caller values before any asynchronous boundary.
+                draft = {...draft}; existing = existing ? {...existing} : null;
+                try {
+                    guard();
+                    if (confirmed !== true) throw Error('MATERIAL_PUBLIC_REVIEW_REQUIRED');
+                    if (storage.getItem(key) !== null || control.state().pending) throw Error('MATERIAL_ATTEMPT_LOCKED');
+                    if (selected && content(selected) !== content(draft)) throw Error('MATERIAL_SCOPE_CHANGED');
+                    if (control.state().sent) return {alreadySent: true};
+                    if (!control.state().assetId && (!(blob instanceof Blob) || blob.type !== 'application/pdf' || !blob.size || blob.size > 10485760 || new TextDecoder().decode(await blob.slice(0, 5).arrayBuffer()) !== '%PDF-')) throw Error('PDF_GENERATION_INVALID');
+                    guard();
+                    onProgress('보호자 연결 확인 중…');
+                    const home = await read('/saas/guardians/' + encodeURIComponent(base.guardianId));
+                    guard();
+                    if (home?.ok !== true || home.guardian?.id !== base.guardianId || home.guardian.homeStatus !== 'linked' || !home.patients?.some(p => p.id === base.patientId && p.guardianId === base.guardianId && p.active === true)) throw Error('HOME_GUARDIAN_NOT_LINKED');
+                    if (!selected) {
+                        const rows = await list();
+                        if (existing) {
+                            const matches = rows.filter(m => m.id === existing.id && m.revision === existing.revision && content(m) === content(draft));
+                            if (matches.length !== 1) throw Error('MATERIAL_REVISION_CHANGED');
+                            bind(matches[0]);
+                        } else {
+                            if (!canApprove()) throw Error('MATERIAL_ADMIN_REQUIRED');
+                            if (!materialKinds.some(([k]) => k === draft.kind) || !draft.title?.trim() || draft.title.length > 120 || !draft.text?.trim() || draft.text.length > 20000) throw Error('MATERIAL_PUBLIC_REVIEW_REQUIRED');
+                            const p = {scopeDigest: await materialHash(materialCanon(base)), contentHash: await materialHash(content(draft)), beforeIds: rows.map(m => m.id)};
+                            guard();
+                            const raw = JSON.stringify(p);
+                            storage.setItem(key, raw);
+                            if (storage.getItem(key) !== raw) throw Error('MATERIAL_REGISTRATION_UNCONFIRMED');
+                            onProgress('공개 자료 등록 중…');
+                            // No retry: a lost response is resolved using a read-only material lookup.
+                            const d = await request('/saas/r61/materials', {method: 'POST', redirect: 'error', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({...draft, patientId: base.patientId, audience: 'guardian', approved: true, finalPublicReview: true})});
+                            guard();
+                            if (d?.ok !== true || !materialId(d.id) || storage.getItem(key) !== raw) throw Error('MATERIAL_REGISTRATION_UNCONFIRMED');
+                            storage.setItem(key, JSON.stringify({...p, id: d.id}));
+                            await recoverRegistration();
+                        }
+                    }
+                    if (!control.state().assetId) {
+                        onProgress('PDF 저장·기존 송부 확인 중…');
+                        await control.prepare(() => blob, draft.kind);
+                        guard();
+                        if (!control.state().sent) await control.upload(true);
+                    }
+                    guard();
+                    if (!control.state().sent) {
+                        if (control.state().status !== 'READY_UNSENT') throw Error('PDF_RESPONSE_UNCONFIRMED');
+                        onProgress('CARESTEP Home에 보내는 중…');
+                        await control.attach(true);
+                    }
+                    guard();
+                    if (!control.state().sent) throw Error('PDF_DELIVERY_UNCONFIRMED');
+                    return {sent: true, deliveryId: control.state().deliveryId};
+                } finally { busy = false; }
+            }
+        };
+    }
+    let materialComposerOpen = false;
+    async function sendMaterial() {
+        if (materialComposerOpen) return;
+        let base;
+        try { base = materialScope('scope-check', 1); }
+        catch { alert('환자 작업공간에서 환자·보호자를 먼저 선택해주세요.'); return; }
+        materialComposerOpen = true;
+        const {body, d} = dialog('보호자 자료 보내기');
+        const info = el('p', '자료와 보호자 연결을 확인하고 있습니다.');
+        info.setAttribute('role', 'status'); info.setAttribute('aria-live', 'polite'); body.append(info);
+        let blobURL = null, uiBusy = false;
+        const guard = () => { if (!d.isConnected) throw Error('MATERIAL_DIALOG_CLOSED'); materialSame(base, materialScope('scope-check', 1)); return base; };
+        d.addEventListener('close', () => { materialComposerOpen = false; if (blobURL) URL.revokeObjectURL(blobURL); });
+        // Keep the current operation visible until its result has been recorded.
+        d.addEventListener('cancel', e => { if (uiBusy) e.preventDefault(); });
+        const close = d.lastElementChild;
+        let list, home;
+        try {
+            const cfg = await pdfRequest('/saas/r113/pdf-config', {method:'GET', redirect:'error'}); guard();
+            if (cfg.pdfEnabled !== true || cfg.guardianMaterialEnabled !== true) throw Error('PDF_FEATURE_OFF');
+            list = await pdfRequest('/saas/r61/materials?patientId=' + encodeURIComponent(base.patientId), {method:'GET', redirect:'error'}); guard();
+            home = await pdfRequest('/saas/guardians/' + encodeURIComponent(base.guardianId), {method:'GET', redirect:'error'}); guard();
+            if (!Array.isArray(list.materials) || home.guardian?.id !== base.guardianId || !home.patients?.some(p => p.id === base.patientId && p.guardianId === base.guardianId)) throw Error('MATERIAL_SCOPE_CHANGED');
+        } catch (e) { info.textContent = '자료를 열지 못했습니다 · ' + pdfErrorCode(e); button(body, '기존 텍스트 자료 보내기', materials); return; }
+        const patient = home.patients.find(p => p.id === base.patientId);
+        body.prepend(el('p', patient.name + ' · 보호자 ' + home.guardian.name));
+        body.append(el('p', '내용 확인 후 한 번 보내면 자료 등록과 PDF 저장을 함께 처리합니다. CARESTEP Home 자료함에 게시하며 문자·알림톡은 발송하지 않습니다.'));
+        const pick = el('select'), kind = el('select'), title = el('input'), text = el('textarea'), reviewed = el('input'), viewer = el('iframe');
+        const admin = () => ['owner', 'admin'].includes(saasMe?.role);
+        const field = (label, node) => { const l = el('label', label); l.style.cssText='display:block;margin:12px 0'; node.style.cssText='display:block;width:100%;box-sizing:border-box;margin-top:4px'; l.append(node); body.append(l); };
+        const newOption = el('option', admin() ? '새 자료 작성' : '기존 승인 자료를 선택해주세요'); newOption.value = ''; pick.append(newOption);
+        for (const m of list.materials) { const o = el('option', m.title); o.value = m.id; pick.append(o); }
+        for (const [value, label] of materialKinds) { const o = el('option', label); o.value=value; kind.append(o); }
+        field('자료', pick); field('자료 종류', kind); field('제목', title); field('보호자에게 보여줄 내용', text);
+        title.maxLength=120; text.maxLength=20000; text.rows=10;
+        const draft = () => ({kind:kind.value,title:title.value,text:text.value});
+        const signature = () => JSON.stringify(draft());
+        let existing = null, previewBlob = null, previewSignature = null, richDraft = null;
+        const buttons = {}, extraButtons = [];
+        const flow = materialDeliveryFlow({scope:guard,request:pdfRequest,storage:sessionStorage,canApprove:admin,
+            onMaterial: m => { existing=m; if (![...pick.options].some(o=>o.value===m.id)) { const o=el('option',m.title);o.value=m.id;pick.append(o); } pick.value=m.id;kind.value=m.kind; title.value=m.title; text.value=m.text; },
+            onProgress: message => { info.textContent=message; controls(); }
+        });
+        const revokePreview = () => { if (blobURL) URL.revokeObjectURL(blobURL); blobURL=null; viewer.removeAttribute('src'); viewer.hidden=true; previewBlob=null; previewSignature=null; reviewed.checked=false; };
+        const controls = () => {
+            const s=flow.state(), locked=uiBusy||s.busy||s.pending||s.registrationPending;
+            close.disabled=uiBusy;
+            for (const b of extraButtons) b.disabled=uiBusy||s.busy;
+            pick.disabled=locked||s.hasMaterial;
+            kind.disabled=title.disabled=text.disabled=locked||s.hasMaterial||!!existing||!admin();
+            buttons.draft.disabled=locked||s.hasMaterial||!!existing||!admin()||!materialDraftSources[kind.value];
+            buttons.preview.disabled=locked||s.sent||!!s.assetId||!title.value.trim()||!text.value.trim();
+            reviewed.disabled=locked||s.sent;
+            buttons.send.disabled=locked||s.sent||!reviewed.checked||(!s.assetId && (!previewBlob||previewSignature!==signature()));
+            buttons.send.textContent=s.sent?'전송 완료':s.assetId?'저장된 PDF 보내기':'보호자에게 보내기';
+            buttons.recover.disabled=uiBusy||s.busy||!(s.registrationPending||s.hasRecovery);
+        };
+        const show = () => {
+            const s=flow.state();
+            if(s.sent) info.textContent='전송 완료 · CARESTEP Home · Delivery ID: '+s.deliveryId;
+            else if(s.status==='READY_UNSENT') info.textContent='저장된 PDF를 확인했습니다. 공개 내용을 확인한 뒤 보내기를 누르면 이어서 송부합니다.';
+            else if(s.hasMaterial) info.textContent='등록된 자료를 확인했습니다. PDF 미리보기 후 보내기를 누르면 이어서 처리합니다.';
+        };
+        const action = (key,label,fn,parent=body) => {
+            const b=el('button',label); b.type='button'; b.className='btn btn-secondary'; parent.append(b); buttons[key]=b;
+            b.onclick=async()=>{if(b.disabled||uiBusy)return;uiBusy=true;controls();try{guard();await fn();guard();}catch(e){
+                const s=flow.state(), code=pdfErrorCode(e);
+                info.textContent=code==='HOME_GUARDIAN_NOT_LINKED'?'보호자를 CARESTEP Home에 먼저 연결해주세요. 자료는 다시 등록하지 않고 이어서 보낼 수 있습니다.':
+                    (s.pending||s.registrationPending?'결과 확인이 필요합니다. 아래 결과 조회를 눌러주세요. ':'처리를 완료하지 못했습니다. ')+code;
+            }finally{uiBusy=false;controls();}};
+        };
+        action('draft','선택 유형의 초안 불러오기',async()=>{
+            if(text.value.trim()&&!confirm('현재 내용을 새 초안으로 바꿀까요?'))return;
+            const doc=renderMaterialDraftPDF(kind.value,base.patientId);guard();
+            title.value=materialKindLabel(kind.value);text.value=doc.innerText;revokePreview();
+            richDraft={signature:signature(),node:doc.cloneNode(true)};
+            info.textContent='초안을 확인·수정한 뒤 PDF 미리보기를 눌러주세요.';
+        });
+        action('preview','PDF 미리보기',async()=>{
+            revokePreview();
+            const before=signature(), m=draft();
+            if(typeof exportPdfElement!=='function'||!window.html2pdf)throw Error('PDF_GENERATOR_UNAVAILABLE');
+            let doc;
+            if(richDraft?.signature===before){doc=document.getElementById('pdfDocument');doc.replaceChildren(...[...richDraft.node.childNodes].map(n=>n.cloneNode(true)));doc.classList.remove('hidden');doc.dataset.r61Patient=base.patientId;doc.dataset.r61MaterialKind=m.kind;}
+            else doc=renderApprovedMaterialPDF(m,base.patientId);
+            const blob=await exportPdfElement('carestep-material.pdf',{save:false,silent:true});guard();
+            if(before!==signature()||!(blob instanceof Blob)||blob.type!=='application/pdf'||!blob.size||blob.size>10485760||new TextDecoder().decode(await blob.slice(0,5).arrayBuffer())!=='%PDF-')throw Error('PDF_GENERATION_INVALID');
+            guard();previewBlob=blob;previewSignature=before;blobURL=URL.createObjectURL(blob);viewer.src=blobURL;viewer.hidden=false;
+            info.textContent='이 PDF가 보호자에게 전달됩니다. 아직 등록·저장·송부하지 않았습니다.';
+        });
+        viewer.title='보호자에게 보낼 PDF 미리보기';viewer.style.cssText='width:100%;height:360px;border:1px solid #ddd;margin-top:12px';viewer.hidden=true;body.append(viewer);
+        const reviewLabel=el('label');reviewed.type='checkbox';reviewLabel.style.cssText='display:block;margin:16px 0';reviewLabel.append(reviewed,document.createTextNode(' 환자·보호자와 공개할 내용을 확인했습니다.'));body.append(reviewLabel);
+        reviewed.onchange=controls;
+        action('send','보호자에게 보내기',async()=>{
+            if(!reviewed.checked)throw Error('MATERIAL_PUBLIC_REVIEW_REQUIRED');
+            const s=flow.state();if(!s.assetId&&previewSignature!==signature())throw Error('MATERIAL_PUBLIC_REVIEW_REQUIRED');
+            await flow.send({draft:draft(),blob:previewBlob,existing,confirmed:true});show();
+        });
+        const more=el('details');more.append(el('summary','기존 자료·결과 조회·관리'));body.append(more);
+        action('recover','중단된 저장·송부 결과 조회',async()=>{revokePreview();await flow.recover();show();},more);
+        extraButtons.push(button(more,'기존 PDF 조회·철회',privatePDF));
+        extraButtons.push(button(more,'텍스트만 보내기·발송 이력',materials));
+        if(admin())extraButtons.push(button(more,'공개 자료 관리',approveMaterial));
+        const changed=()=>{revokePreview();flow.reset();info.textContent='내용을 확인한 뒤 PDF 미리보기를 눌러주세요.';controls();};
+        title.oninput=text.oninput=changed;
+        kind.onchange=()=>{title.value=materialKindLabel(kind.value);text.value='';richDraft=null;changed();};
+        pick.onchange=()=>{existing=list.materials.find(m=>m.id===pick.value)||null;kind.value=existing?.kind||'advanced';title.value=existing?.title||materialKindLabel(kind.value);text.value=existing?.text||'';richDraft=null;changed();};
+        title.value=materialKindLabel(kind.value);
+        info.textContent=home.guardian.homeStatus==='linked'?'자료 종류를 선택해 내용을 준비해주세요.':'보호자의 Home 연결이 필요합니다. 연결 후 이 화면에서 보낼 수 있습니다.';
+        if(flow.state().registrationPending||flow.state().pending){more.open=true;info.textContent='이전에 중단된 요청이 있습니다. 결과 조회로 먼저 확인해주세요.';}
+        controls();
+    }
+
     function mount() {
         if (document.getElementById('r61-controls'))
             return;
@@ -1547,8 +1780,7 @@
         bar.id = 'r61-controls';
         bar.style.cssText = 'padding:12px;display:flex;gap:8px;flex-wrap:wrap';
         bar.setAttribute('aria-label', '후속 기능');
-        button(bar, 'PDF 원본 · Home', privatePDF);
-        button(bar, '보호자 자료 보내기', materials);
+        button(bar, '보호자 자료 보내기', sendMaterial);
         button(bar, '보호자 공개 자료 관리', approveMaterial);
         button(bar, '후속 기능 설정', settings);
         button(bar, '예방관리 발송 예정 미리보기', preventivePreview);
@@ -1574,12 +1806,12 @@
             }
         }
         ;
-        window.r61OpenMaterials = materials;
+        window.r61OpenMaterials = sendMaterial;
         window.r61ApproveMaterial = approveMaterial;
         const observer = new MutationObserver( () => {
             for (const panel of document.querySelectorAll('.patient-workspace-head'))
                 if (!panel.querySelector('[data-r61-material]')) {
-                    const b = button(panel, '보호자 자료 · 발송 및 열람 이력', materials);
+                    const b = button(panel, '보호자 자료 보내기 · 이력', sendMaterial);
                     b.dataset.r61Material = '1';
                 }
         }
