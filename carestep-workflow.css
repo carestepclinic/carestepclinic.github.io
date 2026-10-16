@@ -23,3 +23,5 @@
 @media(max-width:640px){.r61-workflow-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.r61-workflow-steps .btn{white-space:normal}.care-med-dialog{padding:14px;max-width:calc(100vw - 24px)}.patient-workspace-head{position:static}}
 
 .care-home-badge{display:inline-block;color:#2453b5;background:#eef3ff;border:1px solid #d8e3ff;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:700;margin-bottom:6px}
+
+.care-med-comparison{padding:14px;background:#f6f8ff;border:1px solid #dce5f3;border-radius:14px;margin:12px 0;font-size:13px;line-height:1.7}.care-med-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.care-med-compare-grid>div{background:#fff;padding:12px;border-radius:12px;overflow-wrap:anywhere}.care-task{padding:12px;gap:12px}.care-task h3{margin:4px 0}.care-task small{font-size:12px}@media(max-width:640px){.care-med-compare-grid{grid-template-columns:1fr}}

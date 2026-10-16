@@ -36,7 +36,7 @@
     try{const d=await api('/home/r61/materials',{method:'GET',redirect:'error'});if(!current())return;
       for(const m of d.materials||[]){const card=document.createElement('article'),b=document.createElement('button'),actions=document.createElement('div');card.append(homeMaterialHeader(m));homeMaterialMeta(card,m);actions.className='home-material-actions';b.textContent='자료 보기';b.onclick=async()=>{if(!current())return;const p=document.createElement('pre');p.className='home-material-text';p.style.whiteSpace='pre-wrap';p.textContent=m.text;card.append(p);b.disabled=true;try{await api('/home/r61/materials',{method:'POST',redirect:'error',body:JSON.stringify({grantId:m.id})});}catch{const n=document.createElement('p');n.textContent='열람 기록을 저장하지 못했습니다.';card.append(n);}};actions.append(b);card.append(actions);list.append(card);}
     }catch{if(current()){const p=document.createElement('p');p.textContent='텍스트 자료를 불러오지 못했습니다. 자료함 새로고침으로 확인해주세요.';list.append(p);}}
-    if(!current())return;await r113PDFMaterials(list);if(current())filter();
+    if(!current())return;await r113PDFMaterials(list);if(current()){linkMaterialReplacements(list);filter();}
   }
   // R113: authenticated binary fetch only; no R2 URL or public link in DOM/storage.
   const r113PDFURLs=new Set();
@@ -58,9 +58,10 @@
     const parts=homeMaterialTitleParts(m),head=document.createElement('header'),label=document.createElement('span'),title=document.createElement('h3');
     head.className='home-material-header';label.className='home-material-kind';label.textContent=parts.kind;title.textContent=parts.title;title.title=parts.original;const topic=document.createElement('p');topic.className='home-material-topic';topic.textContent=parts.topic||'질환·시술 정보 미기록';title.textContent=parts.topic?parts.kind:parts.title;head.append(topic,title);return head;
   }
+  function linkMaterialReplacements(list){for(const card of [...list.children]){if(!card.dataset.replacementId)continue;const note=document.createElement('div');note.className='home-material-previous';const label=document.createElement('b');label.textContent='이전 안내 · 새 자료가 게시되었습니다';note.append(label);const target=[...list.children].find(c=>c.dataset.deliveryId===card.dataset.replacementId&&c.dataset.patientId===card.dataset.patientId);if(target){const b=document.createElement('button');b.className='home-secondary';b.type='button';b.textContent='새 안내자료 보기';b.onclick=()=>{const controls=list.previousElementSibling;const search=controls?.querySelector('input[type=search]');const kind=controls?.querySelector('select');if(search)search.value='';if(kind)kind.value='all';if(search?.oninput)search.oninput();for(const c of list.children)c.hidden=false;target.scrollIntoView({behavior:'smooth',block:'center'});target.setAttribute('tabindex','-1');target.focus({preventScroll:true});};note.append(b);}else{const p=document.createElement('p');p.textContent='새 자료를 현재 자료함에서 확인할 수 없습니다. 병원에 문의해주세요.';note.append(p);}card.prepend(note);}}
   function homeMaterialMeta(card,m){
     const context=typeof patientContext==='function'?patientContext(m.patientId):null,name=context?.patient?.name||'';
-    card.dataset.patientId=m.patientId||'';card.dataset.materialCard='1';card.dataset.kind=m.kind||'guardian';card.dataset.sentAt=m.sentAt||'';card.dataset.search=(r113PDFTitle(m)+' '+name).toLocaleLowerCase('ko-KR');
+    card.dataset.deliveryId=m.deliveryId||'';card.dataset.replacementId=m.replacementId||'';card.dataset.patientId=m.patientId||'';card.dataset.materialCard='1';card.dataset.kind=m.kind||'guardian';card.dataset.sentAt=m.sentAt||'';card.dataset.search=(r113PDFTitle(m)+' '+name).toLocaleLowerCase('ko-KR');
     card.className='home-material-card';const meta=document.createElement('p'),d=new Date(m.sentAt);meta.className='home-material-meta';meta.textContent=[name,m.sentAt&&Number.isFinite(d.getTime())?'게시 '+d.toLocaleString('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}):'게시일 미기록',m.viewedAt?'내가 열람함':'내가 아직 열람하지 않음'].filter(Boolean).join(' · ');card.append(meta);
   }
   async function r113PDFMaterials(mount){
