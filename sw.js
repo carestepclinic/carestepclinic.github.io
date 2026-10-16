@@ -1,7 +1,7 @@
 /* Carestep Home v10.1-J service worker · 2026-10-13 cache rollout */
-const VERSION='f578db8fef09';
+const VERSION='84f6cefdefbe';
 const CACHE=`carestep-home-${VERSION}`;
-const ASSETS=['./home-care.js?v=f578db8fef09','./home.html','./carestep-home.css?v=f578db8fef09','./carestep-home-response-edit.css?v=10.1-J',`./carestep-home.js?v=${VERSION}`,'./date-input-guard.js?v=10.1-B','./manifest.webmanifest','./carestep-home-icon.svg','./carestep-home-icon-192.png','./carestep-home-icon-512.png'];
+const ASSETS=['./home-care.js?v=84f6cefdefbe','./home.html','./carestep-home.css?v=84f6cefdefbe','./carestep-home-response-edit.css?v=10.1-J',`./carestep-home.js?v=${VERSION}`,'./date-input-guard.js?v=10.1-B','./manifest.webmanifest','./carestep-home-icon.svg','./carestep-home-icon-192.png','./carestep-home-icon-512.png'];
 const HOME_PATHS=new Set(['/home-care.js','/home.html','/carestep-home.css','/carestep-home-response-edit.css','/carestep-home.js','/date-input-guard.js','/manifest.webmanifest','/carestep-home-icon.svg','/carestep-home-icon-192.png','/carestep-home-icon-512.png']);
 
 self.addEventListener('install',event=>{
@@ -42,5 +42,5 @@ self.addEventListener('fetch',event=>{
   if(!HOME_PATHS.has(url.pathname))return;
   event.respondWith(networkFirst(request));
 });
-self.addEventListener('push',event=>{let data={};try{data=event.data?.json()||{}}catch{data={}}const title=data.title||'Carestep Home 관리 알림',options={body:data.body||'확인할 건강관리 안내가 있습니다.',icon:'./carestep-home-icon-192.png',badge:'./carestep-home-icon-192.png',tag:data.tag||'carestep-home',renotify:false,data:{url:data.url||'./home.html',followupId:data.followupId||''}};event.waitUntil(Promise.all([self.registration.showNotification(title,options),self.registration.setAppBadge?self.registration.setAppBadge(1):Promise.resolve()]))});
+self.addEventListener('push',event=>{let data={};try{data=event.data?.json()||{}}catch{data={}}if(data.type==='medication'&&(!Number.isFinite(Date.parse(data.expiresAt||''))||Date.parse(data.expiresAt)<=Date.now())){event.waitUntil(Promise.resolve());return;}const title=data.title||'Carestep Home 관리 알림',options={body:data.body||'확인할 건강관리 안내가 있습니다.',icon:'./carestep-home-icon-192.png',badge:'./carestep-home-icon-192.png',tag:data.tag||'carestep-home',renotify:false,data:{url:data.url||'./home.html',followupId:data.followupId||''}};event.waitUntil(Promise.all([self.registration.showNotification(title,options),self.registration.setAppBadge?self.registration.setAppBadge(1):Promise.resolve()]))});
 self.addEventListener('notificationclick',event=>{event.notification.close();const target=new URL(event.notification.data?.url||'./home.html',self.location.href).href;event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(async clients=>{for(const client of clients){if(new URL(client.url).origin!==self.location.origin)continue;if('navigate' in client)await client.navigate(target);return client.focus()}return self.clients.openWindow(target)}).then(()=>self.registration.clearAppBadge?self.registration.clearAppBadge():undefined))});

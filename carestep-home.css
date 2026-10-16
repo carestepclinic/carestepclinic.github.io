@@ -43,3 +43,5 @@
 .home-care-completed{margin:16px 0}.home-care-completed>summary{padding:12px;border-radius:12px;background:#f3f7fc;font-size:13px;color:#496080;cursor:pointer;font-weight:700}
 
 #logoutButton{white-space:nowrap;flex-shrink:0}
+
+.home-care-push{display:flex;justify-content:space-between;align-items:center;gap:14px;background:#f2f6ff;border:1px solid #dbe6fb;border-radius:14px;padding:14px;margin-top:16px}.home-care-push p{font-size:13px;line-height:1.6;margin:5px 0}.home-care-push small{font-size:11px;color:#687892;line-height:1.6;display:block}.home-care-push button{white-space:nowrap;flex-shrink:0}.home-care-highlight{outline:3px solid #4b7cf6;outline-offset:5px}@media(max-width:600px){.home-care-push{align-items:flex-start;flex-direction:column}}
