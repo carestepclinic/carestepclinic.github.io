@@ -1,7 +1,7 @@
 /* Carestep Home v10.1-J service worker · 2026-10-13 cache rollout */
-const VERSION='d46035a17b29';
+const VERSION='e91f2bdce430';
 const CACHE=`carestep-home-${VERSION}`;
-const ASSETS=['./home-care.js?v=d46035a17b29','./home.html','./carestep-home.css?v=d46035a17b29','./carestep-home-response-edit.css?v=10.1-J',`./carestep-home.js?v=${VERSION}`,'./date-input-guard.js?v=10.1-B','./manifest.webmanifest','./carestep-home-icon.svg','./carestep-home-icon-192.png','./carestep-home-icon-512.png'];
+const ASSETS=['./home-care.js?v=e91f2bdce430','./home.html','./carestep-home.css?v=e91f2bdce430','./carestep-home-response-edit.css?v=10.1-J',`./carestep-home.js?v=${VERSION}`,'./date-input-guard.js?v=10.1-B','./manifest.webmanifest','./carestep-home-icon.svg','./carestep-home-icon-192.png','./carestep-home-icon-512.png'];
 const HOME_PATHS=new Set(['/home-care.js','/home.html','/carestep-home.css','/carestep-home-response-edit.css','/carestep-home.js','/date-input-guard.js','/manifest.webmanifest','/carestep-home-icon.svg','/carestep-home-icon-192.png','/carestep-home-icon-512.png']);
 
 self.addEventListener('install',event=>{
