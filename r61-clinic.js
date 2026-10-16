@@ -27,7 +27,7 @@
           , close = el('button', '닫기');
         d.className='r61-dialog';body.className='r61-dialog-body';close.className='btn btn-secondary r61-dialog-close';
         h.id='r61-dialog-title-'+Math.random().toString(36).slice(2);d.setAttribute('aria-labelledby',h.id);
-        d.append(h, body, close);
+        const header=el('header');header.append(h,close);d.append(header,body);
         close.onclick = () => d.close();
         d.addEventListener('close', () => d.remove());
         document.body.append(d);
@@ -2006,29 +2006,45 @@
     function workCard(parent){const card=el('article');card.className='r61-work-card';parent.append(card);return card;}
     const workAdmin=()=>{if(!['owner','admin'].includes(saasMe?.role)){alert('관리자 계정에서 확인·설정할 수 있습니다.');return false;}return true;};
     function preventiveDiagnostic(d){
-        const labels={RECIPIENT_DECRYPT_FAILED:'보호자 연락처를 읽지 못했습니다. 병원에 저장된 연락처와 서버 암호화 설정을 확인해야 합니다.',INPUT_INVALID:'수신번호 또는 발신번호 등 문자 입력 설정을 확인해주세요.',AUTH_PREPARATION_FAILED:'SOLAPI 인증 준비에 실패했습니다. 연동 상태를 확인해주세요.',SOLAPI_HTTP_ERROR:'SOLAPI가 요청에 오류를 반환했습니다.',SOLAPI_MESSAGE_REJECTED:'SOLAPI가 문자 접수를 거절했습니다. 발신번호·수신번호와 사업자 이력을 확인해주세요.',SOLAPI_RECEIPT_MISSING:'응답에 접수번호가 없어 접수 여부를 확인하지 못했습니다. SOLAPI 이력과 대조해주세요.',REQUEST_OR_RESPONSE_ERROR:'SOLAPI 통신 또는 응답 확인 중 문제가 발생했습니다. 사업자 이력과 대조해주세요.',PROVIDER_RESULT_UNCONFIRMED:'사업자 결과를 확인하지 못했습니다. SOLAPI 이력과 대조해주세요.'};
+        const labels={RECIPIENT_DECRYPT_FAILED:'보호자 연락처를 읽지 못했습니다. 병원에 저장된 연락처와 서버 암호화 설정을 확인해야 합니다.',INPUT_INVALID:'발송 입력 설정을 확인해주세요. 번호·문자 종류·이미지 첨부 조건에서 중단됐습니다.',AUTH_PREPARATION_FAILED:'SOLAPI 인증 준비에 실패했습니다. 연동 상태를 확인해주세요.',SOLAPI_HTTP_ERROR:'SOLAPI가 요청에 오류를 반환했습니다.',SOLAPI_MESSAGE_REJECTED:'SOLAPI가 문자 접수를 거절했습니다. 발신번호·수신번호와 사업자 이력을 확인해주세요.',SOLAPI_RECEIPT_MISSING:'응답에 접수번호가 없어 접수 여부를 확인하지 못했습니다. SOLAPI 이력과 대조해주세요.',REQUEST_OR_RESPONSE_ERROR:'SOLAPI 통신 또는 응답 확인 중 문제가 발생했습니다. 사업자 이력과 대조해주세요.',PROVIDER_RESULT_UNCONFIRMED:'사업자 결과를 확인하지 못했습니다. SOLAPI 이력과 대조해주세요.'};
         const stages={RECIPIENT_DECRYPT:'연락처 확인',SEND_VALIDATION:'발송 입력 확인',AUTH_SELECTION:'인증 방식 확인',TOKEN_ACCESS:'연결 인증 확인',AUTH_HEADER:'연결 인증 준비',PROVIDER_REQUEST:'사업자 요청',PROVIDER_RESPONSE:'사업자 응답',PROVIDER_RESULT:'접수번호 확인'};
         if(!d||!Object.hasOwn(labels,d.code)||!Object.hasOwn(stages,d.stage))return '상세 진단 기록이 없습니다. 이 건은 SOLAPI 발송 이력과 대조해주세요.';
         const http=Number.isInteger(d.httpStatus)&&d.httpStatus>=100&&d.httpStatus<=599?d.httpStatus:null;
         const advice=http===401||http===403?' 인증·권한을 확인해주세요.':http===429?' 사업자 요청 한도에 도달했습니다.':http===400?' 발신번호·수신번호·문자 설정을 확인해주세요.':'';
         return labels[d.code]+advice+' · 확인 단계: '+stages[d.stage]+(http?' · HTTP '+http:'')+(/^\d{4}$/.test(d.providerCode||'')?' · 사업자 코드 '+d.providerCode:'');
     }
+    async function preventiveReadinessPanel(parent,session){
+        const card=workCard(parent);card.className+=' r61-readiness';card.append(el('strong','발송 전 준비 상태'));const text=el('p','확인 중…');card.append(text);
+        button(card,'문자 설정 확인',()=>{if(settingsSession()===session)settings();});
+        try{const d=await api('/preventive/readiness');if(settingsSession()!==session)return;const labels=[d.enabled?'자동 안내 켜짐':'자동 안내 꺼짐',d.senderConfigured?'발신번호 설정됨':'발신번호 필요',d.connected?'SOLAPI 연결됨':d.legacyConfigured?'기존 문자 연결 사용':'SOLAPI 연결 필요',d.channel==='lms'?'장문 문자(LMS)':'Home 우선 안내'];if(d.recipientCheck)labels.push('오늘 대상 연락처 '+d.recipientCheck.valid+'건 정상'+(d.recipientCheck.invalid?' · '+d.recipientCheck.invalid+'건 확인 필요':''));text.textContent=labels.join(' · ');card.dataset.ready=d.ready?'true':'false';}catch{if(settingsSession()===session)text.textContent='준비 상태를 조회하지 못했습니다. 문자 설정을 확인해주세요.';}
+    }
+    async function preventiveRecovery(ids){
+        if(!workAdmin())return;const session=settingsSession(),{body}=dialog('예방문자 복구 발송 검토'),note=el('p','사업자 요청 전 중단 여부와 현재 수신 조건을 확인하고 있습니다.');body.append(note);
+        try{const d=await api('/preventive/recovery-preview',{deliveryIds:ids},{redirect:'error'});if(settingsSession()!==session)return;if(d.ok!==true||!Array.isArray(d.items)||!d.items.length)throw Error('RECOVERY_PREVIEW_INVALID');note.textContent='검토 대상 '+d.count+'건 · 장문 문자(LMS) · 검토 유효시간 5분';
+            for(const x of d.items){const card=workCard(body);card.append(el('strong',x.patientName+' · '+x.guardianName),el('p','수신번호 '+x.recipientHint+' · 예정일 '+x.dueDate));const pre=el('pre',x.message);pre.className='r61-recovery-message';card.append(pre);}
+            body.append(el('p','예상 비용: '+(d.estimatedCost?.note||'병원 SOLAPI 계약요금이 적용됩니다. 총액은 SOLAPI에서 확인해주세요.')));
+            const label=el('label'),check=el('input');check.type='checkbox';label.className='r61-confirm-row';label.append(check,el('span','대상·문구와 문자 비용 발생을 확인했습니다.'));body.append(label);const status=el('p');status.setAttribute('role','status');body.append(status);
+            const send=el('button',d.count+'건 복구 발송 확인');send.type='button';body.append(send);send.onclick=async()=>{if(send.disabled)return;if(settingsSession()!==session){status.textContent='로그인이 변경됐습니다. 검토 화면을 다시 열어주세요.';send.disabled=true;return;}if(!check.checked){status.textContent='대상·문구와 비용 안내를 먼저 확인해주세요.';return;}if(!confirm('검토한 예방문자 '+d.count+'건을 실제로 발송할까요? 문자 비용이 발생합니다.'))return;send.disabled=true;check.disabled=true;try{const out=await api('/preventive/recover',{previewId:d.previewId,confirmed:true},{redirect:'error'});if(settingsSession()!==session)return;const n=key=>(out.items||[]).filter(x=>x.category===key).length;status.textContent='사업자 접수 '+n('accepted')+'건 · 결과 확인 필요 '+(n('unconfirmed')+n('claimed'))+'건 · 발송되지 않은 항목 '+(out.items||[]).filter(x=>!['accepted','unconfirmed','claimed'].includes(x.category)).length+'건. 접수는 수신 완료를 뜻하지 않습니다.';button(body,'현재 발송 결과 확인',()=>preventiveResults());}catch{if(settingsSession()===session){status.textContent='처리 결과를 확인하지 못했습니다. 다시 누르지 말고 발송 결과를 조회해주세요.';button(body,'발송 결과 조회',()=>preventiveResults());}}};send.className='btn btn-primary r61-primary';
+        }catch(e){const labels={RECOVERY_NOT_SAFE:'이 건은 자동 복구 대상이 아닙니다. 사업자 발송 이력을 확인해주세요.',RECOVERY_PROVIDER_CHECK_REQUIRED:'접수 여부가 불확실합니다. SOLAPI 발송 이력을 먼저 확인해주세요.',RECOVERY_SCHEDULE_CHANGED:'일정이 변경됐거나 오늘의 안내 대상이 아닙니다.',RECOVERY_NOT_READY:'문자 발송 설정을 먼저 확인해주세요.',RECOVERY_RECIPIENT_INVALID:'보호자 연락처를 먼저 수정해주세요.',RECOVERY_POLICY_CHANGED:'발송 설정이 바뀌었습니다. 현재 설정을 확인해주세요.',RECOVERY_PERMISSION_CHANGED:'수신 동의 또는 환자 연결을 다시 확인해주세요.'};if(settingsSession()===session){note.textContent=labels[e.message]||'복구 검토를 완료하지 못했습니다. 발송 결과를 새로고침하고 현재 조건을 확인해주세요.';button(body,'문자 설정 확인',settings);}}
+    }
+    const preDispatchFailure=x=>x.category==='unconfirmed'&&x.channel==='lms'&&['RECIPIENT_DECRYPT','SEND_VALIDATION'].includes(x.diagnostic?.stage);
+
     async function preventiveResults(initialFilter='all'){
         if(!workAdmin())return;
         const session=settingsSession(),{body}=dialog('예방문자 발송 결과'),date=el('input'),rows=el('section');date.type='date';date.value=new Date(Date.now()+32400000).toISOString().slice(0,10);
-        body.append(el('p','선택한 한국시간 날짜의 실제 발송 시도입니다. 작업 정상 종료와 문자 접수 성공은 다릅니다.'),date);
+        const readinessMount=el('section');body.append(readinessMount,el('p','선택한 한국시간 날짜의 실제 발송 시도입니다. 작업 정상 종료와 문자 접수 성공은 다릅니다.'),date);void preventiveReadinessPanel(readinessMount,session);
         const load=async()=>{rows.replaceChildren(el('p','결과 확인 중…'));try{
             if(settingsSession()!==session)throw Error('SESSION_CHANGED');const d=await api('/preventive/results?date='+encodeURIComponent(date.value),undefined,{redirect:'error'});if(settingsSession()!==session)throw Error('SESSION_CHANGED');
             if(d?.ok!==true||!d.counts||!Array.isArray(d.deliveries))throw Error('RESULT_INVALID');rows.replaceChildren();
             const cron=d.cron;rows.append(el('p',cron?'공통 자동작업: '+(({ok:'정상 종료',running:'실행 중',failed:'실패'})[cron.status]||'상태 확인 필요')+' · 시작 '+workTime(cron.startedAt)+(cron.status==='running'?'':' · 종료 '+workTime(cron.completedAt)):'공통 자동작업 실행 기록 없음'));
             rows.append(el('strong',Object.entries(resultLabels).map(([k,v])=>v+' '+Number(d.counts[k]||0)+'건').join(' · ')));
             rows.append(el('p','현재 저장 기록으로 계산한 제외 이력 '+Number(d.excludedCount||0)+'건'+(Object.entries(d.excludedReasons||{}).length?' · '+Object.entries(d.excludedReasons).map(([k,v])=>preventiveReason(k)+' '+v+'건').join(' · '):'')+' (당시 실행 시점의 제외 이력 스냅샷은 아닙니다.)'));
-            rows.append(el('p','접수는 보호자의 수신 완료를 뜻하지 않습니다. 결과 미확정 건은 재발송하지 말고 사업자 이력과 대조해주세요.'));
+            rows.append(el('p','접수는 수신 완료를 뜻하지 않습니다. 요청 전 중단 건은 복구 검토할 수 있습니다. 사업자 결과가 불확실한 건은 SOLAPI 이력을 먼저 확인해주세요.'));
             const filter=el('select');for(const [key,label] of [['all','전체'],['pending','결과 확인 필요'],...Object.entries(resultLabels)]){const o=el('option',label);o.value=key;filter.append(o);}filter.value=['all','pending',...Object.keys(resultLabels)].includes(initialFilter)?initialFilter:'all';rows.append(filter);const list=el('section');rows.append(list);
-            const render=()=>{list.replaceChildren();for(const x of d.deliveries.filter(x=>filter.value==='all'||(filter.value==='pending'?['unconfirmed','claimed'].includes(x.category):x.category===filter.value))){const card=workCard(list);card.append(el('strong',x.patientName+' · 보호자 '+x.guardianName),el('p',(resultLabels[x.category]||'결과 확인 필요')+' · '+(x.channel||'채널 미정')+' · '+workTime(x.attemptedAt)),el('p','예정일 '+x.dueDate+' · '+resultReason(x.reason)));if(x.category==='unconfirmed'||x.diagnostic)card.append(el('p',preventiveDiagnostic(x.diagnostic)));}if(!list.children.length)list.append(el('p','표시할 발송 기록이 없습니다.'));};filter.onchange=render;render();
+            const safe=d.deliveries.filter(preDispatchFailure);if(safe.length)button(rows,'발송 전 중단 '+safe.length+'건 복구 검토'+(safe.length>20?' (최대 20건)':''),()=>preventiveRecovery(safe.slice(0,20).map(x=>x.deliveryId)));const provider=button(rows,'SOLAPI 이력 확인',()=>window.open('https://console.solapi.com/','_blank','noopener'));provider.className='btn btn-secondary';const render=()=>{list.replaceChildren();for(const x of d.deliveries.filter(x=>filter.value==='all'||(filter.value==='pending'?['unconfirmed','claimed'].includes(x.category):x.category===filter.value))){const card=workCard(list);card.append(el('strong',x.patientName+' · 보호자 '+x.guardianName),el('p',(preDispatchFailure(x)?'발송 전 중단':resultLabels[x.category]||'결과 확인 필요')+' · '+(x.channel||'채널 미정')+' · '+workTime(x.attemptedAt)),el('p','예정일 '+x.dueDate+' · '+resultReason(x.reason)));if(x.category==='unconfirmed'||x.diagnostic)card.append(el('p',preventiveDiagnostic(x.diagnostic)));if(preDispatchFailure(x))button(card,'이 건 복구 검토',()=>preventiveRecovery([x.deliveryId]));else if(['unconfirmed','failed','blocked'].includes(x.category))button(card,'문자 설정 확인',settings);}if(!list.children.length)list.append(el('p','표시할 발송 기록이 없습니다.'));};filter.onchange=render;render();
             if(d.total>d.deliveries.length)rows.append(el('p','집계는 전체 '+d.total+'건이며 상세는 최근 '+d.deliveries.length+'건입니다.'));
         }catch(e){rows.replaceChildren(el('p',e.message==='SESSION_CHANGED'?'로그인 또는 병원이 바뀌었습니다. 창을 다시 열어주세요.':'발송 결과를 조회하지 못했습니다. 새로고침으로 다시 확인해주세요.'));}};
-        button(body,'결과 새로고침',load);button(body,'예정·제외 대상 확인',preventivePreview);button(body,'충돌 일정 확인·수정',preventiveReview);body.append(rows);await load();
+        button(body,'결과 새로고침',async()=>{readinessMount.replaceChildren();void preventiveReadinessPanel(readinessMount,session);await load();});button(body,'예정·제외 대상 확인',preventivePreview);button(body,'충돌 일정 확인·수정',preventiveReview);body.append(rows);await load();
     }
     async function preventiveReview(){
         if(!workAdmin())return;
@@ -2123,6 +2139,7 @@
         }
         ;
         window.r61OpenMaterials = openWorkspaceComposer;
+        window.r61OpenPatientPreview=async()=>{if(window.crmPrepareMaterialPatient&&!await window.crmPrepareMaterialPatient())return;if(typeof go==='function')go('builder');if(typeof setWizardStep==='function')setWizardStep(5);};
         window.r61SendBuilderMaterials = sendBuilderMaterials;
         document.getElementById('sendBuilderMaterialsBtn')?.addEventListener('click',sendBuilderMaterials);
         window.r61OpenMaterialHistory = materialHistory;

@@ -31,7 +31,7 @@ function fixture({enabled=false,confirm=true,defaultAllowed=false}={}){
     saasToken:'synthetic-token',saasMode:'auth',saasMe:{clinic:{id:'clinic-a'},user:{id:'user-a'},role:'owner'},saasSessionMeta:{id:'session-a'},
     saasRequest:async(url,opt)=>{calls.push({url,opt});return onRequest(url,opt);},alert:s=>alerts.push(s),confirm:()=>allowConfirm});
   const marker='    function mount() {';assert.ok(source.includes(marker));
-  vm.runInContext(source.replace(marker,'    window.testAPI={settings,preventivePreview,preventiveResults,preventiveReview,materialHistory,integrationStatus};\n'+marker),ctx);
+  vm.runInContext(source.replace(marker,'    window.testAPI={settings,preventivePreview,preventiveResults,preventiveRecovery,preventiveReadinessPanel,preventiveReview,materialHistory,integrationStatus};\n'+marker),ctx);
   const button=text=>walk(body).find(e=>e.tagName==='BUTTON'&&e.textContent===text);
   const label=text=>walk(body).find(e=>e.tagName==='LABEL'&&e.textContent.includes(text));
   const checkbox=text=>walk(body).find(e=>e.tagName==='LABEL'&&e.textContent.includes(text)&&e.children.some(c=>c.tagName==='INPUT'&&c.type==='checkbox')).children.find(e=>e.tagName==='INPUT');
@@ -47,6 +47,15 @@ test('results distinguish job completion and uncertain messages with read-only r
 test('uncertain results show safe diagnosis and next action while staying read-only',async()=>{
  const f=fixture();f.setRequest(async()=>({ok:true,counts:{unconfirmed:1},total:1,deliveries:[{category:'unconfirmed',patientName:'가상환자',guardianName:'가상보호자',reason:'PROVIDER_RESULT_UNCONFIRMED',dueDate:'2026-10-23',diagnostic:{code:'SOLAPI_HTTP_ERROR',stage:'PROVIDER_RESPONSE',httpStatus:401,secret:'do-not-show'}}]}));
  await f.ctx.window.testAPI.preventiveResults();assert.match(f.body.textContent,/인증·권한/);assert.match(f.body.textContent,/HTTP 401/);assert.match(f.body.textContent,/사업자 응답/);assert.doesNotMatch(f.body.textContent,/do-not-show/);assert.ok(f.calls.every(c=>!c.opt.method||c.opt.method==='GET'));
+});
+
+test('recovery review only previews, requires cost acknowledgement and sends once on confirmation',async()=>{
+ const f=fixture();f.setRequest(async(p,o)=>p.includes('recovery-preview')?{ok:true,previewId:'p',count:1,items:[{patientName:'검수환자',guardianName:'검수보호자',recipientHint:'***0000',dueDate:'2026-10-23',message:'검수문구'}],estimatedCost:{amount:null,note:'병원 계약요금'}}:{ok:true,items:[{category:'accepted'}]});
+ await f.ctx.window.testAPI.preventiveRecovery(['d']);assert.equal(f.calls.length,1);assert.match(f.body.textContent,/검수문구/);const b=f.button('1건 복구 발송 확인');await b.onclick();assert.equal(f.calls.length,1);assert.match(f.body.textContent,/비용 안내/);
+ walk(f.body).find(x=>x.tagName==='INPUT'&&x.type==='checkbox').checked=true;await b.onclick();assert.equal(f.calls.filter(x=>x.url.endsWith('/recover')).length,1);assert.equal(b.disabled,true);await b.onclick();assert.equal(f.calls.filter(x=>x.url.endsWith('/recover')).length,1);assert.match(f.body.textContent,/사업자 접수 1건/);
+});
+test('recovery send response loss locks submission and offers result lookup instead of another send',async()=>{
+ const f=fixture();f.setRequest(async p=>{if(p.includes('recovery-preview'))return {ok:true,previewId:'p',count:1,items:[{message:'검수문구'}]};throw Error('synthetic loss');});await f.ctx.window.testAPI.preventiveRecovery(['d']);walk(f.body).find(x=>x.tagName==='INPUT'&&x.type==='checkbox').checked=true;const b=f.button('1건 복구 발송 확인');await b.onclick();await b.onclick();assert.equal(f.calls.filter(x=>x.url.endsWith('/recover')).length,1);assert.match(f.body.textContent,/다시 누르지 말고/);assert.ok(f.button('발송 결과 조회'));
 });
 test('missing diagnosis and unsupported codes are explained without arbitrary response text',async()=>{
  for(const diagnostic of [undefined,{code:'untrusted-secret',stage:'PROVIDER_RESPONSE'},{code:'toString',stage:'constructor'}]){const f=fixture();f.setRequest(async()=>({ok:true,counts:{unconfirmed:1},total:1,deliveries:[{category:'unconfirmed',patientName:'가상환자',diagnostic}]}));await f.ctx.window.testAPI.preventiveResults();assert.match(f.body.textContent,/상세 진단 기록이 없습니다/);assert.doesNotMatch(f.body.textContent,/untrusted-secret|native code/);}
