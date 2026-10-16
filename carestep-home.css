@@ -45,3 +45,17 @@
 #logoutButton{white-space:nowrap;flex-shrink:0}
 
 .home-care-push{display:flex;justify-content:space-between;align-items:center;gap:14px;background:#f2f6ff;border:1px solid #dbe6fb;border-radius:14px;padding:14px;margin-top:16px}.home-care-push p{font-size:13px;line-height:1.6;margin:5px 0}.home-care-push small{font-size:11px;color:#687892;line-height:1.6;display:block}.home-care-push button{white-space:nowrap;flex-shrink:0}.home-care-highlight{outline:3px solid #4b7cf6;outline-offset:5px}@media(max-width:600px){.home-care-push{align-items:flex-start;flex-direction:column}}
+
+/* Shared care surfaces and clear action hierarchy. */
+.home-care-next-dose{padding:16px;border:1px solid #cbd9ff;border-radius:14px;background:#eef3ff;font-weight:700;line-height:1.7;margin:12px 0}
+.home-care-next-dose:empty{display:none}
+.home-care-today button,.home-push-card button,.home-material-card button{min-height:44px;border-radius:12px}
+.home-care-patient,.home-material-card,.home-care-push{border-radius:16px}
+.home-care-dose-actions{gap:8px}
+.home-care-state{line-height:1.6}
+.home-push-troubleshoot{flex-basis:100%;font-size:13px;color:#536580;line-height:1.8}
+.home-push-troubleshoot summary{cursor:pointer;min-height:44px;display:list-item;padding-top:10px}
+#homeCarePushChecked{display:block;margin-bottom:4px}
+@media(max-width:600px){.home-care-dose{align-items:stretch}.home-care-dose-actions{width:100%;display:flex;flex-wrap:wrap}.home-care-dose-actions button{flex:1}.home-care-patient-head{flex-wrap:wrap}.home-care-next-dose{font-size:14px;overflow-wrap:anywhere}}
+
+.home-push-troubleshoot{grid-column:2/-1;grid-row:2}.home-push-actions{grid-column:3;grid-row:1}@media(max-width:560px){.home-push-troubleshoot{grid-column:1/-1;grid-row:2}.home-push-actions{grid-column:1/-1;grid-row:3}}

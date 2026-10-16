@@ -11,3 +11,15 @@
 
 /* Home and the material builder share the same medication card. */
 .care-med-lock{border:0;padding:0;min-width:0}.care-med-dialog [data-import]{display:flex;gap:8px;margin:12px 0;align-items:center}.care-med-dialog [data-import]>select{flex:1;min-width:0}.care-med-dialog [data-import]>button{flex-shrink:0}.care-med-dialog .med-card{padding:16px;border-radius:18px}.care-med-dialog .med-card-grid{gap:12px}.care-med-dialog .med-field label{display:flex;justify-content:space-between;align-items:center;margin:0 0 6px;font-size:13px}.care-med-dialog .med-field label small{font-size:11px;color:#8796ae}.care-med-dialog .med-field .input{font-size:14px}.care-med-dialog .med-index-pill{font-size:12px;height:28px}.care-med-dialog .med-card-name-preview{font-size:14px}.care-med-dialog .med-row-presets-label{font-size:11px}.care-med-dialog .med-row-preset{height:34px;font-size:12px}.care-med-dialog .med-row-preset small{font-size:10px}.care-med-dialog .med-time-empty{font-size:12px}.care-med-dialog .med-time-tag{height:32px;font-size:13px}.care-med-dialog .med-time-quick button{font-size:12px;height:30px}.care-med-dialog .med-time-add{font-size:13px;height:44px}.care-med-dialog .med-time-entry{grid-template-columns:minmax(130px,180px) 1fr}.care-med-dialog .med-schedule-preview{font-size:13px}.care-med-dialog .med-field input[type=number]{height:44px}.care-med-lock:disabled{opacity:.7}@media(max-width:620px){.care-med-dialog [data-import]{flex-wrap:wrap}.care-med-dialog .med-card{padding:12px}.care-med-dialog .med-time-entry{grid-template-columns:1fr}.care-med-dialog .med-field label{align-items:flex-start;gap:6px}.care-med-dialog .med-field label small{max-width:52%;text-align:right}}
+
+/* Patient workflow: shared spacing, surfaces and touch targets. */
+.patient-workspace-head{position:sticky;top:0;z-index:3;background:#fff;border-bottom:1px solid #e2e8f3;padding:14px;border-radius:16px 16px 0 0}
+.care-workspace-guide{color:#64748b;font-size:13px;margin:10px 0}
+.r61-workflow-steps{gap:8px;padding:12px;background:#f6f8ff;border:1px solid #e2e8f3;border-radius:14px}
+.r61-workflow-steps .btn,.care-med-dialog .btn{min-height:44px;border-radius:12px}
+.care-med-dialog{border:1px solid #dce4f2;border-radius:20px;padding:20px}
+.care-med-dialog [data-import]{padding:12px;background:#f6f8ff;border-radius:12px;margin-bottom:14px}
+.care-med-dialog [data-import] select{width:100%;min-height:44px;margin-bottom:8px}
+@media(max-width:640px){.r61-workflow-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.r61-workflow-steps .btn{white-space:normal}.care-med-dialog{padding:14px;max-width:calc(100vw - 24px)}.patient-workspace-head{position:static}}
+
+.care-home-badge{display:inline-block;color:#2453b5;background:#eef3ff;border:1px solid #d8e3ff;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:700;margin-bottom:6px}
