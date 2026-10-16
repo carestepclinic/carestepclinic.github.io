@@ -174,7 +174,7 @@
         const cfg = await api('/config');
         materialSame(materialScope('scope-check', 1), base);
         enabled = cfg?.ok === true && cfg.flags?.guardian_material_delivery === true;
-        info.textContent = enabled ? 'CARESTEP Home 자료함에만 게시합니다. 문자·알림톡·푸시·외부 링크 안내는 보내지 않습니다.' : '보호자 자료 송부 준비 중 · 기능 OFF';
+        info.textContent = enabled ? 'CARESTEP Home 자료함에 게시합니다. 문자는 발송하지 않으며, 알림을 켠 연결 기기에 새 자료 푸시 전달을 시도합니다.' : '보호자 자료 송부 준비 중 · 기능 OFF';
         const current = () => {
             const m = list.materials.find(x => x.id === select.value);
             if (!m)
