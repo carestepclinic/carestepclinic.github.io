@@ -1731,16 +1731,17 @@
     }
     function mountPatientContext(){
         if(document.getElementById('r61-patient-context'))return;
-        const root=el('section'),who=el('strong'),hint=el('span');root.id='r61-patient-context';root.setAttribute('aria-label','현재 선택 환자');root.append(who,hint);
+        const root=el('section'),who=el('strong'),hint=el('span');root.id='r61-patient-context';root.setAttribute('aria-label','현재 선택 환자');const topic=el('span');topic.className='r61-context-topic';root.append(who,hint,topic);
         const send=button(root,'자료 만들기',()=>openWorkspaceComposer()),history=button(root,'자료 이력',materialHistory);send.className='btn btn-primary';button(root,'환자 선택·변경',choosePatient);
         (document.querySelector('main')||document.body).prepend(root);let last='';
-        const paint=()=>{syncDraftSession();const c=window.crmMaterialContext?.()||selection(),session=currentDraftSession(),key=JSON.stringify([session,c?.patientId,c?.guardianId,c?.patient?.name,c?.guardian?.name,c?.homeStatus,patientDraft(c)?.updatedAt]);const label='자료 만들기';for(const b of document.querySelectorAll('[data-workspace-material]'))if(b.textContent!==label)b.textContent=label;if(key===last)return;last=key;send.textContent=label;
+        const paint=()=>{syncDraftSession();const c=window.crmMaterialContext?.()||selection(),session=currentDraftSession(),procedure=document.getElementById('caseProcedure')?.value??(typeof caseInfo==='undefined'?'':caseInfo.procedure),education=(typeof templates==='undefined'?[]:templates).find(t=>t.id===(typeof currentTemplateId==='undefined'?'':currentTemplateId))?.title||'',key=JSON.stringify([session,c?.patientId,c?.guardianId,c?.patient?.name,c?.guardian?.name,c?.homeStatus,patientDraft(c)?.updatedAt,procedure,education]);const label='자료 만들기';for(const b of document.querySelectorAll('[data-workspace-material]'))if(b.textContent!==label)b.textContent=label;if(key===last)return;last=key;send.textContent=label;
             root.hidden=!session;const ready=!!session&&materialId(c?.patientId)&&materialId(c?.guardianId);send.disabled=history.disabled=!ready;
             who.textContent=ready?(c.patient?.name||'선택 환자')+' · 보호자 '+(c.guardian?.name||'선택 보호자'):'환자 선택 필요';
             hint.textContent=ready?(({dog:'강아지',cat:'고양이',other:'반려동물'})[c.patient?.species]||'')+' · '+(c.homeStatus==='linked'?'Home 연결됨':c.homeStatus==='invited'?'Home 연결 대기':'Home 연결 확인 필요'):'자료 생성·송부·이력 확인은 환자를 선택하면 사용할 수 있습니다.';
+            const bound=window.crmCurrentPatient?.();topic.textContent=ready&&bound?.patientId===c.patientId&&bound?.guardianId===c.guardianId?'교육자료 · '+(education||'선택 필요')+' / 진단·시술 · '+(procedure||'입력 필요'):'작성 자료 · 환자에 맞는 질환·시술을 선택해주세요.';
             document.querySelectorAll('[data-r61-needs-patient]').forEach(b=>b.disabled=!ready);
         };
-        new MutationObserver(paint).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});window.addEventListener('r61-auth-ready',paint);window.addEventListener('carestep:material-draft-changed',paint);paint();
+        new MutationObserver(paint).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});document.addEventListener('input',paint);document.addEventListener('change',paint);window.addEventListener('r61-auth-ready',paint);window.addEventListener('carestep:material-draft-changed',paint);paint();
     }
     function patientDraft(context=selection()){
         return allComposerDrafts().find(row=>row.base?.patientId===context?.patientId&&row.base?.guardianId===context?.guardianId)||null;
@@ -2139,6 +2140,7 @@
         }
         ;
         window.r61OpenMaterials = openWorkspaceComposer;
+        window.r61OpenPreventiveResults=preventiveResults;window.r61OpenPreventiveReview=preventiveReview;
         window.r61OpenPatientPreview=async()=>{if(window.crmPrepareMaterialPatient&&!await window.crmPrepareMaterialPatient())return;if(typeof go==='function')go('builder');if(typeof setWizardStep==='function')setWizardStep(5);};
         window.r61SendBuilderMaterials = sendBuilderMaterials;
         document.getElementById('sendBuilderMaterialsBtn')?.addEventListener('click',sendBuilderMaterials);

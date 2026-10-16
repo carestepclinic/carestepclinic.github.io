@@ -1035,7 +1035,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 @media(max-width:700px){.r61-dialog{width:calc(100vw - 16px);max-height:calc(100dvh - 20px);padding:18px 14px;border-radius:16px}.r61-dialog>h2{font-size:18px;padding-right:72px}.r61-dialog>.r61-dialog-close.btn{top:12px;right:12px}.r61-dialog .btn{min-height:44px;font-size:13px}.r61-dialog input:not([type=checkbox]):not([type=radio]),.r61-dialog select,.r61-dialog textarea{font-size:16px;min-height:44px}.r61-dialog .r61-stepper li{font-size:12px}.builder-case-context{top:8px;padding:12px}.builder-edit-return{align-items:stretch;flex-direction:column}.builder-edit-return .btn{min-height:44px}.builder-save-options .output-actions{grid-template-columns:1fr}}
 @media print{.builder-case-context,.builder-edit-return{display:none!important}}
 </style>
-<link rel="stylesheet" href="carestep-workflow.css?v=658d6f82c49b">
+<link rel="stylesheet" href="carestep-workflow.css?v=8315bd1a7425">
   <link rel="stylesheet" href="home-access-clinic.css?v=family-1">
 </head>
 <body>
@@ -2267,7 +2267,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
         <div class="care-consult-presets" aria-label="자주 쓰는 답변"><button type="button" data-consult-preset="상태 확인했습니다. 오늘은 식사량과 활력, 구토 여부를 관찰해주세요.">상태 관찰 안내</button><button type="button" data-consult-preset="증상이 반복되거나 악화되면 바로 병원으로 연락해주세요.">악화 시 연락</button><button type="button" data-consult-preset="현재 내용만으로는 정확한 판단이 어려워 진료를 권합니다.">진료 권고</button><button type="button" data-consult-preset="확인했습니다. 추가 변화가 있으면 이 상담에 다시 남겨주세요.">추가 답변 요청</button></div>
         <textarea id="careConsultMessage" maxlength="1000" placeholder="예: 상태 확인했습니다. 오늘은 식사량과 구토 횟수를 관찰해주시고, 증상이 반복되면 바로 병원으로 연락해주세요." required></textarea>
         <div class="care-consult-visit"><input id="careConsultVisitDate" class="input" type="date"><button id="careConsultVisit" class="btn btn-secondary" type="button">진료 예약·권고</button></div>
-        <label class="care-consult-options"><input id="careConsultResolve" type="checkbox"><span>이번 답변으로 상담을 완료 처리합니다. 선택하지 않으면 ‘보호자 답변 대기’로 이동합니다.</span></label>
+        <label class="care-consult-options">답변 후 상담 상태 <select id="careConsultNextStatus" onchange="document.getElementById('careConsultResolve').checked=this.value==='completed'"><option value="waiting">추가 확인 예정 · 보호자 답변 대기</option><option value="completed">처리 완료 · 이번 상담 마침</option></select><input id="careConsultResolve" type="checkbox" hidden></label>
         <div id="careConsultStatus" class="care-consult-status" role="status"></div>
         <div class="care-consult-actions"><button id="careConsultCancel" class="btn btn-secondary" type="button">취소</button><button id="careConsultSend" class="btn btn-primary" type="submit">답변 보내기</button></div>
       </form>
@@ -4373,7 +4373,7 @@ function renderCareNotificationCenter(){const button=$('careNotificationButton')
 function toggleCareNotificationPanel(force){const panel=$('careNotificationPanel'),button=$('careNotificationButton');if(!panel)return;const open=force===undefined?panel.classList.contains('hidden'):!!force;panel.classList.toggle('hidden',!open);button?.setAttribute('aria-expanded',open?'true':'false');if(open)renderCareNotificationCenter();}
 async function requestCareBrowserNotifications(){if(typeof Notification==='undefined'){toast('이 브라우저에서는 알림을 지원하지 않습니다.');return;}const permission=await Notification.requestPermission();renderCareNotificationCenter();toast(permission==='granted'?'새 상담 브라우저 알림을 켰습니다.':'브라우저 설정에서 알림을 허용해주세요.');}
 function notifyNewCareConsultations(){const groups=careNotificationGroups(),ids=new Set(groups.map(g=>g.key));if(careNotificationPrimed&&typeof Notification!=='undefined'&&Notification.permission==='granted'){for(const g of groups){if(careNotificationKnown.has(g.key)||!careWithinNotificationHours(g.priority))continue;const n=new Notification(`CARESTEP · ${g.priority==='urgent'?'긴급':g.priority==='today'?'오늘':'일반'} 업무`,{body:`${g.patientName||'환자'} · ${g.items.length}건을 확인해주세요.`,tag:`carestep-work-${g.key}`});n.onclick=()=>{window.focus();go('dashboard');setTimeout(()=>$('workFirstList')?.scrollIntoView({behavior:'smooth',block:'center'}),100);};}}careNotificationKnown=ids;careNotificationPrimed=true;renderCareNotificationCenter();}
-function careSignalOperationsChanged(){try{careOperationsChannel?.postMessage({clinicId:saasMe?.clinic?.id||'',at:Date.now()});}catch{}}
+function careSignalOperationsChanged(){window.dispatchEvent(new CustomEvent('carestep:operations-changed'));try{careOperationsChannel?.postMessage({clinicId:saasMe?.clinic?.id||'',at:Date.now()});}catch{}}
 if(careOperationsChannel)careOperationsChannel.onmessage=e=>{if(e.data?.clinicId&&e.data.clinicId===saasMe?.clinic?.id&&!followupScheduleLoading)loadFollowupScheduleBoard(false);};
 async function assignCareOperation(id,userId){if(!userId)return;const member=(careOperationsTeam||[]).find(x=>x.userId===userId);try{await saasRequest(`/saas/home-followups/${encodeURIComponent(id)}/action`,{method:'PATCH',body:JSON.stringify({status:'in_progress',assigneeUserId:userId,assignee:member?.displayName||member?.email||''})});toast(`${member?.displayName||'직원'} 담당으로 지정했습니다.`);await loadFollowupScheduleBoard(false);}catch(e){toast(e.message||'담당자를 지정하지 못했습니다.');await loadFollowupScheduleBoard(false);}}
 function renderCareOperationsInbox(){
@@ -4453,7 +4453,7 @@ let careConsultCurrentId='';
 function careConsultClose(){const dialog=$('careConsultDialog');careConsultCurrentId='';if(typeof dialog?.close==='function'&&dialog.open)dialog.close();else dialog?.removeAttribute('open');}
 function renderCareConsultThread(items=[]){const box=$('careConsultThread');if(!box)return;box.innerHTML=items.length?items.map(m=>`<article class="care-consult-message ${m.senderType==='clinic'?'clinic':'guardian'}"><b>${escapeHtml(m.senderType==='clinic'?(m.senderName||'병원'):'보호자')}</b><span>${escapeHtml(m.message||'')}</span><small>${escapeHtml(m.createdAt?new Date(m.createdAt).toLocaleString('ko-KR'):'')}</small></article>`).join(''):'<div class="schedule-board-empty">아직 표시할 상담 메시지가 없습니다.</div>';box.scrollTop=box.scrollHeight;}
 async function openCareConsultReply(id){
-  const item=[...(careConsultInboxItems||[]),...(careOperationsActions||[])].find(x=>x.id===id),dialog=$('careConsultDialog');if(!item||!dialog)return;careConsultCurrentId=id;$('careConsultTitle').textContent=`${item.patientName||'환자'} 보호자 상담`;$('careConsultMeta').textContent=`보호자 ${item.guardianName||'미확인'} · ${item.title||'후속관리'} · ${CONSULT_STATUS_LABELS[item.status]||'상담 확인'}`;$('careConsultThread').innerHTML='<div class="schedule-board-empty">상담 대화를 불러오는 중입니다.</div>';$('careConsultMessage').value='';$('careConsultResolve').checked=false;$('careConsultVisitDate').value=item.visitDate||localTodayIso();$('careConsultStatus').textContent='';$('careConsultSend').disabled=true;if(typeof dialog.showModal==='function'){if(!dialog.open)dialog.showModal();}else dialog.setAttribute('open','');
+  const item=[...(careConsultInboxItems||[]),...(careOperationsActions||[])].find(x=>x.id===id),dialog=$('careConsultDialog');if(!item||!dialog)return;careConsultCurrentId=id;$('careConsultTitle').textContent=`${item.patientName||'환자'} 보호자 상담`;$('careConsultMeta').textContent=`보호자 ${item.guardianName||'미확인'} · ${item.title||'후속관리'} · ${CONSULT_STATUS_LABELS[item.status]||'상담 확인'}`;$('careConsultThread').innerHTML='<div class="schedule-board-empty">상담 대화를 불러오는 중입니다.</div>';$('careConsultMessage').value='';$('careConsultResolve').checked=false;if($('careConsultNextStatus'))$('careConsultNextStatus').value='waiting';$('careConsultVisitDate').value=item.visitDate||localTodayIso();$('careConsultStatus').textContent='';$('careConsultSend').disabled=true;if(typeof dialog.showModal==='function'){if(!dialog.open)dialog.showModal();}else dialog.setAttribute('open','');
   try{await saasRequest(`/saas/home-followups/${encodeURIComponent(id)}/action`,{method:'PATCH',body:JSON.stringify({status:'in_progress',assignee:careOperationActor()})});const data=await saasRequest(`/saas/home-followups/${encodeURIComponent(id)}/consultation`);if(careConsultCurrentId!==id)return;renderCareConsultThread(data.items||[]);$('careConsultSend').disabled=false;await saasRequest(`/saas/home-followups/${encodeURIComponent(id)}/consultation/read`,{method:'POST',body:'{}'}).catch(()=>{});}catch(e){if(careConsultCurrentId===id){$('careConsultThread').innerHTML=`<div class="schedule-board-empty">${escapeHtml(e.message||'상담 대화를 불러오지 못했습니다.')}</div>`;$('careConsultStatus').textContent='다른 직원이 처리 중이면 업무함을 새로고침해주세요.';}}
 }
 async function submitCareConsultReply(event){
@@ -9985,9 +9985,10 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <!-- CARESTEP v10.4-G · Clinical Protocol Settings -->
 <script>document.addEventListener("DOMContentLoaded",()=>CarestepStabilization.compatible());</script>
 <script src="r61-route.js"></script>
-<script src="r61-clinic.js?v=f1fc9a53b939"></script>
+<script src="r61-clinic.js?v=1ec764483f9a"></script>
 <script src="r65-clinic.js?v=R65"></script>
 <script src="r83-clinic.js"></script>
 <script src="home-access-clinic.js?v=67cc0b6e3e2c"></script>
+<script src="clinic-care.js?v=0a0e68141a4e"></script>
 </body>
 </html>
