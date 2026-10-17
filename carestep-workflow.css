@@ -73,3 +73,7 @@
 .r61-dialog{box-sizing:border-box;overscroll-behavior:contain}@media(max-width:600px){.r61-dialog{max-width:calc(100vw - 24px);max-height:calc(var(--care-visible-height,100dvh) - 24px);margin:auto}}
 
 @media(max-width:640px){.r61-dialog header,.care-med-dialog header,.care-consult-head{min-width:0;flex-wrap:wrap}.r61-dialog h2,.care-med-dialog h2,.care-consult-head h3{overflow-wrap:anywhere;min-width:0}.r61-dialog :is(input,textarea,select),.care-med-dialog :is(input,textarea,select),#careConsultDialog textarea{font-size:max(16px,1em);max-width:100%;box-sizing:border-box}.r61-dialog button,.care-med-dialog button,.care-consult-close{min-height:44px}#careConsultDialog{box-sizing:border-box;max-width:calc(100vw - 24px);max-height:calc(var(--care-visible-height,100dvh) - 24px);overflow:auto}body.care-keyboard-open .care-consult-head{position:static!important}}
+
+/* One emphasized next action, with usable mobile focus and safe-area spacing. */
+.r61-dialog :is(button,a.btn),.care-med-dialog button{white-space:normal;line-height:1.5}.r61-dialog button:focus-visible,.care-med-dialog button:focus-visible{outline:3px solid #184fd1;outline-offset:3px}
+@media(max-width:640px){.r61-dialog,.care-med-dialog{padding-bottom:max(16px,env(safe-area-inset-bottom))}.r61-dialog textarea,.care-med-dialog textarea,#careConsultDialog textarea{scroll-margin-block:32px}.r61-dialog .btn,.care-med-dialog .btn{min-height:44px;overflow-wrap:anywhere}}
