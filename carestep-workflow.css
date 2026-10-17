@@ -80,3 +80,5 @@
 
 /* Clinical decisions use readable type; decorative eyebrows remain secondary. */
 .care-task h3{font-size:1rem;line-height:1.6}.care-task p,.care-inbox [role=status],.care-med-dialog .care-check,.care-med-dialog .med-field label,.care-med-dialog .med-schedule-preview{font-size:.9375rem;line-height:1.7;color:#43536b}.care-med-dialog .med-field label small{font-size:.875rem;color:#53647d}.care-med-dialog .med-row-preset,.care-med-dialog .med-time-quick button{font-size:.875rem;min-height:44px;height:auto;white-space:normal;line-height:1.5;padding-block:8px}.care-med-dialog .med-row-preset small{font-size:.8125rem;color:#53647d}.care-med-dialog .med-time-tag{font-size:.9375rem;min-height:36px;height:auto}.care-task small{font-size:.8125rem;color:#53647d}
+
+[data-first-dose]{border:1px solid #d5e0f3;border-radius:12px;padding:12px;background:#f5f8ff;margin-block:12px}[data-first-dose] label{margin-top:0}.home-plan-first-dose{color:#315385;line-height:1.7}
