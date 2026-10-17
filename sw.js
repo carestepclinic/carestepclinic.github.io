@@ -1,7 +1,7 @@
 /* Carestep Home v10.1-J service worker · 2026-10-13 cache rollout */
-const VERSION='custom-reminders-20261017';
+const VERSION='daily-clarity-20261017';
 const CACHE=`carestep-home-${VERSION}`;
-const ASSETS=['./home-reminders.js?v=custom-reminders-20261017','./carestep-ui.css?v=custom-reminders-20261017','./home-care.js?v=custom-reminders-20261017','./home.html','./carestep-home.css?v=custom-reminders-20261017','./carestep-home-response-edit.css?v=10.1-J',`./carestep-home.js?v=${VERSION}`,'./date-input-guard.js?v=10.1-B','./manifest.webmanifest','./carestep-home-icon.svg','./carestep-home-icon-192.png','./carestep-home-icon-512.png'];
+const ASSETS=['./home-reminders.js?v=daily-clarity-20261017','./carestep-ui.css?v=daily-clarity-20261017','./home-care.js?v=daily-clarity-20261017','./home.html','./carestep-home.css?v=daily-clarity-20261017','./carestep-home-response-edit.css?v=10.1-J',`./carestep-home.js?v=${VERSION}`,'./date-input-guard.js?v=10.1-B','./manifest.webmanifest','./carestep-home-icon.svg','./carestep-home-icon-192.png','./carestep-home-icon-512.png'];
 const HOME_PATHS=new Set(['/home-reminders.js','/carestep-ui.css','/home-care.js','/home.html','/carestep-home.css','/carestep-home-response-edit.css','/carestep-home.js','/date-input-guard.js','/manifest.webmanifest','/carestep-home-icon.svg','/carestep-home-icon-192.png','/carestep-home-icon-512.png']);
 
 self.addEventListener('install',event=>{
