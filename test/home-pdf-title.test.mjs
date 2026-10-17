@@ -25,5 +25,5 @@ test('historical or mismatched material titles are never guessed from another ki
 });
 test('source date is not presented as the publication date',()=>{
  const f=fixture(''),card=f.mount;f.c.homeMaterialMeta(card,{kind:'medication',title:'복약 체크표 · 검수 질환_2026-10-01',sentAt:'2026-10-15T01:00:00Z'});
- assert.match(card.children[0].textContent,/게시 2026.*10.*15.*10:00/);assert.doesNotMatch(card.children[0].textContent,/2026-10-01/);
+ assert.match(card.children.find(n=>n.className==='home-material-meta').textContent,/게시 2026.*10.*15.*10:00/);assert.doesNotMatch(card.children.find(n=>n.className==='home-material-meta').textContent,/2026-10-01/);
 });

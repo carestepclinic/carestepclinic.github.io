@@ -52,3 +52,14 @@
 .care-med-dialog>header{top:0}.care-med-steps{top:var(--care-header-height,76px)}.care-med-dialog input:not([type=checkbox]),.care-med-dialog select,.care-med-dialog textarea{font-size:max(16px,1rem)}.care-med-steps button{font-size:.875rem}.care-med-dialog>header h2{font-size:1.125rem}.care-keyboard-open .care-med-steps{top:auto}@media(max-height:500px){.care-med-steps{top:auto}}
 
 .care-med-dialog .med-field .input{font-size:max(16px,1rem)}.care-med-dialog .med-field label,.care-med-dialog p,.care-med-dialog .care-help,.care-med-dialog .care-check{font-size:.875rem}.care-med-dialog .med-field label small{font-size:.75rem}.care-large-header>header,.care-large-header .care-med-steps,.care-large-header .care-med-footer{position:static}
+
+/* Clinic and Home share the same spacing, focus and action sizes. */
+#r61-patient-context,.r61-work-card{--care-ink:#152b49;--care-muted:#526580;--care-line:#d9e3f2;color:var(--care-ink);border-radius:16px}
+.r61-work-card{padding:16px;line-height:1.65}.r61-work-card p{color:var(--care-muted);overflow-wrap:anywhere}
+#r61-patient-context>strong{font-size:1rem;line-height:1.5}#r61-patient-context>span{color:var(--care-muted);line-height:1.6}
+.r61-context-details{flex-basis:100%;min-width:0}.r61-context-details summary{cursor:pointer;font-size:.875rem;color:#365175;min-height:32px;align-content:center}.r61-context-topic{display:block;padding-top:8px;overflow-wrap:anywhere}
+#r61-patient-context button,.r61-work-card button,dialog .btn{min-height:44px;border-radius:12px;line-height:1.45}
+#r61-patient-context button:focus-visible,.r61-work-card button:focus-visible,dialog summary:focus-visible{outline:3px solid #244ee5;outline-offset:3px}
+@media(max-width:600px){#r61-patient-context{gap:8px;padding:12px;position:relative;top:auto}#r61-patient-context>strong,#r61-patient-context>span{flex-basis:100%}#r61-patient-context button{flex:1 1 110px;white-space:normal}.r61-work-card{padding:14px}dialog .r61-work-card button{margin-top:8px}dialog p{line-height:1.7}}
+
+#r61-patient-context{font-size:14px}#r61-patient-context .btn,.r61-overview-grid>.r61-work-card>.btn{font-size:14px;min-height:44px}.r61-work-card{font-size:14px}.r61-work-card>strong{font-size:16px}.r61-context-details summary{font-size:14px}

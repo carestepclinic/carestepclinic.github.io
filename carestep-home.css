@@ -104,3 +104,21 @@
 
 .home-time-dialog input[type=time],#homeRecordDialog input:not([type=checkbox]),#homeRecordDialog select,#homeRecordDialog textarea{font-size:max(16px,1rem)}
 .home-weight-chart svg{min-width:max(100%,calc(20rem - 100px))}.home-weight-last{font-size:16px}
+
+/* Shared visual rhythm: actionable care first, readable supporting detail. */
+:root{--care-ink:#152b49;--care-muted:#526580;--care-line:#d9e3f2;--care-radius:16px;--care-action:#245bff}
+.home-care-today,.home-health-summary,.home-material-card{color:var(--care-ink);border-radius:var(--care-radius)}
+.home-help,.home-material-meta,.home-pet-breed,.home-pet-age,.home-care-state,.home-material-role{color:var(--care-muted);line-height:1.65}
+.home-help,.home-material-meta,.home-care-state,.home-material-role{font-size:max(.875rem,13px)}
+.home-care-today>header{align-items:flex-start;gap:16px}.home-care-today h2{line-height:1.35}
+#homeCareNext{font-size:1.05rem;line-height:1.65;font-weight:700;border-left:4px solid var(--care-action);white-space:pre-line}
+#homeCareHealth{margin-block:20px}#homeCareUpcoming{margin-block:16px}
+.home-primary,.home-secondary,.home-material-actions button,.home-material-quick button{min-height:44px;border-radius:12px;line-height:1.45}
+.home-care-dose-actions{gap:8px}.home-care-dose-amount{font-size:.95rem;line-height:1.6}
+.home-plan-source,.home-material-applicability{padding:8px 12px;border-radius:10px;background:#edf3ff;color:#244a8c;font-size:.875rem;line-height:1.6}
+.home-refresh-note{padding:10px 14px;background:#edf3ff;border-radius:12px;color:#244a8c;line-height:1.6}
+.home-material-card:has(.home-material-previous) .home-material-applicability{background:#fff4df;color:#795212}
+.home-patient-choice:focus-visible,button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #244ee5;outline-offset:3px}
+#homeCareSettings{margin-top:24px}#homeCareSettings>summary{min-height:44px;align-content:center}
+@media(max-width:600px){.home-care-today{padding:16px}.home-care-today>header p{font-size:.9rem}.home-care-patient{padding:14px}.home-care-dose{gap:12px;align-items:stretch}.home-care-dose-actions{width:100%;display:flex;flex-wrap:wrap}.home-care-dose-actions>button:first-child{flex:1}.home-care-inline-actions{display:flex;flex-wrap:wrap;gap:8px}.home-care-inline-actions>button{flex:1 1 160px}.home-material-actions{display:flex;flex-wrap:wrap;gap:8px}.home-material-actions button{flex:1 1 130px}.home-plan-time{font-weight:700;overflow-wrap:anywhere}.home-material-meta{overflow-wrap:anywhere}}
+@media(prefers-reduced-motion:reduce){.care-skeleton,.home-spinner{animation:none!important}*{scroll-behavior:auto!important}}
