@@ -150,3 +150,20 @@
 .home-read-recovery{border:1px solid #e1c6a6;border-radius:12px;background:#fffbf4;padding:12px;margin-top:12px}.home-read-recovery p{margin:0 0 8px;color:#715128;font-size:.9rem;line-height:1.7}.home-read-recovery button{min-height:44px}
 .home-care-dose.home-dose-updated{border:2px solid #517ce1;background:#f2f6ff;flex-wrap:wrap}.home-dose-update-note{flex-basis:100%;margin:0 0 8px;font-size:.9rem;font-weight:700;color:#204d9a;line-height:1.7}
 #homeCareToday .home-care-state,#homeCareToday .home-care-dose-amount,#r61-home-materials .home-material-meta{font-size:.9rem;color:#3f526b;line-height:1.7}
+
+/* Shared reading and action hierarchy for the daily Home screen. */
+:root{--care-ui-line:#d7e1ef;--care-ui-ink:#172d50;--care-ui-muted:#435973;--care-ui-action:#245bff;--care-ui-radius:14px}
+.home-care-today>header h2,#homeCareHealth h3,#r61-home-materials>h2{color:var(--care-ui-ink);line-height:1.5;letter-spacing:-.025em}
+.home-care-today>header p,.home-selected-info,.home-help,.home-region-freshness{color:var(--care-ui-muted);font-size:.875rem;line-height:1.7}
+#homeCareNext{font-size:1rem;padding:14px 16px;margin:12px 0 18px;border-radius:var(--care-ui-radius)}
+#homeCareHealth,#homeCareUpcoming,#homeCarePatients,#r61-home-materials{margin-block:20px;scroll-margin-top:16px}
+.home-push-copy p,.home-push-copy small,.home-access-row p,.home-mobile-care-card header p,.home-mobile-care-card header small,.home-mobile-checks span,.home-mobile-focus span,.home-mobile-red p,.home-mobile-recheck,.home-mobile-care-card footer{font-size:.875rem;line-height:1.7;color:var(--care-ui-muted)}
+.home-mobile-care-card header :is(p,small),.home-mobile-care-card footer{color:#f0f5ff}
+.home-push-title b,.home-mobile-red b{font-size:1rem;line-height:1.6}.home-push-title span,.home-mobile-care-card header span,.home-mobile-focus b{font-size:.75rem;line-height:1.6}
+.home-push-actions :is(.home-primary,.home-secondary),.home-primary,.home-secondary{min-height:44px;border-radius:12px;line-height:1.5;font-size:.9375rem;white-space:normal;overflow-wrap:anywhere}
+.home-family-dialog{border-radius:18px;border-color:var(--care-ui-line);max-height:calc(var(--care-visible-height,100dvh) - 24px);overflow:auto}.home-family-heading{gap:12px;align-items:flex-start}.home-family-heading button{flex-shrink:0;white-space:nowrap;min-width:60px}.home-family-heading h2{font-size:1.25rem;line-height:1.5}
+.home-family-dialog :is(button,input,select,summary):focus-visible{outline:3px solid #184fd1;outline-offset:3px}
+@media(max-width:640px){.home-care-today{padding:16px}.home-care-today>header{gap:10px;align-items:flex-start}.home-care-today>header h2{font-size:1.25rem}.home-care-today>header>div>p{margin-block:6px}.home-care-picker{margin-block:14px}.home-care-jump{margin-block:10px}.home-patient-picker-title{font-size:1rem}.home-selected-info{margin-block:8px}.home-push-actions{grid-template-columns:1fr 1fr}.home-family-dialog{padding:16px}#homeCareUpcoming>h3,#homeCareHealth h3,#r61-home-materials>h2{font-size:1.125rem;margin-block:0 12px}.home-material-controls{gap:8px}}
+@media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}.home-primary,.home-secondary,.home-material-card{transition:none!important}}
+
+#homeCareUpcoming .home-preventive-row strong{font-size:1rem;line-height:1.6}#homeCareUpcoming .home-preventive-row :is(span,time,small),#homeCareUpcoming .home-preventive-row::after{font-size:.875rem;color:#435973;line-height:1.7}
