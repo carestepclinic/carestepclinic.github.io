@@ -87,5 +87,3 @@
 
 .timeline-publish-dialog header button{flex-shrink:0;white-space:nowrap;min-width:60px}
 
-/* Consistent Clinic dialog headings and primary/secondary actions. */
-:is(.care-med-dialog,.r61-dialog,.timeline-publish-dialog)>header{gap:12px;align-items:flex-start}:is(.care-med-dialog,.r61-dialog,.timeline-publish-dialog)>header h2{font-size:1.25rem;line-height:1.5;margin-block:0 8px}:is(.care-med-dialog,.r61-dialog,.timeline-publish-dialog)>header>button{min-width:60px;min-height:44px;flex-shrink:0;white-space:nowrap}:is(.care-med-dialog,.r61-dialog,.timeline-publish-dialog) .btn{min-height:44px;border-radius:12px;line-height:1.5}

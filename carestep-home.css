@@ -152,7 +152,7 @@
 #homeCareToday .home-care-state,#homeCareToday .home-care-dose-amount,#r61-home-materials .home-material-meta{font-size:.9rem;color:#3f526b;line-height:1.7}
 
 /* Shared reading and action hierarchy for the daily Home screen. */
-:root{--care-ui-line:#d7e1ef;--care-ui-ink:#172d50;--care-ui-muted:#435973;--care-ui-action:#245bff;--care-ui-radius:14px}
+
 .home-care-today>header h2,#homeCareHealth h3,#r61-home-materials>h2{color:var(--care-ui-ink);line-height:1.5;letter-spacing:-.025em}
 .home-care-today>header p,.home-selected-info,.home-help,.home-region-freshness{color:var(--care-ui-muted);font-size:.875rem;line-height:1.7}
 #homeCareNext{font-size:1rem;padding:14px 16px;margin:12px 0 18px;border-radius:var(--care-ui-radius)}
