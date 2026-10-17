@@ -1,0 +1,100 @@
+/* HOME navigation: scoped to the authenticated workspace. */
+.home-navigation-active .home-shell{padding-bottom:calc(88px + env(safe-area-inset-bottom));}
+.home-navigation-chrome{margin:0 0 16px;}
+.home-navigation-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.home-navigation-toolbar h1{font-size:clamp(20px,4.8vw,26px);line-height:1.35;margin:0;color:#142c50;}
+.home-navigation-toolbar-actions{display:flex;gap:6px;flex-shrink:0;}
+.home-navigation-toolbar-actions button{min-height:42px;padding:8px 12px;font-size:13px;}
+#homeNavigationActions[hidden]{display:none!important;}
+.home-navigation-chrome.is-home .home-navigation-toolbar{margin:0;}
+.home-navigation-chrome.is-home #homeNavigationTitle{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);}
+.home-navigation-active .home-header{flex-wrap:wrap;gap:8px;}
+.home-navigation-chrome .home-care-picker{margin:0;padding:0;border:0;background:transparent;}
+.home-navigation-chrome .home-patient-picker-title,.home-navigation-chrome #homeCareSelectedInfo,.home-navigation-chrome .home-pet-pending,.home-navigation-chrome .home-pet-selected,.home-navigation-chrome .home-patient-choice small{display:none;}
+.home-navigation-chrome .home-patient-cards{gap:10px;padding:3px 3px 7px;}
+.home-navigation-chrome .home-patient-choice{display:grid;grid-template-columns:32px minmax(0,1fr);grid-template-rows:auto auto;column-gap:8px;row-gap:0;align-items:center;min-width:158px;max-width:220px;min-height:78px;text-align:left;padding:10px 12px;border-radius:15px;background:#fff;}
+.home-navigation-chrome .home-patient-choice[aria-pressed=true]{background:#edf3ff;border-color:#245bff;box-shadow:0 0 0 1px #245bff;}
+.home-navigation-chrome .home-pet-avatar{grid-column:1;grid-row:1/4;width:30px;height:30px;margin:0;}
+.home-navigation-chrome .home-patient-choice strong{grid-column:2;grid-row:1;font-size:16px;line-height:1.3;}
+.home-navigation-chrome .home-pet-breed,.home-navigation-chrome .home-pet-age{grid-column:2;font-size:12px;line-height:1.4;white-space:normal;color:#526987;}
+.home-navigation-chrome #homeCarePatientState{margin:4px 3px;font-size:12px;}
+.home-navigation-chrome #homeCarePatientState[data-read-state=ready]{display:none;}
+.home-navigation-chrome #homeCareFreshness{margin:5px 3px;font-size:12px;}
+.home-navigation-chrome #homeCareFreshness[data-freshness=ready]{display:none;}
+.home-navigation-warning{display:block;width:100%;text-align:left;background:#fff5e6;border:1px solid #e4ba78;color:#754815;border-radius:12px;padding:10px 12px;font:inherit;font-size:13px;min-height:44px;margin-top:9px;}
+.home-navigation-active #homeCareToday{padding:0;margin:0;border:0;background:transparent;box-shadow:none;}
+.home-navigation-active #homeCareToday>header,.home-navigation-active .home-care-jump{display:none;}
+.home-navigation-panel{min-width:0;}
+.home-navigation-panel[hidden],.home-navigation-chrome[hidden],.home-bottom-navigation[hidden],.home-navigation-warning[hidden]{display:none!important;}
+.home-navigation-page-title{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);}
+#homeNavigation-home{display:grid;gap:14px;}
+#homeNavigation-home .home-health-summary{margin:0;background:#fff;border:1px solid #dbe4f4;border-radius:18px;padding:16px;}
+#homeNavigation-home .home-health-summary h3{font-size:16px;margin:0 0 6px;}
+#homeNavigation-home .home-weight-latest{margin:4px 0 10px;font-size:15px;color:#244064;}
+#homeNavigation-home .home-weight-chart{max-height:160px;}
+#homeNavigation-home .home-weight-values{display:none;}
+#homeNavigation-home .home-care-inline-actions{margin-top:8px;display:flex;gap:8px;}
+#homeNavigation-home .home-care-inline-actions button{flex:1;min-height:42px;padding:8px;font-size:13px;}
+.home-navigation-daily{background:#edf3ff;border:1px solid #d4e0fc;border-radius:18px;padding:15px;}
+.home-navigation-daily .home-care-remaining{border:0;background:transparent;margin:0;padding:0;}
+.home-navigation-daily .home-care-remaining h3{margin:0 0 8px;font-size:16px;}
+.home-navigation-daily .home-care-remaining>div{display:flex;gap:7px;}
+.home-navigation-daily .home-care-remaining button{flex:1;background:#fff;padding:8px;font-size:13px;min-height:42px;}
+.home-navigation-next{border:0;background:transparent;color:#173e83;font:inherit;font-weight:700;font-size:14px;line-height:1.6;text-align:left;width:100%;min-height:44px;margin:6px 0 0;padding:8px 0 0;overflow-wrap:anywhere;}
+.home-navigation-prevention{padding:15px 16px;background:#fff;border:1px solid #dbe4f4;border-radius:18px;}
+.home-navigation-prevention h3{margin:0 0 6px;font-size:16px;}
+.home-navigation-preventive-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:8px;width:100%;padding:8px 0;border:0;background:transparent;color:#173257;text-align:left;font:inherit;min-height:52px;}
+.home-navigation-preventive-row+.home-navigation-preventive-row{border-top:1px solid #edf1f8;}
+.home-navigation-preventive-row strong{font-size:14px;font-weight:650;}
+.home-navigation-preventive-date{grid-column:1;font-size:12px;color:#536986;}
+.home-navigation-dday{grid-column:2;grid-row:1/3;color:#245bdb;font-size:15px;font-weight:750;}
+.home-navigation-preventive-row.is-due .home-navigation-dday{color:#a64219;}
+#homeNavigation-home #homeCareHospitalNotice:empty,#homeNavigation-home #homeCareFollowups:empty,#homeNavigation-home #homeCareFollowups:has(>.home-next-followup){display:none;}
+#homeNavigation-home #homeCareHospitalNotice button,#homeNavigation-home #homeCareFollowups button{width:100%;text-align:left;padding:12px 14px;font-size:14px;min-height:44px;border-radius:12px;}
+#homeNavigation-home #homeCareHospitalNotice,#homeNavigation-home #homeCareFollowups{margin:0;}
+#homeNavigation-schedule>div,#homeNavigation-schedule>section{margin-bottom:14px;}
+#homeNavigation-schedule #homeCareNext{padding:12px 14px;margin-top:0;font-size:14px;}
+#homeNavigation-schedule .home-care-patient,#homeNavigation-schedule .home-custom-reminders{padding:16px;border-radius:18px;background:#fff;}
+#homeNavigation-schedule .home-care-patient-head h3{font-size:18px;}
+#homeNavigation-schedule .home-care-patient-head span{font-size:12px;}
+#homeNavigation-schedule #homeCareDue:empty{display:none;}
+#homeNavigation-schedule #homeNavigationFollowupLink{width:100%;margin-top:0;min-height:44px;}
+#homeNavigation-hospital #r61-home-materials{margin-top:0;}
+#homeNavigation-hospital #homeCareAll{padding:0;background:transparent;border:0;}
+#homeNavigation-hospital #homeCareAll>summary{display:none;}
+#homeNavigation-hospital .home-followup-heading .home-step{display:none;}
+#homeNavigation-hospital .home-followup-heading h2{font-size:20px;}
+#homeNavigation-settings>button{margin-bottom:14px;}
+#homeNavigation-settings #homeCareSettings{background:transparent;padding:0;border:0;}
+#homeNavigation-settings #homeCareSettings>summary{display:none;}
+#homeNavigation-settings .home-care-more,#homeNavigation-settings .home-custom-device{background:#fff;border:1px solid #dbe4f4;border-radius:16px;padding:14px;margin-bottom:14px;}
+#homeNavigation-settings .dashboard-head{padding:15px;background:#fff;border:1px solid #dbe4f4;border-radius:16px;}
+#homeNavigation-settings .dashboard-head h1{font-size:18px;margin:0;}
+#homeNavigation-settings .dashboard-head .home-step,#homeNavigation-settings .dashboard-head p{display:none;}
+#homeNavigation-settings .home-custom-device summary{min-height:44px;}
+.home-bottom-navigation{position:fixed;z-index:90;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,760px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));background:#fff;border:1px solid #d8e3f4;border-bottom:0;border-radius:18px 18px 0 0;box-shadow:0 -3px 16px rgba(30,65,120,.06);}
+.home-bottom-navigation button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:56px;border:0;border-radius:12px;background:transparent;color:#526987;font:inherit;font-size:13px;line-height:1.35;}
+.home-bottom-navigation button[aria-current=page]{background:#edf3ff;color:#2459dc;font-weight:750;}
+.home-bottom-navigation button:disabled{opacity:.5;}
+.home-bottom-icon{font-size:23px;line-height:1.1;font-family:system-ui,sans-serif;font-weight:600;}
+.care-keyboard-open .home-bottom-navigation{display:none;}
+.home-navigation-active #patientView .patient-hero .home-step{display:none;}
+.home-navigation-active #patientView .patient-hero h1{font-size:20px;}
+.home-navigation-active #patientView .patient-view-head{margin-top:0;}
+.home-navigation-active #patientBack{font-size:13px;min-height:44px;}
+.home-navigation-active .home-header{padding-bottom:14px;}
+.home-navigation-active .home-brand small{display:none;}
+.home-navigation-active .home-footer{margin-top:22px;font-size:12px;}
+.home-navigation-active [id^=homeCare],.home-navigation-active #homeCustomReminders,.home-navigation-active #r61-home-materials{scroll-margin-bottom:100px;scroll-margin-top:12px;}
+#homeNavigationChrome #homeCarePatientCards .home-patient-choice{display:grid;grid-template-columns:30px minmax(0,1fr);grid-template-rows:auto auto auto;align-content:center;text-align:left;gap:0 8px;flex:0 0 164px;min-width:150px;max-width:220px;padding:9px 10px;}
+#homeNavigationChrome #homeCarePatientCards .home-pet-avatar{grid-column:1;grid-row:1/4;margin:0;}
+#homeNavigationChrome #homeCarePatientCards .home-pet-breed,#homeNavigationChrome #homeCarePatientCards .home-pet-age{display:block;grid-column:2;font-size:12px;}
+#homeNavigationChrome #homeCarePatientCards .home-patient-choice strong{grid-column:2;grid-row:1;margin:0;}
+#homeNavigationChrome #homeCarePatientCards .home-patient-choice strong::after{display:none;}
+#homeNavigation-home #homeCareHealth .home-weight-chart{max-height:none;}
+#homeNavigation-home #homeCareHealth .home-weight-chart svg{height:112px;max-height:112px;min-width:0;}
+#homeNavigation-home #homeCareHealth .home-care-inline-actions .home-primary{background:#edf3ff;color:#194fc7;border:1px solid #d6e2fc;}
+.home-bottom-icon svg{width:23px;height:23px;display:block;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+@media(min-width:760px){#homeNavigation-home{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:start;}#homeNavigation-home #homeCareHealth{grid-row:1/3;}#homeNavigation-home .home-navigation-daily{grid-column:2;}#homeNavigation-home .home-navigation-prevention{grid-column:2;}#homeNavigation-home #homeCareHospitalNotice,#homeNavigation-home #homeCareFollowups{grid-column:1/-1;}.home-navigation-chrome .home-patient-choice{min-width:180px;}}
+@media(max-width:480px){.home-navigation-active .home-shell{padding-top:12px;}.home-navigation-active .home-main{padding-top:4px;}.home-navigation-toolbar-actions button{padding:7px 10px;min-height:40px;font-size:12px;}.home-navigation-toolbar h1{font-size:20px;}.home-navigation-chrome .home-patient-choice{min-width:145px;padding:8px 10px;}.home-navigation-chrome .home-patient-choice strong{font-size:15px;}#homeNavigation-home{gap:12px;}#homeNavigation-home .home-health-summary{padding:14px;}.home-navigation-daily,.home-navigation-prevention{padding:13px 14px;}.home-bottom-navigation button{font-size:12px;}.home-navigation-active .home-footer{padding-bottom:12px;}}
+@media(max-width:360px){.home-navigation-toolbar{gap:6px;}.home-navigation-toolbar h1{font-size:18px;}.home-navigation-toolbar-actions{gap:4px;}.home-navigation-toolbar-actions button{padding:6px 8px;}.home-navigation-chrome .home-patient-choice{min-width:135px;}.home-navigation-daily .home-care-remaining button{font-size:12px;padding:7px 5px;}}
