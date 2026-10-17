@@ -77,3 +77,6 @@
 /* One emphasized next action, with usable mobile focus and safe-area spacing. */
 .r61-dialog :is(button,a.btn),.care-med-dialog button{white-space:normal;line-height:1.5}.r61-dialog button:focus-visible,.care-med-dialog button:focus-visible{outline:3px solid #184fd1;outline-offset:3px}
 @media(max-width:640px){.r61-dialog,.care-med-dialog{padding-bottom:max(16px,env(safe-area-inset-bottom))}.r61-dialog textarea,.care-med-dialog textarea,#careConsultDialog textarea{scroll-margin-block:32px}.r61-dialog .btn,.care-med-dialog .btn{min-height:44px;overflow-wrap:anywhere}}
+
+/* Clinical decisions use readable type; decorative eyebrows remain secondary. */
+.care-task h3{font-size:1rem;line-height:1.6}.care-task p,.care-inbox [role=status],.care-med-dialog .care-check,.care-med-dialog .med-field label,.care-med-dialog .med-schedule-preview{font-size:.9375rem;line-height:1.7;color:#43536b}.care-med-dialog .med-field label small{font-size:.875rem;color:#53647d}.care-med-dialog .med-row-preset,.care-med-dialog .med-time-quick button{font-size:.875rem;min-height:44px;height:auto;white-space:normal;line-height:1.5;padding-block:8px}.care-med-dialog .med-row-preset small{font-size:.8125rem;color:#53647d}.care-med-dialog .med-time-tag{font-size:.9375rem;min-height:36px;height:auto}.care-task small{font-size:.8125rem;color:#53647d}
