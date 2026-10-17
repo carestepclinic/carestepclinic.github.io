@@ -132,3 +132,10 @@
 @media(max-width:600px){#homeCarePatientCards{grid-auto-columns:minmax(86px,100px);gap:8px}#homeCarePatientCards .home-patient-choice{min-width:86px;width:100%;min-height:78px}#homeCarePatientCards .home-pet-selected{display:none}.home-care-picker{margin-bottom:12px}.home-care-picker .home-patient-picker-title{font-size:.95rem}.home-selected-info{margin:10px 0 0}#homeCareUpcoming .home-preventive-row{min-height:64px}.home-material-card>button{width:100%;min-height:48px;white-space:normal}dialog.home-record-dialog>header h2{font-size:1.15rem;line-height:1.4}}
 
 @media(max-width:600px){#homeCarePatientCards .home-patient-choice{flex:0 0 92px;display:flex;flex-direction:column;justify-content:center}#homeCarePatientCards .home-patient-choice strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.home-selected-info{word-break:keep-all;overflow-wrap:anywhere}}
+
+/* Readable mobile flow: content first, optional explanations second. */
+.home-material-guide{margin:8px 0 16px;color:#526887;font-size:.9rem}.home-material-guide summary{cursor:pointer;padding:12px 0}.home-material-topic{font-weight:800;font-size:1.1rem!important}.home-material-header h3{font-size:1rem}.home-region-freshness{font-size:.8rem;color:#526887}
+#homeCareStatus:empty,#homeCarePatientSearchStatus:empty{display:none}
+@media(max-width:640px){.home-care-dose,.home-material-card{min-width:0;overflow-wrap:anywhere}.home-care-dose>div{min-width:0}.home-care-dose-actions{flex-wrap:wrap}.home-care-dose button,.home-material-card button,.home-care-more summary,.home-material-guide summary{min-height:44px}.home-material-card iframe{max-width:100%}#homeCareNext{font-size:1.05rem;line-height:1.6}body.care-keyboard-open .home-care-picker{position:static!important}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+:where(#homeCareToday,#r61-home-materials) :is(button,summary,input,select):focus-visible{outline:3px solid #184fd1;outline-offset:3px}
