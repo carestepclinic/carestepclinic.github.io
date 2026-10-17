@@ -21,6 +21,7 @@
     }
     ;
     function dialog(title) {
+        const returnY=window.scrollY||0,returnFocus=document.activeElement;
         const d = el('dialog')
           , h = el('h2', title)
           , body = el('div')

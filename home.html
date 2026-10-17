@@ -12,7 +12,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="carestep-home-icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="carestep-home-icon-192.png">
-  <link rel="stylesheet" href="carestep-home.css?v=clarity-20261017">
+  <link rel="stylesheet" href="carestep-home.css?v=continuity-20261017">
   <link rel="stylesheet" href="carestep-home-response-edit.css?v=10.1-J">
   <title>Carestep Home v10.1-J</title>
 <meta name="robots" content="noindex,nofollow">
@@ -122,7 +122,7 @@
           <div><div class="home-step">Shared Health Timeline</div><h1><span id="patientName">반려동물</span> 건강 기록</h1><p id="patientMeta"></p></div>
           <div class="patient-hero-side"><div class="patient-clinic"><span>연결 병원</span><b id="patientClinicName">동물병원</b></div><button id="homeRecordOpen" class="home-primary home-record-open" type="button">+ 홈 기록</button></div>
         </div>
-        <div id="patientTimelineLoading" class="patient-loading" aria-live="polite"></div>
+        <p id="patientActionStatus" class="home-status" role="status" aria-live="polite"></p><div id="patientTimelineLoading" class="patient-loading" aria-live="polite"></div>
         <div id="patientTimelineBody" hidden>
           <div class="patient-kpis">
             <article><span>최근 체중</span><b id="patientLatestWeight">미입력</b></article>
@@ -155,7 +155,7 @@
             <div class="home-field span-2"><label for="homeRecordNote">메모 <span>선택</span></label><textarea id="homeRecordNote" maxlength="500" placeholder="식사량, 시간, 함께 관찰한 증상 등을 적어주세요."></textarea></div>
           </div>
           <div class="home-record-warning">기록만으로 응급 여부를 판단하지 마세요. 호흡곤란, 반복 발작, 의식 저하, 심한 출혈 등이 있으면 즉시 병원에 연락하세요.</div>
-          <div id="homeRecordStatus" class="home-status" role="status"></div>
+          <button id="homeRecordRecheck" class="home-secondary" type="button">저장 결과·건강기록 확인</button><div id="homeRecordStatus" class="home-status" role="status"></div>
           <div class="home-record-actions"><button id="homeRecordCancel" class="home-secondary" type="button">취소</button><button id="homeRecordSave" class="home-primary" type="submit">저장</button></div>
         </form>
       </dialog>
@@ -169,7 +169,7 @@
   </div>
   <div id="offlineBar" class="offline-bar" hidden>오프라인 상태입니다. 연결되면 다시 시도해주세요.</div>
   <script src="date-input-guard.js?v=10.1-B"></script>
-  <script src="carestep-home.js?v=clarity-20261017"></script>
-  <script src="home-care.js?v=clarity-20261017"></script>
+  <script src="carestep-home.js?v=continuity-20261017"></script>
+  <script src="home-care.js?v=continuity-20261017"></script>
 </body>
 </html>
