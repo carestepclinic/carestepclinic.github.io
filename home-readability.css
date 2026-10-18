@@ -126,3 +126,33 @@ button,a,summary{-webkit-tap-highlight-color:transparent}
 @media(max-width:360px){.home-timeline-dates{grid-template-columns:1fr}.home-timeline-search{padding:10px}#homeNavigationDaily .home-navigation-next{column-gap:8px}}
 
 #homeNavigation-home #homeCareHealth .home-weight-plot{cursor:default}
+
+/* Home record editor: preserve Korean words and give form controls usable width. */
+#homeRecordDialog{width:min(620px,calc(100vw - 24px));max-width:calc(100vw - 24px);padding:0;overflow:auto;overscroll-behavior:contain;border-radius:16px;color:var(--home-text)}
+#homeRecordDialog .home-record-card{min-width:0;padding:24px;border-radius:16px}
+#homeRecordDialog .home-record-head{display:block;position:relative;margin-bottom:20px}
+#homeRecordDialog .home-record-head>div{min-width:0}
+#homeRecordDialog .home-record-head :is(.home-step,h2){padding-right:56px}
+#homeRecordDialog .home-record-head h2{font-size:1.25rem;line-height:1.5;letter-spacing:normal;word-break:keep-all;overflow-wrap:anywhere}
+#homeRecordDialog .home-record-head p{font-size:.875rem;line-height:1.65;color:var(--home-muted);margin-top:10px;word-break:keep-all;overflow-wrap:anywhere}
+#homeRecordDialog .home-record-close{position:absolute;top:0;right:0;width:44px;height:44px;font-size:1.5rem}
+#homeRecordDialog .home-record-grid{gap:16px}
+#homeRecordDialog .home-field{min-width:0;margin:0}
+#homeRecordDialog .home-field label{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;font-size:.875rem;line-height:1.6;word-break:keep-all;overflow-wrap:anywhere}
+#homeRecordDialog .home-field label span{font-size:.875rem;font-weight:400;color:var(--home-muted)}
+#homeRecordDialog :is(input:not([type=hidden]),select,textarea){box-sizing:border-box;width:100%;min-width:0;max-width:100%;font-family:inherit;font-size:1rem;line-height:1.6;letter-spacing:normal;border-radius:12px;color:var(--home-text);padding:12px}
+#homeRecordDialog :is(input:not([type=hidden]),select){min-height:48px;height:auto}
+#homeRecordDialog select{padding-right:32px}
+#homeRecordDialog textarea{min-height:8rem;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;resize:vertical}
+#homeRecordDialog textarea::placeholder{color:var(--home-muted);opacity:1;word-break:keep-all;overflow-wrap:anywhere}
+#homeRecordDialog .home-value-input{grid-template-columns:minmax(0,1fr) 2.5rem;gap:6px}
+#homeRecordDialog .home-value-input input{padding:12px}
+#homeRecordDialog .home-value-input span{font-size:.875rem;margin:0;color:var(--home-muted)}
+#homeRecordDialog :is(.home-record-warning,.home-record-field-help,.home-status){font-size:.875rem;line-height:1.65;word-break:keep-all;overflow-wrap:anywhere}
+#homeRecordDialog .home-record-field-help{margin:8px 0 0;color:var(--home-muted)}
+#homeRecordDialog .home-record-warning{margin-top:20px}
+#homeRecordDialog #homeRecordRecheck{width:100%;margin-top:12px;word-break:keep-all;overflow-wrap:anywhere}
+#homeRecordDialog .home-record-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#homeRecordDialog .home-record-actions button{font-size:1rem;line-height:1.5;min-height:48px;word-break:keep-all;overflow-wrap:anywhere;padding:12px}
+@media(max-width:640px){#homeRecordDialog .home-record-card{padding:20px 16px max(16px,env(safe-area-inset-bottom))}#homeRecordDialog .home-record-grid{grid-template-columns:minmax(0,1fr)}#homeRecordDialog .home-record-grid .span-2{grid-column:auto}}
+@media(max-height:500px){#homeRecordDialog .home-record-actions{position:static}}

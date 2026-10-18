@@ -1,7 +1,7 @@
 /* Carestep Home v10.1-J service worker · 2026-10-13 cache rollout */
-const VERSION='reading-flow-20261018b';
+const VERSION='record-editor-20261018c';
 const CACHE=`carestep-home-${VERSION}`;
-const ASSETS=['./home-readability.css?v=reading-flow-20261018b','./home-navigation.js?v=reading-flow-20261018b','./home-navigation.css?v=reading-flow-20261018b','./home-reminders.js?v=reading-flow-20261018b','./carestep-ui.css?v=reading-flow-20261018b','./home-care.js?v=reading-flow-20261018b','./home.html','./carestep-home.css?v=reading-flow-20261018b','./carestep-home-response-edit.css?v=10.1-J',`./carestep-home.js?v=${VERSION}`,'./date-input-guard.js?v=10.1-B','./manifest.webmanifest','./carestep-home-icon.svg','./carestep-home-icon-192.png','./carestep-home-icon-512.png'];
+const ASSETS=['./home-readability.css?v=record-editor-20261018c','./home-navigation.js?v=record-editor-20261018c','./home-navigation.css?v=record-editor-20261018c','./home-reminders.js?v=record-editor-20261018c','./carestep-ui.css?v=record-editor-20261018c','./home-care.js?v=record-editor-20261018c','./home.html','./carestep-home.css?v=record-editor-20261018c','./carestep-home-response-edit.css?v=10.1-J',`./carestep-home.js?v=${VERSION}`,'./date-input-guard.js?v=10.1-B','./manifest.webmanifest','./carestep-home-icon.svg','./carestep-home-icon-192.png','./carestep-home-icon-512.png'];
 const HOME_PATHS=new Set(['/home-readability.css','/home-navigation.js','/home-navigation.css','/home-reminders.js','/carestep-ui.css','/home-care.js','/home.html','/carestep-home.css','/carestep-home-response-edit.css','/carestep-home.js','/date-input-guard.js','/manifest.webmanifest','/carestep-home-icon.svg','/carestep-home-icon-192.png','/carestep-home-icon-512.png']);
 
 self.addEventListener('install',event=>{
