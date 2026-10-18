@@ -1038,7 +1038,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 </style>
 <link rel="stylesheet" href="carestep-workflow.css?v=flow-20261017">
   <link rel="stylesheet" href="home-access-clinic.css?v=readable-20261017">
-<link rel="stylesheet" href="carestep-ui.css?v=refresh-flow-20261018a">
+<link rel="stylesheet" href="carestep-ui.css?v=staff-permissions-20261018a">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -1723,7 +1723,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
             <div id="saasMemberList" class="saas-member-list"><div class="voice-empty">로그인 후 직원 목록을 불러옵니다.</div></div>
           </div>
           <div class="panel account-ux-card">
-            <div class="section-head" style="margin:0"><div><h3 style="font-size:15px">역할별 기본 권한</h3><p class="muted" style="margin:4px 0 0">필요 이상으로 권한을 세분화하지 않고 역할 단위로 운영합니다.</p></div></div>
+            <div class="section-head" style="margin:0"><div><h3 style="font-size:15px">역할별 기본 권한</h3><p class="muted" style="margin:4px 0 0">역할 기본값을 유지하거나, 직원별 업무 권한을 펼쳐 전체 권한·직접 선택으로 변경할 수 있습니다. 선택 후 해당 직원의 저장을 눌러주세요.</p></div></div>
             <table class="saas-permission-table">
               <thead><tr><th>역할</th><th>주요 권한</th></tr></thead>
               <tbody>
@@ -3695,6 +3695,121 @@ function saasSetAuthStatus(text='',kind=''){
   const el=document.getElementById('saasAuthStatus');if(!el)return;el.textContent=text;el.className='saas-auth-status '+kind;
 }
 function saasRoleLabel(role){return ({owner:'원장 · 전체 권한',admin:'관리자 · 운영 설정',vet:'수의사 · 진료 업무',staff:'접수 · 고객 업무'})[role]||'LOCAL';}
+/* CLINIC_PERMISSION_POLICY_START: kept identical in Clinic and Worker. */
+const CLINIC_PERMISSIONS = [
+ ['patients.read','환자·보호자 조회'],['patients.edit','환자·보호자 수정·Home 연결'],['patients.delete','환자·보호자 삭제·병합'],
+ ['records.read','진료·건강 기록 조회'],['records.edit','진료·건강 기록 작성·수정'],['records.publish','진료·건강 기록 Home 공개·철회'],
+ ['materials.read','자료·복약 일정 조회'],['materials.edit','자료 만들기·수정'],['materials.publish','자료·복약 일정 Home 게시·철회'],
+ ['followup.read','후속관리·상담 조회'],['followup.manage','상담 답변·일정 관리'],
+ ['messages.read','문자 발송 결과 조회'],['messages.send','문자 발송·재시도·실패 정리'],
+ ['stats.read','운영 통계 조회'],['settings.manage','병원·연동·발송 설정'],['billing.manage','결제·구독 관리'],['team.manage','직원 초대·상태 관리']
+];
+const CLINIC_PERMISSION_DEPENDENCIES = {
+ 'patients.edit':['patients.read'],'patients.delete':['patients.edit'],
+ 'records.read':['patients.read'],'records.edit':['records.read'],'records.publish':['records.edit'],
+ 'materials.read':['patients.read'],'materials.edit':['materials.read'],'materials.publish':['materials.edit'],
+ 'followup.read':['patients.read'],'followup.manage':['followup.read','records.edit','records.publish','materials.publish'],
+ 'messages.read':['patients.read'],'messages.send':['messages.read'],
+ 'settings.manage':[],'stats.read':[],'billing.manage':[],'team.manage':[]
+};
+function clinicExpandPermissions(values){
+ const result=new Set(values);for(const key of result)for(const dep of CLINIC_PERMISSION_DEPENDENCIES[key]||[])result.add(dep);
+ return CLINIC_PERMISSIONS.map(x=>x[0]).filter(x=>result.has(x));
+}
+function clinicDefaultPermissions(role){
+ const all=CLINIC_PERMISSIONS.map(x=>x[0]);
+ if(['owner','admin'].includes(role))return all;
+ return all.filter(x=>!['settings.manage','billing.manage','team.manage','stats.read',...(role==='staff'?['patients.delete']:[])].includes(x));
+}
+function clinicPermissionKeys(config,role){return role==='owner'||config?.mode==='all'?CLINIC_PERMISSIONS.map(x=>x[0]):config?.mode==='custom'?(Array.isArray(config.keys)?config.keys:[]):clinicDefaultPermissions(role);}
+function clinicPermissionRequirements(method,path,body={}){
+ method=String(method||'GET').toUpperCase();path=String(path).split('?')[0];const get=method==='GET',one=x=>[x];
+ // A closed route list: an unclassified request cannot inherit broad access.
+ if((get&&/^\/saas\/(me|entitlements|deployment-status|legal\/(docs|status)|sessions)$/.test(path))||
+    (method==='POST'&&/^\/saas\/(logout|password\/change|switch-clinic|legal\/accept|usage|client-error|account\/withdraw)$/.test(path))||
+    (method==='DELETE'&&/^\/saas\/sessions\/[^/]+$/.test(path))||
+    (['GET','PUT'].includes(method)&&path==='/saas/notification-preferences'))return [];
+ if(/^\/saas\/clinic\/deletion-request(?:\/cancel)?$/.test(path)||/^\/saas\/(ai\/draft|content\/admin\/)/.test(path))return ['owner.only'];
+ if(path==='/saas/members'&&get)return [];
+ if(/^\/saas\/(members\/[^/]+(?:\/revoke-sessions)?|invites)$/.test(path))return one('team.manage');
+ if(/^\/saas\/(billing\/summary|payments\/(overview|setup-intent|setup-complete|subscription\/(plan|cancel)|retry))$/.test(path))return one('billing.manage');
+ if(get&&/^\/saas\/(reports\/monthly|usage\/summary)$/.test(path))return one('stats.read');
+ if(path==='/saas/clinic/state'&&get)return []; // shared hospital branding, no patient content
+ if(/^\/saas\/(clinic\/state|backups(?:\/[^/]+\/restore)?|diagnostics|emr-sync-status|r65\/manual-sync(?:\/close)?|onboarding(?:\/mark)?)$/.test(path))return one('settings.manage');
+ if(path==='/saas/clinical-protocols')return one(get?'followup.read':'settings.manage');
+ if(/^\/saas\/quick-record-presets(?:\/[^/]+)?$/.test(path))return one(get?'records.read':'records.edit');
+ if(/^\/saas\/edit-locks\/(acquire|heartbeat|release)$/.test(path))return one(body.resourceType==='clinical_protocol'?'settings.manage':'followup.manage');
+ if(path==='/saas/google-calendar/proxy')return one(body.method==='GET'?'followup.read':'followup.manage');
+ if(path==='/saas/google-calendar/status'||path==='/saas/integrations/calendar')return one('followup.read');
+ if(/^\/saas\/google-calendar\/(connect|disconnect|calendars|select)$/.test(path))return one('settings.manage');
+ if(/^\/saas\/messaging\/(settings|oauth(?:\/start)?|senders|kakao\/(channels|templates)|sender-onboarding|test(?:\/status)?)$/.test(path))return one(path==='/saas/messaging/test'?'messages.send':'settings.manage');
+ if(/^\/saas\/followup\/messages(?:\/[^/]+(?:\/(ack|retry|quick-retry))?)?$/.test(path))return one(get?'messages.read':'messages.send');
+ if(path==='/saas/followup/messages/schedule')return one('messages.send');
+ if(/^\/saas\/r61\/preventive\/(results|preview|readiness|recovery-preview|recover|preference|review|correct-date)$/.test(path)){
+  if(path.endsWith('/recover'))return one('messages.send');
+  if(path.endsWith('/correct-date'))return one('records.edit');
+  if(path.endsWith('/preference')&&!get)return one('patients.edit');
+  return one('messages.read');
+ }
+ if(/^\/saas\/r61\/(config|operations\/integrations)$/.test(path))return one(get?'materials.read':'settings.manage');
+ if(path==='/saas/r61/consent')return one('patients.edit');
+ if(/^\/saas\/r61\/visibility\/(preview|apply)$/.test(path))return one('records.publish');
+ if(/^\/saas\/r61\/(deliver|deliveries\/(withdraw|supersede)|materials\/revoke)$/.test(path))return one('materials.publish');
+ if(path==='/saas/r61/materials')return one(get?'materials.read':'materials.edit');
+ if(/^\/saas\/r61\/(preview|delivery-receipt|deliveries)$/.test(path))return one('materials.read');
+ if(/^\/saas\/r113\/(pdf-config|pdf-preflight|pdf-assets(?:\/[^/]+(?:\/attach)?)?)$/.test(path))return one(get?'materials.read':path.endsWith('/attach')?'materials.publish':'materials.edit');
+ if(/^\/saas\/patients\/[^/]+\/medications$/.test(path))return one(get?'materials.read':'materials.publish');
+ if(/^\/saas\/patients\/[^/]+\/timeline\/home-publish\/(preview|apply|status)$/.test(path))return one('records.publish');
+ // Existing record save includes its Home visibility/note: editing that object requires publication permission too.
+ if(/^\/saas\/patients\/[^/]+\/timeline(?:\/[^/]+)?$/.test(path))return get?one('records.read'):body.homeVisible===false&&method!=='DELETE'?one('records.edit'):['records.edit','records.publish'];
+ if(/^\/saas\/patients\/[^/]+\/workspace$/.test(path))return one('patients.read');
+ if(/^\/saas\/home-access(?:\/.*)?$/.test(path))return one(get?'patients.read':'patients.edit');
+ if(/^\/saas\/guardians\/[^/]+\/home-invite$/.test(path))return one('patients.edit');
+ if(path==='/saas/patient-directory')return one('patients.read');
+ if(path==='/saas/data-quality/check')return one('patients.edit');
+ if(/^\/saas\/(patients|guardians)(?:\/[^/]+(?:\/(deletion-impact|merge))?)?$/.test(path))return one(get?'patients.read':method==='DELETE'||path.endsWith('/merge')?'patients.delete':'patients.edit');
+ if(/^\/saas\/patient-journeys(?:\/[^/]+(?:\/clone)?)?$/.test(path))return one(get?'materials.read':'materials.edit');
+ if(/^\/saas\/content\/(registry|category-overrides|published)$/.test(path)&&get)return one('materials.read');
+ if(/^\/saas\/recovery(?:\/scan|\/[^/]+\/(retry|ack))?$/.test(path))return one(get?'messages.read':'messages.send');
+ if(/^\/saas\/(care-operations|consultations|surveys(?:\/[^/]+\/ack)?|crm\/(overview|outcomes|cases\/[^/]+\/review)|preventive-events\/[^/]+\/recall|home-followups\/[^/]+\/(action|consultation(?:\/(read|reply|visit))?)|patients\/[^/]+\/home-followups(?:\/[^/]+)?|followup\/(schedule-board|cases(?:\/[^/]+(?:\/(safety|change|cancel|required-stages))?)?|change-ops\/[^/]+\/complete))$/.test(path))return one(get?'followup.read':'followup.manage');
+ return ['unclassified'];
+}
+/* CLINIC_PERMISSION_POLICY_END */
+
+function saasCustomPermissions(){return saasMode==='auth'&&saasMe?.role!=='owner'&&['all','custom'].includes(saasMe?.permissions?.mode);}
+function saasPermission(key,legacy=true){if(saasMode==='demo'||!saasMe)return legacy;return saasCustomPermissions()?clinicPermissionKeys(saasMe.permissions,saasMe.role).includes(key):legacy;}
+function saasCheckPermissionRequest(path,opt={}){
+ if(!saasCustomPermissions()||opt.auth===false)return;
+ let body={};try{body=typeof opt.body==='string'?JSON.parse(opt.body):{};}catch{}
+ const required=clinicPermissionRequirements(opt.method||'GET',path,body);
+ if(required.some(k=>!saasPermission(k)))throw Object.assign(new Error('이 작업의 권한이 없습니다. 원장님에게 직원 권한 설정을 확인해주세요.'),{status:403,details:{code:'CLINIC_PERMISSION_DENIED'}});
+}
+let permissionRefreshPending=null,permissionCheckedAt=0;
+async function saasRefreshPermissions(force=false){
+ if(saasMode!=='auth'||!saasToken||permissionRefreshPending||(!force&&Date.now()-permissionCheckedAt<60000))return;
+ const token=saasToken,clinic=saasMe?.clinic?.id;
+ permissionRefreshPending=(async()=>{try{const d=await saasRawRequest('/saas/me',{method:'GET'});if(token!==saasToken||clinic!==saasMe?.clinic?.id)return;permissionCheckedAt=Date.now();const changed=JSON.stringify([saasMe?.role,saasMe?.permissions])!==JSON.stringify([d.me?.role,d.me?.permissions]);if(changed){saasMe=d.me;clinicReadCoordinator?.invalidate();applySaasPermissions();const view=document.querySelector('.view.active-view')?.id;if(view&&!saasCanView(view))go('dashboard');window.dispatchEvent(new Event('r61-auth-ready'));toast('직원 권한이 변경되어 화면에 반영했습니다.');}}catch{}finally{permissionRefreshPending=null;}})();return permissionRefreshPending;
+}
+window.addEventListener('focus',()=>saasRefreshPermissions());
+setInterval(()=>{if(document.visibilityState==='visible')saasRefreshPermissions();},60000);
+function permissionMemberEditor(x,can){
+ if(x.role==='owner')return '<div class="member-permission-note">원장 계정 · 전체 권한 유지</div>';
+ const editable=can&&saasMe?.role==='owner',config=x.permissions||{mode:'default',keys:[],revision:''},mode=config.mode||'default',keys=clinicPermissionKeys(config,x.role);
+ return `<details class="member-permissions"><summary>업무 권한 · ${mode==='all'?'전체 업무 권한':mode==='custom'?'직접 선택 '+keys.length+'개':'역할 기본값'}</summary><label class="member-permission-mode">권한 설정<select class="input" data-permission-mode ${editable?'':'disabled'}><option value="default" ${mode==='default'?'selected':''}>역할 기본값</option><option value="all" ${mode==='all'?'selected':''}>전체 업무 권한</option><option value="custom" ${mode==='custom'?'selected':''}>직접 선택</option></select></label><p class="member-permission-note">원장님이 직원별 권한을 설정합니다. 작성·관리 권한을 선택하면 필요한 조회 권한도 함께 선택됩니다. 후속관리에는 관련 기록·자료 게시가 포함됩니다.</p><div class="member-permission-grid">${CLINIC_PERMISSIONS.map(([key,label])=>`<label><input type="checkbox" data-permission-key="${key}" ${keys.includes(key)?'checked':''} ${editable&&mode==='custom'?'':'disabled'}><span>${label}</span></label>`).join('')}</div><p class="member-permission-note">전체 업무 권한에도 병원 소유권 변경·원장 계정 수정은 포함되지 않습니다. 이용 중인 요금제의 기능 범위에서 적용됩니다.</p></details>`;
+}
+function bindMemberPermissions(root){
+ root.querySelectorAll('[data-member-id]').forEach(card=>{
+  const mode=card.querySelector('[data-permission-mode]'),role=card.querySelector('[data-member-role]');if(!mode)return;
+  const refresh=()=>{const keys=mode.value==='custom'?null:mode.value==='all'?CLINIC_PERMISSIONS.map(x=>x[0]):clinicDefaultPermissions(role.value);card.querySelectorAll('[data-permission-key]').forEach(input=>{input.disabled=saasMe?.role!=='owner'||mode.value!=='custom';if(keys)input.checked=keys.includes(input.dataset.permissionKey);});const summary=card.querySelector('.member-permissions summary');if(summary)summary.textContent='업무 권한 · '+({default:'역할 기본값',all:'전체 업무 권한',custom:'직접 선택'}[mode.value]||'')+' · 저장 필요';};
+  mode.addEventListener('change',refresh);role.addEventListener('change',refresh);
+  card.querySelectorAll('[data-permission-key]').forEach(input=>input.addEventListener('change',()=>{
+   const inputs=[...card.querySelectorAll('[data-permission-key]')];let selected=inputs.filter(x=>x.checked).map(x=>x.dataset.permissionKey);
+   if(input.checked)selected=clinicExpandPermissions(selected);else selected=selected.filter(k=>!clinicExpandPermissions([k]).includes(input.dataset.permissionKey));
+   inputs.forEach(x=>x.checked=selected.includes(x.dataset.permissionKey));
+  }));
+ });
+}
+
 const CARESTEP_ROLE_UI={
   owner:{label:'원장',title:'전체 운영 화면',description:'진료 업무와 병원 운영 현황을 함께 확인합니다.',defaultView:'dashboard',views:['dashboard','patients','library','builder','followup','onboarding','settings','account','voice','pilot'],actions:[['patients','환자 작업공간'],['followup','후속관리'],['pilot','운영 통계']]},
   admin:{label:'관리자',title:'병원 운영 설정',description:'발송 설정, 직원·권한, 요금제와 연동 상태를 관리합니다.',defaultView:'settings',views:['dashboard','followup','onboarding','settings','account'],actions:[['followup','발송 설정'],['account','직원·권한'],['settings','연동 상태']]},
@@ -3702,10 +3817,10 @@ const CARESTEP_ROLE_UI={
   staff:{label:'접수',title:'접수 업무 화면',description:'환자 검색, 오늘 일정, 상담 요청과 보호자 자료 발송을 빠르게 처리합니다.',defaultView:'dashboard',views:['dashboard','patients','library','builder','followup'],actions:[['patients','환자 검색'],['builder','자료 발송'],['followup','상담·일정']]}
 };
 function roleUiRole(){return saasMode==='demo'||!saasMe?'owner':CARESTEP_ROLE_UI[saasMe.role]?saasMe.role:'staff';}
-function roleUiProfile(){return CARESTEP_ROLE_UI[roleUiRole()]||CARESTEP_ROLE_UI.staff;}
+function roleUiProfile(){const base=CARESTEP_ROLE_UI[roleUiRole()]||CARESTEP_ROLE_UI.staff;if(!saasCustomPermissions())return base;const grants={patients:'patients.read',library:'materials.read',builder:'materials.edit',followup:'followup.read',onboarding:'settings.manage',settings:'settings.manage',pilot:'stats.read'};const views=['dashboard','account',...Object.keys(grants).filter(v=>saasPermission(grants[v])||(v==='followup'&&(saasPermission('messages.read')||saasPermission('settings.manage'))))];return {...base,title:saasMe.permissions.mode==='all'?'전체 업무 화면':'내 업무 화면',description:'원장님이 설정한 직원별 권한으로 사용합니다.',defaultView:'dashboard',views,actions:[['patients','환자 작업공간'],['followup','후속관리'],['pilot','운영 통계'],['account','내 계정']].filter(x=>views.includes(x[0])).slice(0,3)};}
 function roleUiCanView(view){if(['contentStudio','admin'].includes(view))return !!operatorUnlocked;return roleUiProfile().views.includes(String(view||''));}
-function renderRoleWorkspace(){const p=roleUiProfile(),role=roleUiRole();document.body.dataset.carestepRole=role;if($('roleWorkspaceBadge'))$('roleWorkspaceBadge').textContent=p.label;if($('roleWorkspaceTitle'))$('roleWorkspaceTitle').textContent=p.title;if($('roleWorkspaceDescription'))$('roleWorkspaceDescription').textContent=p.description;const actions=$('roleWorkspaceActions');if(actions)actions.innerHTML=p.actions.map(([view,label],i)=>`<button class="btn ${i===0?'btn-primary':'btn-secondary'}" type="button" data-go="${escapeHtml(view)}">${escapeHtml(label)}</button>`).join('');const followLabel=document.querySelector('.nav-item[data-view="followup"] .nav-copy b');if(followLabel)followLabel.textContent=role==='staff'?'상담 · 발송':role==='admin'?'발송 설정':role==='vet'?'Journey · 후속관리':'후속관리';}
-function settingsCanManage(){return saasMode==='demo'||['owner','admin'].includes(saasMe?.role||'');}
+function renderRoleWorkspace(){const p=roleUiProfile(),role=roleUiRole();document.body.dataset.carestepRole=saasCustomPermissions()?'custom':role;if($('roleWorkspaceBadge'))$('roleWorkspaceBadge').textContent=p.label;if($('roleWorkspaceTitle'))$('roleWorkspaceTitle').textContent=p.title;if($('roleWorkspaceDescription'))$('roleWorkspaceDescription').textContent=p.description;const actions=$('roleWorkspaceActions');if(actions)actions.innerHTML=p.actions.map(([view,label],i)=>`<button class="btn ${i===0?'btn-primary':'btn-secondary'}" type="button" data-go="${escapeHtml(view)}">${escapeHtml(label)}</button>`).join('');const followLabel=document.querySelector('.nav-item[data-view="followup"] .nav-copy b');if(followLabel)followLabel.textContent=role==='staff'?'상담 · 발송':role==='admin'?'발송 설정':role==='vet'?'Journey · 후속관리':'후속관리';}
+function settingsCanManage(){return saasPermission('settings.manage',saasMode==='demo'||['owner','admin'].includes(saasMe?.role||''));}
 function settingsScrollTo(selector){setTimeout(()=>{const el=document.querySelector(selector);if(!el)return;el.scrollIntoView({behavior:'smooth',block:'start'});const input=el.matches('input,select,button')?el:el.querySelector('input,select,button');input?.focus?.({preventScroll:true});},100);}
 function openSettingsCategory(action){
   if(!settingsCanManage()){toast('운영 설정은 원장·관리자만 사용할 수 있습니다.');go(roleUiProfile().defaultView);return;}
@@ -3725,12 +3840,14 @@ function saasAuthHeaders(extra={}){
   return {...extra,'Authorization':'Bearer '+saasToken,'Accept':'application/json'};
 }
 async function saasRawRequest(path,opt={}){
+  saasCheckPermissionRequest(path,opt);
   const base=saasEndpoint();if(!base)throw new Error('Worker API URL을 입력해주세요.');
   const headers={...(opt.headers||{})};
   if(opt.auth!==false&&saasToken)headers['Authorization']='Bearer '+saasToken;
   if(opt.body&&!headers['Content-Type'])headers['Content-Type']='application/json';
   const r=await fetch(base+path,{...opt,headers,cache:'no-store'});
   let d={};try{d=await r.json()}catch{}
+  if(d.details?.code==='CLINIC_PERMISSION_DENIED'&&path!=='/saas/me')void saasRefreshPermissions(true);
   if(!r.ok||d.ok===false)throw Object.assign(new Error(d.error||`HTTP ${r.status}`),{status:r.status,details:d.details||null});
   return d;
 }
@@ -3740,7 +3857,7 @@ window.addEventListener('r61-auth-ready',()=>{clinicReadCoordinator?.invalidate(
 function clinicReadScope(){return JSON.stringify([saasToken,saasMe?.clinic?.id,saasMe?.user?.id]);}
 function clinicReadAllowed(path){return ['/saas/patient-journeys','/saas/messaging/settings','/saas/followup/messages?limit=50'].includes(path);}
 function clinicReadNotice(at,reused){const host=$('followup');if(!host)return;let notice=$('clinicReadNotice');if(!notice){notice=document.createElement('div');notice.id='clinicReadNotice';notice.className='care-read-notice';notice.setAttribute('role','status');const text=document.createElement('span'),button=document.createElement('button');text.dataset.readNotice='1';button.type='button';button.className='btn btn-secondary';button.textContent='지금 다시 확인';button.onclick=()=>{clinicReadCoordinator?.invalidate();loadPatientJourneys(false);loadMessagingSettings(false);loadMessagingJobs(false);loadServerFollowupState(true);};notice.append(text,button);host.prepend(notice);}notice.querySelector('[data-read-notice]').textContent=(reused?'최근 조회 내용':'서버 확인')+' · '+new Date(at).toLocaleTimeString('ko-KR');}
-async function saasRequest(path,opt={}){const {reuseNavigation=false,...requestOptions}=opt;const read=(opt.method||'GET').toUpperCase()==='GET';if(!window.CarestepClinicReadFactory)return saasRawRequest(path,requestOptions);if(!clinicReadCoordinator)clinicReadCoordinator=window.CarestepClinicReadFactory({scope:clinicReadScope});if(!read){clinicReadCoordinator.invalidate();try{return await saasRawRequest(path,requestOptions);}finally{clinicReadCoordinator.invalidate();}}if(!clinicReadAllowed(path))return saasRawRequest(path,requestOptions);const result=await clinicReadCoordinator.read(saasEndpoint()+path,()=>saasRawRequest(path,requestOptions),{reuse:reuseNavigation});if(document.querySelector('.view.active-view')?.id==='followup')clinicReadNotice(result.checkedAt,result.reused);return result.value;}
+async function saasRequest(path,opt={}){saasCheckPermissionRequest(path,opt);const {reuseNavigation=false,...requestOptions}=opt;const read=(opt.method||'GET').toUpperCase()==='GET';if(!window.CarestepClinicReadFactory)return saasRawRequest(path,requestOptions);if(!clinicReadCoordinator)clinicReadCoordinator=window.CarestepClinicReadFactory({scope:clinicReadScope});if(!read){clinicReadCoordinator.invalidate();try{return await saasRawRequest(path,requestOptions);}finally{clinicReadCoordinator.invalidate();}}if(!clinicReadAllowed(path))return saasRawRequest(path,requestOptions);const result=await clinicReadCoordinator.read(saasEndpoint()+path,()=>saasRawRequest(path,requestOptions),{reuse:reuseNavigation});if(document.querySelector('.view.active-view')?.id==='followup')clinicReadNotice(result.checkedAt,result.reused);return result.value;}
 
 const multiStaffLocks=new Map();
 let multiStaffHeartbeatTimer=null,followupSafetyState=null;
@@ -3749,7 +3866,7 @@ function renderMultiStaffLocks(){
   const follow=multiStaffLocks.get(multiStaffKey('followup_case',followupCaseNonce)),protocol=saasMe?.clinic?.id?multiStaffLocks.get(multiStaffKey('clinical_protocol',saasMe.clinic.id)):null;
   const setBadge=(id,state,empty)=>{const el=$(id);if(!el)return;el.classList.toggle('blocked',!!state?.blocked);el.textContent=state?.blocked?`${state.ownerName||'다른 직원'} 편집 중`:state?.ownedByMe?'내가 편집 중':empty;};
   setBadge('followupEditLock',follow,serverFollowupState?'편집 가능':'환자 연결 대기');setBadge('clinicalProtocolEditLock',protocol,'편집 가능');
-  const followBlocked=!!follow?.blocked||!['owner','admin','vet'].includes(saasMe?.role||''),protocolBlocked=!!protocol?.blocked||!['owner','admin','vet'].includes(saasMe?.role||'');
+  const followBlocked=!!follow?.blocked||!saasPermission('followup.manage',['owner','admin','vet'].includes(saasMe?.role||'')),protocolBlocked=!!protocol?.blocked||!saasPermission('settings.manage',['owner','admin','vet'].includes(saasMe?.role||''));
   ['followupAssignee','followupVet','saveFollowupAssignment'].forEach(id=>{if($(id))$(id).disabled=followBlocked;});
   if($('saveClinicalProtocol'))$('saveClinicalProtocol').disabled=protocolBlocked;if($('resetClinicalProtocol'))$('resetClinicalProtocol').disabled=protocolBlocked;
 }
@@ -3757,7 +3874,7 @@ function startMultiStaffHeartbeat(){if(multiStaffHeartbeatTimer)return;multiStaf
 async function acquireMultiStaffLock(resourceType,resourceId,silent=true){if(saasMode!=='auth'||!saasToken||!resourceId)return null;const key=multiStaffKey(resourceType,resourceId),current=multiStaffLocks.get(key);if(current?.ownedByMe&&current.editToken)return current;try{const d=await saasRequest('/saas/edit-locks/acquire',{method:'POST',body:JSON.stringify({resourceType,resourceId})}),lock={...(d.lock||{}),resourceType,resourceId,editToken:d.editToken||'',ownedByMe:true,blocked:false};multiStaffLocks.set(key,lock);startMultiStaffHeartbeat();renderMultiStaffLocks();return lock;}catch(e){if(e.status===423){const lock={resourceType,resourceId,blocked:true,ownedByMe:false,ownerName:e.details?.ownerName||'다른 직원',expiresAt:e.details?.expiresAt||''};multiStaffLocks.set(key,lock);renderMultiStaffLocks();if(!silent)toast(`${lock.ownerName}님이 현재 편집 중입니다.`);return lock;}if(!silent)toast(e.message||'편집 잠금을 가져오지 못했습니다.');return null;}}
 async function releaseMultiStaffLock(resourceType,resourceId){const key=multiStaffKey(resourceType,resourceId),lock=multiStaffLocks.get(key);multiStaffLocks.delete(key);renderMultiStaffLocks();if(!lock?.ownedByMe||!lock.editToken)return;try{await saasRequest('/saas/edit-locks/release',{method:'POST',body:JSON.stringify({resourceType,resourceId,editToken:lock.editToken})});}catch{}}
 function safetyActionLabel(action){return ({'assignment.updated':'담당자 변경','lock.acquired':'편집 시작','lock.released':'편집 종료'})[action]||String(action||'변경');}
-function renderFollowupSafety(){const state=followupSafetyState||{},members=state.members||[],assignment=state.assignment||{},canAssign=['owner','admin','vet'].includes(saasMe?.role||'');const fill=(id,placeholder,value,filter=()=>true)=>{const el=$(id);if(!el)return;el.innerHTML=`<option value="">${placeholder}</option>`+members.filter(filter).map(x=>`<option value="${escapeHtml(x.userId)}">${escapeHtml(x.displayName)} · ${escapeHtml(saasRoleLabel(x.role))}</option>`).join('');el.value=value||'';};fill('followupAssignee','실무 담당자 미지정',assignment.assigneeUserId);fill('followupVet','담당 수의사 미지정',assignment.vetUserId,x=>['owner','admin','vet'].includes(x.role));const audit=$('followupSafetyAudit');if(audit){const rows=state.audits||[];audit.innerHTML=rows.length?rows.map(x=>`<div class="safety-audit-row"><b>${escapeHtml(safetyActionLabel(x.action))}</b> · ${escapeHtml(x.actorName||'병원 직원')} · ${escapeHtml(new Date(x.createdAt).toLocaleString('ko-KR'))}</div>`).join(''):'<div class="safety-audit-row">변경 이력이 없습니다.</div>';}if($('saveFollowupAssignment'))$('saveFollowupAssignment').disabled=!canAssign;renderMultiStaffLocks();}
+function renderFollowupSafety(){const state=followupSafetyState||{},members=state.members||[],assignment=state.assignment||{},canAssign=saasPermission('followup.manage',['owner','admin','vet'].includes(saasMe?.role||''));const fill=(id,placeholder,value,filter=()=>true)=>{const el=$(id);if(!el)return;el.innerHTML=`<option value="">${placeholder}</option>`+members.filter(filter).map(x=>`<option value="${escapeHtml(x.userId)}">${escapeHtml(x.displayName)} · ${escapeHtml(saasRoleLabel(x.role))}</option>`).join('');el.value=value||'';};fill('followupAssignee','실무 담당자 미지정',assignment.assigneeUserId);fill('followupVet','담당 수의사 미지정',assignment.vetUserId,x=>['owner','admin','vet'].includes(x.role));const audit=$('followupSafetyAudit');if(audit){const rows=state.audits||[];audit.innerHTML=rows.length?rows.map(x=>`<div class="safety-audit-row"><b>${escapeHtml(safetyActionLabel(x.action))}</b> · ${escapeHtml(x.actorName||'병원 직원')} · ${escapeHtml(new Date(x.createdAt).toLocaleString('ko-KR'))}</div>`).join(''):'<div class="safety-audit-row">변경 이력이 없습니다.</div>';}if($('saveFollowupAssignment'))$('saveFollowupAssignment').disabled=!canAssign;renderMultiStaffLocks();}
 async function loadFollowupSafety(silent=true){if(!serverFollowupState||saasMode!=='auth')return null;try{followupSafetyState=await saasRequest(`/saas/followup/cases/${encodeURIComponent(followupCaseNonce)}/safety`);renderFollowupSafety();await acquireMultiStaffLock('followup_case',followupCaseNonce,silent);return followupSafetyState;}catch(e){followupSafetyState=null;renderFollowupSafety();if(!silent&&e.status!==404)toast(e.message||'담당자 정보를 불러오지 못했습니다.');return null;}}
 async function saveFollowupAssignment(){if(!followupSafetyState)return;try{await acquireMultiStaffLock('followup_case',followupCaseNonce,false);const lock=multiStaffLocks.get(multiStaffKey('followup_case',followupCaseNonce));if(lock?.blocked)return;await saasRequest(`/saas/followup/cases/${encodeURIComponent(followupCaseNonce)}/safety`,{method:'PUT',body:JSON.stringify({assigneeUserId:$('followupAssignee')?.value||'',vetUserId:$('followupVet')?.value||'',expectedRevision:followupSafetyState.revision})});await Promise.allSettled([loadServerFollowupState(true),loadFollowupSafety(true)]);toast('후속관리 담당자를 저장했습니다.');}catch(e){if(e.status===409)await loadFollowupSafety(true);toast(e.message||'담당자를 저장하지 못했습니다.');}}
 function saasSelectAuth(mode){
@@ -3841,7 +3958,7 @@ function saasCanView(view){
   if(['contentStudio','admin'].includes(view))return operatorUnlocked;
   if(saasMode==='demo'||!saasMe)return true;
   if(!roleUiCanView(view))return false;
-  const r=saasMe.role;
+  const r=saasCustomPermissions()?'custom':saasMe.role;
   if(r==='staff'&&['settings','contentStudio','admin','onboarding'].includes(view))return false;
   if(r==='vet'&&['settings','admin','onboarding'].includes(view))return false;
   if(r==='admin'&&view==='admin')return false;
@@ -3862,10 +3979,10 @@ function applySaasPermissions(){
   const role=saasMode==='demo'?'owner':saasMe?.role||'staff';
   document.querySelectorAll('.nav-item').forEach(n=>{const v=n.dataset.view;n.classList.toggle('saas-hidden',!saasCanView(v));});
   document.querySelectorAll('[data-go="settings"]').forEach(n=>n.classList.toggle('saas-hidden',!settingsCanManage()));
-  if($('settingsRoleBadge'))$('settingsRoleBadge').textContent=role==='owner'?'원장 · 전체 설정':role==='admin'?'관리자 · 운영 설정':'접근 제한';
+  if($('settingsRoleBadge'))$('settingsRoleBadge').textContent=settingsCanManage()?'운영 설정 사용 가능':'접근 제한';
   if($('saasRoleBadge'))$('saasRoleBadge').textContent=saasMode==='demo'?'LOCAL DEMO':saasRoleLabel(role);
   if($('saasPlanPill')){const ch=saasMe?.clinic?.subscriptionChannel;$('saasPlanPill').textContent=saasMode==='demo'?'LOCAL · DEMO':`${ch?.channel==='partner'?'PARTNER':'DIRECT'} · ${saasMe?.entitlements?.plan?.displayName||saasMe?.clinic?.plan||'PILOT'} · ${saasMe?.entitlements?.subscription?.status||'active'} · ${role.toUpperCase()}`;}
-  const canManage=saasMode==='auth'&&['owner','admin'].includes(role)&&saasHasFeature('teamManagement');
+  const canManage=saasMode==='auth'&&saasPermission('team.manage',['owner','admin'].includes(role))&&saasHasFeature('teamManagement');
   $('saasInviteControls')?.classList.toggle('saas-hidden',!canManage);
   const visibleManage=[...document.querySelectorAll('#navManageGroup .nav-item')].some(n=>!n.classList.contains('saas-hidden'));document.querySelector('.nav-manage')?.classList.toggle('role-ui-hidden',!visibleManage);document.querySelector('.nav-divider')?.classList.toggle('role-ui-hidden',!visibleManage);
   renderRoleWorkspace();applyAccountRoleVisibility();
@@ -3911,7 +4028,7 @@ async function saasDownloadCloud(){
   }catch(e){toast(e.message||'클라우드 불러오기 실패');if(btn){btn.classList.add('ux-error');btn.textContent='다시 시도';}}finally{if(btn)setTimeout(()=>{if(btn.isConnected){btn.disabled=false;btn.classList.remove('ux-busy','ux-error');btn.textContent=old||'클라우드 설정 불러오기';}},1000);}
 }
 function scheduleClinicCloudSync(){
-  if(saasMode!=='auth'||!saasMe||!saasCloudBound()||!['owner','admin','vet'].includes(saasMe.role)||!saasHasFeature('cloudSync'))return;
+  if(saasMode!=='auth'||!saasMe||!saasCloudBound()||!saasPermission('settings.manage',['owner','admin','vet'].includes(saasMe.role))||!saasHasFeature('cloudSync'))return;
   clearTimeout(saasCloudTimer);saasCloudTimer=setTimeout(()=>saasUploadCloud(true),900);
 }
 function uxEmptyState(title,desc,action='',label='바로가기'){
@@ -3924,14 +4041,11 @@ async function uxButtonTask(btn,pendingText,successText,fn,{resetText='',errorTe
   try{const r=await fn();btn.classList.remove('ux-busy');btn.classList.add('ux-done');btn.textContent=successText;setTimeout(()=>{if(btn.isConnected){btn.disabled=false;btn.classList.remove('ux-done');btn.textContent=old;}},successMs);return r;}catch(e){btn.classList.remove('ux-busy');btn.classList.add('ux-error');btn.textContent=errorText;setTimeout(()=>{if(btn.isConnected){btn.disabled=false;btn.classList.remove('ux-error');btn.textContent=old;}},1500);throw e;}
 }
 function applyAccountRoleVisibility(){
-  const role=saasMode==='auth'&&saasMe?saasMe.role:'owner',manager=['owner','admin'].includes(role);const restricted=new Set(['team','billing']);
-  document.querySelectorAll('[data-account-tab]').forEach(b=>b.classList.toggle('ux-role-hidden',!manager&&restricted.has(b.dataset.accountTab)));
-  document.querySelectorAll('[data-account-pane]').forEach(p=>p.classList.toggle('ux-role-hidden',!manager&&restricted.has(p.dataset.accountPane)));
-  document.querySelectorAll('[data-account-open-tab]').forEach(b=>b.classList.toggle('ux-role-hidden',!manager&&restricted.has(b.dataset.accountOpenTab)));
+  const role=saasMode==='auth'&&saasMe?saasMe.role:'owner',manager=['owner','admin'].includes(role),allowed={team:saasPermission('team.manage',manager),billing:saasPermission('billing.manage',manager)};
+  for(const [attr,key] of [['data-account-tab','accountTab'],['data-account-pane','accountPane'],['data-account-open-tab','accountOpenTab']])document.querySelectorAll('['+attr+']').forEach(el=>el.classList.toggle('ux-role-hidden',allowed[el.dataset[key]]===false));
   const active=document.querySelector('[data-account-tab].active');if(active?.classList.contains('ux-role-hidden'))setAccountTab('my');
-  $('configBackupPanel')?.classList.toggle('ux-role-hidden',!manager);
-  $('clinicDeletionBox')?.classList.toggle('ux-role-hidden',!manager);
-  const tabs=$('accountTabs');if(tabs)tabs.setAttribute('aria-label',manager?'계정 설정 메뉴':'내 계정 · 보안 · 약관 설정');
+  $('configBackupPanel')?.classList.toggle('ux-role-hidden',!saasPermission('settings.manage',manager));
+  $('clinicDeletionBox')?.classList.toggle('ux-role-hidden',role!=='owner');
 }
 
 async function saasLoadMembers(){
@@ -3940,12 +4054,13 @@ async function saasLoadMembers(){
 }
 function renderSaasMembers(rows){
   const el=$('saasMemberList');if(!el)return;if($('saasMemberCount'))$('saasMemberCount').textContent=`${rows.length}명`;if($('accountUxMembers'))$('accountUxMembers').textContent=`${rows.length}명`;
-  const can=saasMode==='auth'&&['owner','admin'].includes(saasMe?.role)&&saasHasFeature('teamManagement');
+  const can=saasMode==='auth'&&saasPermission('team.manage',['owner','admin'].includes(saasMe?.role))&&saasHasFeature('teamManagement');
   if(!rows.length){el.innerHTML=uxEmptyState(can?'아직 직원 계정이 없습니다.':'등록된 직원이 없습니다.',can?'첫 직원을 초대하면 각자 계정으로 CARESTEP을 사용할 수 있습니다.':'Owner/Admin이 직원을 초대하면 여기에 표시됩니다.',can?'invite':'',can?'첫 직원 초대하기':'');bindUxEmptyActions(el);return;}
   el.innerHTML=rows.map(x=>{
-    const owner=x.role==='owner',disabled=!can||owner;
-    return `<div class="saas-member" data-member-id="${escapeHtml(x.membershipId)}"><div><b>${escapeHtml(x.displayName)}</b><small>${escapeHtml(x.email)} · ${escapeHtml(saasRoleLabel(x.role))}</small></div><select class="input" data-member-role ${disabled?'disabled':''}><option value="staff" ${x.role==='staff'?'selected':''}>Staff</option><option value="vet" ${x.role==='vet'?'selected':''}>Vet</option><option value="admin" ${x.role==='admin'?'selected':''}>Admin</option>${owner?'<option value="owner" selected>Owner</option>':''}</select><select class="input" data-member-status ${disabled?'disabled':''}><option value="active" ${x.status==='active'?'selected':''}>정상</option><option value="suspended" ${x.status==='suspended'?'selected':''}>중지</option></select><button class="btn btn-secondary" data-member-save type="button" ${disabled?'disabled':''}>저장</button><button class="btn btn-ghost" data-member-revoke type="button" ${disabled?'disabled':''}>세션종료</button></div>`;
+    const owner=x.role==='owner',disabled=!can||owner||(x.userId===saasMe?.user?.id&&saasMe?.role!=='owner');
+    return `<div class="saas-member" data-member-id="${escapeHtml(x.membershipId)}" data-permission-revision="${escapeHtml(x.permissions?.revision||'')}"><div><b>${escapeHtml(x.displayName)}</b><small>${escapeHtml(x.email)} · ${escapeHtml(saasRoleLabel(x.role))}</small></div><select class="input" data-member-role ${disabled?'disabled':''}><option value="staff" ${x.role==='staff'?'selected':''}>Staff</option><option value="vet" ${x.role==='vet'?'selected':''}>Vet</option><option value="admin" ${x.role==='admin'?'selected':''}>Admin</option>${owner?'<option value="owner" selected>Owner</option>':''}</select><select class="input" data-member-status ${disabled?'disabled':''}><option value="active" ${x.status==='active'?'selected':''}>정상</option><option value="suspended" ${x.status==='suspended'?'selected':''}>중지</option></select><button class="btn btn-secondary" data-member-save type="button" ${disabled?'disabled':''}>저장</button><button class="btn btn-ghost" data-member-revoke type="button" ${disabled?'disabled':''}>세션종료</button>${permissionMemberEditor(x,can)}</div>`;
   }).join('');
+  bindMemberPermissions(el);
   el.querySelectorAll('[data-member-save]').forEach(b=>b.addEventListener('click',()=>saasSaveMember(b.closest('[data-member-id]'))));
   el.querySelectorAll('[data-member-revoke]').forEach(b=>b.addEventListener('click',()=>saasRevokeMemberSessions(b.closest('[data-member-id]'))));
 }
@@ -3955,7 +4070,7 @@ async function saasCreateInvite(){
   }catch(e){toast(e.message||'초대코드 생성 실패');}
 }
 async function saasSaveMember(card){
-  if(!card)return;const btn=card.querySelector('[data-member-save]');try{await uxButtonTask(btn,'저장 중…','✓ 저장됨',async()=>{await saasRequest('/saas/members/'+encodeURIComponent(card.dataset.memberId),{method:'PATCH',body:JSON.stringify({role:card.querySelector('[data-member-role]')?.value,status:card.querySelector('[data-member-status]')?.value})});toast('직원 권한을 저장했습니다.');await saasLoadMembers();},{resetText:'저장'});}catch(e){toast(e.message||'권한 저장 실패');}
+  if(!card)return;const btn=card.querySelector('[data-member-save]');try{await uxButtonTask(btn,'저장 중…','✓ 저장됨',async()=>{await saasRequest('/saas/members/'+encodeURIComponent(card.dataset.memberId),{method:'PATCH',body:JSON.stringify({role:card.querySelector('[data-member-role]')?.value,status:card.querySelector('[data-member-status]')?.value,expectedRevision:card.dataset.permissionRevision||'',...(saasMe?.role==='owner'?{permissions:{mode:card.querySelector('[data-permission-mode]')?.value||'default',keys:[...card.querySelectorAll('[data-permission-key]:checked')].map(x=>x.dataset.permissionKey)}}:{})})});toast('직원 권한을 저장했습니다.');await saasLoadMembers();},{resetText:'저장'});}catch(e){toast(e.message||'권한 저장 실패');}
 }
 async function saasRevokeMemberSessions(card){
   if(!card)return;if(!confirm('이 직원의 이 병원 로그인 세션을 모두 종료할까요?'))return;
@@ -3989,11 +4104,11 @@ async function saasLogClientError(area,code,message){
   if(saasMode!=='auth'||!saasToken)return;try{await saasRequest('/saas/client-error',{method:'POST',body:JSON.stringify({area:String(area||'').slice(0,100),code:String(code||'').slice(0,40),message:String(message||'').slice(0,300)})});}catch{}
 }
 async function saasLoadDiagnostics(){
-  if(saasMode!=='auth'||!['owner','admin'].includes(saasMe?.role||'')){saasDiagnostics=[];renderSaasDiagnostics();return;}
+  if(saasMode!=='auth'||!saasPermission('settings.manage',['owner','admin'].includes(saasMe?.role||''))){saasDiagnostics=[];renderSaasDiagnostics();return;}
   try{const d=await saasRequest('/saas/diagnostics',{method:'GET'});saasDiagnostics=d.errors||[];renderSaasDiagnostics();}catch{saasDiagnostics=[];renderSaasDiagnostics();}
 }
 function renderSaasDiagnostics(){
-  const el=$('saasDiagnostics');if(!el)return;if(!['owner','admin'].includes(saasMe?.role||'')){el.innerHTML='<div class="saas-diag-row">Owner/Admin에서만 진단 로그를 확인합니다.</div>';return;}if(!saasDiagnostics.length){el.innerHTML='<div class="saas-diag-row">최근 기록된 서버·동기화 오류가 없습니다.</div>';return;}el.innerHTML=saasDiagnostics.slice(0,8).map(x=>`<div class="saas-diag-row"><b>${escapeHtml(x.area||'system')}</b> · ${escapeHtml(x.message||'')}<br>${new Date(x.createdAt).toLocaleString('ko-KR')}</div>`).join('');
+  const el=$('saasDiagnostics');if(!el)return;if(!saasPermission('settings.manage',['owner','admin'].includes(saasMe?.role||''))){el.innerHTML='<div class="saas-diag-row">Owner/Admin에서만 진단 로그를 확인합니다.</div>';return;}if(!saasDiagnostics.length){el.innerHTML='<div class="saas-diag-row">최근 기록된 서버·동기화 오류가 없습니다.</div>';return;}el.innerHTML=saasDiagnostics.slice(0,8).map(x=>`<div class="saas-diag-row"><b>${escapeHtml(x.area||'system')}</b> · ${escapeHtml(x.message||'')}<br>${new Date(x.createdAt).toLocaleString('ko-KR')}</div>`).join('');
 }
 async function saasLoadUsage(){
   if(saasMode!=='auth')return;try{saasUsageSummary=await saasRequest('/saas/usage/summary',{method:'GET'});renderSaasAccount();}catch{}
@@ -4080,10 +4195,10 @@ function renderProductionGovernance(){
   const auth=saasMode==='auth'&&saasMe,role=auth?saasMe.role:'',legal=legalStatusState||{},badge=$('legalStatusBadge');if(badge){badge.className='ai-conn-badge '+(legal.accepted?'on':'off');badge.textContent=!auth?'로그인 필요':legal.accepted?'최신 동의 완료':'동의 필요';}
   if($('legalStatusText'))$('legalStatusText').textContent=!auth?'로그인 후 확인합니다.':legal.accepted?`최신 약관 동의 완료 · ${legal.acceptedAt?new Date(legal.acceptedAt).toLocaleString('ko-KR'):''} · 약관 ${legal.termsVersion} / 개인정보 ${legal.privacyVersion}`:`최신 약관 동의가 필요합니다. 결제수단 등록·플랜 변경 전에 완료해주세요. · 약관 ${legal.termsVersion||'-'} / 개인정보 ${legal.privacyVersion||'-'}`;
   $('legalAcceptanceControls')?.classList.toggle('hidden',!auth||!!legal.accepted);
-  const canBackup=auth&&['owner','admin'].includes(role);if($('createConfigBackupBtn'))$('createConfigBackupBtn').disabled=!canBackup;const box=$('configBackupList');if(box)box.innerHTML=!canBackup?'<div class="voice-empty">Owner/Admin 계정에서 구성백업을 관리합니다.</div>':configBackupsState.length?configBackupsState.map(x=>`<div class="governance-list-item"><div><b>${escapeHtml(new Date(x.createdAt).toLocaleString('ko-KR'))} · ${escapeHtml(x.reason||'manual')}</b><span>${Math.max(1,Math.round(Number(x.bytes||0)/1024))}KB · checksum ${escapeHtml(String(x.checksum||'').slice(0,12))}…${x.restoredAt?` · 복구 ${escapeHtml(new Date(x.restoredAt).toLocaleString('ko-KR'))}`:''}</span></div><button class="btn btn-ghost" type="button" data-restore-backup="${escapeHtml(x.id)}">복구</button></div>`).join(''):uxEmptyState('아직 구성백업이 없습니다.','처음 한 번 백업해두면 설정 변경이나 복구가 필요할 때 안전하게 돌아갈 수 있습니다.','backup','첫 백업 만들기');bindUxEmptyActions(box);box?.querySelectorAll('[data-restore-backup]').forEach(b=>b.onclick=()=>restoreConfigBackup(b.dataset.restoreBackup));
+  const canBackup=auth&&saasPermission('settings.manage',['owner','admin'].includes(role));if($('createConfigBackupBtn'))$('createConfigBackupBtn').disabled=!canBackup;const box=$('configBackupList');if(box)box.innerHTML=!canBackup?'<div class="voice-empty">Owner/Admin 계정에서 구성백업을 관리합니다.</div>':configBackupsState.length?configBackupsState.map(x=>`<div class="governance-list-item"><div><b>${escapeHtml(new Date(x.createdAt).toLocaleString('ko-KR'))} · ${escapeHtml(x.reason||'manual')}</b><span>${Math.max(1,Math.round(Number(x.bytes||0)/1024))}KB · checksum ${escapeHtml(String(x.checksum||'').slice(0,12))}…${x.restoredAt?` · 복구 ${escapeHtml(new Date(x.restoredAt).toLocaleString('ko-KR'))}`:''}</span></div><button class="btn btn-ghost" type="button" data-restore-backup="${escapeHtml(x.id)}">복구</button></div>`).join(''):uxEmptyState('아직 구성백업이 없습니다.','처음 한 번 백업해두면 설정 변경이나 복구가 필요할 때 안전하게 돌아갈 수 있습니다.','backup','첫 백업 만들기');bindUxEmptyActions(box);box?.querySelectorAll('[data-restore-backup]').forEach(b=>b.onclick=()=>restoreConfigBackup(b.dataset.restoreBackup));
   const del=clinicDeletionState?.request;if($('clinicDeletionConfirm'))$('clinicDeletionConfirm').placeholder=auth?`병원명 입력: ${saasMe.clinic.name}`:'삭제 요청 시 병원명 입력';if($('clinicDeletionStatus'))$('clinicDeletionStatus').textContent=!auth?'로그인 후 확인합니다.':del?del.status==='requested'?`삭제 요청 접수 · 실행 가능일 ${new Date(del.executeAfter).toLocaleString('ko-KR')} · HQ 확인 후 실행`:del.status==='executed'?`삭제 실행 완료 ${new Date(del.executedAt).toLocaleString('ko-KR')}`:`최근 요청 상태: ${del.status}`:'현재 처리 중인 병원 데이터 삭제 요청이 없습니다.';if($('requestClinicDeletionBtn'))$('requestClinicDeletionBtn').disabled=!(auth&&role==='owner')||del?.status==='requested';$('cancelClinicDeletionBtn')?.classList.toggle('hidden',!(auth&&role==='owner'&&del?.status==='requested'));if($('withdrawAccountBtn'))$('withdrawAccountBtn').disabled=!auth;
 }
-async function loadProductionGovernance(showToast=false){if(saasMode!=='auth'||!saasMe){legalStatusState=null;configBackupsState=[];clinicDeletionState=null;renderProductionGovernance();return;}try{const jobs=[saasRequest('/saas/legal/status',{method:'GET'}),loadLegalDocs(),['owner','admin'].includes(saasMe.role)?saasRequest('/saas/backups',{method:'GET'}):Promise.resolve({backups:[]}),saasMe.role==='owner'?saasRequest('/saas/clinic/deletion-request',{method:'GET'}):Promise.resolve({request:null})],r=await Promise.all(jobs);legalStatusState=r[0];configBackupsState=r[2]?.backups||[];clinicDeletionState=r[3]||{request:null};renderProductionGovernance();if(showToast)toast('상용 운영 설정을 새로고침했습니다.');}catch(e){if(showToast)toast(e.message||'상용 운영 설정 조회 실패');renderProductionGovernance();}}
+async function loadProductionGovernance(showToast=false){if(saasMode!=='auth'||!saasMe){legalStatusState=null;configBackupsState=[];clinicDeletionState=null;renderProductionGovernance();return;}try{const jobs=[saasRequest('/saas/legal/status',{method:'GET'}),loadLegalDocs(),saasPermission('settings.manage',['owner','admin'].includes(saasMe.role))?saasRequest('/saas/backups',{method:'GET'}):Promise.resolve({backups:[]}),saasMe.role==='owner'?saasRequest('/saas/clinic/deletion-request',{method:'GET'}):Promise.resolve({request:null})],r=await Promise.all(jobs);legalStatusState=r[0];configBackupsState=r[2]?.backups||[];clinicDeletionState=r[3]||{request:null};renderProductionGovernance();if(showToast)toast('상용 운영 설정을 새로고침했습니다.');}catch(e){if(showToast)toast(e.message||'상용 운영 설정 조회 실패');renderProductionGovernance();}}
 async function acceptCurrentLegal(){if(!$('accountTermsAgree')?.checked||!$('accountPrivacyAgree')?.checked){toast('이용약관과 개인정보 처리방침을 모두 확인하고 동의해주세요.');return;}try{legalStatusState=await saasRequest('/saas/legal/accept',{method:'POST',body:JSON.stringify({termsAccepted:true,privacyAccepted:true})});renderProductionGovernance();toast('최신 약관 동의가 기록되었습니다.');}catch(e){toast(e.message||'약관 동의 처리 실패');}}
 async function createConfigBackup(){if(!confirm('현재 병원 설정의 구성백업을 생성할까요?\n\n환자 케이스·결제키는 백업에 포함하지 않습니다.'))return;const btn=$('createConfigBackupBtn');try{await uxButtonTask(btn,'백업 중…','✓ 백업 완료',async()=>{const d=await saasRequest('/saas/backups',{method:'POST',body:JSON.stringify({reason:'manual_account'})});configBackupsState=d.backups||[];renderProductionGovernance();toast('구성백업을 생성했습니다.');},{resetText:'지금 백업'});}catch(e){toast(e.message||'백업 생성 실패');}}
 async function restoreConfigBackup(id){if(!confirm('선택한 구성백업으로 병원 설정을 복구할까요?\n\n복구 직전 상태도 자동으로 백업합니다. 결제·구독 정보는 변경하지 않습니다.'))return;try{const d=await saasRequest('/saas/backups/'+encodeURIComponent(id)+'/restore',{method:'POST'});configBackupsState=d.backups||configBackupsState;await saasRefreshAccount(false);toast('구성백업 복구가 완료되었습니다.');}catch(e){toast(e.message||'백업 복구 실패');}}
@@ -4130,7 +4245,7 @@ function renderSaasAccount(){queueMicrotask(()=>r19RefreshGoogleStatus());
   if(badge){if(!auth){badge.className='ai-conn-badge off';badge.textContent='로컬';}else if(saasCloudMeta?.conflict){badge.className='ai-conn-badge error';badge.textContent='충돌 감지';}else if(saasCloudMeta?.state){badge.className='ai-conn-badge on';badge.textContent='클라우드 저장됨';}else{badge.className='ai-conn-badge off';badge.textContent='첫 동기화 필요';}}
   if(note){note.classList.toggle('saas-sync-conflict',!!saasCloudMeta?.conflict);note.textContent=!auth?'SaaS 로그인 후 클라우드 동기화를 사용할 수 있습니다.':saasCloudMeta?.conflict?(saasCloudMeta.error||'다른 PC의 변경을 먼저 불러와야 합니다.'):saasCloudMeta?.updatedAt?`클라우드 v${saasCloudMeta.version||0} · 최종 저장 ${new Date(saasCloudMeta.updatedAt).toLocaleString('ko-KR')} · ${saasCloudBound()?'자동 동기화 ON':'업로드/불러오기 후 자동 동기화 시작'}`:'클라우드에 저장된 설정이 없습니다. 현재 설정을 한 번 업로드하면 이후 병원정보·프리셋 변경이 자동 동기화됩니다.';}
   const security=$('saasSecurityBadge'),sessionCount=auth?(saasSessions.length||1):0;if(security){security.className='ai-conn-badge '+(auth?'on':'off');security.textContent=auth?`${sessionCount} 세션`:'로그인 필요';}if($('accountUxSecurity'))$('accountUxSecurity').textContent=auth?`정상 · ${sessionCount}`:'--';
-  $('saasInviteControls')?.classList.toggle('saas-hidden',!(auth&&['owner','admin'].includes(role)&&saasHasFeature('teamManagement')));renderSubscriptionAccess();applyAccountRoleVisibility();
+  $('saasInviteControls')?.classList.toggle('saas-hidden',!(auth&&saasPermission('team.manage',['owner','admin'].includes(role))&&saasHasFeature('teamManagement')));renderSubscriptionAccess();applyAccountRoleVisibility();
   renderSaasSessions();renderSaasDiagnostics();renderProductionGovernance();bindUxEmptyActions(document);
 }
 async function saasRefreshAccount(showToast=true){
@@ -4425,7 +4540,7 @@ function renderEmrSyncCenter(){
   const integrityGrid=$('emrIntegrityGrid'),integrityItems=[['자동 재시도',integrity.retry,'다음 실행에서 재처리'],['Dead Letter',integrity.deadLetter,'3회 실패 · 확인 필요'],['매칭 확인',integrity.quarantine,'자동 병합 차단'],['정합성 차이',integrity.differences,integrity.reconcileAt?`대조 ${emrDate(integrity.reconcileAt)}`:'대조 전']];if(integrityGrid)integrityGrid.innerHTML=integrityItems.map(x=>`<div class="emr-sync-stat"><span>${x[0]}</span><b>${Number(x[1]||0).toLocaleString('ko-KR')}</b><small>${escapeHtml(x[2])}</small></div>`).join('');
   const failures=Array.isArray(d.failures)?d.failures:[],quarantine=Array.isArray(d.quarantine)?d.quarantine:[],items=[...quarantine.map(x=>({externalId:x.externalId,message:`${x.kind==='guardian'?'보호자':'환자'} 매칭 확인 필요 · ${x.conflictType}`,when:x.updatedAt})),...failures.map(x=>({externalId:x.externalId,message:x.message,when:x.finishedAt||x.startedAt}))];if(errors)errors.innerHTML=items.length?items.map(x=>`<div class="emr-sync-error"><b>${escapeHtml(x.externalId?`외부 ID ${x.externalId}`:'동기화 실행 오류')}</b><br>${escapeHtml(x.message||'원인을 확인해주세요.')} · ${escapeHtml(emrDate(x.when))}</div>`).join(''):'<div class="emr-sync-empty">최근 기록된 동기화 실패나 매칭 확인 항목이 없습니다.</div>';
 }
-async function loadEmrSyncStatus(showToast=false){if(saasMode!=='auth'||!saasMe||!['owner','admin'].includes(saasMe.role||'')){emrSyncState=null;renderEmrSyncCenter();return false;}emrSyncLoading=true;renderEmrSyncCenter();try{emrSyncState=await saasRequest('/saas/emr-sync-status');if(showToast)toast('EMR 동기화 상태를 새로고침했습니다.');return true;}catch(e){emrSyncState=null;if(showToast)toast(e.message||'EMR 동기화 상태를 불러오지 못했습니다.');return false;}finally{emrSyncLoading=false;renderEmrSyncCenter();}}
+async function loadEmrSyncStatus(showToast=false){if(saasMode!=='auth'||!saasMe||!saasPermission('settings.manage',['owner','admin'].includes(saasMe.role||''))){emrSyncState=null;renderEmrSyncCenter();return false;}emrSyncLoading=true;renderEmrSyncCenter();try{emrSyncState=await saasRequest('/saas/emr-sync-status');if(showToast)toast('EMR 동기화 상태를 새로고침했습니다.');return true;}catch(e){emrSyncState=null;if(showToast)toast(e.message||'EMR 동기화 상태를 불러오지 못했습니다.');return false;}finally{emrSyncLoading=false;renderEmrSyncCenter();}}
 async function copyEmrCommand(kind){const commands={pause:'schtasks /Change /TN "CARESTEP eFriends Sync" /DISABLE',retry:'schtasks /Run /TN "CARESTEP eFriends Sync"',resume:'schtasks /Change /TN "CARESTEP eFriends Sync" /ENABLE'},value=commands[kind]||'';if(!value)return;try{await navigator.clipboard.writeText(value);toast('PowerShell 명령을 복사했습니다.');}catch{toast('명령을 복사하지 못했습니다.');}}
 
 const CARESTEP_SCREEN_HELP={dashboard:'오늘 처리할 상담·예방·후속관리·발송 오류를 우선순위대로 확인합니다.',patients:'환자를 한 번 선택하면 기본정보, 기록, Journey와 상담을 한 작업공간에서 처리합니다.',library:'자료 목적과 진료 카테고리를 고른 뒤 환자에게 맞는 자료를 선택합니다.',builder:'환자 → 퇴원지시 → 복약 → 재진 → 출력 순서로 진행합니다.',followup:'Journey를 선택하면 Home·Calendar·외부 발송 상태를 함께 관리합니다.',onboarding:'완료되지 않은 단계의 이유를 확인하고 바로 옆 해결 버튼을 누르세요.',settings:'병원 운영 설정을 목적별 카테고리에서 선택합니다.',account:'내 계정, 직원·권한, 결제와 보안을 탭별로 관리합니다.',voice:'사용 중 필요한 자료나 기능을 CARESTEP 운영팀에 요청합니다.',pilot:'월간 사용량과 운영 성과를 확인합니다.'};
@@ -4686,11 +4801,11 @@ function renderOnboardingStatus(){
   const payment=$('onboardingPayment'),p=d?.payment||{};if(payment){const span=payment.querySelector('span');if(span)span.textContent=p.ready?`등록 카드 ${p.maskedNumber||'확인됨'} · ${p.subscriptionStatus||'구독'} 상태`:(d?.planCode==='PILOT'?'무료체험 중에는 선택사항입니다. 유료 전환 전에 카드를 등록하세요.':'유료 구독을 위해 결제카드를 등록해주세요.');payment.classList.toggle('done',!!p.ready);}
   $('onboardingComplete')?.classList.toggle('onboarding-hidden',!d?.ready);
   const nav=$('onboardingNavBadge');if(nav){nav.textContent=`${completed}/${total}`;nav.classList.toggle('done',!!d?.ready);}
-  const banner=$('onboardingDashboardBanner');if(banner){banner.classList.toggle('show',!!(saasMode==='auth'&&saasMe&&['owner','admin'].includes(saasMe.role)&&!d?.ready));if($('onboardingDashboardTitle'))$('onboardingDashboardTitle').textContent=d?.ready?'CARESTEP 사용 준비 완료':`CARESTEP 사용 준비 ${completed}/${total}`;if($('onboardingDashboardText'))$('onboardingDashboardText').textContent=d?.ready?'모든 개통 단계가 완료되었습니다.':`아직 ${Math.max(0,total-completed)}단계가 남았습니다. 다음 설정을 이어서 진행하세요.`;if($('onboardingDashboardFill'))$('onboardingDashboardFill').style.width=`${percent}%`;}
+  const banner=$('onboardingDashboardBanner');if(banner){banner.classList.toggle('show',!!(saasMode==='auth'&&saasMe&&saasPermission('settings.manage',['owner','admin'].includes(saasMe.role))&&!d?.ready));if($('onboardingDashboardTitle'))$('onboardingDashboardTitle').textContent=d?.ready?'CARESTEP 사용 준비 완료':`CARESTEP 사용 준비 ${completed}/${total}`;if($('onboardingDashboardText'))$('onboardingDashboardText').textContent=d?.ready?'모든 개통 단계가 완료되었습니다.':`아직 ${Math.max(0,total-completed)}단계가 남았습니다. 다음 설정을 이어서 진행하세요.`;if($('onboardingDashboardFill'))$('onboardingDashboardFill').style.width=`${percent}%`;}
   renderOnboardingAdminCheck();
 }
 async function loadOnboardingStatus(showToast=false,autoOpen=false){
-  if(saasMode!=='auth'||!saasMe||!['owner','admin'].includes(saasMe.role)){onboardingState=null;renderOnboardingStatus();return null;}
+  if(saasMode!=='auth'||!saasMe||!saasPermission('settings.manage',['owner','admin'].includes(saasMe.role))){onboardingState=null;renderOnboardingStatus();return null;}
   try{const d=await saasRequest('/saas/onboarding');onboardingState=d.onboarding||null;if(onboardingState?.senderAccess)messagingSenderAccess=onboardingState.senderAccess;if(onboardingState?.solapiOauth)messagingOauth=onboardingState.solapiOauth;if(onboardingState?.senderAccess?.senderIds)messagingSenderIds=onboardingState.senderAccess.senderIds;if(onboardingState?.messageTest){messagingTestDeliveryState={...onboardingState.messageTest};renderMessagingTestDelivery();if(onboardingState.messageTest.pending)setTimeout(()=>startMessagingTestDeliveryPolling(false),0);}renderOnboardingStatus();if(showToast)toast('시작 설정 상태를 새로고침했습니다.');if(autoOpen&&onboardingState&&!onboardingState.ready&&!onboardingAutoOpened){const key=`carestep_onboarding_seen_${saasMe.clinic?.id||''}`;if(!sessionStorage.getItem(key)){sessionStorage.setItem(key,'1');onboardingAutoOpened=true;go('onboarding');setTimeout(startFiveMinuteGuide,250);}}return onboardingState;}catch(e){if(showToast)toast(e.message||'시작 설정 상태 조회 실패');return null;}
 }
 async function markOnboardingStep(step){try{const d=await saasRequest('/saas/onboarding/mark',{method:'POST',body:JSON.stringify({step})});onboardingState=d.onboarding||onboardingState;renderOnboardingStatus();return onboardingState;}catch(e){toast(e.message||'시작 설정 상태 저장 실패');return null;}}
@@ -8478,7 +8593,7 @@ async function saveGoogleCalendarChoice(id,summary=''){
  try{const d=await saasRequest('/saas/google-calendar/select',{method:'POST',body:JSON.stringify({calendarId:id})});if(scope!==followupScope()||session!==saasToken||d?.ok!==true||d.calendarId!==id)throw Error('UNCONFIRMED');googleCalendarChoice={id,summary:'CARESTEP 후속관리'};renderCalendarIntegrationStatus();return true;}catch{if(scope===followupScope()&&session===saasToken)toast('캘린더 선택 저장을 확인하지 못했습니다. 상태를 다시 확인해주세요.');return false;}
 }
 function renderGoogleCalendarPicker(){
- syncGoogleCalendarChoiceFromStorage();const connected=googleCalendarConnected(),admin=['owner','admin'].includes(saasMe?.role||''),sel=$('googleFollowupCalendarSelect'),choice=$('googleCalendarChoice'),status=$('googleCalendarListStatus');
+ syncGoogleCalendarChoiceFromStorage();const connected=googleCalendarConnected(),admin=saasPermission('settings.manage',['owner','admin'].includes(saasMe?.role||'')),sel=$('googleFollowupCalendarSelect'),choice=$('googleCalendarChoice'),status=$('googleCalendarListStatus');
  if(sel){const current=googleCalendarChoice.id||'',rows=googleCalendarList.filter(x=>x.id&&x.accessRole==='owner'&&x.summary==='CARESTEP 후속관리'),unique=[],seen=new Set();for(const x of rows){if(seen.has(x.id))continue;seen.add(x.id);unique.push(x);}if(current&&!seen.has(current))unique.push({id:current,summary:googleCalendarChoice.summary||'선택한 캘린더'});sel.innerHTML='<option value="">캘린더를 선택해주세요</option>'+unique.map(x=>`<option value="${escapeHtml(x.id)}">${escapeHtml(x.summary)}</option>`).join('');sel.value=current;sel.disabled=!connected||!admin;}
  if(choice)choice.textContent=googleCalendarChoice.id?`현재: ${selectedGoogleCalendarName()}`:'Google 연결 후 사용할 CARESTEP 후속관리 캘린더를 선택해주세요.';
  if(status)status.textContent=googleCalendarList.length?`${googleCalendarList.length}개 캘린더 확인`:(connected?'목록을 불러와 캘린더를 선택해주세요':'연결 상태 확인 후 선택');
@@ -8546,7 +8661,7 @@ async function ensureGoogleCalendarToken(forcePrompt=false){
   googleCalendarAuthState={scope,session:saasToken,status:d.status};googleCalendarToken={connected:d.connected,expiresAt:0};googleCalendarChoice={id:d.connected?d.calendarId||'':'',summary:d.connected?d.calendarName||'':''};
   if(d.connected)return true;
   if(forcePrompt&&['disconnected','reconnect_required'].includes(d.status)){
-   if(!['owner','admin'].includes(saasMe?.role||''))throw Error('ROLE');
+   if(!saasPermission('settings.manage',['owner','admin'].includes(saasMe?.role||'')))throw Error('ROLE');
    const a=await saasRequest('/saas/google-calendar/connect',{method:'POST',credentials:'include',body:JSON.stringify({returnPath:'/',reconnect:d.status==='reconnect_required'})});
    if(!current())throw Error('SCOPE');
    if(a?.ok===true&&a.authorizationUrl){const u=new URL(a.authorizationUrl);if(u.origin!=='https://accounts.google.com'||u.pathname!=='/o/oauth2/v2/auth')throw Error('OAUTH_URL');window.location.assign(u.href);return false;}
@@ -8557,7 +8672,7 @@ async function ensureGoogleCalendarToken(forcePrompt=false){
  }catch{if(current()&&googleCalendarAuthState.status==='loading'){googleCalendarAuthState={scope,session:saasToken,status:'error'};googleCalendarToken={connected:false,expiresAt:0};}throw Error('Google 연결 상태를 확인하지 못했습니다. 연결 확인 버튼으로 다시 확인해주세요.');}
  finally{if(current()){googleCalendarAuthPending=null;renderCalendarIntegrationStatus();}}})();googleCalendarAuthPending=task;return task;
 }
-async function r19DisconnectGoogle(){if(!['owner','admin'].includes(saasMe?.role||''))throw Error('관리자 권한이 필요합니다.');const d=await saasRequest('/saas/google-calendar/disconnect',{method:'POST',body:'{}'});googleCalendarToken={connected:false,expiresAt:0};googleCalendarChoice={id:'',summary:''};googleCalendarAuthState={scope:followupScope(),session:saasToken,status:'disconnected'};renderCalendarIntegrationStatus();if(d.revoke==='unconfirmed')toast('로컬 연결은 중지했습니다. Google 해제 결과가 미확정이므로 자동 재시도하지 않습니다.');return d;}
+async function r19DisconnectGoogle(){if(!saasPermission('settings.manage',['owner','admin'].includes(saasMe?.role||'')))throw Error('연동 설정 권한이 필요합니다.');const d=await saasRequest('/saas/google-calendar/disconnect',{method:'POST',body:'{}'});googleCalendarToken={connected:false,expiresAt:0};googleCalendarChoice={id:'',summary:''};googleCalendarAuthState={scope:followupScope(),session:saasToken,status:'disconnected'};renderCalendarIntegrationStatus();if(d.revoke==='unconfirmed')toast('로컬 연결은 중지했습니다. Google 해제 결과가 미확정이므로 자동 재시도하지 않습니다.');return d;}
 function r19CompletionUsage(){const empty=()=>({outputs:[],model:'',inputTokens:0,cachedInputTokens:0,outputTokens:0,totalTokens:0,estimatedUsd:0});return {templateId:activePatientJourney?'journey:'+activePatientJourney.id:currentTemplateId,setup:empty(),home:empty()};}
 let r19GoogleStatusScope='';
 async function r19RefreshGoogleStatus(){const scope=followupScope();if(!scope||scope===r19GoogleStatusScope)return;r19GoogleStatusScope=scope;try{await ensureGoogleCalendarToken(false);}catch{if(scope===followupScope())r19GoogleStatusScope='';}}
@@ -8832,7 +8947,7 @@ function renderPatientJourneyBuilder(){
     detail.innerHTML='<div class="journey-empty">Journey를 선택해주세요.</div>';
     return;
   }
-  const canEdit=['owner','admin'].includes(saasMe?.role||'');
+  const canEdit=saasPermission('materials.edit',['owner','admin'].includes(saasMe?.role||''));
   detail.innerHTML=`<h4>${escapeHtml(j.name)}</h4><div class="journey-detail-desc">${escapeHtml(j.description||'설명 없음')}<br>${escapeHtml(categoryLabel(j.category||'기타'))} · ${escapeHtml(j.species||'dog,cat')} · v${Number(j.version)||1}</div><div class="journey-stage-preview">${(j.stages||[]).map(st=>`<div class="journey-stage-preview-row"><strong>D+${Number(st.day)}</strong><div><strong>${escapeHtml(st.title||'확인')}</strong><br><span>${escapeHtml(st.focus||'')}</span></div><div class="journey-card-tags">${st.calendar!==false?'<span class="journey-tag">캘린더</span>':''}${st.message!==false?'<span class="journey-tag">문자</span>':''}${st.survey===true?'<span class="journey-tag survey">보호자 응답</span>':''}</div></div>`).join('')}</div><div class="journey-actions"><button id="applyPatientJourney" class="btn btn-primary" type="button">현재 케이스에 적용</button>${canEdit?`<button id="clonePatientJourney" class="btn btn-secondary" type="button">병원용으로 복제</button>${!j.isSystem?'<button id="editPatientJourney" class="btn btn-secondary" type="button">편집</button><button id="deletePatientJourney" class="btn btn-secondary" type="button">삭제</button>':''}`:''}</div>`;
   $('applyPatientJourney')?.addEventListener('click',()=>applyPatientJourney(j.id));
   $('clonePatientJourney')?.addEventListener('click',()=>clonePatientJourney(j.id));
@@ -8875,7 +8990,7 @@ function syncPatientJourneyBrowserToCurrentCase(force=false){
 function applyPatientJourney(id,opts={}){const j=patientJourneyById(id);if(!j)return false;if(!(j.stages||[]).length){if(!opts.silent)toast('이 Journey에는 적용할 D+ 단계가 없습니다. HQ에서 Journey 내용을 확인해주세요.');return false;}resetFollowupMessageEdits();activePatientJourney=j;activeJourneyStageSelection=[...new Set((j.stages||[]).map(x=>Number(x.day)).filter(d=>d>=1&&d<=365))].sort((a,b)=>a-b);sessionStorage.setItem(patientJourneySessionKey(),j.id);patientJourneySelectedId=j.id;if(opts.resetMessaging!==false){resetMessagingCaseState();window.crmSyncFollowupPhone?.({force:true});}saasRecordUsageEvent('patient_journey_apply',j.id,{stageCount:activeJourneyStageSelection.length,category:j.category||'',system:!!j.isSystem});ensureFollowupExecutionPlacement();renderPatientJourneyBuilder();renderFollowupCenter();renderFollowupGuide();queueUnifiedFollowupChange('journey_changed');if(opts.advance!==false)scrollToFollowupExecution();if(!opts.silent)toast(`${j.name}을 현재 케이스에 적용했습니다. 다음 단계에서 일정 등록을 진행하세요.`);renderGlobalCaseBadge();return true;}
 function clearActivePatientJourney(){resetFollowupMessageEdits();activePatientJourney=null;activeJourneyStageSelection=[];sessionStorage.removeItem(patientJourneySessionKey());renderPatientJourneyBuilder();renderFollowupCenter();queueUnifiedFollowupChange('journey_cleared');toast('현재 케이스를 기본 D+1·3·7·14 후속관리로 전환했습니다.');}
 function blankPatientJourney(){return {id:'',name:'새 병원 Patient Journey',category:'기타',species:'dog,cat',description:'',stages:[{day:1,title:'초기 상태 확인',focus:'',checks:[''],redFlag:'',calendar:true,message:true},{day:7,title:'추세 확인',focus:'',checks:[''],redFlag:'',calendar:true,message:true,survey:false}]};}
-function openPatientJourneyEditor(j=null){if(!['owner','admin'].includes(saasMe?.role||'')){toast('Owner/Admin만 병원 Journey를 편집할 수 있습니다.');return;}patientJourneyEditorDraft=JSON.parse(JSON.stringify(j||blankPatientJourney()));renderPatientJourneyEditor();}
+function openPatientJourneyEditor(j=null){if(!saasPermission('materials.edit',['owner','admin'].includes(saasMe?.role||''))){toast('자료 작성·수정 권한이 필요합니다.');return;}patientJourneyEditorDraft=JSON.parse(JSON.stringify(j||blankPatientJourney()));renderPatientJourneyEditor();}
 function renderPatientJourneyEditor(){const el=$('patientJourneyEditor'),d=patientJourneyEditorDraft;if(!el||!d){if(el)el.classList.add('hidden');return;}el.classList.remove('hidden');el.innerHTML=`<div class="patient-journey-head"><div><h3>${d.id?'병원 Journey 편집':'새 병원 Journey'}</h3><p>환자별 정보가 아니라 병원 공통 운영 템플릿만 입력하세요.</p></div><button id="closeJourneyEditor" class="btn btn-secondary" type="button">닫기</button></div><div class="journey-editor-grid"><input id="journeyEditName" class="input" value="${escapeHtml(d.name||'')}" placeholder="Journey 이름"><select id="journeyEditCategory" class="input">${CATEGORY_CODES.map(c=>`<option value="${escapeHtml(c)}" ${c===(d.category||'기타')?'selected':''}>${escapeHtml(categoryLabel(c))}</option>`).join('')}</select><input id="journeyEditSpecies" class="input" value="${escapeHtml(d.species||'dog,cat')}" placeholder="dog,cat"><textarea id="journeyEditDescription" class="input wide" rows="2" placeholder="운영 목적 설명">${escapeHtml(d.description||'')}</textarea></div><div id="journeyEditStages">${(d.stages||[]).map((st,i)=>patientJourneyStageEditorHtml(st,i)).join('')}</div><div class="journey-actions"><button id="addJourneyStage" class="btn btn-secondary" type="button">D+ 단계 추가</button><button id="saveJourneyEditor" class="btn btn-primary" type="button">Journey 저장</button>${d.id?'<button id="archiveJourneyEditor" class="btn btn-secondary" type="button">보관 처리</button><button id="deleteJourneyEditor" class="btn btn-secondary" type="button">삭제</button>':''}</div>`;$('closeJourneyEditor').onclick=()=>{patientJourneyEditorDraft=null;renderPatientJourneyEditor()};$('addJourneyStage').onclick=()=>{syncPatientJourneyEditorDraft();const days=(patientJourneyEditorDraft.stages||[]).map(x=>Number(x.day)||0);patientJourneyEditorDraft.stages.push({day:Math.min(365,Math.max(1,(Math.max(0,...days)||0)+7)),title:'추가 확인',focus:'',checks:[''],redFlag:'',calendar:true,message:true,survey:false});renderPatientJourneyEditor()};$('saveJourneyEditor').onclick=()=>savePatientJourneyEditor();$('archiveJourneyEditor')?.addEventListener('click',()=>archivePatientJourneyEditor());$('deleteJourneyEditor')?.addEventListener('click',()=>deletePatientJourney(d.id));el.querySelectorAll('[data-remove-journey-stage]').forEach(b=>b.addEventListener('click',()=>{syncPatientJourneyEditorDraft();patientJourneyEditorDraft.stages.splice(Number(b.dataset.removeJourneyStage),1);renderPatientJourneyEditor();}));el.scrollIntoView({behavior:'smooth',block:'start'});}
 function patientJourneyStageEditorHtml(st,i){return `<div class="journey-stage-editor" data-journey-stage-index="${i}"><div class="journey-stage-editor-top"><input class="input journey-stage-day" type="number" min="1" max="365" value="${Number(st.day)||1}"><input class="input journey-stage-title" value="${escapeHtml(st.title||'')}" placeholder="단계 제목"><button class="btn btn-secondary" type="button" data-remove-journey-stage="${i}">삭제</button></div><div class="journey-stage-editor-body"><textarea class="input journey-stage-focus" rows="2" placeholder="오늘의 핵심">${escapeHtml(st.focus||'')}</textarea><textarea class="input journey-stage-red" rows="2" placeholder="빠른 확인이 필요한 변화">${escapeHtml(st.redFlag||'')}</textarea><textarea class="input journey-stage-checks wide" rows="3" placeholder="확인항목을 한 줄에 하나씩">${escapeHtml((st.checks||[]).join('\n'))}</textarea></div><div class="journey-stage-editor-actions"><label><input class="journey-stage-calendar" type="checkbox" ${st.calendar!==false?'checked':''}> 캘린더 업무</label><label><input class="journey-stage-message" type="checkbox" ${st.message!==false?'checked':''}> 보호자 자동발송</label><label><input class="journey-stage-survey" type="checkbox" ${st.survey===true?'checked':''}> 보호자 회복응답</label></div></div>`;}
 function syncPatientJourneyEditorDraft(){const d=patientJourneyEditorDraft;if(!d)return;d.name=$('journeyEditName')?.value||d.name;d.category=$('journeyEditCategory')?.value||'';d.species=$('journeyEditSpecies')?.value||'dog,cat';d.description=$('journeyEditDescription')?.value||'';d.stages=[...document.querySelectorAll('#journeyEditStages [data-journey-stage-index]')].map(row=>({day:Number(row.querySelector('.journey-stage-day')?.value)||0,title:row.querySelector('.journey-stage-title')?.value||'',focus:row.querySelector('.journey-stage-focus')?.value||'',redFlag:row.querySelector('.journey-stage-red')?.value||'',checks:String(row.querySelector('.journey-stage-checks')?.value||'').split(/\n+/).map(x=>x.trim()).filter(Boolean),calendar:!!row.querySelector('.journey-stage-calendar')?.checked,message:!!row.querySelector('.journey-stage-message')?.checked,survey:!!row.querySelector('.journey-stage-survey')?.checked&&!!row.querySelector('.journey-stage-message')?.checked}));}
@@ -9036,7 +9151,7 @@ function icsDateLocal(d){if(!(d instanceof Date)||Number.isNaN(d.getTime()))retu
 function followupIcsEscape(v=''){return String(v).replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');}
 
 function messagingAllowed(show=true){if(saasMode!=='auth'||!saasMe){if(show)toast('보호자 자동발송은 병원 계정 로그인 후 사용할 수 있습니다.');return false;}if(!saasHasFeature('automatedMessaging')){if(show)toast(saasFeatureMessage('automatedMessaging'));return false;}return true;}
-function messagingCanEditSettings(){return !!saasMe&&['owner','admin'].includes(saasMe.role);}
+function messagingCanEditSettings(){return !!saasMe&&saasPermission('settings.manage',['owner','admin'].includes(saasMe.role));}
 function messagingStatusLabel(status){return careUiState(status).label;}
 function messagingChannelLabel(ch){return ch==='mms'?'모바일 카드 MMS':ch==='kakao'?'알림톡':'LMS';}
 function followupKakaoDefaultGuide(day){const d=followupStageData(day),items=(d.items||[]).slice(0,2);return items.join(' / ').slice(0,700);}
@@ -9355,7 +9470,7 @@ $('saasSwitchClinicBtn')?.addEventListener('click',saasSwitchClinic);
 $('saasCreateInvite')?.addEventListener('click',saasCreateInvite);
 document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=>go(b.dataset.view)));
 $('navManageToggle')?.addEventListener('click',toggleManageNav);
-document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+document.addEventListener('click',event=>{const button=event.target?.closest?.('[data-go]');if(!button||button.disabled||event.defaultPrevented)return;event.preventDefault();go(button.dataset.go);});
 document.querySelectorAll('[data-settings-action]').forEach(b=>b.addEventListener('click',()=>openSettingsCategory(b.dataset.settingsAction)));
 $('refreshEmrSync')?.addEventListener('click',()=>loadEmrSyncStatus(true));
 document.querySelectorAll('[data-emr-copy]').forEach(b=>b.addEventListener('click',()=>copyEmrCommand(b.dataset.emrCopy)));
@@ -10033,8 +10148,8 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
 <script src="patient-breeds.js?v=9.5.3"></script>
-<script src="patient-crm.js?v=reading-flow-20261018b"></script>
-<script src="patient-timeline.js?v=patient-home-state-20261018"></script>
+<script src="patient-crm.js?v=staff-permissions-20261018a"></script>
+<script src="patient-timeline.js?v=staff-permissions-20261018a"></script>
 <script src="date-input-guard.js?v=9.5.3"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
 <!-- CARESTEP v9.1 · SOLAPI OAuth2 clinic-account messaging -->
@@ -10046,11 +10161,11 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <!-- CARESTEP v10.4-G · Clinical Protocol Settings -->
 <script>document.addEventListener("DOMContentLoaded",()=>CarestepStabilization.compatible());</script>
 <script src="r61-route.js"></script>
-<script src="r61-clinic.js?v=refresh-flow-20261018a"></script>
-<script src="r65-clinic.js?v=R65"></script>
+<script src="r61-clinic.js?v=staff-permissions-20261018a"></script>
+<script src="r65-clinic.js?v=staff-permissions-20261018a"></script>
 <script src="r83-clinic.js"></script>
 <script src="clinic-read-flow.js?v=flow-20261017"></script>
 <script src="home-access-clinic.js?v=refresh-flow-20261018a"></script>
-<script src="clinic-care.js?v=refresh-flow-20261018a"></script>
+<script src="clinic-care.js?v=staff-permissions-20261018a"></script>
 </body>
 </html>

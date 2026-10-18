@@ -5,7 +5,7 @@
  const el=(tag,text)=>{const x=document.createElement(tag);if(text)x.textContent=text;return x;};
  let scope='',generation=0,key='',ownRequest='',busy=false,timer=null;
  const api=(suffix='',body)=>saasRequest('/saas/r65/manual-sync'+suffix,body===undefined?{}:{method:'POST',body:JSON.stringify(body),redirect:'error'});
- const identity=()=>typeof saasMode!=='undefined'&&saasMode==='auth'&&typeof saasMe!=='undefined'&&['owner','admin'].includes(saasMe?.role)?String(saasMe.clinic?.id||'')+':'+String(saasMe.user?.id||''):'';
+ const identity=()=>typeof saasMode!=='undefined'&&saasMode==='auth'&&typeof saasMe!=='undefined'&&(typeof saasPermission==='function'?saasPermission('settings.manage',['owner','admin'].includes(saasMe?.role)):['owner','admin'].includes(saasMe?.role))?String(saasMe.clinic?.id||'')+':'+String(saasMe.user?.id||''):'';
  const remove=()=>document.getElementById('r65-manual-controls')?.remove();
  async function refresh(force=false){
   clearTimeout(timer);timer=null;const current=identity();if(!force&&scope===current)return;if(scope!==current){key='';ownRequest='';}scope=current;const rev=++generation;remove();if(!current)return;
