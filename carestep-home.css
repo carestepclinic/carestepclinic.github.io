@@ -167,3 +167,5 @@
 @media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}.home-primary,.home-secondary,.home-material-card{transition:none!important}}
 
 #homeCareUpcoming .home-preventive-row strong{font-size:1rem;line-height:1.6}#homeCareUpcoming .home-preventive-row :is(span,time,small),#homeCareUpcoming .home-preventive-row::after{font-size:.875rem;color:#435973;line-height:1.7}
+
+.home-visit-purpose{white-space:pre-wrap;overflow-wrap:anywhere}.home-visit-purpose>b{display:block;margin-bottom:5px;font-size:14px;color:#31547c}
