@@ -156,3 +156,19 @@ button,a,summary{-webkit-tap-highlight-color:transparent}
 #homeRecordDialog .home-record-actions button{font-size:1rem;line-height:1.5;min-height:48px;word-break:keep-all;overflow-wrap:anywhere;padding:12px}
 @media(max-width:640px){#homeRecordDialog .home-record-card{padding:20px 16px max(16px,env(safe-area-inset-bottom))}#homeRecordDialog .home-record-grid{grid-template-columns:minmax(0,1fr)}#homeRecordDialog .home-record-grid .span-2{grid-column:auto}}
 @media(max-height:500px){#homeRecordDialog .home-record-actions{position:static}}
+
+/* Read saved records without squeezing Korean labels beside attribution. */
+.home-navigation-active #patientView .home-event-body{min-width:0}
+.home-navigation-active #patientView :is(.home-event-head,.home-event-head-right,.home-event-title,.home-event-meta){flex-wrap:wrap;min-width:0;gap:6px 10px}
+.home-navigation-active #patientView .home-event-head>span:first-child{flex:0 0 auto}
+.home-navigation-active #patientView .home-event-head-right{margin-left:auto;max-width:100%}
+.home-navigation-active #patientView .home-event-actions{flex-wrap:wrap;gap:4px}
+.home-navigation-active #patientView .home-event-actions button{min-width:44px;min-height:44px;padding:6px;font-size:.875rem;line-height:1.5;white-space:nowrap}
+.home-navigation-active #patientView .home-event-title{align-items:baseline}
+.home-navigation-active #patientView .home-event-title b{min-width:0;word-break:keep-all;overflow-wrap:anywhere}
+.home-navigation-active #patientView .home-event-title strong{flex:0 0 auto;font-size:1rem;line-height:1.6;white-space:nowrap;font-variant-numeric:tabular-nums}
+.home-navigation-active #patientView .home-event-meta{align-items:baseline;gap:4px 10px}
+.home-navigation-active #patientView .home-event-meta>span:not(.home-event-attribution){flex:0 0 auto;white-space:nowrap}
+.home-navigation-active #patientView .home-event-meta>.home-event-attribution{flex:1 0 100%;min-width:0;background:none;color:var(--home-muted);word-break:keep-all;overflow-wrap:anywhere;white-space:normal}
+.home-navigation-active #patientView .home-event-meta>.home-event-attribution::before{content:none}
+.home-navigation-active #patientView :is(.home-visit-purpose,.home-purpose-more p){word-break:keep-all;overflow-wrap:anywhere;white-space:pre-wrap}
