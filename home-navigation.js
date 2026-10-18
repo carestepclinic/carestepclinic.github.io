@@ -1,9 +1,10 @@
-/* CARESTEP HOME: compact overview and patient-scoped navigation. No writes or network calls. */
+/* CARESTEP HOME: compact overview and patient-scoped navigation. Read-only refresh coordination; no record writes. */
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
   const routes = {home:'홈',health:'건강기록',schedule:'관리일정',hospital:'병원',settings:'설정'};
   const positions = new Map();
+  let routeRefreshFlight=null;
   let route = 'home', view = '', patientId = '', account = '', auth = '', healthReturn = 'home', settingsReturn = 'home';
   let mounted = false, routing = false, arranging = false, positionRevision = 0;
   const query = new URLSearchParams(location.search);
@@ -60,6 +61,7 @@
     actions.append(settings);move($('homeCareRefresh'),actions);toolbar.append(heading,actions);chrome.append(toolbar);dashboard.before(chrome);
     actions.id='homeNavigationActions';actions.hidden=true;move(actions,document.querySelector('.home-header'));
     document.querySelector('.home-brand')?.addEventListener('click',event=>{if(snapshot().allowed){event.preventDefault();go('home');}});
+    const refreshStatus=make('p','home-help');refreshStatus.id='homeNavigationRefreshStatus';refreshStatus.setAttribute('role','status');refreshStatus.hidden=true;chrome.append(refreshStatus);
     const picker=care.querySelector('.home-care-picker');move(picker,chrome);move($('homeCareFreshness'),chrome);
     const warning=make('button','home-navigation-warning');warning.id='homeNavigationWarning';warning.type='button';warning.hidden=true;warning.onclick=()=>{if(warning.dataset.custom==='true'){const detail=$('homeNavigationReminderSettings')?.querySelector('details');if(detail)detail.open=true;go('settings',{target:'homeNavigationReminderSettings'});}else window.carestepHomeCare?.openPushSettings?.();};chrome.append(warning);
     for(const name of ['home','schedule','hospital','settings']){
@@ -135,7 +137,8 @@
     }
     text($('homeNavigationTitle'),route==='home'?'우리 아이 건강관리':route==='hospital'?'병원 자료·상담':routes[route]);
     $('homeNavigationSettingsButton').setAttribute('aria-pressed',String(route==='settings'));
-    if($('homeCareRefresh'))$('homeCareRefresh').hidden=route==='health';
+    if($('homeCareRefresh')){$('homeCareRefresh').hidden=route==='health';$('homeCareRefresh').setAttribute('aria-label',routes[route]+' 새로고침');const b=$('homeCareRefresh');if(b.dataset.refreshScope&&b.dataset.refreshScope!==refreshScope()){b.disabled=false;b.textContent='새로고침';delete b.dataset.refreshScope;}}
+    const refreshStatus=$('homeNavigationRefreshStatus');if(refreshStatus&&refreshStatus.dataset.scope!==refreshScope())refreshStatus.hidden=true;
     const selected=(base.home?.connections||[]).flatMap(c=>c.patients||[]).find(p=>p.id===care.patientId),compact=$('homeCurrentPatient');text(compact,selected?(selected.name||'환자')+' · '+(selected.species==='cat'?'고양이':selected.species==='dog'?'강아지':'반려동물')+' · 환자 변경':'');if(!active||!selected)compact.hidden=true;
     if(!allowed)return;
     const custom=window.carestepHomeReminderSummary?.();
@@ -201,8 +204,35 @@
     if(match)for(let n=match.parentElement;n&&n!==scope;n=n.parentElement)if(n.tagName==='DETAILS')n.open=true;
     go('schedule',{target:match||next.target});
   }
+  function refreshScope(){const s=snapshot();return JSON.stringify([s.base.token,s.base.home?.user?.id,s.care.patientId,route]);}
+  function refreshBusy(){return routeRefreshFlight?.scope===refreshScope();}
+  async function refreshCurrent(){
+    const initial=snapshot();if(!initial.allowed)return false;
+    const scope=refreshScope();if(routeRefreshFlight?.scope===scope)return routeRefreshFlight.promise;
+    const selectedRoute=route,status=$('homeNavigationRefreshStatus'),button=$('homeCareRefresh');
+    const jobs=selectedRoute==='hospital'?['care','materials','followups']:selectedRoute==='settings'?['push','device']:selectedRoute==='schedule'?['care','reminders']:['care','reminders','materials','followups'];
+    const actions={
+      care:()=>window.carestepHomeCare?.refresh?.(),
+      reminders:()=>window.carestepRefreshHomeReminders?.(),
+      materials:()=>window.carestepRefreshHomeMaterials?.(),
+      followups:()=>window.carestepRefreshHomeFollowups?.(),
+      push:()=>window.carestepRefreshHomePushStatus?.(),
+      device:()=>window.carestepRefreshHomeReminderDevice?.()
+    };
+    const flight={scope,promise:null};routeRefreshFlight=flight;
+    if(button){button.disabled=true;button.textContent='확인 중…';button.dataset.refreshScope=scope;}
+    if(status){status.hidden=false;status.textContent=routes[selectedRoute]+' 화면을 새로 확인하고 있습니다…';status.dataset.scope=scope;}
+    flight.promise=(async()=>{try{
+      const results=await Promise.allSettled(jobs.map(job=>Promise.resolve().then(actions[job])));
+      if(refreshScope()!==scope||routeRefreshFlight!==flight)return false;
+      const incomplete=results.some(r=>r.status==='rejected'||r.value===false);
+      if(status)status.textContent=incomplete?'일부 항목을 확인하지 못했습니다. 각 영역의 조회 안내를 확인해주세요.':'새로고침을 마쳤습니다. 각 영역의 최신 조회 상태를 확인해주세요.';
+      return !incomplete;
+    }finally{if(routeRefreshFlight===flight)routeRefreshFlight=null;if(refreshScope()===scope&&button){button.disabled=false;button.textContent='새로고침';delete button.dataset.refreshScope;}}})();
+    return flight.promise;
+  }
   function backFromSettings(){go(settingsReturn==='settings'?'home':settingsReturn);}
-  window.carestepHomeNavigation={mounted:false,mount,arrange,refresh,go,onView,allowsNotificationFocus:name=>route===name&&view==='dashboardView',back:()=>go(healthReturn==='health'?'home':healthReturn)};
+  window.carestepHomeNavigation={mounted:false,mount,arrange,refresh,refreshCurrent,refreshBusy,go,onView,allowsNotificationFocus:name=>route===name&&view==='dashboardView',back:()=>go(healthReturn==='health'?'home':healthReturn)};
   window.addEventListener('carestep-home-patient',syncPatient);
   const boot=()=>{if(!mount())return;syncPatient();view=window.carestepHomeSnapshot?.().view||(!$('patientView')?.hidden?'patientView':!$('dashboardView')?.hidden?'dashboardView':'');onView(view,window.carestepHomeSnapshot?.().activePatientId);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();

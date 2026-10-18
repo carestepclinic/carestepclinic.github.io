@@ -1,15 +1,24 @@
 /* Carestep Home v10.1-J service worker · 2026-10-13 cache rollout */
-const VERSION='screen-flow-20261018a';
+const VERSION='refresh-flow-20261018a';
 const CACHE=`carestep-home-${VERSION}`;
-const ASSETS=['./home-insights.js?v=screen-flow-20261018a','./home-insights.css?v=screen-flow-20261018a','./home-readability.css?v=screen-flow-20261018a','./home-navigation.js?v=screen-flow-20261018a','./home-navigation.css?v=screen-flow-20261018a','./home-reminders.js?v=screen-flow-20261018a','./carestep-ui.css?v=screen-flow-20261018a','./home-care.js?v=screen-flow-20261018a','./home.html','./carestep-home.css?v=screen-flow-20261018a','./carestep-home-response-edit.css?v=10.1-J',`./carestep-home.js?v=${VERSION}`,'./date-input-guard.js?v=10.1-B','./manifest.webmanifest','./carestep-home-icon.svg','./carestep-home-icon-192.png','./carestep-home-icon-512.png'];
+const FONT_CACHE='carestep-fonts-v1',FONT_PATH='./pretendard-variable-1.3.9.woff2';
+const ASSETS=['./home-insights.js?v=refresh-flow-20261018a','./home-insights.css?v=refresh-flow-20261018a','./home-readability.css?v=refresh-flow-20261018a','./home-navigation.js?v=refresh-flow-20261018a','./home-navigation.css?v=refresh-flow-20261018a','./home-reminders.js?v=refresh-flow-20261018a','./carestep-ui.css?v=refresh-flow-20261018a','./home-care.js?v=refresh-flow-20261018a','./home.html','./carestep-home.css?v=refresh-flow-20261018a','./carestep-home-response-edit.css?v=10.1-J',`./carestep-home.js?v=${VERSION}`,'./date-input-guard.js?v=10.1-B','./manifest.webmanifest','./carestep-home-icon.svg','./carestep-home-icon-192.png','./carestep-home-icon-512.png'];
 const HOME_PATHS=new Set(['/home-insights.js','/home-insights.css','/home-readability.css','/home-navigation.js','/home-navigation.css','/home-reminders.js','/carestep-ui.css','/home-care.js','/home.html','/carestep-home.css','/carestep-home-response-edit.css','/carestep-home.js','/date-input-guard.js','/manifest.webmanifest','/carestep-home-icon.svg','/carestep-home-icon-192.png','/carestep-home-icon-512.png']);
 
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
 
+async function retainFontCache(keys){
+  const fonts=await caches.open(FONT_CACHE);if(await fonts.match(FONT_PATH))return;
+  for(const key of keys.filter(k=>k.startsWith('carestep-home-'))){const old=await caches.open(key),saved=await old.match(FONT_PATH);if(saved){await fonts.put(FONT_PATH,saved);return;}}
+}
+async function cachedFont(request){
+  const fonts=await caches.open(FONT_CACHE),saved=await fonts.match(FONT_PATH);if(saved)return saved;
+  const response=await fetch(request);if(response.ok)await fonts.put(FONT_PATH,response.clone());return response;
+}
 self.addEventListener('activate',event=>{
-  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('carestep-home-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));
+  event.waitUntil(caches.keys().then(async keys=>{await retainFontCache(keys).catch(()=>{});await Promise.all(keys.filter(key=>key.startsWith('carestep-home-')&&key!==CACHE).map(key=>caches.delete(key)));}).then(()=>self.clients.claim()));
 });
 
 self.addEventListener('message',event=>{
@@ -36,10 +45,7 @@ self.addEventListener('fetch',event=>{
   if(request.method!=='GET'||url.origin!==self.location.origin)return;
   // Load the font without holding up installation; reuse it on later visits.
   if(url.pathname==='/pretendard-variable-1.3.9.woff2'){
-    event.respondWith(caches.open(CACHE).then(async cache=>{
-      const saved=await cache.match(request);if(saved)return saved;
-      const response=await fetch(request);if(response.ok)await cache.put(request,response.clone());return response;
-    }));return;
+    event.respondWith(cachedFont(request));return;
   }
   if(request.mode==='navigate'){
     if(url.pathname!=='/home.html')return;

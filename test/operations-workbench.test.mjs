@@ -102,3 +102,16 @@ test('a late result for the previous date cannot overwrite a newer successful re
  const first=f.button('결과 새로고침').onclick();await new Promise(r=>setImmediate(r));walk(f.body).find(n=>n.type==='date').value='2026-10-01';const second=f.button('결과 새로고침').onclick();await new Promise(r=>setImmediate(r));
  pending[1]({ok:true,counts:{},total:1,deliveries:[{category:'unconfirmed',patientName:'새 날짜'}]});await second;pending[0]({ok:true,counts:{},total:1,deliveries:[{category:'unconfirmed',patientName:'오래된 응답'}]});await first;assert.match(f.body.textContent,/새 날짜/);assert.doesNotMatch(f.body.textContent,/오래된 응답/);
 });
+
+test('result summary separates channel acceptance and narrows all four attention categories without sending',async()=>{
+ const f=fixture(),categories=['accepted','home','failed','blocked','unconfirmed','claimed','canceled'];
+ f.setRequest(async()=>({ok:true,counts:{accepted:6,home:3,failed:2,blocked:1,unconfirmed:4,claimed:1,canceled:5},total:22,deliveries:categories.map(category=>({category,patientName:'가상 '+category}))}));
+ await f.ctx.window.testAPI.preventiveResults();
+ const tiles=walk(f.body).filter(n=>n.className?.startsWith('care-result-metric'));assert.equal(tiles.length,3);
+ assert.match(tiles[0].textContent,/확인 필요 8건/);assert.match(tiles[1].textContent,/문자·외부 채널 접수 6건/);assert.match(tiles[2].textContent,/Home 알림 접수 3건/);
+ tiles[0].onclick();const filter=walk(f.body).find(n=>n.tagName==='SELECT'&&n.value==='attention');
+ const rows=walk(f.body).find(n=>n.tagName==='SECTION'&&n.children.includes(filter)),list=rows.children[rows.children.indexOf(filter)+1];
+ assert.equal(list.children.length,4);assert.doesNotMatch(list.textContent,/가상 accepted|가상 canceled|가상 home/);
+ tiles[1].onclick();assert.equal(list.children.length,1);assert.match(list.textContent,/가상 accepted/);
+ assert.ok(f.calls.every(x=>!x.opt.method||x.opt.method==='GET'));assert.match(f.body.textContent,/접수는 수신 완료를 뜻하지 않습니다/);
+});
