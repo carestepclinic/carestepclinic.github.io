@@ -52,6 +52,14 @@ test('exact guide navigation does not pick a different Journey and rejects chang
  vm.runInContext(core.slice(core.indexOf('  window.carestepOpenHomeGuide='),core.indexOf('  async function loadMaterialSources(')),c);assert.equal(c.window.carestepOpenHomeGuide('p','wrong'),false);assert.equal(c.window.carestepOpenHomeGuide('p','right'),true);assert.deepEqual(called,['right']);c.patientContext=()=>null;assert.equal(c.window.carestepOpenHomeGuide('p','right'),false);
 });
 test('material shortcut opens only the exact currently authorized source and never marks other materials',()=>{
- const calls=[],card={querySelector:()=>({click:()=>calls.push('pdf')})},c=vm.createContext({insightMaterialIndex:new Map([['p|a',{card,meta:{patientId:'p'}}]]),insightMaterialToken:'s',state:{token:'s'},patientContext:()=>({}),window:{carestepHomeSelectedPatient:'p',carestepHomeNavigation:{go(){}},carestepHomeMaterialReveal:()=>true}});
- vm.runInContext(core.slice(core.indexOf('  window.carestepOpenHomeMaterial='),core.indexOf('  window.carestepOpenHomeGuide=')),c);assert.equal(c.window.carestepOpenHomeMaterial('p','missing'),false);assert.equal(c.window.carestepOpenHomeMaterial('other','p|a'),false);assert.equal(c.window.carestepOpenHomeMaterial('p','p|a'),true);assert.deepEqual(calls,['pdf']);c.state.token='new';assert.equal(c.window.carestepOpenHomeMaterial('p','p|a'),false);
+ const calls=[],shelf={open:false},card={querySelector:()=>({click:()=>calls.push('pdf')})},c=vm.createContext({$:id=>id==='homeHospitalMaterials'?shelf:null,insightMaterialIndex:new Map([['p|a',{card,meta:{patientId:'p'}}]]),insightMaterialToken:'s',state:{token:'s'},patientContext:()=>({}),window:{carestepHomeSelectedPatient:'p',carestepHomeNavigation:{go(){}},carestepHomeMaterialReveal:()=>true}});
+ vm.runInContext(core.slice(core.indexOf('  window.carestepOpenHomeMaterial='),core.indexOf('  window.carestepOpenHomeGuide=')),c);assert.equal(c.window.carestepOpenHomeMaterial('p','missing'),false);assert.equal(c.window.carestepOpenHomeMaterial('other','p|a'),false);assert.equal(c.window.carestepOpenHomeMaterial('p','p|a'),true);assert.deepEqual(calls,['pdf']);assert.equal(shelf.open,true);c.state.token='new';assert.equal(c.window.carestepOpenHomeMaterial('p','p|a'),false);
+});
+
+test('collapsed summary keeps counts honest for partial, missing and failed reads',()=>{
+ const f=fixture(),m=models();let r=model(f);assert.match(m.recentHeadline(r),/최근 7일.*홈 기록 0일.*체중 측정 0일/);
+ f.care.publicGroup.events=[event('a','2026-10-18'),event('b','2026-10-18')];r=model(f);assert.match(m.recentHeadline(r),/홈 기록 1일.*체중 측정 1일/);
+ r.recent.partial=true;assert.match(m.recentHeadline(r),/조회된 기록 기준/);
+ r.loading=true;assert.match(m.recentHeadline(r),/확인 중/);assert.doesNotMatch(m.recentHeadline(r),/홈 기록/);
+ r.failed=true;assert.match(m.recentHeadline(r),/조회 실패/);
 });

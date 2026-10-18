@@ -77,3 +77,28 @@ test('eFriends request history uses KST and completion counts without duplicate 
 
 test('history withdrawal is explicit, scoped and POST once; no send request',async()=>{const f=fixture();let revoked=false;f.setRequest(async(p,o)=>{if(p.endsWith('/withdraw')){assert.equal(o.redirect,'error');const b=JSON.parse(o.body);assert.equal(b.patientId,'patient-a');assert.equal(b.guardianId,'guardian-a');assert.equal(b.confirmed,true);revoked=true;return {ok:true,deliveryId:b.deliveryId,accessRevoked:true};}return {ok:true,deliveries:[{deliveryId:'delivery-a',kind:'pdf-material',title:'시험자료',status:'sent',channel:'home',accessRevoked:revoked?1:0}]};});await f.ctx.window.testAPI.materialHistory();await f.button('Home 공개 철회').onclick();assert.equal(f.calls.filter(x=>x.opt.method==='POST').length,1);assert.match(f.body.textContent,/공개 철회됨/);});
 test('withdraw response loss locks button until fresh history; decline writes nothing',async()=>{for(const allow of [true,false]){const f=fixture({confirm:allow});f.setRequest(async(p)=>{if(p.endsWith('/withdraw'))throw Error('response loss');return {ok:true,deliveries:[{deliveryId:'delivery-a',kind:'pdf-material',title:'시험자료',status:'sent',channel:'home',accessRevoked:0}]};});await f.ctx.window.testAPI.materialHistory();const b=f.button('Home 공개 철회');await b.onclick();assert.equal(f.calls.filter(x=>x.opt.method==='POST').length,allow?1:0);if(allow){assert.equal(b.disabled,true);await b.onclick();assert.equal(f.calls.filter(x=>x.opt.method==='POST').length,1);}}});
+
+test('same-date refresh retains results, blocks stale actions, and preserves the result filter',async()=>{
+ const f=fixture(),data={ok:true,counts:{unconfirmed:1},total:1,deliveries:[{category:'unconfirmed',patientName:'이전 가상환자',guardianName:'보호자'}]};
+ f.setRequest(async()=>data);await f.ctx.window.testAPI.preventiveResults();
+ const filter=walk(f.body).find(n=>n.tagName==='SELECT'&&n.children.some(x=>x.value==='pending'));filter.value='all';filter.onchange();
+ const rows=walk(f.body).find(n=>n.tagName==='SECTION'&&n.children.includes(filter));
+ let release;f.setRequest((url)=>url.includes('/preventive/results')?new Promise(r=>release=r):Promise.resolve({ok:true}));
+ const pending=f.button('결과 새로고침').onclick();await new Promise(r=>setImmediate(r));
+ assert.match(rows.textContent,/이전 가상환자/);assert.equal(rows.inert,true);assert.match(f.body.textContent,/이전 결과/);
+ release({...data,deliveries:[{category:'unconfirmed',patientName:'새 가상환자'}]});await pending;
+ assert.doesNotMatch(rows.textContent,/이전 가상환자/);assert.match(rows.textContent,/새 가상환자/);assert.equal(rows.inert,false);
+ assert.equal(rows.children.find(n=>n.tagName==='SELECT').value,'all');
+});
+test('failed refresh retains explicitly old results without enabling their actions; changed date clears them',async()=>{
+ const f=fixture();f.setRequest(async()=>({ok:true,counts:{unconfirmed:1},total:1,deliveries:[{category:'unconfirmed',patientName:'이전 가상환자'}]}));await f.ctx.window.testAPI.preventiveResults();
+ const rows=walk(f.body).find(n=>n.tagName==='SECTION'&&n.children.some(x=>x.tagName==='SELECT'));
+ f.setRequest(async()=>{throw Error('offline');});await f.button('결과 새로고침').onclick();assert.match(rows.textContent,/이전 가상환자/);assert.equal(rows.inert,true);assert.match(f.body.textContent,/업데이트 실패.*이전 결과/);
+ const date=walk(f.body).find(n=>n.type==='date');date.value='2026-10-01';await f.button('결과 새로고침').onclick();assert.doesNotMatch(rows.textContent,/이전 가상환자/);
+});
+test('a late result for the previous date cannot overwrite a newer successful read',async()=>{
+ const f=fixture();f.setRequest(async()=>({ok:true,counts:{},total:0,deliveries:[]}));await f.ctx.window.testAPI.preventiveResults();
+ const pending=[];f.setRequest(url=>url.includes('/preventive/results')?new Promise(r=>pending.push(r)):Promise.resolve({ok:true}));
+ const first=f.button('결과 새로고침').onclick();await new Promise(r=>setImmediate(r));walk(f.body).find(n=>n.type==='date').value='2026-10-01';const second=f.button('결과 새로고침').onclick();await new Promise(r=>setImmediate(r));
+ pending[1]({ok:true,counts:{},total:1,deliveries:[{category:'unconfirmed',patientName:'새 날짜'}]});await second;pending[0]({ok:true,counts:{},total:1,deliveries:[{category:'unconfirmed',patientName:'오래된 응답'}]});await first;assert.match(f.body.textContent,/새 날짜/);assert.doesNotMatch(f.body.textContent,/오래된 응답/);
+});

@@ -44,7 +44,7 @@
     const revision=++positionRevision,expected=key();
     requestAnimationFrame(()=>{
       if(revision!==positionRevision||expected!==key()||!['dashboardView','patientView'].includes(view))return;
-      if(focus){const target=typeof focus==='string'?$(focus):focus;if(target&&!target.closest('[hidden]')){target.setAttribute('tabindex','-1');target.scrollIntoView({block:'start',behavior:'auto'});target.focus({preventScroll:true});return;}}
+      if(focus){const target=typeof focus==='string'?$(focus):focus;if(target&&!target.closest('[hidden]')){for(let n=target.parentElement;n;n=n.parentElement)if(n.tagName==='DETAILS')n.open=true;target.setAttribute('tabindex','-1');target.scrollIntoView({block:'start',behavior:'auto'});target.focus({preventScroll:true});return;}}
       window.scrollTo({top:Math.max(0,top||0),behavior:'auto'});
     });
   }
@@ -103,9 +103,9 @@
       move($('homeCareHospitalNotice'),home);move($('homeCareFollowups'),home);
       for(const id of ['homeCareNext','homeCareStatus','homeCareFamilyUpdate','homeCarePatients','homeCustomReminders','homeCareDue','homeCareUpcoming'])move($(id),schedule);
       if($('homeNavigationFollowupLink')?.previousElementSibling!==$('homeCareUpcoming'))schedule.append($('homeNavigationFollowupLink'));
-      move($('r61-home-materials'),hospital);move($('homeCareAll'),hospital);
-      if($('r61-home-materials')&&$('homeCareAll')?.previousElementSibling!==$('r61-home-materials'))$('r61-home-materials').after($('homeCareAll'));
-      const all=$('homeCareAll');if(all){all.open=true;text(all.querySelector(':scope > summary'),'병원 안내·상담');}
+      let shelf=$('homeHospitalMaterials');if(!shelf){shelf=make('details','home-hospital-library');shelf.id='homeHospitalMaterials';shelf.append(make('summary','','전체 자료함 보기'));hospital.append(shelf);}
+      move($('r61-home-materials'),shelf);move($('homeCareAll'),hospital);
+      const all=$('homeCareAll');if(all){all.classList.add('home-hospital-library');text(all.querySelector(':scope > summary'),'전체 병원 안내·상담 보기');}
       text($('homeFollowupSection')?.querySelector('h2'),'병원 안내·상담');
       move($('homeCareSettings'),settings);if($('homeCareSettings'))$('homeCareSettings').open=true;
       move($('homeCareConnections'),settings);
@@ -158,6 +158,7 @@
     const {base,care}=snapshot(),changedAuth=auth!==base.token||account!==base.home?.user?.id;
     if(changedAuth){positions.clear();positionRevision++;route=initialHomeRoute(query);healthReturn='home';auth=base.token||'';account=base.home?.user?.id||'';patientId='';}
     const next=care.patientId||'';
+    if(changedAuth||next!==patientId)for(const id of ['homeHospitalMaterials','homeCareAll'])if($(id))$(id).open=false;
     if(next!==patientId){
       if(!changedAuth)remember();patientId=next;
       if(!routing&&view==='patientView'&&route==='health'&&next){void window.carestepOpenHomeHealth?.(next);}

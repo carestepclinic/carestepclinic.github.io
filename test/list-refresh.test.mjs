@@ -1,0 +1,14 @@
+import test from 'node:test';import assert from 'node:assert/strict';import vm from 'node:vm';import {readFileSync} from 'node:fs';
+const code=readFileSync(new URL('../home-access-clinic.js',import.meta.url),'utf8');
+function fixture(){
+ const node=()=>({children:[],dataset:{},style:{},textContent:'',inert:false,replaceChildren(){this.children=[];this.textContent='';},setAttribute(){},querySelectorAll(){return [];},getBoundingClientRect(){return {height:200};},get childElementCount(){return this.children.length;},set innerHTML(v){this.textContent=v;this.children=[{html:v}];}});
+ const out=node(),summary=node(),pages=node(),meta=node(),query={q:{value:''},role:{value:'all'},view:{value:'guardian'}},button={disabled:false},form={querySelector(s){return query[s.match(/name=(\w+)/)[1]];},querySelectorAll(){return [button];}},d={open:true,scrollTop:180,querySelector(s){return {'form':form,'[data-directory-results]':out,'[data-directory-summary]':summary,'[data-directory-pages]':pages,'[data-directory-status]':meta}[s];}};
+ let scope='a',request=async()=>data('첫 보호자');
+ const c=vm.createContext({directoryRevision:0,directoryState:null,directoryRenderedKey:'',scope:()=>scope,$:()=>d,api:()=>request(),esc:String,URLSearchParams,requestAnimationFrame:f=>f()});
+ vm.runInContext(code.slice(code.indexOf(' function directoryQuery('),code.indexOf(' function ensureDirectory('))+code.slice(code.indexOf(' async function loadDirectory('),code.indexOf(' function openDirectory(')),c);
+ return {c,out,summary,pages,meta,query,d,scope:v=>scope=v,request:v=>request=v,load:()=>c.loadDirectory(1)};
+}
+const data=name=>({ok:true,members:[{name,patientId:'p',guardianId:'g',role:'primary'}],pagination:{page:1,total:1,totalPages:1},summary:{guardians:1,patients:1,connections:1}});
+test('directory retains same-filter rows while refreshing and unlocks only the fresh rows',async()=>{const f=fixture();await f.load();f.d.scrollTop=180;const row=f.out.children[0];let done;f.request(()=>new Promise(r=>done=r));const p=f.load();assert.equal(f.out.children[0],row);assert.equal(f.out.inert,true);assert.match(f.meta.textContent,/이전 결과/);done(data('새 보호자'));await p;assert.match(f.out.textContent,/새 보호자/);assert.equal(f.out.inert,false);assert.equal(f.d.scrollTop,180);});
+test('directory failure labels old results and keeps navigation locked',async()=>{const f=fixture();await f.load();f.request(async()=>{throw Error('offline');});await f.load();assert.match(f.out.textContent,/첫 보호자/);assert.match(f.meta.textContent,/이전 결과/);assert.equal(f.out.inert,true);});
+test('directory never retains another query or clinic rows and ignores late responses',async()=>{for(const change of [f=>f.query.q.value='다른 검색',f=>f.scope('b')]){const f=fixture();await f.load();let done;f.request(()=>new Promise(r=>done=r));change(f);const p=f.load();assert.equal(f.out.children.length,0);f.scope('c');done(data('늦은 응답'));await p;assert.doesNotMatch(f.out.textContent,/늦은 응답/);}});

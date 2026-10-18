@@ -89,3 +89,25 @@ body,button,input,select,textarea{font-family:'Carestep Pretendard','Noto Sans K
 .patient-workspace .patient-workspace-head .eyebrow{font-size:.75rem;color:var(--care-ui-muted)}
 }
 @media(max-width:600px){.patient-workspace .patient-workspace-quick>.btn{flex:1 1 7rem;min-width:0}.patient-workspace .patient-workspace-fast-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}.patient-workspace .patient-workspace-quick{position:static;margin-inline:0!important;padding-inline:0}}
+
+/* Shared work and reading hierarchy. Secondary actions retain a quiet outline. */
+#workFirstDashboard>.work-first-head{align-items:flex-start;flex-wrap:wrap;gap:12px}
+#workFirstDashboard>.work-first-head h3{font-size:1.375rem;line-height:1.4}
+#workFirstDashboard>.work-first-head p:not(.eyebrow){font-size:.875rem;line-height:1.65;color:var(--care-ui-muted)}
+#workFirstDashboard>.work-first-head .eyebrow{display:none}
+#workFirstDashboard .care-inbox{padding:4px 0 12px}
+#workFirstDashboard .care-inbox nav{gap:8px;margin:12px 0}
+#workFirstDashboard :is(.care-inbox nav button,#refreshWorkFirst,.care-work-more>summary){font:inherit;font-size:.875rem;min-height:44px;line-height:1.5;border-radius:12px;white-space:normal;padding:10px 14px}
+#workFirstDashboard .care-inbox nav button{background:#fff;color:#244a8c;border:1px solid var(--care-ui-line)}
+#workFirstDashboard .care-inbox nav button[aria-pressed=true]{background:var(--care-ui-action);color:#fff;border-color:var(--care-ui-action)}
+#workFirstDashboard .care-task{border-radius:var(--care-ui-radius);box-shadow:none}
+#workFirstDashboard .care-task .btn-primary{font-size:.875rem;min-height:44px;border-radius:12px;line-height:1.5}
+#workFirstDashboard .care-task-detail summary{font-size:.875rem;min-height:44px;line-height:1.6;align-content:center}
+#workFirstDashboard .care-work-more{border-top:1px solid var(--care-ui-line);padding-top:8px}
+#workFirstDashboard .care-work-more>summary{padding-inline:0;color:#244a8c;cursor:pointer}
+.care-refresh-status{font-size:.875rem;line-height:1.65;color:var(--care-ui-muted);min-height:1.65em;margin:8px 0;overflow-wrap:anywhere}
+.care-refresh-status.is-error{color:#854400}
+[data-refreshing=true]{cursor:progress}
+@media(max-width:600px){#workFirstDashboard>.work-first-head .btn{white-space:normal}#workFirstDashboard .care-inbox nav button{flex:1 1 8rem}}
+
+#workFirstDashboard .care-inbox-region button{background:#fff;color:#244a8c;border:1px solid var(--care-ui-line);border-radius:12px;min-height:44px;font-size:.875rem;padding:10px 14px;line-height:1.5}

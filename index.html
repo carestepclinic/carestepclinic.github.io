@@ -1037,7 +1037,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 </style>
 <link rel="stylesheet" href="carestep-workflow.css?v=flow-20261017">
   <link rel="stylesheet" href="home-access-clinic.css?v=readable-20261017">
-<link rel="stylesheet" href="carestep-ui.css?v=reading-flow-20261018b">
+<link rel="stylesheet" href="carestep-ui.css?v=screen-flow-20261018a">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -1227,7 +1227,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
         </section>
 
         <section id="workFirstDashboard" class="work-first-dashboard" aria-label="오늘 처리할 업무">
-          <div class="work-first-head"><div><p class="eyebrow">TODAY WORKSPACE</p><h3>오늘 업무</h3><p>오늘 처리할 항목과 확인이 필요한 상태를 모았습니다. 지난 미처리 업무는 아래에서 펼쳐볼 수 있습니다.</p></div><button id="refreshWorkFirst" class="btn btn-secondary" type="button">업무 새로고침</button></div>
+          <div class="work-first-head"><div><p class="eyebrow">TODAY WORKSPACE</p><h3>오늘 업무</h3><p>상담·연결 승인·발송·일정 충돌을 확인하세요. 진료·예방 업무는 아래에서 펼쳐볼 수 있습니다.</p></div><button id="refreshWorkFirst" class="btn btn-secondary" type="button">업무 새로고침</button></div>
           <div class="work-first-kpis" role="list">
             <button type="button" class="work-first-kpi active" data-work-filter="all"><span>오늘 전체 업무</span><b id="workCountAll">0</b><small>우선순위순</small></button>
             <button type="button" class="work-first-kpi" data-work-filter="preventive"><span>오늘 접종·사상충</span><b id="workCountPreventive">0</b><small>오늘 예방 예정</small></button>
@@ -10045,11 +10045,11 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <!-- CARESTEP v10.4-G · Clinical Protocol Settings -->
 <script>document.addEventListener("DOMContentLoaded",()=>CarestepStabilization.compatible());</script>
 <script src="r61-route.js"></script>
-<script src="r61-clinic.js?v=fullcourse-20261017"></script>
+<script src="r61-clinic.js?v=screen-flow-20261018a"></script>
 <script src="r65-clinic.js?v=R65"></script>
 <script src="r83-clinic.js"></script>
 <script src="clinic-read-flow.js?v=flow-20261017"></script>
-<script src="home-access-clinic.js?v=readable-20261017"></script>
-<script src="clinic-care.js?v=daily-clarity-20261017"></script>
+<script src="home-access-clinic.js?v=screen-flow-20261018a"></script>
+<script src="clinic-care.js?v=screen-flow-20261018a"></script>
 </body>
 </html>
