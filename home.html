@@ -12,14 +12,14 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="carestep-home-icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="carestep-home-icon-192.png">
-  <link rel="stylesheet" href="carestep-home.css?v=patient-home-state-20261018a">
+  <link rel="stylesheet" href="carestep-home.css?v=reading-flow-20261018b">
   <link rel="stylesheet" href="carestep-home-response-edit.css?v=10.1-J">
   <title>Carestep Home v10.1-J</title>
 <meta name="robots" content="noindex,nofollow">
 <meta name="referrer" content="no-referrer">
-<link rel="stylesheet" href="carestep-ui.css?v=patient-home-state-20261018a">
-<link rel="stylesheet" href="home-navigation.css?v=patient-home-state-20261018a">
-<link rel="stylesheet" href="home-readability.css?v=patient-home-state-20261018a">
+<link rel="stylesheet" href="carestep-ui.css?v=reading-flow-20261018b">
+<link rel="stylesheet" href="home-navigation.css?v=reading-flow-20261018b">
+<link rel="stylesheet" href="home-readability.css?v=reading-flow-20261018b">
 </head>
 <body>
   <div class="home-shell">
@@ -130,7 +130,7 @@
           <div class="patient-kpis">
             <article><span>최근 체중</span><b id="patientLatestWeight">미입력</b></article>
             <article><span>다음 일정</span><b id="patientNextDate">없음</b><small id="patientNextTitle">예정된 일정 없음</small></article>
-            <article><span>전체 기록</span><b id="patientRecordCount">0건</b></article>
+            <article><span>조회 기록</span><b id="patientRecordCount">0건</b></article>
           </div>
           <section class="patient-chart-card">
             <div class="patient-section-title"><div><span>WEIGHT</span><h2>체중 변화</h2></div><small>병원·보호자 측정 기록</small></div>
@@ -139,6 +139,11 @@
           <section class="patient-timeline-card">
             <div class="patient-section-title"><div><span>TIMELINE</span><h2>건강 타임라인</h2></div><small>병원·보호자 기록 · 최신순</small></div>
             <div id="patientTimelineFilters" class="home-filters" aria-label="건강 기록 종류 필터"></div>
+            <form id="homeTimelineSearch" class="home-timeline-search" role="search" aria-label="건강기록 검색">
+              <label class="home-timeline-query">제목 · 방문목적 검색<input id="homeTimelineQuery" type="search" maxlength="100" placeholder="예: 스케일링, 사료 구입" autocomplete="off"></label>
+              <details id="homeTimelinePeriod"><summary>기간 선택 <span id="homeTimelinePeriodLabel">전체 기간</span></summary><div class="home-timeline-dates"><label>시작일<input id="homeTimelineFrom" type="date"></label><label>종료일<input id="homeTimelineTo" type="date"></label></div></details>
+              <button id="homeTimelineReset" class="home-text-button" type="button">검색 초기화</button>
+            </form><p id="homeTimelineResult" class="home-help" role="status" aria-live="polite"></p>
             <div id="patientTimelineList" class="home-timeline-list"></div>
           </section>
           <div class="stage-note"><b>Carestep Home 안내</b><p>홈 기록은 상태 변화를 정리해 병원 진료를 준비하도록 돕는 기능이며 진단·처방을 대신하지 않습니다. 응급상황이 의심되면 기록보다 가까운 동물병원 진료를 우선하세요.</p></div>
@@ -172,9 +177,9 @@
   </div>
   <div id="offlineBar" class="offline-bar" hidden>오프라인 상태입니다. 연결되면 다시 시도해주세요.</div>
   <script src="date-input-guard.js?v=10.1-B"></script>
-  <script src="carestep-home.js?v=patient-home-state-20261018a"></script>
-  <script src="home-care.js?v=patient-home-state-20261018a"></script>
-  <script src="home-reminders.js?v=patient-home-state-20261018a"></script>
-  <script src="home-navigation.js?v=patient-home-state-20261018a"></script>
+  <script src="carestep-home.js?v=reading-flow-20261018b"></script>
+  <script src="home-care.js?v=reading-flow-20261018b"></script>
+  <script src="home-reminders.js?v=reading-flow-20261018b"></script>
+  <script src="home-navigation.js?v=reading-flow-20261018b"></script>
 </body>
 </html>

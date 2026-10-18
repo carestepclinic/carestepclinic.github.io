@@ -1,5 +1,4 @@
 /* HOME reading scale and shared visual language. Font is self-hosted under SIL OFL. */
-@font-face{font-family:'Carestep Pretendard';font-style:normal;font-weight:45 920;font-display:swap;src:url('./pretendard-variable-1.3.9.woff2') format('woff2')}
 :root{font-family:'Carestep Pretendard','Noto Sans KR',system-ui,-apple-system,'Segoe UI',sans-serif;--home-text:#172d50;--home-muted:#435973;--home-line:#d7e1ef;--home-action:#245bdb;--home-surface:#fff;--home-radius:16px;--home-space:16px}
 body{font-family:inherit;font-size:1rem;line-height:1.6}
 button,input,select,textarea{font-family:inherit}
@@ -106,3 +105,24 @@ button,a,summary{-webkit-tap-highlight-color:transparent}
 
 .home-navigation-active #patientView #patientTimelineLoading[data-read-mode=refresh]:not(:has(.home-timeline-empty)){position:absolute;width:1px;height:1px;min-height:0;overflow:hidden;clip-path:inset(50%);padding:0;margin:0}
 #patientTimelineRefresh{min-width:6.5rem}
+
+/* Reading hierarchy and compact overview. */
+.home-navigation-active #patientView :is(.home-event-meta,.home-event-head){color:var(--home-muted)}
+.home-navigation-active #patientView .home-visit-purpose,.home-navigation-active #patientView .home-purpose-more p{font-size:1rem;line-height:1.65;color:var(--home-text);margin:10px 0 0;overflow-wrap:anywhere;white-space:pre-wrap}
+.home-navigation-active #patientView .home-visit-purpose>b{font-size:.875rem;line-height:1.6;color:var(--home-muted);margin-bottom:4px}
+.home-purpose-more summary{display:inline-flex;align-items:center;min-height:44px;color:#244a8c;font-size:.875rem;cursor:pointer;font-weight:600;white-space:normal}
+.home-purpose-more .purpose-less-label,.home-purpose-more[open] .purpose-more-label{display:none}.home-purpose-more[open] .purpose-less-label{display:inline}
+.home-timeline-month>h3{font-size:1.125rem;line-height:1.5;margin:24px 0 12px;display:flex;align-items:baseline;gap:10px}.home-timeline-month>h3 span{font-size:.875rem;font-weight:400;color:var(--home-muted)}
+.home-navigation-active #patientTimelineFilters{display:flex;flex-wrap:wrap;gap:6px;overflow:visible}.home-navigation-active #patientTimelineFilters button{min-height:44px;font-size:.875rem;padding:8px 12px;border-radius:12px;color:#244a8c;background:#fff;border:1px solid var(--home-line)}.home-navigation-active #patientTimelineFilters button.active{background:var(--home-action);color:#fff;border-color:var(--home-action)}
+.home-timeline-search{display:flex;flex-wrap:wrap;align-items:start;gap:8px 12px;padding:14px;background:#f4f7fc;border:1px solid var(--home-line);border-radius:12px;margin-top:12px}.home-timeline-search label{display:flex;flex-direction:column;gap:5px;font-size:.875rem;color:var(--home-muted);min-width:0}.home-timeline-query{flex:1 1 100%}.home-timeline-search input{font-size:1rem;min-height:44px;box-sizing:border-box;width:100%;padding:8px 10px;border:1px solid var(--home-line);border-radius:10px;background:#fff;color:var(--home-text);line-height:1.5}.home-timeline-search details{flex:1 1 14rem;min-width:0}.home-timeline-search summary{min-height:44px;cursor:pointer;font-size:.875rem;line-height:1.6;align-content:center;color:#244a8c}.home-timeline-search summary span{margin-left:6px;color:var(--home-muted);overflow-wrap:anywhere}.home-timeline-dates{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-block:8px}.home-timeline-dates label{min-width:0}.home-timeline-search button{align-self:start;min-height:44px}
+#homeNavigation-home #homeCareHealth .home-weight-plot{height:5rem;min-height:5rem;pointer-events:none}
+#homeNavigation-home #homeCareHealth .home-weight-range,#homeNavigation-home #homeCareHealth .home-weight-inspect,#homeNavigation-home #homeCareHealth .home-weight-values{display:none}
+#homeNavigation-home #homeCareHealth .home-weight-date{flex-basis:auto;display:inline}
+#homeNavigation-home #homeCareHealth .home-care-inline-actions{margin-top:6px;gap:6px}
+#homeNavigation-home #homeCareHealth .home-care-inline-actions button{flex:1 1 7rem}
+#homeNavigationDaily .home-navigation-next{grid-template-columns:auto minmax(0,1fr);column-gap:12px;min-height:88px}
+#homeNavigationDaily .home-next-kicker{grid-column:1/-1}#homeNavigationDaily .home-next-time{grid-column:1;grid-row:2/4;align-self:center}#homeNavigationDaily .home-next-label,#homeNavigationDaily .home-next-source{grid-column:2}#homeNavigationDaily .home-navigation-next:has(.home-next-time:empty) :is(.home-next-label,.home-next-source){grid-column:1/-1}
+.home-navigation-active #homeCareHealth:has(.care-loading){min-height:15rem}
+@media(max-width:360px){.home-timeline-dates{grid-template-columns:1fr}.home-timeline-search{padding:10px}#homeNavigationDaily .home-navigation-next{column-gap:8px}}
+
+#homeNavigation-home #homeCareHealth .home-weight-plot{cursor:default}

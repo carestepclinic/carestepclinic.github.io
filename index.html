@@ -1037,7 +1037,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 </style>
 <link rel="stylesheet" href="carestep-workflow.css?v=flow-20261017">
   <link rel="stylesheet" href="home-access-clinic.css?v=readable-20261017">
-<link rel="stylesheet" href="carestep-ui.css?v=daily-clarity-20261017">
+<link rel="stylesheet" href="carestep-ui.css?v=reading-flow-20261018b">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -2232,7 +2232,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
         <div><label class="field-label" for="crmPatientNeutered">중성화</label><select id="crmPatientNeutered" class="input"><option value="unknown">미확인</option><option value="yes">완료</option><option value="no">미완료</option></select></div>
         <div><label class="field-label" for="crmPatientWeight">최근 체중(kg)</label><input id="crmPatientWeight" class="input" type="number" min="0.01" max="200" step="0.01" inputmode="decimal" placeholder="4.80"></div>
         <div class="span-2"><label class="field-label" for="crmPatientConditions">주요 질환</label><input id="crmPatientConditions" class="input" maxlength="300" autocomplete="off" placeholder="예: 심장병 B2, 만성신장병 IRIS 2"></div>
-        <fieldset id="crmPatientHomeState" class="span-2 patient-home-state"><legend>환자 활성 상태 · HOME 공개</legend><div><label><input type="radio" name="crmPatientActive" value="active" checked> 활성 · HOME 공개</label><label><input type="radio" name="crmPatientActive" value="inactive"> 비활성 · HOME 비공개</label></div><p>비활성으로 저장하면 연결된 모든 보호자의 HOME에서 환자·자료·일정이 숨겨지고 새 알림 대상에서 제외됩니다. 병원 기록과 가족 연결은 보존됩니다.</p><p>다시 활성화하면 기존 공개 기록과 남은 일정이 다시 표시됩니다.</p></fieldset><div class="span-2"><label class="field-label" for="crmPatientNotes">관리 메모</label><textarea id="crmPatientNotes" class="input" maxlength="700" placeholder="자료 생성과 후속관리에 필요한 최소 메모"></textarea></div>
+        <fieldset id="crmPatientHomeState" class="span-2 patient-home-state"><legend>환자 활성 상태 · HOME 표시</legend><div><label><input type="radio" name="crmPatientActive" value="active" checked> 활성 · HOME 표시 허용</label><label><input type="radio" name="crmPatientActive" value="inactive"> 비활성 · HOME 비공개</label></div><p>비활성으로 저장하면 연결된 모든 보호자의 HOME에서 환자·자료·일정이 숨겨지고 새 알림 대상에서 제외됩니다. 병원 기록과 가족 연결은 보존됩니다.</p><p>다시 활성화하면 기존 공개 기록과 남은 일정이 다시 표시됩니다.</p></fieldset><div class="span-2"><label class="field-label" for="crmPatientNotes">관리 메모</label><textarea id="crmPatientNotes" class="input" maxlength="700" placeholder="자료 생성과 후속관리에 필요한 최소 메모"></textarea></div>
       </div>
       <div id="crmPatientStatus" class="patient-crm-status"></div><div class="patient-crm-dialog-actions"><button class="btn btn-ghost" type="button" data-crm-dialog-close="crmPatientDialog">취소</button><button id="crmPatientSave" class="btn btn-primary" type="submit">저장</button></div>
     </form>
@@ -9990,7 +9990,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
 <script src="patient-breeds.js?v=9.5.3"></script>
-<script src="patient-crm.js?v=patient-home-state-20261018"></script>
+<script src="patient-crm.js?v=reading-flow-20261018b"></script>
 <script src="patient-timeline.js?v=patient-home-state-20261018"></script>
 <script src="date-input-guard.js?v=9.5.3"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->

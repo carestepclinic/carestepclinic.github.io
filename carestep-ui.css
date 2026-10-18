@@ -1,5 +1,5 @@
 /* Shared Clinic / Home controls, focus, and reflow rules. */
-:root{--care-ui-line:#d7e1ef;--care-ui-ink:#172d50;--care-ui-muted:#435973;--care-ui-action:#245bff;--care-ui-radius:14px}
+:root{--care-ui-line:#d7e1ef;--care-ui-ink:#172d50;--care-ui-muted:#435973;--care-ui-action:#245bdb;--care-ui-radius:16px}
 .care-sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 .care-read-notice{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#eef3ff;border:1px solid var(--care-ui-line);border-radius:var(--care-ui-radius);padding:12px 16px;color:var(--care-ui-muted);font-size:.875rem;line-height:1.7;margin-bottom:16px}
 :is(.care-med-dialog,.r61-dialog,.timeline-publish-dialog,.home-access-clinic-dialog,.home-family-dialog){box-sizing:border-box;max-width:calc(100vw - 24px);max-height:calc(var(--care-visible-height,100dvh) - 24px);border-radius:18px;border-color:var(--care-ui-line);overflow:auto;font-size:1rem}
@@ -61,3 +61,31 @@
 .home-reminder-preview{border:1px solid #b9cbed;border-radius:12px;background:#eef4ff;padding:12px;font-size:.875rem;line-height:1.7;color:var(--care-ui-ink);overflow-wrap:anywhere}.home-confirm-context{font-weight:700;white-space:pre-wrap}.home-action-confirm{width:min(460px,calc(100vw - 24px))}.home-action-confirm .home-custom-actions>button{flex:1;white-space:normal}.home-custom-dialog :is(button,input,select,textarea):focus-visible,.home-care-remaining button:focus-visible{outline:3px solid #184fd1;outline-offset:3px}
 .care-inbox-region{border:1px solid var(--care-ui-line);border-radius:12px;background:#f7f9fd;padding:12px;margin:8px 0;line-height:1.7}.care-inbox-region p{margin:0 0 8px}.care-inbox-region.is-error{background:#fff5eb;border-color:#e8cba4;color:#744300}.care-inbox-region button{min-height:44px}.home-custom-actions button{font-size:.875rem;line-height:1.5}
 @media(max-width:480px){.home-care-remaining{padding:12px}.home-custom-actions>button{flex-basis:100%}.home-action-confirm .home-custom-actions>button{flex:1 1 100%;min-height:48px}.home-custom-reminders>header>button{min-height:44px}}
+
+/* Common app typography; generated print documents retain their own styles. */
+@font-face{font-family:'Carestep Pretendard';font-style:normal;font-weight:45 920;font-display:swap;src:url('./pretendard-variable-1.3.9.woff2') format('woff2')}
+@media screen{
+body,button,input,select,textarea{font-family:'Carestep Pretendard','Noto Sans KR',system-ui,-apple-system,'Segoe UI',sans-serif}
+:is(#view-patients,.patient-workspace,.patient-crm-dialog,.timeline-dialog,.care-med-dialog,.r61-dialog,.home-access-clinic-dialog){font-size:1rem;line-height:1.6;color:var(--care-ui-ink)}
+:is(.patient-crm-dialog,.timeline-dialog) .field-label,:is(.patient-workspace,.patient-crm-dialog,.timeline-dialog) :is(small,.muted),.patient-search-result-copy :is(span,small),.patient-search-result-side :is(b,span){font-size:.875rem;line-height:1.6;color:var(--care-ui-muted)}
+:is(.patient-crm-dialog,.timeline-dialog) :is(input,select,textarea){font-size:1rem;line-height:1.6;border-radius:12px;border-color:var(--care-ui-line)}
+:is(.patient-workspace,.patient-crm-dialog,.timeline-dialog,.care-med-dialog,.r61-dialog,.home-access-clinic-dialog) button{min-height:44px;font-size:.875rem;border-radius:12px;white-space:normal;line-height:1.5}
+:is(.patient-workspace,.patient-crm-dialog,.timeline-dialog,.care-med-dialog,.r61-dialog) .btn-primary{background:var(--care-ui-action);color:#fff}
+:is(.patient-workspace,.patient-crm-dialog,.timeline-dialog,.care-med-dialog,.r61-dialog) .btn-secondary{color:#244a8c;background:#fff;border-color:var(--care-ui-line)}
+.patient-workspace,.patient-crm-dialog{border-color:var(--care-ui-line);border-radius:var(--care-ui-radius)}
+}
+.clinic-home-visibility{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:14px;margin:12px 0;background:#f4f7fc;border:1px solid var(--care-ui-line);border-radius:var(--care-ui-radius)}
+.clinic-home-visibility>div{display:flex;flex-direction:column;gap:3px;min-width:0}.clinic-home-visibility span,.clinic-home-visibility small,.clinic-home-visibility p{font-size:.875rem;color:var(--care-ui-muted);line-height:1.6}.clinic-home-visibility b{font-size:1rem;line-height:1.6;overflow-wrap:anywhere}.clinic-home-visibility p{grid-column:1/-1;margin:0;padding-top:8px;border-top:1px solid var(--care-ui-line)}
+.clinic-loading-list{padding:16px;border:1px solid var(--care-ui-line);border-radius:var(--care-ui-radius);font-size:1rem;color:var(--care-ui-ink);line-height:1.6}.clinic-loading-list p{font-size:.875rem;color:var(--care-ui-muted);margin:6px 0 12px}.clinic-loading-row{min-height:92px;padding:16px;border:1px solid var(--care-ui-line);border-radius:12px;background:#fff;margin:8px 0}.clinic-loading-row .care-skeleton{display:block;max-width:72%;height:14px;margin:4px 0 12px}.clinic-loading-row .care-skeleton:last-child{max-width:48%}
+#patientCrmPagination{min-height:48px}#crmPatientSave[aria-busy=true]{min-width:7rem}
+@media(max-width:600px){.clinic-home-visibility{grid-template-columns:1fr 1fr}.clinic-home-visibility>div:first-child{grid-column:1/-1}}
+
+@media screen{
+.patient-workspace :is(.patient-workspace-head p,.patient-workspace-kpis span,.patient-workspace-kpis small,.patient-workspace-row span,.patient-workspace-row em,.patient-workspace-section-head span,.patient-workspace-empty,.patient-workspace-fast-record>div:first-child span,.patient-workspace-mobile-context span,.patient-workspace-alert){font-size:.875rem;line-height:1.6;color:var(--care-ui-muted)}
+.patient-workspace :is(.patient-workspace-kpis b,.patient-workspace-row b,.patient-workspace-section-head b,.patient-workspace-fast-record>div:first-child b){font-size:1rem;line-height:1.6}
+.patient-workspace .patient-workspace-head h4{font-size:1.25rem}.patient-workspace .patient-workspace-fast-buttons b{font-size:.875rem}
+.patient-workspace :is(.patient-workspace-row b,.patient-workspace-row span,.patient-workspace-kpis small,.patient-workspace-fast-buttons small){white-space:normal;overflow:visible;overflow-wrap:anywhere;text-overflow:clip}
+.patient-workspace .patient-workspace-quick{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.patient-workspace .patient-workspace-quick>.btn{flex:0 1 auto;min-width:7rem;width:auto;padding:10px 14px;word-break:keep-all}.patient-workspace .patient-workspace-more{flex:0 1 auto;min-width:10rem}.patient-workspace .patient-workspace-more summary{font-size:.875rem;min-height:44px;align-content:center;word-break:keep-all}.patient-workspace .patient-workspace-fast-record{align-items:start}.patient-workspace .patient-workspace-fast-buttons{grid-template-columns:repeat(auto-fit,minmax(7rem,1fr))}
+.patient-workspace .patient-workspace-head .eyebrow{font-size:.75rem;color:var(--care-ui-muted)}
+}
+@media(max-width:600px){.patient-workspace .patient-workspace-quick>.btn{flex:1 1 7rem;min-width:0}.patient-workspace .patient-workspace-fast-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}.patient-workspace .patient-workspace-quick{position:static;margin-inline:0!important;padding-inline:0}}
