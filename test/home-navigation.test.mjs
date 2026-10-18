@@ -1,4 +1,6 @@
 import test from 'node:test';
+test('tapping the active menu keeps reading position and does not request health again',()=>{const f=router();f.c.go('health');f.flush();const calls=f.health.length,scrolls=f.scrolls.length;f.c.window.scrollY=410;f.c.go('health');f.flush();assert.equal(f.health.length,calls);assert.equal(f.scrolls.length,scrolls);});
+test('next action and past incomplete records link to their own source',()=>{const c=models(),m={patientId:'p',state:'ready',count:0},r={patientId:'p',state:'ready',count:2,overdue:1,next:{time:'20:00',title:'산책'}};let result=c.nextHomeCare(m,r,'p');assert.equal(result.time,'20:00');assert.equal(result.noteTarget,'homeCustomReminders');assert.match(result.note,/미완료 1건/);r.next=null;result=c.nextHomeCare(m,r,'p');assert.equal(result.kind,'overdue');assert.equal(result.target,'homeCustomReminders');r.state='failed';assert.equal(c.nextHomeCare(m,r,'p').target,'homeCustomReminders');});
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';

@@ -13,12 +13,15 @@
     return 'home';
   }
   function nextHomeCare(medication, custom, pid) {
-    const valid = [medication,custom].map(x=>x?.patientId===pid?x:null);
-    const next = valid.flatMap((x,i)=>x?.state==='ready' && x.next ? [{...x.next,source:i===0?'병원 복약':'보호자 알림'}] : []).sort((a,b)=>a.time.localeCompare(b.time))[0];
-    if (next) return {text:'다음 '+next.time+' · '+(next.label||next.title||next.source),target:next.source==='병원 복약'?'homeCarePatients':'homeCustomReminders'};
-    if (valid.some(x=>!x||x.state!=='ready')) return {text:'오늘 일정 확인이 필요한 항목이 있습니다',target:'homeCarePatients'};
-    if (valid.some(x=>x.count>0)) return {text:'시간이 지난 미완료 기록을 확인해주세요',target:'homeCarePatients'};
-    return {text:'오늘 남은 관리가 없습니다 · 전체 일정 보기',target:'homeCarePatients'};
+    const valid=[medication,custom].map(x=>x?.patientId===pid?x:null),targets=['homeCarePatients','homeCustomReminders'];
+    const next=valid.flatMap((x,i)=>x?.state==='ready'&&x.next?[{...x.next,source:i===0?'병원 복약':'보호자 알림',target:targets[i]}]:[]).sort((a,b)=>a.time.localeCompare(b.time))[0];
+    const uncertain=valid.findIndex(x=>!x||x.state!=='ready'),overdue=valid.reduce((sum,x)=>sum+(x?.state==='ready'?Number(x.overdue)||0:0),0);
+    const overdueTarget=targets[valid.findIndex(x=>x?.state==='ready'&&x.overdue>0)]||targets[0];
+    const note=uncertain>=0?'일부 일정 확인 필요':overdue?'지난 미완료 '+overdue+'건 · 기록 확인':'';
+    if(next)return {text:'다음 '+next.time+' · '+(next.label||next.title||next.source),time:next.time,label:next.label||next.title||next.source,source:next.source,target:next.target,occurrence:next,kind:'next',note,noteTarget:uncertain>=0?targets[uncertain]:overdueTarget};
+    if(uncertain>=0)return {text:'오늘 일정 확인이 필요한 항목이 있습니다',target:targets[uncertain],kind:'checking',label:'일정 확인이 필요해요',source:'확인할 일정 보기'};
+    if(valid.some(x=>x.count>0))return {text:'시간이 지난 미완료 기록을 확인해주세요',target:overdueTarget,kind:'overdue',label:'지난 미완료 기록 확인',source:'실제 관리 여부를 확인해주세요'};
+    return {text:'오늘 남은 관리가 없습니다 · 전체 일정 보기',target:targets[0],kind:'done',label:'오늘 남은 관리가 없어요',source:'전체 일정 보기'};
   }
   function preventiveHomeRows(summary, pid) {
     const valid = summary?.patientId===pid?summary:null;
@@ -65,7 +68,7 @@
       care.append(panel);
     }
     const today=make('section','home-navigation-daily');today.id='homeNavigationDaily';
-    const next=make('button','home-navigation-next');next.id='homeNavigationNext';next.type='button';next.onclick=()=>go('schedule',{target:next.dataset.target});today.append(next);
+    today.append(make('h3','','오늘 관리'));const next=make('button','home-navigation-next');next.id='homeNavigationNext';next.type='button';next.onclick=()=>openNextCare();next.append(make('span','home-next-kicker'),make('strong','home-next-time'),make('span','home-next-label'),make('span','home-next-source'));today.append(next);const note=make('button','home-next-note');note.id='homeNavigationNextNote';note.type='button';note.hidden=true;note.onclick=()=>go('schedule',{target:note.dataset.target});today.append(note);
     $('homeNavigation-home').append(today);
     const prevention=make('section','home-navigation-prevention');prevention.id='homeNavigationPrevention';prevention.append(make('h3','','예방 예정'));
     for(const [type,label] of [['heartworm','심장사상충'],['vaccination','예방접종']]){
@@ -83,6 +86,9 @@
       const button=make('button');button.type='button';button.dataset.homeRoute=name;const icon=make('span','home-bottom-icon');icon.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+symbols[name]+'</svg>';icon.setAttribute('aria-hidden','true');button.append(icon,make('span','',routes[name]));button.onclick=()=>go(name);nav.append(button);
     }
     main.after(nav);
+    const compact=make('button','home-current-patient');compact.id='homeCurrentPatient';compact.type='button';compact.hidden=true;compact.onclick=()=>{const picker=$('homeCarePatientCards');picker?.scrollIntoView({block:'center',behavior:'auto'});picker?.querySelector('[aria-pressed=true]')?.focus({preventScroll:true});};document.body.append(compact);
+    let scrollQueued=false;const updateCompact=()=>{scrollQueued=false;const active=!$('homeNavigationChrome').hidden,picker=$('homeCarePatientCards');compact.hidden=!active||!patientId||!picker||picker.getBoundingClientRect().bottom>0||document.body.classList.contains('care-keyboard-open');};
+    window.addEventListener('scroll',()=>{if(!scrollQueued){scrollQueued=true;requestAnimationFrame(updateCompact);}},{passive:true});window.addEventListener('resize',updateCompact);window.addEventListener('carestep-home-patient',updateCompact);
     mounted=true;window.carestepHomeNavigation.mounted=true;
     arrange();
     return true;
@@ -93,7 +99,7 @@
       const home=$('homeNavigation-home'),schedule=$('homeNavigation-schedule'),hospital=$('homeNavigation-hospital'),settings=$('homeNavigation-settings');
       // Move live nodes, preserving their handlers, filters, details and drafts.
       move($('homeCareHealth'),home);if(home.firstElementChild!==$('homeCareHealth')&&$('homeCareHealth'))home.prepend($('homeCareHealth'));
-      const today=$('homeNavigationDaily');move($('homeCareRemaining'),today);if(today.firstElementChild!==$('homeCareRemaining')&&$('homeCareRemaining'))today.prepend($('homeCareRemaining'));
+      const today=$('homeNavigationDaily');move($('homeCareRemaining'),today);
       move($('homeCareHospitalNotice'),home);move($('homeCareFollowups'),home);
       for(const id of ['homeCareNext','homeCareStatus','homeCareFamilyUpdate','homeCarePatients','homeCustomReminders','homeCareDue','homeCareUpcoming'])move($(id),schedule);
       if($('homeNavigationFollowupLink')?.previousElementSibling!==$('homeCareUpcoming'))schedule.append($('homeNavigationFollowupLink'));
@@ -129,14 +135,15 @@
     text($('homeNavigationTitle'),route==='home'?'우리 아이 건강관리':route==='hospital'?'병원 자료·상담':routes[route]);
     $('homeNavigationSettingsButton').setAttribute('aria-pressed',String(route==='settings'));
     if($('homeCareRefresh'))$('homeCareRefresh').hidden=route==='health';
+    const selected=(base.home?.connections||[]).flatMap(c=>c.patients||[]).find(p=>p.id===care.patientId),compact=$('homeCurrentPatient');text(compact,selected?(selected.name||'환자')+' · '+(selected.species==='cat'?'고양이':selected.species==='dog'?'강아지':'반려동물')+' · 환자 변경':'');if(!active||!selected)compact.hidden=true;
     if(!allowed)return;
     const custom=window.carestepHomeReminderSummary?.();
-    const next=nextHomeCare(care.medicationSummary,custom,care.patientId);text($('homeNavigationNext'),next.text+' ›');$('homeNavigationNext').dataset.target=next.target;
+    const next=nextHomeCare(care.medicationSummary,custom,care.patientId),nextButton=$('homeNavigationNext');nextButton.dataset.target=next.target;nextButton.dataset.state=next.kind;text(nextButton.querySelector('.home-next-kicker'),next.kind==='next'?'다음 예정':next.kind==='done'?'✓ 확인 완료':'확인 필요');text(nextButton.querySelector('.home-next-time'),next.time||'');text(nextButton.querySelector('.home-next-label'),next.label);text(nextButton.querySelector('.home-next-source'),next.source+' ›');nextButton.setAttribute('aria-label',next.text);const note=$('homeNavigationNextNote');text(note,next.note||'');note.hidden=!next.note;note.dataset.target=next.noteTarget||next.target;
     $('homeNavigationDaily').hidden=!care.patientId;
     for(const row of preventiveHomeRows(care.preventiveSummary,care.patientId)){
       const b=$('homeNavigationPrevention').querySelector('[data-preventive-type="'+row.type+'"]');
       text(b.querySelector('strong'),row.label+(row.count>1?' · '+row.count+'종':''));
-      text(b.querySelector('.home-navigation-preventive-date'),row.state==='failed'?'조회 실패 · 다시 확인':row.state==='loading'?'예정일 확인 중':row.item?.nextDueDate||'예정일 미등록');
+      text(b.querySelector('.home-navigation-preventive-date'),row.state==='failed'?'조회 실패 · 다시 확인':row.state==='loading'?'예정일 확인 중':row.item?.nextDueDate?.replace(/^(\d{4})-(\d{2})-(\d{2})$/,(_,y,m,d)=>Number(y)+'년 '+Number(m)+'월 '+Number(d)+'일')||'예정일 미등록');
       text(b.querySelector('.home-navigation-dday'),row.state==='failed'?'확인 필요':row.state==='loading'?'…':row.item?.countdown||'미등록');
       b.dataset.target=row.item?.days<=0?'homeCareDue':'homeCareUpcoming';b.classList.toggle('is-due',row.state==='ready'&&row.item?.days<=0);
     }
@@ -173,7 +180,7 @@
   }
   function go(name,{target,scroll=true}={}) {
     if(!routes[name]||!mount()||!snapshot().allowed)return false;
-    syncPatient();remember();
+    syncPatient();if(name===route&&!target&&['dashboardView','patientView'].includes(view))return true;remember();
     if(name==='health'&&!patientId)return false;
     if(name==='settings'&&route!=='settings')settingsReturn=route;
     if(name==='health'&&route!=='health'&&route!=='settings')healthReturn=route;
@@ -185,6 +192,12 @@
     refresh();
     if(scroll)restorePosition(target?0:positions.get(key())||0,target);
     return true;
+  }
+  function openNextCare(){
+    const {care}=snapshot(),next=nextHomeCare(care.medicationSummary,window.carestepHomeReminderSummary?.(),care.patientId),item=next.occurrence,scope=$(next.target);
+    const match=item&&(next.target==='homeCustomReminders'?[...(scope?.querySelectorAll('[data-custom-occurrence]')||[])].find(n=>n.dataset.customOccurrence===item.reminderId+'|'+item.date+'|'+item.time):[...(scope?.querySelectorAll('[data-dose-time]')||[])].find(n=>n.dataset.planId===item.planId&&n.dataset.doseTime===item.time&&n.dataset.doseDate===item.date));
+    if(match)for(let n=match.parentElement;n&&n!==scope;n=n.parentElement)if(n.tagName==='DETAILS')n.open=true;
+    go('schedule',{target:match||next.target});
   }
   function backFromSettings(){go(settingsReturn==='settings'?'home':settingsReturn);}
   window.carestepHomeNavigation={mounted:false,mount,arrange,refresh,go,onView,allowsNotificationFocus:name=>route===name&&view==='dashboardView',back:()=>go(healthReturn==='health'?'home':healthReturn)};

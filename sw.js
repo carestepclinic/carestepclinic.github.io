@@ -1,8 +1,8 @@
 /* Carestep Home v10.1-J service worker · 2026-10-13 cache rollout */
-const VERSION='home-tabs-20261017';
+const VERSION='home-readability-20261018';
 const CACHE=`carestep-home-${VERSION}`;
-const ASSETS=['./home-navigation.js?v=home-tabs-20261017','./home-navigation.css?v=home-tabs-20261017','./home-reminders.js?v=home-tabs-20261017','./carestep-ui.css?v=home-tabs-20261017','./home-care.js?v=home-tabs-20261017','./home.html','./carestep-home.css?v=home-tabs-20261017','./carestep-home-response-edit.css?v=10.1-J',`./carestep-home.js?v=${VERSION}`,'./date-input-guard.js?v=10.1-B','./manifest.webmanifest','./carestep-home-icon.svg','./carestep-home-icon-192.png','./carestep-home-icon-512.png'];
-const HOME_PATHS=new Set(['/home-navigation.js','/home-navigation.css','/home-reminders.js','/carestep-ui.css','/home-care.js','/home.html','/carestep-home.css','/carestep-home-response-edit.css','/carestep-home.js','/date-input-guard.js','/manifest.webmanifest','/carestep-home-icon.svg','/carestep-home-icon-192.png','/carestep-home-icon-512.png']);
+const ASSETS=['./home-readability.css?v=home-readability-20261018','./home-navigation.js?v=home-readability-20261018','./home-navigation.css?v=home-readability-20261018','./home-reminders.js?v=home-readability-20261018','./carestep-ui.css?v=home-readability-20261018','./home-care.js?v=home-readability-20261018','./home.html','./carestep-home.css?v=home-readability-20261018','./carestep-home-response-edit.css?v=10.1-J',`./carestep-home.js?v=${VERSION}`,'./date-input-guard.js?v=10.1-B','./manifest.webmanifest','./carestep-home-icon.svg','./carestep-home-icon-192.png','./carestep-home-icon-512.png'];
+const HOME_PATHS=new Set(['/home-readability.css','/home-navigation.js','/home-navigation.css','/home-reminders.js','/carestep-ui.css','/home-care.js','/home.html','/carestep-home.css','/carestep-home-response-edit.css','/carestep-home.js','/date-input-guard.js','/manifest.webmanifest','/carestep-home-icon.svg','/carestep-home-icon-192.png','/carestep-home-icon-512.png']);
 
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
@@ -34,6 +34,13 @@ self.addEventListener('fetch',event=>{
   const request=event.request;
   const url=new URL(request.url);
   if(request.method!=='GET'||url.origin!==self.location.origin)return;
+  // Load the font without holding up installation; reuse it on later visits.
+  if(url.pathname==='/pretendard-variable-1.3.9.woff2'){
+    event.respondWith(caches.open(CACHE).then(async cache=>{
+      const saved=await cache.match(request);if(saved)return saved;
+      const response=await fetch(request);if(response.ok)await cache.put(request,response.clone());return response;
+    }));return;
+  }
   if(request.mode==='navigate'){
     if(url.pathname!=='/home.html')return;
     event.respondWith(networkFirst(request,'./home.html'));
