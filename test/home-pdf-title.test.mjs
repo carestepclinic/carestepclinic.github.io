@@ -29,3 +29,5 @@ test('source date is not presented as the publication date',()=>{
 });
 
 test('a PDF for a no-longer-authorized patient is never rendered',async()=>{const f=fixture('숨길 가상 자료');f.c.patientContext=()=>null;await f.c.r113PDFMaterials(f.mount);assert.equal(f.mount.children.length,0);assert.equal(f.downloads.length,0);});
+
+test('membership removed while a PDF downloads prevents a late viewer or download',async()=>{const f=fixture('가상 자료');await f.c.r113PDFMaterials(f.mount);const fetch=f.c.fetch;f.c.fetch=async url=>{f.c.patientContext=()=>null;return fetch(url);};await f.mount.children[0].all().find(n=>n.textContent==='PDF 다운로드').onclick();assert.equal(f.downloads.length,0);assert.equal(f.c.r113PDFURLs.size,0);});
