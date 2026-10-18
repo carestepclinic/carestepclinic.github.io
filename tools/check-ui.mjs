@@ -5,7 +5,7 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
 export const uiFiles = new Set([
-  'home-navigation.js', 'home-navigation.css', 'home-readability.css', 'pretendard-variable-1.3.9.woff2', 'PRETENDARD-LICENSE.txt',
+  'home-insights.js', 'home-insights.css', 'home-navigation.js', 'home-navigation.css', 'home-readability.css', 'pretendard-variable-1.3.9.woff2', 'PRETENDARD-LICENSE.txt',
   'home-reminders.js', 'clinic-read-flow.js', 'carestep-ui.css', 'clinic-care.js', 'home-care.js', 'index.html', 'home.html', 'carestep-workflow.css', 'home-access-clinic.js', 'home-access-clinic.css', 'r61-clinic.js', 'r61-route.js', 'r65-clinic.js',
   'r83-clinic.js', 'carestep-home.js', 'date-input-guard.js', 'patient-breeds.js',
   'patient-crm.js', 'patient-timeline.js', 'sw.js', 'carestep-home.css',

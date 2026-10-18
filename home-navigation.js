@@ -121,6 +121,7 @@
   }
   function refresh() {
     if(!mounted)return;
+    window.carestepHomeInsights?.refresh();
     const {base,care,allowed}=snapshot();
     const active=allowed&&['dashboardView','patientView'].includes(view);
     $('homeNavigationChrome').hidden=!active;$('homeBottomNavigation').hidden=!active;
