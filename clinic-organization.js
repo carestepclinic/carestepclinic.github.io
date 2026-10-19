@@ -17,6 +17,27 @@
   while(remaining>0){for(const [key,r] of selected){if(!remaining)break;const n=counts.get(key);if(n<r.items.length){counts.set(key,n+1);remaining--;}}}
   return {total,visible:expanded?total:Math.min(total,limit),regions:selected.map(([key,r])=>[key,{...r,items:r.items.slice(0,counts.get(key))}])};
  }
+ function clinicalRows(rows,attention){
+  const ids=new Set(attention?.state==='ready'?(attention.items||[]).map(x=>String(x.id||'')).filter(Boolean):[]);
+  return (rows||[]).filter(x=>!(x.sourceType==='home'&&x.responseCode==='concern'&&ids.has(String(x.id||''))));
+ }
+ function noticeLabel(notice){
+  if(!notice||typeof notice!=='object')return '결과 확인 불가 · 자료 게시만 확인됐으며 알림 수신은 별도입니다.';
+  if(notice.skipped)return '시도하지 않음 · 알림 조건 미충족';
+  const count=k=>Number.isSafeInteger(notice[k])&&notice[k]>=0?notice[k]:null;
+  const accepted=count('accepted'),failed=count('failed'),pending=count('unconfirmed');
+  if(accepted===null||failed===null)return '결과 확인 불가 · 푸시 처리 결과를 확인하지 못했습니다.';
+  if(accepted===0&&failed===0&&!(pending>0))return notice.attempted===0?'시도하지 않음 · 발송 대상 없음':'접수·실패 기록 0건 · 시도 여부 확인 필요';
+  return ['접수 '+accepted+'건','실패 '+failed+'건',pending?'결과 미확정 '+pending+'건':'','기기 수신·보호자 열람은 별도'].filter(Boolean).join(' · ');
+ }
+ function updateTodayCounts(){
+  const attention=global.carestepAttentionSummary?.(),clinical=global.carestepClinicalSummary?.();
+  for(const [key,label,value] of [['attention','상담·승인·발송 확인',attention],['clinical','진료·예방·후속관리',clinical]]){
+   const button=$('clinicToday-tab-'+key);if(!button)continue;
+   const suffix=!value||value.state==='loading'?'확인 중':value.state==='failed'?'조회 실패':value.state==='unavailable'?'이용 불가':value.total+'항목';
+   const text=label+' · '+suffix;if(button.textContent!==text)button.textContent=text;
+  }
+ }
  function createTabs(root,entries,{prefix,selected,onChange=()=>{}}){
   const nav=document.createElement('div');nav.className='clinic-section-tabs';nav.setAttribute('role','tablist');nav.setAttribute('aria-label',root.getAttribute('aria-label')||'업무 구역');
   const buttons=entries.map(([key,label,panel])=>{const b=document.createElement('button');b.type='button';b.id=prefix+'-tab-'+key;b.textContent=label;b.setAttribute('role','tab');panel.id=panel.id||prefix+'-panel-'+key;b.setAttribute('aria-controls',panel.id);panel.classList.add('clinic-section-panel');panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',b.id);nav.append(b);return b;});
@@ -58,7 +79,7 @@
   for(const id of ['workFirstBacklog','workFirstCleanupStatus']){const n=$(id);if(n)clinical.append(n);}
   const attention=document.createElement('section');attention.append(box);
   createTabs(queue,[['attention','상담·승인·발송 확인',attention],['clinical','진료·예방·후속관리',clinical]],{prefix:'clinicToday',selected:'attention'});
-  grid.append(queue);if(recent)grid.append(recent);
+  grid.append(queue);if(recent)grid.append(recent);updateTodayCounts();
   const explorer=document.createElement('details');explorer.id='clinicTaskExplorer';explorer.className='clinic-task-explorer';explorer.innerHTML='<summary>상담·일정 상세 보기</summary>';
   const body=document.createElement('div');body.setAttribute('aria-label','상담과 일정 목록');explorer.append(body);
   const consult=$('careConsultInbox'),schedule=$('followupScheduleBoard');if(!consult||!schedule)return;
@@ -86,7 +107,7 @@
    const loaded=workspace?.recordsLoaded;if(showWorkspaceTab('records',patient.id)&&loaded)return original(patient,guardian);
   };
  }
- global.ClinicOrganization={ageLabel,recentTemplates,taskPreview,createTabs,organizeWorkspace,showWorkspaceTab,mountDashboard,syncNav};
+ global.ClinicOrganization={clinicalRows,noticeLabel,updateTodayCounts,ageLabel,recentTemplates,taskPreview,createTabs,organizeWorkspace,showWorkspaceTab,mountDashboard,syncNav};
  if(typeof module!=='undefined')module.exports=global.ClinicOrganization;
  if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();}
 })(typeof window==='undefined'?globalThis:window);
