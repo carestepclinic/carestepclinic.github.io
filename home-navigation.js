@@ -79,7 +79,8 @@
       b.onclick=()=>go('schedule',{target:b.dataset.target||'homeCareUpcoming'});prevention.append(b);
     }
     $('homeNavigation-home').append(prevention);
-    const careLink=make('button','home-secondary','병원 후속관리·상담 일정 보기');careLink.type='button';careLink.id='homeNavigationFollowupLink';careLink.onclick=()=>window.carestepOpenHomeFollowups?.(patientId);$('homeNavigation-schedule').append(careLink);
+    const careLink=make('button','home-secondary','병원 회복관리·상담 일정 보기');careLink.type='button';careLink.id='homeNavigationFollowupLink';careLink.onclick=()=>window.carestepOpenHomeFollowups?.(patientId);$('homeNavigation-schedule').append(careLink);
+    window.CarestepHomeDisplay?.mount($('homeNavigation-settings'));
     const reminderSettings=make('div');reminderSettings.id='homeNavigationReminderSettings';$('homeNavigation-settings').append(reminderSettings);
     const back=make('button','home-secondary','이전 화면으로');back.type='button';back.onclick=()=>backFromSettings();$('homeNavigation-settings').prepend(back);
     const nav=make('nav','home-bottom-navigation');nav.id='homeBottomNavigation';nav.hidden=true;nav.setAttribute('aria-label','HOME 주요 메뉴');

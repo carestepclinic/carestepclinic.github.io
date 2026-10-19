@@ -29,7 +29,9 @@
         d.className='r61-dialog';body.className='r61-dialog-body';close.className='btn btn-secondary r61-dialog-close';
         h.id='r61-dialog-title-'+Math.random().toString(36).slice(2);d.setAttribute('aria-labelledby',h.id);
         const header=el('header');header.append(h,close);d.append(header,body);
-        close.onclick = () => d.close();
+        const requestClose=()=>{if(!d.careBeforeClose||d.careBeforeClose())d.close();};
+        close.onclick = requestClose;
+        d.addEventListener('cancel',e=>{e.preventDefault();requestClose();});
         d.addEventListener('close', () => {d.remove();window.requestAnimationFrame?.(()=>{if(document.querySelector('dialog[open]'))return;window.scrollTo({top:returnY,behavior:'instant'});if(returnFocus?.isConnected)returnFocus.focus?.({preventScroll:true});});});
         document.body.append(d);
         d.showModal();
@@ -531,12 +533,32 @@
         button(body, '예방문자 해제', () => save('blocked'));
         button(body, '병원 기본 설정으로 복원', () => save('default'));
     }
+    function trackSettingsEdits(d,controls,status,save){
+        const snapshot=()=>JSON.stringify(controls.map(c=>c.type==='checkbox'?!!c.checked:String(c.value||'')));
+        let baseline=snapshot(),pending=false,locked=[];
+        const dirty=()=>snapshot()!==baseline;
+        const changed=()=>{if(pending)return;d.dataset.saveState=dirty()?'dirty':'clean';status.textContent=dirty()?'변경사항 있음 · 설정 저장을 눌러 반영해주세요.':'변경사항 없음';};
+        d.careBeforeClose=()=>{if(pending){status.textContent='저장 결과를 확인하는 중입니다. 잠시 기다려주세요.';return false;}return !dirty()||confirm('저장하지 않은 설정 변경사항이 있습니다. 저장하지 않고 닫을까요?');};
+        const unload=e=>{if(pending||dirty()){e.preventDefault();e.returnValue='';}};
+        for(const c of controls){c.addEventListener('input',changed);c.addEventListener('change',changed);}
+        window.addEventListener?.('beforeunload',unload);
+        d.addEventListener('close',()=>window.removeEventListener?.('beforeunload',unload));
+        changed();
+        return {busy:()=>pending,dirty,begin(){pending=true;d.dataset.saveState='saving';d.setAttribute('aria-busy','true');save.textContent='저장 중…';status.textContent='변경한 설정을 저장하고 있습니다…';locked=[...(d.querySelectorAll?.('button,input,select,textarea')||controls)].map(c=>[c,c.disabled]);for(const [c] of locked)c.disabled=true;},saved(){baseline=snapshot();d.dataset.saveState='saved';},failed(){d.dataset.saveState='error';},end(){pending=false;for(const [c,disabled] of locked)c.disabled=disabled;locked=[];d.setAttribute('aria-busy','false');save.textContent='설정 저장';}};
+    }
     async function settings() {
         const session = settingsSession();
-        const cfg = await api('/config');
-        if (settingsSession() !== session) throw Error('SESSION_CHANGED');
-        const {body} = dialog('후속 기능 설정')
-          , inputs = {};
+        const {body,d} = dialog('후속 기능 설정'), inputs = {};
+        d.className += ' r61-settings-dialog';
+        const loading=el('p','병원 설정을 불러오는 중입니다…');loading.className='r61-settings-loading';loading.setAttribute('role','status');body.append(loading);
+        let cfg;
+        try {cfg=await api('/config');} catch {loading.textContent='설정을 불러오지 못했습니다. 저장된 값은 변경하지 않았습니다.';button(body,'다시 조회',()=>{d.close();return settings();});return;}
+        if (settingsSession() !== session || d.isConnected===false || d.open===false) {d.close();return;}
+        body.replaceChildren();
+        const group=(title,collapsed=false)=>{const box=el(collapsed?'details':'section');box.className='r61-settings-group';box.append(el(collapsed?'summary':'h3',title));body.append(box);return box;};
+        const publication=group('기록 공개'),delivery=group('자동 발송·업무 처리'),consent=group('보호자 동의'),advanced=group('고급 설정 · 문자 채널·템플릿',true),footer=el('footer');footer.className='r61-settings-footer';
+        let tracker;
+        d.append(footer);
         const labels = {
             preventive_auto_delivery: '접종·사상충 자동 발송',
             followup_auto_completion: '최종확인 후 자동 완료·초기화',
@@ -550,11 +572,11 @@
             c.checked = value;
             inputs[key] = c;
             l.append(c, document.createTextNode(labels[key]));
-            l.style.display = 'block';
-            body.append(l);
+            l.className='r61-settings-check';
+            (key==='efriends_home_visible_default'?publication:delivery).append(l);
         }
-        body.append(el('p', '자동 공개를 켜면 HOME에 연결된 활성 환자의 새 체중·접종·심장사상충·진료 기록이 이후 동기화부터 공개됩니다. 기존 기록의 공개·비공개 설정과 명시적으로 비공개 처리한 기록은 유지됩니다. 병원 내부 메모는 자동 공개하지 않습니다.'));
-        body.append(el('p', '접종·사상충 자동발송을 켜면 저장된 예정일과 보호자별 발송 허용 상태를 기준으로 정기 발송합니다. 먼저 대상과 문구를 확인해주세요.'));
+        publication.append(el('p', '자동 공개를 켜면 HOME에 연결된 활성 환자의 새 체중·접종·심장사상충·진료 기록이 이후 동기화부터 공개됩니다. 기존 기록의 공개·비공개 설정과 명시적으로 비공개 처리한 기록은 유지됩니다. 병원 내부 메모는 자동 공개하지 않습니다.'));
+        delivery.append(el('p', '접종·사상충 자동발송을 켜면 저장된 예정일과 보호자별 발송 허용 상태를 기준으로 정기 발송합니다. 먼저 대상과 문구를 확인해주세요.'));
         const preventiveMode = el('select');
         preventiveMode.id = 'r61PreventiveChannel';
         for (const [value,label] of [['home-first', 'Home 푸시 우선 · 불가 시 외부 채널'], ['lms', '문자(LMS)로 발송']]) {
@@ -562,19 +584,19 @@
         }
         preventiveMode.value = cfg.policy.preventiveChannel || 'home-first';
         const modeLabel = el('label', '접종·사상충 안내 방식 ');
-        modeLabel.style.cssText = 'display:block;margin:14px 0';
-        modeLabel.append(preventiveMode); body.append(modeLabel);
-        body.append(el('p', '접종 7일 전·당일 / 사상충 3일 전·당일. 같은 환자의 같은 예정일·회차는 한 번만 처리하며, 지난 예정일을 소급 발송하지 않습니다.'));
+        modeLabel.className='r61-settings-field';
+        modeLabel.append(preventiveMode); delivery.append(modeLabel);
+        delivery.append(el('p', '접종 7일 전·당일 / 사상충 3일 전·당일. 같은 환자의 같은 예정일·회차는 한 번만 처리하며, 지난 예정일을 소급 발송하지 않습니다.'));
         if (cfg.preventive?.reasons?.length)
-            body.append(el('p', '문자 준비: ' + cfg.preventive.reasons.map(preventiveReason).join(' · ')));
+            delivery.append(el('p', '문자 준비: ' + cfg.preventive.reasons.map(preventiveReason).join(' · ')));
         const defaultAllowed = el('input'); defaultAllowed.type = 'checkbox';
         defaultAllowed.checked = cfg.policy.preventiveDefaultAllowed === true;
         const defaultLabel = el('label', ' 기존·신규 보호자 예방문자 기본 허용');
-        defaultLabel.prepend(defaultAllowed); defaultLabel.style.display = 'block'; body.append(defaultLabel,
+        defaultLabel.prepend(defaultAllowed); defaultLabel.className='r61-settings-check'; consent.append(defaultLabel,
             el('p', '한 번 저장하면 기존·신규 보호자에게 함께 적용됩니다. 기존 수신거부·개별 해제는 유지되며 실제 동의 완료 기록은 생성하지 않습니다. 보호자 자료 발송에는 적용되지 않습니다.'));
-        button(body, '선택 보호자 예방문자 허용·해제', preventivePreference);
-        const saveInfo = el('p'); saveInfo.setAttribute('role', 'status'); body.append(saveInfo);
-        button(body, '선택 보호자의 예방문자 동의 기록', async () => {
+        button(consent, '선택 보호자 예방문자 허용·해제', preventivePreference);
+        const saveInfo = el('p'); saveInfo.setAttribute('role', 'status'); footer.append(saveInfo);
+        button(consent, '선택 보호자의 예방문자 동의 기록', async () => {
             const selected = selection();
             if (!selected.patientId || !selected.guardianId) {saveInfo.textContent = '먼저 환자 작업공간에서 환자·보호자를 선택해주세요.'; return;}
             if (!confirm('선택한 보호자의 접종·사상충 예방 문자 수신 동의를 실제로 확인했습니까?')) return;
@@ -584,14 +606,14 @@
             saveInfo.textContent = '선택한 보호자의 예방문자 동의를 저장했습니다. 예정 대상 조회에서 확인해주세요.';
         });
         if (cfg.flags.followup_auto_completion === true)
-            button(body, '실제 후속관리 단계 확인', () => window.r83OpenRequiredStages());
-        button(body, '예방관리 대상 먼저 확인', preventivePreview);
+            button(delivery, '실제 후속관리 단계 확인', () => window.r83OpenRequiredStages());
+        button(delivery, '예방관리 대상 먼저 확인', preventivePreview);
         const external = el('input');
         external.type = 'checkbox';
         external.checked = cfg.policy.enabled === true;
         const l = el('label', ' 병원 외부 발송 허용 (예방문자는 위 허용 기준 적용)');
         l.prepend(external);
-        body.append(l);
+        l.className='r61-settings-check';delivery.append(l);
         const channels = {};
         for (const [key,label] of [['lms', 'LMS'], ['kakao', '알림톡'], ['mms', 'MMS']]) {
             const c = el('input');
@@ -600,7 +622,7 @@
             channels[key] = c;
             const l = el('label', ' ' + label);
             l.prepend(c);
-            body.append(l);
+            l.className='r61-settings-check';advanced.append(l);
         }
         const bindings = {};
         for (const [key,label] of [['preventive', '예방관리 알림톡 템플릿 ID'], ['material', '보호자 자료 알림톡 템플릿 ID']]) {
@@ -609,13 +631,14 @@
             i.value = cfg.policy.templateBindings?.[key] || '';
             bindings[key] = i;
             l.append(i);
-            body.append(l);
+            l.className='r61-settings-field';advanced.append(l);
         }
         const image = el('input');
         image.value = cfg.policy.imageId || '';
         image.placeholder = '공개 승인 MMS 이미지 ID';
-        body.append(image, el('p', '알림톡은 실제 승인 템플릿과 안내문구 변수 한 개를 서버에서 재확인합니다. MMS 이미지는 환자정보가 없는 보호자 공개용으로 검토해야 합니다.'));
-        button(body, '설정 저장', async () => {
+        const imageLabel=el('label','공개 승인 MMS 이미지 ID');imageLabel.className='r61-settings-field';imageLabel.append(image);advanced.append(imageLabel, el('p', '알림톡은 실제 승인 템플릿과 안내문구 변수 한 개를 서버에서 재확인합니다. MMS 이미지는 환자정보가 없는 보호자 공개용으로 검토해야 합니다.'));
+        const saveButton=button(footer, '설정 저장', async () => {
+            if(tracker?.busy())return;
             try {
                 if (settingsSession() !== session) throw Error('SESSION_CHANGED');
                 const enabled = inputs.preventive_auto_delivery.checked;
@@ -628,6 +651,7 @@
                 if (defaultAllowed.checked && cfg.policy.preventiveDefaultAllowed !== true &&
                     !confirm('기존·신규 보호자를 예방문자 기본 허용 대상으로 설정합니다. 기존 수신거부는 유지됩니다. 자동발송이 켜져 있으면 다음 정기 발송부터 적용됩니다. 저장하시겠습니까?')) return;
                 const changes = Object.fromEntries(Object.entries(inputs).filter(([k,v]) => v.checked !== cfg.flags[k]).map(([k,v]) => [k,v.checked]));
+                tracker?.begin();
                 const saved = await saasRequest('/saas/r61/config', {
                     method: 'PUT', redirect: 'error',
                     body: JSON.stringify({flags: changes, policy: {
@@ -639,14 +663,17 @@
                     }})
                 });
                 if (settingsSession() !== session || saved?.ok !== true || !saved.flags || !saved.policy) throw Error('CONFIG_UNCONFIRMED');
-                Object.assign(cfg, saved);
+                Object.assign(cfg, saved);tracker?.saved();
                 saveInfo.textContent = saved.flags.preventive_auto_delivery ? '설정 저장 완료 · 자동발송 켜짐. 예정 대상 조회에서 확인해주세요.' : '설정 저장 완료 · 자동발송 꺼짐. 발송 없이 대상을 미리 확인할 수 있습니다.';
             } catch (e) {
+                tracker?.failed();
                 const code = Object.keys(preventiveReasons).find(k => String(e?.message || '').includes(k));
                 saveInfo.textContent = code ? preventiveReason(code) : '설정 저장 결과를 확인하지 못했습니다. 창을 다시 열어 현재 설정을 확인해주세요.';
-            }
+            } finally {tracker?.end();}
         });
-        button(body, '선택 보호자의 외부 발송 동의 기록', async () => {
+        saveButton.className='btn btn-primary r61-settings-save';
+        consent.append(el('p','아래 동의 기록·철회 버튼은 선택한 보호자에게 각각 실행됩니다. 위 설정 저장과 별도입니다.'));
+        button(consent, '선택 보호자의 외부 발송 동의 기록', async () => {
             const s = selection();
             if (!s.patientId)
                 throw Error('PATIENT');
@@ -662,7 +689,7 @@
             alert('동의 확인 기록을 저장했습니다.');
         }
         );
-        button(body, '선택 보호자의 외부 발송 동의 철회', async () => {
+        button(consent, '선택 보호자의 외부 발송 동의 철회', async () => {
             const s = selection();
             if (!s.patientId)
                 throw Error('PATIENT');
@@ -676,7 +703,7 @@
             alert('동의 철회를 기록했습니다.');
         }
         );
-        button(body, '기존 비공개 기록 공개 후보 미리보기', async () => {
+        button(publication, '기존 비공개 기록 공개 후보 미리보기', async () => {
             const s = selection();
             if (!s.patientId)
                 throw Error('PATIENT');
@@ -728,9 +755,11 @@
                 apply.disabled = !approval.value.trim();
             }
             ;
-            body.append(box);
+            publication.append(box);
         }
         );
+        const controls=[...Object.values(inputs),preventiveMode,defaultAllowed,external,...Object.values(channels),...Object.values(bindings),image];
+        tracker=trackSettingsEdits(d,controls,saveInfo,saveButton);
     }
     async function approveMaterial() {
         const subject = {...selection()};
@@ -1736,13 +1765,13 @@
     function mountBuilderProgress(){const steps=document.getElementById('wizardSteps');if(!steps||document.getElementById('r61-builder-progress'))return;const panel=el('section'),list=el('ol'),note=el('p'),refresh=el('button','⑤ 출력에서 미리보기 갱신');panel.id='r61-builder-progress';panel.className='r61-builder-progress';panel.setAttribute('aria-label','자료 생성 진행 상태');note.setAttribute('role','status');refresh.type='button';refresh.className='btn btn-secondary';const labels=['작성','미리보기·출력','Home 게시'];for(const text of labels)list.append(el('li',text));panel.append(list,note,refresh);steps.after(panel);let preview='',scope='';const current=()=>{const p=selection(),source=materialSourceContext();return {source,key:JSON.stringify([currentDraftSession(),p?.patientId,p?.guardianId,source.signature]),scope:JSON.stringify([currentDraftSession(),p?.patientId,p?.guardianId])};};const paint=()=>{const value=current();if(scope!==value.scope){scope=value.scope;preview='';}let queue=null;try{if(builderMaterialQueue?.source?.signature===value.source.signature){materialSame(builderMaterialQueue.base,materialScope('scope-check',1));queue=builderMaterialQueue;}}catch{}const items=queue?.items||[],step=typeof currentWizardStep==='number'?currentWizardStep:1,model=builderProgressModel({step,previewSeen:!!preview,previewCurrent:preview===value.key,published:items.filter(i=>i.sent).length,total:items.length});panel.dataset.phase=model.phase;panel.dataset.stale=String(model.stale);if(note.textContent!==model.message)note.textContent=model.message;refresh.hidden=!model.stale;for(const [i,n] of [...list.children].entries())n.setAttribute('aria-current',i===({writing:0,preview:1,published:2})[model.phase]?'step':'false');};refresh.onclick=()=>{if(typeof setWizardStep==='function')setWizardStep(5);};window.r61RefreshBuilderProgress=paint;window.addEventListener('carestep:output-rendered',()=>{const value=current();scope=value.scope;preview=value.key;paint();});document.addEventListener('input',paint);document.addEventListener('change',paint);new MutationObserver(paint).observe(steps,{attributes:true,subtree:true,attributeFilter:['class']});window.addEventListener('r61-auth-ready',paint);paint();}
     function mountPatientContext(){
         if(document.getElementById('r61-patient-context'))return;
-        const root=el('section'),who=el('strong'),hint=el('span');root.id='r61-patient-context';root.setAttribute('aria-label','현재 선택 환자');const topic=el('span');topic.className='r61-context-topic';root.append(who,hint);const detail=el('details'),detailTitle=el('summary','작성 자료·진단 확인');detail.className='r61-context-details';detail.append(detailTitle,topic);root.append(detail);
-        const send=button(root,'자료 만들기',()=>openWorkspaceComposer()),history=button(root,'자료 이력',materialHistory);send.className='btn btn-primary';button(root,'환자 선택·변경',choosePatient);
+        const root=el('section'),who=el('strong'),hint=el('span');root.id='r61-patient-context';root.setAttribute('aria-label','현재 선택 환자');const topic=el('span');topic.className='r61-context-topic';root.append(who,hint);const detail=el('details'),detailTitle=el('summary','작업·작성정보');detail.className='r61-context-details';detail.append(detailTitle,topic);root.append(detail);
+        const send=button(root,'자료 만들기',()=>openWorkspaceComposer()),history=button(root,'자료 이력',materialHistory);send.className='btn btn-primary r61-context-create';history.className+=' r61-context-history';const change=button(root,'환자 선택·변경',choosePatient);change.className+=' r61-context-change';
         (document.querySelector('main')||document.body).prepend(root);let last='';
         const paint=()=>{syncDraftSession();const c=window.crmMaterialContext?.()||selection(),session=currentDraftSession(),procedure=document.getElementById('caseProcedure')?.value??(typeof caseInfo==='undefined'?'':caseInfo.procedure),education=(typeof templates==='undefined'?[]:templates).find(t=>t.id===(typeof currentTemplateId==='undefined'?'':currentTemplateId))?.title||'',key=JSON.stringify([session,c?.patientId,c?.guardianId,c?.patient?.name,c?.guardian?.name,c?.homeStatus,patientDraft(c)?.updatedAt,procedure,education]);const label='자료 만들기';for(const b of document.querySelectorAll('[data-workspace-material]'))if(b.textContent!==label)b.textContent=label;if(key===last)return;last=key;send.textContent=label;
-            root.hidden=!session;const ready=!!session&&materialId(c?.patientId)&&materialId(c?.guardianId);send.disabled=history.disabled=!ready;
+            root.hidden=!session;const ready=!!session&&materialId(c?.patientId)&&materialId(c?.guardianId);send.disabled=history.disabled=!ready;root.dataset.ready=String(!!ready);detail.hidden=!ready;if(!ready)detail.open=false;change.textContent=ready?'환자 변경':'환자 선택';
             who.textContent=ready?(c.patient?.name||'선택 환자')+' · 보호자 '+(c.guardian?.name||'선택 보호자'):'환자 선택 필요';
-            hint.textContent=ready?(({dog:'강아지',cat:'고양이',other:'반려동물'})[c.patient?.species]||'')+' · '+(c.homeStatus==='linked'?'Home 연결됨':c.homeStatus==='invited'?'Home 연결 대기':'Home 연결 확인 필요'):'자료 생성·송부·이력 확인은 환자를 선택하면 사용할 수 있습니다.';
+            hint.textContent=ready?(({dog:'강아지',cat:'고양이',other:'반려동물'})[c.patient?.species]||'')+' · '+(c.homeStatus==='linked'?'Home 연결됨':c.homeStatus==='invited'?'Home 연결 대기':'Home 연결 확인 필요'):'환자를 선택하면 자료를 만들고 이력을 확인할 수 있습니다.';
             const bound=window.crmCurrentPatient?.();topic.textContent=ready&&bound?.patientId===c.patientId&&bound?.guardianId===c.guardianId?'교육자료 · '+(education||'선택 필요')+' / 진단·시술 · '+(procedure||'입력 필요'):'작성 자료 · 환자에 맞는 질환·시술을 선택해주세요.';
             document.querySelectorAll('[data-r61-needs-patient]').forEach(b=>b.disabled=!ready);
         };

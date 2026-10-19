@@ -172,3 +172,14 @@ button,a,summary{-webkit-tap-highlight-color:transparent}
 .home-navigation-active #patientView .home-event-meta>.home-event-attribution{flex:1 0 100%;min-width:0;background:none;color:var(--home-muted);word-break:keep-all;overflow-wrap:anywhere;white-space:normal}
 .home-navigation-active #patientView .home-event-meta>.home-event-attribution::before{content:none}
 .home-navigation-active #patientView :is(.home-visit-purpose,.home-purpose-more p){word-break:keep-all;overflow-wrap:anywhere;white-space:pre-wrap}
+
+/* Device reading size also applies to login and joining. */
+html[data-home-text-size=large]{font-size:112.5%}
+.home-display-settings{min-width:0;margin:0 0 16px;padding:16px;border:1px solid var(--home-line);border-radius:16px;background:#fff}
+.home-display-settings legend{font-size:1.125rem;font-weight:700;padding:0 6px}.home-display-choices{display:flex;gap:10px;flex-wrap:wrap}.home-display-choices button{flex:1;min-height:48px;font:inherit;border:1px solid var(--home-line);border-radius:12px;padding:10px;background:#fff;color:var(--home-text)}.home-display-choices button[aria-pressed=true]{background:var(--home-action);color:#fff;border-color:var(--home-action)}.home-display-settings p{font-size:.875rem;line-height:1.65;margin:12px 0 0;text-align:left;word-break:keep-all;overflow-wrap:anywhere}
+.home-join-help{margin-top:24px;padding-top:16px;border-top:1px solid var(--home-line);font-size:1rem;line-height:1.6}.home-join-help h2{font-size:1.125rem;margin:0 0 12px}.home-join-help details{padding:10px 12px;margin:8px 0;border:1px solid var(--home-line);border-radius:12px}.home-join-help summary{min-height:44px;align-content:center;cursor:pointer;font-size:1rem;font-weight:600;word-break:keep-all}.home-join-help p{font-size:.875rem;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere;margin:8px 0}.home-join-help a{display:inline-block;min-height:44px;align-content:center;font-size:.875rem;color:var(--home-action)}
+#loginView .home-lead{font-size:1rem;line-height:1.6;word-break:keep-all}#loginView :is(input,button){font-size:1rem;min-height:48px}#loginView label{font-size:.875rem}
+.home-footer details{font-size:.875rem;line-height:1.6}.home-footer summary{min-height:44px;cursor:pointer;align-content:center}
+@media(max-width:380px){.home-display-settings{padding:12px}html[data-home-text-size=large] .home-bottom-navigation button{font-size:.875rem}html[data-home-text-size=large] #homeNavigationChrome #homeCarePatientCards .home-patient-choice{flex-basis:11rem}}
+
+.home-navigation-active #homeNavigation-settings .home-custom-device summary>span{display:inline-block;margin-left:.5em}

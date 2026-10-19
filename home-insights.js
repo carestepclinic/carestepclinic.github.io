@@ -113,9 +113,9 @@
     if(m.materialState!=='ready')note(host,m.materialState==='failed'?'일부 자료 조회 실패 · 아래 자료함에서 다시 조회해주세요.':'안내자료 확인 중…',m.materialState==='failed');
     list(host,m.materials.slice(0,1),item=>{const row=make('article','home-insight-item');row.append(make('small','',item.kindLabel+' · '+(item.sentAt?stamp(item.sentAt):'게시일 미기록')),make('b','',item.topic||item.title||'병원 안내자료'));if(!item.topic)note(row,'질환·시술명은 자료 원문에서 확인해주세요.');row.append(button('안내자료 보기',guard(m,()=>window.carestepOpenHomeMaterial?.(m.pid,item.key))));return row;},'안내자료');
     if(m.materialState==='ready'&&!m.materials.length)note(host,'연결된 질환·퇴원·수술 안내자료가 없습니다.');
-    if(m.followupState!=='ready')note(host,m.followupState==='failed'?'Journey 안내 조회 실패 · 병원 안내·상담에서 다시 조회해주세요.':'Journey 안내 확인 중…',m.followupState==='failed');
+    if(m.followupState!=='ready')note(host,m.followupState==='failed'?'회복관리 안내 조회 실패 · 병원 안내·상담에서 다시 조회해주세요.':'회복관리 안내 확인 중…',m.followupState==='failed');
     if(m.followups.length){const row=make('div','home-insight-medication');row.append(make('b','','병원 안내·상담'),make('span','','받은 안내 '+m.followups.length+'건'),button('병원 안내·상담 전체 보기',guard(m,()=>{if($('homeCareAll'))$('homeCareAll').open=true;window.carestepHomeNavigation?.go('hospital',{target:'homeCareAll'});})));host.append(row);}
-    if(m.followupState==='ready'&&!m.followups.length)note(host,'받은 병원 후속관리 안내가 없습니다.');
+    if(m.followupState==='ready'&&!m.followups.length)note(host,'받은 병원 회복관리 안내가 없습니다.');
     host.append(button('자료함 전체 보기',guard(m,()=>window.carestepOpenHomeMaterials?.(m.pid))));
   }
 

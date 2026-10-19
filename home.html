@@ -3,6 +3,7 @@
 <head>
 <link rel="preload" href="pretendard-variable-1.3.9.woff2" as="font" type="font/woff2" crossorigin>
   <meta charset="utf-8">
+  <script src="home-display.js?v=ui-comfort-20261019a"></script>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#1859d8">
   <meta name="description" content="동물병원과 연결되는 반려동물 건강관리 앱 Carestep Home">
@@ -13,15 +14,15 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="carestep-home-icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="carestep-home-icon-192.png">
-  <link rel="stylesheet" href="carestep-home.css?v=refresh-flow-20261018a">
+  <link rel="stylesheet" href="carestep-home.css?v=ui-comfort-20261019a">
   <link rel="stylesheet" href="carestep-home-response-edit.css?v=10.1-J">
   <title>Carestep Home v10.1-J</title>
 <meta name="robots" content="noindex,nofollow">
 <meta name="referrer" content="no-referrer">
-<link rel="stylesheet" href="carestep-ui.css?v=refresh-flow-20261018a">
-<link rel="stylesheet" href="home-navigation.css?v=refresh-flow-20261018a">
-<link rel="stylesheet" href="home-readability.css?v=refresh-flow-20261018a">
-<link rel="stylesheet" href="home-insights.css?v=refresh-flow-20261018a">
+<link rel="stylesheet" href="carestep-ui.css?v=ui-comfort-20261019a">
+<link rel="stylesheet" href="home-navigation.css?v=ui-comfort-20261019a">
+<link rel="stylesheet" href="home-readability.css?v=ui-comfort-20261019a">
+<link rel="stylesheet" href="home-insights.css?v=ui-comfort-20261019a">
 </head>
 <body>
   <div class="home-shell">
@@ -59,10 +60,10 @@
           </div>
           <details class="home-legal">
             <summary>이용약관 및 개인정보 처리 안내 보기</summary>
-            <div><b>서비스 이용 안내</b><p>Carestep Home은 동물병원과 보호자를 연결해 반려동물 건강관리를 돕는 서비스이며, 진단·처방 또는 응급진료를 대신하지 않습니다.</p><b>개인정보 처리 안내</b><p>계정 생성, 본인 확인, 병원·환자 연결, 병원이 공개한 건강기록과 후속관리 안내 제공, 보호자가 입력한 홈 기록·상담 메시지의 병원 전달과 병원 답변 제공을 위해 휴대전화 번호, 보호자명, 환자 기본정보, 건강기록·응답·상담 및 연결 이력을 암호화하여 처리합니다. 병원 내부 메모는 Carestep Home으로 제공되지 않습니다.</p></div>
+            <div><b>서비스 이용 안내</b><p>Carestep Home은 동물병원과 보호자를 연결해 반려동물 건강관리를 돕는 서비스이며, 진단·처방 또는 응급진료를 대신하지 않습니다.</p><b>개인정보 처리 안내</b><p>계정 생성, 본인 확인, 병원·환자 연결, 병원이 공개한 건강기록과 회복관리 안내 제공, 보호자가 입력한 홈 기록·상담 메시지의 병원 전달과 병원 답변 제공을 위해 휴대전화 번호, 보호자명, 환자 기본정보, 건강기록·응답·상담 및 연결 이력을 암호화하여 처리합니다. 병원 내부 메모는 Carestep Home으로 제공되지 않습니다.</p></div>
           </details>
           <label class="home-check"><input id="inviteTerms" type="checkbox" required><span>Carestep Home 이용약관에 동의합니다.</span></label>
-          <label class="home-check"><input id="invitePrivacy" type="checkbox" required><span>개인정보 수집·이용, 병원 환자 연결, 건강기록·후속관리 안내 제공 및 보호자 홈 기록·응답의 연결 병원 전달에 동의합니다.</span></label>
+          <label class="home-check"><input id="invitePrivacy" type="checkbox" required><span>개인정보 수집·이용, 병원 환자 연결, 건강기록·회복관리 안내 제공 및 보호자 홈 기록·응답의 연결 병원 전달에 동의합니다.</span></label>
           <div id="inviteStatus" class="home-status" role="status"></div>
           <button id="inviteSubmit" class="home-primary" type="submit">계정 만들고 환자 연결</button>
         </form>
@@ -71,14 +72,14 @@
       <section id="loginView" class="home-card home-login" hidden>
         <div class="home-step">Carestep Home 로그인</div>
         <h1>우리 아이의 건강 연결을<br>계속 확인하세요</h1>
-        <p class="home-lead">병원 초대로 생성한 계정으로 로그인합니다.</p>
+        <p class="home-lead">이미 가입했다면 본인의 휴대전화 번호로 로그인해주세요.</p>
         <form id="loginForm" class="home-form">
           <div class="home-field"><label for="loginPhone">휴대전화 번호</label><input id="loginPhone" type="tel" inputmode="tel" autocomplete="username" maxlength="20" placeholder="010-0000-0000" required></div>
           <div class="home-field"><label for="loginPassword">비밀번호</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" maxlength="72" placeholder="비밀번호" required></div>
           <div id="loginStatus" class="home-status" role="status"></div>
           <button id="loginSubmit" class="home-primary" type="submit">로그인</button>
         </form>
-        <p class="home-help">아직 계정이 없다면 이용 중인 동물병원에서 Carestep Home 초대 링크를 받아주세요.</p>
+        <section class="home-join-help" aria-labelledby="homeJoinHelpTitle"><h2 id="homeJoinHelpTitle">처음 이용하시나요?</h2><details><summary>병원 공용 QR로 처음 연결</summary><p>휴대전화 카메라로 병원에 있는 CARESTEP HOME QR을 비춰주세요. 열린 화면에서 가입하고 환자 연결을 요청하면 병원 확인 후 기록을 볼 수 있습니다.</p></details><details><summary>가족과 함께 관리하기</summary><p>기존 보호자에게 가족 초대 링크를 받아 열어주세요. 본인 번호로 가입하거나 로그인한 뒤 초대를 수락하면 함께 관리할 수 있습니다. 가족의 로그인 정보를 공유할 필요가 없습니다.</p></details><details><summary>병원 초대 링크로 가입</summary><p>병원에서 보내준 초대 링크를 열고 안내에 따라 가입해주세요. 링크가 만료됐다면 병원에 새 초대를 요청해주세요.</p></details></section>
       </section>
 
       <section id="dashboardView" hidden>
@@ -103,15 +104,15 @@
         <section id="homeHealthConsent" class="health-consent-card" hidden>
           <div class="home-step">건강기록 연결 동의</div>
           <h2>병원 기록과 홈 기록을 연결할까요?</h2>
-          <p>병원이 공개한 건강기록과 Journey 후속관리 안내·상담 답변을 확인하고, 보호자가 입력한 체중·식욕·음수·구토·설사·투약 기록과 후속관리 응답·상담 메시지를 연결 병원과 공유할 수 있습니다. 병원 내부 메모는 전달되지 않습니다.</p>
-          <label class="home-check"><input id="homeHealthConsentCheck" type="checkbox"><span>병원 건강기록·후속관리 안내 제공과 보호자 홈 기록·응답의 저장 및 연결 병원 전달에 동의합니다.</span></label>
+          <p>병원이 공개한 건강기록과 Journey 회복관리 안내·상담 답변을 확인하고, 보호자가 입력한 체중·식욕·음수·구토·설사·투약 기록과 회복관리 응답·상담 메시지를 연결 병원과 공유할 수 있습니다. 병원 내부 메모는 전달되지 않습니다.</p>
+          <label class="home-check"><input id="homeHealthConsentCheck" type="checkbox"><span>병원 건강기록·회복관리 안내 제공과 보호자 홈 기록·응답의 저장 및 연결 병원 전달에 동의합니다.</span></label>
           <div id="homeHealthConsentStatus" class="home-status" role="status"></div>
           <button id="homeHealthConsentSubmit" class="home-primary" type="button">동의하고 건강 기록 보기</button>
         </section>
         <section id="homeFollowupSection" class="home-followup-section" hidden>
           <div class="home-followup-heading"><div><div class="home-step">TODAY'S CARE</div><h2>오늘의 관리</h2><p>병원에서 보낸 Journey 단계별 안내를 확인하고 현재 상태를 알려주세요.</p></div><button id="homeFollowupRefresh" class="home-text-button" type="button">새로고침</button></div>
           <div class="home-followup-kpis"><article><span>오늘</span><b id="homeFollowupToday">0</b></article><article class="attention"><span>미확인 지연</span><b id="homeFollowupOverdue">0</b></article><article><span>예정</span><b id="homeFollowupUpcoming">0</b></article><article><span>완료</span><b id="homeFollowupCompleted">0</b></article></div>
-          <div id="homeFollowupFilters" class="home-filters" aria-label="후속관리 필터"></div>
+          <div id="homeFollowupFilters" class="home-filters" aria-label="회복관리 필터"></div>
           <div id="homeFollowupList" class="home-followup-list" aria-live="polite"></div>
         </section>
         <div id="homeConnections" class="connection-list"></div>
@@ -175,14 +176,14 @@
       </section>
     </main>
 
-    <footer class="home-footer"><b>Carestep Home</b><span>응급상황이 의심되면 앱 기록보다 가까운 동물병원 진료를 우선하세요.</span><small id="homeBuildStatus">v10.1-J · 운영 상태 확인 중</small><button id="homeApplyUpdate" class="home-secondary" type="button" hidden>새 버전 적용</button></footer>
+    <footer class="home-footer"><b>Carestep Home</b><span>응급상황이 의심되면 앱 기록보다 가까운 동물병원 진료를 우선하세요.</span><details class="home-app-info"><summary>앱 정보·업데이트 상태</summary><small id="homeBuildStatus">운영 상태 확인 중</small></details><button id="homeApplyUpdate" class="home-secondary" type="button" hidden>새 버전 적용</button></footer>
   </div>
   <div id="offlineBar" class="offline-bar" hidden>오프라인 상태입니다. 연결되면 다시 시도해주세요.</div>
   <script src="date-input-guard.js?v=10.1-B"></script>
-  <script src="carestep-home.js?v=refresh-flow-20261018a"></script>
-  <script src="home-care.js?v=refresh-flow-20261018a"></script>
-  <script src="home-reminders.js?v=refresh-flow-20261018a"></script>
-  <script src="home-navigation.js?v=refresh-flow-20261018a"></script>
-  <script src="home-insights.js?v=refresh-flow-20261018a"></script>
+  <script src="carestep-home.js?v=ui-comfort-20261019a"></script>
+  <script src="home-care.js?v=ui-comfort-20261019a"></script>
+  <script src="home-reminders.js?v=ui-comfort-20261019a"></script>
+  <script src="home-navigation.js?v=ui-comfort-20261019a"></script>
+  <script src="home-insights.js?v=ui-comfort-20261019a"></script>
 </body>
 </html>
