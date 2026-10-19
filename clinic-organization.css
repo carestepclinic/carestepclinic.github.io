@@ -119,3 +119,13 @@
 #patients .patient-search-recent-item>button span{font-size:12px;margin-left:4px;color:#667d99}
 
 #clinicHomePrimary .care-task-subject{font-size:14px;color:#405a7d;margin:5px 0}#clinicHomePrimary .care-task-when{font-size:12px;color:#647995;margin:4px 0}
+
+/* Daily work has one queue; detailed lists remain available below it. */
+#clinicTodayQueue{min-width:0}#clinicTodayQueue>.clinic-section-tabs{margin-bottom:14px}
+#clinicClinicalTasks .work-first-content{grid-template-columns:1fr}
+#clinicClinicalTasks .work-first-kpis{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
+#dashboard .hero-panel,#roleWorkspaceBanner,.screen-help-bar>span{display:none}
+.screen-help-bar{justify-content:flex-end;background:transparent;border:0;padding:0;margin:0 0 8px}
+.topbar>.eyebrow:empty,.topbar>div>.eyebrow:empty,.section-head .eyebrow:empty,.consult-inbox-head .eyebrow:empty,.work-first-head .eyebrow:empty{display:none}
+#clinicTodayQueue .care-inbox{margin:0}#clinicTodayQueue .work-first-content{margin-top:12px}
+@media(max-width:700px){#clinicTodayQueue>.clinic-section-tabs{flex-wrap:wrap}#clinicTodayQueue>.clinic-section-tabs button{flex:1;white-space:normal}}

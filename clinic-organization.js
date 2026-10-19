@@ -51,18 +51,26 @@
  function showWorkspaceTab(tab,patientId){if(!workspace?.root.isConnected||(patientId&&workspace.patientId!==patientId))return false;return workspace.control?.select(tab)||false;}
  function mountDashboard(){
   const host=$('workFirstDashboard'),box=$('clinicCareInbox'),recent=document.querySelector('#dashboard .recent-patients');if(!host||!box||$('clinicHomePrimary'))return;
-  const grid=document.createElement('div');grid.id='clinicHomePrimary';host.querySelector('.work-first-head').after(grid);grid.append(box);if(recent)grid.append(recent);
-  const explorer=document.createElement('details');explorer.id='clinicTaskExplorer';explorer.className='clinic-task-explorer';explorer.innerHTML='<summary>상담·전체 일정 자세히 보기</summary>';
+  const grid=document.createElement('div');grid.id='clinicHomePrimary';host.querySelector('.work-first-head').after(grid);const queue=document.createElement('section');queue.id='clinicTodayQueue';queue.setAttribute('aria-label','오늘 업무 목록');
+  const clinical=document.createElement('section');clinical.id='clinicClinicalTasks';
+  const existing=host.querySelector('.care-work-more');
+  if(existing){for(const n of [...existing.children])if(n.tagName!=='SUMMARY')clinical.append(n);existing.remove();}
+  for(const id of ['workFirstBacklog','workFirstCleanupStatus']){const n=$(id);if(n)clinical.append(n);}
+  const attention=document.createElement('section');attention.append(box);
+  createTabs(queue,[['attention','상담·승인·발송 확인',attention],['clinical','진료·예방·후속관리',clinical]],{prefix:'clinicToday',selected:'attention'});
+  grid.append(queue);if(recent)grid.append(recent);
+  const explorer=document.createElement('details');explorer.id='clinicTaskExplorer';explorer.className='clinic-task-explorer';explorer.innerHTML='<summary>상담·일정 상세 보기</summary>';
   const body=document.createElement('div');body.setAttribute('aria-label','상담과 일정 목록');explorer.append(body);
   const consult=$('careConsultInbox'),schedule=$('followupScheduleBoard');if(!consult||!schedule)return;
   schedule.open=true;schedule.classList.add('clinic-schedule-list');
   $('dashboard').append(explorer);
   const controls=createTabs(body,[['consult','상담 목록',consult],['schedule','전체 일정',schedule]],{prefix:'clinicTasks',selected:'consult'});
+  const scheduleShortcut=$('workFirstOpenSchedule');if(scheduleShortcut)scheduleShortcut.remove();
   const links=document.createElement('div');links.className='clinic-home-list-links';
   for(const [kind,label] of [['consult','상담 전체 보기'],['schedule','전체 일정 보기']]){const b=document.createElement('button');b.type='button';b.className='btn btn-secondary';b.textContent=label;b.onclick=()=>open(kind);links.append(b);}host.append(links);
   function open(kind){if(typeof go==='function')go('dashboard');explorer.open=true;controls.select(kind);explorer.scrollIntoView({block:'start',behavior:'smooth'});body.querySelector('[aria-selected="true"]')?.focus({preventScroll:true});}
   global.carestepOpenClinicList=open;
-  $('workFirstOpenSchedule')?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();open('schedule');},true);
+
  }
  function syncNav(){
   const group=$('clinicMaterialNav');if(group){const children=[...group.querySelectorAll('.nav-item')];group.hidden=!children.some(n=>!n.classList.contains('saas-hidden')&&!n.classList.contains('role-ui-hidden'));if(children.some(n=>n.classList.contains('active')))group.open=true;}
