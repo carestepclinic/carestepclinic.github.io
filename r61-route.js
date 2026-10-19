@@ -25,7 +25,13 @@
   }
   return true;
  }
- const api={parse,urlFor,open};
+ function clear(){
+  revision++;
+  const url=new URL(global.location.href);for(const key of ['patient','guardian','record','task'])url.searchParams.delete(key);
+  global.history.replaceState(global.history.state,'',url.pathname+url.search+url.hash);
+  global.crmClearPatientSelection?.();
+ }
+ const api={parse,urlFor,open,clear};
  global.R61PatientRoute=api;
  if(typeof module!=='undefined')module.exports=api;
  if(global.addEventListener){

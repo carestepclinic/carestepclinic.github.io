@@ -35,7 +35,11 @@
   function crmCanonicalId(v){return typeof v==='string'&&v.trim()?v.trim():typeof v==='number'&&Number.isSafeInteger(v)&&v>=0?String(v):'';}
   function crmRecentKey(){const scope=crmScopeKey();return scope?'carestep_crm_recent_patients_v3:'+scope:'';}
   function crmRemoveRecent(patientId){crmSaveRecentPatients(crmRecentPatients().filter(x=>x.patientId!==crmCanonicalId(patientId)));crmRenderRecent();}
-  function crmClearPatientSelection(){crmWorkspaceRevision++;crmGuardianRevision++;crmGuardianAbort?.abort();activeCrmPatient=null;Object.assign(crmState,{selectedGuardian:null,selectedPatientId:'',workspace:null,workspaceLoading:false,dirty:false});crmRenderDetail();}
+  function crmClearPatientSelection(){
+    crmWorkspaceRevision++;crmGuardianRevision++;crmGuardianAbort?.abort();crmGuardianAbort=null;crmGuardianPending=null;activeCrmPatient=null;
+    Object.assign(crmState,{selectedGuardian:null,selectedPatientId:'',workspace:null,workspaceLoading:false,workspaceError:false,dirty:false});
+    crmRenderList();crmRenderDetail();crmPaintBuilderSelection();
+  }
 
   function crmRecentPatients(){const key=crmRecentKey();if(!key)return [];try{const d=JSON.parse(localStorage.getItem(key)||'null');if(!d||d.version!==3||d.scope!==crmScopeKey()||!Array.isArray(d.items))return [];return d.items.filter(x=>x&&crmCanonicalId(x.patientId)&&crmCanonicalId(x.guardianId)).slice(0,12).map(x=>({...x,patientId:crmCanonicalId(x.patientId),guardianId:crmCanonicalId(x.guardianId)}));}catch{return [];}}
   function crmSaveRecentPatients(items){const key=crmRecentKey();if(!key)return;try{localStorage.setItem(key,JSON.stringify({version:3,scope:crmScopeKey(),items:items.slice(0,12)}));}catch{}}

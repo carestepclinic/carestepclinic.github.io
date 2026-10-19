@@ -4414,7 +4414,11 @@ function showCaseResetGuard(){
   let ok=false;try{ok=window.confirm('현재 작성 중인 환자가 있습니다. 이전 환자 입력과 적용된 Journey를 지우고 새 환자를 시작할까요? 병원 설정과 연동 설정은 유지됩니다.');}catch{ok=true;}return Promise.resolve(!!ok);
 }
 function resolveCaseResetGuard(reset){$('caseResetModal')?.classList.remove('show');const r=caseResetResolver;caseResetResolver=null;if(r)r(!!reset);}
+function clearNewCasePatientSelection(){
+  if(typeof window.R61PatientRoute?.clear==='function')window.R61PatientRoute.clear();else window.crmClearPatientSelection?.();
+}
 function criticalFallbackPatientReset(){
+  clearNewCasePatientSelection();
   const today=(typeof localTodayIso==='function'?localTodayIso():new Date().toISOString().slice(0,10));
   [()=>resetIndividualOutputSelection(),()=>clearPreparedIndividualArtifacts(),()=>resetFollowupCaseNonce(),()=>resetMessagingCaseState(),()=>resetFollowupMessageEdits()].forEach(fn=>{try{fn();}catch(e){console.warn('[CARESTEP reset fallback]',e);}});
   activePatientJourney=null;activeJourneyStageSelection=[];patientJourneySelectedId='';patientJourneyBrowserSyncKey='';try{sessionStorage.removeItem(patientJourneySessionKey());}catch{}
@@ -4800,6 +4804,7 @@ function beginNewCase(confirmFirst=false,silent=false){
   readCaseInfoFromForm();
   const hasData=!!(caseInfo.patientName||caseInfo.guardianName||caseInfo.procedure||caseInfo.medication||caseInfo.feeding||caseInfo.activity||caseInfo.protection||caseInfo.extra||validMedications().length);
   if(confirmFirst&&hasData&&!confirm('현재 환자 입력내용과 적용된 Journey를 지우고 새 환자를 시작할까요? 병원 프리셋과 병원정보는 유지됩니다.'))return false;
+  clearNewCasePatientSelection();
   resetIndividualOutputSelection();clearPreparedIndividualArtifacts();resetFollowupCaseNonce();resetMessagingCaseState();resetFollowupMessageEdits();
   activePatientJourney=null;activeJourneyStageSelection=[];patientJourneySelectedId='';patientJourneyBrowserSyncKey='';
   try{sessionStorage.removeItem(patientJourneySessionKey());}catch{}
@@ -10234,7 +10239,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
 <script src="patient-breeds.js?v=9.5.3"></script>
-<script src="patient-crm.js?v=staff-permissions-20261018a"></script>
+<script src="patient-crm.js?v=patient-reset-20261019a"></script>
 <script src="patient-timeline.js?v=staff-permissions-20261018a"></script>
 <script src="date-input-guard.js?v=9.5.3"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
@@ -10246,7 +10251,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <!-- CARESTEP v9.5.3 · multiple vaccines per visit · grouped timeline display -->
 <!-- CARESTEP v10.4-G · Clinical Protocol Settings -->
 <script>document.addEventListener("DOMContentLoaded",()=>CarestepStabilization.compatible());</script>
-<script src="r61-route.js"></script>
+<script src="r61-route.js?v=patient-reset-20261019a"></script>
 <script src="r61-clinic.js?v=ui-comfort-20261019a"></script>
 <script src="r65-clinic.js?v=staff-permissions-20261018a"></script>
 <script src="r83-clinic.js"></script>
