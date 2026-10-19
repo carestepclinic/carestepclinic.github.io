@@ -245,3 +245,8 @@ body,button,input,select,textarea{font-family:'Carestep Pretendard','Noto Sans K
  #r61-patient-context:has(.r61-context-details[open]) .r61-context-history{display:block;grid-column:2;grid-row:4}
  .r61-settings-dialog>header{padding:14px}.r61-settings-dialog .r61-dialog-body{padding:12px}.r61-settings-group{padding:12px}.r61-settings-footer{padding:12px;flex-wrap:wrap}.r61-settings-footer p{flex-basis:100%}.r61-settings-footer .r61-settings-save{width:100%}
 }
+
+/* Keep operational diagnostics readable without changing patient workflows. */
+.care-deployment-schema{margin-top:10px;max-width:100%;font-size:.875rem;line-height:1.65;word-break:keep-all;overflow-wrap:anywhere}.care-deployment-schema summary{cursor:pointer;min-height:44px;align-content:center}.care-deployment-schema p{margin:8px 0}.care-deployment-schema li{margin:4px 0}
+
+.care-deployment-status>div{min-width:0}.care-deployment-status>div>b{font-size:1rem;line-height:1.5}.care-deployment-status>div>span{font-size:.875rem;line-height:1.65;word-break:keep-all;overflow-wrap:anywhere}.care-deployment-status>.btn{min-height:44px}
