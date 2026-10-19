@@ -1043,6 +1043,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="carestep-workflow.css?v=flow-20261017">
   <link rel="stylesheet" href="home-access-clinic.css?v=readable-20261017">
 <link rel="stylesheet" href="carestep-ui.css?v=deployment-check-20261019a">
+<link rel="stylesheet" href="clinic-organization.css?v=organization-20261019a">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -1141,25 +1142,27 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
       <nav class="nav-list" aria-label="CARESTEP 메뉴">
         <button class="nav-item nav-home active" data-view="dashboard">
           <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5v8a1.5 1.5 0 0 1-1.5 1.5h-5v-6h-5v6h-5A1.5 1.5 0 0 1 3 19.5z"/></svg></span>
-          <span class="nav-copy"><b>홈</b><small>오늘의 현황</small></span>
+          <span class="nav-copy"><b>오늘 업무</b><small>처리할 일 · 최근 환자</small></span>
         </button>
 
         <div class="nav-section-label">주요 업무</div>
         <button class="nav-item nav-main" data-view="patients">
           <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20v-2.5A3.5 3.5 0 0 1 7.5 14h5a3.5 3.5 0 0 1 3.5 3.5V20"/><circle cx="10" cy="8" r="4"/><path d="M17 8h4M19 6v4"/></svg></span>
-          <span class="nav-copy"><b>보호자 · 환자</b><small>등록 · 검색 · 불러오기</small></span>
+          <span class="nav-copy"><b>환자 관리</b><small>환자 검색 · 건강기록</small></span>
         </button>
+        <details id="clinicMaterialNav" class="clinic-nav-category" open><summary>자료</summary>
         <button class="nav-item nav-main" data-view="library">
           <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M8 4v13a3 3 0 0 0 3 3"/></svg></span>
-          <span class="nav-copy"><b>자료실</b><small>교육자료 찾기</small></span>
+          <span class="nav-copy"><b>자료 찾기</b><small>교육자료 · 최근 사용</small></span>
         </button>
         <button class="nav-item nav-main" data-view="builder">
           <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5M9 13h6M12 10v6"/></svg></span>
-          <span class="nav-copy"><b>자료 생성</b><small>환자 맞춤 출력</small></span>
+          <span class="nav-copy"><b>자료 작성</b><small>작성 · 출력 · HOME 게시</small></span>
         </button>
+        </details>
         <button class="nav-item nav-main" data-view="followup">
           <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5h14v14H5z"/><path d="M8 9h8M8 13h5M8 17h3"/></svg></span>
-          <span class="nav-copy"><b>후속관리</b><small>Journey · 문자 · 일정</small></span>
+          <span class="nav-copy"><b>상담·후속관리</b><small>회복관리 · 문자 · 일정</small></span>
           <span id="navFollowupBadge" class="nav-task-badge hidden" title="오늘 확인할 후속관리">0</span>
         </button>
 
@@ -1167,15 +1170,15 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
         <div class="nav-manage">
           <button id="navManageToggle" class="nav-group-toggle" type="button" aria-expanded="false" aria-controls="navManageGroup">
             <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/><path d="m4.9 6.3 1.4-1.4 2 1a8 8 0 0 1 1.7-.7l.7-2.2h2.6l.7 2.2a8 8 0 0 1 1.7.7l2-1 1.4 1.4-1 2a8 8 0 0 1 .7 1.7l2.2.7v2.6l-2.2.7a8 8 0 0 1-.7 1.7l1 2-1.4 1.4-2-1a8 8 0 0 1-1.7.7l-.7 2.2h-2.6l-.7-2.2a8 8 0 0 1-1.7-.7l-2 1-1.4-1.4 1-2a8 8 0 0 1-.7-1.7L3 13.3v-2.6l2.2-.7a8 8 0 0 1 .7-1.7z"/></svg></span>
-            <span class="nav-copy"><b>관리 · 설정</b><small>필요할 때만 열기</small></span>
+            <span class="nav-copy"><b>병원 관리</b><small>설정 · 직원 · 통계</small></span>
             <span class="nav-chevron" aria-hidden="true">⌄</span>
           </button>
           <div id="navManageGroup" class="nav-submenu">
-            <button class="nav-item nav-sub" data-view="onboarding"><span class="nav-sub-dot"></span><span class="nav-copy"><b>시작 설정</b><small>개통 체크리스트 · Go-Live</small></span><span id="onboardingNavBadge" class="onboarding-nav-badge">0/6</span></button>
-            <button class="nav-item nav-sub" data-view="settings"><span class="nav-sub-dot"></span><span class="nav-copy"><b>운영 설정</b><small>병원 · 직원 · 연동 · 보안</small></span></button>
-            <button class="nav-item nav-sub" data-view="account"><span class="nav-sub-dot"></span><span class="nav-copy"><b>계정 · 직원</b><small>직원 초대 · 계정 관리</small></span></button>
+            <button class="nav-item nav-sub" data-view="onboarding"><span class="nav-sub-dot"></span><span class="nav-copy"><b>처음 사용 설정</b><small>병원 개통 확인</small></span><span id="onboardingNavBadge" class="onboarding-nav-badge">0/6</span></button>
+            <button class="nav-item nav-sub" data-view="settings"><span class="nav-sub-dot"></span><span class="nav-copy"><b>병원·연동 설정</b><small>병원정보 · 자동 발송 · 연동</small></span></button>
+            <button class="nav-item nav-sub" data-view="account"><span class="nav-sub-dot"></span><span class="nav-copy"><b>계정·직원·권한</b><small>내 계정 · 직원 · 결제</small></span></button>
             <button class="nav-item nav-sub" data-view="voice"><span class="nav-sub-dot"></span><span class="nav-copy"><b>문의 · 요청</b><small>질환 · 기능 · 고객문의</small></span></button>
-            <button class="nav-item nav-sub" data-view="pilot"><span class="nav-sub-dot"></span><span class="nav-copy"><b>운영 리포트</b><small>월간 성과 · 통계</small></span></button>
+            <button class="nav-item nav-sub" data-view="pilot"><span class="nav-sub-dot"></span><span class="nav-copy"><b>운영 통계</b><small>월간 성과 · 사용량</small></span></button>
           </div>
         </div>
 
@@ -1202,7 +1205,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
           <div class="care-notification-wrap"><button id="careNotificationButton" class="care-notification-button" type="button" aria-label="업무 알림" aria-expanded="false">🔔<span id="careNotificationCount" class="care-notification-count hidden">0</span></button><div id="careNotificationPanel" class="care-notification-panel hidden"><div class="care-notification-head"><div><b>묶음 업무 알림</b><span id="careNotificationSummary">긴급·오늘·일반 순으로 확인합니다.</span></div><button id="careBrowserNotificationButton" class="btn btn-ghost" type="button">브라우저 알림 켜기</button></div><div id="careNotificationList" class="care-notification-list"><div class="care-notification-empty">업무 알림을 확인하는 중입니다.</div></div><details class="care-notification-settings"><summary>내 알림 설정</summary><div class="care-notification-options"><label><input id="careNotifyConsult" type="checkbox" checked> 보호자 상담</label><label><input id="careNotifyPreventive" type="checkbox" checked> 접종·사상충</label><label><input id="careNotifyDelivery" type="checkbox" checked> 발송 실패·미열람</label><label><input id="careNotifyAssignment" type="checkbox" checked> 담당자 미지정</label><label><input id="careNotifyQuiet" type="checkbox" checked> 업무시간 외 제한</label><label><input id="careNotifyUrgentAfterHours" type="checkbox" checked> 긴급은 시간 외 허용</label></div><div class="care-notification-hours"><input id="careNotifyStart" type="time" value="08:30" aria-label="업무 시작"><span>~</span><input id="careNotifyEnd" type="time" value="20:00" aria-label="업무 종료"></div><label class="care-notification-muted">보호자 미열람 재알림 최대 <select id="careNotifyUnreadMax"><option value="0">안 함</option><option value="1">1회</option><option value="2" selected>2회</option><option value="3">3회</option></select></label><button id="careNotificationSave" class="btn btn-primary care-notification-save" type="button">내 알림 설정 저장</button></details></div></div>
           <span id="saasRoleBadge" class="saas-role-badge">LOCAL</span>
           <span id="globalCaseBadge" class="global-case-badge">현재 케이스 · 새 환자</span>
-          <button id="globalNewCase" class="btn btn-secondary global-new-case" type="button">+ 새 환자 / 초기화</button>
+          <button id="globalNewCase" class="btn btn-secondary global-new-case" type="button" title="선택 환자와 현재 작성 내용을 비웁니다. 저장된 환자 기록은 유지됩니다.">작성 초기화</button>
           <span id="hospitalBadge" class="hospital-badge">병원 정보 확인 중</span>
         </div>
       </header>
@@ -1232,7 +1235,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
         </section>
 
         <section id="workFirstDashboard" class="work-first-dashboard" aria-label="오늘 처리할 업무">
-          <div class="work-first-head"><div><p class="eyebrow">TODAY WORKSPACE</p><h3>오늘 업무</h3><p>상담·연결 승인·발송·일정 충돌을 확인하세요. 진료·예방 업무는 아래에서 펼쳐볼 수 있습니다.</p></div><button id="refreshWorkFirst" class="btn btn-secondary" type="button">업무 새로고침</button></div>
+          <div class="work-first-head"><div><p class="eyebrow">TODAY WORKSPACE</p><h3>오늘 업무</h3><p>지금 확인할 업무부터 처리하고, 최근 환자의 작업을 이어가세요.</p></div><button id="refreshWorkFirst" class="btn btn-secondary" type="button">업무 새로고침</button></div>
           <div class="work-first-kpis" role="list">
             <button type="button" class="work-first-kpi active" data-work-filter="all"><span>오늘 전체 업무</span><b id="workCountAll">0</b><small>우선순위순</small></button>
             <button type="button" class="work-first-kpi" data-work-filter="preventive"><span>오늘 접종·사상충</span><b id="workCountPreventive">0</b><small>오늘 예방 예정</small></button>
@@ -1287,7 +1290,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
         </section>
         <details id="followupScheduleBoard" class="schedule-board work-dashboard-details" aria-label="Carestep 통합 건강관리 일정">
           <summary class="schedule-board-head"><div><p class="eyebrow">FULL OPERATIONS BOARD</p><h3>전체 일정·스마트 업무함</h3><p>기간·상태·채널별 상세 업무가 필요할 때 펼쳐봅니다.</p></div><span class="btn btn-secondary">펼쳐보기</span></summary>
-          <details id="deliveryRecoveryCenter" class="delivery-recovery"><summary>Delivery Recovery Center <span id="recoveryActiveBadge">확인 중</span></summary><div class="recovery-body"><div class="recovery-kpis"><div class="recovery-kpi"><span>확인 필요</span><b id="recoveryNeedsAction">0</b></div><div class="recovery-kpi"><span>자동 재시도</span><b id="recoveryAutoRetry">0</b></div><div class="recovery-kpi"><span>Home 미열람</span><b id="recoveryUnread">0</b></div><div class="recovery-kpi"><span>인증 만료</span><b id="recoveryAuth">0</b></div></div><div id="deliveryRecoveryList" class="action-center-list"><div class="action-empty">복구 상태를 확인하는 중입니다.</div></div></div></details>
+          <details id="deliveryRecoveryCenter" class="delivery-recovery"><summary>발송 확인·복구 <span id="recoveryActiveBadge">확인 중</span></summary><div class="recovery-body"><div class="recovery-kpis"><div class="recovery-kpi"><span>확인 필요</span><b id="recoveryNeedsAction">0</b></div><div class="recovery-kpi"><span>자동 재시도</span><b id="recoveryAutoRetry">0</b></div><div class="recovery-kpi"><span>Home 미열람</span><b id="recoveryUnread">0</b></div><div class="recovery-kpi"><span>인증 만료</span><b id="recoveryAuth">0</b></div></div><div id="deliveryRecoveryList" class="action-center-list"><div class="action-empty">복구 상태를 확인하는 중입니다.</div></div></div></details>
           <div class="care-inbox-head"><div><b>스마트 업무함</b><span>보호자 상담·전송 실패와 예정일이 지난 접종·사상충 리콜을 우선순위대로 표시합니다.</span></div><div class="care-inbox-filters" role="tablist" aria-label="업무함 필터"><button class="care-inbox-filter active" type="button" data-care-filter="all">전체 <em id="careFilterAllCount">0</em></button><button class="care-inbox-filter" type="button" data-care-filter="urgent">긴급·SLA <em id="careFilterUrgentCount">0</em></button><button class="care-inbox-filter" type="button" data-care-filter="mine">내 업무 <em id="careFilterMineCount">0</em></button><button class="care-inbox-filter" type="button" data-care-filter="unassigned">미배정 <em id="careFilterUnassignedCount">0</em></button></div></div>
           <div id="careOperationsInbox" class="care-operations-inbox"><div class="schedule-board-empty">상담·미열람·전송 실패·예방 리콜 업무를 확인하는 중입니다.</div></div>
           <div class="schedule-board-kpis">
@@ -1336,26 +1339,26 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 
       <section id="patients" class="view">
         <div class="patient-crm-head">
-          <div><p class="eyebrow">PATIENT SEARCH 2.0 · v10.7-A</p><h3>보호자 · 환자 통합 작업공간</h3><p>환자명·보호자·전화번호·eFriends 번호·품종·생년월일을 암호화 색인으로 빠르게 검색하고 예방 일정을 함께 확인합니다.</p></div>
+          <div><p class="eyebrow">PATIENT SEARCH 2.0 · v10.7-A</p><h3>환자 관리</h3><p>환자를 검색해 선택하면 건강기록·자료·복약·HOME 연결을 한곳에서 관리할 수 있습니다.</p></div>
           <div class="patient-crm-actions"><button id="patientCrmRefresh" class="btn btn-secondary" type="button">새로고침</button><button id="patientCrmNewGuardian" class="btn btn-secondary" type="button">+ 보호자 등록</button><button id="patientCrmNewPatient" class="btn btn-primary" type="button">+ 환자 등록</button></div>
         </div>
         <div class="patient-crm-notice"><span>🔒</span><div><b>병원별 분리 · 암호화 저장</b><br>보호자명·연락처, 환자 식별정보와 건강 타임라인 제목·메모는 병원별로 분리해 암호화 저장합니다. 체중·접종·사상충·병원 진료·Journey는 환자별 날짜순으로 누적됩니다.</div></div>
         <div class="patient-crm-kpis"><div class="patient-crm-kpi"><span>등록 보호자</span><b id="crmGuardianCount">—</b></div><div class="patient-crm-kpi"><span>등록 환자</span><b id="crmPatientCount">—</b></div><div class="patient-crm-kpi"><span>Carestep Home 연결</span><b id="crmHomeCount">—</b></div></div>
         <div class="patient-crm-layout">
-          <div class="panel patient-crm-list-panel"><div class="patient-search-toolbar"><div class="patient-crm-search"><input id="patientCrmSearch" class="input" type="search" autocomplete="off" placeholder="환자·보호자·전화 뒤 4자리·eFriends 번호·품종·생년월일"><button id="patientCrmSearchClear" class="btn btn-ghost" type="button">지우기</button></div><select id="patientCrmActive" class="input" aria-label="환자 상태"><option value="active">활성 환자</option><option value="inactive">비활성 환자</option><option value="all">전체 환자</option></select><select id="patientCrmSort" class="input" aria-label="정렬"><option value="recent">최근 진료순</option><option value="name">가나다순</option></select></div><div id="patientCrmRecent" class="patient-search-recent"></div><div id="patientCrmResultMeta" class="patient-crm-result-meta">환자를 불러오는 중입니다.</div><div id="patientCrmList" class="patient-crm-list"></div><div id="patientCrmPagination" class="patient-search-pagination"></div></div>
+          <div class="panel patient-crm-list-panel"><div class="patient-search-toolbar"><div class="patient-crm-search"><input id="patientCrmSearch" class="input" type="search" autocomplete="off" placeholder="환자·보호자·전화 뒤 4자리·eFriends 번호·품종·생년월일"><button id="patientCrmSearchClear" class="btn btn-ghost" type="button">지우기</button></div><select id="patientCrmActive" class="input" aria-label="환자 상태"><option value="active">활성 환자</option><option value="inactive">비활성 환자</option><option value="all">전체 환자</option></select><select id="patientCrmSort" class="input" aria-label="정렬"><option value="recent">최근 진료순</option><option value="name">가나다순</option></select></div><div id="patientCrmRecent" class="patient-search-recent"></div><div id="patientCrmResultMeta" class="patient-crm-result-meta">환자를 불러오는 중입니다.</div><div class="clinic-patient-columns" aria-hidden="true"><span>환자명</span><span>품종·나이</span><span>보호자</span><span>최근 진료</span><span>HOME 상태</span></div><div id="patientCrmList" class="patient-crm-list" aria-label="환자 검색 결과"></div><div id="patientCrmPagination" class="patient-search-pagination"></div></div>
           <div id="patientCrmDetail" class="panel patient-crm-detail"><div class="patient-crm-empty"><div><b>보호자를 선택하세요</b><span>왼쪽 목록에서 보호자를 선택하면 연결된 환자와 기본 정보를 확인할 수 있습니다.</span></div></div></div>
         </div>
       </section>
 
       <section id="library" class="view">
         <div class="section-head">
-          <div><p class="eyebrow">PURPOSE-FIRST LIBRARY</p><h3>보호자 자료실</h3><p class="muted">자료 목적을 먼저 고른 뒤 진료 카테고리로 좁혀보세요.</p></div>
-          <input id="searchInput" class="input search" placeholder="질환·수술·퇴원관리 검색" />
+          <div><p class="eyebrow">PURPOSE-FIRST LIBRARY</p><h3>보호자 자료실</h3><p class="muted">질환·수술명을 검색하거나 최근 사용 자료를 선택하세요.</p></div>
+          <input id="searchInput" class="input search" type="search" aria-label="보호자 자료 검색" placeholder="질환·수술·퇴원관리 검색" />
         </div>
         <div class="workflow-next-note"><b>다음 할 일</b><span>교육자료를 찾은 뒤 카드의 <strong>“이 자료로 만들기 →”</strong>를 누르면 새 환자 자료 생성으로 이어집니다.</span></div>
-        <div class="library-filter-block"><div class="library-filter-label"><b>1. 자료 목적</b><span>서로 다른 용도의 자료가 한 목록에 섞이지 않습니다.</span></div><div class="purpose-filter-row"><button class="purpose-chip active" type="button" data-purpose="all">전체 자료</button><button class="purpose-chip" type="button" data-purpose="education">질환 교육</button><button class="purpose-chip" type="button" data-purpose="procedure">수술·시술 안내</button><button class="purpose-chip" type="button" data-purpose="discharge">입원·퇴원관리</button><button class="purpose-chip" type="button" data-purpose="clinic">병원 직접 제작</button><button class="purpose-chip journey-link" type="button" data-go="followup">Patient Journey →</button></div></div>
-        <div class="library-filter-block"><div class="library-filter-label"><b>2. 진료 카테고리</b><span id="libraryFilterSummary">전체 목적 · 전체 카테고리</span></div><div class="filter-row"><button class="chip active" data-filter="전체">전체</button><button class="chip" data-filter="수술시술">수술·시술</button><button class="chip" data-filter="입원퇴원">입원·퇴원</button><button class="chip" data-filter="만성질환">만성질환</button><button class="chip" data-filter="예방관리">예방관리</button><button class="chip" data-filter="재활생활">재활·생활관리</button><button class="chip" data-filter="종양중증">종양·중증관리</button><button class="chip" data-filter="고양이특화">고양이 특화</button><button class="chip" data-filter="병원제작">병원 직접 제작</button></div></div>
-        <div id="libraryResultMeta" class="library-result-meta">자료를 분류하는 중입니다.</div>
+        <section id="clinicLibraryRecent" class="clinic-library-recent" aria-label="최근 사용 자료"></section><div class="clinic-library-filter-status"><span id="clinicLibraryActiveFilters" role="status">전체 자료</span><button id="clinicLibraryReset" class="btn btn-secondary" type="button">검색·필터 초기화</button></div><details id="clinicLibraryFilters" class="clinic-library-filters"><summary>자료 종류·진료 분류로 좁히기</summary><div class="library-filter-block"><div class="library-filter-label"><b>자료 종류</b><span>필요한 자료 종류만 선택할 수 있습니다.</span></div><div class="purpose-filter-row"><button class="purpose-chip active" type="button" data-purpose="all">전체 자료</button><button class="purpose-chip" type="button" data-purpose="education">질환 교육</button><button class="purpose-chip" type="button" data-purpose="procedure">수술·시술 안내</button><button class="purpose-chip" type="button" data-purpose="discharge">입원·퇴원관리</button><button class="purpose-chip" type="button" data-purpose="clinic">병원 직접 제작</button><button class="purpose-chip journey-link" type="button" data-go="followup">회복관리 일정 →</button></div></div>
+        <div class="library-filter-block"><div class="library-filter-label"><b>진료 분류</b><span id="libraryFilterSummary">전체 목적 · 전체 카테고리</span></div><div class="filter-row"><button class="chip active" data-filter="전체">전체</button><button class="chip" data-filter="수술시술">수술·시술</button><button class="chip" data-filter="입원퇴원">입원·퇴원</button><button class="chip" data-filter="만성질환">만성질환</button><button class="chip" data-filter="예방관리">예방관리</button><button class="chip" data-filter="재활생활">재활·생활관리</button><button class="chip" data-filter="종양중증">종양·중증관리</button><button class="chip" data-filter="고양이특화">고양이 특화</button><button class="chip" data-filter="병원제작">병원 직접 제작</button></div></div>
+        </details><div id="libraryResultMeta" class="library-result-meta">자료를 분류하는 중입니다.</div>
         <div id="libraryGrid" class="cards-grid"></div>
       </section>
 
@@ -2026,7 +2029,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
           <div class="messaging-queue"><div class="messaging-queue-head"><b>최근 자동발송 예약</b><span id="messagingQueueSummary" class="muted" style="font-size:8px">--</span></div><div id="messagingQueueList" class="messaging-queue-list"><div class="messaging-empty">아직 불러온 예약내역이 없습니다.</div></div></div>
         </div>
         <div class="guardian-survey-panel">
-          <div class="guardian-survey-head"><div><p class="eyebrow">GUARDIAN RESPONSE · CLINICAL FOLLOW-UP · v9.2</p><h3>Guardian Response · 보호자 회복응답</h3><p>Journey 단계에서 보호자 응답을 켜면 D+ 메시지에 1회용 상태 확인 링크가 포함됩니다. 식욕·구토·활력·관리 시행·연락 요청을 구조화하여 병원 업무 우선순위로 자동 분류합니다.</p></div><button id="refreshGuardianSurveys" class="btn btn-secondary" type="button">응답 새로고침</button></div>
+          <div class="guardian-survey-head"><div><p class="eyebrow">GUARDIAN RESPONSE · CLINICAL FOLLOW-UP · v9.2</p><h3>보호자 회복응답</h3><p>Journey 단계에서 보호자 응답을 켜면 D+ 메시지에 1회용 상태 확인 링크가 포함됩니다. 식욕·구토·활력·관리 시행·연락 요청을 구조화하여 병원 업무 우선순위로 자동 분류합니다.</p></div><button id="refreshGuardianSurveys" class="btn btn-secondary" type="button">응답 새로고침</button></div>
           <div id="guardianSurveyLock" class="followup-lock hidden"></div>
           <div class="guardian-survey-kpis"><div class="survey-kpi"><span>응답률</span><b id="surveyResponseRate">0%</b><small id="surveyResponded">응답 0 / 초대 0</small></div><div class="survey-kpi"><span>정상</span><b id="surveyNormal">0</b><small>일반 후속관리</small></div><div class="survey-kpi"><span>확인 권장</span><b id="surveyWatch">0</b><small>직원 확인 우선</small></div><div class="survey-kpi alert"><span>빠른 확인 필요</span><b id="surveyUrgent">0</b><small id="surveyOpenAlertNote">미확인 0건</small></div></div>
           <div id="guardianSurveyList" class="guardian-survey-list"><div class="survey-empty">보호자 응답을 불러오는 중입니다.</div></div>
@@ -3829,15 +3832,15 @@ function bindMemberPermissions(root){
 }
 
 const CARESTEP_ROLE_UI={
-  owner:{label:'원장',title:'전체 운영 화면',description:'진료 업무와 병원 운영 현황을 함께 확인합니다.',defaultView:'dashboard',views:['dashboard','patients','library','builder','followup','onboarding','settings','account','voice','pilot'],actions:[['patients','환자 작업공간'],['followup','후속관리'],['pilot','운영 통계']]},
+  owner:{label:'원장',title:'전체 운영 화면',description:'진료 업무와 병원 운영 현황을 함께 확인합니다.',defaultView:'dashboard',views:['dashboard','patients','library','builder','followup','onboarding','settings','account','voice','pilot'],actions:[['patients','환자 관리'],['followup','후속관리'],['pilot','운영 통계']]},
   admin:{label:'관리자',title:'병원 운영 설정',description:'발송 설정, 직원·권한, 요금제와 연동 상태를 관리합니다.',defaultView:'settings',views:['dashboard','followup','onboarding','settings','account'],actions:[['followup','발송 설정'],['account','직원·권한'],['settings','연동 상태']]},
-  vet:{label:'수의사',title:'진료 작업공간',description:'환자 작업공간에서 진료기록, Journey와 임상 메모를 이어서 처리합니다.',defaultView:'patients',views:['dashboard','patients','followup'],actions:[['patients','환자 작업공간'],['followup','Journey·후속관리']]},
+  vet:{label:'수의사',title:'진료 작업공간',description:'환자 작업공간에서 진료기록, Journey와 임상 메모를 이어서 처리합니다.',defaultView:'patients',views:['dashboard','patients','followup'],actions:[['patients','환자 관리'],['followup','Journey·후속관리']]},
   staff:{label:'접수',title:'접수 업무 화면',description:'환자 검색, 오늘 일정, 상담 요청과 보호자 자료 발송을 빠르게 처리합니다.',defaultView:'dashboard',views:['dashboard','patients','library','builder','followup'],actions:[['patients','환자 검색'],['builder','자료 발송'],['followup','상담·일정']]}
 };
 function roleUiRole(){return saasMode==='demo'||!saasMe?'owner':CARESTEP_ROLE_UI[saasMe.role]?saasMe.role:'staff';}
-function roleUiProfile(){const base=CARESTEP_ROLE_UI[roleUiRole()]||CARESTEP_ROLE_UI.staff;if(!saasCustomPermissions())return base;const grants={patients:'patients.read',library:'materials.read',builder:'materials.edit',followup:'followup.read',onboarding:'settings.manage',settings:'settings.manage',pilot:'stats.read'};const views=['dashboard','account',...Object.keys(grants).filter(v=>saasPermission(grants[v])||(v==='followup'&&(saasPermission('messages.read')||saasPermission('settings.manage'))))];return {...base,title:saasMe.permissions.mode==='all'?'전체 업무 화면':'내 업무 화면',description:'원장님이 설정한 직원별 권한으로 사용합니다.',defaultView:'dashboard',views,actions:[['patients','환자 작업공간'],['followup','후속관리'],['pilot','운영 통계'],['account','내 계정']].filter(x=>views.includes(x[0])).slice(0,3)};}
+function roleUiProfile(){const base=CARESTEP_ROLE_UI[roleUiRole()]||CARESTEP_ROLE_UI.staff;if(!saasCustomPermissions())return base;const grants={patients:'patients.read',library:'materials.read',builder:'materials.edit',followup:'followup.read',onboarding:'settings.manage',settings:'settings.manage',pilot:'stats.read'};const views=['dashboard','account',...Object.keys(grants).filter(v=>saasPermission(grants[v])||(v==='followup'&&(saasPermission('messages.read')||saasPermission('settings.manage'))))];return {...base,title:saasMe.permissions.mode==='all'?'전체 업무 화면':'내 업무 화면',description:'원장님이 설정한 직원별 권한으로 사용합니다.',defaultView:'dashboard',views,actions:[['patients','환자 관리'],['followup','후속관리'],['pilot','운영 통계'],['account','내 계정']].filter(x=>views.includes(x[0])).slice(0,3)};}
 function roleUiCanView(view){if(['contentStudio','admin'].includes(view))return !!operatorUnlocked;return roleUiProfile().views.includes(String(view||''));}
-function renderRoleWorkspace(){const p=roleUiProfile(),role=roleUiRole();document.body.dataset.carestepRole=saasCustomPermissions()?'custom':role;if($('roleWorkspaceBadge'))$('roleWorkspaceBadge').textContent=p.label;if($('roleWorkspaceTitle'))$('roleWorkspaceTitle').textContent=p.title;if($('roleWorkspaceDescription'))$('roleWorkspaceDescription').textContent=p.description;const actions=$('roleWorkspaceActions');if(actions)actions.innerHTML=p.actions.map(([view,label],i)=>`<button class="btn ${i===0?'btn-primary':'btn-secondary'}" type="button" data-go="${escapeHtml(view)}">${escapeHtml(label)}</button>`).join('');const followLabel=document.querySelector('.nav-item[data-view="followup"] .nav-copy b');if(followLabel)followLabel.textContent=role==='staff'?'상담 · 발송':role==='admin'?'발송 설정':role==='vet'?'Journey · 후속관리':'후속관리';}
+function renderRoleWorkspace(){const p=roleUiProfile(),role=roleUiRole();document.body.dataset.carestepRole=saasCustomPermissions()?'custom':role;if($('roleWorkspaceBadge'))$('roleWorkspaceBadge').textContent=p.label;if($('roleWorkspaceTitle'))$('roleWorkspaceTitle').textContent=p.title;if($('roleWorkspaceDescription'))$('roleWorkspaceDescription').textContent=p.description;const actions=$('roleWorkspaceActions');if(actions)actions.innerHTML=p.actions.map(([view,label],i)=>`<button class="btn ${i===0?'btn-primary':'btn-secondary'}" type="button" data-go="${escapeHtml(view)}">${escapeHtml(label)}</button>`).join('');const followLabel=document.querySelector('.nav-item[data-view="followup"] .nav-copy b');if(followLabel)followLabel.textContent='상담·후속관리';}
 function settingsCanManage(){return saasPermission('settings.manage',saasMode==='demo'||['owner','admin'].includes(saasMe?.role||''));}
 function settingsScrollTo(selector){setTimeout(()=>{const el=document.querySelector(selector);if(!el)return;el.scrollIntoView({behavior:'smooth',block:'start'});const input=el.matches('input,select,button')?el:el.querySelector('input,select,button');input?.focus?.({preventScroll:true});},100);}
 function openSettingsCategory(action){
@@ -4605,7 +4608,7 @@ function renderEmrSyncCenter(){
 async function loadEmrSyncStatus(showToast=false){if(saasMode!=='auth'||!saasMe||!saasPermission('settings.manage',['owner','admin'].includes(saasMe.role||''))){emrSyncState=null;renderEmrSyncCenter();return false;}emrSyncLoading=true;renderEmrSyncCenter();try{emrSyncState=await saasRequest('/saas/emr-sync-status');if(showToast)toast('EMR 동기화 상태를 새로고침했습니다.');return true;}catch(e){emrSyncState=null;if(showToast)toast(e.message||'EMR 동기화 상태를 불러오지 못했습니다.');return false;}finally{emrSyncLoading=false;renderEmrSyncCenter();}}
 async function copyEmrCommand(kind){const commands={pause:'schtasks /Change /TN "CARESTEP eFriends Sync" /DISABLE',retry:'schtasks /Run /TN "CARESTEP eFriends Sync"',resume:'schtasks /Change /TN "CARESTEP eFriends Sync" /ENABLE'},value=commands[kind]||'';if(!value)return;try{await navigator.clipboard.writeText(value);toast('PowerShell 명령을 복사했습니다.');}catch{toast('명령을 복사하지 못했습니다.');}}
 
-const CARESTEP_SCREEN_HELP={dashboard:'오늘 처리할 상담·예방·후속관리·발송 오류를 우선순위대로 확인합니다.',patients:'환자를 한 번 선택하면 기본정보, 기록, Journey와 상담을 한 작업공간에서 처리합니다.',library:'자료 목적과 진료 카테고리를 고른 뒤 환자에게 맞는 자료를 선택합니다.',builder:'환자 → 퇴원지시 → 복약 → 재진 → 출력 순서로 진행합니다.',followup:'Journey를 선택하면 Home·Calendar·외부 발송 상태를 함께 관리합니다.',onboarding:'완료되지 않은 단계의 이유를 확인하고 바로 옆 해결 버튼을 누르세요.',settings:'병원 운영 설정을 목적별 카테고리에서 선택합니다.',account:'내 계정, 직원·권한, 결제와 보안을 탭별로 관리합니다.',voice:'사용 중 필요한 자료나 기능을 CARESTEP 운영팀에 요청합니다.',pilot:'월간 사용량과 운영 성과를 확인합니다.'};
+const CARESTEP_SCREEN_HELP={dashboard:'오늘 처리할 상담·예방·후속관리·발송 오류를 우선순위대로 확인합니다.',patients:'환자를 한 번 선택하면 기본정보, 기록, Journey와 상담을 한 작업공간에서 처리합니다.',library:'질환·수술명으로 검색하거나 최근 사용 자료를 선택하세요. 자료 종류·진료 분류는 필요할 때 펼칩니다.',builder:'환자 → 퇴원지시 → 복약 → 재진 → 출력 순서로 진행합니다.',followup:'Journey를 선택하면 Home·Calendar·외부 발송 상태를 함께 관리합니다.',onboarding:'완료되지 않은 단계의 이유를 확인하고 바로 옆 해결 버튼을 누르세요.',settings:'병원 운영 설정을 목적별 카테고리에서 선택합니다.',account:'내 계정, 직원·권한, 결제와 보안을 탭별로 관리합니다.',voice:'사용 중 필요한 자료나 기능을 CARESTEP 운영팀에 요청합니다.',pilot:'월간 사용량과 운영 성과를 확인합니다.'};
 function renderScreenHelp(view){const bar=$('screenHelpBar'),copy=CARESTEP_SCREEN_HELP[view]||'현재 화면의 주요 업무를 확인하세요.';if(!bar)return;bar.querySelector('span').innerHTML=`<b>화면 도움말</b> · ${escapeHtml(copy)}`;const btn=$('openScreenGuide');if(btn)btn.textContent=view==='onboarding'?'가이드 다시 보기':'5분 가이드';}
 let onboardingTourIndex=0,onboardingTourSample=false;
 const ONBOARDING_TOUR_STEPS=[
@@ -5388,7 +5391,7 @@ function setManageNavOpen(open){
   const toggle=$('navManageToggle'),group=$('navManageGroup');if(!toggle||!group)return;
   toggle.classList.toggle('open',!!open);group.classList.toggle('open',!!open);toggle.setAttribute('aria-expanded',open?'true':'false');
 }
-function syncSidebarNavGroup(view){if(SECONDARY_NAV_VIEWS.has(view))setManageNavOpen(true);}
+function syncSidebarNavGroup(view){if(SECONDARY_NAV_VIEWS.has(view))setManageNavOpen(true);if(['library','builder'].includes(view)&&$('clinicMaterialNav'))$('clinicMaterialNav').open=true;}
 function toggleManageNav(){const group=$('navManageGroup');setManageNavOpen(!group?.classList.contains('open'));}
 
 
@@ -5403,7 +5406,7 @@ function go(view,options={}){
   $(view).classList.add('active-view');
   const nav=document.querySelector(`.nav-item[data-view="${view}"]`); if(nav) nav.classList.add('active');
   syncSidebarNavGroup(view);
-  const titles={dashboard:'홈',patients:'보호자 · 환자',library:'자료실',builder:'자료 생성',followup:'후속관리',onboarding:'시작 설정',settings:'운영 설정',account:'계정 · 직원',contentStudio:'AI Content Studio',voice:'문의 · 요청',pilot:'운영 리포트',admin:'운영자 도구'};
+  const titles={dashboard:'오늘 업무',patients:'환자 관리',library:'자료 찾기',builder:'자료 작성',followup:'상담·후속관리',onboarding:'처음 사용 설정',settings:'병원·연동 설정',account:'계정·직원·권한',contentStudio:'AI Content Studio',voice:'문의 · 요청',pilot:'운영 통계',admin:'운영자 도구'};
   $('viewTitle').textContent=titles[view]||'';
   announceClinicView(view,titles[view]||'');
   renderScreenHelp(view);
@@ -5463,6 +5466,19 @@ function cardTemplate(t){
 }
 
 function renderQuick(){ $('quickCards').innerHTML = templates.filter(t=>t.featured).map(cardTemplate).join(''); bindBuilderButtons(); }
+function renderClinicLibraryRecent(){
+  const host=$('clinicLibraryRecent');if(!host)return;const q=String($('searchInput')?.value||'').trim(),filtered=!!q||currentPurpose!=='all'||currentFilter!=='전체';
+  host.hidden=filtered;if(filtered){host.replaceChildren();return;}
+  const rows=window.ClinicOrganization?.recentTemplates(templates,workflowSettings.recent||[])||[];
+  host.innerHTML='<h4>최근 사용 자료</h4>'+(rows.length?'<div class="clinic-recent-template-list">'+rows.map(t=>'<button type="button" class="btn btn-secondary open-builder" data-critical-template="'+escapeHtml(t.id)+'" data-id="'+escapeHtml(t.id)+'">'+escapeHtml(templateDisplayTitle(t))+'</button>').join('')+'</div>':'<p>자료를 선택하면 이곳에서 다시 찾을 수 있습니다.</p>');
+}
+function resetClinicLibraryFilters(){
+ currentFilter='전체';currentPurpose='all';if($('searchInput'))$('searchInput').value='';
+ document.querySelectorAll('#library [data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter==='전체'));
+ document.querySelectorAll('#library [data-purpose]').forEach(b=>b.classList.toggle('active',b.dataset.purpose==='all'));
+ renderLibrary();$('searchInput')?.focus();
+}
+
 function renderLibrary(){
   const q=normalizeSearchText($('searchInput')?.value||'');
   let data;
@@ -5476,7 +5492,9 @@ function renderLibrary(){
   }
   if(currentPurpose!=='all')data=data.filter(t=>templatePurpose(t)===currentPurpose);
   const summary=`${PURPOSE_LABELS[currentPurpose]||PURPOSE_LABELS.all} · ${categoryLabel(currentFilter)}`;if($('libraryFilterSummary'))$('libraryFilterSummary').textContent=summary;if($('libraryResultMeta'))$('libraryResultMeta').textContent=`${summary} · ${data.length}개 자료`;
-  $('libraryGrid').innerHTML=data.map(cardTemplate).join('') || '<div class="panel">검색 결과가 없습니다.</div>';
+  const active=$('clinicLibraryActiveFilters');if(active)active.textContent=(q?'검색: '+String($('searchInput').value).trim()+' · ':'')+summary;if($('clinicLibraryReset'))$('clinicLibraryReset').hidden=!q&&currentPurpose==='all'&&currentFilter==='전체';
+  renderClinicLibraryRecent();
+  $('libraryGrid').innerHTML=data.map(cardTemplate).join('') || '<div class="panel">조건에 맞는 자료가 없습니다. 검색·필터 초기화로 전체 자료를 확인하세요.</div>';
   bindBuilderButtons();
 }
 function bindBuilderButtons(){document.querySelectorAll('.open-builder').forEach(btn=>{btn.type='button';btn.onclick=(e)=>{e.preventDefault();return startNewCaseSafely(btn.dataset.id||btn.dataset.criticalTemplate||'');};});}
@@ -9566,6 +9584,7 @@ document.querySelectorAll('[data-settings-action]').forEach(b=>b.addEventListene
 $('refreshEmrSync')?.addEventListener('click',()=>loadEmrSyncStatus(true));
 document.querySelectorAll('[data-emr-copy]').forEach(b=>b.addEventListener('click',()=>copyEmrCommand(b.dataset.emrCopy)));
 $('searchInput').addEventListener('input',renderLibrary);
+$('clinicLibraryReset')?.addEventListener('click',resetClinicLibraryFilters);
 $('careGlobalSearch')?.addEventListener('input',renderCareGlobalSearch);$('careGlobalSearch')?.addEventListener('focus',async()=>{try{await window.crmLoad?.(false);}catch{}renderCareGlobalSearch();});$('careGlobalSearch')?.addEventListener('keydown',e=>{if(e.key==='Enter')$('careGlobalSearchResults')?.querySelector('[data-care-search-type]')?.click();if(e.key==='Escape')$('careGlobalSearchResults')?.classList.add('hidden');});document.addEventListener('click',e=>{if(!e.target.closest('.care-global-search'))$('careGlobalSearchResults')?.classList.add('hidden');});
 document.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active')); b.classList.add('active'); currentFilter=b.dataset.filter; renderLibrary();}));
 document.querySelectorAll('[data-purpose]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-purpose]').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentPurpose=b.dataset.purpose||'all';renderLibrary();}));
@@ -10239,7 +10258,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
 <script src="patient-breeds.js?v=9.5.3"></script>
-<script src="patient-crm.js?v=patient-reset-20261019a"></script>
+<script src="patient-crm.js?v=organization-20261019a"></script>
 <script src="patient-timeline.js?v=staff-permissions-20261018a"></script>
 <script src="date-input-guard.js?v=9.5.3"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
@@ -10252,11 +10271,12 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <!-- CARESTEP v10.4-G · Clinical Protocol Settings -->
 <script>document.addEventListener("DOMContentLoaded",()=>CarestepStabilization.compatible());</script>
 <script src="r61-route.js?v=patient-reset-20261019a"></script>
-<script src="r61-clinic.js?v=ui-comfort-20261019a"></script>
+<script src="r61-clinic.js?v=organization-20261019a"></script>
 <script src="r65-clinic.js?v=staff-permissions-20261018a"></script>
 <script src="r83-clinic.js"></script>
 <script src="clinic-read-flow.js?v=flow-20261017"></script>
 <script src="home-access-clinic.js?v=refresh-flow-20261018a"></script>
-<script src="clinic-care.js?v=staff-permissions-20261018a"></script>
+<script src="clinic-care.js?v=organization-20261019a"></script>
+<script src="clinic-organization.js?v=organization-20261019a"></script>
 </body>
 </html>

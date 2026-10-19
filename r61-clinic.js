@@ -2144,7 +2144,7 @@
             const sync=responses[1].status==='fulfilled'?responses[1].value:null,manual=responses[2].status==='fulfilled'?responses[2].value:null,e=workCard(rows);e.append(el('strong','eFriends 동기화'));
             if(sync?.ok===true){const h=sync.heartbeat,last=sync.lastSuccess,age=h?Date.now()-Date.parse(h.last_seen_at):Infinity,late=!Number.isFinite(age)||age>Math.max(35,(Number(h?.interval_minutes)||15)*2+5)*60000;e.append(el('p',!h?'서버 PC 연결 기록 없음':h.status==='failed'?'서버 PC 동기화 오류':late?'서버 PC 응답 지연 · 연결 확인 필요':h.status==='syncing'?'동기화 처리 중':'서버 PC 응답 확인'),el('p','마지막 응답 '+workTime(h?.last_seen_at)+' · 다음 예정 '+workTime(h?.next_expected_at)),el('p','최근 반영 완료 '+workTime(last?.finished_at)+(last?.status==='completed_with_errors'?' · 일부 오류 있음':'')),el('p',last?'최근 반영: 신규 '+Number(last.events_created||0)+'건 · 수정 '+Number(last.events_updated||0)+'건 · 오류 '+Number(last.errors||0)+'건':'반영 완료 기록 없음'));}else e.append(el('p','동기화 상태를 조회하지 못했습니다.'));
             e.append(el('p',manual?.ok===true?(manual.enabled&&manual.agentVerified?'수동 최신 백업 반영 사용 가능 · 15분 자동 동기화 유지':'수동 반영 비활성 · 설치/승인 상태 확인 필요'):'수동 반영 상태 미확인'));
-            button(e,'수동 반영 위치 보기',async()=>{await window.R65ManualSync?.refresh(true);const management=document.getElementById('r61-management');if(management)management.open=true;document.getElementById('r65-manual-controls')?.scrollIntoView({block:'center'});body.closest('dialog')?.close();});
+            button(e,'수동 반영 위치 보기',async()=>{if(typeof go==='function')go('settings');await window.R65ManualSync?.refresh(true);const management=document.getElementById('r61-management');if(management)management.open=true;document.getElementById('r65-manual-controls')?.scrollIntoView({block:'center'});body.closest('dialog')?.close();});
         };button(body,'연동 상태 새로고침',load);body.append(rows);await load();
     }
 
@@ -2155,8 +2155,8 @@
         bar.id = 'r61-controls';
 
         bar.setAttribute('aria-label', '후속 기능');
-        const management=el('details'),tools=el('div'),syncSlot=el('div');management.id='r61-management';management.append(el('summary','관리 · 발송 이력 · 연동'));tools.className='r61-management-tools';syncSlot.id='r61-sync-slot';management.append(tools,syncSlot);bar.append(management);
-        button(tools,'예방문자 발송 결과',()=>preventiveResults());button(tools,'예방 일정 확인·수정',preventiveReview);button(tools,'연동 상태',integrationStatus);button(tools,'보호자 공개 자료 관리',approveMaterial);button(tools,'후속 기능 설정',settings);button(tools,'예방관리 발송 예정 미리보기',preventivePreview);
+        const management=el('details'),tools=el('div'),syncSlot=el('div');management.id='r61-management';management.append(el('summary','발송·공개·연동 관리'));tools.className='r61-management-tools';syncSlot.id='r61-sync-slot';management.append(tools,syncSlot);bar.append(management);
+        button(tools,'예방문자 발송 결과',()=>preventiveResults());button(tools,'예방 일정 확인·수정',preventiveReview);button(tools,'연동 상태',integrationStatus);button(tools,'보호자 공개 자료 관리',approveMaterial);button(tools,'자동 발송·공개 설정',settings);button(tools,'예방관리 발송 예정 미리보기',preventivePreview);
         (document.querySelector('main')||document.body).append(bar);
         mountPatientContext();mountTodayOverview();mountBuilderProgress();
         window.r61RenderTimeline = async (mount, patientId) => {
