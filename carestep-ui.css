@@ -178,3 +178,18 @@ body,button,input,select,textarea{font-family:'Carestep Pretendard','Noto Sans K
 .permission-guide-foot{border-top:1px solid var(--care-ui-line);margin-top:16px;padding-top:12px;color:var(--care-ui-muted);font-size:13px;line-height:1.7}
 .permission-guide-foot p{margin:0}.permission-guide-foot p+p{margin-top:8px}
 @media(max-width:700px){.permission-guide-modes,.permission-guide-groups{grid-template-columns:1fr}.permission-guide-modes{gap:8px}.permission-guide-catalog{padding-inline:12px}}
+
+/* Identify each guardian response independently of the selected patient. */
+.survey-identity{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin-bottom:6px;min-width:0;color:var(--care-ui-ink);font-size:14px;line-height:1.6;word-break:keep-all;overflow-wrap:anywhere}
+.survey-identity strong{font-size:15px;line-height:1.6;font-weight:800}
+.survey-main .survey-identity>span,.message-failure-main .survey-identity>span{font-size:14px;line-height:1.6;color:var(--care-ui-muted)}
+.survey-identity.survey-identity-missing{font-size:13px;color:#765714}
+.survey-main .survey-identity .survey-inactive,.message-failure-main .survey-identity .survey-inactive{font-size:12px;border-radius:999px;padding:2px 8px;background:#edf0f5;color:#526581}
+#guardianSurveyList .survey-row{grid-template-columns:112px minmax(0,1fr) auto;gap:14px;padding:14px;align-items:start}
+#guardianSurveyList .survey-main{min-width:0}
+#guardianSurveyList .survey-main>.survey-journey{font-size:13px;line-height:1.65;color:var(--care-ui-muted)}
+#guardianSurveyList .survey-main>span,#guardianSurveyList .survey-comment{font-size:12px;line-height:1.65;word-break:keep-all;overflow-wrap:anywhere}
+#guardianSurveyList .survey-when,#guardianSurveyList .survey-when b{font-size:12px;line-height:1.65}
+#guardianSurveyList .survey-badge{font-size:12px;line-height:1.5}
+#guardianSurveyList .survey-actions .btn{font-size:13px;min-height:44px}
+@media(max-width:700px){#guardianSurveyList .survey-row{grid-template-columns:minmax(0,1fr);gap:8px}#guardianSurveyList .survey-when{display:flex;flex-wrap:wrap;gap:4px 10px}#guardianSurveyList .survey-actions{justify-content:flex-start}.survey-identity{gap:4px 10px}}
