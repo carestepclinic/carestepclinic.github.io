@@ -155,3 +155,26 @@ body,button,input,select,textarea{font-family:'Carestep Pretendard','Noto Sans K
 .saas-member .member-permissions,.saas-member>.member-permission-note{grid-column:1/-1;width:100%;box-sizing:border-box}.member-permissions{border-top:1px solid #dce5f5;margin-top:8px;padding-top:12px;font-size:14px;line-height:1.6}.member-permissions summary{cursor:pointer;font-weight:700;color:#17305b;min-height:44px;display:list-item;align-content:center}.member-permission-mode{display:grid;gap:6px;max-width:360px;font-weight:700}.member-permission-mode select{font:inherit;min-height:44px}.member-permission-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.member-permission-grid label{display:flex;align-items:center;gap:10px;min-height:44px;padding:10px;border:1px solid #dce5f5;border-radius:10px;background:#f7f9fd;cursor:pointer;word-break:keep-all;overflow-wrap:anywhere}.member-permission-grid input{width:18px;height:18px;flex:0 0 auto;accent-color:#2858ff}.member-permission-note{font-size:13px;line-height:1.65;color:#526581}.member-permission-grid label:has(input:checked){background:#eef3ff;border-color:#acc1ff}.member-permission-grid label:has(input:disabled){cursor:default}@media(max-width:600px){.member-permission-grid{grid-template-columns:1fr}.saas-member{min-width:0}.member-permission-mode{max-width:none}}
 
 #saasMemberList .saas-member{font-size:14px;line-height:1.6}#saasMemberList .saas-member b{font-size:14px}#saasMemberList .saas-member small{font-size:12px;line-height:1.6;overflow-wrap:anywhere}#saasMemberList .saas-member select{font-size:14px;min-height:44px}#saasMemberList .member-permissions summary{font-size:14px}
+
+/* Staff permission guide uses the same labels as the permission editor. */
+#account .permission-guide{color:var(--care-ui-ink);font-size:14px;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere}
+#account .permission-guide h3{font-size:17px;line-height:1.5;margin:0}
+#account .permission-guide-head p{font-size:14px;line-height:1.7;color:var(--care-ui-muted);margin:6px 0 0}
+.permission-guide-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+.permission-guide-modes>div{padding:14px 16px;border:1px solid var(--care-ui-line);border-radius:12px;background:#f7f9fd;min-width:0}
+.permission-guide-modes dt{font-weight:800;color:var(--care-ui-ink);margin:0 0 6px}
+.permission-guide-modes dd{margin:0;color:var(--care-ui-muted)}
+.permission-guide-owner{padding:12px 14px;border-radius:12px;background:#eef3ff;margin:0 0 16px}
+.permission-guide-catalog{border:1px solid var(--care-ui-line);border-radius:12px;padding:0 16px}
+.permission-guide-catalog summary{cursor:pointer;min-height:48px;padding:12px 0;font-weight:800;list-style-position:inside}
+.permission-guide-catalog summary:focus-visible{outline:3px solid var(--care-ui-action);outline-offset:3px;border-radius:6px}
+.permission-guide-count{display:inline-block;background:#eef3ff;color:#214fbd;border-radius:999px;padding:1px 9px;font-size:12px;margin-left:6px;vertical-align:middle}
+.permission-guide-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:4px 0 12px}
+.permission-guide-group{border:1px solid var(--care-ui-line);border-radius:10px;padding:12px 14px;min-width:0;background:#fff}
+#account .permission-guide-group h4{font-size:14px;line-height:1.6;margin:0 0 6px;color:var(--care-ui-ink)}
+.permission-guide-group ul{padding-left:18px;margin:0;color:var(--care-ui-muted)}
+.permission-guide-group li+li{margin-top:4px}
+.permission-guide-dependencies{margin:0 0 14px;color:var(--care-ui-muted)}
+.permission-guide-foot{border-top:1px solid var(--care-ui-line);margin-top:16px;padding-top:12px;color:var(--care-ui-muted);font-size:13px;line-height:1.7}
+.permission-guide-foot p{margin:0}.permission-guide-foot p+p{margin-top:8px}
+@media(max-width:700px){.permission-guide-modes,.permission-guide-groups{grid-template-columns:1fr}.permission-guide-modes{gap:8px}.permission-guide-catalog{padding-inline:12px}}
