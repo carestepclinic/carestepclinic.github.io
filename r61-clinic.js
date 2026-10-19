@@ -541,7 +541,7 @@
             preventive_auto_delivery: '접종·사상충 자동 발송',
             followup_auto_completion: '최종확인 후 자동 완료·초기화',
             guardian_material_delivery: '보호자 자료 즉시 송부',
-            efriends_home_visible_default: '공개 분류된 신규 eFriends 기록 Home 표시'
+            efriends_home_visible_default: 'HOME 연결 환자의 신규 eFriends 기록 자동 공개'
         };
         for (const [key,value] of Object.entries(cfg.flags)) {
             const l = el('label')
@@ -553,6 +553,7 @@
             l.style.display = 'block';
             body.append(l);
         }
+        body.append(el('p', '자동 공개를 켜면 HOME에 연결된 활성 환자의 새 체중·접종·심장사상충·진료 기록이 이후 동기화부터 공개됩니다. 기존 기록의 공개·비공개 설정과 명시적으로 비공개 처리한 기록은 유지됩니다. 병원 내부 메모는 자동 공개하지 않습니다.'));
         body.append(el('p', '접종·사상충 자동발송을 켜면 저장된 예정일과 보호자별 발송 허용 상태를 기준으로 정기 발송합니다. 먼저 대상과 문구를 확인해주세요.'));
         const preventiveMode = el('select');
         preventiveMode.id = 'r61PreventiveChannel';
