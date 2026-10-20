@@ -283,6 +283,7 @@
       journeys:loadPatientJourneysHQ,surveys:loadGuardianSurveyHQ,crm:loadFollowupCrmHQ,content:loadContent,voice:loadVoice,production:loadProductionLaunch,audit:loadAudit})[view];
   }
   async function reloadView(view=currentView){
+    if(!byId('loginOverlay').classList.contains('hidden'))return;
     if(!allowLeave())return;
     const loader=viewLoader(view);if(!loader)return;
     try{
@@ -327,13 +328,15 @@
     if(!table)return;
     table.classList.add('hq-compact-table');
     table.closest('.table-wrap')?.classList.add('hq-compact-wrap');
+    const numericColumns=new Set([...(table.tHead?.rows[0]?.cells||[])].flatMap((cell,i)=>cell.classList.contains('right')?[i]:[]));
     const shown=[...keep.map(i=>labels[i]),'상세'];
-    table.tHead.innerHTML='<tr>'+shown.map(label=>`<th scope="col">${esc(label)}</th>`).join('')+'</tr>';
+    table.dataset.columns=String(shown.length);
+    table.tHead.innerHTML='<tr>'+shown.map((label,i)=>`<th scope="col"${numericColumns.has(keep[i])?' class="right"':''}>${esc(label)}</th>`).join('')+'</tr>';
     for(const row of [...(table.tBodies[0]?.rows||[])]){
       const cells=[...row.cells];if(cells.length!==labels.length){if(cells[0])cells[0].colSpan=shown.length;continue;}
       const name=cells[0].querySelector('button')?.textContent||cells[0].textContent;
-      const identity=cells[0].querySelector('[data-open-onboarding-clinic],[data-cs-clinic],[data-sub-clinic]');
-      const identityAttribute=['data-open-onboarding-clinic','data-cs-clinic','data-sub-clinic'].find(key=>identity?.hasAttribute(key));
+      const identity=cells[0].querySelector('[data-open-onboarding-clinic],[data-cs-clinic],[data-sub-clinic],[data-billing-clinic],[data-report-clinic]');
+      const identityAttribute=['data-open-onboarding-clinic','data-cs-clinic','data-sub-clinic','data-billing-clinic','data-report-clinic'].find(key=>identity?.hasAttribute(key));
       const stateKey=identityAttribute?(table.tBodies[0].id||table.closest('[id]')?.id||'')+':'+identityAttribute+':'+identity.getAttribute(identityAttribute):'';
       const expanded=!!stateKey&&compactExpanded.has(stateKey);
       const detail=document.createElement('td'),disclosure=document.createElement('div'),toggle=document.createElement('button'),list=document.createElement('dl');
@@ -357,7 +360,7 @@
       disclosure.querySelectorAll('.onboarding-step-dots i').forEach(step=>{step.textContent=step.title||step.textContent;});
     }
     const wrap=table.parentElement;wrap.style.removeProperty('overflow');wrap.style.removeProperty('max-height');
-    wrap.classList.add('hq-compact-wrap');wrap.tabIndex=0;wrap.setAttribute('aria-label','병원 목록');
+    wrap.classList.add('hq-compact-wrap');wrap.tabIndex=0;wrap.setAttribute('aria-label',detailLabel+' 목록');
   }
   const originalOnboardingRender=renderOnboardingPortfolio;
   renderOnboardingPortfolio=function(){
@@ -600,7 +603,7 @@
   });};
   runHqQuickClinicSearch=async function(){
     const seq=++quickSequence,q=byId('hqQuickClinicSearch')?.value.trim()||'';
-    if(!q){hideHqQuickResults();return;}
+    if(!q||!byId('loginOverlay').classList.contains('hidden')){hideHqQuickResults();return;}
     const box=byId('hqQuickClinicResults');box.innerHTML='<div class="hq-quick-empty">검색 중…</div>';box.classList.remove('hidden');
     try{const data=await req(`/hq/clinics?q=${encodeURIComponent(q)}&status=all&approval=all`);if(seq!==quickSequence||byId('hqQuickClinicSearch').value.trim()!==q)return;renderHqQuickClinicResults(data.clinics||[],q);}
     catch(e){if(seq!==quickSequence||byId('hqQuickClinicSearch').value.trim()!==q)return;box.innerHTML='<div class="hq-quick-empty">검색하지 못했습니다. 다시 입력해주세요.</div>';}
@@ -1134,6 +1137,121 @@
   byId('onboardingRefresh').onclick=()=>loadOnboardingPortfolio();
   byId('customerSuccessRefresh').onclick=()=>loadCustomerSuccess();
 
+  // Shared presentation for the remaining operational screens.
+  const finalUsageRender=renderUsageBilling,finalReportRender=renderMonthlyOperationsReportsHQ;
+  renderUsageBilling=function(){
+    finalUsageRender();
+    const table=byId('messagingBillingTable').querySelector('table');
+    if(table){for(const i of [5,8])table.tHead.rows[0].cells[i]?.classList.add('right');for(const row of table.tBodies[0].rows)for(const i of [5,8])row.cells[i]?.classList.add('right');
+      compactHqTable(table,['병원','요금제·구독','사용량','채널','발송 상태','예상 원가','추가 사용','정산 상태','월 환산 구독'],[0,2,7,5],'사용·정산 상세');}
+  };
+  renderMonthlyOperationsReportsHQ=function(){
+    finalReportRender();
+    compactHqTable(byId('hqMonthlyReportTable').querySelector('table'),['병원','요금제','패키지','후속 케이스','완료율','문자 성공률','설문 응답률','만족도','위험 케이스','관리 접점'],[0,2,4,8],'운영 지표 상세');
+  };
+  const finalSenderRender=renderSenderOnboarding;
+  renderSenderOnboarding=function(){
+    finalSenderRender();
+    const table=byId('senderOnboardingTable').querySelector('table');if(!table)return;
+    table.classList.add('hq-sender-table','hq-responsive-table');
+    const labels=['병원','신청 발신번호','상태','검토 정보','처리'];
+    table.tHead.innerHTML='<tr>'+labels.map(x=>'<th scope="col">'+esc(x)+'</th>').join('')+'</tr>';
+    for(const row of table.tBodies[0].rows){
+      const cells=[...row.cells];if(cells.length!==6){cells[0].colSpan=5;continue;}
+      const details=document.createElement('details'),summary=document.createElement('summary'),dates=document.createElement('p');
+      summary.textContent='일정·메모 보기';dates.className='muted';dates.append(...cells[3].childNodes);
+      const label=document.createElement('label');label.textContent='검토 메모';const input=cells[4].querySelector('input');
+      input.style.removeProperty('min-width');label.append(input);details.append(summary,dates,label);cells[4].replaceChildren(details);
+      row.replaceChildren(cells[0],cells[1],cells[2],cells[4],cells[5]);
+      [...row.cells].forEach((cell,i)=>cell.dataset.label=labels[i]);
+    }
+    table.parentElement.tabIndex=0;table.parentElement.setAttribute('aria-label','발신번호 신청 목록');
+  };
+  byId('senderSearch').oninput=()=>renderSenderOnboarding();
+  byId('senderStatusFilter').onchange=()=>renderSenderOnboarding();
+  byId('senderAutoFilter').onchange=()=>renderSenderOnboarding();
+  const finalProductionRender=renderProductionLaunch;
+  renderProductionLaunch=function(){
+    const root=byId('productionSecurityChecks'),open=!!root.querySelector('details[open]');
+    finalProductionRender();
+    const checks=[...root.querySelectorAll('.launch-check')],passed=checks.filter(x=>x.classList.contains('pass')),attention=checks.filter(x=>!x.classList.contains('pass'));
+    const summary=document.createElement('p');summary.className='hq-check-summary';
+    summary.textContent=checks.length?`확인 필요 ${attention.length}개 · 정상 ${passed.length}개`:'자동 점검 결과가 없습니다. 새로고침해 확인해주세요.';
+    const details=document.createElement('details'),heading=document.createElement('summary');details.className='hq-passed-checks';details.open=open;
+    heading.textContent=`정상 항목 ${passed.length}개 보기`;details.append(heading,...passed);details.hidden=!passed.length;
+    root.replaceChildren(summary,...attention,details);
+    byId('plReady').textContent=productionLaunch?.goLiveReady?'준비 완료':'확인 필요';
+    byId('plSecurityMeta').textContent=`필수 항목 ${productionLaunch?.security?.criticalPassed||0}/${productionLaunch?.security?.criticalTotal||0}`;
+    byId('plToss').textContent=productionLaunch?.security?.liveToss?'실결제':productionLaunch?.security?.testMode?'시험 결제':'미설정';
+  };
+  const auditActions={
+    'clinic.signup':'병원 가입 신청','clinic.approval':'가입 승인 상태 변경','clinic.update':'병원 설정 변경','clinic.content':'병원별 콘텐츠 설정 변경',
+    'subscription.update':'구독 설정 변경','subscription.canceled':'구독 해지','subscription.channel_changed':'구독 계약 채널 변경','subscription.plan_scheduled':'요금제 변경 예약','subscription.cancel_scheduled':'구독 해지 예약','subscription.cancel_revoked':'구독 해지 예약 취소',
+    'plan.update':'공통 요금제 변경','content.status':'콘텐츠 게시 상태 변경','content.delete':'콘텐츠 삭제','content.category':'콘텐츠 분류 변경','content.category.reset':'콘텐츠 분류 초기화','content.short_bulk_repair':'콘텐츠 일괄 정리',
+    'billing.payment_succeeded':'구독 결제 성공','billing.payment_failed':'구독 결제 실패','billing.method_registered':'결제 수단 등록','billing.messaging_rates':'메시지 원가 단가 변경','billing.overage_final_succeeded':'추가 사용료 정산 완료','billing.test_failure_simulated':'결제 실패 시험 실행',
+    'sender.onboarding.review':'발신번호 신청 검토','voice.status':'병원 요청 처리 상태 변경','integration.calendar.update':'캘린더 연동 설정 변경',
+    'production.checklist.update':'운영 체크리스트 변경','incident.status':'장애 처리 상태 변경','backup.create':'구성백업 생성','backup.restore':'구성백업 복원',
+    'clinic.deletion_requested':'병원 데이터 삭제 요청','clinic.deletion_canceled':'병원 데이터 삭제 요청 취소','clinic.deletion_executed':'병원 데이터 삭제 실행',
+    'journey.auto_sync.publish':'회복관리 자동 동기화 게시','journey.auto_sync.rescan':'회복관리 자동 동기화 재검색','legal.accept':'약관 동의','account.withdraw':'계정 탈퇴',
+    'partner.create':'제휴사 등록','partner.update':'제휴사 설정 변경','partner.api_key.created':'제휴사 API 키 생성','partner.api_key.revoked':'제휴사 API 키 해제','partner.settlement.generated':'제휴 정산 생성','partner.settlement.status':'제휴 정산 상태 변경','onboarding.team_skipped':'직원 초대 단계 건너뛰기'
+  };
+  const auditTargets={clinic:'병원',subscription:'구독',content:'콘텐츠',plan:'요금제',invoice:'청구',payment_method:'결제 수단',incident:'장애',backup:'백업',partner:'제휴사'};
+  const auditFields={from:'변경 전',to:'변경 후',status:'상태',plan:'요금제',planCode:'요금제',clinicName:'병원',title:'자료명',billingCycle:'결제 주기',amountKrw:'금액',priceOverrideKrw:'계약 금액',reviewNote:'검토 메모'};
+  function auditDetail(detail){
+    if(typeof detail==='string'){try{return JSON.parse(detail);}catch{return {};}}
+    return detail&&typeof detail==='object'?detail:{};
+  }
+  function auditDisplay(value,key){
+    if(value===null||value===undefined||value==='')return '미등록';
+    if(typeof value==='boolean')return value?'사용':'사용 안 함';
+    if(typeof value==='object')return '원본 상세에서 확인';
+    if(/Krw$/.test(key)&&safeNumber(value))return won(value);
+    if(['from','to','status'].includes(key))return hqStatusLabel(String(value));
+    if(key==='billingCycle')return ({monthly:'월간',annual:'연간'})[value]||String(value);
+    return String(value);
+  }
+  loadAudit=async function(){
+    const current=latest('audit-read');
+    const d=await req('/hq/audit');if(!current())return;audit=d.events||[];
+    byId('auditList').innerHTML=audit.length?`<div class="table-wrap" tabindex="0" aria-label="운영 감사로그"><table class="table hq-audit-table hq-responsive-table"><thead><tr><th scope="col">시각</th><th scope="col">작업자</th><th scope="col">작업</th><th scope="col">대상</th><th scope="col">변경 내용</th></tr></thead><tbody>${audit.map(x=>{
+      const detail=auditDetail(x.detail),known=auditActions[x.action],summary=Object.entries(auditFields).filter(([key])=>Object.hasOwn(detail,key)).map(([key,label])=>`<div><dt>${label}</dt><dd>${esc(auditDisplay(detail[key],key))}</dd></div>`).join('');
+      const targetName=detail.clinicName||detail.title||x.targetName||'';
+      return `<tr><td data-label="시각">${esc(date(x.createdAt))}</td><td data-label="작업자">${esc(x.actor==='HQ'||!x.actor?'HQ 운영자':x.actor)}</td><td data-label="작업"><b>${esc(known||'운영 작업 · 원본 코드 확인')}</b></td><td data-label="대상">${esc(auditTargets[x.targetType]||'기타 대상')}${targetName?'<br><b>'+esc(targetName)+'</b>':''}</td><td data-label="변경 내용">${summary?'<dl class="hq-audit-summary">'+summary+'</dl>':'<span class="muted">변경 내용은 원본 상세에서 확인하세요.</span>'}<details class="hq-audit-raw"><summary>원본 상세</summary><p>작업 코드: ${esc(x.action)}<br>대상 유형: ${esc(x.targetType)}<br>대상 ID: ${esc(x.targetId)}</p><pre>${esc(typeof x.detail==='string'?x.detail:JSON.stringify(x.detail??{},null,2))}</pre></details></td></tr>`;
+    }).join('')}</tbody></table></div>`:'<div class="empty">기록된 운영 작업이 없습니다.</div>';
+  };
+  byId('auditRefresh').onclick=()=>reloadView('audit');
+  const quickInput=byId('hqQuickClinicSearch'),quickBox=byId('hqQuickClinicResults');
+  quickInput.setAttribute('role','combobox');quickInput.setAttribute('aria-autocomplete','list');quickInput.setAttribute('aria-controls',quickBox.id);quickInput.setAttribute('aria-expanded','false');
+  quickBox.setAttribute('role','listbox');quickBox.setAttribute('aria-label','병원 검색 결과');
+  let quickActive=-1;
+  const quickRenderWithLinks=renderHqQuickClinicResults;
+  renderHqQuickClinicResults=function(rows,q){
+    quickRenderWithLinks(rows,q);quickActive=-1;quickInput.removeAttribute('aria-activedescendant');
+    quickBox.querySelectorAll('[data-quick-clinic]').forEach((button,i)=>{
+      button.id='hqQuickOption'+i;button.setAttribute('role','option');button.setAttribute('aria-selected','false');button.tabIndex=-1;
+      const small=button.querySelector('small'),row=rows[i];if(small&&row)small.textContent=(row.plan||'요금제 미등록')+' · '+hqStatusLabel(row.subscriptionStatus||row.approvalStatus||'미등록');
+    });
+    quickInput.setAttribute('aria-expanded','true');
+  };
+  const quickHideWithSequence=hideHqQuickResults;
+  hideHqQuickResults=function(){quickHideWithSequence();quickActive=-1;quickInput.setAttribute('aria-expanded','false');quickInput.removeAttribute('aria-activedescendant');};
+  quickInput.addEventListener('keydown',event=>{
+    const options=[...quickBox.querySelectorAll('[data-quick-clinic]')];
+    if(quickBox.classList.contains('hidden')||!options.length)return;
+    if(event.key==='ArrowDown'||event.key==='ArrowUp'){
+      event.preventDefault();quickActive=event.key==='ArrowDown'?(quickActive+1)%options.length:(quickActive<0?options.length-1:(quickActive-1+options.length)%options.length);
+      options.forEach((button,i)=>button.setAttribute('aria-selected',String(i===quickActive)));
+      quickInput.setAttribute('aria-activedescendant',options[quickActive].id);options[quickActive].scrollIntoView({block:'nearest'});
+    }else if(event.key==='Enter'&&quickActive>=0){event.preventDefault();options[quickActive].click();}
+    else if(event.key==='Tab')hideHqQuickResults();
+  });
+  const loginOverlay=byId('loginOverlay'),shell=document.querySelector('.shell');
+  function syncAuthenticationPresentation(){
+    const locked=!loginOverlay.classList.contains('hidden');document.body.classList.toggle('hq-auth-locked',locked);shell.inert=locked;
+    byId('hqHeaderTools').inert=locked;byId('hqMenuToggle').disabled=locked;byId('hqToolsToggle').disabled=locked;
+    if(locked){hideHqQuickResults();document.body.classList.remove('hq-menu-open');byId('hqNavBackdrop').hidden=true;}
+  }
+  new MutationObserver(syncAuthenticationPresentation).observe(loginOverlay,{attributes:true,attributeFilter:['class']});syncAuthenticationPresentation();
 
   globalThis.CarestepHqUX={updateActionLayout,won,priceText,changes,latest,allowLeave,restoreRoute,enhanceClinic,setRegion,
     beginClinic(id){const seq=++clinicDetailSequence;setRegion('clinicDetail','loading');byId('clinicDetail').innerHTML='<div class="hq-detail-loading"><p>병원 정보를 불러오는 중입니다.</p><div class="hq-loading-lines" aria-hidden="true"><i></i><i></i><i></i></div></div>';return ()=>seq===clinicDetailSequence&&selectedClinic===id;},
