@@ -1382,7 +1382,7 @@
         return doc;
     }
     async function privatePDF() {
-        const {body, d} = dialog('PDF 원본 · 비공개 CARESTEP HOME')
+        const {body, d} = dialog('PDF 저장·HOME 게시 관리')
           , info = el('p');
         body.append(info);
         let cfg, list, q0;
@@ -1392,7 +1392,7 @@
                 redirect: 'error'
             });
             if (cfg.pdfEnabled !== true || cfg.guardianMaterialEnabled !== true) {
-                info.textContent = 'PDF 첨부 준비 중 · 기능 OFF. 기존 텍스트 자료 송부는 그대로 이용할 수 있습니다.';
+                info.textContent = 'PDF 게시 기능을 사용할 수 없습니다. 기존 텍스트 자료 게시는 계속 이용할 수 있습니다.';
                 return;
             }
             q0 = materialScope('scope-check', 1);
@@ -1461,7 +1461,8 @@
             buttons.preview.disabled = empty || locked || s.sent || !!s.assetId;
             buttons.save.disabled = empty || locked || s.sent || !s.previewed || !!s.assetId;
             buttons.send.disabled = empty || locked || s.sent || s.status !== 'READY_UNSENT';
-            buttons.lookup.disabled = buttons.recover.disabled = empty || uiBusy || s.busy || !s.hasRecovery;
+            buttons.recover.disabled = empty || uiBusy || s.busy || !s.hasRecovery;
+            buttons.recover.textContent = s.pending ? '미확정 저장·게시 결과 조회' : '저장·게시 결과 조회';
             buttons.revoke.disabled = empty || locked || !s.assetId;
         }
         ;
@@ -1472,9 +1473,9 @@
         ;
         const show = result => {
             if (control.state().sent)
-                info.textContent = '이미 전송 완료 · CARESTEP HOME · Delivery ID: ' + (result?.deliveryId || result?.deliveryReceipt?.deliveryId || control.state().deliveryId || '');
+                info.textContent = 'HOME 게시 완료 · 게시 번호: ' + (result?.deliveryId || result?.deliveryReceipt?.deliveryId || control.state().deliveryId || '');
             else if (result)
-                info.textContent = 'PDF 저장 완료 · CARESTEP HOME 미송부';
+                info.textContent = 'PDF 저장 완료 · HOME 미게시';
         }
         ;
         const action = (key, label, fn) => {
@@ -1535,7 +1536,7 @@
             info.textContent = 'PDF 미리보기 완료 · 아직 서버에 저장하지 않았습니다.';
         }
         );
-        action('save', 'HOME 송부 확인 후 PDF 저장', async () => {
+        action('save', 'PDF 비공개 저장', async () => {
             if (!confirm('현재 환자·연결 보호자·자료의 PDF 원본을 비공개 저장합니까? 외부 메시지는 보내지 않습니다.'))
                 return;
             show(await control.upload(true));
@@ -1546,15 +1547,14 @@
                 return;
             const result = await control.attach(true);
             if (result)
-                info.textContent = (result.replayed ? '이미 전송 완료' : '전송 완료') + ' · CARESTEP HOME · Delivery ID: ' + result.deliveryId;
+                info.textContent = (result.replayed ? '기존 HOME 게시 확인' : 'HOME 게시 완료') + ' · 게시 번호: ' + result.deliveryId;
         }
         );
-        action('lookup', '기존 PDF 저장 결과 확인', async () => show(await control.recover()));
-        action('recover', '미확정 저장·게시 결과 조회', async () => show(await control.recover()));
-        action('revoke', '해당 PDF 게시 철회', async () => {
-            const result = await control.revoke(confirm('PDF 접근을 철회합니까? 기존 텍스트·후속관리 기록은 보존합니다.'));
+        action('recover', '저장·게시 결과 조회', async () => show(await control.recover()));
+        action('revoke', 'PDF 공개 철회', async () => {
+            const result = await control.revoke(confirm('이 PDF의 공개를 철회할까요? 이 PDF를 연결한 게시 건의 접근이 차단됩니다. 기존 텍스트·후속관리 기록은 보존합니다.'));
             if (result)
-                info.textContent = '접근 철회 완료 · ' + result.status;
+                info.textContent = 'PDF 공개 철회 완료';
         }
         );
         pick.onchange = () => {
@@ -2010,7 +2010,7 @@
         const afterSend=el('div');afterSend.className='r61-after-send';afterSend.hidden=true;body.append(afterSend);let nextMaterial;if(builder){nextMaterial=button(afterSend,'남은 자료 확인',async()=>{guard();d.close();await sendBuilderMaterials();});nextMaterial.className='btn btn-primary r61-primary';nextMaterial.hidden=true;}button(afterSend,'HOME 복약 일정·알림 등록',async()=>{guard();d.close();await window.carestepOpenMedicationPlans?.();});button(afterSend,'자료 전달 이력',materialHistory);button(afterSend,'출력 화면으로 돌아가기',()=>{d.close();if(typeof go==='function')go('builder');if(typeof setWizardStep==='function')setWizardStep(5);});button(afterSend,'다른 환자 선택',()=>{d.close();choosePatient();});
         const more=el('details');more.className='r61-composer-help';more.append(el('summary','기존 자료·결과 조회·관리'));body.append(more);
         action('recover','중단된 저장·게시 결과 조회',async()=>{if(builder){reviewed.checked=false;stage=2;if(!previewBlob||!builder.item.draft)throw Error('MATERIAL_ORIGINAL_SOURCE_CHANGED');}else revokePreview();const result=await flow.recover();if(builder&&result?.receipt?.sha256&&result.receipt.sha256!==Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await previewBlob.arrayBuffer())),x=>x.toString(16).padStart(2,'0')).join('')){revokePreview();throw Error('MATERIAL_ORIGINAL_SOURCE_CHANGED');}show();},more);
-        extraButtons.push(button(more,'기존 PDF 조회·철회',privatePDF));
+        extraButtons.push(button(more,'PDF 저장·게시 관리',privatePDF));
         if(!builder)extraButtons.push(button(more,'텍스트 자료 게시·이력',materials));
         if(!builder&&admin())extraButtons.push(button(more,'게시용 자료 관리',approveMaterial));
         const changed=()=>{revokePreview();flow.reset();stage=1;info.textContent='내용을 확인한 뒤 PDF 미리보기를 눌러주세요.';controls();};
