@@ -156,3 +156,78 @@
 .output-action-target{min-width:0;display:flex;flex-direction:column;gap:8px}.output-action-target p{margin:0;font-size:12px;line-height:1.6;overflow-wrap:anywhere;color:#405b7b}.output-action-target .btn{margin-top:auto}
 body:has(#builder.view.active-view) #caseContextBar,body:has(#builder.view.active-view) #globalCaseBadge,body:has(#builder.view.active-view) #r61-patient-context .r61-context-details,body:has(#caseContextBar:not(.hidden)) #globalCaseBadge{display:none!important}
 @media(max-width:700px){.template-classification{max-width:none}#templateSelected{flex-wrap:wrap}.readiness-head{align-items:flex-start;gap:10px}.output-action-target .btn{white-space:normal;line-height:1.5}}
+
+/* Billing is an account pane, using the same Clinic controls and reading scale.
+   The legacy billing rules inside the print template do not style the app. */
+@media screen{
+#account [data-account-pane="billing"]{font-family:'Carestep Pretendard','Noto Sans KR',system-ui,sans-serif;font-size:14px;line-height:1.65;color:var(--care-ui-ink,#172d50)}
+#account [data-account-pane="billing"] .account-pane-head{gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:16px}
+#account [data-account-pane="billing"] .account-pane-head h3{font-size:18px;line-height:1.5;font-weight:700}
+#account [data-account-pane="billing"] .account-pane-head p{font-size:13px!important;line-height:1.65;color:var(--care-ui-muted,#435973)}
+#subscriptionBillingPanel{padding:20px;border:1px solid var(--care-ui-line,#d7e1ef);border-radius:var(--care-ui-radius,16px);background:#fff;min-width:0}
+#subscriptionBillingPanel .billing-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}
+#subscriptionBillingPanel .billing-head>div{min-width:0}
+#subscriptionBillingPanel .billing-head h3{font-size:16px!important;line-height:1.5;font-weight:700;margin:0 0 6px!important}
+#subscriptionBillingPanel .billing-head p,#subscriptionBillingPanel .billing-box p{font-size:13px;line-height:1.7;color:var(--care-ui-muted,#435973);margin:0 0 12px;overflow-wrap:anywhere}
+#subscriptionBillingPanel .billing-provider{display:inline-flex;align-items:center;flex-shrink:0;font-size:13px;font-weight:600;line-height:1.5;padding:6px 10px;border-radius:8px;background:#f0f3f8;color:#526178}
+#subscriptionBillingPanel .billing-provider.on{background:#eaf7f1;color:#176b4a}
+#subscriptionBillingPanel .billing-provider.warn{background:#fff6df;color:#805700}
+#subscriptionBillingPanel .billing-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(260px,1fr);gap:16px;align-items:start}
+#subscriptionBillingPanel .billing-box{min-width:0;padding:18px;border:1px solid var(--care-ui-line,#d7e1ef);border-radius:14px;background:#fafbfd}
+#subscriptionBillingPanel .billing-box h4{font-size:16px!important;line-height:1.5;font-weight:700;margin:0 0 10px;color:var(--care-ui-ink,#172d50)}
+#subscriptionBillingPanel .billing-status-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+#subscriptionBillingPanel .billing-mini{min-width:0;border:1px solid var(--care-ui-line,#d7e1ef);border-radius:12px;background:#fff;padding:12px}
+#subscriptionBillingPanel .billing-mini span{display:block;font-size:13px;color:var(--care-ui-muted,#435973);margin-bottom:6px}
+#subscriptionBillingPanel .billing-mini b{display:block;font-size:15px;line-height:1.6;font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#subscriptionBillingPanel .billing-contract-comparison{margin:16px 0;padding:16px;border:1px solid var(--care-ui-line,#d7e1ef);border-radius:12px;background:#f3f7ff}
+#subscriptionBillingPanel .billing-contract-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+#subscriptionBillingPanel .billing-contract-columns>div{min-width:0}
+#subscriptionBillingPanel .billing-contract-columns :is(span,small){display:block;font-size:13px;line-height:1.7;color:var(--care-ui-muted,#435973);overflow-wrap:anywhere}
+#subscriptionBillingPanel .billing-contract-columns strong{display:block;font-size:20px;font-weight:700;line-height:1.5;color:#184a98;margin:8px 0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#subscriptionBillingPanel .billing-contract-comparison p{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--care-ui-line,#d7e1ef)}
+#subscriptionBillingPanel details>summary{cursor:pointer;font-size:14px;font-weight:600;line-height:1.6;min-height:44px;padding:12px 0}
+#subscriptionBillingPanel .billing-catalog-row{font-size:14px;line-height:1.7;padding:12px 0;border-top:1px solid var(--care-ui-line,#d7e1ef)}
+#subscriptionBillingPanel .billing-catalog-row :is(b,span,small){display:block;overflow-wrap:anywhere}
+#subscriptionBillingPanel .billing-catalog-row small{font-size:13px;color:var(--care-ui-muted,#435973)}
+#subscriptionBillingPanel .billing-plan-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:end;margin-top:16px}
+#subscriptionBillingPanel .billing-plan-row>div{min-width:0}
+#subscriptionBillingPanel .field-label{display:block;font-size:13px;font-weight:600;line-height:1.6;margin:0 0 6px}
+#subscriptionBillingPanel :is(.input,.btn){font-family:inherit;font-size:14px!important;line-height:1.5;min-height:44px;border-radius:12px;max-width:100%;box-sizing:border-box}
+#subscriptionBillingPanel .input{width:100%;min-width:0;padding:10px 12px;border:1px solid var(--care-ui-line,#d7e1ef);background:#fff;color:var(--care-ui-ink,#172d50)}
+#subscriptionBillingPanel .btn{font-weight:600;padding:10px 14px;white-space:normal;overflow-wrap:anywhere}
+#subscriptionBillingPanel .btn-primary{background:var(--care-ui-action,#245bdb);color:#fff}
+#subscriptionBillingPanel .btn-secondary{background:#fff;color:#244a8c;border:1px solid var(--care-ui-line,#d7e1ef)}
+#subscriptionBillingPanel .btn-ghost{background:#f2f5fa;color:#435973;border:1px solid transparent}
+#subscriptionBillingPanel .billing-danger{color:#a33a32;border-color:#efcbc7;background:#fff8f7}
+#subscriptionBillingPanel .billing-plan-row>.btn{grid-column:1/-1;justify-self:start}
+#subscriptionBillingPanel .billing-actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+#account [data-account-pane="billing"] .billing-note{font-size:13px;line-height:1.75;color:var(--care-ui-muted,#435973);margin-top:12px;overflow-wrap:anywhere}
+#account [data-account-pane="billing"] .billing-note:empty{display:none}
+#subscriptionBillingPanel #billingPlanPrice{padding:12px 14px;background:#eef3fc;border-radius:10px;color:#244a8c}
+#subscriptionBillingPanel .billing-card{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:14px;border:1px solid var(--care-ui-line,#d7e1ef);border-radius:12px;background:#fff;margin:12px 0}
+#subscriptionBillingPanel .billing-card b{display:block;font-size:15px;font-weight:700}
+#subscriptionBillingPanel .billing-card span{display:block;font-size:13px;line-height:1.7;color:var(--care-ui-muted,#435973);margin-top:4px;overflow-wrap:anywhere}
+#subscriptionBillingPanel .billing-blocked{padding:12px 14px;background:#fff6f5;border:1px solid #efcbc7;border-radius:10px;font-size:14px;line-height:1.7;margin-bottom:16px;color:#8f3932}
+#subscriptionBillingPanel .invoice-list{display:grid;gap:10px;margin-top:12px}
+#subscriptionBillingPanel .invoice-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:14px;border:1px solid var(--care-ui-line,#d7e1ef);border-radius:12px;background:#fff}
+#subscriptionBillingPanel .invoice-row b{font-size:14px;font-weight:600}#subscriptionBillingPanel .invoice-row span{font-size:13px;line-height:1.65;overflow-wrap:anywhere}
+#subscriptionBillingPanel .invoice-status{display:inline-flex;padding:5px 8px;border-radius:8px;font-size:13px;font-weight:600;background:#eef2f7;color:#526178}
+#subscriptionBillingPanel .invoice-status.paid{background:#eaf7f1;color:#176b4a}#subscriptionBillingPanel .invoice-status.failed{background:#fff0ef;color:#a33a32}
+#subscriptionBillingPanel :is(button,input,select,summary):focus-visible{outline:3px solid #84a7ff;outline-offset:3px}
+}
+@media screen and (max-width:1100px){#subscriptionBillingPanel .billing-grid{grid-template-columns:minmax(0,1fr)}}
+@media screen and (max-width:600px){
+#subscriptionBillingPanel{padding:14px}#subscriptionBillingPanel .billing-box{padding:14px}
+#subscriptionBillingPanel .billing-head{flex-direction:column;gap:10px}
+#subscriptionBillingPanel .billing-status-grid{grid-template-columns:minmax(0,1fr)}
+#subscriptionBillingPanel .billing-mini{display:flex;justify-content:space-between;gap:12px;align-items:baseline}#subscriptionBillingPanel .billing-mini span{margin:0;flex-shrink:0}#subscriptionBillingPanel .billing-mini b{text-align:right}
+#subscriptionBillingPanel .billing-contract-columns,#subscriptionBillingPanel .billing-plan-row{grid-template-columns:minmax(0,1fr)}
+#subscriptionBillingPanel .billing-contract-columns>div+div{border-top:1px solid var(--care-ui-line,#d7e1ef);padding-top:14px}
+#subscriptionBillingPanel .billing-plan-row>.btn,#subscriptionBillingPanel .billing-actions>.btn{width:100%}
+#subscriptionBillingPanel .invoice-row{grid-template-columns:minmax(0,1fr) auto}#subscriptionBillingPanel .invoice-row>.btn{grid-column:1/-1}
+}
+@media screen{
+#subscriptionBillingPanel .field-label{font-size:13px!important}
+#subscriptionBillingPanel .invoice-row>div>b,#subscriptionBillingPanel .invoice-row>div>span{display:block}
+#subscriptionBillingPanel .invoice-row>div>span{margin-top:4px;color:var(--care-ui-muted,#435973)}
+}
