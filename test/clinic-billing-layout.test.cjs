@@ -46,3 +46,38 @@ for(const width of [390,900,1440])test(`Clinic billing uses shared typography, b
  await page.locator('#billingContractComparison summary').click();assert.equal(await page.locator('.billing-catalog-row').isVisible(),true);
  if(process.env.HQ_SCREENSHOTS)await page.locator('[data-account-pane="billing"]').screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`clinic-billing-${width}.png`)});
 });
+
+const organization=readFileSync(resolve(root,'clinic-organization.js'),'utf8');
+const management=organization.slice(organization.indexOf(' function mountHospitalManagement(){'),organization.indexOf(' function mount(){'));
+const tabFunction=source.slice(source.indexOf('function setAccountTab('),source.indexOf('function initAccountUx('));
+const accountKeyHandler=source.slice(source.indexOf("    tabs.addEventListener('keydown',e=>"),source.indexOf("    tabs.addEventListener('keydown',e=>")+source.slice(source.indexOf("    tabs.addEventListener('keydown',e=>")).indexOf('\n'));
+for(const width of [390,1440])test(`Hospital management tabs remain readable and preserve controls at ${width}px`,async t=>{
+ const context=await browser.newContext({viewport:{width,height:1000}});t.after(()=>context.close());
+ await context.route('**/*',route=>route.request().url().startsWith(origin)?route.continue():route.abort());
+ const page=await context.newPage();page.setDefaultTimeout(5000);await page.goto(origin);
+ await page.evaluate(()=>{$('appView');function $(id){return document.getElementById(id);}window.$=$;$('appView').classList.remove('hidden');$('loginView').classList.add('hidden');window.ACCOUNT_TABS=new Set(['my','team','billing','security','legal']);window.ACCOUNT_TAB_STORAGE_KEY='test';window.saasMode='demo';});
+ await page.evaluate('(()=>{const global=window;const $=window.$;'+management+'\nmountHospitalManagement();mountHospitalManagement();})()');
+ await page.evaluate('(()=>{'+tabFunction+'\nwindow.setAccountTab=setAccountTab;})()');
+ await page.evaluate('(()=>{const tabs=document.getElementById("accountTabs");'+accountKeyHandler+'})()');
+ assert.equal(await page.locator('#clinicLocalAnalytics').count(),1);assert.equal(await page.locator('#clinicVoiceAdministration').count(),1);
+ assert.equal(await page.locator('#saasNewPassword').count(),1);assert.equal(await page.locator('label[for="saasNewPassword"]').count(),1);
+ for(const view of ['onboarding','settings','account','voice','pilot']){
+  await page.evaluate(view=>{document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active-view',el.id===view));window.scrollTo(0,0);if(view==='account')setAccountTab('my');},view);
+  await page.locator('#'+view).waitFor({state:'visible'});
+  const font=await page.locator('#'+view+' :is(.input,.btn)').first().evaluate(el=>getComputedStyle(el).fontSize);assert.equal(font,'14px',view+' control size');
+  if(view==='onboarding'){const color=await page.locator('#onboardingPercent').evaluate(el=>getComputedStyle(el).color);assert.equal(color,'rgb(67, 89, 115)');}
+  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);assert.ok(overflow<=1,`${view} overflow ${overflow}px`);
+  if(process.env.HQ_SCREENSHOTS)await page.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`clinic-management-${view}-${width}.png`)});
+ }
+ await page.evaluate(()=>{document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active-view',el.id==='pilot'));});
+ assert.equal(await page.locator('#pilotLabel').isVisible(),false);await page.locator('#clinicLocalAnalytics>summary').click();assert.equal(await page.locator('#pilotLabel').isVisible(),true);
+ await page.evaluate(()=>{document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active-view',el.id==='voice'));});
+ assert.equal(await page.locator('#voiceTitle').isVisible(),true);assert.equal(await page.locator('#voiceAdminKey').isVisible(),false);await page.locator('#clinicVoiceAdministration>summary').click();assert.equal(await page.locator('#voiceAdminKey').isVisible(),true);
+ assert.equal(await page.locator('[data-voice-type="condition"]').getAttribute('aria-pressed'),'true');
+ await page.evaluate(()=>{document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active-view',el.id==='account'));setAccountTab('my');document.querySelector('[data-account-tab="team"]').style.display='none';});
+ await page.locator('[data-account-tab="my"]').focus();await page.keyboard.press('ArrowRight');assert.equal(await page.locator('[data-account-tab="billing"]').getAttribute('aria-selected'),'true');
+ for(const tab of ['my','team','billing','security','legal']){
+  await page.evaluate(tab=>setAccountTab(tab),tab);assert.equal(await page.locator(`[data-account-pane="${tab}"]`).isVisible(),true);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'account '+tab+' overflow');
+ }
+});

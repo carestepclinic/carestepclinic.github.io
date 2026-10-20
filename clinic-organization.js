@@ -96,8 +96,37 @@
  function syncNav(){
   const group=$('clinicMaterialNav');if(group){const children=[...group.querySelectorAll('.nav-item')];group.hidden=!children.some(n=>!n.classList.contains('saas-hidden')&&!n.classList.contains('role-ui-hidden'));if(children.some(n=>n.classList.contains('active')))group.open=true;}
  }
+
+ function mountHospitalManagement(){
+  const views=['onboarding','settings','account','voice','pilot'].map($).filter(Boolean);
+  for(const root of views)root.classList.add('clinic-management-view');
+  function fold(root,start,id,title,note){
+   if(!root||!start||$(id))return;
+   const details=document.createElement('details'),summary=document.createElement('summary'),hint=document.createElement('p');
+   details.id=id;details.className='clinic-management-details';summary.textContent=title;hint.className='clinic-management-note';hint.textContent=note;
+   const siblings=[...root.children],index=siblings.indexOf(start);if(index<0)return;
+   root.insertBefore(details,start);details.append(summary,hint,...siblings.slice(index));
+  }
+  const pilot=$('pilot'),legacy=pilot?.querySelector('.legacy-pilot-title');
+  fold(pilot,legacy,'clinicLocalAnalytics','이 브라우저의 시범 사용 통계',
+   '현재 기기에 저장된 사용 기록입니다. 위의 병원 전체 월간 리포트와 집계 범위가 다르며, 다른 기기의 기록은 합산되지 않습니다.');
+  const key=$('voiceAdminKey'),admin=key?.closest('.voice-panel');
+  fold(admin?.parentElement,admin,'clinicVoiceAdministration','CARESTEP 운영자 요청 관리',
+   '접수된 요청을 검토하는 운영자 전용 영역입니다. 병원에서 문의를 보낼 때는 위의 요청 양식을 사용하세요.');
+  for(const [id,title] of [['saasCurrentPassword','현재 비밀번호'],['saasNewPassword','새 비밀번호'],['saasNewPasswordConfirm','새 비밀번호 확인']]){
+   const input=$(id);if(!input||input.closest('label'))continue;
+   const label=document.createElement('label');label.className='clinic-management-field';label.htmlFor=id;label.append(document.createTextNode(title));input.before(label);label.append(input);
+  }
+  const voiceTabs=$('voiceTabs');
+  if(voiceTabs&&!voiceTabs.dataset.managementKeys){
+   voiceTabs.dataset.managementKeys='1';voiceTabs.setAttribute('role','group');voiceTabs.setAttribute('aria-label','요청 종류');
+   const sync=()=>voiceTabs.querySelectorAll('[data-voice-type]').forEach(b=>b.setAttribute('aria-pressed',String(b.classList.contains('active'))));
+   new MutationObserver(sync).observe(voiceTabs,{subtree:true,attributes:true,attributeFilter:['class']});sync();
+  }
+ }
+
  function mount(){
-  mountDashboard();syncNav();
+  mountDashboard();syncNav();mountHospitalManagement();
   const bar=$('r61-controls'),settings=$('settings');if(bar&&settings){settings.insertBefore(bar,$('emrSyncCenter'));bar.setAttribute('aria-label','발송·공개·연동 관리');}
   document.querySelector('.nav-list')&&new MutationObserver(syncNav).observe(document.querySelector('.nav-list'),{subtree:true,attributes:true,attributeFilter:['class']});
   const original=global.crmTimelineOpen;timelineOpen=original;
@@ -107,7 +136,7 @@
    const loaded=workspace?.recordsLoaded;if(showWorkspaceTab('records',patient.id)&&loaded)return original(patient,guardian);
   };
  }
- global.ClinicOrganization={clinicalRows,noticeLabel,updateTodayCounts,ageLabel,recentTemplates,taskPreview,createTabs,organizeWorkspace,showWorkspaceTab,mountDashboard,syncNav};
+ global.ClinicOrganization={clinicalRows,noticeLabel,updateTodayCounts,ageLabel,recentTemplates,taskPreview,createTabs,mountHospitalManagement,organizeWorkspace,showWorkspaceTab,mountDashboard,syncNav};
  if(typeof module!=='undefined')module.exports=global.ClinicOrganization;
  if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();}
 })(typeof window==='undefined'?globalThis:window);

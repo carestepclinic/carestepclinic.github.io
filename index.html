@@ -1043,7 +1043,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="carestep-workflow.css?v=flow-20261017">
   <link rel="stylesheet" href="home-access-clinic.css?v=readable-20261017">
 <link rel="stylesheet" href="carestep-ui.css?v=deployment-check-20261019a">
-<link rel="stylesheet" href="clinic-organization.css?v=billing-20261020a">
+<link rel="stylesheet" href="clinic-organization.css?v=management-20261020a">
 <style>
 .billing-contract-comparison{margin:16px 0;border:1px solid var(--line);border-radius:12px;padding:14px;background:#f8faff;line-height:1.65;font-size:14px}.billing-contract-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.billing-contract-columns span,.billing-contract-columns strong,.billing-contract-columns small{display:block}.billing-contract-columns strong{font-size:19px;margin:5px 0;color:#143d83}.billing-contract-comparison p{font-size:13px}.billing-contract-comparison summary{cursor:pointer;padding:8px 0;font-weight:700}.billing-catalog-row{padding:10px 0;border-top:1px solid var(--line)}.billing-catalog-row b,.billing-catalog-row span,.billing-catalog-row small{display:block}#billingReadStatus[data-state="error"]{color:#9a372d;background:#fff3f0;padding:12px;border-radius:10px}@media(max-width:600px){.billing-contract-columns{grid-template-columns:minmax(0,1fr)}.billing-contract-columns>div+div{border-top:1px solid var(--line);padding-top:12px}}
 </style>
@@ -1880,14 +1880,14 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 
       <section id="voice" class="view">
         <div class="voice-hero">
-          <div><p class="eyebrow">CUSTOMER VOICE · v6.2.2</p><h3>요청질환 · 기능제안 · 고객문의를 한곳에서 받습니다.</h3><p>고객 병원의 요청을 중앙 D1 데이터베이스에 모아 우선순위를 확인하고, 요청질환은 AI Content Studio로 바로 보내 제작을 시작할 수 있습니다. 환자명·보호자명·전화번호·차트번호·진료기록 등 환자 개인정보는 입력하지 않습니다.</p></div>
-          <span class="voice-safe">🔒 NO PATIENT DATA</span>
+          <div><p class="eyebrow">CUSTOMER VOICE · v6.2.2</p><h3>자료 제작 요청 · 기능 제안 · 사용 문의</h3><p>필요한 질환 안내자료나 기능을 요청하고, 서비스 사용 중 궁금한 점을 문의하세요. 환자명·보호자명·전화번호·차트번호·진료기록 등 환자 개인정보는 입력하지 않습니다.</p></div>
+          <span class="voice-safe">환자 개인정보 입력 금지</span>
         </div>
 
         <div class="voice-layout">
           <div>
             <div class="voice-panel">
-              <div class="voice-panel-head"><div><h4>고객 요청 접수</h4><p>같은 질환·기능 요청은 관리자 화면에서 자동 집계되어 수요 순위를 확인할 수 있습니다.</p></div><span class="privacy-badge">D1 CENTRAL INBOX</span></div>
+              <div class="voice-panel-head"><div><h4>문의·요청 작성</h4><p>같은 질환·기능 요청은 관리자 화면에서 자동 집계되어 수요 순위를 확인할 수 있습니다.</p></div><span class="privacy-badge">CARESTEP 요청 접수</span></div>
               <div class="voice-tabs" id="voiceTabs">
                 <button class="voice-tab active" type="button" data-voice-type="condition">요청질환</button>
                 <button class="voice-tab" type="button" data-voice-type="feature">기능제안</button>
@@ -1906,7 +1906,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
                 <input id="voiceWebsite" class="voice-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
               </div>
               <label class="voice-privacy"><input id="voiceNoPatientInfo" type="checkbox" /> <strong>환자 개인정보를 입력하지 않았음을 확인합니다.</strong><br>환자명, 보호자명, 전화번호, 차트번호, 검사결과 원문 등 특정 환자를 식별할 수 있는 정보는 이 요청함에 입력하지 마세요.</label>
-              <div class="voice-submit-row"><button id="voiceSubmit" class="btn btn-primary" type="button">요청 보내기</button><span id="voiceSubmitStatus" class="voice-status">AI Gateway와 같은 Worker URL을 사용합니다.</span></div>
+              <div class="voice-submit-row"><button id="voiceSubmit" class="btn btn-primary" type="button">요청 보내기</button><span id="voiceSubmitStatus" class="voice-status" role="status" aria-live="polite">작성 내용을 확인한 뒤 요청 보내기를 눌러주세요.</span></div>
             </div>
           </div>
 
@@ -1944,14 +1944,14 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
           <div id="monthlyReportExportSurface" class="monthly-report-export-surface">
             <div class="monthly-report-cover"><div><p class="eyebrow">CARESTEP MONTHLY OPERATIONS REPORT</p><h4 id="monthlyReportTitle">월간 운영 리포트</h4><p id="monthlyReportSubtitle">병원 전체 비식별 운영데이터 기준</p></div><div class="monthly-report-brand"><b>CARESTEP</b><span id="monthlyReportGeneratedAt"></span></div></div>
             <div class="monthly-report-kpis">
-              <article><span>퇴원 패키지</span><b id="mrPackages">0</b><small id="mrPackagesSub">생성 건수</small></article>
-              <article><span>후속관리 케이스</span><b id="mrFollowCases">0</b><small>비식별 case key</small></article>
+              <article><span>퇴원 패키지</span><b id="mrPackages">—</b><small id="mrPackagesSub">생성 건수</small></article>
+              <article><span>후속관리 케이스</span><b id="mrFollowCases">—</b><small>등록된 후속관리 건수</small></article>
               <article><span>후속관리 완료율</span><b id="mrFollowCompletion">--</b><small id="mrFollowCompletionSub">등록 업무 대비 결과입력</small></article>
               <article><span>문자 성공률</span><b id="mrMessageSuccess">--</b><small id="mrMessageSub">성공 / 실패</small></article>
               <article><span>보호자 응답률</span><b id="mrSurveyResponse">--</b><small id="mrSurveySub">응답 / 초대</small></article>
               <article><span>평균 만족도</span><b id="mrSatisfaction">--</b><small>5점 기준</small></article>
-              <article class="attention"><span>위험 케이스 발견</span><b id="mrRiskCases">0</b><small id="mrRiskSub">주의·악화·연락요청</small></article>
-              <article><span>보호자 관리 접점</span><b id="mrTouchpoints">0</b><small>문자+보호자응답+결과입력</small></article>
+              <article class="attention"><span>위험 케이스 발견</span><b id="mrRiskCases">—</b><small id="mrRiskSub">주의·악화·연락요청</small></article>
+              <article><span>보호자 관리 접점</span><b id="mrTouchpoints">—</b><small>문자+보호자응답+결과입력</small></article>
             </div>
             <div class="monthly-report-value" id="monthlyReportValue">이번 달 CARESTEP 운영가치를 계산하고 있습니다.</div>
             <div class="monthly-report-compare"><div><p class="eyebrow">MONTH OVER MONTH</p><h4>지난달 대비</h4></div><div id="monthlyReportComparison" class="monthly-comparison-grid"></div></div>
@@ -1965,12 +1965,12 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
           </div>
         </section>
 
-        <div class="legacy-pilot-title"><div><p class="eyebrow">LOCAL PILOT ANALYTICS</p><h4>초기 도입 Pilot 분석</h4><p>아래 지표는 현재 브라우저에 저장되는 초기 도입용 로컬 사용성 분석입니다.</p></div><div class="pilot-head-actions"><button id="exportPilotReport" class="btn btn-secondary" type="button">Pilot Report ZIP</button><button id="exportClinicBackup" class="btn btn-secondary" type="button">병원 설정 백업</button></div></div>
+        <div class="legacy-pilot-title"><div><p class="eyebrow">LOCAL PILOT ANALYTICS</p><h4>시범 사용 분석</h4><p>아래 지표는 현재 브라우저에 저장되는 초기 도입용 로컬 사용성 분석입니다.</p></div><div class="pilot-head-actions"><button id="exportPilotReport" class="btn btn-secondary" type="button">Pilot Report ZIP</button><button id="exportClinicBackup" class="btn btn-secondary" type="button">병원 설정 백업</button></div></div>
 
         <div class="panel pilot-setup-panel">
           <div class="pilot-setup-head"><div><h4>Pilot 기본설정</h4><p>환자정보는 기록하지 않고 목표 건수·기간·사용통계만 이 브라우저에 저장합니다.</p></div><span class="privacy-badge">🔒 환자정보 없음</span></div>
           <div class="pilot-setup-grid"><div><label class="field-label" for="pilotLabel">Pilot 이름</label><input id="pilotLabel" class="input" placeholder="예: 메디스 1차 Pilot" /></div><div><label class="field-label" for="pilotTarget">목표 퇴원건수</label><input id="pilotTarget" class="input" type="number" min="1" max="500" value="20" /></div><div><label class="field-label" for="pilotStart">시작일</label><input id="pilotStart" class="input" type="date" min="1900-01-01" max="2099-12-31" /></div><div><label class="field-label" for="pilotStaffCount">테스트 직원 수</label><input id="pilotStaffCount" class="input" type="number" min="1" max="100" value="1" /></div></div>
-          <div class="pilot-setup-actions"><button id="savePilotSetup" class="btn btn-primary" type="button">Pilot 설정 저장</button><button id="resetPilotAnalytics" class="btn btn-ghost" type="button">통계만 초기화</button></div>
+          <div class="pilot-setup-actions"><button id="savePilotSetup" class="btn btn-primary" type="button">Pilot 설정 저장</button><button id="resetPilotAnalytics" class="btn btn-ghost" type="button">이 브라우저의 시범 통계 초기화</button></div>
         </div>
 
         <div class="pilot-kpi-grid">
@@ -2077,8 +2077,8 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 
       <section id="onboarding" class="view">
         <div class="onboarding-hero">
-          <div><p class="eyebrow">CLINIC ONBOARDING · GO-LIVE CENTER · v10.4-G</p><h3>첫 로그인 후 5분이면 기본 준비를 끝낼 수 있습니다.</h3><p>화면 안내를 따라 병원정보, 팀, 발송, Calendar와 첫 업무 흐름을 확인하세요. 실제 환자정보를 입력하기 전에는 저장되지 않는 샘플 환자로 전체 흐름을 체험할 수 있습니다.</p></div>
-          <div class="onboarding-score"><span>GO-LIVE READINESS</span><div><strong id="onboardingScore">0/6</strong> <span id="onboardingPercent">0%</span></div><div class="onboarding-progress-track"><div id="onboardingProgressFill" class="onboarding-progress-fill" style="width:0%"></div></div><span id="onboardingScoreNote">상태를 확인하는 중입니다.</span></div>
+          <div><p class="eyebrow">CLINIC ONBOARDING · GO-LIVE CENTER · v10.4-G</p><h3>병원 사용 준비 상태를 확인하세요.</h3><p>병원정보·직원·메시지·캘린더 설정과 첫 업무 흐름을 확인하세요. 실제 환자정보를 입력하기 전에는 저장되지 않는 샘플 환자로 전체 흐름을 체험할 수 있습니다.</p></div>
+          <div class="onboarding-score"><span>사용 준비 상태</span><div><strong id="onboardingScore">0/6</strong> <span id="onboardingPercent">0%</span></div><div class="onboarding-progress-track"><div id="onboardingProgressFill" class="onboarding-progress-fill" style="width:0%"></div></div><span id="onboardingScoreNote">상태를 확인하는 중입니다.</span></div>
         </div>
         <div class="onboarding-starter"><div><h4>5분 빠른 시작</h4><p>처음부터 순서대로 보거나, 샘플 환자 ‘코코’로 자료 작성과 후속관리 흐름만 먼저 체험하세요.</p><div class="onboarding-five-min"><div><b>1분 · 병원</b><span>기본정보 저장</span></div><div><b>2분 · 팀</b><span>직원 초대 또는 건너뛰기</span></div><div><b>3분 · 발송</b><span>SOLAPI와 테스트 문자</span></div><div><b>4분 · 일정</b><span>Calendar 쓰기 확인</span></div><div><b>5분 · 체험</b><span>샘플 자료와 후속관리 계획</span></div></div></div><div class="onboarding-starter-actions"><button id="startFiveMinuteGuide" class="btn btn-primary" type="button">5분 가이드 시작</button><button id="startSampleExperience" class="btn btn-secondary" type="button">샘플 환자 체험</button></div></div>
         <div id="onboardingSteps" class="onboarding-grid"><div class="voice-empty">온보딩 상태를 불러오는 중입니다.</div></div>
@@ -2090,14 +2090,14 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 
       <section id="settings" class="view">
         <div class="settings-hub" aria-labelledby="settingsHubTitle">
-          <div class="settings-hub-head"><div><p class="eyebrow">OPERATIONS SETTINGS · v10.6-A</p><h3 id="settingsHubTitle">운영 설정</h3><p>원장·관리자에게만 표시됩니다. 설정 목적을 선택하면 해당 관리 화면으로 바로 이동합니다.</p></div><span id="settingsRoleBadge" class="settings-role-badge">관리 권한</span></div>
+          <div class="settings-hub-head"><div><p class="eyebrow">OPERATIONS SETTINGS · v10.6-A</p><h3 id="settingsHubTitle">병원·연동 설정</h3><p>원장·관리자에게만 표시됩니다. 설정 목적을 선택하면 해당 관리 화면으로 바로 이동합니다.</p></div><span id="settingsRoleBadge" class="settings-role-badge">관리 권한</span></div>
           <div class="settings-category-grid">
             <button class="settings-category-card" type="button" data-settings-action="clinic"><span class="settings-category-icon">병원</span><b>병원 기본정보</b><small>병원명·대표원장·연락처·로고·QR</small><em>이 화면에서 설정 →</em></button>
             <button class="settings-category-card" type="button" data-settings-action="team"><span class="settings-category-icon">직원</span><b>직원·권한</b><small>직원 초대·역할·담당 권한</small><em>계정 관리로 이동 →</em></button>
-            <button class="settings-category-card" type="button" data-settings-action="protocol"><span class="settings-category-icon">예방</span><b>접종·사상충 규칙</b><small>종별 기초접종·Booster·예정일 간격</small><em>이 화면에서 설정 →</em></button>
+            <button class="settings-category-card" type="button" data-settings-action="protocol"><span class="settings-category-icon">예방</span><b>접종·사상충 규칙</b><small>동물종별 기초접종·추가접종·예정일 간격</small><em>이 화면에서 설정 →</em></button>
             <button class="settings-category-card" type="button" data-settings-action="home"><span class="settings-category-icon">HOME</span><b>CARESTEP HOME</b><small>보호자 연결·초대·환자 연결 상태</small><em>환자 관리로 이동 →</em></button>
             <button class="settings-category-card" type="button" data-settings-action="messaging"><span class="settings-category-icon">메시지</span><b>메시지·알림톡</b><small>SOLAPI·발신번호·MMS/LMS·알림톡</small><em>발송 설정으로 이동 →</em></button>
-            <button class="settings-category-card" type="button" data-settings-action="calendar"><span class="settings-category-icon">일정</span><b>Calendar</b><small>Google·Outlook 연결과 자동 일정 등록</small><em>캘린더 설정으로 이동 →</em></button>
+            <button class="settings-category-card" type="button" data-settings-action="calendar"><span class="settings-category-icon">일정</span><b>캘린더 연동</b><small>Google·Outlook 연결과 자동 일정 등록</small><em>캘린더 설정으로 이동 →</em></button>
             <button class="settings-category-card" type="button" data-settings-action="billing"><span class="settings-category-icon">결제</span><b>결제·구독</b><small>플랜·결제수단·사용량·영수증</small><em>계정 관리로 이동 →</em></button>
             <button class="settings-category-card" type="button" data-settings-action="partner"><span class="settings-category-icon">API</span><b>EMR·Partner API</b><small>제휴 채널·EMR 연동·API Key 운영 상태</small><em>연동 안내 보기 →</em></button>
             <button class="settings-category-card" type="button" data-settings-action="emr"><span class="settings-category-icon">EMR</span><b>EMR 동기화</b><small>eFriends 백업·자동 실행·데이터 건수·오류</small><em>동기화 상태 보기 →</em></button>
@@ -2170,15 +2170,15 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
           </div>
           <section class="clinical-protocol" aria-labelledby="clinicalProtocolTitle">
             <div class="clinical-protocol-head"><div><h4 id="clinicalProtocolTitle">접종·사상충 일정 규칙</h4><p>병원 프로토콜에 맞춰 건강 타임라인의 다음 예정일을 자동 계산합니다. 기존 기록의 예정일은 바뀌지 않고 새 기록부터 적용됩니다.</p></div><div class="row-actions"><span id="clinicalProtocolEditLock" class="safety-lock">편집 준비</span><button id="resetClinicalProtocol" class="btn btn-ghost" type="button">기본값</button></div></div>
-            <div class="protocol-table"><div class="protocol-row head"><span>대상</span><span>예방 항목</span><span>기초 접종 간격</span><span>Booster 간격</span></div>
-              <div class="protocol-row"><span class="protocol-species">강아지</span><span class="protocol-name">종합백신</span><label class="protocol-input" data-label="기초 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.dhppl.primary"><span>일</span></label><label class="protocol-input" data-label="Booster"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.dhppl.booster"><span>일</span></label></div>
-              <div class="protocol-row"><span class="protocol-species">강아지</span><span class="protocol-name">코로나백신</span><label class="protocol-input" data-label="기초 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.corona.primary"><span>일</span></label><label class="protocol-input" data-label="Booster"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.corona.booster"><span>일</span></label></div>
-              <div class="protocol-row"><span class="protocol-species">강아지</span><span class="protocol-name">켄넬코프백신</span><label class="protocol-input" data-label="기초 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.kennel.primary"><span>일</span></label><label class="protocol-input" data-label="Booster"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.kennel.booster"><span>일</span></label></div>
-              <div class="protocol-row"><span class="protocol-species">강아지</span><span class="protocol-name">광견병백신</span><label class="protocol-input" data-label="1차 이후"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.rabies.primary"><span>일</span></label><label class="protocol-input" data-label="Booster"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.rabies.booster"><span>일</span></label></div>
-              <div class="protocol-row"><span class="protocol-species">강아지</span><span class="protocol-name">인플루엔자백신</span><label class="protocol-input" data-label="기초 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.influenza.primary"><span>일</span></label><label class="protocol-input" data-label="Booster"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.influenza.booster"><span>일</span></label></div>
-              <div class="protocol-row"><span class="protocol-species">고양이</span><span class="protocol-name">종합백신</span><label class="protocol-input" data-label="기초 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="cat.fvrcp.primary"><span>일</span></label><label class="protocol-input" data-label="Booster"><input class="input" type="number" min="1" max="730" data-protocol-path="cat.fvrcp.booster"><span>일</span></label></div>
-              <div class="protocol-row"><span class="protocol-species">고양이</span><span class="protocol-name">백혈병백신</span><label class="protocol-input" data-label="기초 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="cat.felv.primary"><span>일</span></label><label class="protocol-input" data-label="Booster"><input class="input" type="number" min="1" max="730" data-protocol-path="cat.felv.booster"><span>일</span></label></div>
-              <div class="protocol-row"><span class="protocol-species">고양이</span><span class="protocol-name">광견병백신</span><label class="protocol-input" data-label="1차 이후"><input class="input" type="number" min="1" max="730" data-protocol-path="cat.rabies.primary"><span>일</span></label><label class="protocol-input" data-label="Booster"><input class="input" type="number" min="1" max="730" data-protocol-path="cat.rabies.booster"><span>일</span></label></div>
+            <div class="protocol-table"><div class="protocol-row head"><span>대상</span><span>예방 항목</span><span>기초 접종 간격</span><span>추가접종 간격</span></div>
+              <div class="protocol-row"><span class="protocol-species">강아지</span><span class="protocol-name">종합백신</span><label class="protocol-input" data-label="기초 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.dhppl.primary"><span>일</span></label><label class="protocol-input" data-label="추가접종 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.dhppl.booster"><span>일</span></label></div>
+              <div class="protocol-row"><span class="protocol-species">강아지</span><span class="protocol-name">코로나백신</span><label class="protocol-input" data-label="기초 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.corona.primary"><span>일</span></label><label class="protocol-input" data-label="추가접종 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.corona.booster"><span>일</span></label></div>
+              <div class="protocol-row"><span class="protocol-species">강아지</span><span class="protocol-name">켄넬코프백신</span><label class="protocol-input" data-label="기초 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.kennel.primary"><span>일</span></label><label class="protocol-input" data-label="추가접종 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.kennel.booster"><span>일</span></label></div>
+              <div class="protocol-row"><span class="protocol-species">강아지</span><span class="protocol-name">광견병백신</span><label class="protocol-input" data-label="1차 이후"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.rabies.primary"><span>일</span></label><label class="protocol-input" data-label="추가접종 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.rabies.booster"><span>일</span></label></div>
+              <div class="protocol-row"><span class="protocol-species">강아지</span><span class="protocol-name">인플루엔자백신</span><label class="protocol-input" data-label="기초 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.influenza.primary"><span>일</span></label><label class="protocol-input" data-label="추가접종 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="dog.influenza.booster"><span>일</span></label></div>
+              <div class="protocol-row"><span class="protocol-species">고양이</span><span class="protocol-name">종합백신</span><label class="protocol-input" data-label="기초 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="cat.fvrcp.primary"><span>일</span></label><label class="protocol-input" data-label="추가접종 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="cat.fvrcp.booster"><span>일</span></label></div>
+              <div class="protocol-row"><span class="protocol-species">고양이</span><span class="protocol-name">백혈병백신</span><label class="protocol-input" data-label="기초 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="cat.felv.primary"><span>일</span></label><label class="protocol-input" data-label="추가접종 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="cat.felv.booster"><span>일</span></label></div>
+              <div class="protocol-row"><span class="protocol-species">고양이</span><span class="protocol-name">광견병백신</span><label class="protocol-input" data-label="1차 이후"><input class="input" type="number" min="1" max="730" data-protocol-path="cat.rabies.primary"><span>일</span></label><label class="protocol-input" data-label="추가접종 간격"><input class="input" type="number" min="1" max="730" data-protocol-path="cat.rabies.booster"><span>일</span></label></div>
               <div class="protocol-row"><span class="protocol-species">공통</span><span class="protocol-name">심장사상충 예방</span><label class="protocol-input" data-label="예방 간격"><input class="input" type="number" min="7" max="365" data-protocol-path="heartworm.interval"><span>일</span></label><span class="protocol-status">매 기록일 기준 자동 계산</span></div>
             </div>
             <div class="settings-actions"><button id="saveClinicalProtocol" class="btn btn-secondary" type="button">일정 규칙 저장</button><span id="clinicalProtocolStatus" class="protocol-status">규칙을 불러오는 중입니다.</span></div>
@@ -4307,7 +4307,7 @@ function initAccountUx(){
   if(tabs&&!tabs.dataset.bound){
     tabs.dataset.bound='1';
     tabs.addEventListener('click',e=>{const b=e.target.closest('[data-account-tab]');if(!b||!tabs.contains(b))return;e.preventDefault();setAccountTab(b.dataset.accountTab);});
-    tabs.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;const visible=[...tabs.querySelectorAll('[data-account-tab]')].filter(b=>!b.classList.contains('ux-role-hidden'));if(!visible.length)return;const cur=Math.max(0,visible.findIndex(b=>b.classList.contains('active')));let i=cur;if(e.key==='ArrowRight')i=(cur+1)%visible.length;else if(e.key==='ArrowLeft')i=(cur-1+visible.length)%visible.length;else if(e.key==='Home')i=0;else i=visible.length-1;e.preventDefault();setAccountTab(visible[i].dataset.accountTab);visible[i].focus();});
+    tabs.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;const visible=[...tabs.querySelectorAll('[data-account-tab]')].filter(b=>!b.disabled&&b.getClientRects().length);if(!visible.length)return;const cur=Math.max(0,visible.findIndex(b=>b.classList.contains('active')));let i=cur;if(e.key==='ArrowRight')i=(cur+1)%visible.length;else if(e.key==='ArrowLeft')i=(cur-1+visible.length)%visible.length;else if(e.key==='Home')i=0;else i=visible.length-1;e.preventDefault();setAccountTab(visible[i].dataset.accountTab);visible[i].focus();});
   }
   const account=$('account');if(account&&!account.dataset.quickBound){account.dataset.quickBound='1';account.addEventListener('click',e=>{const b=e.target.closest('[data-account-open-tab]');if(!b||!account.contains(b))return;setAccountTab(b.dataset.accountOpenTab,b.dataset.accountFocus||'');});}
   let saved='my';try{saved=localStorage.getItem(ACCOUNT_TAB_STORAGE_KEY)||'my';}catch{}setAccountTab(saved);
@@ -10394,6 +10394,6 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-read-flow.js?v=flow-20261017"></script>
 <script src="home-access-clinic.js?v=clarity-20261020f"></script>
 <script src="clinic-care.js?v=clarity-20261020g"></script>
-<script src="clinic-organization.js?v=clarity-20261020f"></script>
+<script src="clinic-organization.js?v=management-20261020a"></script>
 </body>
 </html>

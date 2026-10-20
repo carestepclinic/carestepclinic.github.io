@@ -231,3 +231,93 @@ body:has(#builder.view.active-view) #caseContextBar,body:has(#builder.view.activ
 #subscriptionBillingPanel .invoice-row>div>b,#subscriptionBillingPanel .invoice-row>div>span{display:block}
 #subscriptionBillingPanel .invoice-row>div>span{margin-top:4px;color:var(--care-ui-muted,#435973)}
 }
+
+/* Hospital management: one screen-only reading scale across the five destinations. */
+@media screen{
+:is(#onboarding,#settings,#account,#voice,#pilot).clinic-management-view{font-family:'Carestep Pretendard','Noto Sans KR',system-ui,sans-serif;font-size:14px;line-height:1.65;color:var(--care-ui-ink,#172d50);min-width:0}
+.clinic-management-view :is(.panel,.voice-panel,.settings-hub,.onboarding-starter,.monthly-report-panel){border:1px solid var(--care-ui-line,#d7e1ef);border-radius:16px;min-width:0}
+:is(#onboarding,#settings,#account,#voice,#pilot).clinic-management-view :is(p,small,.muted,.field-label,.account-role-note,.saas-cloud-note,.saas-invite-result,.saas-pilot-warning,.saas-member,.saas-member span,.saas-member small,.voice-status,.voice-empty,.voice-card p,.voice-card small,.monthly-report-foot,.report-empty,.protocol-status,.image-size-guide span,.image-size-guide small,.emr-sync-private,.service-pill,.settings-role-badge){font-size:13px!important;line-height:1.7!important;overflow-wrap:anywhere}
+:is(#onboarding,#settings,#account,#voice,#pilot).clinic-management-view :is(h3,h4){font-size:16px!important;line-height:1.5!important;font-weight:700;overflow-wrap:anywhere}
+.clinic-management-view :is(.onboarding-hero,.saas-account-hero,.voice-hero){background:#f3f7ff;color:var(--care-ui-ink,#172d50);border:1px solid var(--care-ui-line,#d7e1ef);border-radius:16px;padding:20px;gap:20px}
+:is(#onboarding,#account,#voice).clinic-management-view :is(.onboarding-hero,.saas-account-hero,.voice-hero) h3{font-size:22px!important;line-height:1.4!important}
+.clinic-management-view :is(.onboarding-hero,.saas-account-hero,.voice-hero) p{color:var(--care-ui-muted,#435973)!important}
+.clinic-management-view :is(.voice-hero,.onboarding-hero,.saas-account-hero) .eyebrow{display:none}
+:is(#onboarding,#settings,#account,#voice,#pilot).clinic-management-view :is(button,.btn,.input,input.input,select.input,textarea.input){font-family:inherit;font-size:14px!important;line-height:1.5;min-height:44px;border-radius:12px;box-sizing:border-box;max-width:100%;min-width:0}
+.clinic-management-view :is(button,.btn){font-weight:600;white-space:normal;overflow-wrap:anywhere}
+.clinic-management-view :is(input.input,select.input,textarea.input){padding:10px 12px;border-color:var(--care-ui-line,#d7e1ef);color:var(--care-ui-ink,#172d50);background:#fff}
+.clinic-management-view textarea.input{min-height:120px;resize:vertical}
+.clinic-management-view :is(input[type="checkbox"],input[type="radio"]){width:18px;height:18px;flex-shrink:0;accent-color:var(--care-ui-action,#245bdb)}
+.clinic-management-view :is(button,input,select,textarea,summary,a):focus-visible{outline:3px solid #84a7ff;outline-offset:3px}
+.clinic-management-view :is(.account-tabs,.voice-tabs){gap:8px;padding:6px;background:#f0f4fa;border:1px solid var(--care-ui-line,#d7e1ef);border-radius:12px}
+.clinic-management-view :is(.account-tab,.voice-tab){font-size:14px!important;min-height:44px;padding:10px 14px;font-weight:600}
+.clinic-management-view :is(.account-tab.active,.voice-tab.active){color:#174ba8;background:#fff;box-shadow:0 1px 4px #172d5012}
+#voice.clinic-management-view .voice-layout{grid-template-columns:minmax(0,1fr)}
+#voice.clinic-management-view .voice-panel{padding:20px;background:#fff}
+#voice.clinic-management-view .voice-form-grid{gap:16px}
+#voice.clinic-management-view .voice-privacy{font-size:13px;line-height:1.7;padding:14px;display:block}
+#voice.clinic-management-view .voice-submit-row{flex-wrap:wrap;gap:12px}
+.clinic-management-details{border:1px solid var(--care-ui-line,#d7e1ef);border-radius:14px;padding:0 16px;margin:18px 0;background:#fff;min-width:0}
+.clinic-management-details>summary{cursor:pointer;min-height:48px;padding:13px 0;font-size:15px;font-weight:600;line-height:1.6}
+.clinic-management-details[open]>summary{border-bottom:1px solid var(--care-ui-line,#d7e1ef);margin-bottom:12px}
+.clinic-management-note{padding:12px;background:#f3f7ff;border-radius:10px;color:var(--care-ui-muted,#435973)}
+.clinic-management-field{display:grid;gap:6px;font-size:13px;line-height:1.6;min-width:0}
+#account.clinic-management-view :is(.saas-account-grid,.saas-password-grid){gap:16px}
+#account.clinic-management-view .account-pane-head{gap:16px;flex-wrap:wrap}
+#account.clinic-management-view .account-ux-card{padding:18px}
+#account.clinic-management-view .account-ux-summary span,#account.clinic-management-view .account-ux-summary small,#account.clinic-management-view .account-quick-btn span{font-size:13px;line-height:1.65}
+#account.clinic-management-view .account-quick-btn b{font-size:15px;font-weight:600}
+#account.clinic-management-view :is(.saas-session,.saas-diag-row,.saas-member,.member-permission-note,.permission-guide-foot){font-size:13px!important;line-height:1.7!important;padding-block:10px}
+#account.clinic-management-view :is(.saas-permission-table th,.saas-permission-table td){font-size:13px!important;line-height:1.65;padding:10px;text-align:left}
+#settings.clinic-management-view .settings-category-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr));gap:12px}
+#settings.clinic-management-view .settings-category-card{padding:16px;text-align:left}
+#settings.clinic-management-view .settings-category-card b{font-size:16px;line-height:1.5;font-weight:700}
+#settings.clinic-management-view .settings-category-card :is(small,em){font-size:13px;line-height:1.65;font-style:normal}
+#settings.clinic-management-view :is(.settings-actions,.emr-sync-head,.settings-hub-head){flex-wrap:wrap;gap:12px}
+#settings.clinic-management-view :is(.emr-sync-stat span,.emr-sync-stat small,.emr-sync-reason,.emr-sync-section,.protocol-row,.toggle-row){font-size:13px;line-height:1.7}
+#settings.clinic-management-view .settings-actions{margin-top:18px}
+#settings.clinic-management-view :is(.panel,.clinical-protocol,#r61-controls){scroll-margin-top:100px}
+#onboarding.clinic-management-view :is(.onboarding-step,.onboarding-starter,.onboarding-payment){padding:18px}
+#onboarding.clinic-management-view .onboarding-five-min{gap:10px}
+#onboarding.clinic-management-view .onboarding-five-min :is(b,span){font-size:13px;line-height:1.65}
+#onboarding.clinic-management-view .onboarding-score :is(span,#onboardingScoreNote){font-size:13px;line-height:1.6}
+#pilot.clinic-management-view .monthly-report-kpis{grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:12px}
+#pilot.clinic-management-view .monthly-report-kpis :is(span,small){font-size:13px;line-height:1.65}
+#pilot.clinic-management-view .monthly-report-kpis b{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+#pilot.clinic-management-view :is(.monthly-mini-table th,.monthly-mini-table td){font-size:13px!important;line-height:1.65;padding:10px}
+#pilot.clinic-management-view :is(.monthly-report-toolbar,.pilot-head-actions){flex-wrap:wrap;gap:12px}
+#pilot.clinic-management-view .monthly-report-toolbar input{min-width:170px}
+#pilot.clinic-management-view .monthly-report-grid>*{min-width:0}
+#pilot.clinic-management-view :is(.monthly-report-card,.monthly-report-panel){overflow-wrap:anywhere}
+#pilot.clinic-management-view .monthly-report-card:has(table){overflow-x:auto}
+.clinic-management-view .clinic-management-details [style*="font-size"]{font-size:13px!important;line-height:1.65!important}
+}
+@media screen and (max-width:760px){
+#account.clinic-management-view :is(.saas-account-grid,.saas-password-grid),#voice.clinic-management-view .voice-form-grid{grid-template-columns:minmax(0,1fr)}
+#voice.clinic-management-view .voice-form-grid>.span-2{grid-column:1}
+#pilot.clinic-management-view .monthly-report-grid{grid-template-columns:minmax(0,1fr)}
+#onboarding.clinic-management-view .onboarding-hero{flex-direction:column;align-items:stretch}
+#onboarding.clinic-management-view .onboarding-score{min-width:0;width:100%}
+.clinic-management-view :is(.voice-hero,.saas-account-hero){flex-wrap:wrap;padding:16px}
+#voice.clinic-management-view .voice-panel,#account.clinic-management-view .account-ux-card{padding:14px}
+#voice.clinic-management-view .voice-submit-row>.btn{width:100%}
+#account.clinic-management-view .account-tabs{overflow-x:auto;flex-wrap:nowrap}
+#account.clinic-management-view .account-tab{flex:0 0 auto;min-width:108px}
+.clinic-management-details{padding-inline:12px}
+}
+@media screen{
+.clinic-management-view .eyebrow{display:none}
+#settings.clinic-management-view #settingsHubTitle,#pilot.clinic-management-view>.section-head h3{font-size:22px!important;line-height:1.4!important}
+.clinic-management-view :is(p,small){font-weight:400}
+.clinic-management-view :is(.voice-safe,.privacy-badge,.status-badge,.ai-conn-badge,.emr-sync-badge,.safety-lock){font-size:13px!important;line-height:1.6;font-weight:600}
+#account.clinic-management-view .info-box strong{font-size:15px;font-weight:700}
+#account.clinic-management-view .info-box span{font-size:13px;line-height:1.65}
+#settings.clinic-management-view .settings-category-card small{font-weight:400}
+}
+@media screen{
+#onboarding.clinic-management-view .onboarding-score{background:#fff;border-color:var(--care-ui-line,#d7e1ef);color:var(--care-ui-ink,#172d50)}
+#onboarding.clinic-management-view .onboarding-score span{font-size:13px!important;color:var(--care-ui-muted,#435973)}
+#onboarding.clinic-management-view .onboarding-progress-track{background:#dce6f6}
+#onboarding.clinic-management-view .onboarding-progress-fill{background:var(--care-ui-action,#245bdb)}
+#onboarding.clinic-management-view :is(.onboarding-payment b,.onboarding-admin-grid b){font-size:15px;line-height:1.6}
+#onboarding.clinic-management-view :is(.onboarding-payment span,.onboarding-admin-grid span,.onboarding-privacy,.onboarding-complete){font-size:13px!important;line-height:1.7}
+}
