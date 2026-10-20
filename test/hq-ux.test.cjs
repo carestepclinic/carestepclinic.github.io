@@ -193,8 +193,8 @@ test('compact header opens an accessible mobile menu and restores content focus 
  await p.keyboard.press('Escape');assert.equal(await p.locator('#nav').isVisible(),false);
  assert.equal(await p.evaluate(()=>document.activeElement.id),'hqMenuToggle');
  await p.locator('#hqMenuToggle').click();await p.locator('#nav [data-view="onboarding"]').click();
- assert.equal(await p.locator('#nav').isVisible(),false);assert.equal(await p.locator('#hqCurrentView').innerText(),'개통 센터');
- assert.equal(await p.evaluate(()=>document.activeElement.textContent),'개통 센터');
+ assert.equal(await p.locator('#nav').isVisible(),false);assert.equal(await p.locator('#hqCurrentView').innerText(),'병원 개통·설정');
+ assert.equal(await p.evaluate(()=>document.activeElement.textContent),'병원 개통·설정');
  await p.locator('#hqToolsToggle').click();assert.equal(await p.locator('#hqQuickClinicSearch').isVisible(),true);
  assert.equal(await p.locator('#refresh').innerText(),'현재 화면 새로고침');
  await p.keyboard.press('Escape');assert.equal(await p.locator('#hqQuickClinicSearch').isVisible(),false);
@@ -932,7 +932,7 @@ test('next-step buttons open the selected hospital pane and return to the source
  await p.locator('.hq-contract-summary').waitFor();
  assert.match(await p.locator('.detail-title h2').innerText(),/A$/);
  assert.equal(await p.locator('#hqClinicTab-subscription').getAttribute('aria-selected'),'true');
- await p.getByRole('button',{name:'병원 도입 현황 · 돌아가기',exact:true}).click();
+ await p.getByRole('button',{name:'병원 사용·정착 현황 · 돌아가기',exact:true}).click();
  await p.locator('[data-cs-action-clinic="A"]').waitFor();
  assert.equal(await p.locator('#customerSuccessSearch').inputValue(),'구독');
  assert.equal(await p.locator('#customerSuccessStatus').inputValue(),'risk');
@@ -941,7 +941,7 @@ test('next-step buttons open the selected hospital pane and return to the source
   await p.locator('[data-cs-action-clinic="'+id+'"]').click();
   await p.locator('#hqClinicTab-'+pane+'[aria-selected="true"]').waitFor();
   assert.match(await p.locator('.detail-title h2').innerText(),new RegExp(id+'$'));
-  await p.getByRole('button',{name:'병원 도입 현황 · 돌아가기',exact:true}).click();
+  await p.getByRole('button',{name:'병원 사용·정착 현황 · 돌아가기',exact:true}).click();
   await p.locator('[data-cs-action-clinic="'+id+'"]').waitFor();
  }
  assert.equal(await p.evaluate(()=>writes.length),0);
@@ -1140,4 +1140,22 @@ for(const width of [390,1280])test(`refined sender, audit and production screens
   if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`hq-refined-${view}-${width}.png`),fullPage:true});
  }
  assert.equal(await p.evaluate(()=>writes.length),0);
+});
+
+test('monthly rates distinguish zero percent from missing data',async t=>{
+ const p=await fixture(t);
+ await p.evaluate(()=>{monthlyOperationsReports={totals:{},rows:[{clinicId:'A',clinicName:'실제 0',followupCompletionRate:0,messageSuccessRate:0,surveyResponseRate:0},{clinicId:'B',clinicName:'대상 없음',followupCompletionRate:null,messageSuccessRate:null,surveyResponseRate:null}]};renderMonthlyOperationsReportsHQ();});
+ const text=await p.locator('#hqMonthlyReportTable').textContent();
+ assert.equal((text.match(/0\.0%/g)||[]).length,3);
+ assert.equal((text.match(/집계 대상 없음/g)||[]).length,3);
+});
+test('production and integration failures retain a persistent error and retry',async t=>{
+ const p=await fixture(t);
+ await p.evaluate(()=>{req=async()=>{throw Error('시험 연결 실패');};showView('production');});
+ await p.waitForFunction(()=>document.querySelector('#production .hq-load-status')?.textContent.includes('조회하지 못했습니다'));
+ assert.match(await p.locator('#production .hq-load-status').innerText(),/이전 결과/);
+ assert.equal(await p.locator('#production .hq-load-status button').innerText(),'다시 시도');
+ await p.evaluate(()=>showView('integrations'));
+ await p.waitForFunction(()=>document.querySelector('#integrations .hq-load-status')?.textContent.includes('조회하지 못했습니다'));
+ assert.equal(await p.locator('#integrations .hq-load-status button').innerText(),'다시 시도');
 });

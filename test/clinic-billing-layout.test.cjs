@@ -59,6 +59,10 @@ for(const width of [390,1440])test(`Hospital management tabs remain readable and
  await page.evaluate('(()=>{const global=window;const $=window.$;'+management+'\nmountHospitalManagement();mountHospitalManagement();})()');
  await page.evaluate('(()=>{'+tabFunction+'\nwindow.setAccountTab=setAccountTab;})()');
  await page.evaluate('(()=>{const tabs=document.getElementById("accountTabs");'+accountKeyHandler+'})()');
+ await page.evaluate(()=>{document.getElementById('hospitalName').dispatchEvent(new Event('input',{bubbles:true}));});
+ assert.equal(await page.locator('#saveHospitalScope').getAttribute('data-dirty'),'true');
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('carestep:clinical-protocol-updated')));
+ assert.equal(await page.locator('#saveClinicalProtocolScope').getAttribute('data-dirty'),'false');
  assert.equal(await page.locator('#clinicLocalAnalytics').count(),1);assert.equal(await page.locator('#clinicVoiceAdministration').count(),1);
  assert.equal(await page.locator('#saasNewPassword').count(),1);assert.equal(await page.locator('label[for="saasNewPassword"]').count(),1);
  for(const view of ['onboarding','settings','account','voice','pilot']){

@@ -321,3 +321,17 @@ body:has(#builder.view.active-view) #caseContextBar,body:has(#builder.view.activ
 #onboarding.clinic-management-view :is(.onboarding-payment b,.onboarding-admin-grid b){font-size:15px;line-height:1.6}
 #onboarding.clinic-management-view :is(.onboarding-payment span,.onboarding-admin-grid span,.onboarding-privacy,.onboarding-complete){font-size:13px!important;line-height:1.7}
 }
+
+@media screen {
+ #clinicHomePrimary .work-first-section-head span,#clinicHomePrimary .work-recent-item span,
+ #clinicHomePrimary .care-task-when,#patients .clinic-patient-cell small,
+ #patients .clinic-patient-cell .clinic-home-status,#patients .patient-workspace-kpis span,
+ #patients .patient-workspace-kpis small,#patients .patient-workspace-row span,
+ #patients .patient-workspace-row small,#patients .patient-workspace-fast-buttons small,
+ #patients .clinic-workspace-home .guardian-summary span,#patients .patient-search-recent-item>button,
+ #patients .patient-search-recent-item>button span,.care-home-overview [data-overview-status]{font-size:13px;line-height:1.65}
+ #navFollowupBadge{font-size:12px}
+ .clinic-save-scope{font-size:13px;line-height:1.6;color:#425a78;margin:10px 0}
+ .clinic-save-scope[data-dirty="true"]{color:#8a4b00;font-weight:700}
+ #monthlyReportExportSurface[hidden]{display:none!important}
+}

@@ -242,7 +242,7 @@
   }
   async function region(id,fetchData,commit,retry){
     const isLatest=latest(id);setRegion(id,'loading');
-    try{const data=await fetchData();if(!isLatest())return;commit(data);setRegion(id,'ready');return true;}
+    try{const data=await fetchData();if(!isLatest())return;if(data===false||(Array.isArray(data)&&data.includes(false)))throw Error('최신 정보를 불러오지 못했습니다. 표시된 수치는 이전 결과일 수 있습니다.');commit(data);setRegion(id,'ready');return true;}
     catch(error){if(!isLatest())return;setRegion(id,'error',{error:error.message,retry});return false;}
   }
   function billingLayout(){
@@ -612,6 +612,7 @@
   hideHqQuickResults=function(){quickSequence++;originalHide();};
   byId('hqQuickClinicSearch')?.addEventListener('input',()=>{quickSequence++;if(!byId('hqQuickClinicSearch').value.trim())hideHqQuickResults();});
   byId('refresh').onclick=()=>reloadView();
+  for(const [id,view] of [['integrationRefresh','integrations'],['refreshMessagingIntegration','integrations'],['productionRefresh','production']])if(byId(id))byId(id).onclick=()=>reloadView(view);
   byId('billingRefresh').onclick=()=>{if(allowLeave())loadBilling();};
   byId('hqPaymentRefresh').onclick=()=>{if(allowLeave())loadPaymentAutomation();};
   window.addEventListener('beforeunload',event=>{if(hasDirty()||activeSave){event.preventDefault();event.returnValue='';}});
@@ -1147,7 +1148,7 @@
   };
   renderMonthlyOperationsReportsHQ=function(){
     finalReportRender();
-    compactHqTable(byId('hqMonthlyReportTable').querySelector('table'),['병원','요금제','패키지','후속 케이스','완료율','문자 성공률','설문 응답률','만족도','위험 케이스','관리 접점'],[0,2,4,8],'운영 지표 상세');
+    compactHqTable(byId('hqMonthlyReportTable').querySelector('table'),['병원','요금제','보호자 안내자료','후속 케이스','완료율','문자 성공률','설문 응답률','만족도','위험 케이스','관리 접점'],[0,2,4,8],'운영 지표 상세');
   };
   const finalSenderRender=renderSenderOnboarding;
   renderSenderOnboarding=function(){

@@ -117,6 +117,16 @@
    const input=$(id);if(!input||input.closest('label'))continue;
    const label=document.createElement('label');label.className='clinic-management-field';label.htmlFor=id;label.append(document.createTextNode(title));input.before(label);label.append(input);
   }
+  function saveScope(id,inputs,copy,successEvent){
+   const button=$(id);if(!button||$(id+'Scope'))return;
+   const note=document.createElement('p');note.id=id+'Scope';note.className='clinic-save-scope';note.setAttribute('role','status');note.textContent=copy;button.parentElement.before(note);
+   const clean=()=>{note.dataset.dirty='false';note.textContent=copy;};
+   for(const input of inputs)input.addEventListener('input',()=>{note.dataset.dirty='true';note.textContent='저장하지 않은 변경사항이 있습니다. '+copy;});
+   if(successEvent)window.addEventListener(successEvent,clean);
+   else button.addEventListener('click',()=>{if($('hospitalName')?.value.trim())clean();});
+  }
+  saveScope('saveHospital',['hospitalName','directorName','hospitalPhone','hospitalAddress','hospitalWebsite'].map($).filter(Boolean),'병원정보 저장은 병원 기본정보에 적용됩니다. 접종·사상충 일정 규칙은 별도로 저장하세요.');
+  saveScope('saveClinicalProtocol',[...document.querySelectorAll('[data-protocol-path]')],'일정 규칙 저장은 접종·사상충 간격에만 적용됩니다. 병원 기본정보는 별도로 저장하세요.','carestep:clinical-protocol-updated');
   const voiceTabs=$('voiceTabs');
   if(voiceTabs&&!voiceTabs.dataset.managementKeys){
    voiceTabs.dataset.managementKeys='1';voiceTabs.setAttribute('role','group');voiceTabs.setAttribute('aria-label','요청 종류');
