@@ -42,11 +42,133 @@ async function fixture(t,width=1280){
       if(path.startsWith('/hq/reports/monthly'))return {totals:{packageGenerations:3},rows:[]};
       return {};
     };
-    req=baseReq;loadOverview=async()=>{};window.confirm=()=>false;
+    req=baseReq;window.realOverview=loadOverview;loadOverview=async()=>{};window.confirm=()=>false;
   });
   return page;
 }
 async function billing(page){await page.evaluate(()=>showView('billing'));await page.locator('.plan-card').first().waitFor({state:'attached'});await page.waitForFunction(()=>document.getElementById('hqPaymentProvider').textContent==='정상');}
+test('dashboard keeps its current title after loading and places work before collapsed statistics',async t=>{
+ const p=await fixture(t,390);
+ await p.evaluate(async()=>{
+  req=(path,o)=>path==='/hq/overview'?Promise.resolve({clinics:{pending:2},subscriptions:{},people:{},usage:{},content:{},voice:{},recentClinics:[],generatedAt:new Date().toISOString()}):baseReq(path,o);
+  loadHqDeploymentStatus=async()=>{};showView('dashboard');await realOverview();
+ });
+ assert.equal(await p.locator('#hqCurrentView').innerText(),'대시보드');
+ assert.equal(await p.locator('#hqOverviewMetrics').evaluate(el=>el.open),false);
+ assert.equal(await p.locator('#hqDashboardDiagnostics').evaluate(el=>el.open),false);
+ assert.equal(await p.locator('#kPending').isVisible(),false);
+ assert.ok(await p.locator('.approval-center').evaluate(el=>el.getBoundingClientRect().top<200));
+ await p.locator('#hqOverviewMetrics>summary').click();assert.equal(await p.locator('#kPending').innerText(),'2');
+ await p.locator('#hqOverviewMetrics>summary').click();
+ await p.evaluate(()=>{document.activeElement.blur();scrollTo(0,0);});
+ if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,'hq-next-dashboard-390.png'),fullPage:true});
+ assert.equal(await p.evaluate(()=>writes.length),0);
+});
+test('action center resolves regions independently, never shows a pending zero, and ignores stale responses',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>{
+  window.actionPending=[];
+  req=path=>new Promise((resolve,reject)=>actionPending.push({path,resolve,reject}));
+  window.actionRun1=loadHqActionCenter();
+ });
+ assert.equal(await p.locator('#acClinicPending').innerText(),'확인 중');
+ assert.equal(await p.locator('#acPaymentFailed').innerText(),'확인 중');
+ await p.evaluate(()=>actionPending.find(x=>x.path.includes('/hq/clinics?')).resolve({clinics:[{},{}]}));
+ await p.waitForFunction(()=>document.getElementById('acClinicPending').textContent==='2');
+ assert.equal(await p.locator('#acPaymentFailed').innerText(),'확인 중');
+ await p.evaluate(()=>{
+  window.actionRun2=loadHqActionCenter();
+  for(const task of actionPending.slice(10))task.path==='/hq/payments/overview'?task.reject(Error('시험 결제 조회 실패')):task.resolve(task.path.includes('/hq/clinics?')?{clinics:[{}]}:{ok:true,db:true,platform:{oauthAppConfigured:true}});
+ });
+ await p.evaluate(()=>actionRun2);
+ assert.equal(await p.locator('#acClinicPending').innerText(),'1');
+ assert.equal(await p.locator('#acPaymentFailed').innerText(),'확인 필요');
+ assert.equal(await p.locator('#acTotalPending').innerText(),'일부 조회 실패');
+ await p.evaluate(async()=>{for(const task of actionPending.slice(0,10))task.resolve({clinics:Array(9).fill({}),ok:true,db:true});await actionRun1;});
+ assert.equal(await p.locator('#acClinicPending').innerText(),'1');
+ assert.match(await p.locator('#approvalCenterError').textContent(),/시험 결제 조회 실패/);
+});
+test('hospital links focus the detail and return to the source filter and scroll',async t=>{
+ const p=await fixture(t,390);await billing(p);
+ await p.locator('#hqSubscriptionSearch').fill('병원 A');
+ await p.evaluate(()=>scrollTo(0,200));const before=await p.evaluate(()=>scrollY);
+ await p.locator('#subscriptionTable [data-sub-clinic="A"]').click();
+ await p.locator('.hq-contract-summary').waitFor();
+ assert.equal(await p.evaluate(()=>document.activeElement===document.querySelector('.detail-title h2')),true);
+ assert.ok(await p.locator('#clinicDetail').evaluate(el=>el.getBoundingClientRect().top<150));
+ await p.getByRole('button',{name:'요금제 · 구독 · 돌아가기',exact:true}).click();
+ await p.locator('#subscriptionTable [data-sub-clinic="A"]').waitFor();
+ await p.waitForFunction(()=>document.activeElement?.dataset.subClinic==='A');
+ assert.equal(await p.locator('#hqSubscriptionSearch').inputValue(),'병원 A');
+ assert.ok(Math.abs(await p.evaluate(()=>scrollY)-before)<3);
+ assert.equal(await p.evaluate(()=>writes.length),0);
+});
+test('quick hospital selection restores the filtered hospital list on return',async t=>{
+ const p=await fixture(t);
+ await p.evaluate(async()=>{
+  req=(path,o)=>path.startsWith('/hq/clinics?')?Promise.resolve({clinics:(path.includes('q=')&&new URL(path,'https://example.test').searchParams.get('q')?['A']:['A','B']).map(id=>({id,name:'시험 병원 '+id,status:'active',approvalStatus:'approved',plan:'BASIC'}))}):baseReq(path,o);
+  showView('clinics');await loadClinics();
+  document.getElementById('clinicSearch').value='병원 A';await loadClinics();
+  renderHqQuickClinicResults([{id:'B',name:'시험 병원 B',plan:'BASIC',status:'active'}],'B');
+ });
+ await p.locator('[data-quick-clinic="B"]').click();
+ await p.locator('.hq-contract-summary').waitFor();
+ assert.match(await p.locator('.detail-title h2').innerText(),/B$/);
+ await p.locator('.hq-back-to-list').click();
+ await p.waitForFunction(()=>document.activeElement.id==='clinicSearch');
+ assert.equal(await p.locator('#clinicSearch').inputValue(),'병원 A');
+ assert.equal(await p.locator('#clinicList .clinic-item').count(),1);
+ assert.match(await p.locator('#clinicList').innerText(),/시험 병원 A/);
+});
+for(const width of [390,1280])test(`journey pagination preserves approval boundaries and full readable details at ${width}px`,async t=>{
+ const p=await fixture(t,width);await p.evaluate(()=>{
+  loadPatientJourneysHQ=async()=>{};
+  patientJourneys=Array.from({length:45},(_,i)=>({name:'시험 일정 '+String(i+1).padStart(2,'0'),isSystem:true,status:'active',autoSyncStatus:'update_available',sourceId:'test-'+i,sourceVersion:'1',description:'전체 설명 <img src=x onerror=alert(1)>',stages:[{day:1,title:'D+1 상태 확인'},{day:3,title:'다음 확인'}],applyCount:i}));
+  showView('journeys');renderPatientJourneysHQ();
+ });
+ assert.equal(await p.locator('.hq-journey-row').count(),20);
+ assert.equal(await p.locator('.hq-journey-table th').count(),5);
+ await p.locator('[data-journey-detail]').first().click();
+ const detail=p.locator('.hq-journey-detail-row').first();
+ assert.match(await detail.innerText(),/전체 설명 <img src=x onerror=alert\(1\)>/);
+ assert.match(await detail.innerText(),/D\+1 상태 확인/);assert.doesNotMatch(await detail.innerText(),/D\+1 D\+1/);
+ assert.equal(await detail.locator('img').count(),0);
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ assert.ok(await detail.evaluate(el=>el.getBoundingClientRect().width>=el.closest('table').getBoundingClientRect().width*.95));
+ await p.locator('#journeySelectAllReview').check();assert.equal(await p.locator('[data-journey-bulk]:checked').count(),20);
+ await p.locator('#journeyBulkApprove').click();assert.equal(await p.evaluate(()=>writes.length),0);
+ await p.evaluate(()=>{journeyBulkBusy=true;updateJourneyBulkUi();});
+ assert.equal(await p.getByRole('button',{name:'다음',exact:true}).isDisabled(),true);
+ assert.equal(await p.locator('[data-journey-status-quick]').first().isDisabled(),true);
+ await p.evaluate(()=>{journeyBulkBusy=false;updateJourneyBulkUi();});
+ await p.getByRole('button',{name:'다음',exact:true}).click();
+ assert.equal(await p.locator('[data-journey-bulk]:checked').count(),0);
+ assert.match(await p.locator('.hq-journey-count').innerText(),/21–40건/);
+ await p.getByRole('button',{name:'다음',exact:true}).click();
+ assert.equal(await p.locator('.hq-journey-row').count(),5);assert.equal(await p.getByRole('button',{name:'다음',exact:true}).isDisabled(),true);
+ await p.locator('#journeySearch').fill('시험 일정 01');
+ assert.equal(await p.locator('.hq-journey-row').count(),1);assert.match(await p.locator('.hq-pagination').innerText(),/1 \/ 1페이지/);
+ await p.locator('#journeySearch').fill('');
+ if(process.env.HQ_SCREENSHOTS){await p.evaluate(()=>{document.activeElement.blur();scrollTo(0,0);});await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`hq-next-journeys-${width}.png`),fullPage:true});}
+});
+for(const width of [390,1280])test(`plan comparison shows saved amounts and a single selected editor at ${width}px`,async t=>{
+ const p=await fixture(t,width);await billing(p);await p.locator('#hqTabplans').click();
+ assert.equal(await p.locator('#hqPlanComparison tbody tr').count(),4);
+ assert.match(await p.locator('#hqPlanComparison').innerText(),/86,900원[\s\S]*185,900원[\s\S]*별도 견적/);
+ assert.equal(await p.locator('#planGrid .plan-card:visible').count(),1);
+ assert.equal(await p.locator('#hqBillingChannels').isVisible(),false);
+ await p.locator('[data-choose-plan="PRO"]').click();
+ assert.equal(await p.locator('[data-plan="PRO"]').isVisible(),true);assert.equal(await p.locator('[data-plan="BASIC"]').isVisible(),false);
+ assert.equal(await p.evaluate(()=>document.activeElement.textContent),'PRO');
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ await p.locator('[data-plan="PRO"]').getByRole('button',{name:'수정',exact:true}).click();
+ await p.locator('[data-plan="PRO"] .monthly').fill('170000');
+ await p.locator('[data-choose-plan="BASIC"]').click();
+ assert.equal(await p.locator('[data-plan="PRO"]').isVisible(),true);
+ assert.equal(await p.locator('[data-plan="PRO"] .monthly').inputValue(),'170000');
+ assert.equal(await p.evaluate(()=>writes.length),0);
+ await p.locator('[data-plan="PRO"]').getByRole('button',{name:'수정 취소',exact:true}).click();
+ if(process.env.HQ_SCREENSHOTS){await p.evaluate(()=>{document.activeElement.blur();scrollTo(0,0);});await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`hq-next-plans-${width}.png`),fullPage:true});}
+});
 async function onboardingPage(p){
  await p.evaluate(()=>{
   window.onboardFail=false;
@@ -348,7 +470,7 @@ test('plan benefits omit central credits and explain hospital SOLAPI billing wit
   const p=await fixture(t);await billing(p);await p.locator('#hqTabplans').click();
   assert.equal(await p.locator('#planGrid .credit').count(),0);
   assert.doesNotMatch(await p.locator('[data-plan="PILOT"]').innerText(),/문자 5,000원|월 문자 크레딧/);
-  assert.match(await p.locator('[data-plan="PRO"]').innerText(),/병원 SOLAPI 계정에서 별도 결제[\s\S]*HOME 앱 푸시는 구독에 포함/);
+  assert.match(await p.locator('#planGrid>.notice').innerText(),/병원 SOLAPI 계정에서 별도 결제[\s\S]*HOME 앱 푸시는 구독에 포함/);
   await p.locator('[data-plan="BASIC"]').getByRole('button',{name:'수정',exact:true}).click();
   await p.locator('[data-plan="BASIC"] .monthly').fill('80000');
   await p.locator('[data-plan="BASIC"] .save-plan').click();await p.locator('[data-review-save]').click();
@@ -440,7 +562,7 @@ test('another editor cannot discard a dirty draft; saving locks inputs until res
   const p=await fixture(t);await billing(p);await p.locator('#hqTabplans').click();
   const basic=p.locator('[data-plan="BASIC"]'),pro=p.locator('[data-plan="PRO"]');
   await basic.getByRole('button',{name:'수정',exact:true}).click();await basic.locator('.monthly').fill('81000');
-  await pro.getByRole('button',{name:'수정',exact:true}).click();
+  await p.locator('[data-choose-plan="PRO"]').click();
   assert.equal(await basic.getAttribute('data-editing'),'true');assert.equal(await pro.getAttribute('data-editing'),'false');
   await p.evaluate(()=>{req=async(path,o)=>{if(o?.method==='PATCH'){await new Promise(r=>window.releaseSave=r);}return baseReq(path,o);};});
   await basic.locator('.save-plan').click();await p.locator('[data-review-save]').click();
@@ -615,7 +737,7 @@ for(const width of [390,521,1280])test(`HQ fits ${width}px viewport; tables scro
   const p=await fixture(t,width);await billing(p);
   for(const pane of ['subscriptions','plans','payments']){
     await p.locator('#hqTab'+pane).click();
-    const result=await p.evaluate(()=>({viewport:innerWidth,width:document.documentElement.scrollWidth,body:parseFloat(getComputedStyle(document.body).fontSize),button:parseFloat(getComputedStyle(document.querySelector('#hqTabplans')).fontSize),cards:[...document.querySelectorAll('.plan-card')].map(el=>el.getBoundingClientRect().width)}));
+    const result=await p.evaluate(()=>({viewport:innerWidth,width:document.documentElement.scrollWidth,body:parseFloat(getComputedStyle(document.body).fontSize),button:parseFloat(getComputedStyle(document.querySelector('#hqTabplans')).fontSize),cards:[...document.querySelectorAll('.plan-card:not([hidden])')].map(el=>el.getBoundingClientRect().width)}));
     assert.ok(result.width<=result.viewport+1,`${pane}: ${JSON.stringify(result)}`);
     assert.ok(result.body>=14&&result.button>=14);
     if(width<650&&pane==='plans')assert.ok(result.cards.every(w=>w>width*.7));

@@ -182,7 +182,9 @@
     if(!title)return;
     const heading=title.querySelector('h2');heading.tabIndex=-1;
     const back=document.createElement('button');back.className='btn hq-back-to-list';back.type='button';back.textContent='병원 목록으로';
-    back.onclick=()=>{byId('clinicSearch').focus({preventScroll:true});byId('clinicSearch').scrollIntoView({block:'center'});};title.prepend(back);
+    if(clinicReturnContext&&clinicReturnContext.view!=='clinics')back.textContent=(byId(clinicReturnContext.view)?.querySelector('h1')?.textContent||'이전 화면')+' · 돌아가기';
+    if(clinicReturnContext&&(clinicReturnContext.view!=='clinics'||clinicReturnContext.sourceAttribute))back.classList.add('hq-source-back');
+    back.onclick=returnFromClinic;title.prepend(back);
     const definitions=[['subscription','구독·이용현황'],['operation','승인·운영'],['connection','연동'],['members','직원'],['content','콘텐츠'],['errors','오류']];
     const sections=new Map(definitions.map(([key,label])=>{
       const panel=document.createElement('section');panel.className='hq-detail-pane';panel.id='hqClinicPane-'+key;
@@ -221,7 +223,7 @@
     root.append(tabs,...sections.values());select(clinicPanes.get(hospital)||'subscription',false);
     if(clinicFocusRequested===hospital){
       clinicFocusRequested='';heading.focus({preventScroll:true});
-      if(matchMedia('(max-width:900px)').matches)root.scrollIntoView({block:'start'});
+      root.scrollIntoView({block:'start'});
     }
   }
   function setRegion(id,state,{error='',retry=null}={}){
@@ -230,6 +232,7 @@
     if(!record||!record.box.isConnected){const box=document.createElement('div');box.className='hq-load-status';box.setAttribute('role','status');box.setAttribute('aria-live','polite');if(target.matches('.view')&&target.querySelector('.head'))target.querySelector('.head').append(box);else if(target.matches('.view,#hqRateEditor'))target.prepend(box);else target.before(box);record={box,at:record?.at||null};regions.set(id,record);}
     if(state==='ready')record.at=new Date();
     record.box.dataset.state=state;target.setAttribute('aria-busy',String(state==='loading'));
+    if(id==='hqBillingChannels')record.box.hidden=billingPane!=='subscriptions';
     record.box.replaceChildren();
     const label=document.createElement('span');
     const checked=record.at?record.at.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}):'';
@@ -269,6 +272,8 @@
     const ids={subscriptions:'hqBillingsubscriptions',plans:'hqPolicyPane',payments:'hqBillingpayments'};
     for(const [key,id] of Object.entries(ids))if(byId(id))byId(id).hidden=key!==billingPane;
     document.querySelectorAll('[data-billing-pane]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.billingPane===billingPane)));
+    if(byId('hqBillingChannels'))byId('hqBillingChannels').hidden=billingPane!=='subscriptions';
+    if(regions.get('hqBillingChannels'))regions.get('hqBillingChannels').box.hidden=billingPane!=='subscriptions';
     if(push)writeRoute();return true;
   }
   function viewLoader(view){
@@ -279,13 +284,16 @@
   async function reloadView(view=currentView){
     if(!allowLeave())return;
     const loader=viewLoader(view);if(!loader)return;
-    if(['billing','usageBilling','clinics','onboarding','crm','voice','content'].includes(view)){await loader();return;}
-    await region(view,loader,()=>{},()=>reloadView(view));
+    try{
+      if(['dashboard','billing','usageBilling','clinics','onboarding','crm','voice','content'].includes(view)){await loader();return;}
+      await region(view,loader,()=>{},()=>reloadView(view));
+    }finally{restoreClinicReturn(view);}
   }
   function navigate(view,{push=true,check=true}={}){
     const target=byId(view);if(!target?.classList.contains('view')){toast('현재 제공되지 않는 화면입니다.');return false;}
     if(check&&!allowLeave())return false;
     viewPositions.set(currentView,window.scrollY||0);
+    if(view!=='clinics'&&!pendingClinicReturn)clinicReturnContext=null;
     currentView=view;
     document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x===target));
     document.querySelectorAll('#nav [data-view]').forEach(x=>{
@@ -406,8 +414,110 @@
   }
   const closeCompactMenu=setupCompactHeader();
 
+  let clinicReturnContext=null,pendingClinicReturn=null,selectedPlanCode='BASIC';
+  const clinicLinkAttributes=['data-sub-clinic','data-billing-clinic','data-report-clinic','data-open-onboarding-clinic','data-cs-clinic','data-clinic','data-quick-clinic'];
+  function captureClinicReturn(source){
+    const attribute=clinicLinkAttributes.find(key=>source?.hasAttribute(key));
+    return {view:currentView,pane:billingPane,scroll:window.scrollY||0,listScroll:byId('clinicList').scrollTop,
+      sourceAttribute:attribute,sourceValue:attribute?source.getAttribute(attribute):'',
+      filters:Object.fromEntries(filterIds.filter(byId).map(id=>[id,byId(id).type==='checkbox'?byId(id).checked:byId(id).value]))};
+  }
+  function openClinicFrom(id,source){
+    if(!id||!allowLeave())return false;
+    clinicReturnContext=captureClinicReturn(source);pendingClinicReturn=null;selectedClinic=id;clinicFocusRequested=id;
+    byId('clinicSearch').value='';byId('clinicStatus').value='all';byId('clinicApproval').value='all';
+    if(source?.hasAttribute('data-quick-clinic'))hideHqQuickResults();
+    return navigate('clinics',{check:false});
+  }
+  document.addEventListener('click',event=>{
+    const source=event.target.closest?.(clinicLinkAttributes.map(key=>'['+key+']').join(','));
+    if(!source)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    const attribute=clinicLinkAttributes.find(key=>source.hasAttribute(key));openClinicFrom(source.getAttribute(attribute),source);
+  },true);
+  async function returnFromClinic(){
+    if(!allowLeave())return;
+    const context=clinicReturnContext;
+    if(!context||context.view==='clinics'){
+      if(context){
+        let changed=false;
+        for(const id of ['clinicSearch','clinicStatus','clinicApproval'])if(byId(id).value!==context.filters[id]){byId(id).value=context.filters[id];changed=true;}
+        clinicFocusRequested='';if(changed)await loadClinics();
+      }
+      byId('clinicSearch').focus({preventScroll:true});byId('clinicSearch').scrollIntoView({block:'center'});
+      if(context)byId('clinicList').scrollTop=context.listScroll;return;
+    }
+    clinicReturnContext=null;pendingClinicReturn=context;clinicFocusRequested='';
+    for(const [id,value] of Object.entries(context.filters)){
+      const field=byId(id);if(!field)continue;if(field.type==='checkbox')field.checked=value;else field.value=value;
+    }
+    billingPane=context.pane;viewPositions.set(context.view,context.scroll);navigate(context.view,{check:false});
+  }
+  function restoreClinicReturn(view){
+    const context=pendingClinicReturn;if(!context||context.view!==view||currentView!==view)return;
+    pendingClinicReturn=null;
+    const source=context.sourceAttribute?[...document.querySelectorAll('['+context.sourceAttribute+']')].find(el=>el.getAttribute(context.sourceAttribute)===context.sourceValue&&el.getClientRects().length):null;
+    source?.focus({preventScroll:true});window.scrollTo({top:context.scroll,behavior:'instant'});
+  }
+  function dashboardLayout(){
+    const dashboard=byId('dashboard'),head=dashboard.querySelector('.head'),actions=dashboard.querySelector('.approval-center');
+    head.after(actions);actions.querySelector('h2').textContent='지금 처리할 업무';
+    const metrics=document.createElement('details');metrics.id='hqOverviewMetrics';metrics.className='hq-dashboard-details';
+    metrics.innerHTML='<summary>사용량·운영 통계 보기</summary>';
+    metrics.append(dashboard.querySelector('.kpis'),dashboard.querySelector('.grid2'));actions.after(metrics);
+    const generated=byId('generated');if(generated)metrics.append(generated);
+    const diagnostics=document.createElement('details');diagnostics.className='hq-dashboard-details';diagnostics.id='hqDashboardDiagnostics';
+    diagnostics.innerHTML='<summary>연동·배포 상태 보기</summary>';
+    const services=actions.querySelector('.hq-service-grid'),deployment=byId('hqDeploymentCard');
+    if(services)diagnostics.append(services);if(deployment)diagnostics.append(deployment);metrics.after(diagnostics);
+    actions.querySelectorAll('[data-approval-center]').forEach(card=>{
+      card.tabIndex=0;card.setAttribute('role','button');
+      card.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();card.click();}};
+    });
+  }
+  const originalOverview=loadOverview;
+  loadOverview=async function(...args){
+    await Promise.all([
+      region('hqOverviewMetrics',()=>originalOverview(...args),()=>{
+        document.querySelectorAll('#recentClinics [data-clinic]').forEach(link=>{
+          link.tabIndex=0;link.setAttribute('role','button');link.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();link.click();}};
+        });
+      },()=>loadOverview()),
+      loadHqActionCenter()
+    ]);
+  };
+  function selectPlan(code,{check=true,focus=false}={}){
+    if(check&&code!==selectedPlanCode&&!allowLeave())return false;
+    selectedPlanCode=code;
+    for(const card of document.querySelectorAll('#planGrid .plan-card'))card.hidden=card.dataset.plan!==code;
+    for(const button of document.querySelectorAll('[data-choose-plan]'))button.setAttribute('aria-pressed',String(button.dataset.choosePlan===code));
+    if(focus){
+      const card=[...document.querySelectorAll('#planGrid .plan-card')].find(x=>x.dataset.plan===code);
+      const heading=card?.querySelector('h3');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});card.scrollIntoView({block:'start'});}
+    }
+    return true;
+  }
+  function renderPlanComparison(){
+    let comparison=byId('hqPlanComparison');
+    if(!comparison){comparison=document.createElement('section');comparison.id='hqPlanComparison';comparison.className='hq-plan-comparison';byId('planGrid').before(comparison);}
+    const limit=(n,unit)=>!safeNumber(n)?'확인 필요':Number(n)===0?'제한 없음':Number(n).toLocaleString('ko-KR')+unit;
+    comparison.innerHTML=`<h2>요금제 비교</h2><p class="muted">월 결제 총액은 부가세 포함입니다. 요금제를 선택하면 아래에서 상세 조건을 확인하고 수정할 수 있습니다.</p><div class="table-wrap"><table class="table hq-plan-compare-table"><thead><tr><th>요금제</th><th>월 결제 총액</th><th>직원</th><th>월 HOME 게시</th><th>상세</th></tr></thead><tbody>${plans.map(plan=>{
+      const code=plan.planCode,price=code==='PILOT'?'무료체험 · 0원':code==='ENTERPRISE'?'별도 견적':safeNumber(plan.monthlyPriceKrw)?won(Math.round(Number(plan.monthlyPriceKrw)*(plan.limits?.vatExclusive?1.1:1))):'금액 확인 필요';
+      return `<tr><th scope="row">${esc(plan.displayName||code)}${!plan.isActive?'<small class="hq-plan-disabled">신규 선택 중단</small>':''}</th><td data-label="월 결제 총액"><b>${esc(price)}</b></td><td data-label="직원">${esc(limit(plan.limits?.members,'명'))}</td><td data-label="월 HOME 게시">${esc(limit(plan.limits?.packagesMonthly,'건'))}</td><td><button type="button" class="btn" data-choose-plan="${esc(code)}" aria-controls="hqPlanDetail-${esc(code)}" aria-pressed="false">${esc(code)} 상세</button></td></tr>`;
+    }).join('')||'<tr><td colspan="5">등록된 요금제가 없습니다.</td></tr>'}</tbody></table></div>`;
+    for(const card of document.querySelectorAll('#planGrid .plan-card')){
+      card.id='hqPlanDetail-'+card.dataset.plan;
+      for(const p of card.querySelectorAll('p'))if(p.textContent.includes('연결한 병원 SOLAPI 계정'))p.remove();
+    }
+    const notice=byId('planGrid').querySelector(':scope>.notice');
+    if(notice&&!notice.textContent.includes('HOME 앱 푸시는 구독에 포함됩니다.'))notice.insertAdjacentHTML('beforeend','<p>HOME 앱 푸시는 구독에 포함됩니다.</p>');
+    if(!plans.some(plan=>plan.planCode===selectedPlanCode))selectedPlanCode=plans[0]?.planCode||'';
+    comparison.querySelectorAll('[data-choose-plan]').forEach(button=>button.onclick=()=>selectPlan(button.dataset.choosePlan,{focus:true}));
+    selectPlan(selectedPlanCode,{check:false});
+  }
+
   const originalRenderPlans=renderPlans,originalRenderSubscriptions=renderSubscriptions;
-  renderPlans=function(){originalRenderPlans();enhancePlans();};
+  renderPlans=function(){originalRenderPlans();enhancePlans();renderPlanComparison();};
   renderSubscriptions=function(){originalRenderSubscriptions();compactSubscriptionTable();renderChannelCounts();filterSubscriptions();bindHospitalLinks();};
   function bindHospitalLinks(){
     document.querySelectorAll('[data-sub-clinic],[data-billing-clinic],[data-report-clinic]').forEach(b=>b.onclick=()=>{
@@ -462,7 +572,7 @@
     document.querySelectorAll('.clinic-item').forEach(row=>{
       row.setAttribute('role','button');row.tabIndex=0;row.setAttribute('aria-pressed',String(row.dataset.id===selectedClinic));
       row.onclick=()=>{
-        if(!allowLeave())return;selectedClinic=row.dataset.id;clinicFocusRequested=selectedClinic;renderClinicList();saveState();loadClinicDetail(selectedClinic).catch(()=>{});
+        if(!allowLeave())return;clinicReturnContext=captureClinicReturn(row);selectedClinic=row.dataset.id;clinicFocusRequested=selectedClinic;renderClinicList();saveState();loadClinicDetail(selectedClinic).catch(()=>{});
       };
       row.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();row.click();}};
     });
@@ -694,7 +804,7 @@
   saveClinic=()=>{if(!allowLeave())return;return originalClinicSave();};
   byId('usageBillingRefresh').onclick=()=>loadUsageBilling();
   byId('billingMonth').onchange=()=>loadUsageBilling();
-  billingLayout();
+  billingLayout();dashboardLayout();byId('journeySearch').parentElement.classList.add('hq-journey-filters');
   document.querySelectorAll('.table-wrap').forEach(el=>{el.tabIndex=0;el.setAttribute('aria-label','표 · 좌우로 스크롤할 수 있습니다.');});
   globalThis.CarestepHqUX={won,priceText,changes,latest,allowLeave,restoreRoute,enhanceClinic,setRegion,
     beginClinic(id){const seq=++clinicDetailSequence;setRegion('clinicDetail','loading');byId('clinicDetail').innerHTML='<div class="hq-detail-loading"><p>병원 정보를 불러오는 중입니다.</p><div class="hq-loading-lines" aria-hidden="true"><i></i><i></i><i></i></div></div>';return ()=>seq===clinicDetailSequence&&selectedClinic===id;},

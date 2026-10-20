@@ -200,3 +200,69 @@ input[type="checkbox"]{width:18px;height:18px;flex-shrink:0;accent-color:var(--b
   .hq-row-details dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
   .hq-row-details dd{min-width:0}
 }
+
+/* Prioritize pending work and keep secondary information optional. */
+.hq-dashboard-details{border:1px solid var(--line);border-radius:14px;background:#fff;margin:16px 0;padding:16px}
+.hq-dashboard-details>summary{cursor:pointer;font-size:16px;font-weight:700;padding:4px 0;min-height:36px}
+.hq-dashboard-details[open]>summary{margin-bottom:14px}
+.hq-dashboard-details .kpis{margin-top:12px}
+#dashboard .approval-center-grid{grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px}
+#dashboard .approval-center-card{min-height:100px;padding:14px}
+#dashboard .approval-center-card b{font-size:24px;line-height:1.5}
+#dashboard .approval-center-card b[data-state="loading"],#dashboard .approval-center-card b[data-state="error"],#acTotalPending{font-size:18px}
+#dashboard .approval-center-card.hq-action-zero{border-color:var(--line);background:#f8fafc}
+#dashboard .approval-center-card.hq-action-zero b{color:var(--muted)}
+.hq-back-to-list.hq-source-back{display:inline-block}
+.hq-journey-count,.hq-journey-row,.hq-journey-detail-row,.plan-card{scroll-margin-top:calc(var(--hq-header-height,76px) + 18px)}
+.hq-journey-count{font-size:13px;color:var(--muted)}
+.hq-journey-filters{display:grid;grid-template-columns:minmax(180px,1fr) 160px 160px;gap:8px}
+.hq-journey-wrap{max-height:75vh;overflow:auto}
+.hq-journey-table{min-width:0!important;table-layout:fixed}
+.hq-journey-table th{position:sticky;top:0;z-index:2}
+.hq-journey-table th:nth-child(1){width:60px}
+.hq-journey-table th:nth-child(2){width:38%}
+.hq-journey-table th:nth-child(3){width:16%}
+.hq-journey-table th:nth-child(4){width:70px}
+.hq-journey-table th:last-child{width:auto}
+.hq-journey-row td>b{font-size:15px;line-height:1.6}
+.hq-journey-category{display:block;font-size:13px;line-height:1.6;margin-top:4px}
+.hq-journey-actions{display:flex;gap:8px;flex-wrap:wrap}
+.hq-journey-detail-row td{background:#f8faff;padding:18px}
+.hq-journey-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:0}
+.hq-journey-details dt{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.hq-journey-details dd{font-size:14px;line-height:1.7;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.hq-pagination{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;padding:16px 0 4px}
+.hq-pagination span{font-size:13px;color:var(--muted)}
+.hq-plan-comparison{margin:18px 0}
+.hq-plan-comparison h2{font-size:20px}
+.hq-plan-compare-table{min-width:0;table-layout:fixed}
+.hq-plan-compare-table th:nth-child(1){width:19%}
+.hq-plan-compare-table th:nth-child(2){width:25%}
+.hq-plan-compare-table th:nth-child(3){width:14%}
+.hq-plan-compare-table th:nth-child(4){width:19%}
+.hq-plan-compare-table th:nth-child(5){width:23%}
+.hq-plan-compare-table [aria-pressed="true"]{background:#eaf1ff;border-color:var(--blue);color:#1749c4}
+.hq-plan-disabled{display:block;font-size:12px;font-weight:400;color:var(--muted)}
+#planGrid{display:block!important}
+#planGrid>.notice{margin:16px 0}
+#planGrid .plan-card{max-width:100%;width:100%;padding:22px}
+#planGrid .price-row,#planGrid .limits{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:650px){
+  .hq-journey-filters{grid-template-columns:minmax(0,1fr)}
+  #dashboard .approval-center-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #dashboard .approval-center-card{padding:12px;min-height:104px}
+  #dashboard .approval-center-card span,#dashboard .approval-center-card small{font-size:12px}
+  .hq-journey-wrap{max-height:none;overflow:visible;border:0}
+  .hq-journey-table,.hq-journey-table tbody,.hq-plan-compare-table,.hq-plan-compare-table tbody{display:block;width:100%}
+  .hq-journey-table thead,.hq-plan-compare-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .hq-journey-table tr,.hq-plan-compare-table tr{display:block;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+  .hq-journey-table td,.hq-plan-compare-table td,.hq-plan-compare-table tbody th{display:block;border:0;padding:7px 0;width:auto!important}
+  .hq-journey-table td[data-label]::before,.hq-plan-compare-table td[data-label]::before{content:attr(data-label);display:inline-block;margin-right:8px;font-size:12px;color:var(--muted)}
+  .hq-journey-table td:nth-child(2)::before{display:none}
+  .hq-journey-table .hq-journey-detail-row{background:#f8faff;margin-top:-12px;border-top-left-radius:0;border-top-right-radius:0}
+  .hq-journey-details{grid-template-columns:minmax(0,1fr)}
+  .hq-plan-compare-table tbody th{position:static;font-size:17px;background:transparent}
+  .hq-plan-compare-table .btn{width:100%}
+  #planGrid .plan-card{padding:16px}
+  #planGrid .price-row,#planGrid .limits{grid-template-columns:minmax(0,1fr)}
+}
