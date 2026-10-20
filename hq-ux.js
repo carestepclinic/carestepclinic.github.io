@@ -6,7 +6,7 @@
   const stateKey='carestep_hq_ui_v20261020';
   let currentView='dashboard',billingPane='subscriptions',restoring=false,reviewOpen=false;
   let activeSave=null,quickSequence=0,clinicListSequence=0,clinicDetailSequence=0;
-  const filterIds=['clinicSearch','clinicStatus','clinicApproval','journeySearch','journeyScope','journeyStatusFilter','billingMonth','hqSubscriptionSearch','crmHqPeriod','voiceType','voiceStatus'];
+  const filterIds=['clinicSearch','clinicStatus','clinicApproval','journeySearch','journeyScope','journeyStatusFilter','billingMonth','hqSubscriptionSearch','crmHqPeriod','voiceType','voiceStatus','contentSearch','contentStatus','contentCategory','contentDueOnly'];
   const safeNumber=n=>n!==null&&n!==undefined&&n!==''&&Number.isFinite(Number(n));
   const won=n=>safeNumber(n)?`${Number(n).toLocaleString('ko-KR')}원`:'금액 확인 필요';
   const latest=key=>{const n=(sequences.get(key)||0)+1;sequences.set(key,n);return ()=>sequences.get(key)===n;};
@@ -20,7 +20,7 @@
       : {detail:`월 공급가 ${won(supply)} + 부가세 ${won(tax)}`,total:`월 결제 총액 ${won(supply+tax)}`};
   }
   function saveState() {
-    const filters=Object.fromEntries(filterIds.filter(id=>byId(id)).map(id=>[id,byId(id).value]));
+    const filters=Object.fromEntries(filterIds.filter(id=>byId(id)).map(id=>[id,byId(id).type==='checkbox'?byId(id).checked:byId(id).value]));
     try{sessionStorage.setItem(stateKey,JSON.stringify({view:currentView,pane:billingPane,clinic:selectedClinic,filters}));}catch{}
   }
   function loadState() {try{return JSON.parse(sessionStorage.getItem(stateKey)||'{}');}catch{return {};}}
@@ -215,7 +215,7 @@
   async function reloadView(view=currentView){
     if(!allowLeave())return;
     const loader=viewLoader(view);if(!loader)return;
-    if(['billing','usageBilling','clinics','crm','voice'].includes(view)){await loader();return;}
+    if(['billing','usageBilling','clinics','crm','voice','content'].includes(view)){await loader();return;}
     await region(view,loader,()=>{},()=>reloadView(view));
   }
   function navigate(view,{push=true,check=true}={}){
@@ -224,7 +224,11 @@
     viewPositions.set(currentView,window.scrollY||0);
     currentView=view;
     document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x===target));
-    document.querySelectorAll('#nav [data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===view));
+    document.querySelectorAll('#nav [data-view]').forEach(x=>{
+      x.classList.toggle('active',x.dataset.view===view);
+      if(x.dataset.view===view)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current');
+    });
+    document.title=`${target.querySelector('h1')?.textContent||'관리'} · CARESTEP HQ`;
     syncHqNavForView(view);if(view==='billing')setBillingPane(billingPane,{push:false,check:false});
     if(push)writeRoute();saveState();
     window.scrollTo({top:viewPositions.get(view)||0,behavior:'instant'});
@@ -232,7 +236,11 @@
   }
   function restoreRoute(){
     const saved=loadState(),parsed=route(location.hash||('#'+(saved.view||'dashboard')+(saved.view==='billing'?'/'+(saved.pane||'subscriptions'):'')));
-    for(const id of filterIds)if(byId(id)&&typeof saved.filters?.[id]==='string')byId(id).value=saved.filters[id];
+    for(const id of filterIds){
+      const el=byId(id),value=saved.filters?.[id];if(!el)continue;
+      if(el.type==='checkbox'&&typeof value==='boolean')el.checked=value;
+      else if(typeof value==='string'){if(id==='contentCategory')el.dataset.restoreValue=value;else el.value=value;}
+    }
     selectedClinic=typeof saved.clinic==='string'?saved.clinic:'';
     billingPane=parsed.pane;navigate(parsed.view,{push:false,check:false});writeRoute(true);
   }
@@ -363,6 +371,102 @@
       table.querySelectorAll('.table-wrap').forEach(el=>{el.tabIndex=0;el.setAttribute('aria-label','후속관리 현황 · 좌우로 스크롤할 수 있습니다.');});
     }
   };
+  const contentCounts=['contentTotal','contentPublished','contentArchived','contentReviewDue'];
+  const contentStates={published:'게시 중',archived:'보관 · 게시 중단',draft:'초안',review:'검수 중',deleted:'삭제 이력'};
+  let contentReady=false;
+  const contentDue=x=>x.status==='published'&&!!x.reviewDueAt&&Number.isFinite(Date.parse(x.reviewDueAt))&&Date.parse(x.reviewDueAt)<=Date.now();
+  const contentDate=value=>value&&Number.isFinite(Date.parse(value))?new Date(value).toLocaleDateString('ko-KR'):'미등록';
+  function lockContent(locked){
+    byId('content').querySelectorAll('button,input,select').forEach(el=>el.disabled=locked);
+    if(!locked)updateContentBulkUi();
+  }
+  loadContent=async function({keepResult=false}={}){
+    if(activeSave)return;
+    const current=latest('content-data');contentReady=false;contents=[];
+    setRegion('content','loading');clearCounts(contentCounts);lockContent(true);
+    if(!keepResult)byId('contentBulkResult').textContent='';
+    byId('contentResultSummary').textContent='자료 목록을 불러오는 중입니다.';
+    byId('contentTable').innerHTML='<div class="empty">자료 목록을 불러오는 중입니다.</div>';
+    updateContentBulkUi();
+    try{
+      const data=await req('/hq/content');if(!current())return;
+      if(!Array.isArray(data.contents))throw Error('중앙 콘텐츠 조회 결과를 확인할 수 없습니다.');
+      contents=data.contents;contentReady=true;
+      const category=byId('contentCategory'),selected=category.dataset.restoreValue||category.value;
+      delete category.dataset.restoreValue;
+      const categories=[...new Set(contents.map(x=>x.category||'').filter(Boolean))].sort((a,b)=>hqCategoryLabel(a).localeCompare(hqCategoryLabel(b),'ko'));
+      category.innerHTML='<option value="all">전체 분류</option>'+categories.map(x=>`<option value="${esc(x)}">${esc(hqCategoryLabel(x))}</option>`).join('');
+      category.value=categories.includes(selected)?selected:'all';
+      const counts=[contents.filter(x=>x.status!=='deleted').length,contents.filter(x=>x.status==='published').length,contents.filter(x=>x.status==='archived').length,contents.filter(contentDue).length];
+      contentCounts.forEach((id,i)=>byId(id).textContent=fmt(counts[i]));
+      renderContent();setRegion('content','ready');
+    }catch(error){
+      if(!current())return;
+      contents=[];contentReady=false;clearCounts(contentCounts);
+      byId('contentResultSummary').textContent='조회 실패 · 자료 건수를 확인하지 못했습니다.';
+      byId('contentTable').innerHTML='<div class="empty">조회하지 못했습니다. 위의 다시 시도를 눌러주세요.</div>';
+      setRegion('content','error',{error:error.message,retry:()=>loadContent({keepResult:true})});
+    }finally{if(current()){lockContent(false);saveState();}}
+  };
+  updateContentBulkUi=function(){
+    const boxes=[...byId('contentTable').querySelectorAll('[data-content-bulk]')],selected=boxes.filter(x=>x.checked).length,all=byId('contentSelectAllArchived');
+    all.checked=boxes.length>0&&selected===boxes.length;all.indeterminate=selected>0&&selected<boxes.length;
+    all.disabled=!contentReady||!!activeSave||!boxes.length;
+    byId('contentBulkSummary').textContent=`선택 ${fmt(selected)}건 · 선택 가능 ${fmt(boxes.length)}건`;
+    byId('contentBulkDelete').disabled=!contentReady||!!activeSave||!selected;
+  };
+  renderContent=function(){
+    if(!contentReady)return;
+    const q=byId('contentSearch').value.trim().toLowerCase(),status=byId('contentStatus').value,category=byId('contentCategory').value,dueOnly=byId('contentDueOnly').checked;
+    const rows=contents.filter(x=>(status==='all'?x.status!=='deleted':x.status===status)&&(category==='all'||x.category===category)&&(!dueOnly||contentDue(x))&&(!q||`${x.title||''} ${hqCategoryLabel(x.category)} ${x.contentId||''}`.toLowerCase().includes(q)));
+    byId('contentResultSummary').textContent=`현재 조건 ${fmt(rows.length)}건 · 전체 자료 ${fmt(contents.filter(x=>x.status!=='deleted').length)}건 (삭제 제외)`;
+    byId('contentTable').innerHTML=rows.length?`<div class="table-wrap" tabindex="0" aria-label="중앙 콘텐츠 목록"><table class="table hq-content-table"><thead><tr><th>선택</th><th>교육자료</th><th>게시 상태</th><th>품질 점수</th><th>검토 정보</th><th>병원별 제공 설정</th><th>관리</th></tr></thead><tbody>${rows.map(x=>`<tr data-content-row="${esc(x.contentId)}"><td data-label="선택">${x.status==='archived'?`<label class="hq-content-check"><input type="checkbox" data-content-bulk value="${esc(x.contentId)}" aria-label="${esc(x.title)} 선택"><span>선택</span></label>`:'—'}</td><td data-label="교육자료" class="hq-content-title"><b>${esc(x.title||'제목 없음')}</b><span class="muted">${esc(hqCategoryLabel(x.category))} · 버전 ${esc(x.version||'미등록')}</span></td><td data-label="게시 상태"><span class="status ${esc(x.status)}">${esc(contentStates[x.status]||x.status||'확인 필요')}</span></td><td data-label="품질 점수">${safeNumber(x.qualityScore)?fmt(x.qualityScore)+' / 100':'미등록'}</td><td data-label="검토 정보">${esc(x.reviewerName||'검토자 미등록')}<br><span class="${contentDue(x)?'hq-content-due':'muted'}">재검토 ${esc(contentDate(x.reviewDueAt))}${contentDue(x)?' · 기한 도래':''}</span></td><td data-label="병원별 제공 설정">${x.status==='published'?`허용 ${fmt(x.enabledClinics)}곳 · 숨김 ${fmt(x.disabledClinics)}곳`:'현재 제공 중 아님'}</td><td data-label="관리"><div class="hq-content-actions">${x.status==='published'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="archived">게시 중단</button>`:x.status==='archived'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="published">다시 게시</button><button class="btn small danger" data-content-delete="${esc(x.contentId)}">삭제</button>`:'—'}</div></td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">${contents.length?'선택한 조건에 해당하는 자료가 없습니다. 검색 조건을 초기화해보세요.':'등록된 중앙 콘텐츠가 없습니다.'}</div>`;
+    byId('contentTable').querySelectorAll('[data-content-status]').forEach(b=>b.onclick=()=>patchContent(b.dataset.contentStatus,b.dataset.next));
+    byId('contentTable').querySelectorAll('[data-content-delete]').forEach(b=>b.onclick=()=>deleteContent(b.dataset.contentDelete));
+    byId('contentTable').querySelectorAll('[data-content-bulk]').forEach(b=>b.onchange=updateContentBulkUi);
+    updateContentBulkUi();saveState();
+  };
+  async function changeContent(ids,status){
+    if(activeSave||!contentReady)return false;
+    const targets=[...new Set(ids)].map(id=>contents.find(x=>x.contentId===id)).filter(x=>x&&(status==='archived'?x.status==='published':x.status==='archived'));
+    if(!targets.length)return false;
+    const action=status==='archived'?'게시 중단':status==='published'?'다시 게시':'삭제';
+    const names=targets.slice(0,5).map(x=>x.title||x.contentId).join('\n')+(targets.length>5?`\n외 ${targets.length-5}건`:'');
+    const impact=status?'연결된 자동생성 회복관리 일정의 상태도 함께 변경됩니다.':'연결된 자동생성 회복관리 일정도 삭제 처리됩니다. 과거 운영 이력용 최소 정보는 보존됩니다. 화면에서 삭제를 되돌릴 수 없습니다.';
+    if(!confirm(`${targets.length}건을 ${action}할까요?\n\n${names}\n\n${impact}`))return false;
+    activeSave='content';lockContent(true);
+    const result=byId('contentBulkResult'),failed=[];let done=0;
+    try{
+      for(const entry of targets){
+        result.textContent=`${action} 처리 중 · ${done+failed.length+1} / ${targets.length}건`;
+        try{
+          await req('/hq/content/'+encodeURIComponent(entry.contentId),status?{method:'PATCH',body:JSON.stringify({status})}:{method:'DELETE'});
+          done++;
+        }catch(error){failed.push({id:entry.contentId,title:entry.title||entry.contentId,error:error.message||'처리 결과 확인 필요'});}
+      }
+    }finally{activeSave=null;lockContent(false);}
+    result.textContent=`${action} 완료 ${done}건${failed.length?` · 결과 확인 필요 ${failed.length}건\n`+failed.map(x=>`${x.title}: ${x.error}`).join('\n'):''}`;
+    await loadContent({keepResult:true});
+    byId('contentTable').querySelectorAll('[data-content-bulk]').forEach(box=>box.checked=failed.some(x=>x.id===box.value));
+    updateContentBulkUi();
+    if(done)loadHqActionCenter().catch(()=>{});
+    return !failed.length;
+  }
+  patchContent=(id,status)=>['published','archived'].includes(status)?changeContent([id],status):Promise.resolve(false);
+  deleteContent=id=>changeContent([id],null);
+  bulkDeleteArchivedContent=()=>changeContent(selectedContentBulkIds(),null);
+  byId('contentRefresh').onclick=()=>loadContent();
+  byId('contentSearch').oninput=()=>renderContent();
+  for(const id of ['contentStatus','contentCategory','contentDueOnly'])byId(id).onchange=()=>renderContent();
+  byId('contentReset').onclick=()=>{
+    byId('contentSearch').value='';byId('contentStatus').value='all';byId('contentCategory').value='all';byId('contentDueOnly').checked=false;
+    renderContent();
+  };
+  byId('contentSelectAllArchived').onchange=event=>{
+    byId('contentTable').querySelectorAll('[data-content-bulk]').forEach(box=>box.checked=event.target.checked);
+    updateContentBulkUi();
+  };
+  byId('contentBulkDelete').onclick=()=>bulkDeleteArchivedContent();
   const voiceTypes={condition:'질환 자료 요청',feature:'기능 제안',inquiry:'문의'};
   const voiceStates={new:'신규',reviewing:'검토 중',planned:'제작 예정',building:'제작 중',review:'검수 중',published:'공개 완료',answered:'답변 완료',hold:'보류'};
   function voiceControlsDisabled(disabled){

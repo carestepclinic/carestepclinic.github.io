@@ -47,6 +47,146 @@ async function fixture(t,width=1280){
   return page;
 }
 async function billing(page){await page.evaluate(()=>showView('billing'));await page.locator('.plan-card').first().waitFor({state:'attached'});await page.waitForFunction(()=>document.getElementById('hqPaymentProvider').textContent==='정상');}
+async function contentFixture(t,width=1280){
+  const p=await fixture(t,width);
+  await p.evaluate(()=>{
+    window.contentFail=false;window.contentReads=0;window.contentConfirms=[];
+    window.contentReply=[
+      {contentId:'sample-live',title:'시험 게시 자료 <img src=x onerror=alert(1)>',status:'published',category:'수술',version:'1.0',qualityScore:95,reviewerName:'시험 검토자',reviewDueAt:'2020-01-01',enabledClinics:4,disabledClinics:1},
+      {contentId:'sample-archive-a',title:'시험 보관 자료 A',status:'archived',category:'수술',version:'1.0',qualityScore:90},
+      {contentId:'sample-archive-b',title:'시험 보관 자료 B',status:'archived',category:'내과',version:'1.0',qualityScore:80},
+      {contentId:'sample-deleted',title:'시험 삭제 이력',status:'deleted',category:'내과'},
+    ];
+    req=async(path,options)=>{
+      if(path==='/hq/content'){contentReads++;if(contentFail)throw Error('시험 콘텐츠 조회 실패');return {contents:contentReply.map(x=>({...x}))};}
+      if(path.startsWith('/hq/content/')){
+        writes.push({path,method:options.method,body:JSON.parse(options.body||'{}')});
+        if(window.contentWriteDelay)await new Promise(r=>window.releaseContent=r);
+        if(path.endsWith(window.contentWriteFail||'never-fail'))throw Error('시험 콘텐츠 저장 실패');
+        const entry=contentReply.find(x=>x.contentId===path.split('/').pop());
+        entry.status=options.method==='DELETE'?'deleted':JSON.parse(options.body).status;return {ok:true};
+      }
+      return baseReq(path,options);
+    };
+    loadHqActionCenter=async()=>{};
+    window.confirm=message=>{contentConfirms.push(message);return window.allowContentWrite===true;};
+  });
+  return p;
+}
+async function contentPage(p){await p.evaluate(()=>showView('content'));await p.locator('#content .hq-load-status[data-state="ready"]').waitFor();}
+
+test('every HQ menu has a unique destination and opens its matching accessible heading',async t=>{
+  const p=await fixture(t);
+  assert.deepEqual(await p.evaluate(()=>[...document.querySelectorAll('#nav [data-view]')].filter(b=>document.querySelectorAll('section.view#'+b.dataset.view).length!==1).map(b=>b.dataset.view)),[]);
+  await p.evaluate(()=>{
+    const noop=async()=>{};
+    loadOverview=loadApproval=loadClinics=loadOnboardingPortfolio=loadCustomerSuccess=loadBilling=loadUsageBilling=loadCalendarIntegration=loadMessagingIntegration=loadSenderOnboarding=loadPatientJourneysHQ=loadGuardianSurveyHQ=loadFollowupCrmHQ=loadContent=loadVoice=loadProductionLaunch=loadAudit=noop;
+  });
+  for(const button of await p.locator('#nav [data-view]').all()){
+    const view=await button.getAttribute('data-view'),label=(await button.locator('span').first().textContent()).trim();
+    const toggle=button.locator('xpath=ancestor::div[contains(@class,"hq-nav-group")]').locator('[data-hq-nav-toggle]');
+    if(!await button.isVisible())await toggle.click();
+    await button.click();
+    assert.equal(await p.locator('.view.active').getAttribute('id'),view);
+    assert.equal(await button.getAttribute('aria-current'),'page');
+    assert.match(await p.title(),/CARESTEP HQ$/);
+    assert.equal((await p.locator('#'+view+' h1').textContent()).trim().includes(label),true,`${view}: ${label}`);
+  }
+  assert.equal(await p.evaluate(()=>writes.length),0);
+});
+
+test('central content lists safe text, counts, category and review filters without modifying records',async t=>{
+  const p=await contentFixture(t);await contentPage(p);
+  assert.deepEqual(await p.locator('.hq-content-kpis strong').allTextContents(),['3','1','2','1']);
+  assert.equal(await p.locator('[data-content-row]').count(),3);
+  assert.equal(await p.locator('#contentTable img').count(),0);
+  assert.match(await p.locator('#contentTable').innerText(),/<img src=x onerror=alert\(1\)>/);
+  await p.locator('#contentCategory').selectOption('수술');assert.equal(await p.locator('[data-content-row]').count(),2);
+  await p.locator('#contentDueOnly').check();assert.equal(await p.locator('[data-content-row]').count(),1);
+  await p.locator('#contentSearch').fill('일치 없음');assert.match(await p.locator('#contentTable').innerText(),/검색 조건을 초기화/);
+  await p.locator('#contentReset').click();assert.equal(await p.locator('[data-content-row]').count(),3);
+  await p.locator('#contentStatus').selectOption('deleted');
+  assert.match(await p.locator('#contentTable').innerText(),/시험 삭제 이력/);
+  assert.equal(await p.locator('[data-content-delete],[data-content-status],[data-content-bulk]').count(),0);
+  assert.equal(await p.evaluate(()=>writes.length),0);
+});
+
+test('content selection covers only visible archived rows, supports partial state and clears with filters',async t=>{
+  const p=await contentFixture(t);await contentPage(p);
+  await p.locator('#contentSelectAllArchived').check();
+  assert.equal(await p.locator('[data-content-bulk]:checked').count(),2);
+  await p.locator('[data-content-bulk]').first().uncheck();
+  assert.equal(await p.locator('#contentSelectAllArchived').evaluate(el=>el.indeterminate),true);
+  await p.locator('#contentSearch').fill('보관 자료 A');
+  assert.equal(await p.locator('[data-content-bulk]:checked').count(),0);
+  assert.equal(await p.locator('#contentBulkDelete').isDisabled(),true);
+  await p.locator('#contentSelectAllArchived').check();await p.locator('#contentBulkDelete').click();
+  assert.equal(await p.evaluate(()=>writes.length),0);
+  assert.match(await p.evaluate(()=>contentConfirms.at(-1)),/1건을 삭제[\s\S]*시험 보관 자료 A[\s\S]*되돌릴 수 없습니다/);
+});
+
+test('content loading/error never reports zero data and retry restores real empty result',async t=>{
+  const p=await contentFixture(t);await p.evaluate(()=>{contentFail=true;showView('content');});
+  await p.locator('#content .hq-load-status[data-state="error"]').waitFor();
+  assert.deepEqual(await p.locator('.hq-content-kpis strong').allTextContents(),['—','—','—','—']);
+  assert.match(await p.locator('#contentResultSummary').innerText(),/조회 실패/);
+  await p.locator('#contentSearch').fill('검색');assert.match(await p.locator('#contentResultSummary').innerText(),/조회 실패/);
+  assert.equal(await p.locator('#contentBulkDelete').isDisabled(),true);
+  await p.evaluate(()=>{contentFail=false;contentReply=[];});
+  await p.locator('#content .hq-load-status button').click();await p.locator('#content .hq-load-status[data-state="ready"]').waitFor();
+  assert.equal(await p.locator('#contentTotal').innerText(),'0');
+  assert.match(await p.locator('#contentTable').innerText(),/등록된 중앙 콘텐츠가 없습니다/);
+});
+
+test('content keeps the newest load and restores category, checkbox and search through deep links',async t=>{
+  const p=await contentFixture(t);await contentPage(p);
+  await p.evaluate(async()=>{
+    const original=req;window.pendingContent=[];req=()=>new Promise(r=>pendingContent.push(r));
+    const first=loadContent(),second=loadContent();
+    pendingContent[1]({contents:contentReply});await second;
+    pendingContent[0]({contents:[]});await first;req=original;
+  });
+  assert.equal(await p.locator('#contentTotal').innerText(),'3');
+  await p.locator('#contentCategory').selectOption('수술');await p.locator('#contentDueOnly').check();await p.locator('#contentSearch').fill('시험 게시');
+  await p.evaluate(()=>{history.replaceState(null,'','#content');$('contentCategory').innerHTML='<option value="all">전체 분류</option>';$('contentDueOnly').checked=false;$('contentSearch').value='';CarestepHqUX.restoreRoute();});
+  await p.locator('#content .hq-load-status[data-state="ready"]').waitFor();
+  assert.equal(await p.locator('#contentCategory').inputValue(),'수술');assert.equal(await p.locator('#contentDueOnly').isChecked(),true);
+  assert.equal(await p.locator('#contentSearch').inputValue(),'시험 게시');assert.equal(await p.locator('[data-content-row]').count(),1);
+});
+
+test('content status writes once, blocks navigation during save, then reloads confirmed state',async t=>{
+  const p=await contentFixture(t);await contentPage(p);
+  await p.evaluate(()=>{allowContentWrite=true;contentWriteDelay=true;});
+  await p.locator('[data-content-status="sample-live"]').dblclick();
+  await p.waitForFunction(()=>writes.length===1);
+  assert.equal(await p.locator('#contentRefresh').isDisabled(),true);
+  await p.evaluate(()=>showView('voice'));assert.equal(await p.locator('.view.active').getAttribute('id'),'content');
+  await p.evaluate(()=>{contentWriteDelay=false;releaseContent();});
+  await p.waitForFunction(()=>$('contentPublished').textContent==='0');
+  assert.deepEqual((await p.evaluate(()=>writes))[0],{path:'/hq/content/sample-live',method:'PATCH',body:{status:'archived'}});
+  assert.match(await p.locator('#contentBulkResult').innerText(),/게시 중단 완료 1건/);
+  assert.equal(await p.locator('#contentRefresh').isDisabled(),false);
+});
+
+test('content bulk deletion reports partial failure, retains only failed selection and does not retry automatically',async t=>{
+  const p=await contentFixture(t);await contentPage(p);
+  await p.evaluate(()=>{allowContentWrite=true;contentWriteFail='sample-archive-b';});
+  await p.locator('#contentSelectAllArchived').check();await p.locator('#contentBulkDelete').click();
+  await p.waitForFunction(()=>$('contentBulkResult').textContent.includes('결과 확인 필요 1건')&&$('contentArchived').textContent==='1');
+  assert.equal(await p.evaluate(()=>writes.length),2);
+  assert.match(await p.locator('#contentBulkResult').innerText(),/삭제 완료 1건[\s\S]*시험 보관 자료 B: 시험 콘텐츠 저장 실패/);
+  assert.equal(await p.locator('[data-content-bulk]:checked').count(),1);
+  assert.equal(await p.locator('[data-content-bulk]:checked').inputValue(),'sample-archive-b');
+});
+
+for(const width of [390,1280])test(`content layout fits ${width}px with readable titles and usable actions`,async t=>{
+  const p=await contentFixture(t,width);await contentPage(p);
+  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  assert.ok(await p.locator('.hq-content-title b').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize)>=15));
+  if(width<650)assert.equal(await p.locator('.hq-content-table').evaluate(el=>getComputedStyle(el).minWidth),'0px');
+  if(process.env.HQ_SCREENSHOTS)await p.locator('#content').screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`hq-content-${width}.png`)});
+});
+
 test('billing opens on hospitals, separates plan/payment panes, distinguishes free/quote/VAT',async t=>{
   const p=await fixture(t);await billing(p);
   assert.equal(await p.locator('#hqTabsubscriptions').getAttribute('aria-selected'),'true');
@@ -193,12 +333,12 @@ async function feedbackFixture(t,width=1280){
 test('CRM and Customer Voice menu clicks show populated screens and send the expected filters',async t=>{
   const p=await feedbackFixture(t);
   await p.locator('[data-hq-nav-toggle="content"]').click();
-  await p.getByRole('button',{name:'Follow-up CRM',exact:true}).click();
+  await p.getByRole('button',{name:'후속관리 현황',exact:true}).click();
   await p.waitForFunction(()=>$('crmHqActive').textContent==='12');
   assert.match(p.url(),/#crm$/);assert.match(await p.locator('#crmHqClinicTable').innerText(),/시험 병원 A/);
   assert.match(await p.locator('#crmHqJourneyTable').innerText(),/시험 회복관리/);
   await p.locator('#crmHqPeriod').selectOption('90');
-  await p.getByRole('button',{name:'Customer Voice',exact:true}).click();
+  await p.getByRole('button',{name:'병원 요청·문의',exact:true}).click();
   await p.waitForFunction(()=>$('voiceResultSummary').textContent.startsWith('조회 1건'));
   assert.match(p.url(),/#voice$/);
   await p.locator('#voiceType').selectOption('feature');await p.locator('#voiceStatus').selectOption('new');
