@@ -1043,7 +1043,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="carestep-workflow.css?v=flow-20261017">
   <link rel="stylesheet" href="home-access-clinic.css?v=readable-20261017">
 <link rel="stylesheet" href="carestep-ui.css?v=deployment-check-20261019a">
-<link rel="stylesheet" href="clinic-organization.css?v=clarity-20261020b">
+<link rel="stylesheet" href="clinic-organization.css?v=reliability-20261020a">
 <style>
 .billing-contract-comparison{margin:16px 0;border:1px solid var(--line);border-radius:12px;padding:14px;background:#f8faff;line-height:1.65;font-size:14px}.billing-contract-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.billing-contract-columns span,.billing-contract-columns strong,.billing-contract-columns small{display:block}.billing-contract-columns strong{font-size:19px;margin:5px 0;color:#143d83}.billing-contract-comparison p{font-size:13px}.billing-contract-comparison summary{cursor:pointer;padding:8px 0;font-weight:700}.billing-catalog-row{padding:10px 0;border-top:1px solid var(--line)}.billing-catalog-row b,.billing-catalog-row span,.billing-catalog-row small{display:block}#billingReadStatus[data-state="error"]{color:#9a372d;background:#fff3f0;padding:12px;border-radius:10px}@media(max-width:600px){.billing-contract-columns{grid-template-columns:minmax(0,1fr)}.billing-contract-columns>div+div{border-top:1px solid var(--line);padding-top:12px}}
 </style>
@@ -3978,7 +3978,7 @@ async function saasLogout(){
   if(saasMode==='auth'&&saasToken){try{await saasRequest('/saas/logout',{method:'POST'});}catch{}}
   saasToken='';saasMe=null;saasSessionMeta=null;saasSessions=[];saasDiagnostics=[];billingOverviewState=null;billingRedirectHandled=false;legalStatusState=null;legalDocsState=null;configBackupsState=[];clinicDeletionState=null;saasMode='auth';googleCalendarToken={connected:false,expiresAt:0};googleCalendarTokenClient=null;microsoftCalendarApp=null;microsoftCalendarAccount=null;calendarIntegrationConfig={googleClientId:'',microsoftClientId:'',microsoftTenant:'common',updatedAt:''};centralStudioItems=[];centralContentMeta={loaded:false,count:0,updatedAt:'',error:''};categoryOverrides={};syncPublishedStudioItems();applyCategoryOverrides();persistSaasSessionToken('');try{sessionStorage.removeItem(SAAS_LAST_VIEW_SESSION_KEY);}catch{}showLogin();saasSetAuthStatus('로그아웃되었습니다.','ok');
 }
-function saasEnterDemo(){
+function saasEnterDemo(){window.ClinicReliability?.clearPrivate();
   saasMode='demo';saasMe=null;saasSessionMeta=null;saasSessions=[];saasDiagnostics=[];billingOverviewState=null;billingRedirectHandled=false;legalStatusState=null;configBackupsState=[];clinicDeletionState=null;googleCalendarToken={connected:false,expiresAt:0};googleCalendarTokenClient=null;microsoftCalendarApp=null;microsoftCalendarAccount=null;calendarIntegrationConfig={googleClientId:'',microsoftClientId:'',microsoftTenant:'common',updatedAt:''};centralStudioItems=[];centralContentMeta={loaded:false,count:0,updatedAt:'',error:''};categoryOverrides={};syncPublishedStudioItems();applyCategoryOverrides();showApp();applySaasPermissions();renderSaasAccount();toast('로컬 데모로 입장했습니다.');
 }
 function saasEntitlements(){return saasMe?.entitlements||null;}
@@ -4041,8 +4041,8 @@ async function saasCheckCloud(){
   const d=await saasRequest('/saas/clinic/state',{method:'GET'});saasCloudMeta={...d,conflict:false,error:''};renderSaasAccount();return d;
 }
 async function saasUploadCloud(silent=false){
-  if(saasMode!=='auth')return;if(!saasHasFeature('cloudSync')){if(!silent)toast(saasFeatureMessage('cloudSync'));return;}const btn=silent?null:$('saasUploadState'),old=btn?.textContent;if(btn){btn.disabled=true;btn.classList.add('ux-busy');btn.textContent='저장 중…';}
-  try{const baseVersion=Number(saasCloudMeta?.version)||0;const d=await saasRequest('/saas/clinic/state',{method:'PUT',body:JSON.stringify({state:saasStatePayload(),baseVersion})});saasCloudMeta={...d,state:saasStatePayload(),conflict:false,error:''};const k=saasCloudKey();if(k)localStorage.setItem(k,'1');renderSaasAccount();if(!silent)toast('병원 설정을 클라우드에 저장했습니다.');if(btn){btn.classList.remove('ux-busy');btn.classList.add('ux-done');btn.textContent='✓ 저장 완료';}}catch(e){if(e.status===409)saasCloudMeta={...(saasCloudMeta||{}),conflict:true,error:e.message||'동기화 충돌',version:e.details?.currentVersion??saasCloudMeta?.version,updatedAt:e.details?.updatedAt||saasCloudMeta?.updatedAt};renderSaasAccount();saasLogClientError('clinic_state_sync',String(e.status||''),e.message||'클라우드 저장 실패');if(!silent)toast(e.message||'클라우드 저장 실패');if(btn){btn.classList.remove('ux-busy');btn.classList.add('ux-error');btn.textContent='다시 시도';}}finally{if(btn)setTimeout(()=>{if(btn.isConnected){btn.disabled=false;btn.classList.remove('ux-done','ux-error');btn.textContent=old||'현재 설정 동기화';}},1200);}
+  if(saasMode!=='auth')return;if(!saasHasFeature('cloudSync')){if(!silent)toast(saasFeatureMessage('cloudSync'));return;}const uploadToken=saasToken,uploadClinic=saasMe?.clinic?.id;const uploadCurrent=()=>uploadToken===saasToken&&uploadClinic===saasMe?.clinic?.id;const btn=silent?null:$('saasUploadState'),old=btn?.textContent;if(btn){btn.disabled=true;btn.classList.add('ux-busy');btn.textContent='저장 중…';}
+  try{const baseVersion=Number(saasCloudMeta?.version)||0;const d=await saasRequest('/saas/clinic/state',{method:'PUT',body:JSON.stringify({state:saasStatePayload(),baseVersion})});if(!uploadCurrent())return;saasCloudMeta={...d,state:saasStatePayload(),conflict:false,error:''};const k=saasCloudKey();if(k)localStorage.setItem(k,'1');renderSaasAccount();if(!silent)toast('병원 설정을 클라우드에 저장했습니다.');if(btn){btn.classList.remove('ux-busy');btn.classList.add('ux-done');btn.textContent='✓ 저장 완료';}}catch(e){if(!uploadCurrent())return;if(e.status===409)saasCloudMeta={...(saasCloudMeta||{}),conflict:true,error:e.message||'동기화 충돌',version:e.details?.currentVersion??saasCloudMeta?.version,updatedAt:e.details?.updatedAt||saasCloudMeta?.updatedAt};renderSaasAccount();saasLogClientError('clinic_state_sync',String(e.status||''),e.message||'클라우드 저장 실패');if(!silent)toast(e.message||'클라우드 저장 실패');if(btn){btn.classList.remove('ux-busy');btn.classList.add('ux-error');btn.textContent='다시 시도';}}finally{if(btn)setTimeout(()=>{if(btn.isConnected){btn.disabled=false;btn.classList.remove('ux-done','ux-error');btn.textContent=old||'현재 설정 동기화';}},1200);}
 }
 async function saasDownloadCloud(){
   if(saasMode!=='auth')return;if(!saasHasFeature('cloudSync')){toast(saasFeatureMessage('cloudSync'));return;}const btn=$('saasDownloadState'),old=btn?.textContent;if(btn){btn.disabled=true;btn.classList.add('ux-busy');btn.textContent='불러오는 중…';}
@@ -4373,13 +4373,7 @@ let qrDataUrl='';
 
 function $(id){ return document.getElementById(id); }
 
-function localTodayIso(){
-  const d=new Date();
-  const y=d.getFullYear();
-  const m=String(d.getMonth()+1).padStart(2,'0');
-  const day=String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
-}
+function localTodayIso(){return new Date(Date.now()+32400000).toISOString().slice(0,10);}
 function setDefaultDischargeDate(force=false){
   const el=$('dischargeDate');
   if(!el)return;
@@ -4426,11 +4420,11 @@ function loadHospital(){
   try { return { ...defaultHospital, ...JSON.parse(localStorage.getItem('carestep_hospital') || '{}') }; }
   catch { return { ...defaultHospital }; }
 }
-function saveHospitalData(){ localStorage.setItem(clinicHospitalStorageKey(), JSON.stringify(hospital)); scheduleClinicCloudSync(); }
+function saveHospitalData(){ localStorage.setItem(clinicHospitalStorageKey(), JSON.stringify(hospital)); window.ClinicReliability?.cloudLocalSaved(); scheduleClinicCloudSync(); }
 function loadWorkflowSettings(){
   try{const raw=JSON.parse(localStorage.getItem('carestep_workflow')||'{}');return {...defaultWorkflowSettings,...raw,qr:{...defaultWorkflowSettings.qr,...(raw.qr||{})},followup:{...defaultWorkflowSettings.followup,...(raw.followup||{}),stages:Array.isArray(raw.followup?.stages)?raw.followup.stages:defaultWorkflowSettings.followup.stages},dischargePresets:{...(raw.dischargePresets||{})},packagePresets:{...(raw.packagePresets||{})},followupMessagePresets:Array.isArray(raw.followupMessagePresets)?raw.followupMessagePresets:[],recent:Array.isArray(raw.recent)?raw.recent:[],timings:Array.isArray(raw.timings)?raw.timings:[],usage:Array.isArray(raw.usage)?raw.usage:[],feedback:Array.isArray(raw.feedback)?raw.feedback:[],pilot:{...defaultWorkflowSettings.pilot,...(raw.pilot||{})}};}catch{return JSON.parse(JSON.stringify(defaultWorkflowSettings));}
 }
-function saveWorkflowSettings(){localStorage.setItem(clinicWorkflowStorageKey(),JSON.stringify(workflowSettings));scheduleClinicCloudSync();}
+function saveWorkflowSettings(){localStorage.setItem(clinicWorkflowStorageKey(),JSON.stringify(workflowSettings));window.ClinicReliability?.cloudLocalSaved();scheduleClinicCloudSync();}
 function formatElapsed(ms){const sec=Math.max(0,Math.round(ms/1000));const m=Math.floor(sec/60);const s=sec%60;return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
 function startWorkflowTimer(reset=true){if(reset) workflowStartAt=Date.now();clearInterval(workflowTimerHandle);const tick=()=>{if($('workflowTimer'))$('workflowTimer').textContent=formatElapsed(Date.now()-workflowStartAt);};tick();workflowTimerHandle=setInterval(tick,1000);}
 function stopWorkflowTimer(){const elapsed=Date.now()-workflowStartAt;clearInterval(workflowTimerHandle);workflowTimerHandle=null;return elapsed;}
@@ -5439,7 +5433,7 @@ function showApp(){
   renderAll();carestepSafeCall('permissions',()=>applySaasPermissions());carestepSafeCall('account_render',()=>renderSaasAccount());carestepSafeCall('history_init',()=>carestepInitHistory(carestepActiveView()));
   setTimeout(()=>{try{refreshDailyWorkflowIndicators(false);}catch(e){console.error('[CARESTEP RECOVERY] daily_indicators',e);}},0);
 }
-function showLogin(){r19GoogleStatusScope=''; clearFollowupScopedDetails();carestepResetHistoryForLogin(); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
+function showLogin(){window.ClinicReliability?.clearPrivate();r19GoogleStatusScope=''; clearFollowupScopedDetails();carestepResetHistoryForLogin(); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
 
 /* v9.0.2 HOTFIX 25 · IN-APP BROWSER BACK NAVIGATION
    CARESTEP behaves like a single-page app, so browser Back should move through CARESTEP views
@@ -9703,7 +9697,7 @@ $('cancelClinicDeletionBtn')?.addEventListener('click',cancelClinicDeletion);
 $('withdrawAccountBtn')?.addEventListener('click',withdrawAccount);
 $('saasInviteAcceptBtn')?.addEventListener('click',saasAcceptInvite);
 $('saasUploadState')?.addEventListener('click',()=>saasUploadCloud(false));
-$('saasDownloadState')?.addEventListener('click',saasDownloadCloud);
+$('saasDownloadState')?.addEventListener('click',()=>window.ClinicReliability?.reviewCloud());
 $('saasRefreshAccount')?.addEventListener('click',()=>saasRefreshAccount(true));
 $('saasChangePassword')?.addEventListener('click',saasChangePassword);
 window.addEventListener('beforeunload',e=>{if(!caseHasActiveWork()&&!($('careConsultDialog')?.open&&$('careConsultMessage')?.value.trim()))return;e.preventDefault();e.returnValue='';});
@@ -10392,9 +10386,10 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
+<script src="clinic-reliability.js?v=reliability-20261020a"></script>
 <script src="patient-breeds.js?v=9.5.3"></script>
-<script src="patient-crm.js?v=clarity-20261020f"></script>
-<script src="patient-timeline.js?v=clarity-20261020g"></script>
+<script src="patient-crm.js?v=reliability-20261020a"></script>
+<script src="patient-timeline.js?v=reliability-20261020a"></script>
 <script src="date-input-guard.js?v=9.5.3"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
 <!-- CARESTEP v9.1 · SOLAPI OAuth2 clinic-account messaging -->

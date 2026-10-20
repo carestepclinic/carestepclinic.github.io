@@ -27,9 +27,9 @@
   const DEFAULT_PROTOCOL={vaccines:{dog:{dhppl:{primary:14,booster:365},corona:{primary:14,booster:365},kennel:{primary:14,booster:365},rabies:{primary:365,booster:365},influenza:{primary:14,booster:365}},cat:{fvrcp:{primary:28,booster:365},felv:{primary:28,booster:365},rabies:{primary:365,booster:365}}},heartworm:{interval:28}};
   const state={patient:null,guardian:null,events:[],summary:{},weights:[],filter:'clinical',loading:false,loadError:false,dirty:false,demo:new Map(),demoPresets:[],homeFollowups:[],homeFollowupSummary:{},homeFollowupReadState:'idle',protocol:DEFAULT_PROTOCOL,protocolLoaded:false,presets:[],presetsLoaded:false};
   const esc=v=>String(v??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
-  const today=()=>new Date().toISOString().slice(0,10);
+  const today=()=>window.ClinicReliability.today();
   const dateLabel=v=>{if(!v)return '미입력';const raw=String(v),day=new Date(Date.now()+32400000).toISOString().slice(0,10),d=new Date(raw.length===10?raw+'T00:00:00+09:00':raw);if(!Number.isFinite(d.getTime()))return raw;const key=new Date(d.getTime()+32400000).toISOString().slice(0,10);return key===day?'오늘':(key.slice(0,4)===day.slice(0,4)?'':Number(key.slice(0,4))+'년 ')+Number(key.slice(5,7))+'월 '+Number(key.slice(8,10))+'일';};
-  const addDays=(v,days)=>{const d=new Date((v||today())+'T00:00:00');d.setDate(d.getDate()+Number(days||0));return d.toISOString().slice(0,10);};
+  const addDays=(v,days)=>window.ClinicReliability.addDays(v||today(),Number(days));
   const isDemo=()=>typeof saasMode!=='undefined'&&saasMode==='demo';
   const canDelete=()=>isDemo()||typeof saasMe==='undefined'||!saasMe||(typeof saasPermission==='function'?saasPermission('records.publish',['owner','admin','vet'].includes(String(saasMe.role||'').toLowerCase())):['owner','admin','vet'].includes(String(saasMe.role||'').toLowerCase()));
   function demoEvents(patientId){if(!state.demo.has(patientId))state.demo.set(patientId,[]);return state.demo.get(patientId);}
