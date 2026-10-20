@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {readFileSync} from 'node:fs';
+const index=readFileSync(new URL('../index.html',import.meta.url),'utf8'),care=readFileSync(new URL('../clinic-care.js',import.meta.url),'utf8');
+const slice=(s,a,b)=>s.slice(s.indexOf(a),s.indexOf(b,s.indexOf(a)));
+const context=vm.createContext({Date});
+vm.runInContext(slice(index,'function clinicDraftBadge(','function renderGlobalCaseBadge(')+slice(index,'function followupCaseReadiness(','function followupGuideCaseState(')+slice(care,'function medicationProgressSummary(','function setupMedicationSteps('),context);
+test('a default disease is never shown as an active draft before writing starts',()=>{assert.equal(context.clinicDraftBadge({active:false,topic:'췌장염'}),'자료 작성 전');assert.equal(context.clinicDraftBadge({active:true,patientName:'',topic:'췌장염'}),'자료 작성 중 · 환자 확인 필요');});
+test('a different selected patient cannot inherit the previous draft name and education badge',()=>{assert.equal(context.clinicDraftBadge({active:true,patientName:'이전 환자',topic:'이전 교육자료',samePatient:false}),'작성 환자 확인 필요');assert.equal(context.clinicDraftBadge({active:true,patientName:'가상 환자',topic:'선택 교육자료'}),'자료 작성 중 · 가상 환자 · 선택 교육자료');});
+test('a date alone does not complete the patient and material step',()=>{const s=context.followupCaseReadiness({date:'2026-10-20',templateId:'template'});assert.equal(s.dateReady,true);assert.equal(s.patientReady,false);assert.equal(s.ready,false);});
+test('authenticated followup requires a matching selected and drafting patient and a selected education',()=>{const good={date:'2026-10-20',patientName:'검수환자',templateId:'dental',authenticated:true,patientId:'a',draftPatientId:'a'};assert.equal(context.followupCaseReadiness(good).ready,true);for(const patch of [{patientId:''},{draftPatientId:'b'},{patientName:''},{templateId:''},{date:''}])assert.equal(context.followupCaseReadiness({...good,...patch}).ready,false);assert.equal(context.followupCaseReadiness({...good,authenticated:false,patientId:'',draftPatientId:''}).ready,true);});
+test('unknown registration status never claims zero registered drugs or missing medication',()=>{for(const state of ['조회 필요','확인 중','확인 필요']){const result=context.medicationProgressSummary(['등록 완료',state]);assert.match(result.text,/등록 상태 확인 필요/);assert.doesNotMatch(result.text,/미등록|등록 완료 0/);assert.equal(result.next,1);}});
+test('only confirmed missing drugs are counted separately from comparison-required drugs',()=>{const result=context.medicationProgressSummary(['등록 완료','미등록','대조 필요']);assert.equal(result.text,'작성한 처방 3종 · 등록 완료 1종 · 미등록 1종 · 대조 필요 1종');assert.equal(context.medicationProgressSummary(['등록 완료']).next,-1);});

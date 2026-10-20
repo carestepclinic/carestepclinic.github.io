@@ -73,7 +73,7 @@ function registrationFixture(options={}){
   crypto:{randomUUID:()=> 'request-id'},sessionStorage:{removeItem(){}},draftStorageKey:'draft',medicationDrafts:new Map(),
   paintComparison(){},paintDraftStatus(){},clearMedicationErrors(){},focusMedicationError(){},refreshOverviewAfterMedication(){},
   confirm:()=>{throw Error('A second confirmation popup must not appear');},
-  setupMedicationSteps:(_d,validate)=>({go:n=>{dialog.dataset.medStep=String(n);if(n===3)validate();}})});
+  setupMedicationSteps:(_d,validate)=>({go:n=>{dialog.dataset.medStep=String(n);if(n===3)validate();},complete:()=>{dialog.dataset.medStep='complete';}})});
  c.refresh=async()=>{state.reads++;if(options.read)await options.read({c,state,fields,med,locked,button});};
  c.api=async(_path,opt)=>{const body=JSON.parse(opt.body);writes.push(body);if(options.send)return options.send(body);return {ok:true,plan:{...body,id:'plan-a',patientId:'p1'}};};
  vm.runInContext(part('function homeMedicationPayload(','function createRegistrationBatch(')+part(' const registrationPayload=',' const batchButton=')+'\nthis.review=()=>steps.go(3);this.isSaving=()=>saving;',c);
