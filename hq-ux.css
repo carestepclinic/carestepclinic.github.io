@@ -1,0 +1,55 @@
+@font-face{font-family:"CARESTEP Pretendard";src:url("./pretendard-variable-1.3.9.woff2") format("woff2");font-weight:100 900;font-display:swap}
+:root{--muted:#58677d;--line:#dce4ef}
+body{font-family:"CARESTEP Pretendard","Malgun Gothic",system-ui,sans-serif;font-size:15px;line-height:1.55}
+button,input,select,textarea{font-family:inherit}
+.shell{grid-template-columns:218px minmax(0,1fr)}
+.main,.view,.card,.split,.grid2,.plan-grid,.table-wrap,.hq-payment-card,.hq-payment-head,.head>div{min-width:0;max-width:100%}
+.main{margin:0 auto;padding:24px;width:100%}
+.top{gap:12px;top:0;flex-wrap:wrap}.brand b{font-size:18px}.brand span{font-size:12px}
+.top-actions{flex-wrap:wrap}.pill{font-size:12px}.hq-quick-search{min-width:180px}.hq-quick-search input{font-size:14px;min-height:42px}
+.btn,.btn.small,.nav button,.hq-nav-link{font-size:14px;min-height:42px;padding:9px 13px;line-height:1.4}
+.btn:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #84a7ff;outline-offset:3px}
+.hq-nav-group-toggle{font-size:12px!important;min-height:40px}
+.input,.plan-card .input{font-size:15px;min-height:44px;max-width:100%;width:100%;padding:10px 12px}
+input[type="checkbox"]{width:18px;height:18px;flex-shrink:0;accent-color:var(--blue)}
+.head h1{font-size:24px;line-height:1.35}.card h2{font-size:18px}.plan-card h3{font-size:21px}
+.head p,.card .sub,.muted,.notice,.warn,.field label,.feature,.limits label,.audit,.empty,.clinic-item small,.kpi span,.kpi small{font-size:13px;line-height:1.65}
+.main [style*="font-size:8"],.main [style*="font-size:9"],.main [style*="font-size:10"],.main [style*="font-size:11"]{font-size:12px!important;line-height:1.6!important}
+.status,.cs-status,.cs-reasons span,.hq-nav-count{font-size:12px;line-height:1.4}
+.table th,.table td,.launch-table th,.launch-table td{font-size:13px;padding:12px;line-height:1.6;overflow-wrap:anywhere}
+.table-wrap{width:100%;overflow:auto;overscroll-behavior-x:contain}
+.table-wrap:focus-visible{outline:3px solid #84a7ff;outline-offset:2px}
+.kpis,.customer-success-kpis,.launch-kpis{grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr))!important}
+.kpi strong{font-size:25px}.kpi{padding:16px}.mini span,.hq-service span,.approval-center-card span,.approval-center-card small{font-size:12px}
+.kpi small,.mini span,.approval-center-card small{color:#58677d}
+.clinic-item{padding:14px}.clinic-item b{font-size:15px}.clinic-list{max-height:75vh}
+.form-grid,.price-row,.limits{gap:12px}.field{gap:6px;margin-top:16px}
+.notice,.warn,.critical-note{padding:14px;font-size:13px;overflow-wrap:anywhere}
+.bulk-bar{gap:12px}.bulk-bar label{display:flex;align-items:center;gap:8px}
+.hq-tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:12px;margin:18px 0}
+.hq-tabs [aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.hq-policy{margin:14px 0}.hq-policy>summary{cursor:pointer;font-weight:700;padding:12px}
+.hq-clinic-link{border:0;color:var(--blue);padding:0;text-align:left;min-height:32px}
+.hq-load-status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0;padding:10px 12px;border-radius:10px;background:#f1f5fc;color:#4c5c73;font-size:13px}
+.hq-load-status[data-state="error"]{background:#fff3f1;color:#963d34;border:1px solid #efd1cd}
+.hq-load-status[data-state="loading"]:before{content:"";width:16px;height:16px;border:2px solid #c6d6ff;border-top-color:var(--blue);border-radius:50%;animation:hq-spin .8s linear infinite}
+@keyframes hq-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.hq-load-status[data-state="loading"]:before{animation:none}}
+.hq-editor-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}
+.hq-edit-state{font-size:13px;color:#55657a;margin-right:auto}.hq-edit-state.dirty{color:#97600b;font-weight:700}
+.hq-editor [disabled]{color:#435168;opacity:1;background:#f5f7fb}
+.hq-editor .hq-read-value{display:block;font-size:16px;font-weight:700;color:var(--ink);padding:8px 0;overflow-wrap:anywhere}
+.hq-editor[data-editing="false"] input:not([type="checkbox"]),.hq-editor[data-editing="false"] textarea,.hq-editor[data-editing="false"] select{display:none}
+.hq-editor[data-editing="true"] .hq-read-value{display:none}
+.hq-price-summary{background:#f4f7ff;border-radius:10px;padding:12px;font-size:14px;line-height:1.8}
+.hq-price-summary strong{display:block;color:#163b83;font-size:17px}
+.hq-editor-note{font-size:13px;color:#5a6a80;margin:8px 0}
+.hq-review{border:0;border-radius:18px;padding:24px;width:min(640px,calc(100vw - 28px));max-height:85vh;overflow:auto;color:var(--ink);box-shadow:0 20px 80px #17203340}
+.hq-review::backdrop{background:#17203399}.hq-review h2{font-size:21px;margin-top:0}
+.hq-review-table{width:100%;border-collapse:collapse}.hq-review-table td,.hq-review-table th{padding:10px;border-bottom:1px solid var(--line);text-align:left;overflow-wrap:anywhere;font-size:14px}
+.hq-review-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.hq-subscription-search{max-width:360px}.hq-current-contract{display:block;font-size:12px;color:#52627b;margin-top:5px}
+.hq-detail-loading{padding:20px;border:1px solid var(--line);border-radius:12px}
+.toast{font-size:14px;max-width:calc(100vw - 36px);line-height:1.6}
+@media(max-width:1100px){#planGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.split{grid-template-columns:270px minmax(0,1fr)}}
+@media(max-width:900px){.shell{grid-template-columns:minmax(0,1fr)}.main{padding:16px}.split,.grid2{grid-template-columns:minmax(0,1fr)}.hq-nav{display:flex;flex-wrap:wrap;gap:6px;overflow:visible}.hq-nav-group{min-width:0;margin:0;flex:1 1 150px}.hq-quick-search{order:3;margin:0;max-width:none;flex-basis:100%}.top{padding:12px 16px}.clinic-list{max-height:300px}}
+@media(max-width:650px){#planGrid,.plan-grid,.form-grid,.hq-payment-kpis,.hq-deployment-grid{grid-template-columns:minmax(0,1fr)!important}.main{padding:12px}.head{display:block}.head .toolbar{margin-top:12px}.card{padding:14px}.brand{width:100%}.top-actions{width:100%;gap:6px}.top-actions .pill{margin-right:auto}.hq-tabs .btn{flex:1 1 120px}.hq-review{padding:18px}.hq-review-table td,.hq-review-table th{font-size:13px;padding:8px}.bulk-bar .btn{width:100%}.toolbar .grow{min-width:0;flex-basis:100%}.hq-payment-actions{flex-wrap:wrap}.content-setting{grid-template-columns:auto minmax(0,1fr)}}
