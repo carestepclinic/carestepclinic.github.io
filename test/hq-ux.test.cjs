@@ -744,3 +744,150 @@ for(const width of [390,521,1280])test(`HQ fits ${width}px viewport; tables scro
     if(process.env.HQ_SCREENSHOTS&&pane==='plans')await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`hq-plans-${width}.png`),fullPage:true});
   }
 });
+
+test('Journey work card and All recover the full list without a hidden approval scope',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>{
+  window.journeyReply=Array.from({length:67},(_,i)=>({name:'일정 '+i,isSystem:i!==0,status:'active',autoSyncStatus:'synced',sourceId:'j'+i,stages:[]}));
+  req=(path,o)=>path==='/hq/patient-journeys'?Promise.resolve({journeys:journeyReply}):baseReq(path,o);
+  openApprovalCenterTarget('journeys');
+ });
+ await p.waitForFunction(()=>document.getElementById('hqJourneyTotal').textContent==='67');
+ assert.match(await p.locator('.hq-journey-count').innerText(),/0건/);
+ assert.equal(await p.locator('#journeyScope').inputValue(),'all');
+ assert.equal(await p.locator('#journeyStatusFilter').isVisible(),false);
+ assert.equal(await p.locator('#journeyScope option[value="review"]').count(),0);
+ await p.locator('[data-journey-status-quick="all"]').click();
+ assert.match(await p.locator('.hq-journey-count').innerText(),/67건/);
+ await p.locator('#journeyScope').selectOption('clinic');await p.locator('#journeySearch').fill('없는 이름');
+ await p.getByRole('button',{name:'조건 초기화',exact:true}).click();
+ assert.match(await p.locator('.hq-journey-count').innerText(),/67건/);
+ assert.equal(await p.locator('#journeys .kpis .kpi').count(),3);
+ assert.equal(await p.locator('#journeys .hq-help[open]').count(),0);
+ assert.equal(await p.evaluate(()=>writes.length),0);
+});
+
+test('action totals count six findings at three distinct hospitals and fold only confirmed zero categories',async t=>{
+ const p=await fixture(t);await p.evaluate(async()=>{
+  window.workReply=path=>{
+   if(path.startsWith('/hq/clinics?'))return {clinics:[]};
+   if(path==='/hq/onboarding')return {summary:{attention:3},clinics:['A','B','C'].map(clinicId=>({clinicId,needsAttention:true,goLiveStatus:'attention'}))};
+   if(path==='/hq/customer-success')return {summary:{risk:3},clinics:['A','B','C'].map(clinicId=>({clinicId,status:'risk'}))};
+   return {ok:true,db:true,platform:{oauthAppConfigured:true},provider:{configured:true}};
+  };
+  req=async path=>workReply(path);showView('dashboard');await loadHqActionCenter();
+ });
+ assert.equal(await p.locator('#acTotalPending').innerText(),'6');
+ assert.equal(await p.locator('#acTargetClinics').innerText(),'대상 병원 3곳 · 중복 제외');
+ assert.equal(await p.locator('#hqZeroActions [data-approval-center]').count(),6);
+ assert.equal(await p.locator('#hqZeroActions').evaluate(el=>el.open),false);
+ assert.equal(await p.locator('[data-approval-center="onboarding"]').isVisible(),true);
+ assert.equal(await p.locator('[data-approval-center="content"]').isVisible(),false);
+ await p.locator('#hqZeroActions>summary').click();
+ assert.equal(await p.locator('[data-approval-center="content"]').isVisible(),true);
+ await p.evaluate(async()=>{req=async()=>({ok:true,db:true,platform:{oauthAppConfigured:true}});await loadHqActionCenter();});
+ assert.equal(await p.locator('#hqNoActions').isVisible(),true);
+ assert.equal(await p.locator('#acTargetClinics').innerText(),'대상 병원 0곳 · 중복 제외');
+ assert.equal(await p.evaluate(()=>writes.length),0);
+ if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,'hq8-dashboard-zero.png'),fullPage:true});
+});
+
+test('a failed supplementary payment hospital lookup does not invent a distinct hospital total or lose the known count',async t=>{
+ const p=await fixture(t);await p.evaluate(async()=>{
+  req=async path=>{
+   if(path==='/hq/payments/overview')return {subscriptions:{pastDue:2}};
+   if(path==='/hq/subscriptions')throw Error('시험 병원 목록 실패');
+   return {ok:true,db:true,platform:{oauthAppConfigured:true}};
+  };
+  await loadHqActionCenter();
+ });
+ assert.equal(await p.locator('#acPaymentFailed').innerText(),'2');
+ assert.equal(await p.locator('#acTotalPending').innerText(),'2');
+ assert.equal(await p.locator('#acTargetClinics').innerText(),'대상 병원 일부 확인 불가');
+});
+
+test('work cards set matching list conditions before loading and preserve ready hospitals needing attention',async t=>{
+ const p=await fixture(t);
+ await p.evaluate(()=>{
+  req=async(path,o)=>{
+   if(path==='/hq/onboarding')return {summary:{attention:1},clinics:[{clinicId:'A',clinicName:'대상 병원',goLiveStatus:'live',needsAttention:true,steps:[]},{clinicId:'B',clinicName:'정상 병원',goLiveStatus:'live',needsAttention:false,steps:[]}]};
+   if(path==='/hq/customer-success')return {summary:{risk:1},clinics:[{clinicId:'A',clinicName:'도입 확인 대상',status:'risk'},{clinicId:'B',clinicName:'도입 양호',status:'healthy'}]};
+   if(path.startsWith('/hq/messaging/sender-onboarding'))return {requests:[{clinicId:'A',clinicName:'승인 신청 병원',status:'pending'},{clinicId:'B',clinicName:'등록 진행 병원',status:'registering'},{clinicId:'C',clinicName:'승인 완료 병원',status:'approved'}]};
+   if(path==='/hq/content')return {contents:[{contentId:'a',title:'재검토 대상',status:'published',reviewDueAt:'2020-01-01'},{contentId:'b',title:'검토 완료',status:'published',reviewDueAt:'2099-01-01'}]};
+   if(path==='/hq/subscriptions')return {subscriptions:[{clinicId:'A',clinicName:'결제 확인 대상',status:'past_due'},{clinicId:'B',clinicName:'구독 정상 병원',status:'active'}]};
+   return baseReq(path,o);
+  };
+  document.getElementById('onboardingSearch').value='이전 검색';
+  openApprovalCenterTarget('onboarding');
+ });
+ await p.locator('[data-open-onboarding-clinic="A"]').waitFor();
+ assert.doesNotMatch(await p.locator('#onboardingRows').innerText(),/정상 병원/);
+ await p.evaluate(()=>openApprovalCenterTarget('customerSuccess'));await p.locator('[data-cs-clinic="A"]').waitFor();
+ assert.doesNotMatch(await p.locator('#customerSuccessRows').innerText(),/도입 양호/);
+ await p.evaluate(()=>openApprovalCenterTarget('senders'));await p.locator('[data-sender-clinic="B"]').waitFor();
+ assert.equal(await p.locator('#senderOnboardingTable tbody tr').count(),2);
+ await p.evaluate(()=>openApprovalCenterTarget('content'));await p.locator('[data-content-row="a"]').waitFor();
+ assert.equal(await p.locator('#contentDueOnly').isChecked(),true);
+ assert.doesNotMatch(await p.locator('#contentTable').innerText(),/검토 완료/);
+ await p.evaluate(()=>openApprovalCenterTarget('billing'));await p.locator('[data-sub-clinic="A"]').waitFor();
+ assert.equal(await p.locator('#hqSubscriptionStatus').inputValue(),'past_due');
+ assert.equal(await p.locator('[data-sub-clinic="B"]').isVisible(),false);
+ assert.equal(await p.evaluate(()=>writes.length),0);
+});
+
+test('recovery response periods show pending, reject older replies, distinguish failure and retry to a real zero',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>{
+  window.surveyPendingRequests=[];
+  req=path=>new Promise((resolve,reject)=>surveyPendingRequests.push({path,resolve,reject}));
+  showView('surveys');
+ });
+ assert.equal(await p.locator('#surveyHqInvited').innerText(),'—');
+ assert.equal(await p.locator('#surveyHqRate').innerText(),'응답률 확인 중');
+ await p.locator('#surveyHqPeriod').selectOption('30');
+ await p.evaluate(()=>surveyPendingRequests[1].resolve({overall:{invited:10,responded:2,responseRate:20},byClinic:[],byJourney:[]}));
+ await p.waitForFunction(()=>document.getElementById('surveyHqInvited').textContent==='10');
+ await p.evaluate(()=>surveyPendingRequests[0].resolve({overall:{invited:99},byClinic:[],byJourney:[]}));
+ assert.equal(await p.locator('#surveyHqInvited').innerText(),'10');
+ await p.locator('#surveyHqPeriod').selectOption('365');
+ assert.equal(await p.locator('#surveyHqInvited').innerText(),'—');
+ await p.evaluate(()=>surveyPendingRequests[2].reject(Error('시험 회복응답 실패')));
+ await p.waitForFunction(()=>document.querySelector('#surveys .hq-load-status')?.dataset.state==='error');
+ assert.match(await p.locator('#surveys .hq-load-status').innerText(),/시험 회복응답 실패/);
+ assert.doesNotMatch(await p.locator('#surveyHqClinicTable').innerText(),/집계된 회복응답이 없습니다/);
+ await p.getByRole('button',{name:'다시 시도',exact:true}).click();
+ await p.evaluate(()=>surveyPendingRequests[3].resolve({overall:{invited:0,responded:0},byClinic:[],byJourney:[]}));
+ await p.waitForFunction(()=>document.getElementById('surveyHqInvited').textContent==='0');
+ assert.match(await p.locator('#surveyHqClinicTable').innerText(),/집계된 회복응답이 없습니다/);
+ assert.equal(await p.locator('#surveyHqPeriod').inputValue(),'365');
+});
+
+for(const width of [390,1280])test(`adoption and response tables keep key actions readable with full details at ${width}px`,async t=>{
+ const p=await fixture(t,width);
+ await p.evaluate(()=>{
+  req=async(path,o)=>{
+   if(path==='/hq/customer-success')return {summary:{total:1,risk:1},clinics:[{clinicId:'A',clinicName:'긴 이름의 시험 병원',status:'risk',riskScore:80,adoptionScore:25,riskReasons:['14일 이상 미사용','개통 준비 미완료'],nextAction:'병원 담당자에게 이용 상황 확인',usage:{packages30:1,followup30:4},subscription:{status:'trialing',trialDaysLeft:3},onboarding:{percent:50}}]};
+   if(path.startsWith('/hq/surveys'))return {overall:{invited:20,responded:10,openAlerts:2,openUrgent:1,responseRate:50},byClinic:[{clinicId:'A',clinicName:'확인 대상 병원',openAlerts:2,urgent:1,watch:1,invited:10,responseRate:50},{clinicId:'B',clinicName:'확인 완료 병원',openAlerts:0}],byJourney:[{journeyName:'회복관리 A',openAlerts:2,urgent:1,responded:2,improved:1,responseRate:50}]};
+   return baseReq(path,o);
+  };
+  showView('customerSuccess');
+ });
+ await p.locator('[data-cs-clinic="A"]').waitFor();
+ assert.equal(await p.locator('.hq-adoption-table th').count(),5);
+ assert.match(await p.locator('.hq-adoption-table .hq-compact-main-row').innerText(),/병원 담당자에게 이용 상황 확인/);
+ assert.ok(await p.locator('.hq-adoption-table td').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize)>=14));
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ await p.locator('.hq-adoption-table .hq-row-toggle').click();
+ assert.match(await p.locator('.hq-adoption-table .hq-compact-detail-row').innerText(),/80[\s\S]*후속 4/);
+ if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`hq8-adoption-${width}.png`),fullPage:true});
+ await p.evaluate(()=>openApprovalCenterTarget('surveys'));
+ await p.waitForFunction(()=>document.getElementById('surveyHqInvited').textContent==='20');
+ assert.equal(await p.locator('#hqSurveyScope').inputValue(),'open');
+ assert.match(await p.locator('#surveyHqClinicTable').innerText(),/확인 대상 병원/);
+ assert.doesNotMatch(await p.locator('#surveyHqClinicTable').innerText(),/확인 완료 병원/);
+ assert.doesNotMatch(await p.locator('#surveys').innerText(),/urgent|watch|callback|Guardian Response/);
+ assert.equal(await p.locator('#surveyHqClinicTable th').count(),5);
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ await p.locator('#hqSurveyScope').selectOption('all');
+ assert.match(await p.locator('#surveyHqClinicTable').innerText(),/확인 완료 병원/);
+ if(process.env.HQ_SCREENSHOTS){await p.evaluate(()=>scrollTo(0,0));await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`hq8-surveys-${width}.png`),fullPage:true});}
+ assert.equal(await p.evaluate(()=>writes.length),0);
+});
