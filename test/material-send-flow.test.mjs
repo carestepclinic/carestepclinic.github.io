@@ -168,7 +168,7 @@ test('changing education after preview blocks posting an outdated disease title'
 });
 test('output queue posts supported selections one at a time and does not resend completed items',async()=>{
  const f=domFixture();f.ctx.selectedOutputTypes=()=>['medcheck','summary','staff','sms'];await f.openBuilder();assert.match(f.body.textContent,/이번 HOME 전송에서 제외: staff · sms/);await reviewBuilder(f);await f.click('HOME에 게시하기');
- assert.match(f.body.textContent,/총 2개 중 1개 게시 완료 · 남은 1개/);await f.click('남은 자료 확인 (1개)');assert.deepEqual(f.generatedTypes,['medcheck','summary']);assert.match(f.body.textContent,/복약 체크표 · HOME 게시 완료/);await reviewBuilder(f);await f.click('HOME에 게시하기');assert.equal(f.find('button','남은 자료 확인 (0개)').hidden,true);
+ assert.match(f.body.textContent,/총 2개 중 1개 게시 완료 · 남은 1개/);await f.click('남은 자료 확인 (1개)');assert.deepEqual(f.generatedTypes,['medcheck','summary']);assert.match(f.body.textContent,/투약 체크표 · 문서 · HOME 게시 완료/);await reviewBuilder(f);await f.click('HOME에 게시하기');assert.equal(f.find('button','남은 자료 확인 (0개)').hidden,true);
  await f.click('출력 화면으로 돌아가기');const count=f.requests.length;await f.openBuilder();assert.equal(f.requests.length,count);assert.match(f.body.textContent,/선택 자료 HOME 게시 완료/);assert.equal(f.requests.filter(r=>r.url.endsWith('/attach')).length,2);
 });
 test('staff-only or no output selection never silently sends the default education',async()=>{for(const selected of [[],['staff','sms','meds']]){const f=domFixture();f.ctx.selectedOutputTypes=()=>selected;await f.openBuilder();assert.equal(f.requests.length,0);assert.equal(f.exported.length,0);assert.match(f.body.textContent,/보낼 항목을 체크/);}});
@@ -194,6 +194,6 @@ test('preview edit choices route to the requested input without registration or 
 });
 test('uncertain upload stays pending in the multi-material progress summary until recovery and explicit publication',async()=>{
  const f=domFixture({loseUpload:true});f.ctx.selectedOutputTypes=()=>['medcheck','summary'];await f.openBuilder();await reviewBuilder(f);await f.click('HOME에 게시하기');
- assert.match(f.body.textContent,/총 2개 중 0개 게시 완료 · 남은 2개/);assert.match(f.body.textContent,/복약 체크표 · 결과 확인 필요/);assert.equal(f.find('button','남은 자료 확인 (2개)').hidden,true);
+ assert.match(f.body.textContent,/총 2개 중 0개 게시 완료 · 남은 2개/);assert.match(f.body.textContent,/투약 체크표 · 문서 · 결과 확인 필요/);assert.equal(f.find('button','남은 자료 확인 (2개)').hidden,true);
  await f.click('중단된 저장·게시 결과 조회');assert.match(f.body.textContent,/총 2개 중 0개 게시 완료/);await reviewBuilder(f);await f.click('저장된 PDF HOME에 게시');assert.match(f.body.textContent,/총 2개 중 1개 게시 완료 · 남은 1개/);assert.equal(f.find('button','남은 자료 확인 (1개)').hidden,false);
 });
