@@ -7,7 +7,7 @@ const source=readFileSync(new URL('../hq.html',import.meta.url),'utf8');
 const markup=source.slice(0,source.indexOf('<script>'));
 const scripts=[...source.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(x=>x[1]);
 
-function fixture() {
+function fixture({omit=[]}={}) {
   const rows=[],posts=[],notices=[],nodes=new Map(),timers=[];
   let confirmResult=true, responder=async()=>({ok:true,json:async()=>({ok:true})});
   function node(id='') {
@@ -24,6 +24,7 @@ function fixture() {
     };
   }
   for(const m of markup.matchAll(/\bid="([^"]+)"/g))nodes.set(m[1],node(m[1]));
+  for(const id of omit)nodes.delete(id);
   const select=(selector)=>{
     if(selector.includes('data-journey-bulk'))return rows.filter(r=>!selector.includes(':checked')||r.checked);
     return [];
@@ -44,11 +45,19 @@ function fixture() {
 }
 
 test('actual HQ boot binds Journey bulk controls even when optional CRM/content/voice widgets are absent',()=>{
-  const f=fixture();
+  const f=fixture({omit:['crmHqRefresh','crmHqPeriod','voiceType','voiceStatus']});
   assert.equal(f.nodes.has('crmHqRefresh'),false);
   assert.equal(typeof f.nodes.get('journeySelectAllReview').onchange,'function');
   assert.equal(typeof f.nodes.get('journeyBulkApprove').onclick,'function');
   assert.equal(typeof f.nodes.get('journeyRefresh').onclick,'function');
+});
+
+test('restored CRM and Voice controls bind without interrupting Journey initialization',()=>{
+  const f=fixture();
+  assert.equal(typeof f.nodes.get('crmHqRefresh').onclick,'function');
+  assert.equal(typeof f.nodes.get('voiceType').onchange,'function');
+  assert.equal(typeof f.nodes.get('voiceStatus').onchange,'function');
+  assert.equal(typeof f.nodes.get('journeyBulkApprove').onclick,'function');
 });
 
 test('select all, partial selection, clear and no eligible rows keep header/count/button consistent',async()=>{

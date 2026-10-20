@@ -49,6 +49,8 @@ input[type="checkbox"]{width:18px;height:18px;flex-shrink:0;accent-color:var(--b
 .hq-review-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
 .hq-subscription-search{max-width:360px}.hq-current-contract{display:block;font-size:12px;color:#52627b;margin-top:5px}
 .hq-detail-loading{padding:20px;border:1px solid var(--line);border-radius:12px}
+.hq-voice-body{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:10px;max-width:440px}
+.hq-voice-save-result{display:block;max-width:220px;white-space:normal;overflow-wrap:anywhere;margin-top:6px;font-size:12px}
 .toast{font-size:14px;max-width:calc(100vw - 36px);line-height:1.6}
 @media(max-width:1100px){#planGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.split{grid-template-columns:270px minmax(0,1fr)}}
 @media(max-width:900px){.shell{grid-template-columns:minmax(0,1fr)}.main{padding:16px}.split,.grid2{grid-template-columns:minmax(0,1fr)}.hq-nav{display:flex;flex-wrap:wrap;gap:6px;overflow:visible}.hq-nav-group{min-width:0;margin:0;flex:1 1 150px}.hq-quick-search{order:3;margin:0;max-width:none;flex-basis:100%}.top{padding:12px 16px}.clinic-list{max-height:300px}}

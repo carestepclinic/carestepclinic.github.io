@@ -171,6 +171,113 @@ test('usage, rates and monthly report load independently; rate editor is reusabl
   await p.evaluate(()=>loadUsageBilling());await rate.getByRole('button',{name:'수정',exact:true}).click();
   assert.equal(await p.locator('#rateSms').isDisabled(),false);
 });
+async function feedbackFixture(t,width=1280){
+  const p=await fixture(t,width);
+  await p.evaluate(()=>{
+    window.reads=[];
+    window.crmReply={overall:{activeCases:12,needsReview:3,critical:1,avgRisk:2.5,surveyResponseRate:40,messageSuccessRate:90},byClinic:[{clinicName:'시험 병원 A',activeCases:12,needsReview:3,critical:1,avgRisk:2.5,surveyResponseRate:40}],byJourney:[{journeyName:'시험 회복관리',activeCases:12,needsReview:3,critical:1,high:2,improvementRate:75,messageSuccessRate:90}]};
+    window.voiceReply=[{id:'synthetic-request',title:'시험 기능 요청',clinicName:'시험 병원 A',type:'feature',details:'긴 요청 내용\n'+'내용 확인 '.repeat(80)+'<img src=x onerror=alert(1)>',status:'new',adminNote:'기존 메모 보존',sameRequestCount:2,createdAt:'2026-10-20T00:00:00Z'}];
+    window.feedbackFail='';
+    req=async(path,o)=>{
+      reads.push(path);
+      if(o?.method==='PATCH'){
+        const result=await baseReq(path,o);const body=JSON.parse(o.body);voiceReply[0].status=body.status;return result;
+      }
+      if(path.startsWith('/hq/followup-crm')){if(feedbackFail==='crm')throw Error('시험 CRM 조회 실패');return structuredClone(crmReply);}
+      if(path.startsWith('/hq/voice')){if(feedbackFail==='voice')throw Error('시험 요청 조회 실패');return {requests:structuredClone(voiceReply)};}
+      return baseReq(path,o);
+    };
+  });
+  return p;
+}
+test('CRM and Customer Voice menu clicks show populated screens and send the expected filters',async t=>{
+  const p=await feedbackFixture(t);
+  await p.locator('[data-hq-nav-toggle="content"]').click();
+  await p.getByRole('button',{name:'Follow-up CRM',exact:true}).click();
+  await p.waitForFunction(()=>$('crmHqActive').textContent==='12');
+  assert.match(p.url(),/#crm$/);assert.match(await p.locator('#crmHqClinicTable').innerText(),/시험 병원 A/);
+  assert.match(await p.locator('#crmHqJourneyTable').innerText(),/시험 회복관리/);
+  await p.locator('#crmHqPeriod').selectOption('90');
+  await p.getByRole('button',{name:'Customer Voice',exact:true}).click();
+  await p.waitForFunction(()=>$('voiceResultSummary').textContent.startsWith('조회 1건'));
+  assert.match(p.url(),/#voice$/);
+  await p.locator('#voiceType').selectOption('feature');await p.locator('#voiceStatus').selectOption('new');
+  await p.waitForFunction(()=>reads.includes('/hq/voice?type=feature&status=new'));
+  assert.ok((await p.evaluate(()=>reads)).includes('/hq/followup-crm?days=90'));
+  assert.equal(await p.evaluate(()=>writes.length),0);
+});
+test('CRM loading and failure remain distinct from a successful empty result; retry works',async t=>{
+  const p=await feedbackFixture(t);
+  await p.evaluate(()=>{feedbackFail='crm';showView('crm');});
+  await p.locator('#crm .hq-load-status[data-state="error"]').waitFor();
+  assert.equal(await p.locator('#crmHqActive').innerText(),'—');
+  assert.doesNotMatch(await p.locator('#crmHqClinicTable').innerText(),/집계된 후속관리가 없습니다/);
+  await p.evaluate(()=>{feedbackFail='';crmReply={overall:{},byClinic:[],byJourney:[]};});
+  await p.locator('#crm .hq-load-status button').click();
+  await p.locator('#crm .hq-load-status[data-state="ready"]').waitFor();
+  assert.equal(await p.locator('#crmHqActive').innerText(),'0');
+  assert.match(await p.locator('#crmHqClinicTable').innerText(),/선택한 기간에 집계된 후속관리가 없습니다/);
+});
+test('Customer Voice distinguishes a failed lookup from no requests and supports retry',async t=>{
+  const p=await feedbackFixture(t);await p.evaluate(()=>{feedbackFail='voice';showView('voice');});
+  await p.locator('#voice .hq-load-status[data-state="error"]').waitFor();
+  assert.match(await p.locator('#voiceResultSummary').innerText(),/조회 실패/);
+  assert.doesNotMatch(await p.locator('#voiceResultSummary').innerText(),/조회 0건/);
+  await p.evaluate(()=>{feedbackFail='';voiceReply=[];});
+  await p.locator('#voice .hq-load-status button').click();
+  await p.locator('#voice .hq-load-status[data-state="ready"]').waitFor();
+  assert.match(await p.locator('#voiceResultSummary').innerText(),/조회 0건/);
+  assert.match(await p.locator('#voiceTable').innerText(),/해당하는 병원 요청이 없습니다/);
+});
+test('CRM and Voice ignore out-of-order responses after changing filters',async t=>{
+  const p=await feedbackFixture(t);
+  await p.evaluate(async()=>{
+    window.pending={};req=path=>new Promise(r=>pending[path]=r);
+    $('crmHqPeriod').value='180';const c1=loadFollowupCrmHQ();
+    $('crmHqPeriod').value='30';const c2=loadFollowupCrmHQ();
+    pending['/hq/followup-crm?days=30']({...crmReply,overall:{activeCases:30}});await c2;
+    pending['/hq/followup-crm?days=180']({...crmReply,overall:{activeCases:180}});await c1;
+    $('voiceType').value='all';const v1=loadVoice();$('voiceType').value='feature';const v2=loadVoice();
+    pending['/hq/voice?type=feature&status=all']({requests:[{...voiceReply[0],title:'최신 조회 결과'}]});await v2;
+    pending['/hq/voice?type=all&status=all']({requests:[{...voiceReply[0],title:'오래된 조회 결과'}]});await v1;
+  });
+  assert.equal(await p.locator('#crmHqActive').textContent(),'30');
+  assert.match(await p.locator('#voiceTable').textContent(),/최신 조회 결과/);
+  assert.doesNotMatch(await p.locator('#voiceTable').textContent(),/오래된 조회 결과/);
+});
+test('Voice keeps full escaped request text, preserves admin note and writes each status change once',async t=>{
+  const p=await feedbackFixture(t);await p.evaluate(()=>showView('voice'));
+  await p.locator('[data-voice]').waitFor();
+  await p.locator('#voiceTable summary').click();
+  assert.match(await p.locator('#voiceTable .hq-voice-body').first().innerText(),/<img src=x onerror=alert\(1\)>/);
+  assert.equal(await p.locator('#voiceTable img').count(),0);
+  assert.equal(await p.locator('.voice-save').isDisabled(),true);
+  await p.locator('.voice-status').selectOption('reviewing');
+  await p.evaluate(()=>{const current=req;req=async(path,o)=>{if(o?.method==='PATCH')await new Promise(r=>window.releaseVoice=r);return current(path,o);};});
+  await p.locator('.voice-save').dblclick();
+  assert.equal(await p.locator('#voiceType').isDisabled(),true);
+  assert.equal(await p.locator('.voice-save').isDisabled(),true);
+  await p.evaluate(()=>releaseVoice());await p.waitForFunction(()=>writes.length===1&&!CarestepHqUX.isSaving());
+  assert.deepEqual((await p.evaluate(()=>writes))[0],{path:'/hq/voice/synthetic-request',body:{status:'reviewing',adminNote:'기존 메모 보존'}});
+  await p.waitForFunction(()=>document.querySelector('.voice-status')?.value==='reviewing');
+});
+test('Voice failed save retains the chosen status and permits an explicit retry',async t=>{
+  const p=await feedbackFixture(t);await p.evaluate(()=>{showView('voice');failWrite=true;});
+  await p.locator('[data-voice]').waitFor();await p.locator('.voice-status').selectOption('hold');await p.locator('.voice-save').click();
+  await p.waitForFunction(()=>writes.length===1&&!CarestepHqUX.isSaving());
+  assert.equal(await p.locator('.voice-status').inputValue(),'hold');assert.equal(await p.locator('.voice-save').isDisabled(),false);
+  assert.match(await p.locator('.hq-voice-save-result').innerText(),/시험 저장 실패/);
+});
+test('restored feedback deep links retain filters and fit a narrow screen',async t=>{
+  const p=await feedbackFixture(t,390);
+  for(const view of ['crm','voice']){
+    await p.evaluate(view=>{history.replaceState(null,'','#'+view);CarestepHqUX.restoreRoute();},view);
+    await p.locator('#'+view+' .hq-load-status[data-state="ready"]').waitFor();
+    assert.equal(await p.locator('.view.active').getAttribute('id'),view);
+    assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+    if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`hq-${view}-390.png`),fullPage:true});
+  }
+});
 for(const width of [390,521,1280])test(`HQ fits ${width}px viewport; tables scroll internally and text is readable`,async t=>{
   const p=await fixture(t,width);await billing(p);
   for(const pane of ['subscriptions','plans','payments']){

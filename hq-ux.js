@@ -6,7 +6,7 @@
   const stateKey='carestep_hq_ui_v20261020';
   let currentView='dashboard',billingPane='subscriptions',restoring=false,reviewOpen=false;
   let activeSave=null,quickSequence=0,clinicListSequence=0,clinicDetailSequence=0;
-  const filterIds=['clinicSearch','clinicStatus','clinicApproval','journeySearch','journeyScope','journeyStatusFilter','billingMonth','hqSubscriptionSearch'];
+  const filterIds=['clinicSearch','clinicStatus','clinicApproval','journeySearch','journeyScope','journeyStatusFilter','billingMonth','hqSubscriptionSearch','crmHqPeriod','voiceType','voiceStatus'];
   const safeNumber=n=>n!==null&&n!==undefined&&n!==''&&Number.isFinite(Number(n));
   const won=n=>safeNumber(n)?`${Number(n).toLocaleString('ko-KR')}원`:'금액 확인 필요';
   const latest=key=>{const n=(sequences.get(key)||0)+1;sequences.set(key,n);return ()=>sequences.get(key)===n;};
@@ -215,7 +215,7 @@
   async function reloadView(view=currentView){
     if(!allowLeave())return;
     const loader=viewLoader(view);if(!loader)return;
-    if(['billing','usageBilling','clinics'].includes(view)){await loader();return;}
+    if(['billing','usageBilling','clinics','crm','voice'].includes(view)){await loader();return;}
     await region(view,loader,()=>{},()=>reloadView(view));
   }
   function navigate(view,{push=true,check=true}={}){
@@ -337,6 +337,82 @@
   };
   const originalRatesSave=saveMessagingRates;
   saveMessagingRates=()=>reviewedSave('rates',()=>originalRatesSave());
+  const crmCountIds=['crmHqActive','crmHqReview','crmHqCritical','crmHqRisk','crmHqSurvey','crmHqMessage'];
+  loadFollowupCrmHQ=async function(){
+    const current=latest('crm-data'),days=byId('crmHqPeriod').value;
+    saveState();setRegion('crm','loading');clearCounts(crmCountIds);
+    for(const id of ['crmHqClinicTable','crmHqJourneyTable'])byId(id).innerHTML='<div class="empty">후속관리 현황을 불러오는 중입니다.</div>';
+    try{
+      const data=await req('/hq/followup-crm?days='+encodeURIComponent(days));
+      if(!current())return;
+      if(!data.overall||!Array.isArray(data.byClinic)||!Array.isArray(data.byJourney))throw Error('후속관리 조회 결과를 확인할 수 없습니다.');
+      crmAnalytics=data;renderFollowupCrmHQ();setRegion('crm','ready');
+    }catch(error){
+      if(!current())return;
+      clearCounts(crmCountIds);
+      for(const id of ['crmHqClinicTable','crmHqJourneyTable'])byId(id).innerHTML='<div class="empty">조회하지 못했습니다. 위의 다시 시도를 눌러주세요.</div>';
+      setRegion('crm','error',{error:error.message,retry:()=>loadFollowupCrmHQ()});
+    }
+  };
+  const originalCrmRender=renderFollowupCrmHQ;
+  renderFollowupCrmHQ=function(){
+    originalCrmRender();
+    for(const id of ['crmHqClinicTable','crmHqJourneyTable']){
+      const table=byId(id);
+      table.querySelectorAll('td').forEach(cell=>{if(cell.textContent==='CRM 데이터 없음')cell.textContent='선택한 기간에 집계된 후속관리가 없습니다.';});
+      table.querySelectorAll('.table-wrap').forEach(el=>{el.tabIndex=0;el.setAttribute('aria-label','후속관리 현황 · 좌우로 스크롤할 수 있습니다.');});
+    }
+  };
+  const voiceTypes={condition:'질환 자료 요청',feature:'기능 제안',inquiry:'문의'};
+  const voiceStates={new:'신규',reviewing:'검토 중',planned:'제작 예정',building:'제작 중',review:'검수 중',published:'공개 완료',answered:'답변 완료',hold:'보류'};
+  function voiceControlsDisabled(disabled){
+    byId('voice').querySelectorAll('select,button').forEach(el=>{
+      el.disabled=disabled||(el.matches('.voice-save')&&el.closest('tr')?.querySelector('.voice-status')?.value===el.closest('tr')?.dataset.savedStatus);
+    });
+  }
+  loadVoice=async function(){
+    if(activeSave)return;
+    const current=latest('voice-data'),type=byId('voiceType').value,status=byId('voiceStatus').value;
+    saveState();setRegion('voice','loading');
+    byId('voiceResultSummary').textContent='요청 목록을 불러오는 중입니다.';
+    byId('voiceTable').innerHTML='<div class="empty">요청 목록을 불러오는 중입니다.</div>';
+    try{
+      const data=await req(`/hq/voice?type=${encodeURIComponent(type)}&status=${encodeURIComponent(status)}`);
+      if(!current())return;
+      if(!Array.isArray(data.requests))throw Error('요청 목록의 조회 결과를 확인할 수 없습니다.');
+      voice=data.requests;renderVoice();setRegion('voice','ready');
+    }catch(error){
+      if(!current())return;
+      byId('voiceResultSummary').textContent='조회 실패 · 요청 건수를 확인하지 못했습니다.';
+      byId('voiceTable').innerHTML='<div class="empty">조회하지 못했습니다. 위의 다시 시도를 눌러주세요.</div>';
+      setRegion('voice','error',{error:error.message,retry:()=>loadVoice()});
+    }
+  };
+  renderVoice=function(){
+    byId('voiceResultSummary').textContent=`조회 ${voice.length.toLocaleString('ko-KR')}건 · 최신순${voice.length>=250?' · 최근 250건까지 표시':''}`;
+    byId('voiceTable').innerHTML=voice.length?`<div class="table-wrap" tabindex="0" aria-label="병원 요청 목록 · 좌우로 스크롤할 수 있습니다."><table class="table"><thead><tr><th>요청</th><th>병원</th><th>내용</th><th>동일 요청</th><th>처리 상태</th><th>저장</th></tr></thead><tbody>${voice.map(x=>`<tr data-voice="${esc(x.id)}" data-saved-status="${esc(x.status)}"><td><b>${esc(x.title)}</b><br><span class="muted">${esc(voiceTypes[x.type]||x.type)} · ${date(x.createdAt)}</span></td><td>${esc(x.clinicName||'병원 미연결')}</td><td><details><summary>요청 내용 보기</summary><div class="hq-voice-body">${esc(x.details||'추가 내용 없음')}</div>${x.adminNote?`<p class="hq-voice-body"><b>기존 관리 메모</b><br>${esc(x.adminNote)}</p>`:''}</details></td><td>${fmt(x.sameRequestCount)}건</td><td><select class="input voice-status" aria-label="${esc(x.title)} 처리 상태">${Object.entries(voiceStates).map(([key,label])=>`<option value="${key}" ${x.status===key?'selected':''}>${label}</option>`).join('')}</select></td><td><button type="button" class="btn small voice-save" disabled>상태 저장</button><span class="hq-voice-save-result" role="status"></span></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">선택한 조건에 해당하는 병원 요청이 없습니다.</div>';
+    byId('voiceTable').querySelectorAll('[data-voice]').forEach(row=>{
+      row.querySelector('.voice-status').onchange=()=>{row.querySelector('.voice-save').disabled=!!activeSave||row.querySelector('.voice-status').value===row.dataset.savedStatus;};
+      row.querySelector('.voice-save').onclick=()=>saveVoice(row);
+    });
+  };
+  saveVoice=async function(row){
+    if(activeSave)return false;
+    const id=row.dataset.voice,entry=voice.find(x=>x.id===id),status=row.querySelector('.voice-status').value,result=row.querySelector('.hq-voice-save-result');
+    if(!entry||status===entry.status||!Object.hasOwn(voiceStates,status))return false;
+    activeSave='voice:'+id;voiceControlsDisabled(true);result.textContent='저장 중…';
+    try{
+      await req('/hq/voice/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({status,adminNote:entry.adminNote||''})});
+      entry.status=status;row.dataset.savedStatus=status;result.textContent='저장 완료';toast('요청 상태를 저장했습니다.');
+    }catch(error){result.textContent=error.message||'저장 실패 · 다시 시도해주세요.';return false;}
+    finally{activeSave=null;voiceControlsDisabled(false);}
+    await loadVoice();return true;
+  };
+  byId('crmHqRefresh').onclick=()=>loadFollowupCrmHQ();
+  byId('crmHqPeriod').onchange=()=>loadFollowupCrmHQ();
+  byId('voiceRefresh').onclick=()=>loadVoice();
+  byId('voiceType').onchange=()=>loadVoice();
+  byId('voiceStatus').onchange=()=>loadVoice();
   const originalClinicSave=saveClinic;
   saveClinic=()=>{if(!allowLeave())return;return originalClinicSave();};
   byId('usageBillingRefresh').onclick=()=>loadUsageBilling();
