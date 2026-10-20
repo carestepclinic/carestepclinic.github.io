@@ -14,8 +14,8 @@ test('only a successfully loaded identical consultation is removed from the clin
 test('both tab counts distinguish zero from failed, loading, and unavailable reads',()=>{
  const nodes={'clinicToday-tab-attention':{},'clinicToday-tab-clinical':{}};
  const {c,model}=organization({document:{readyState:'loading',addEventListener(){},getElementById:id=>nodes[id]}});
- c.carestepAttentionSummary=()=>({state:'ready',total:0});c.carestepClinicalSummary=()=>({state:'ready',total:7});model.updateTodayCounts();assert.match(nodes['clinicToday-tab-attention'].textContent,/0항목/);assert.match(nodes['clinicToday-tab-clinical'].textContent,/7항목/);
- for(const [state,label] of [['failed','조회 실패'],['loading','확인 중'],['unavailable','이용 불가']]){c.carestepClinicalSummary=()=>({state,total:0});model.updateTodayCounts();assert.match(nodes['clinicToday-tab-clinical'].textContent,new RegExp(label));assert.doesNotMatch(nodes['clinicToday-tab-clinical'].textContent,/0항목/);}
+ c.carestepAttentionSummary=()=>({state:'ready',total:0});c.carestepClinicalSummary=()=>({state:'ready',total:7});model.updateTodayCounts();assert.match(nodes['clinicToday-tab-attention'].textContent,/확인 항목 0개 · 대상 0건/);assert.match(nodes['clinicToday-tab-clinical'].textContent,/개별 업무 7건/);
+ for(const [state,label] of [['failed','조회 실패'],['loading','확인 중'],['unavailable','이용 불가']]){c.carestepClinicalSummary=()=>({state,total:0});model.updateTodayCounts();assert.match(nodes['clinicToday-tab-clinical'].textContent,new RegExp(label));assert.doesNotMatch(nodes['clinicToday-tab-clinical'].textContent,/개별 업무 0건/);}
 });
 test('publication notices never infer an attempt, receipt, or reading from an absent result',()=>{
  const {model}=organization();assert.match(model.noticeLabel(null),/결과 확인 불가/);assert.doesNotMatch(model.noticeLabel(null),/전달 시도|접수 0/);

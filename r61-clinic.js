@@ -1466,7 +1466,7 @@
         ;
         const showError = e => {
             const code = pdfErrorCode(e);
-            info.textContent = code === 'HOME_GUARDIAN_NOT_LINKED' ? 'HOME_GUARDIAN_NOT_LINKED · 보호자를 CARESTEP Home에 먼저 연결해주세요. PDF는 저장하지 않았습니다.' : (control.state().pending ? '결과 미확정 · ' : '처리 중단 · ') + code + ' · 자동 재시도하지 않습니다.';
+            info.textContent = code === 'HOME_GUARDIAN_NOT_LINKED' ? 'HOME_GUARDIAN_NOT_LINKED · 보호자를 CARESTEP HOME에 먼저 연결해주세요. PDF는 저장하지 않았습니다.' : (control.state().pending ? '결과 미확정 · ' : '처리 중단 · ') + code + ' · 자동 재시도하지 않습니다.';
         }
         ;
         const show = result => {
@@ -1541,7 +1541,7 @@
         }
         );
         action('send', 'PDF를 HOME에 게시', async () => {
-            if (!confirm('현재 환자·연결 보호자·자료를 CARESTEP Home에 게시합니까?'))
+            if (!confirm('현재 환자·연결 보호자·자료를 CARESTEP HOME에 게시합니까?'))
                 return;
             const result = await control.attach(true);
             if (result)
@@ -1685,7 +1685,7 @@
                     guard();
                     if (!control.state().sent) {
                         if (control.state().status !== 'READY_UNSENT') throw Error('PDF_RESPONSE_UNCONFIRMED');
-                        onProgress('CARESTEP Home에 보내는 중…');
+                        onProgress('CARESTEP HOME에 보내는 중…');
                         await control.attach(true);
                     }
                     guard();
@@ -1711,7 +1711,7 @@
     }
     function deleteComposerDraft(base,kind){const key=draftKey(base,kind);composerDrafts.delete(key);try{sessionStorage.removeItem(key);}catch{}draftChanged();}
     function allComposerDrafts(){const session=syncDraftSession(),rows=new Map();try{for(let i=0;i<sessionStorage.length;i++){const key=sessionStorage.key(i);if(!key?.startsWith(draftPrefix))continue;const row=JSON.parse(sessionStorage.getItem(key));if(row?.session===session&&(row.text?.trim()||row.title!==materialKindLabel(row.kind)))rows.set(key,row);}}catch{}for(const [key,row] of composerDrafts)if(row.session===session&&(row.text?.trim()||row.title!==materialKindLabel(row.kind)))rows.set(key,row);return [...rows.values()].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));}
-    function materialHelp(code){return ({HOME_GUARDIAN_NOT_LINKED:'보호자 HOME 연결이 필요합니다.',PDF_ALREADY_POSTED:'이 자료는 이미 Home에 게시되어 있습니다. 기존 자료 이력을 확인해주세요.',PDF_PENDING_OTHER_ASSET:'앞서 저장한 PDF의 결과 확인이 필요합니다.',PDF_ASSET_UNAVAILABLE:'저장된 PDF를 확인하지 못했습니다. 자료 이력과 중단된 결과를 조회해주세요.',MATERIAL_TEMPLATE_REQUIRED:'이번 진료에 맞는 질환·시술 교육자료를 선택하거나 확인해주세요.',MATERIAL_SOURCE_CHANGED:'교육자료 또는 진단·처방 입력이 바뀌었습니다. 현재 내용을 확인하고 PDF 미리보기를 다시 만들어주세요.',MATERIAL_SCOPE_CHANGED:'선택한 환자 또는 보호자가 바뀌었습니다. 현재 창을 닫고 다시 열어주세요.',PDF_PATIENT_CHANGED:'자료 작성 화면의 환자가 다릅니다. 선택 환자의 자료 작성 화면에서 내용을 확인해주세요.',PDF_FEATURE_OFF:'PDF 송부 기능이 꺼져 있습니다. 관리자 설정을 확인해주세요.',MATERIAL_LOGIN_REQUIRED:'로그인 후 환자를 선택해주세요.',PDF_MEDICATION_REQUIRED:'약 이름과 복약 정보를 입력한 뒤 미리보기를 눌러주세요.',PDF_MEDICATION_DURATION_REQUIRED:'각 약의 투약 기간을 확인해주세요.',MATERIAL_ORIGINAL_SOURCE_CHANGED:'등록 자료와 현재 입력 내용이 다릅니다. 새 자료 작성 또는 기존 자료 이력을 선택해주세요.'})[code]||'처리 결과를 확인하지 못했습니다. 결과 조회 후 이어서 진행해주세요.';}
+    function materialHelp(code){return ({HOME_GUARDIAN_NOT_LINKED:'보호자 HOME 연결이 필요합니다.',PDF_ALREADY_POSTED:'이 자료는 이미 HOME에 게시되어 있습니다. 기존 자료 이력을 확인해주세요.',PDF_PENDING_OTHER_ASSET:'앞서 저장한 PDF의 결과 확인이 필요합니다.',PDF_ASSET_UNAVAILABLE:'저장된 PDF를 확인하지 못했습니다. 자료 이력과 중단된 결과를 조회해주세요.',MATERIAL_TEMPLATE_REQUIRED:'이번 진료에 맞는 질환·시술 교육자료를 선택하거나 확인해주세요.',MATERIAL_SOURCE_CHANGED:'교육자료 또는 진단·처방 입력이 바뀌었습니다. 현재 내용을 확인하고 PDF 미리보기를 다시 만들어주세요.',MATERIAL_SCOPE_CHANGED:'선택한 환자 또는 보호자가 바뀌었습니다. 현재 창을 닫고 다시 열어주세요.',PDF_PATIENT_CHANGED:'자료 작성 화면의 환자가 다릅니다. 선택 환자의 자료 작성 화면에서 내용을 확인해주세요.',PDF_FEATURE_OFF:'PDF 송부 기능이 꺼져 있습니다. 관리자 설정을 확인해주세요.',MATERIAL_LOGIN_REQUIRED:'로그인 후 환자를 선택해주세요.',PDF_MEDICATION_REQUIRED:'약 이름과 복약 정보를 입력한 뒤 미리보기를 눌러주세요.',PDF_MEDICATION_DURATION_REQUIRED:'각 약의 투약 기간을 확인해주세요.',MATERIAL_ORIGINAL_SOURCE_CHANGED:'등록 자료와 현재 입력 내용이 다릅니다. 새 자료 작성 또는 기존 자료 이력을 선택해주세요.'})[code]||'처리 결과를 확인하지 못했습니다. 결과 조회 후 이어서 진행해주세요.';}
     async function showHomeConnection(){const c=selection();if(!materialId(c.patientId)||!materialId(c.guardianId))return choosePatient();await window.crmOpenPatientRecord?.(c.guardianId,c.patientId);const target=document.querySelector('[data-crm-home-invite]');target?.scrollIntoView({block:'center'});target?.focus();}
     function choosePatient(){if(typeof go==='function')go('patients');document.getElementById('patientCrmSearch')?.focus();}
     async function openWorkspaceComposer(){
@@ -1752,13 +1752,13 @@
         let base;try{base=materialScope('scope-check',1);}catch{choosePatient();return;}
         if(typeof currentWizardStep!=='undefined'&&currentWizardStep!==5){if(typeof go==='function')go('builder');setWizardStep(5);return;}
         const selected=typeof selectedOutputTypes==='function'?selectedOutputTypes():[],kinds=[...new Set(selected.map(type=>builderMaterialKinds[type]).filter(Boolean))];
-        if(!kinds.length){const {body,d}=dialog('Home에 보낼 자료 선택');body.append(el('p','⑤ 출력에서 고급 보호자 자료·퇴원 1P 요약·복약 체크표 중 보낼 항목을 체크해주세요. 다른 출력물은 다운로드로 이용할 수 있습니다.'));button(body,'출력 선택으로 돌아가기',()=>d.close());return;}
+        if(!kinds.length){const {body,d}=dialog('HOME에 보낼 자료 선택');body.append(el('p','⑤ 출력에서 고급 보호자 자료·퇴원 1P 요약·복약 체크표 중 보낼 항목을 체크해주세요. 다른 출력물은 다운로드로 이용할 수 있습니다.'));button(body,'출력 선택으로 돌아가기',()=>d.close());return;}
         syncDraftSession();const source=materialSourceContext(),key=JSON.stringify([base,source.signature]);
         if(!builderMaterialQueue||builderMaterialQueue.key!==key)builderMaterialQueue={base,source,key,pool:new Map()};
         const queue=builderMaterialQueue;queue.items=kinds.map(kind=>{if(!queue.pool.has(kind))queue.pool.set(kind,{kind,sent:false});return queue.pool.get(kind);});queue.excluded=selected.filter(type=>!builderMaterialKinds[type]).map(type=>typeof outputLabel==='function'?outputLabel(type):type);
         try{builderMaterialGuard(queue);}catch(e){const {body}=dialog('작성 환자 확인');body.append(el('p',materialHelp(pdfErrorCode(e))));button(body,'환자 선택 확인',choosePatient);return;}
         const item=queue.items.find(row=>!row.sent);
-        if(!item){const {body,d}=dialog('선택 자료 HOME 게시 완료'),summary=el('p'),list=el('ol');summary.className='r61-queue-summary';list.className='r61-output-queue';renderBuilderQueue(summary,list,queue);body.append(summary,list,el('p','선택한 자료는 이미 Home에 게시했습니다. 문자는 발송하지 않았습니다. 새 자료 푸시는 알림이 켜진 연결 기기에 전달을 시도합니다.'));button(body,'HOME 복약 일정 등록',async()=>{materialSame(queue.base,materialScope('scope-check',1));d.close();await window.carestepOpenMedicationPlans?.();});button(body,'게시 이력 확인',materialHistory);button(body,'출력으로 돌아가기',()=>d.close());return;}
+        if(!item){const {body,d}=dialog('선택 자료 HOME 게시 완료'),summary=el('p'),list=el('ol');summary.className='r61-queue-summary';list.className='r61-output-queue';renderBuilderQueue(summary,list,queue);body.append(summary,list,el('p','선택한 자료는 이미 HOME에 게시했습니다. 문자는 발송하지 않았습니다. 새 자료 푸시는 알림이 켜진 연결 기기에 전달을 시도합니다.'));button(body,'HOME 복약 일정 등록',async()=>{materialSame(queue.base,materialScope('scope-check',1));d.close();await window.carestepOpenMedicationPlans?.();});button(body,'게시 이력 확인',materialHistory);button(body,'출력으로 돌아가기',()=>d.close());return;}
         await sendMaterial(item.kind,{queue,item});
     }
     function builderProgressModel({step,previewSeen,previewCurrent,published=0,total=0}){const stale=previewSeen&&!previewCurrent;return {phase:total>0&&published===total?'published':step===5?'preview':'writing',stale,message:stale?'입력 내용이 바뀌었습니다. 출력 단계에서 최신 미리보기를 확인해주세요.':total>0&&published===total?'HOME 게시 '+published+'/'+total+'개 완료 · 알림·열람 여부는 게시 이력에서 확인':step===5?(previewCurrent?'현재 입력으로 미리보기 갱신됨 · 출력과 HOME 게시를 선택하세요.':'출력 단계 · 미리보기를 확인한 뒤 HOME 게시를 진행하세요.'):'작성 '+step+'/5 · '+({1:'환자',2:'퇴원지시',3:'복약',4:'재진'})[step]+' 입력 중 · 작성 내용은 단계 이동 시 유지됩니다.'};}
@@ -1854,7 +1854,7 @@
         try { base = materialScope('scope-check', 1); }
         catch { alert('환자를 선택하면 자료 작성·송부를 진행할 수 있습니다.'); choosePatient(); return; }
         materialComposerOpen = true;
-        const {body, d} = dialog(builder?'보호자 Home에 게시':'이전 작성창 초안');d.className+=' r61-composer'+(builder?' r61-builder-send':'');
+        const {body, d} = dialog(builder?'보호자 HOME에 게시':'이전 작성창 초안');d.className+=' r61-composer'+(builder?' r61-builder-send':'');
         const info = el('p', '자료와 보호자 연결을 확인하고 있습니다.');
         info.setAttribute('role', 'status'); info.setAttribute('aria-live', 'polite'); body.append(info);
         let blobURL = null, uiBusy = false, previewSourceSignature=null, builderRecoveryInvalid=false;
@@ -1879,7 +1879,7 @@
         if(builder){body.insertBefore(queueSummary,stepper);body.insertBefore(queueList,stepper);body.insertBefore(sourceSummary,stepper);sourceSummary.textContent='교육자료: '+builder.queue.source.title+' · 진단/수술: '+(builder.queue.source.procedure||'미입력')+' · 작성한 환자·복약·일정을 그대로 사용합니다.';if(builder.queue.excluded.length)body.append(el('p','이번 HOME 전송에서 제외: '+builder.queue.excluded.join(' · ')+' — 출력 화면의 다운로드를 이용해주세요.'));}
         const helpActions=el('details');helpActions.className='r61-composer-help';helpActions.append(el('summary','환자·처방·HOME 연결 확인'));if(builder)helpActions.open=home.guardian.homeStatus!=='linked';body.append(helpActions);const helpNavigation=[button(helpActions,'HOME 연결 확인',async()=>{d.close();await showHomeConnection();}),button(helpActions,'환자·처방 입력 화면',()=>{d.close();if(typeof go==='function')go('builder');})];
 
-        publishPanel.append(el('h3','Home에 게시할 자료를 확인하세요.'),el('p', '자료 등록과 PDF 저장 후 CARESTEP HOME 자료함에 게시합니다. 문자는 발송하지 않습니다. 게시 후 알림이 켜진 연결 기기에 새 자료 푸시를 시도합니다.'));const publishSummary=el('section');publishSummary.className='care-publish-review';publishSummary.setAttribute('aria-label','HOME 게시 전 최종 확인');publishPanel.append(publishSummary);let medicationReview='조회 중';pdfRequest('/saas/patients/'+encodeURIComponent(base.patientId)+'/medications',{method:'GET',redirect:'error'}).then(result=>{guard();medicationReview=Array.isArray(result.plans)?result.plans.filter(p=>p.active&&p.homeVisible!==false&&p.endDate>=new Date(Date.now()+32400000).toISOString().slice(0,10)).length+'개 진행 일정 · 처방 대조 필요':'조회 필요';controls();}).catch(()=>{if(d.isConnected){medicationReview='조회 실패 · 게시 후 별도 확인 필요';controls();}});
+        publishPanel.append(el('h3','HOME에 게시할 자료를 확인하세요.'),el('p', '자료 등록과 PDF 저장 후 CARESTEP HOME 자료함에 게시합니다. 문자는 발송하지 않습니다. 게시 후 알림이 켜진 연결 기기에 새 자료 푸시를 시도합니다.'));const publishSummary=el('section');publishSummary.className='care-publish-review';publishSummary.setAttribute('aria-label','HOME 게시 전 최종 확인');publishPanel.append(publishSummary);let medicationReview='조회 중';pdfRequest('/saas/patients/'+encodeURIComponent(base.patientId)+'/medications',{method:'GET',redirect:'error'}).then(result=>{guard();medicationReview=Array.isArray(result.plans)?result.plans.filter(p=>p.active&&p.homeVisible!==false&&p.endDate>=new Date(Date.now()+32400000).toISOString().slice(0,10)).length+'개 진행 일정 · 처방 대조 필요':'조회 필요';controls();}).catch(()=>{if(d.isConnected){medicationReview='조회 실패 · 게시 후 별도 확인 필요';controls();}});
         const pick = el('select'), kind = el('select'), title = el('input'), text = el('textarea'), reviewed = el('input'), viewer = el('iframe'), previewLink=el('a','PDF 새 창에서 보기');previewLink.className='btn btn-secondary';previewLink.target='_blank';previewLink.rel='noopener';previewLink.hidden=true;
         const admin = () => typeof saasPermission==='function'?saasPermission('materials.edit',['owner','admin'].includes(saasMe?.role)):['owner','admin'].includes(saasMe?.role);
         const field = (label, node) => { const l = el('label', label); l.style.cssText='display:block;margin:12px 0'; node.style.cssText='display:block;width:100%;box-sizing:border-box;margin-top:4px'; l.append(node); writePanel.append(l); };
@@ -1937,7 +1937,7 @@
             reviewed.disabled=locked||s.sent;
             buttons.send.disabled=(!s.assetId&&!topicReady())||locked||s.sent||stage!==3||!reviewed.checked||(!s.assetId && (!previewBlob||previewSignature!==signature()));
             if(builderRecoveryInvalid)buttons.send.disabled=true;
-            buttons.send.textContent=s.sent?'HOME 게시 완료':s.assetId?'저장된 PDF Home에 게시':'Home에 게시하기';
+            buttons.send.textContent=s.sent?'HOME 게시 완료':s.assetId?'저장된 PDF HOME에 게시':'HOME에 게시하기';
             buttons.recover.disabled=uiBusy||s.busy||!(s.registrationPending||s.hasRecovery);
             if(s.assetId&&stage===1)stage=2;writePanel.hidden=!!builder||s.sent||stage!==1;previewPanel.hidden=s.sent||stage!==2;publishPanel.hidden=s.sent||stage!==3;steps.forEach((n,i)=>n.setAttribute('aria-current',!s.sent&&i===stage-(builder?2:1)?'step':'false'));nextStep.disabled=locked||!reviewed.checked||(!previewBlob&&!s.assetId);nextStep.className='btn '+(previewBlob||s.assetId?'btn-primary r61-primary':'btn-secondary');previousStep.disabled=locked||s.sent;editStep.disabled=locked||s.sent||s.hasMaterial||!!s.assetId;buttons.draft.hidden=!materialDraftSources[kind.value]||!!existing;publishSummary.replaceChildren();for(const [label,value] of [['환자',patient.name],['보호자',home.guardian.name],['질환·시술 교육자료',source.title||'직접 작성 · 원문 확인'],['진단/수술',source.procedure||'미입력'],['자료 종류',materialKindLabel(kind.value)],['제목',title.value],['PDF',s.assetId?'저장된 원본 · 현재 입력 변경 반영 안 됨':previewBlob?'미리보기 확인한 원본':'미리보기 필요'],['HOME 복약 일정',medicationReview]]){const row=el('div'),term=el('b',label),valueNode=el('span',value);row.append(term,valueNode);publishSummary.append(row);};draftStatus.hidden=!!builder||s.sent;buttons.preview.hidden=!!builder&&!!previewBlob;buttons.preview.className='btn '+(stage===1?'btn-primary r61-primary':'btn-secondary');buttons.send.className='btn btn-primary r61-primary';
             if(builder){renderBuilderQueue(queueSummary,queueList,builder.queue,builder.item,{...s,busy:uiBusy||s.busy});const remaining=builder.queue.items.filter(row=>!row.sent).length;nextMaterial.hidden=!s.sent||!remaining;nextMaterial.textContent='남은 자료 확인 ('+remaining+'개)';for(const b of editButtons)b.disabled=locked||s.sent||s.hasMaterial||!!s.assetId;}
@@ -2002,7 +2002,7 @@
         const editBuilder=(target,step)=>{guard();d.close();if(typeof beginBuilderEdit==='function')beginBuilderEdit(target);else{if(typeof go==='function')go('builder');setWizardStep(step);}};
         if(builder)for(const [target,label,step] of [['patient','환자정보 수정',1],['education','교육자료 변경',1],['instructions','개별지시 수정',2],['medication','복약 수정',3],['recheck','재진 일정 수정',4]])editButtons.push(button(editActions,label,()=>editBuilder(target,step)));
         reviewed.onchange=controls;const editStep=button(previewPanel,'내용 수정',()=>{revokePreview();controls();title.focus?.();}),nextStep=button(previewPanel,'확인 후 게시 단계로',()=>{try{guard();}catch(e){revokePreview();confirmedTopic='';info.textContent=materialHelp(pdfErrorCode(e));controls();return;}if(!reviewed.checked||(!previewBlob&&!flow.state().assetId))return;stage=3;controls();body.scrollTop=0;previousStep.focus?.({preventScroll:true});});editStep.hidden=!!builder;nextStep.className='btn btn-primary r61-primary';const previousStep=button(publishPanel,'미리보기로 돌아가기',()=>{stage=2;controls();body.scrollTop=0;reviewed.focus?.({preventScroll:true});});
-        action('send','Home에 게시하기',async()=>{
+        action('send','HOME에 게시하기',async()=>{
             if(!reviewed.checked)throw Error('MATERIAL_PUBLIC_REVIEW_REQUIRED');
             guard();const s=flow.state();if(!s.assetId&&previewSignature!==signature())throw Error('MATERIAL_PUBLIC_REVIEW_REQUIRED');
             await flow.send({draft:draft(),blob:previewBlob,existing,confirmed:true});show();

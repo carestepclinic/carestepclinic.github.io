@@ -1043,7 +1043,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="carestep-workflow.css?v=flow-20261017">
   <link rel="stylesheet" href="home-access-clinic.css?v=readable-20261017">
 <link rel="stylesheet" href="carestep-ui.css?v=deployment-check-20261019a">
-<link rel="stylesheet" href="clinic-organization.css?v=clinic-clarity-20261020a">
+<link rel="stylesheet" href="clinic-organization.css?v=clarity-20261020b">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -1502,7 +1502,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
               <div id="mobileDayControl" class="mobile-day-control hidden"><label class="field-label" for="mobileDaySelect">모바일 카드 시점</label><select id="mobileDaySelect" class="input"><option value="1">D+1</option><option value="3">D+3</option><option value="7">D+7</option><option value="14">D+14</option></select></div>
               <div class="info-box"><strong>병원정보 자동 반영</strong><span>병원명 · 로고 · 대표원장 · 대표전화 · 주소 · 홈페이지 · 라이선스 번호</span></div>
               <section class="builder-delivery-options" aria-label="자료 게시와 저장">
-                <div class="builder-followup-handoff builder-home-send"><b>HOME에 자료 게시</b><span>선택한 고급 보호자 자료·퇴원 요약·복약 체크표를 PDF로 확인한 뒤 HOME 자료함에 게시합니다.</span><button id="sendBuilderMaterialsBtn" class="btn btn-primary" type="button">보호자 Home에 게시</button><small>문자는 발송하지 않습니다. 게시 후 알림이 켜진 연결 기기에 푸시를 시도하며, 수신 여부는 보장되지 않습니다.</small></div>
+                <div class="builder-followup-handoff builder-home-send"><b>HOME에 자료 게시</b><span>선택한 고급 보호자 자료·퇴원 요약·복약 체크표를 PDF로 확인한 뒤 HOME 자료함에 게시합니다.</span><button id="sendBuilderMaterialsBtn" class="btn btn-primary" type="button">보호자 HOME에 게시</button><small>문자는 발송하지 않습니다. 게시 후 알림이 켜진 연결 기기에 푸시를 시도하며, 수신 여부는 보장되지 않습니다.</small></div>
                 <div class="builder-save-options"><b>파일로 저장하거나 인쇄하기</b><div class="output-actions"><button id="generateOutputBtn" class="btn btn-secondary">선택한 자료 작성 · 다운로드</button><button id="secondaryOutputBtn" class="btn btn-secondary">인쇄 / PDF 저장</button></div><small>선택한 출력 형식에 따라 PDF·이미지·문구를 저장합니다.</small></div>
               </section>
               <div class="builder-followup-handoff builder-next-work"><b>다음 업무 · 후속관리</b><span>출력·게시를 마친 뒤 이동하세요. 현재 환자정보와 질환·복약 입력을 이어서 사용합니다.</span><button id="continueToFollowupBtn" class="btn btn-secondary" type="button">현재 정보로 후속관리 계속 →</button></div>
@@ -1515,7 +1515,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
               <span id="wizardStepLabel" class="wizard-step-label">1 / 5 · 환자</span>
               <button id="wizardNext" class="btn btn-primary" type="button">다음 →</button>
             </div>
-            <p class="fineprint">개별 환자의 투약·식사·운동·재검 계획은 담당 수의사의 지시가 우선합니다. CRM에 등록한 보호자·환자 기본정보만 암호화 저장하며, 개별 퇴원지시와 복약정보는 현재 자료 작성 과정에서만 사용합니다.</p>
+            <p class="fineprint">개별 환자의 투약·식사·운동·재검 계획은 담당 수의사의 지시가 우선합니다. 작성 중 입력의 보관 방식은 각 작성창의 임시보관 안내를 따릅니다. 자료를 저장·HOME 게시하거나 복약 일정을 등록하면 해당 자료·퇴원 지시·복약 정보가 서버에 저장됩니다. HOME 공개와 복약 일정 등록은 별도입니다.</p>
           </div>
 
           <div class="preview-wrap">
@@ -5531,7 +5531,7 @@ function templateSearchAliases(category=''){
 }
 
 /* v9.0.2 HOTFIX 13 · CONSISTENT DISEASE SEARCH
-   자료실 / 자료 작성 / 후속관리 계획가 동일한 질환 검색 규칙을 사용합니다. */
+   자료실 / 자료 작성 / 후속관리 계획이 동일한 질환 검색 규칙을 사용합니다. */
 const DISEASE_SEARCH_SYNONYMS=[
   ['슬개골','슬개골탈구','patella','mpl'],
   ['십자인대','전십자인대','전방십자인대','전방십자','ccl','cruciate','tplo'],
@@ -9108,7 +9108,7 @@ function openPatientJourneyEditor(j=null){if(!saasPermission('materials.edit',['
 function renderPatientJourneyEditor(){const el=$('patientJourneyEditor'),d=patientJourneyEditorDraft;if(!el||!d){if(el)el.classList.add('hidden');return;}el.classList.remove('hidden');el.innerHTML=`<div class="patient-journey-head"><div><h3>${d.id?'병원 후속관리 계획 편집':'새 병원 후속관리 계획'}</h3><p>환자별 정보가 아니라 병원 공통 운영 템플릿만 입력하세요.</p></div><button id="closeJourneyEditor" class="btn btn-secondary" type="button">닫기</button></div><div class="journey-editor-grid"><input id="journeyEditName" class="input" value="${escapeHtml(d.name||'')}" placeholder="후속관리 계획 이름"><select id="journeyEditCategory" class="input">${CATEGORY_CODES.map(c=>`<option value="${escapeHtml(c)}" ${c===(d.category||'기타')?'selected':''}>${escapeHtml(categoryLabel(c))}</option>`).join('')}</select><input id="journeyEditSpecies" class="input" value="${escapeHtml(d.species||'dog,cat')}" placeholder="dog,cat"><textarea id="journeyEditDescription" class="input wide" rows="2" placeholder="운영 목적 설명">${escapeHtml(d.description||'')}</textarea></div><div id="journeyEditStages">${(d.stages||[]).map((st,i)=>patientJourneyStageEditorHtml(st,i)).join('')}</div><div class="journey-actions"><button id="addJourneyStage" class="btn btn-secondary" type="button">D+ 단계 추가</button><button id="saveJourneyEditor" class="btn btn-primary" type="button">후속관리 계획 저장</button>${d.id?'<button id="archiveJourneyEditor" class="btn btn-secondary" type="button">보관 처리</button><button id="deleteJourneyEditor" class="btn btn-secondary" type="button">삭제</button>':''}</div>`;$('closeJourneyEditor').onclick=()=>{patientJourneyEditorDraft=null;renderPatientJourneyEditor()};$('addJourneyStage').onclick=()=>{syncPatientJourneyEditorDraft();const days=(patientJourneyEditorDraft.stages||[]).map(x=>Number(x.day)||0);patientJourneyEditorDraft.stages.push({day:Math.min(365,Math.max(1,(Math.max(0,...days)||0)+7)),title:'추가 확인',focus:'',checks:[''],redFlag:'',calendar:true,message:true,survey:false});renderPatientJourneyEditor()};$('saveJourneyEditor').onclick=()=>savePatientJourneyEditor();$('archiveJourneyEditor')?.addEventListener('click',()=>archivePatientJourneyEditor());$('deleteJourneyEditor')?.addEventListener('click',()=>deletePatientJourney(d.id));el.querySelectorAll('[data-remove-journey-stage]').forEach(b=>b.addEventListener('click',()=>{syncPatientJourneyEditorDraft();patientJourneyEditorDraft.stages.splice(Number(b.dataset.removeJourneyStage),1);renderPatientJourneyEditor();}));el.scrollIntoView({behavior:'smooth',block:'start'});}
 function patientJourneyStageEditorHtml(st,i){return `<div class="journey-stage-editor" data-journey-stage-index="${i}"><div class="journey-stage-editor-top"><input class="input journey-stage-day" type="number" min="1" max="365" value="${Number(st.day)||1}"><input class="input journey-stage-title" value="${escapeHtml(st.title||'')}" placeholder="단계 제목"><button class="btn btn-secondary" type="button" data-remove-journey-stage="${i}">삭제</button></div><div class="journey-stage-editor-body"><textarea class="input journey-stage-focus" rows="2" placeholder="오늘의 핵심">${escapeHtml(st.focus||'')}</textarea><textarea class="input journey-stage-red" rows="2" placeholder="빠른 확인이 필요한 변화">${escapeHtml(st.redFlag||'')}</textarea><textarea class="input journey-stage-checks wide" rows="3" placeholder="확인항목을 한 줄에 하나씩">${escapeHtml((st.checks||[]).join('\n'))}</textarea></div><div class="journey-stage-editor-actions"><label><input class="journey-stage-calendar" type="checkbox" ${st.calendar!==false?'checked':''}> 캘린더 업무</label><label><input class="journey-stage-message" type="checkbox" ${st.message!==false?'checked':''}> 보호자 자동발송</label><label><input class="journey-stage-survey" type="checkbox" ${st.survey===true?'checked':''}> 보호자 회복응답</label></div></div>`;}
 function syncPatientJourneyEditorDraft(){const d=patientJourneyEditorDraft;if(!d)return;d.name=$('journeyEditName')?.value||d.name;d.category=$('journeyEditCategory')?.value||'';d.species=$('journeyEditSpecies')?.value||'dog,cat';d.description=$('journeyEditDescription')?.value||'';d.stages=[...document.querySelectorAll('#journeyEditStages [data-journey-stage-index]')].map(row=>({day:Number(row.querySelector('.journey-stage-day')?.value)||0,title:row.querySelector('.journey-stage-title')?.value||'',focus:row.querySelector('.journey-stage-focus')?.value||'',redFlag:row.querySelector('.journey-stage-red')?.value||'',checks:String(row.querySelector('.journey-stage-checks')?.value||'').split(/\n+/).map(x=>x.trim()).filter(Boolean),calendar:!!row.querySelector('.journey-stage-calendar')?.checked,message:!!row.querySelector('.journey-stage-message')?.checked,survey:!!row.querySelector('.journey-stage-survey')?.checked&&!!row.querySelector('.journey-stage-message')?.checked}));}
-async function savePatientJourneyEditor(){syncPatientJourneyEditorDraft();const d=patientJourneyEditorDraft;if(!d?.name?.trim()){toast('후속관리 계획 이름을 입력해주세요.');return;}if(!d.stages?.length){toast('D+ 단계를 하나 이상 추가해주세요.');return;}const payload={name:d.name,category:d.category,species:d.species,description:d.description,stages:d.stages},btn=$('saveJourneyEditor');try{await uxButtonTask(btn,'저장 중…','✓ 저장됨',async()=>{const out=d.id?await saasRequest('/saas/patient-journeys/'+encodeURIComponent(d.id),{method:'PUT',body:JSON.stringify(payload)}):await saasRequest('/saas/patient-journeys',{method:'POST',body:JSON.stringify(payload)});patientJourneyEditorDraft=null;await loadPatientJourneys(false);patientJourneySelectedId=out.journey?.id||patientJourneySelectedId;renderPatientJourneyBuilder();toast('병원 후속관리 계획를 저장했습니다.');return out;},{resetText:'후속관리 계획 저장'});}catch(e){toast(e.message||'후속관리 계획 저장 실패');}}
+async function savePatientJourneyEditor(){syncPatientJourneyEditorDraft();const d=patientJourneyEditorDraft;if(!d?.name?.trim()){toast('후속관리 계획 이름을 입력해주세요.');return;}if(!d.stages?.length){toast('D+ 단계를 하나 이상 추가해주세요.');return;}const payload={name:d.name,category:d.category,species:d.species,description:d.description,stages:d.stages},btn=$('saveJourneyEditor');try{await uxButtonTask(btn,'저장 중…','✓ 저장됨',async()=>{const out=d.id?await saasRequest('/saas/patient-journeys/'+encodeURIComponent(d.id),{method:'PUT',body:JSON.stringify(payload)}):await saasRequest('/saas/patient-journeys',{method:'POST',body:JSON.stringify(payload)});patientJourneyEditorDraft=null;await loadPatientJourneys(false);patientJourneySelectedId=out.journey?.id||patientJourneySelectedId;renderPatientJourneyBuilder();toast('병원 후속관리 계획을 저장했습니다.');return out;},{resetText:'후속관리 계획 저장'});}catch(e){toast(e.message||'후속관리 계획 저장 실패');}}
 async function clonePatientJourney(id){if(!confirm('선택한 Journey를 병원 전용 사본으로 복제할까요?'))return;try{const d=await saasRequest('/saas/patient-journeys/'+encodeURIComponent(id)+'/clone',{method:'POST'});await loadPatientJourneys(false);patientJourneySelectedId=d.journey?.id||'';const j=patientJourneyById(patientJourneySelectedId);if(j)openPatientJourneyEditor(j);saasRecordUsageEvent('patient_journey_clone',id,{sourceId:id});toast('병원용 후속관리 계획 사본을 만들었습니다.');}catch(e){toast(e.message||'후속관리 계획 복제 실패');}}
 async function deletePatientJourney(id){const j=patientJourneyById(id)||patientJourneyEditorDraft;if(!j||j.isSystem){toast('CARESTEP 기본 Journey는 삭제할 수 없습니다.');return;}if(!confirm(`“${j.name||'병원 후속관리 계획'}”를 삭제할까요?\n\nJourney 목록에서는 즉시 사라지지만 이미 생성된 SOLAPI 예약문자와 Google/Outlook 일정은 자동 취소되지 않습니다. 과거 운영 집계를 위한 최소 메타데이터는 보존됩니다.`))return;try{await saasRequest('/saas/patient-journeys/'+encodeURIComponent(id),{method:'DELETE'});if(activePatientJourney?.id===id){activePatientJourney=null;activeJourneyStageSelection=[];sessionStorage.removeItem(patientJourneySessionKey());resetMessagingCaseState();}patientJourneyEditorDraft=null;if(patientJourneySelectedId===id)patientJourneySelectedId='';await loadPatientJourneys(false);toast('병원 전용 Journey를 삭제했습니다.');}catch(e){toast(e.message||'후속관리 계획 삭제 실패');}}
 async function archivePatientJourneyEditor(){syncPatientJourneyEditorDraft();const d=patientJourneyEditorDraft;if(!d?.id||!confirm('이 병원 Journey를 보관 처리할까요?'))return;try{await saasRequest('/saas/patient-journeys/'+encodeURIComponent(d.id),{method:'PUT',body:JSON.stringify({...d,status:'archived'})});if(activePatientJourney?.id===d.id)clearActivePatientJourney();patientJourneyEditorDraft=null;await loadPatientJourneys(false);toast('Journey를 보관 처리했습니다.');}catch(e){toast(e.message||'후속관리 계획 보관 실패');}}
@@ -9205,7 +9205,7 @@ function followupGuideMessagesNeeded(){return followupMessagingStages().length>0
 function followupGuideStepComplete(n){const s=readFollowupGuideState();if(n===1)return followupGuideCaseReady();if(n===2)return !!activePatientJourney;if(n===3)return !followupGuideCalendarNeeded()||s.calendarDone||s.calendarSkipped;if(n===4)return !followupGuideMessagesNeeded()||s.messagesDone||s.messagesSkipped||(s.messagesPrepared&&followupGuideMessageValidation().ok);return s.finished;}
 function followupGuideStepSkipped(n){const s=readFollowupGuideState();return n===3&&s.calendarSkipped||n===4&&s.messagesSkipped;}
 function followupGuideMaxStep(){let max=1;for(let i=1;i<=4;i++){if(followupGuideStepComplete(i))max=i+1;else break;}return Math.min(5,max);}
-function followupGuideRequirement(n){if(n===1&&!followupGuideCaseReady())return '관리 시작일을 먼저 입력해주세요.';if(n===2&&!activePatientJourney)return '이 케이스에 사용할 후속관리 계획를 먼저 적용해주세요.';if(n===3&&!followupGuideStepComplete(3))return '캘린더 일정을 등록하거나 “캘린더 없이 계속”을 선택해주세요.';if(n===4&&!followupGuideStepComplete(4))return '예약 정보를 확인하거나 “문자 없이 계속”을 선택해주세요. 실제 예약은 최종 확인 후 진행됩니다.';return '';}
+function followupGuideRequirement(n){if(n===1&&!followupGuideCaseReady())return '관리 시작일을 먼저 입력해주세요.';if(n===2&&!activePatientJourney)return '이 케이스에 사용할 후속관리 계획을 먼저 적용해주세요.';if(n===3&&!followupGuideStepComplete(3))return '캘린더 일정을 등록하거나 “캘린더 없이 계속”을 선택해주세요.';if(n===4&&!followupGuideStepComplete(4))return '예약 정보를 확인하거나 “문자 없이 계속”을 선택해주세요. 실제 예약은 최종 확인 후 진행됩니다.';return '';}
 /* v9.0.2 HOTFIX 14 · FOLLOW-UP STEP NAVIGATION
    Step changes update content in place. No automatic scroll on step/prev/next/skip actions. */
 function setFollowupGuideStep(n,force=false){
@@ -10263,7 +10263,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
 <script src="patient-breeds.js?v=9.5.3"></script>
-<script src="patient-crm.js?v=clinic-clarity-20261020a"></script>
+<script src="patient-crm.js?v=clarity-20261020b"></script>
 <script src="patient-timeline.js?v=staff-permissions-20261018a"></script>
 <script src="date-input-guard.js?v=9.5.3"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
@@ -10276,12 +10276,12 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <!-- CARESTEP v10.4-G · Clinical Protocol Settings -->
 <script>document.addEventListener("DOMContentLoaded",()=>CarestepStabilization.compatible());</script>
 <script src="r61-route.js?v=patient-reset-20261019a"></script>
-<script src="r61-clinic.js?v=clinic-clarity-20261020a"></script>
+<script src="r61-clinic.js?v=clarity-20261020b"></script>
 <script src="r65-clinic.js?v=staff-permissions-20261018a"></script>
 <script src="r83-clinic.js"></script>
 <script src="clinic-read-flow.js?v=flow-20261017"></script>
 <script src="home-access-clinic.js?v=refresh-flow-20261018a"></script>
-<script src="clinic-care.js?v=clinic-clarity-20261020a"></script>
-<script src="clinic-organization.js?v=clinic-clarity-20261020a"></script>
+<script src="clinic-care.js?v=clarity-20261020b"></script>
+<script src="clinic-organization.js?v=clarity-20261020b"></script>
 </body>
 </html>

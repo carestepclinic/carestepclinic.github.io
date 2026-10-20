@@ -129,3 +129,11 @@
 .topbar>.eyebrow:empty,.topbar>div>.eyebrow:empty,.section-head .eyebrow:empty,.consult-inbox-head .eyebrow:empty,.work-first-head .eyebrow:empty{display:none}
 #clinicTodayQueue .care-inbox{margin:0}#clinicTodayQueue .work-first-content{margin-top:12px}
 @media(max-width:700px){#clinicTodayQueue>.clinic-section-tabs{flex-wrap:wrap}#clinicTodayQueue>.clinic-section-tabs button{flex:1;white-space:normal}}
+
+/* Consistent status summaries and a single registration review. */
+.care-home-overview dl.care-preparation{display:grid;grid-template-columns:minmax(130px,1fr) minmax(0,2fr);gap:10px 18px;margin:14px 0;padding:14px;background:#f5f8ff;border-radius:12px;line-height:1.6}
+.care-home-overview .care-preparation dt{font-weight:700;color:#233b60}.care-home-overview .care-preparation dd{margin:0;min-width:0;overflow-wrap:anywhere;color:#425b7c}
+.care-home-overview [data-overview-row]{padding:10px 0;border-top:1px solid #e4eaf5}.care-home-overview [data-overview-row] p{margin:6px 0;overflow-wrap:anywhere;line-height:1.65}.care-home-overview [data-overview-status]{font-size:12px;line-height:1.65;color:#60728d}
+#clinicCareInbox .care-task-count{margin:6px 0;font-size:13px;color:#39577e;font-weight:600}#clinicTodayQueue>.clinic-section-tabs button{white-space:normal;line-height:1.5;text-align:left}#clinicCareInbox>nav .btn{white-space:normal;line-height:1.5}
+.care-med-dialog .care-review-patient{background:#f0f5ff;border:1px solid #d9e4ff;border-radius:12px;padding:12px 14px;font-size:16px;line-height:1.6;overflow-wrap:anywhere}.care-med-dialog .care-review-patient b{color:#18386c}
+@media(max-width:600px){.care-home-overview dl.care-preparation{grid-template-columns:1fr;gap:4px;padding:12px}.care-home-overview .care-preparation dd{margin-bottom:10px}.care-home-overview .care-preparation dd:last-child{margin-bottom:0}#clinicCareInbox>nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}#clinicCareInbox>nav .btn{min-width:0;text-align:left}}
