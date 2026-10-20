@@ -47,6 +47,55 @@ async function fixture(t,width=1280){
   return page;
 }
 async function billing(page){await page.evaluate(()=>showView('billing'));await page.locator('.plan-card').first().waitFor({state:'attached'});await page.waitForFunction(()=>document.getElementById('hqPaymentProvider').textContent==='정상');}
+test('hospital detail stays in the second column through loading, ready and errors',async t=>{
+ const p=await fixture(t);
+ await p.evaluate(async()=>{selectedClinic='A';showView('clinics');await loadClinics();});
+ const geometry=()=>p.evaluate(()=>{
+  const grid=document.querySelector('.hq-clinic-workspace'),list=grid.children[0].getBoundingClientRect(),detail=grid.children[1].getBoundingClientRect();
+  return {children:grid.children.length,left:list.left,right:detail.left,delta:Math.abs(list.top-detail.top),width:document.documentElement.scrollWidth};
+ });
+ let pos=await geometry();assert.equal(pos.children,2);assert.ok(pos.right>pos.left);assert.ok(pos.delta<2);assert.ok(pos.width<=1280);
+ assert.match(await p.locator('#clinicListCount').innerText(),/1곳/);
+ assert.equal(await p.locator('#hqClinicPane-subscription').isVisible(),true);
+ assert.equal(await p.locator('#hqClinicPane-operation').isVisible(),false);
+ await p.locator('#hqClinicTab-members').click();assert.equal(await p.locator('#hqClinicPane-members').isVisible(),true);
+ await p.locator('#hqClinicTab-members').press('ArrowLeft');assert.equal(await p.locator('#hqClinicTab-connection').getAttribute('aria-selected'),'true');
+ await p.evaluate(()=>{req=async path=>{if(path==='/hq/clinics/A')throw Error('시험 조회 실패');return baseReq(path)};return loadClinicDetail('A');});
+ pos=await geometry();assert.equal(pos.children,2);assert.ok(pos.delta<2);
+ assert.match(await p.locator('.hq-clinic-detail-region').innerText(),/시험 조회 실패/);
+ await p.evaluate(()=>{req=baseReq;});
+ await p.locator('.hq-clinic-detail-region').getByRole('button',{name:'다시 시도'}).click();
+ await p.locator('#hqClinicTab-subscription').click();
+ if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,'hq-hospital-1280.png'),fullPage:true});
+});
+test('mobile hospital choice supports keyboard, focuses detail and returns to the searchable list',async t=>{
+ const p=await fixture(t,390);await p.evaluate(async()=>{showView('clinics');await loadClinics();});
+ await p.locator('.clinic-item').focus();await p.locator('.clinic-item').press('Enter');
+ await p.waitForFunction(()=>document.activeElement===document.querySelector('#clinicDetail h2'));
+ assert.equal(await p.locator('.clinic-item').getAttribute('aria-pressed'),'true');
+ assert.equal(await p.locator('.hq-clinic-workspace').evaluate(el=>el.children.length),2);
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ await p.getByRole('button',{name:'병원 목록으로',exact:true}).click();
+ assert.equal(await p.evaluate(()=>document.activeElement.id),'clinicSearch');
+ await p.locator('.clinic-item').click();await p.locator('#hqClinicTab-subscription').waitFor();
+ if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,'hq-hospital-390.png'),fullPage:true});
+});
+test('hospital refresh reads current catalog while preserving its contract and price difference',async t=>{
+ const p=await fixture(t);
+ await p.evaluate(async()=>{
+  const original=detail;window.catalogReads=0;detail=id=>{const d=original(id);d.subscription.effectivePriceKrw=79000;d.subscription.priceOverrideKrw=0;d.subscription.commercialVersion='legacy';d.entitlements.plan={...syntheticPlans[1],monthlyPriceKrw:79000,limits:{vatExclusive:false,members:3,packagesMonthly:400}};return d;};
+  req=(path,o)=>{if(path==='/hq/plans')catalogReads++;return baseReq(path,o);};
+  selectedClinic='A';showView('clinics');await loadClinics();
+ });
+ assert.match(await p.locator('.hq-contract-summary').innerText(),/79,000원[\s\S]*86,900원/);
+ await p.evaluate(async()=>{syntheticPlans[1].monthlyPriceKrw=89000;await loadClinicDetail('A');});
+ assert.match(await p.locator('.hq-contract-summary').innerText(),/79,000원[\s\S]*97,900원/);
+ assert.ok(await p.evaluate(()=>catalogReads>=2));assert.equal(await p.evaluate(()=>writes.length),0);
+ await p.evaluate(async()=>{req=path=>path==='/hq/plans'?Promise.reject(Error('catalog unavailable')):baseReq(path);await loadClinicDetail('A');});
+ assert.match(await p.locator('.hq-contract-summary').innerText(),/불러오지 못했습니다/);
+ await p.locator('.hq-subscription-editor').getByRole('button',{name:'수정',exact:true}).click();
+ assert.equal(await p.locator('#subPlan').isEnabled(),false);
+});
 async function contentFixture(t,width=1280){
   const p=await fixture(t,width);
   await p.evaluate(()=>{

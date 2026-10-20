@@ -49,6 +49,34 @@ input[type="checkbox"]{width:18px;height:18px;flex-shrink:0;accent-color:var(--b
 .hq-review-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
 .hq-subscription-search{max-width:360px}.hq-current-contract{display:block;font-size:12px;color:#52627b;margin-top:5px}
 .hq-detail-loading{padding:20px;border:1px solid var(--line);border-radius:12px}
+.hq-clinic-workspace{align-items:start}
+.hq-clinic-detail-region{min-width:0}
+.hq-clinic-detail-region>.hq-load-status{margin:0 0 10px;min-height:40px}
+.hq-clinic-list-panel{position:sticky;top:100px}
+.hq-clinic-list-panel .clinic-list{max-height:max(160px,calc(100dvh - 430px))}
+.hq-clinic-list-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0;color:var(--muted);font-size:13px}
+.clinic-item[role="button"]:focus-visible{outline:3px solid #84a7ff;outline-offset:-3px}
+.clinic-item[aria-pressed="true"]{border-color:var(--blue);background:#eef3ff;box-shadow:inset 4px 0 var(--blue)}
+#clinicDetail{scroll-margin-top:100px}
+#clinicDetail .detail-title{flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--line);padding-bottom:14px}
+#clinicDetail .detail-title h2{font-size:22px;margin:0}
+.hq-detail-tabs{gap:6px;margin:14px 0}
+.hq-detail-tabs .btn{font-size:13px;padding:8px 10px}
+.hq-detail-pane[hidden]{display:none}
+.hq-detail-pane>h2:first-child{margin-top:0!important}
+.hq-back-to-list{display:none}
+.hq-contract-summary{border:1px solid #d7e3fa;background:#f8faff;border-radius:12px;padding:16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:14px 0}
+.hq-contract-summary span,.hq-contract-summary strong,.hq-contract-summary small{display:block}
+.hq-contract-summary span{font-size:13px;color:var(--muted)}
+.hq-contract-summary strong{font-size:21px;color:#173e85;margin:6px 0}
+.hq-contract-summary small{font-size:13px;line-height:1.7}
+.hq-contract-summary p{grid-column:1/-1;font-size:13px;margin:0;padding-top:12px;border-top:1px solid var(--line)}
+.hq-feature-details{margin:16px 0;border:1px solid var(--line);border-radius:10px;padding:12px}
+.hq-feature-details summary{font-size:14px;font-weight:700;cursor:pointer}
+.hq-feature-details .entitlement{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.hq-feature-details .entitlement span{font-size:12px;padding:6px 9px;line-height:1.5}
+@media(max-width:900px){.hq-clinic-list-panel{position:static}.hq-clinic-list-panel .clinic-list{max-height:280px}.hq-back-to-list{display:block}#clinicDetail{scroll-margin-top:180px}.hq-clinic-workspace>.hq-clinic-detail-region{grid-column:1}.hq-detail-tabs{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior:contain}.hq-detail-tabs .btn{flex:0 0 auto;white-space:nowrap}}
+@media(max-width:650px){.hq-contract-summary{grid-template-columns:minmax(0,1fr)}.hq-contract-summary>div+div{border-top:1px solid var(--line);padding-top:12px}#clinicDetail .detail-title .hq-back-to-list{width:100%}}
 .hq-voice-body{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:10px;max-width:440px}
 .hq-voice-save-result{display:block;max-width:220px;white-space:normal;overflow-wrap:anywhere;margin-top:6px;font-size:12px}
 .hq-content-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}

@@ -6,6 +6,8 @@
   const stateKey='carestep_hq_ui_v20261020';
   let currentView='dashboard',billingPane='subscriptions',restoring=false,reviewOpen=false;
   let activeSave=null,quickSequence=0,clinicListSequence=0,clinicDetailSequence=0;
+  const clinicPanes=new Map();
+  let clinicFocusRequested='';
   const filterIds=['clinicSearch','clinicStatus','clinicApproval','journeySearch','journeyScope','journeyStatusFilter','billingMonth','hqSubscriptionSearch','crmHqPeriod','voiceType','voiceStatus','contentSearch','contentStatus','contentCategory','contentDueOnly'];
   const safeNumber=n=>n!==null&&n!==undefined&&n!==''&&Number.isFinite(Number(n));
   const won=n=>safeNumber(n)?`${Number(n).toLocaleString('ko-KR')}원`:'금액 확인 필요';
@@ -162,6 +164,57 @@
     editors.delete('subscription');
     registerEditor('subscription',section,fields,byId('saveSub'),`${root.querySelector('h2')?.textContent||'선택 병원'} 구독 변경`,
       '이 병원의 구독 설정에 저장 즉시 반영됩니다. 결제주기·가격·기간을 확인해주세요. 구독을 중지하거나 해지하면 병원 세션과 유료 기능이 제한됩니다.');
+    const features=root.querySelector('.entitlement');
+    if(features){const details=document.createElement('details');details.className='hq-feature-details';const summary=document.createElement('summary');summary.textContent='현재 계약의 포함 기능 보기';features.before(details);details.append(summary,features);}
+    organizeClinicDetail(root);
+  }
+  function organizeClinicDetail(root){
+    if(root.querySelector('.hq-detail-tabs'))return;
+    const hospital=selectedClinic,title=root.querySelector('.detail-title');
+    if(!title)return;
+    const heading=title.querySelector('h2');heading.tabIndex=-1;
+    const back=document.createElement('button');back.className='btn hq-back-to-list';back.type='button';back.textContent='병원 목록으로';
+    back.onclick=()=>{byId('clinicSearch').focus({preventScroll:true});byId('clinicSearch').scrollIntoView({block:'center'});};title.prepend(back);
+    const definitions=[['subscription','구독·이용현황'],['operation','승인·운영'],['connection','연동'],['members','직원'],['content','콘텐츠'],['errors','오류']];
+    const sections=new Map(definitions.map(([key,label])=>{
+      const panel=document.createElement('section');panel.className='hq-detail-pane';panel.id='hqClinicPane-'+key;
+      panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby','hqClinicTab-'+key);
+      return [key,panel];
+    }));
+    let current='subscription';
+    for(const node of [...root.children]){
+      if(node===title)continue;
+      if(node.matches('h2')){
+        const text=node.textContent;
+        current=text.includes('연동')?'connection':text==='직원'?'members':text.includes('중앙 콘텐츠')?'content':text.includes('최근 오류')?'errors':'subscription';
+      }
+      if(node.matches('.approval-card')||node.querySelector('#saveClinic'))sections.get('operation').append(node);
+      else sections.get(current).append(node);
+    }
+    const tabs=document.createElement('div');tabs.className='hq-tabs hq-detail-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','병원 상세 항목');
+    function select(key,check=true){
+      if(check&&!allowLeave())return false;
+      clinicPanes.set(hospital,key);
+      for(const [k,panel] of sections)panel.hidden=k!==key;
+      tabs.querySelectorAll('button').forEach(b=>{const on=b.dataset.pane===key;b.setAttribute('aria-selected',String(on));b.tabIndex=on?0:-1;});
+      return true;
+    }
+    for(const [key,label] of definitions){
+      const b=document.createElement('button');b.type='button';b.className='btn';b.id='hqClinicTab-'+key;b.dataset.pane=key;b.textContent=label;
+      b.setAttribute('role','tab');b.setAttribute('aria-controls',sections.get(key).id);b.onclick=()=>select(key);
+      tabs.append(b);
+    }
+    tabs.onkeydown=event=>{
+      if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+      const buttons=[...tabs.querySelectorAll('button')],at=buttons.indexOf(document.activeElement);if(at<0)return;
+      const next=event.key==='Home'?0:event.key==='End'?buttons.length-1:(at+(event.key==='ArrowRight'?1:-1)+buttons.length)%buttons.length;
+      event.preventDefault();if(select(buttons[next].dataset.pane))buttons[next].focus();
+    };
+    root.append(tabs,...sections.values());select(clinicPanes.get(hospital)||'subscription',false);
+    if(clinicFocusRequested===hospital){
+      clinicFocusRequested='';heading.focus({preventScroll:true});
+      if(matchMedia('(max-width:900px)').matches)root.scrollIntoView({block:'start'});
+    }
   }
   function setRegion(id,state,{error='',retry=null}={}){
     const target=byId(id);if(!target)return;
@@ -290,15 +343,26 @@
       if(seq!==clinicListSequence)return;
       clinics=data.clinics||[];renderClinicList();setRegion('clinicList','ready');
       if(selectedClinic&&clinics.some(x=>x.id===selectedClinic))await loadClinicDetail(selectedClinic);
-      else{clinicDetailSequence++;byId('clinicDetail').innerHTML='<div class="empty">목록에서 병원을 선택해주세요.</div>';editors.delete('subscription');}
+      else{clinicDetailSequence++;byId('clinicDetail').innerHTML='<div class="empty">목록에서 병원을 선택해주세요.</div>';regions.get('clinicDetail')?.box.remove();editors.delete('subscription');}
     }catch(e){if(seq!==clinicListSequence)return;byId('clinicList').replaceChildren();setRegion('clinicList','error',{error:e.message,retry:()=>loadClinics()});}
   };
   const originalClinicList=renderClinicList;
   renderClinicList=function(){
     originalClinicList();
-    document.querySelectorAll('.clinic-item').forEach(row=>row.onclick=()=>{
-      if(!allowLeave())return;selectedClinic=row.dataset.id;renderClinicList();saveState();loadClinicDetail(selectedClinic).catch(()=>{});
+    byId('clinicListCount').textContent=`검색 결과 ${clinics.length}곳`;
+    document.querySelectorAll('.clinic-item').forEach(row=>{
+      row.setAttribute('role','button');row.tabIndex=0;row.setAttribute('aria-pressed',String(row.dataset.id===selectedClinic));
+      row.onclick=()=>{
+        if(!allowLeave())return;selectedClinic=row.dataset.id;clinicFocusRequested=selectedClinic;renderClinicList();saveState();loadClinicDetail(selectedClinic).catch(()=>{});
+      };
+      row.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();row.click();}};
     });
+  };
+  byId('clinicSearch')?.setAttribute('aria-label','병원명 검색');
+  byId('clinicApproval')?.setAttribute('aria-label','가입 승인 상태');
+  byId('clinicStatus')?.setAttribute('aria-label','병원 운영 상태');
+  byId('clinicFilterReset').onclick=()=>{
+    if(!allowLeave())return;byId('clinicSearch').value='';byId('clinicApproval').value='all';byId('clinicStatus').value='all';loadClinics();
   };
   const originalQuickRender=renderHqQuickClinicResults;
   renderHqQuickClinicResults=function(rows,q){originalQuickRender(rows,q);byId('hqQuickClinicResults')?.querySelectorAll('[data-quick-clinic]').forEach(b=>b.onclick=()=>{
