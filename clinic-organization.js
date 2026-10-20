@@ -34,7 +34,7 @@
   const attention=global.carestepAttentionSummary?.(),clinical=global.carestepClinicalSummary?.();
   for(const [key,label,value] of [['attention','상담·승인·발송 확인',attention],['clinical','진료·예방·후속관리',clinical]]){
    const button=$('clinicToday-tab-'+key);if(!button)continue;
-   const suffix=!value||value.state==='loading'?'확인 중':value.state==='failed'?'조회 실패':value.state==='unavailable'?'이용 불가':key==='attention'?'확인 항목 '+value.total+'개 · 대상 '+(value.targets??value.total)+'건':'개별 업무 '+value.total+'건';
+   const suffix=!value||value.state==='loading'?'확인 중':value.state==='failed'?'조회 실패':value.state==='unavailable'?'이용 불가':key==='attention'?'이 탭 '+value.total+'항목 · 대상 '+(value.targets??value.total)+'건':'이 탭 개별 업무 '+value.total+'건';
    const text=label+' · '+suffix;if(button.textContent!==text)button.textContent=text;
   }
  }

@@ -140,3 +140,10 @@
 
 /* Completed registration keeps the next actions distinct from the saved schedule. */
 .care-med-dialog [hidden]{display:none!important}.care-med-complete{padding:18px;border:1px solid #c9dced;border-radius:14px;background:#f4f9ff}.care-med-complete h3{margin:0 0 12px;font-size:20px}.care-med-complete p{line-height:1.65;overflow-wrap:anywhere}.care-med-complete-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.care-med-complete-actions .btn{min-height:44px}.care-publish-review{margin-bottom:16px}.clinic-home-status{white-space:normal;line-height:1.5}@media(max-width:600px){.care-med-complete{padding:14px}.care-med-complete-actions{display:grid;grid-template-columns:1fr;width:100%}.care-med-complete-actions .btn{width:100%}}
+
+/* One progress navigation per task; examples are distinct from chosen patient material. */
+#builder .wizard-header[hidden],#builder #wizardStepLabel[hidden],#r61-builder-progress[hidden]{display:none!important}
+#builder .wizard-progress{display:none}#r61-builder-progress{margin:0 0 12px}#r61-builder-progress p{margin:0;line-height:1.6}
+#confirmBuilderEducation{margin:10px 0;min-height:44px;white-space:normal}#confirmBuilderEducation[hidden]{display:none!important}
+#followup>.followup-hero .clinic-followup-heading,#followup>.followup-hero .eyebrow{display:none}#followup .followup-guide-top h3{margin:0;font-size:18px}
+#navFollowupBadge{width:auto;white-space:nowrap;font-size:10px}#clinicTodayQueue .clinic-section-tabs button{line-height:1.55}
