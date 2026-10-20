@@ -891,3 +891,146 @@ for(const width of [390,1280])test(`adoption and response tables keep key action
  if(process.env.HQ_SCREENSHOTS){await p.evaluate(()=>scrollTo(0,0));await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`hq8-surveys-${width}.png`),fullPage:true});}
  assert.equal(await p.evaluate(()=>writes.length),0);
 });
+
+async function adoptionPortfolio(p){
+ await p.evaluate(()=>{
+  window.adoptionData={summary:{total:4,risk:3,success:1,trialEnding7:0,inactive14:2},clinics:[
+   {clinicId:'A',clinicName:'구독 확인 시험 병원',status:'risk',riskScore:90,subscription:{status:'paused'},onboarding:{ready:false,percent:50},riskReasons:['구독 일시중지','온보딩 미완료','Calendar 미연결','실사용 이벤트 없음','검토 <img src=x onerror=alert(1)>'],nextAction:'구독 상태와 재활성화 의사 확인'},
+   {clinicId:'B',clinicName:'연동 확인 시험 병원',status:'risk',riskScore:80,subscription:{status:'active'},onboarding:{ready:false,percent:50},riskReasons:['온보딩 미완료'],nextAction:'개통 준비 확인'},
+   {clinicId:'C',clinicName:'운영 확인 시험 병원',status:'risk',riskScore:70,subscription:{status:'active'},onboarding:{ready:true,percent:100},riskReasons:['14일 이상 미사용'],nextAction:'사용 중단 원인 확인'},
+   {clinicId:'D',clinicName:'정상 시험 병원',status:'success',riskScore:0,subscription:{status:'active'},onboarding:{ready:true,percent:100},successSignals:['도입 완료'],nextAction:'현재 이용 상태 유지'}
+  ].map(x=>({...x,planCode:'BASIC',usage:{packages30:1,followup30:2},createdAt:'2026-10-01'}))};
+  req=(path,o)=>path==='/hq/customer-success'?Promise.resolve(adoptionData):path.startsWith('/hq/clinics?')?Promise.resolve({clinics:adoptionData.clinics.map(x=>({id:x.clinicId,name:x.clinicName,status:'active',approvalStatus:'approved',plan:'BASIC'}))}):baseReq(path,o);
+  openApprovalCenterTarget('customerSuccess');
+ });
+ await p.locator('[data-cs-clinic="A"]').waitFor();
+}
+test('adoption All clears combined conditions and reports the full versus visible hospital count',async t=>{
+ const p=await fixture(t);await adoptionPortfolio(p);
+ assert.match(await p.locator('#hqAdoptionResults').innerText(),/전체 4곳 · 현재 표시 3곳.*이용 중단 위험/);
+ assert.equal(await p.locator('[data-cs-quick="all"]').getAttribute('aria-pressed'),'false');
+ await p.locator('#hqAdoptionFilters>summary').click();
+ await p.locator('#customerSuccessSearch').fill('구독');
+ await p.locator('#customerSuccessPlan').selectOption('BASIC');
+ assert.match(await p.locator('#hqAdoptionResults').innerText(),/현재 표시 1곳/);
+ await p.getByRole('button',{name:'전체 병원',exact:true}).click();
+ assert.equal(await p.locator('#customerSuccessStatus').inputValue(),'all');
+ assert.equal(await p.locator('#customerSuccessPlan').inputValue(),'all');
+ assert.equal(await p.locator('#customerSuccessSearch').inputValue(),'');
+ assert.equal(await p.locator('#customerSuccessRows .hq-compact-main-row').count(),4);
+ assert.match(await p.locator('#hqAdoptionResults').innerText(),/^전체 4곳 · 현재 표시 4곳$/);
+ await p.locator('#customerSuccessSearch').fill('없는 병원');
+ assert.match(await p.locator('#hqAdoptionResults').innerText(),/현재 표시 0곳/);
+ await p.locator('#hqAdoptionReset').click();
+ assert.equal(await p.locator('#customerSuccessRows .hq-compact-main-row').count(),4);
+ assert.equal(await p.evaluate(()=>writes.length),0);
+});
+test('next-step buttons open the selected hospital pane and return to the source conditions without writes',async t=>{
+ const p=await fixture(t);await adoptionPortfolio(p);
+ await p.locator('#customerSuccessSearch').fill('구독');
+ await p.getByRole('button',{name:'구독 확인 시험 병원 구독 확인',exact:true}).click();
+ await p.locator('.hq-contract-summary').waitFor();
+ assert.match(await p.locator('.detail-title h2').innerText(),/A$/);
+ assert.equal(await p.locator('#hqClinicTab-subscription').getAttribute('aria-selected'),'true');
+ await p.getByRole('button',{name:'병원 도입 현황 · 돌아가기',exact:true}).click();
+ await p.locator('[data-cs-action-clinic="A"]').waitFor();
+ assert.equal(await p.locator('#customerSuccessSearch').inputValue(),'구독');
+ assert.equal(await p.locator('#customerSuccessStatus').inputValue(),'risk');
+ await p.getByRole('button',{name:'전체 병원',exact:true}).click();
+ for(const [id,pane] of [['B','connection'],['C','operation']]){
+  await p.locator('[data-cs-action-clinic="'+id+'"]').click();
+  await p.locator('#hqClinicTab-'+pane+'[aria-selected="true"]').waitFor();
+  assert.match(await p.locator('.detail-title h2').innerText(),new RegExp(id+'$'));
+  await p.getByRole('button',{name:'병원 도입 현황 · 돌아가기',exact:true}).click();
+  await p.locator('[data-cs-action-clinic="'+id+'"]').waitFor();
+ }
+ assert.equal(await p.evaluate(()=>writes.length),0);
+});
+for(const width of [390,1280])test(`portfolio metrics, conditions and reasons are compact and readable at ${width}px`,async t=>{
+ const p=await fixture(t,width);await adoptionPortfolio(p);
+ assert.equal(await p.locator('#customerSuccess .hq-core-metrics>div').count(),3);
+ assert.equal(await p.locator('#hqAdoptionMetrics').evaluate(el=>el.open),false);
+ assert.equal(await p.locator('#hqAdoptionFilters').evaluate(el=>el.open),false);
+ assert.ok(await p.locator('.hq-adoption-table').evaluate(el=>el.getBoundingClientRect().top<650));
+ const reasons=p.locator('#customerSuccessRows .cs-reasons').first();
+ assert.equal(await reasons.locator(':scope>span').count(),2);
+ assert.doesNotMatch(await reasons.innerText(),/온보딩|Calendar|실사용 이벤트/);
+ await reasons.locator('summary').click();
+ assert.match(await reasons.innerText(),/캘린더 미연결.*사용 기록 없음/s);
+ assert.match(await reasons.innerText(),/검토 <img src=x onerror=alert\(1\)>/);
+ assert.equal(await reasons.locator('img').count(),0);
+ assert.ok(await reasons.locator('span').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize)>=14));
+ await reasons.locator('summary').click();
+ await p.locator('#hqAdoptionMetrics>summary').click();
+ assert.equal(await p.locator('#csInactive').isVisible(),true);
+ await p.locator('#hqAdoptionMetrics>summary').click();
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`hq9-adoption-${width}.png`),fullPage:true});
+ await onboardingPage(p);
+ assert.equal(await p.locator('#onboarding .hq-core-metrics>div').count(),3);
+ assert.ok(await p.locator('.onboarding-reasons span').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize)>=14));
+ assert.doesNotMatch(await p.locator('#onboarding .notice').innerText(),/kakao:read/);
+ await p.locator('#onboarding .hq-technical-help>summary').click();
+ assert.match(await p.locator('#onboarding .notice').innerText(),/kakao:read/);
+ await p.locator('#onboarding .hq-technical-help>summary').click();
+ if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`hq9-onboarding-${width}.png`),fullPage:true});
+ assert.equal(await p.evaluate(()=>writes.length),0);
+});
+test('first portfolio load uses final columns and a failure remains different from an empty result',async t=>{
+ const p=await fixture(t,390);
+ await p.evaluate(()=>{
+  window.portfolioJobs=[];req=path=>new Promise((resolve,reject)=>portfolioJobs.push({path,resolve,reject}));
+  showView('customerSuccess');
+ });
+ assert.equal(await p.locator('.hq-adoption-table th').count(),5);
+ assert.equal(await p.locator('.hq-portfolio-loading').first().isVisible(),false); // onboarding is hidden
+ assert.equal(await p.locator('#customerSuccessRows .hq-portfolio-loading').isVisible(),true);
+ assert.equal(await p.locator('#csTotal').innerText(),'--');
+ assert.doesNotMatch(await p.locator('#hqAdoptionResults').innerText(),/0곳/);
+ await p.evaluate(()=>portfolioJobs[0].reject(Error('시험 목록 실패')));
+ await p.locator('#customerSuccess .hq-load-status[data-state="error"]').waitFor();
+ assert.match(await p.locator('#hqAdoptionResults').innerText(),/조회 실패/);
+ await p.getByRole('button',{name:'다시 시도',exact:true}).click();
+ await p.evaluate(()=>portfolioJobs[1].resolve({summary:{total:0},clinics:[]}));
+ await p.locator('#customerSuccess .hq-load-status[data-state="ready"]').waitFor();
+ assert.match(await p.locator('#hqAdoptionResults').innerText(),/전체 0곳 · 현재 표시 0곳/);
+ await p.evaluate(()=>showView('onboarding'));
+ assert.equal(await p.locator('.onboarding-table th').count(),5);
+ assert.equal(await p.locator('#onboardingRows td').getAttribute('colspan'),'5');
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ await p.evaluate(()=>portfolioJobs[2].resolve({summary:{total:0},clinics:[]}));
+});
+test('refresh keeps expanded hospital details by ID even after order changes and ignores earlier replies',async t=>{
+ const p=await fixture(t);await adoptionPortfolio(p);
+ await p.locator('[data-cs-clinic="B"]').locator('..').locator('..').locator('.hq-row-toggle').click();
+ await p.evaluate(()=>{
+  window.adoptionJobs=[];req=path=>new Promise((resolve,reject)=>adoptionJobs.push({path,resolve,reject}));
+  window.olderAdoption=loadCustomerSuccess();window.newerAdoption=loadCustomerSuccess();
+ });
+ await p.evaluate(()=>adoptionJobs[1].resolve({...adoptionData,clinics:adoptionData.clinics.map(x=>({...x,riskScore:x.clinicId==='B'?99:x.riskScore}))}));
+ await p.evaluate(()=>newerAdoption);
+ const b=p.locator('.hq-compact-main-row').filter({has:p.locator('[data-cs-clinic="B"]')});
+ assert.equal(await b.locator('.hq-row-toggle').getAttribute('aria-expanded'),'true');
+ assert.equal(await p.locator('#customerSuccessRows .hq-compact-main-row').first().locator('[data-cs-clinic]').getAttribute('data-cs-clinic'),'B');
+ await p.evaluate(()=>adoptionJobs[0].resolve({summary:{total:0},clinics:[]}));
+ await p.evaluate(()=>olderAdoption);
+ assert.equal(await p.locator('#customerSuccessRows .hq-compact-main-row').count(),3);
+ await p.locator('#customerSuccessSearch').fill('구독');await p.locator('#customerSuccessSearch').fill('');
+ assert.equal(await p.locator('.hq-compact-main-row').filter({has:p.locator('[data-cs-clinic="B"]')}).locator('.hq-row-toggle').getAttribute('aria-expanded'),'true');
+ assert.equal(await p.evaluate(()=>writes.length),0);
+});
+test('onboarding refresh preserves expanded details, focus and reading position',async t=>{
+ const p=await fixture(t);await onboardingPage(p);
+ await p.evaluate(()=>{
+  onboardData.clinics=Array.from({length:10},(_,i)=>({...onboardData.clinics[0],clinicId:'hospital-'+i,clinicName:'시험 병원 '+i,attentionReasons:['온보딩 미완료','Calendar 미연결','실사용 이벤트 없음']}));
+  renderOnboardingPortfolio();
+ });
+ const row=p.locator('[data-onboarding-clinic="hospital-5"]'),toggle=row.locator('.hq-row-toggle');
+ await toggle.click();
+ const before=await row.evaluate(el=>el.getBoundingClientRect().top);
+ await p.evaluate(()=>loadOnboardingPortfolio());
+ assert.equal(await p.locator('[data-onboarding-clinic="hospital-5"] .hq-row-toggle').getAttribute('aria-expanded'),'true');
+ assert.ok(Math.abs(await p.locator('[data-onboarding-clinic="hospital-5"]').evaluate(el=>el.getBoundingClientRect().top)-before)<3);
+ assert.equal(await p.evaluate(()=>document.activeElement.closest('[data-onboarding-clinic]')?.dataset.onboardingClinic),'hospital-5');
+ assert.equal(await p.evaluate(()=>writes.length),0);
+});

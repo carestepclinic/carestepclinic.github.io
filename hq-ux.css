@@ -303,3 +303,44 @@ input[type="checkbox"]{width:18px;height:18px;flex-shrink:0;accent-color:var(--b
  #hqSubscriptionStatus{max-width:100%;margin:8px 0}
  #surveys .head .toolbar>.input{width:100%}
 }
+
+
+/* Hospital portfolios: compact overview, readable reasons and explicit next steps. */
+.hq-core-metrics{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;margin-bottom:8px!important}
+.hq-core-metrics>div{min-width:0;padding:12px!important}
+.hq-core-metrics span{display:block;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.hq-core-metrics b{font-size:24px!important}
+.hq-portfolio-metrics{margin-bottom:16px}
+.hq-portfolio-metrics>summary,.hq-list-filters>summary,.hq-help>summary{cursor:pointer;min-height:42px;padding:10px 0;font-size:14px;font-weight:650}
+.hq-extra-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:8px 0}
+.hq-extra-metrics>div{padding:12px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.hq-extra-metrics span{display:block;font-size:13px;color:var(--muted)}
+.hq-extra-metrics b{font-size:20px}
+.hq-portfolio-metrics>[id$="Generated"]{display:block;font-size:13px;padding:8px 0}
+.cs-filters.hq-portfolio-search{display:flex;flex-wrap:nowrap;gap:8px;margin:12px 0 0}
+.hq-portfolio-search .input{flex:1;min-width:0}
+.hq-portfolio-search .btn{flex-shrink:0}
+.hq-list-filters{margin:4px 0}
+.hq-filter-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:8px 0}
+.hq-filter-fields label{display:grid;gap:6px;font-size:13px;color:var(--muted)}
+.hq-list-filters .hq-priority-legend{display:block;font-size:13px;padding:8px 0}
+.hq-results-summary{font-size:14px;color:var(--ink);margin:8px 0 12px;line-height:1.65;overflow-wrap:anywhere}
+.onboarding-table .onboarding-reasons span,.hq-adoption-table .cs-reasons span,.hq-adoption-table .cs-next{font-size:14px;line-height:1.65}
+.onboarding-reasons span,.cs-reasons span{padding:4px 8px}
+.hq-more-reasons{flex-basis:100%;margin-top:4px}
+.hq-more-reasons>summary,.hq-technical-help>summary{cursor:pointer;font-size:14px;color:var(--blue);min-height:42px;padding:10px 0}
+.hq-reason-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.hq-next-action{display:block;margin-top:10px;white-space:normal;text-align:left;color:var(--blue)}
+.hq-technical-help p{font-size:13px;line-height:1.65;margin:4px 0}
+.hq-portfolio-loading td{height:170px;min-width:0}
+.hq-portfolio-loading span{display:block;font-size:14px;color:var(--muted)}
+.hq-portfolio-loading .hq-loading-lines{max-width:560px}
+@media(max-width:650px){
+ .hq-core-metrics{gap:6px!important}
+ .hq-core-metrics>div{padding:10px 8px!important}
+ .hq-core-metrics b{font-size:22px!important}
+ .hq-filter-fields{grid-template-columns:minmax(0,1fr)}
+ .hq-more-reasons{width:100%}
+}
+
+.hq-adoption-table .cs-status{font-size:14px;line-height:1.6}
