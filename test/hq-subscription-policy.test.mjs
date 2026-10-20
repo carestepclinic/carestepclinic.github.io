@@ -24,17 +24,19 @@ function fixture(){
  vm.runInContext(between('function planHint(','function renderSubscriptions('),ctx);
  return {ctx,get,requests,notices};
 }
-test('HQ plan card distinguishes VAT, credits and publications and retains basic HOME features',()=>{
+test('HQ plan card separates SOLAPI charges from subscription benefits and retains HOME features',()=>{
  const f=fixture();f.ctx.renderPlans();const html=f.get('planGrid').innerHTML;
- assert.match(html,/86,900원/);assert.match(html,/HOME 신규 자료 게시/);assert.match(html,/문자 0원은 포함 크레딧 없음/);
+ assert.match(html,/86,900원/);assert.match(html,/HOME 신규 자료 게시/);assert.match(html,/병원 SOLAPI 계정에서 별도 결제/);
+ assert.doesNotMatch(html,/class="input credit"|월 문자 크레딧|문자 0원/);
+ assert.doesNotMatch(f.ctx.planHint('PILOT'),/5,000|문자.*한도/);
  assert.match(html,/data-feature="homePush" checked disabled/);assert.doesNotMatch(html,/월 메시지.*무제한/);
 });
-test('HQ invalid plan inputs do not write; valid inputs send credit instead of message count',async()=>{
- const f=fixture(),values={monthly:'79000',annual:'790000',founding:'59000',members:'5',packages:'500',credit:'-1'};
+test('HQ plan updates omit credit fields so the server preserves existing central account limits',async()=>{
+ const f=fixture(),values={monthly:'-1',annual:'790000',founding:'59000',members:'5',packages:'500'};
  const card={dataset:{plan:'BASIC'},querySelectorAll:()=>[],querySelector:s=>s==='.active-plan'?{checked:true}:s==='.save-plan'?{}:{value:values[s.slice(1)]}};
  await f.ctx.savePlan(card);assert.equal(f.requests.length,0);
- values.credit='0';await f.ctx.savePlan(card);assert.equal(f.requests.length,1);
- assert.deepEqual(f.requests[0].body.limits,{members:5,packagesMonthly:500,messageCreditKrw:0});
+ values.monthly='79000';await f.ctx.savePlan(card);assert.equal(f.requests.length,1);
+ assert.deepEqual(f.requests[0].body.limits,{members:5,packagesMonthly:500});
 });
 test('HQ usage table uses money for credit plans and counts for legacy plans',()=>{
  const f=fixture();

@@ -1758,7 +1758,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
         </div>
 
         <div class="account-tab-pane" data-account-pane="billing">
-          <div class="account-pane-head"><div><h3>요금제 · 결제</h3><p>현재 구독, 결제수단, 문자 초과정산과 영수증을 관리합니다.</p></div></div>
+          <div class="account-pane-head"><div><h3>요금제 · 결제</h3><p>현재 구독, 결제수단, 문자 비용 안내와 영수증을 확인합니다.</p></div></div>
           <div class="panel billing-subscription-panel account-ux-card" id="subscriptionBillingPanel">
             <div class="billing-head">
               <div><h3 style="font-size:15px;margin:2px 0 0">결제 · 구독 관리</h3><p class="muted" style="margin-top:5px">BASIC은 보호자 관리, PRO는 회복관리·예방 안내 자동화를 제공합니다. ENTERPRISE와 EMR 연동은 별도 계약합니다. 기존 계약 가격과 제공량은 유지되며, 플랜 변경 시 적용 금액을 확인해주세요.</p></div>
@@ -1790,13 +1790,13 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
               </div>
             </div>
             <div class="billing-box" style="margin-top:12px">
-              <h4>문자 초과사용 자동정산</h4>
-              <p>신규 계약은 포함 크레딧과 병원이 정한 추가 예산 안에서 문자를 사용합니다. 기존 계약은 종전 제공량·초과요금을 유지합니다. 확정된 추가 사용료는 다음 정기결제에 합산됩니다.</p>
-              <div id="billingOverageSummary" class="billing-note">초과사용 정책을 불러오는 중입니다.</div>
-              <div id="billingOverageHistory" class="invoice-list" style="margin-top:8px"></div>
+              <h4>문자·알림톡 비용</h4>
+              <p>문자·알림톡 비용은 연결한 병원 SOLAPI 계정에서 별도 결제됩니다. HOME 앱 푸시는 구독에 포함되며 문자 비용이 발생하지 않습니다.</p>
+              <div id="billingOverageSummary" class="billing-note">문자 결제 방식을 확인하는 중입니다.</div>
+              <details id="billingCentralHistory"><summary>CARESTEP 중앙계정 정산 이력</summary><p>중앙계정으로 발송한 과거 사용분만 표시합니다. 병원 SOLAPI 사용 내역은 SOLAPI에서 확인해주세요.</p><div id="billingOverageHistory" class="invoice-list" style="margin-top:8px"></div></details>
             </div>
             <div class="billing-box" style="margin-top:12px">
-              <div class="section-head" style="margin:0"><div><h4 style="font-size:12px">청구내역 · 영수증</h4><p style="margin:3px 0 0">구독료와 문자 초과사용료의 합산 내역, 성공·실패 기록과 카드 매출전표를 확인합니다.</p></div><button id="billingRefresh" class="btn btn-ghost" type="button">새로고침</button></div>
+              <div class="section-head" style="margin:0"><div><h4 style="font-size:12px">청구내역 · 영수증</h4><p style="margin:3px 0 0">CARESTEP 구독 청구내역과 영수증을 확인합니다. 중앙계정 발송을 이용한 경우 해당 정산액도 포함됩니다. 병원 SOLAPI 결제는 포함되지 않습니다.</p></div><button id="billingRefresh" class="btn btn-ghost" type="button">새로고침</button></div>
               <div id="billingInvoiceList" class="invoice-list"><div class="voice-empty">결제내역을 불러오는 중입니다.</div></div>
             </div>
           </div>
@@ -3998,8 +3998,8 @@ function renderSubscriptionAccess(){
   banner.classList.remove('hidden','blocked','warn');const plan=e?.plan?.displayName||saasMe.clinic.plan||'PILOT',sub=e?.subscription?.status||'active',pkgLimit=Number(e?.plan?.limits?.packagesMonthly)||0,msg=e?.messaging||{},msgUsed=Number(msg.usage?.used)||0,msgLimit=Number(msg.included)||0,channel=saasMe?.clinic?.subscriptionChannel||{channel:'direct'},channelLabel=channel.channel==='partner'?`Partner · ${channel.partnerName||channel.partnerCode||'제휴사'}`:'Direct';
   if(e?.accessBlocked)banner.classList.add('blocked');else if(sub==='trialing')banner.classList.add('warn');
   if($('subscriptionBannerTitle'))$('subscriptionBannerTitle').textContent=e?.accessBlocked?`${channelLabel} · ${plan} · 구독 사용 제한`:sub==='trialing'?`${channelLabel} · ${plan} · 체험 구독`:`${channelLabel} · ${plan} · ${sub}`;
-  if($('subscriptionBannerText')){const end=e?.subscription?.trialEndsAt||e?.subscription?.currentPeriodEnd||'';const endText=end?` · 사용기한 ${new Date(end).toLocaleDateString('ko-KR')}`:'';const blocked=e?.accessReason==='trial_expired'?'30일 무료체험이 종료되었습니다. BASIC·PRO를 선택하거나 ENTERPRISE 계약을 문의해주세요.':e?.accessReason==='period_expired'?'현재 구독 사용기한이 종료되었습니다. 구독 갱신이 필요합니다.':'현재 구독 상태에서는 기능을 사용할 수 없습니다. HQ에서 구독 상태를 확인해주세요.';$('subscriptionBannerText').textContent=e?.accessBlocked?blocked:`이번 달 HOME 신규 게시 ${Number(e?.usage?.packages)||0}/${pkgLimit||'제한 없음'} · ${msg.credit?`문자 크레딧 ${billingMoney(msg.credit.usedKrw)} 사용 / ${billingMoney(msg.credit.includedKrw)} 포함`:`기존 문자 제공량 ${msgUsed}/${msgLimit||'제한 없음'}건`} · 직원 ${e?.plan?.limits?.members||'무제한'}명 한도${endText}`;}
-  if($('dashboardPlan'))$('dashboardPlan').textContent=plan;if($('dashboardPlanSub')){const end=e?.subscription?.trialEndsAt||e?.subscription?.currentPeriodEnd||'';$('dashboardPlanSub').textContent=`${sub} · HOME 게시 ${pkgLimit||'제한 없음'} · ${msg.credit?'문자 크레딧 '+billingMoney(msg.credit.includedKrw):'기존 문자 '+(msgLimit||'제한 없음')}${end?' · ~ '+new Date(end).toLocaleDateString('ko-KR'):''}`;}
+  if($('subscriptionBannerText')){const end=e?.subscription?.trialEndsAt||e?.subscription?.currentPeriodEnd||'';const endText=end?` · 사용기한 ${new Date(end).toLocaleDateString('ko-KR')}`:'';const blocked=e?.accessReason==='trial_expired'?'30일 무료체험이 종료되었습니다. BASIC·PRO를 선택하거나 ENTERPRISE 계약을 문의해주세요.':e?.accessReason==='period_expired'?'현재 구독 사용기한이 종료되었습니다. 구독 갱신이 필요합니다.':'현재 구독 상태에서는 기능을 사용할 수 없습니다. HQ에서 구독 상태를 확인해주세요.';$('subscriptionBannerText').textContent=e?.accessBlocked?blocked:`이번 달 HOME 신규 게시 ${Number(e?.usage?.packages)||0}/${pkgLimit||'제한 없음'} · 문자·알림톡 비용 별도 · 직원 ${e?.plan?.limits?.members||'무제한'}명 한도${endText}`;}
+  if($('dashboardPlan'))$('dashboardPlan').textContent=plan;if($('dashboardPlanSub')){const end=e?.subscription?.trialEndsAt||e?.subscription?.currentPeriodEnd||'';$('dashboardPlanSub').textContent=`${sub} · HOME 게시 ${pkgLimit||'제한 없음'} · HOME 푸시 포함${end?' · ~ '+new Date(end).toLocaleDateString('ko-KR'):''}`;}
 }
 function applySaasPermissions(){
   window.R65ManualSync?.refresh();
@@ -4141,7 +4141,7 @@ async function saasLoadUsage(){
   if(saasMode!=='auth')return;try{saasUsageSummary=await saasRequest('/saas/usage/summary',{method:'GET'});renderSaasAccount();}catch{}
 }
 
-let billingOverviewState=null,billingRedirectHandled=false;
+let billingOverviewState=null,billingRedirectHandled=false,billingOverviewSequence=0;
 let onboardingState=null,onboardingAutoOpened=false;
 let messagingTestDeliveryState=null,messagingTestPollSeq=0;
 function billingDate(v=''){if(!v)return '-';const d=new Date(v);return Number.isFinite(d.getTime())?d.toLocaleDateString('ko-KR'):'-';}
@@ -4170,20 +4170,47 @@ function renderBillingOverview(){
   if(oh){const labels={pending:'청구 대기',attached:'결제 처리중',paid:'정산 완료',no_charge:'추가 청구 없음'};oh.innerHTML=settlements.length?settlements.slice(0,6).map(x=>`<div class="invoice-row"><div><b>${escapeHtml(x.month)} ${x.mode==='credit'?'문자 크레딧 추가 사용':`문자 ${Number(x.used||0).toLocaleString('ko-KR')}건 · 초과 ${Number(x.overageCount||0).toLocaleString('ko-KR')}건`}</b><span>${Number(x.overageCount||0)>0?`${billingMoney(x.unitPriceKrw)}/건 · `:''}${billingMoney(x.amountKrw)}</span></div><span class="invoice-status ${x.status==='paid'?'paid':''}">${escapeHtml(labels[x.status]||x.status)}</span><span></span></div>`).join(''):'<div class="voice-empty">아직 확정된 월 초과정산 내역이 없습니다.</div>';}
   renderMessageCreditBudget(d);
   updateBillingPlanPrice();
-  const list=$('billingInvoiceList'),rows=d.invoices||[];if(list)list.innerHTML=rows.length?rows.map(x=>{const items=Array.isArray(x.lineItems)?x.lineItems:[],over=Number(x.overageAmountKrw)||0,detail=over>0?`구독료 ${billingMoney(x.baseAmountKrw)} + 문자 초과사용 ${billingMoney(over)}${items.filter(i=>i.type==='message_overage').length?` (${items.filter(i=>i.type==='message_overage').map(i=>`${i.month} ${i.mode==='credit'?billingMoney(i.amountKrw):Number(i.count||0).toLocaleString('ko-KR')+'건'}`).join(', ')})`:''}`:(x.invoiceType==='overage_final'?`문자 초과사용 최종정산 ${billingMoney(x.amountKrw)}`:'');return `<div class="invoice-row"><div><b>${x.invoiceType==='overage_final'?'문자 초과사용 최종정산':`${escapeHtml(x.planCode)} ${x.billingCycle==='annual'?'연':'월'} 구독`} · ${billingMoney(x.amountKrw)}</b><span>${escapeHtml(new Date(x.createdAt).toLocaleString('ko-KR'))}${detail?` · ${escapeHtml(detail)}`:''}${x.failureMessage?` · ${escapeHtml(x.failureMessage)}`:''}</span></div><span class="invoice-status ${x.status==='paid'?'paid':x.status==='failed'?'failed':''}">${x.status==='paid'?'결제완료':x.status==='failed'?'결제실패':escapeHtml(x.status)}</span>${x.receiptUrl?`<a class="btn btn-ghost" href="${escapeHtml(x.receiptUrl)}" target="_blank" rel="noopener">영수증</a>`:'<span></span>'}</div>`;}).join(''):uxEmptyState('아직 청구내역이 없습니다.','첫 유료 결제가 완료되면 구독료·문자 초과사용료와 영수증이 여기에 표시됩니다.',d.canManage&&!method?'billing_card':'',d.canManage&&!method?'카드 등록하기':'');bindUxEmptyActions(list);
+  const list=$('billingInvoiceList'),rows=d.invoices||[];if(list)list.innerHTML=rows.length?rows.map(x=>{const items=Array.isArray(x.lineItems)?x.lineItems:[],over=Number(x.overageAmountKrw)||0,detail=over>0?`구독료 ${billingMoney(x.baseAmountKrw)} + 문자 초과사용 ${billingMoney(over)}${items.filter(i=>i.type==='message_overage').length?` (${items.filter(i=>i.type==='message_overage').map(i=>`${i.month} ${i.mode==='credit'?billingMoney(i.amountKrw):Number(i.count||0).toLocaleString('ko-KR')+'건'}`).join(', ')})`:''}`:(x.invoiceType==='overage_final'?`문자 초과사용 최종정산 ${billingMoney(x.amountKrw)}`:'');return `<div class="invoice-row"><div><b>${x.invoiceType==='overage_final'?'문자 초과사용 최종정산':`${escapeHtml(x.planCode)} ${x.billingCycle==='annual'?'연':'월'} 구독`} · ${billingMoney(x.amountKrw)}</b><span>${escapeHtml(new Date(x.createdAt).toLocaleString('ko-KR'))}${detail?` · ${escapeHtml(detail)}`:''}${x.failureMessage?` · ${escapeHtml(x.failureMessage)}`:''}</span></div><span class="invoice-status ${x.status==='paid'?'paid':x.status==='failed'?'failed':''}">${x.status==='paid'?'결제완료':x.status==='failed'?'결제실패':escapeHtml(x.status)}</span>${x.receiptUrl?`<a class="btn btn-ghost" href="${escapeHtml(x.receiptUrl)}" target="_blank" rel="noopener">영수증</a>`:'<span></span>'}</div>`;}).join(''):uxEmptyState('아직 청구내역이 없습니다.','첫 유료 결제가 완료되면 CARESTEP 청구내역과 영수증이 여기에 표시됩니다.',d.canManage&&!method?'billing_card':'',d.canManage&&!method?'카드 등록하기':'');bindUxEmptyActions(list);
 }
 
 function renderMessageCreditBudget(d){
- const op=$('billingOverageSummary'),credit=d?.messaging?.credit;if(!op||!credit)return;
- op.innerHTML=`<b>이번 달 문자 크레딧 ${billingMoney(credit.includedKrw)}</b><br>확정 사용 ${billingMoney(credit.usedKrw)} · 결과 확인 중 ${billingMoney(credit.reservedKrw)} · 크레딧 잔액 ${billingMoney(credit.remainingKrw)}<br>추가 사용 예상 결제액 ${billingMoney(credit.overageGrossKrw)} · 부가세 포함<br><label for="billingMessageBudget">월 추가 문자 예산 · 부가세 별도</label><input id="billingMessageBudget" class="input" type="number" min="0" max="1000000" step="1" value="${credit.extraBudgetKrw}" ${!d.canManage||d.subscription.planCode==='PILOT'?'disabled':''}><button id="billingSaveMessageBudget" class="btn btn-secondary" ${!d.canManage||d.subscription.planCode==='PILOT'?'disabled':''}>예산 저장</button><p>0원은 포함 크레딧을 넘는 발송을 차단합니다. 실패·금액 미확정 건은 확정 청구하지 않습니다. HOME 푸시는 차감하지 않으며, 병원 SOLAPI 직접 결제에는 크레딧이 적용되지 않습니다.</p>`;
+ const op=$('billingOverageSummary'),credit=d?.messaging?.credit,mode=d?.messageBillingMode;if(!op)return;
+ const history=$('billingCentralHistory');if(history)history.open=mode==='central';
+ if(mode==='direct'){op.innerHTML='<b>병원 SOLAPI 직접 결제</b><br>문자·알림톡 발송비는 연결한 병원 SOLAPI 계정에서 차감됩니다. 잔액과 충전·사용 내역은 SOLAPI에서 확인해주세요. CARESTEP 문자 크레딧이나 추가 예산은 적용되지 않습니다.';return;}
+ if(mode!=='central'){op.innerHTML='<b>문자 결제 방식 확인 필요</b><br>병원 SOLAPI 연결 상태를 확인하지 못했거나 아직 연결 전입니다. 연결 정보를 확인한 뒤 비용 설정을 표시합니다.<br><button id="billingMessagingRetry" type="button" class="btn btn-secondary">연결 방식 다시 확인</button>';$('billingMessagingRetry').onclick=()=>loadBillingOverview(true);return;}
+ if(!credit){op.innerHTML='<b>CARESTEP 중앙계정 발송 · 기존 계약 정산</b><br>'+op.innerHTML;return;}
+ op.innerHTML=`<b>CARESTEP 중앙계정 발송 · 이번 달 문자 크레딧 ${billingMoney(credit.includedKrw)}</b><br>확정 사용 ${billingMoney(credit.usedKrw)} · 결과 확인 중 ${billingMoney(credit.reservedKrw)} · 크레딧 잔액 ${billingMoney(credit.remainingKrw)}<br>추가 사용 예상 결제액 ${billingMoney(credit.overageGrossKrw)} · 부가세 포함<br><label for="billingMessageBudget">월 추가 문자 예산 · 부가세 별도</label><input id="billingMessageBudget" class="input" type="number" min="0" max="1000000" step="1" value="${credit.extraBudgetKrw}" ${!d.canManage||d.subscription.planCode==='PILOT'?'disabled':''}><button id="billingSaveMessageBudget" class="btn btn-secondary" ${!d.canManage||d.subscription.planCode==='PILOT'?'disabled':''}>예산 저장</button><p>0원은 중앙계정의 포함 크레딧을 넘는 발송을 차단합니다. 실패·금액 미확정 건은 확정 청구하지 않습니다. HOME 푸시는 차감하지 않으며, 병원 SOLAPI 직접 결제에는 크레딧이 적용되지 않습니다.</p>`;
  $('billingSaveMessageBudget').onclick=async()=>{const el=$('billingMessageBudget'),v=Number(el.value),btn=$('billingSaveMessageBudget');if(!el.value||!Number.isSafeInteger(v)||v<0||v>1000000){toast('추가 예산을 0~1,000,000원으로 입력해주세요.');return;}if(!confirm(`월 추가 문자 예산을 ${billingMoney(v)}으로 설정합니다. 실제 사용한 비용에 부가세가 더해져 정산됩니다. 저장할까요?`))return;btn.disabled=true;try{await saasRequest('/saas/billing/message-budget',{method:'PATCH',body:JSON.stringify({extraBudgetKrw:v,confirmed:true})});await loadBillingOverview();toast('문자 예산을 저장했습니다.');}catch(e){toast(e.message||'예산 저장 실패');btn.disabled=false;}};
 }
 
-function updateBillingPlanPrice(){const el=$('billingPlanPrice');if(!el||!billingOverviewState)return;const x=billingSelectedPlanInfo(),p=billingOverviewState.plans?.[x.code]||{},sub=billingOverviewState.subscription||{};el.textContent=p.quoteRequired&&sub.planCode!==x.code?'ENTERPRISE는 제공 범위·금액 협의 후 계약합니다.':`결제 총액 ${billingMoney(x.price)} · 부가세 포함${sub.commercialVersion==='legacy'&&x.code===sub.planCode?' · 기존 계약 조건 유지':''}${sub.foundingActive?' · Founding 가격보장 적용':''}${x.cycle==='annual'?' · 연간 선결제':''} · 확정된 문자 추가 사용료 별도`;}
-async function loadBillingOverview(showToast=false){
-  if(saasMode!=='auth'||!saasMe){billingOverviewState=null;renderBillingOverview();return;}
-  try{billingOverviewState=await saasRequest('/saas/payments/overview',{method:'GET'});renderBillingOverview();if(showToast)toast('결제·구독 정보를 새로고침했습니다.');}catch(e){if(showToast)toast(e.message||'결제정보 조회 실패');}
+function updateBillingPlanPrice(){const el=$('billingPlanPrice');if(!el||!billingOverviewState)return;const x=billingSelectedPlanInfo(),p=billingOverviewState.plans?.[x.code]||{},sub=billingOverviewState.subscription||{};el.textContent=p.quoteRequired&&sub.planCode!==x.code?'ENTERPRISE는 제공 범위·금액 협의 후 계약합니다.':`결제 총액 ${billingMoney(x.price)} · 부가세 포함${sub.commercialVersion==='legacy'&&x.code===sub.planCode?' · 기존 계약 조건 유지':''}${sub.foundingActive?' · Founding 가격보장 적용':''}${x.cycle==='annual'?' · 연간 선결제':''} · 문자·알림톡 비용 별도 · HOME 푸시 포함`;}
+function billingMessageMode(onboarding){
+  if(onboarding?.solapiOauth?.connected===true)return 'direct';
+  if(onboarding?.solapiOauth?.status==='error')return 'unknown';
+  if(onboarding?.sender?.source==='legacy'&&onboarding.sender.status==='approved')return 'central';
+  return 'unknown';
 }
+async function loadBillingOverview(showToast=false){
+  const sequence=++billingOverviewSequence,scope=clinicReadScope();
+  if(saasMode!=='auth'||!saasMe){billingOverviewState=null;renderBillingOverview();return;}
+  if($('billingOverageSummary'))$('billingOverageSummary').textContent='문자 결제 방식을 확인하는 중입니다.';
+  try{
+    const [billing,onboarding]=await Promise.allSettled([
+      saasRequest('/saas/payments/overview',{method:'GET'}),
+      saasRequest('/saas/onboarding',{method:'GET'})
+    ]);
+    if(sequence!==billingOverviewSequence||scope!==clinicReadScope()||saasMode!=='auth'||!saasMe)return;
+    if(billing.status==='rejected')throw billing.reason;
+    billingOverviewState={...billing.value,messageBillingMode:onboarding.status==='fulfilled'?billingMessageMode(onboarding.value?.onboarding):'unknown'};
+    renderBillingOverview();if(showToast)toast('결제·구독 정보를 새로고침했습니다.');
+  }catch(error){
+    if(sequence!==billingOverviewSequence||scope!==clinicReadScope())return;
+    if(billingOverviewState)billingOverviewState.messageBillingMode='unknown';
+    renderMessageCreditBudget({messageBillingMode:'unknown'});
+    if(showToast)toast(error.message||'결제정보 조회 실패');
+  }
+}
+
 function cleanBillingReturnUrl(){
   const u=new URL(location.href);['carestepBilling','intentId','authKey','customerKey','code','message','orderId'].forEach(k=>u.searchParams.delete(k));return u.toString();
 }
@@ -4211,7 +4238,7 @@ async function handleBillingRedirect(){
   finally{history.replaceState(history.state&&typeof history.state==='object'?{...history.state}:{},document.title,cleanBillingReturnUrl());await saasRefreshAccount(false);await loadBillingOverview(false);}
 }
 async function scheduleBillingPlan(){
-  const {code,cycle,price}=billingSelectedPlanInfo();if(!confirm(`${code} · ${cycle==='annual'?'연 결제':'월 결제'}로 변경 예약할까요?\n결제 총액: ${billingMoney(price)} · 부가세 포함 · 확정된 문자 추가 사용료 별도\n\n무료체험 중이면 체험 종료일, 유료 구독 중이면 다음 결제일부터 적용됩니다.`))return;const btn=$('billingSchedulePlan');
+  const {code,cycle,price}=billingSelectedPlanInfo();if(!confirm(`${code} · ${cycle==='annual'?'연 결제':'월 결제'}로 변경 예약할까요?\n결제 총액: ${billingMoney(price)} · 부가세 포함 · 문자·알림톡 비용 별도 · HOME 푸시 포함\n\n무료체험 중이면 체험 종료일, 유료 구독 중이면 다음 결제일부터 적용됩니다.`))return;const btn=$('billingSchedulePlan');
   try{await uxButtonTask(btn,'예약 중…','✓ 변경 예약됨',async()=>{billingOverviewState=await saasRequest('/saas/payments/subscription/plan',{method:'POST',body:JSON.stringify({planCode:code,billingCycle:cycle})});renderBillingOverview();toast('플랜 변경을 예약했습니다.');},{resetText:'다음 결제일부터 변경'});}catch(e){toast(e.message||'플랜 변경 예약 실패');}
 }
 async function setBillingCancel(flag){
@@ -4272,7 +4299,7 @@ function renderSaasAccount(){queueMicrotask(()=>r19RefreshGoogleStatus());
   if($('saasUserName'))$('saasUserName').textContent=auth?saasMe.user.displayName:'로컬 데모';
   if($('saasUserEmail'))$('saasUserEmail').textContent=auth?saasMe.user.email:'계정 미연결';
   const uxPlan=auth?(saasMe.entitlements?.plan?.displayName||saasMe.clinic.plan):'DEMO';if($('saasPlanKpi'))$('saasPlanKpi').textContent=uxPlan;if($('accountUxPlan'))$('accountUxPlan').textContent=uxPlan;
-  if($('saasSubscriptionDetail')){const e=auth?saasMe.entitlements:null;if(!auth)$('saasSubscriptionDetail').textContent='구독 정보는 로그인 후 표시됩니다.';else{const p=e?.plan||{},sub=e?.subscription||{},pkg=p.limits?.packagesMonthly||'무제한',members=p.limits?.members||'무제한',mb=e?.messaging||saasUsageSummary?.messaging||{},msgLimit=mb.included||'무제한';const end=sub.trialEndsAt||sub.currentPeriodEnd||'',founding=sub.foundingApplied?`<br><b>Founding Clinic ${sub.foundingActive?'가격보장 적용 중':'가격보장 종료'}</b>${sub.foundingLockedUntil?` · ${escapeHtml(new Date(sub.foundingLockedUntil).toLocaleDateString('ko-KR'))}까지`:''}${sub.effectivePriceKrw?` · 적용가 ${Number(sub.effectivePriceKrw).toLocaleString('ko-KR')}원/월`:''}`:'';$('saasSubscriptionDetail').innerHTML=`<b>${escapeHtml(p.displayName||saasMe.clinic.plan)} · ${escapeHtml(billingStatusLabel(sub.status||'active'))}</b><br>결제주기 ${sub.billingCycle==='annual'?'연 결제':'월 결제'} · 월 HOME 신규 게시 ${escapeHtml(String(pkg))}건 · ${mb.credit?'문자 크레딧 '+billingMoney(mb.credit.includedKrw):'기존 문자 제공량 '+escapeHtml(String(msgLimit))} · 직원 ${escapeHtml(String(members))}명 한도${end?`<br>${sub.status==='trialing'?'무료체험 종료':'현재 사용기한'} ${escapeHtml(new Date(end).toLocaleDateString('ko-KR'))}`:''}${founding}`;}}
+  if($('saasSubscriptionDetail')){const e=auth?saasMe.entitlements:null;if(!auth)$('saasSubscriptionDetail').textContent='구독 정보는 로그인 후 표시됩니다.';else{const p=e?.plan||{},sub=e?.subscription||{},pkg=p.limits?.packagesMonthly||'무제한',members=p.limits?.members||'무제한',mb=e?.messaging||saasUsageSummary?.messaging||{},msgLimit=mb.included||'무제한';const end=sub.trialEndsAt||sub.currentPeriodEnd||'',founding=sub.foundingApplied?`<br><b>Founding Clinic ${sub.foundingActive?'가격보장 적용 중':'가격보장 종료'}</b>${sub.foundingLockedUntil?` · ${escapeHtml(new Date(sub.foundingLockedUntil).toLocaleDateString('ko-KR'))}까지`:''}${sub.effectivePriceKrw?` · 적용가 ${Number(sub.effectivePriceKrw).toLocaleString('ko-KR')}원/월`:''}`:'';$('saasSubscriptionDetail').innerHTML=`<b>${escapeHtml(p.displayName||saasMe.clinic.plan)} · ${escapeHtml(billingStatusLabel(sub.status||'active'))}</b><br>결제주기 ${sub.billingCycle==='annual'?'연 결제':'월 결제'} · 월 HOME 신규 게시 ${escapeHtml(String(pkg))}건 · 문자·알림톡 비용 별도 · HOME 푸시 포함 · 직원 ${escapeHtml(String(members))}명 한도${end?`<br>${sub.status==='trialing'?'무료체험 종료':'현재 사용기한'} ${escapeHtml(new Date(end).toLocaleDateString('ko-KR'))}`:''}${founding}`;}}
   if($('saasRoleKpi'))$('saasRoleKpi').textContent=auth?role.toUpperCase():'LOCAL';
   if($('saasPackageKpi'))$('saasPackageKpi').textContent=auth?String(saasUsageSummary?.packages??'--'):'--';if($('saasMessageKpi'))$('saasMessageKpi').textContent=auth?String((saasUsageSummary?.messaging?.usage?.used??saasMe?.entitlements?.messaging?.usage?.used)??'--'):'--';const mb=auth?(saasUsageSummary?.messaging||saasMe?.entitlements?.messaging||{}):{},limit=Number(mb.included)||0,used=Number(mb.usage?.used)||0,pct=limit?Math.min(100,Number(mb.percent)||0):0,meter=$('saasBillingMeter');if(meter){meter.classList.toggle('warn',limit>0&&pct>=80&&pct<100);meter.classList.toggle('danger',limit>0&&pct>=100);if($('saasBillingMeterValue'))$('saasBillingMeterValue').textContent=auth?`${used} / ${limit||'무제한'}${limit?` · ${Math.round(Number(mb.percent)||0)}%`:''}`:'--';if($('saasBillingMeterFill'))$('saasBillingMeterFill').style.width=auth?(limit?`${pct}%`:'0%'):'0%';if($('saasBillingMeterNote'))$('saasBillingMeterNote').textContent=!auth?'로그인 후 이번 달 사용량을 확인합니다.':limit&&pct>=100?(mb.overageEnabled?`포함량을 초과했습니다. 초과 ${Number(mb.overageCount)||0}건은 병원 계약 정책에 따라 정산됩니다.`:'월 한도에 도달하여 신규 자동발송 예약이 제한됩니다.'):limit&&pct>=80?'월 포함량의 80% 이상을 사용했습니다.':'테스트 문자는 사용량에 포함하지 않으며, 취소·교체된 예약은 제외됩니다.';}
   const sw=$('saasClinicSwitch');if(sw){const memberships=auth?(saasMe.memberships||[]):[];sw.innerHTML=memberships.length?memberships.map(x=>`<option value="${escapeHtml(x.clinicId)}" ${x.clinicId===saasMe.clinic.id?'selected':''}>${escapeHtml(x.clinicName)} · ${escapeHtml(String(x.role).toUpperCase())}</option>`).join(''):'<option value="">로그인 후 확인</option>';sw.disabled=!auth||memberships.length<2;if($('saasSwitchClinicBtn'))$('saasSwitchClinicBtn').disabled=sw.disabled;}

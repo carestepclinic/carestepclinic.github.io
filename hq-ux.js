@@ -143,7 +143,7 @@
         `${card.dataset.plan} 공통 요금제 변경`,'저장 후 신규 계약과 명시적인 플랜 변경에 적용됩니다. 기존 계약 가격·할인·제공량은 유지됩니다.');
     });
   }
-  const subscriptionLabels={subPlan:'플랜',subStatus:'구독 상태',subCycle:'결제주기',subPrice:'계약 결제금액 · 부가세 포함',subFounding:'초기 가입 가격보장',subPeriodStart:'사용 시작일',subPeriodEnd:'사용 종료일',subTrialEnd:'체험 종료일',subNote:'구독 메모',subMessagesOverride:'기존 계약 문자 제공량',subMessagingOverage:'초과 사용 허용',subMessagingOveragePrice:'기존 계약 초과요금',subExtraMessageBudget:'월 추가 문자 예산'};
+  const subscriptionLabels={subPlan:'플랜',subStatus:'구독 상태',subCycle:'결제주기',subPrice:'계약 결제금액 · 부가세 포함',subFounding:'초기 가입 가격보장',subPeriodStart:'사용 시작일',subPeriodEnd:'사용 종료일',subTrialEnd:'체험 종료일',subNote:'구독 메모',subMessagesOverride:'기존 계약 문자 제공량',subMessagingOverage:'초과 사용 허용',subMessagingOveragePrice:'기존 계약 초과요금',subExtraMessageBudget:'중앙계정 월 추가 문자 예산'};
   function enhanceClinic(){
     const root=byId('clinicDetail');if(!root)return;
     const fields=Object.keys(subscriptionLabels).map(byId).filter(Boolean);fields.forEach(x=>{

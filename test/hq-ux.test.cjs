@@ -199,6 +199,53 @@ test('billing opens on hospitals, separates plan/payment panes, distinguishes fr
   assert.equal(await p.locator('[data-plan="BASIC"] .monthly').isVisible(),false);
   await p.goBack();assert.equal(await p.locator('#hqTabsubscriptions').getAttribute('aria-selected'),'true');
 });
+test('plan benefits omit central credits and explain hospital SOLAPI billing with included HOME push',async t=>{
+  const p=await fixture(t);await billing(p);await p.locator('#hqTabplans').click();
+  assert.equal(await p.locator('#planGrid .credit').count(),0);
+  assert.doesNotMatch(await p.locator('[data-plan="PILOT"]').innerText(),/문자 5,000원|월 문자 크레딧/);
+  assert.match(await p.locator('[data-plan="PRO"]').innerText(),/병원 SOLAPI 계정에서 별도 결제[\s\S]*HOME 앱 푸시는 구독에 포함/);
+  await p.locator('[data-plan="BASIC"]').getByRole('button',{name:'수정',exact:true}).click();
+  await p.locator('[data-plan="BASIC"] .monthly').fill('80000');
+  await p.locator('[data-plan="BASIC"] .save-plan').click();await p.locator('[data-review-save]').click();
+  await p.waitForFunction(()=>writes.length===1&&!CarestepHqUX.isSaving());
+  assert.equal(await p.evaluate(()=>Object.hasOwn(writes[0].body.limits,'messageCreditKrw')),false);
+});
+
+test('direct and unconfirmed hospitals do not show or overwrite central credit and legacy overage settings',async t=>{
+  const p=await fixture(t);
+  await p.evaluate(async()=>{
+    const oldDetail=detail;window.directTestMode='direct';
+    detail=id=>({...oldDetail(id),messagingBilling:{credit:{includedKrw:20000,usedKrw:0,extraBudgetKrw:5000}},onboarding:directTestMode==='direct'?{solapiOauth:{connected:true}}:{}});
+    plans=syntheticPlans;selectedClinic='A';showView('clinics');await loadClinics();
+  });
+  await p.locator('#hqClinicMessagingPolicy[data-mode="direct"]').waitFor();
+  assert.match(await p.locator('#hqClinicMessagingPolicy').innerText(),/병원 SOLAPI 직접 결제/);
+  assert.equal(await p.locator('#subExtraMessageBudget,#subMessagesOverride,#subMessagingOverage,#subMessagingOveragePrice').count(),0);
+  await p.locator('.hq-subscription-editor').getByRole('button',{name:'수정',exact:true}).click();
+  await p.locator('#subPrice').fill('88000');await p.locator('#saveSub').click();await p.locator('[data-review-save]').click();
+  await p.waitForFunction(()=>writes.length===1&&!CarestepHqUX.isSaving());
+  const body=await p.evaluate(()=>writes[0].body);
+  for(const key of ['extraMessageBudgetKrw','messagesMonthlyOverride','messagingOverageEnabled','messagingOveragePriceKrw'])assert.equal(Object.hasOwn(body,key),false);
+  await p.evaluate(async()=>{directTestMode='unknown';await loadClinicDetail('A');});
+  assert.match(await p.locator('#hqClinicMessagingPolicy[data-mode="unknown"]').innerText(),/결제 방식 확인 필요/);
+  assert.equal(await p.locator('#subExtraMessageBudget').count(),0);
+});
+
+test('confirmed central-account hospital retains a separate budget editor and explicit reviewed save',async t=>{
+  const p=await fixture(t);await p.evaluate(async()=>{
+    const oldDetail=detail;detail=id=>({...oldDetail(id),messagingBilling:{credit:{includedKrw:20000,usedKrw:500,extraBudgetKrw:5000}},onboarding:{solapiOauth:{connected:false,status:'disconnected'},sender:{source:'legacy',status:'approved'}}});
+    plans=syntheticPlans;selectedClinic='A';showView('clinics');await loadClinics();
+  });
+  await p.locator('#hqClinicMessagingPolicy[data-mode="central"]').waitFor();
+  assert.match(await p.locator('#hqClinicMessagingPolicy').innerText(),/CARESTEP 중앙계정 발송 · 별도 정산 설정/);
+  assert.equal(await p.locator('#subExtraMessageBudget').isVisible(),false);
+  await p.locator('.hq-subscription-editor').getByRole('button',{name:'수정',exact:true}).click();
+  await p.locator('#subExtraMessageBudget').fill('6000');await p.locator('#saveSub').click();
+  assert.match(await p.locator('dialog').innerText(),/중앙계정 월 추가 문자 예산[\s\S]*5,000원[\s\S]*6,000원/);
+  await p.locator('[data-review-save]').click();await p.waitForFunction(()=>writes.length===1&&!CarestepHqUX.isSaving());
+  assert.equal(await p.evaluate(()=>writes[0].body.extraMessageBudgetKrw),6000);
+});
+
 test('payment outage is unknown, retains other regions, retry restores true zero and OFF',async t=>{
   const p=await fixture(t);await p.evaluate(()=>{failPayment=true;showView('billing');});
   await p.waitForFunction(()=>document.getElementById('hqPaymentProvider').textContent==='확인 필요');
