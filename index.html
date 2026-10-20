@@ -4029,6 +4029,7 @@ function saasStatePayload(){
     workflow:{
       dischargePresets:{...(workflowSettings.dischargePresets||{})},
       packagePresets:{...(workflowSettings.packagePresets||{})},
+      followupMessagePresets:structuredClone(workflowSettings.followupMessagePresets||[]),
       qr:{...(workflowSettings.qr||{})},
       followup:{...defaultWorkflowSettings.followup,...(workflowSettings.followup||{}),stages:[...(workflowSettings.followup?.stages||[])]},
       recent:[...(workflowSettings.recent||[])].slice(0,5),
@@ -4042,7 +4043,7 @@ async function saasCheckCloud(){
 }
 async function saasUploadCloud(silent=false){
   if(saasMode!=='auth')return;if(!saasHasFeature('cloudSync')){if(!silent)toast(saasFeatureMessage('cloudSync'));return;}const uploadToken=saasToken,uploadClinic=saasMe?.clinic?.id;const uploadCurrent=()=>uploadToken===saasToken&&uploadClinic===saasMe?.clinic?.id;const btn=silent?null:$('saasUploadState'),old=btn?.textContent;if(btn){btn.disabled=true;btn.classList.add('ux-busy');btn.textContent='저장 중…';}
-  try{const baseVersion=Number(saasCloudMeta?.version)||0;const d=await saasRequest('/saas/clinic/state',{method:'PUT',body:JSON.stringify({state:saasStatePayload(),baseVersion})});if(!uploadCurrent())return;saasCloudMeta={...d,state:saasStatePayload(),conflict:false,error:''};const k=saasCloudKey();if(k)localStorage.setItem(k,'1');renderSaasAccount();if(!silent)toast('병원 설정을 클라우드에 저장했습니다.');if(btn){btn.classList.remove('ux-busy');btn.classList.add('ux-done');btn.textContent='✓ 저장 완료';}}catch(e){if(!uploadCurrent())return;if(e.status===409)saasCloudMeta={...(saasCloudMeta||{}),conflict:true,error:e.message||'동기화 충돌',version:e.details?.currentVersion??saasCloudMeta?.version,updatedAt:e.details?.updatedAt||saasCloudMeta?.updatedAt};renderSaasAccount();saasLogClientError('clinic_state_sync',String(e.status||''),e.message||'클라우드 저장 실패');if(!silent)toast(e.message||'클라우드 저장 실패');if(btn){btn.classList.remove('ux-busy');btn.classList.add('ux-error');btn.textContent='다시 시도';}}finally{if(btn)setTimeout(()=>{if(btn.isConnected){btn.disabled=false;btn.classList.remove('ux-done','ux-error');btn.textContent=old||'현재 설정 동기화';}},1200);}
+  try{const baseVersion=Number(saasCloudMeta?.version)||0,payload=saasStatePayload();const d=await saasRequest('/saas/clinic/state',{method:'PUT',body:JSON.stringify({state:payload,baseVersion})});if(!uploadCurrent())return;saasCloudMeta={...d,state:payload,conflict:false,error:''};const k=saasCloudKey();if(k)localStorage.setItem(k,'1');renderSaasAccount();if(!silent)toast('병원 설정을 클라우드에 저장했습니다.');if(btn){btn.classList.remove('ux-busy');btn.classList.add('ux-done');btn.textContent='✓ 저장 완료';}}catch(e){if(!uploadCurrent())return;if(e.status===409)saasCloudMeta={...(saasCloudMeta||{}),conflict:true,error:e.message||'동기화 충돌',version:e.details?.currentVersion??saasCloudMeta?.version,updatedAt:e.details?.updatedAt||saasCloudMeta?.updatedAt};renderSaasAccount();saasLogClientError('clinic_state_sync',String(e.status||''),e.message||'클라우드 저장 실패');if(!silent)toast(e.message||'클라우드 저장 실패');if(btn){btn.classList.remove('ux-busy');btn.classList.add('ux-error');btn.textContent='다시 시도';}}finally{if(btn)setTimeout(()=>{if(btn.isConnected){btn.disabled=false;btn.classList.remove('ux-done','ux-error');btn.textContent=old||'현재 설정 동기화';}},1200);}
 }
 async function saasDownloadCloud(){
   if(saasMode!=='auth')return;if(!saasHasFeature('cloudSync')){toast(saasFeatureMessage('cloudSync'));return;}const btn=$('saasDownloadState'),old=btn?.textContent;if(btn){btn.disabled=true;btn.classList.add('ux-busy');btn.textContent='불러오는 중…';}
@@ -10386,7 +10387,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
-<script src="clinic-reliability.js?v=reliability-20261020a"></script>
+<script src="clinic-reliability.js?v=reliability-20261020b"></script>
 <script src="patient-breeds.js?v=9.5.3"></script>
 <script src="patient-crm.js?v=reliability-20261020a"></script>
 <script src="patient-timeline.js?v=reliability-20261020a"></script>
