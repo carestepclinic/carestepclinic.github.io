@@ -47,6 +47,99 @@ async function fixture(t,width=1280){
   return page;
 }
 async function billing(page){await page.evaluate(()=>showView('billing'));await page.locator('.plan-card').first().waitFor({state:'attached'});await page.waitForFunction(()=>document.getElementById('hqPaymentProvider').textContent==='정상');}
+async function onboardingPage(p){
+ await p.evaluate(()=>{
+  window.onboardFail=false;
+  window.onboardData={summary:{total:2,live:1,setting:0,attention:1},clinics:[
+   {clinicId:'A',clinicName:'시험 병원 A',planCode:'BASIC',completed:4,stepCount:6,percent:67,goLiveStatus:'attention',attentionReasons:['문자 연결 확인'],steps:[{key:'profile',label:'병원 정보',detail:'등록 완료',done:true}],solapiOauth:{connected:true},sender:{source:'oauth2',status:'approved',senderNumber:'0000000000'},payment:{trialDaysLeft:12},messageTest:{done:true}},
+   {clinicId:'B',clinicName:'시험 병원 B',planCode:'PRO',completed:6,stepCount:6,percent:100,goLiveStatus:'live',attentionReasons:[],steps:[],payment:{trialDaysLeft:0}}
+  ]};
+  req=(path,o)=>{if(path==='/hq/onboarding'){if(onboardFail)return Promise.reject(Error('시험 개통 조회 실패'));return Promise.resolve(onboardData);}return baseReq(path,o);};
+  showView('onboarding');
+ });
+ await p.locator('[data-onboarding-clinic="A"]').waitFor();
+}
+test('compact header opens an accessible mobile menu and restores content focus on navigation',async t=>{
+ const p=await fixture(t,390);await p.evaluate(()=>showView('dashboard'));
+ assert.equal(await p.locator('#nav').isVisible(),false);
+ assert.ok(await p.locator('.top').evaluate(el=>el.getBoundingClientRect().height<100));
+ await p.locator('#hqMenuToggle').click();
+ assert.equal(await p.locator('#nav').getAttribute('aria-modal'),'true');
+ assert.equal(await p.locator('main').evaluate(el=>el.inert),true);
+ await p.locator('#hqMenuClose').press('Shift+Tab');
+ assert.ok(await p.evaluate(()=>document.querySelector('#nav').contains(document.activeElement)));
+ await p.keyboard.press('Escape');assert.equal(await p.locator('#nav').isVisible(),false);
+ assert.equal(await p.evaluate(()=>document.activeElement.id),'hqMenuToggle');
+ await p.locator('#hqMenuToggle').click();await p.locator('#nav [data-view="onboarding"]').click();
+ assert.equal(await p.locator('#nav').isVisible(),false);assert.equal(await p.locator('#hqCurrentView').innerText(),'개통 센터');
+ assert.equal(await p.evaluate(()=>document.activeElement.textContent),'개통 센터');
+ await p.locator('#hqToolsToggle').click();assert.equal(await p.locator('#hqQuickClinicSearch').isVisible(),true);
+ assert.equal(await p.locator('#refresh').innerText(),'현재 화면 새로고침');
+ await p.keyboard.press('Escape');assert.equal(await p.locator('#hqQuickClinicSearch').isVisible(),false);
+ assert.equal(await p.evaluate(()=>writes.length),0);
+ await p.setViewportSize({width:1280,height:900});assert.equal(await p.locator('#nav').isVisible(),true);
+ assert.equal(await p.locator('main').evaluate(el=>el.inert),false);
+});
+for(const width of [390,1280])test(`onboarding and subscription tables show five columns and retain details at ${width}px`,async t=>{
+ const p=await fixture(t,width);await onboardingPage(p);
+ assert.equal(await p.locator('.onboarding-table th').count(),5);
+ assert.equal(await p.locator('[data-onboarding-clinic="A"] td').count(),5);
+ assert.ok(await p.locator('.onboarding-table th').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize)>=13));
+ assert.ok(await p.locator('.hq-onboarding-kpis span').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize)>=13));
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ await p.locator('[data-onboarding-clinic="A"] .hq-row-toggle').click();
+ const detail=p.locator('[data-onboarding-clinic="A"] + .hq-compact-detail-row');
+ assert.match(await detail.innerText(),/SOLAPI 연결[\s\S]*0000000000[\s\S]*12일 남음/);
+ assert.match(await detail.locator('.onboarding-step-dots').innerText(),/병원 정보 · 등록 완료/);
+ assert.ok(await detail.evaluate(el=>el.getBoundingClientRect().width>=el.closest('table').getBoundingClientRect().width*.95));
+ await p.locator('[data-onboarding-clinic="A"] .hq-row-toggle').press('Enter');assert.equal(await detail.isVisible(),false);
+ await p.locator('#onboardingSearch').fill('병원 B');
+ assert.equal(await p.locator('#onboardingRows .hq-compact-main-row').count(),1);assert.equal(await p.locator('#onboardingRows .hq-compact-main-row td').count(),5);
+ assert.match(await p.locator('#onboardingRows').innerText(),/개통 완료/);
+ await p.locator('#onboardingSearch').fill('없음');assert.equal(await p.locator('#onboardingRows td').getAttribute('colspan'),'5');
+ await p.locator('#onboardingSearch').fill('');
+ await p.locator('[data-onboarding-clinic="A"] .hq-row-toggle').click();
+ if(width<=650)assert.ok(await p.locator('.onboarding-table').evaluate(el=>el.parentElement.scrollHeight<=el.parentElement.clientHeight+1));
+ await p.evaluate(()=>{document.activeElement.blur();scrollTo(0,0);});
+ if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`hq-six-onboarding-${width}.png`),fullPage:true});
+ await billing(p);
+ assert.equal(await p.locator('#subscriptionTable th').count(),5);
+ assert.equal(await p.locator('#subscriptionTable tbody tr').first().locator('td').count(),5);
+ assert.match(await p.locator('#subscriptionTable').innerText(),/BASIC · 월 결제[\s\S]*86,900원/);
+ await p.locator('#subscriptionTable .hq-row-toggle').click();assert.match(await p.locator('#subscriptionTable').innerText(),/판매 채널[\s\S]*청구 주체[\s\S]*가입 승인/);
+ await p.locator('#hqSubscriptionSearch').fill('없음');assert.equal(await p.locator('#subscriptionTable tbody tr:visible').count(),0);
+ await p.locator('#hqSubscriptionSearch').fill('');
+ assert.equal(await p.locator('#subscriptionTable .hq-compact-detail-row').isVisible(),true);
+ await p.evaluate(()=>{document.activeElement.blur();scrollTo(0,0);});
+ if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`hq-six-subscriptions-${width}.png`),fullPage:true});
+ assert.equal(await p.evaluate(()=>writes.length),0);
+});
+test('failed onboarding refresh retains prior rows with an error and retries without claiming current data',async t=>{
+ const p=await fixture(t);await onboardingPage(p);
+ await p.evaluate(()=>onboardFail=true);await p.locator('#onboardingRefresh').click();
+ await p.locator('#onboarding .hq-load-status[data-state="error"]').waitFor();
+ assert.match(await p.locator('#onboarding .hq-load-status').innerText(),/시험 개통 조회 실패.*이전 결과/);
+ assert.equal(await p.locator('#onboardingRows .hq-compact-main-row').count(),2);
+ await p.evaluate(()=>onboardFail=false);await p.locator('#onboarding .hq-load-status button').click();
+ await p.locator('#onboarding .hq-load-status[data-state="ready"]').waitFor();
+ assert.ok(await p.locator('#onboarding .hq-load-status').evaluate(el=>el.getBoundingClientRect().height<=28));
+});
+test('hospital overview prioritizes actual charge, hides secondary settings and disambiguates statuses',async t=>{
+ const p=await fixture(t);
+ await p.evaluate(async()=>{const previous=detail;detail=id=>{const d=previous(id);d.subscription.priceOverrideKrw=0;d.subscription.effectivePriceKrw=86900;d.subscription.status='paused';d.clinic.approvalStatus='rejected';return d;};selectedClinic='A';showView('clinics');await loadClinics();});
+ assert.match(await p.locator('.detail-title').innerText(),/가입 거절[\s\S]*구독 일시중지[\s\S]*운영 정상/);
+ assert.equal(await p.locator('.hq-catalog-comparison').evaluate(el=>el.open),false);
+ assert.equal(await p.locator('.hq-contract-settings').evaluate(el=>el.open),false);
+ assert.match(await p.locator('.hq-contract-summary').innerText(),/86,900원/);
+ await p.locator('.hq-contract-settings summary').click();
+ assert.match(await p.locator('.hq-contract-settings').innerText(),/별도 금액 미설정 · 계약 기본가격 적용/);
+ assert.doesNotMatch(await p.locator('.hq-contract-settings').innerText(),/플랜 기본값 적용 \(0\)|Founding/);
+ await p.locator('.hq-contract-settings summary').click();
+ await p.locator('.hq-subscription-editor').getByRole('button',{name:'수정',exact:true}).click();
+ assert.equal(await p.locator('.hq-contract-settings').evaluate(el=>el.open),true);
+ await p.locator('#subNote').fill('시험 메모');await p.locator('#saveSub').click();await p.locator('[data-review-cancel]').click();
+ assert.equal(await p.evaluate(()=>writes.length),0);
+});
 test('hospital detail stays in the second column through loading, ready and errors',async t=>{
  const p=await fixture(t);
  await p.evaluate(async()=>{selectedClinic='A';showView('clinics');await loadClinics();});
@@ -87,11 +180,14 @@ test('hospital refresh reads current catalog while preserving its contract and p
   req=(path,o)=>{if(path==='/hq/plans')catalogReads++;return baseReq(path,o);};
   selectedClinic='A';showView('clinics');await loadClinics();
  });
+ await p.locator('.hq-catalog-comparison summary').click();
  assert.match(await p.locator('.hq-contract-summary').innerText(),/79,000원[\s\S]*86,900원/);
  await p.evaluate(async()=>{syntheticPlans[1].monthlyPriceKrw=89000;await loadClinicDetail('A');});
+ await p.locator('.hq-catalog-comparison summary').click();
  assert.match(await p.locator('.hq-contract-summary').innerText(),/79,000원[\s\S]*97,900원/);
  assert.ok(await p.evaluate(()=>catalogReads>=2));assert.equal(await p.evaluate(()=>writes.length),0);
  await p.evaluate(async()=>{req=path=>path==='/hq/plans'?Promise.reject(Error('catalog unavailable')):baseReq(path);await loadClinicDetail('A');});
+ await p.locator('.hq-catalog-comparison summary').click();
  assert.match(await p.locator('.hq-contract-summary').innerText(),/불러오지 못했습니다/);
  await p.locator('.hq-subscription-editor').getByRole('button',{name:'수정',exact:true}).click();
  assert.equal(await p.locator('#subPlan').isEnabled(),false);
@@ -285,7 +381,8 @@ test('confirmed central-account hospital retains a separate budget editor and ex
     const oldDetail=detail;detail=id=>({...oldDetail(id),messagingBilling:{credit:{includedKrw:20000,usedKrw:500,extraBudgetKrw:5000}},onboarding:{solapiOauth:{connected:false,status:'disconnected'},sender:{source:'legacy',status:'approved'}}});
     plans=syntheticPlans;selectedClinic='A';showView('clinics');await loadClinics();
   });
-  await p.locator('#hqClinicMessagingPolicy[data-mode="central"]').waitFor();
+  await p.locator('#hqClinicMessagingPolicy[data-mode="central"]').waitFor({state:'attached'});
+  await p.locator('.hq-contract-settings summary').click();
   assert.match(await p.locator('#hqClinicMessagingPolicy').innerText(),/CARESTEP 중앙계정 발송 · 별도 정산 설정/);
   assert.equal(await p.locator('#subExtraMessageBudget').isVisible(),false);
   await p.locator('.hq-subscription-editor').getByRole('button',{name:'수정',exact:true}).click();
