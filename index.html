@@ -2274,7 +2274,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
         <div id="crmTimelineStatusField"><label class="field-label" for="crmTimelineStatus">상태</label><select id="crmTimelineStatus" class="input"><option value="completed">완료</option><option value="scheduled">예정</option><option value="active">진행 중</option><option value="canceled">취소</option></select></div>
         <div><label class="field-label" for="crmTimelineSource">기록 출처</label><select id="crmTimelineSource" class="input"><option value="clinic">병원 기록</option><option value="system">자동 기록</option></select></div>
         <div class="span-2"><label class="field-label" for="crmTimelineDetail">병원 내부 메모</label><textarea id="crmTimelineDetail" class="input" maxlength="700" placeholder="병원에서 관리할 필요한 최소 내용을 입력하세요"></textarea></div>
-        <div class="span-2 timeline-home-share"><div class="timeline-home-share-head"><label><input id="crmTimelineHomeVisible" type="checkbox" checked><span><b>CARESTEP HOME 보호자에게 공개</b><small>기록 제목·날짜·수치·다음 예정일과 아래 안내 내용만 전달됩니다.</small></span></label><span>HOME</span></div><label id="crmTimelineHomeNoteLabel" class="field-label" for="crmTimelineHomeNote">보호자 안내 내용</label><button id="crmTimelineCopyPurpose" type="button" class="btn btn-secondary" hidden>내부 메모에서 방문목적 가져오기</button><textarea id="crmTimelineHomeNote" class="input" maxlength="700" placeholder="예: 다음 접종 예정일에 맞춰 병원으로 문의해주세요."></textarea><p>병원 내부 메모는 자동 공개되지 않습니다. HOME 공개용 내용만 검토 후 저장해주세요.</p></div>
+        <div class="span-2 timeline-home-share"><div class="timeline-home-share-head"><label><input id="crmTimelineHomeVisible" type="checkbox" checked><span><b>CARESTEP HOME 보호자에게 공개</b><small>기록 제목·날짜·수치·다음 예정일과 아래 안내 내용만 전달됩니다.</small></span></label><span>HOME</span></div><label id="crmTimelineHomeNoteLabel" class="field-label" for="crmTimelineHomeNote">보호자 안내 내용</label><button id="crmTimelineCopyPurpose" type="button" class="btn btn-secondary" hidden>내부 메모를 공개용 안내에 복사</button><textarea id="crmTimelineHomeNote" class="input" maxlength="700" placeholder="예: 다음 접종 예정일에 맞춰 병원으로 문의해주세요."></textarea><p>병원 내부 메모는 자동 공개되지 않습니다. HOME 공개용 내용만 검토 후 저장해주세요.</p></div>
       </div>
       <div id="crmTimelineStatusMessage" class="patient-crm-status error"></div><div class="patient-crm-dialog-actions"><button class="btn btn-ghost" type="button" data-timeline-dialog-close>취소</button><button id="crmTimelineSave" class="btn btn-primary" type="submit">저장</button></div>
     </form>
@@ -10314,8 +10314,8 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
 <script src="patient-breeds.js?v=9.5.3"></script>
-<script src="patient-crm.js?v=clarity-20261020d"></script>
-<script src="patient-timeline.js?v=staff-permissions-20261018a"></script>
+<script src="patient-crm.js?v=clarity-20261020f"></script>
+<script src="patient-timeline.js?v=clarity-20261020f"></script>
 <script src="date-input-guard.js?v=9.5.3"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
 <!-- CARESTEP v9.1 · SOLAPI OAuth2 clinic-account messaging -->
@@ -10327,12 +10327,12 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <!-- CARESTEP v10.4-G · Clinical Protocol Settings -->
 <script>document.addEventListener("DOMContentLoaded",()=>CarestepStabilization.compatible());</script>
 <script src="r61-route.js?v=patient-reset-20261019a"></script>
-<script src="r61-clinic.js?v=clarity-20261020e"></script>
+<script src="r61-clinic.js?v=clarity-20261020f"></script>
 <script src="r65-clinic.js?v=staff-permissions-20261018a"></script>
 <script src="r83-clinic.js"></script>
 <script src="clinic-read-flow.js?v=flow-20261017"></script>
-<script src="home-access-clinic.js?v=clarity-20261020d"></script>
-<script src="clinic-care.js?v=clarity-20261020e"></script>
-<script src="clinic-organization.js?v=clarity-20261020d"></script>
+<script src="home-access-clinic.js?v=clarity-20261020f"></script>
+<script src="clinic-care.js?v=clarity-20261020f"></script>
+<script src="clinic-organization.js?v=clarity-20261020f"></script>
 </body>
 </html>

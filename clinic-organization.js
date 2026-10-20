@@ -54,7 +54,7 @@
   const move=(selector,target,base=root)=>{const n=base.querySelector(selector);if(n)panels[target].append(n);};
   move('.patient-workspace-alert','summary');move('.patient-workspace-kpis','summary');move('.patient-workspace-grid','summary');
   move('.patient-workspace-fast-record','records');move('#crmPatientTimelineMount','records',detail);
-  const timeline=root.querySelector('[data-workspace-timeline]');if(timeline)panels.records.prepend(timeline);
+  
   move('.care-workspace-guide','materials');
   const actions=document.createElement('div');actions.className='clinic-workspace-actions';
   for(const key of ['material','medication','preview','publish','history']){const n=root.querySelector('[data-workspace-'+key+']');if(n)actions.append(n);}
