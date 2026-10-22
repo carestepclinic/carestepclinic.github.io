@@ -40,6 +40,20 @@ window.app=StaffTraining.mount(document.getElementById('root'),{common:params.ge
  await new Promise(r=>server.listen(0,'127.0.0.1',r));origin='http://127.0.0.1:'+server.address().port;
 });
 after(async()=>{await browser?.close();if(server)await new Promise(r=>server.close(r));});
+for(const role of ['staff','hq'])for(const width of [390,1280])browserTest('reading keeps citations optional and sources available '+role+' '+width,async t=>{
+ const f=fixture(t),body=f.body();for(const s of body.sections)s.items[0].sourceIds=['guardian','ref1'];
+ const sourceTitle='Reference title for education readability and safe staff workflow '.repeat(3).trim();
+ const d=await f.create(f.hq,{body,references:[{title:sourceTitle,excerpt:'Synthetic source excerpt for browser testing only. No clinical use.',url:'https://example.org/reference',rightsConfirmed:true}]});await f.publish(d.versionId,f.hq);
+ const before=JSON.stringify((await f.doc(d.versionId,f.hq)).document.body),p=await pageFor(t,f,role,width),open=()=>p.getByRole('button',{name:role==='hq'?'자료·검토 열기':'자료 보기',exact:true}).click();await open();
+ const toggle=p.getByRole('button',{name:'문장별 근거 보기',exact:true}),citations=p.locator('[data-item-sources]'),sources=p.locator('.st-sources').first();
+ await toggle.waitFor();assert.equal(await toggle.getAttribute('aria-expanded'),'false');assert.equal(await citations.count(),3);assert.equal(await citations.first().isVisible(),false);assert.equal(await sources.getAttribute('open'),null);assert.doesNotMatch(await p.locator('.st-reading').innerText(),/Reference title/);
+ assert.ok(await p.locator('dialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
+ mkdirSync(resolve(root,'../outputs'),{recursive:true});await p.screenshot({path:resolve(root,`../outputs/training-reading-clean-${role}-${width}.png`),fullPage:true});
+ await toggle.focus();await p.keyboard.press('Enter');assert.equal(await p.getByRole('button',{name:'문장별 근거 숨기기',exact:true}).getAttribute('aria-expanded'),'true');assert.equal(await citations.first().isVisible(),true);assert.match(await citations.first().innerText(),/Reference title/);assert.equal(await citations.first().getByRole('link',{name:sourceTitle,exact:true}).getAttribute('href'),'https://example.org/reference');assert.ok(await p.locator('dialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
+ await p.getByRole('button',{name:'문장별 근거 숨기기',exact:true}).click();await p.getByText('원본·참고 근거 2개',{exact:true}).click();assert.equal(await sources.getByRole('link',{name:'근거 원문 열기',exact:true}).isVisible(),true);
+ if(role==='staff'&&width===1280){const pending=p.waitForEvent('download');await p.getByRole('button',{name:'자료 다운로드',exact:true}).click();const download=await pending,text=readFileSync(await download.path(),'utf8');assert.match(text,/원본·참고 근거/);assert.ok(text.includes(sourceTitle+' https://example.org/reference'));assert.equal(text.split(sourceTitle).length-1,1);}
+ await p.getByRole('button',{name:'닫기',exact:true}).click();await open();await p.getByRole('button',{name:'문장별 근거 보기',exact:true}).waitFor();assert.equal(await citations.first().isVisible(),false);assert.deepEqual(await p.evaluate(()=>writes),[]);assert.equal(JSON.stringify((await f.doc(d.versionId,f.hq)).document.body),before);
+});
 browserTest('clinic management offers assignment and SOP without content creation or AI',async t=>{
  const f=fixture(t);await approved(f,f.hq);const p=await pageFor(t,f);
  await p.getByRole('button',{name:'교육 관리',exact:true}).click();assert.equal(await p.getByRole('button',{name:'교육자료 만들기',exact:true}).count(),0);assert.equal(await p.getByRole('button',{name:'직원 배정',exact:true}).count(),1);assert.match(await p.locator('[data-content]').innerText(),/HQ에서 제작/);

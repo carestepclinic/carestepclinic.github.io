@@ -19,3 +19,7 @@ body:has(#training.active-view) #clinicSyncStatus[data-state="idle"]{display:non
 
 /* HQ authors common courses; clinics assign and learn. */
 .st-list-title{font-size:20px;margin:28px 0 12px}.staff-training .st-report{margin:18px 0 28px}.st-dialog [data-practice-wrap] p{line-height:1.8}.st-dialog .st-info{line-height:1.7}.st-toolbar [data-course-type]{min-width:155px}.st-reading .st-item-sources{display:inline}.st-reading .st-item-sources a{font-size:13px}
+
+/* Keep source traceability available without interrupting default reading. */
+.st-reading-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0;color:var(--st-muted);font-size:14px;line-height:1.6}.st-reading-tools .st-button{flex:none}.st-reading .st-citation[hidden]{display:none}.st-reading .st-citation{margin-top:6px;line-height:1.65;overflow-wrap:anywhere}.st-sources article{overflow-wrap:anywhere}
+@media(max-width:600px){.st-reading-tools{align-items:flex-start}.st-reading-tools .st-button{min-height:44px}}
