@@ -45,7 +45,7 @@
   species.onchange=()=>{details();fluidDetails();};el('category').onchange=()=>{clearMed();list();};el('search').oninput=()=>{clearMed();list();};el('drug').onchange=details;el('manual').onclick=()=>{clearMed();el('drug').value='';el('detail').replaceChildren();med.elements.times.value='1';med.elements.days.value='1';el('status').textContent='직접 입력 모드입니다. 수의사가 정한 제품·용량을 입력해주세요.';};
   fe('ref-fluid').onchange=fluidDetails;fe('fluid-purpose').onchange=fluidDetails;list();
   return {
-   patient(p){species.value=ref.species(p?.species);species.disabled=!!species.value;card.querySelector('[data-ref-patient]').textContent=p?(species.value?'연결 환자의 종을 반영했습니다.':'연결 환자의 종을 직접 확인해 선택해주세요.'):'환자 미연결 · 계산할 동물을 선택해주세요.';details();fluidDetails();},
+   patient(p){species.value=ref.species(p?.species);species.disabled=!!species.value;b.querySelector('[data-ref-patient]').textContent=p?(species.value?'연결 환자의 종을 반영했습니다.':'연결 환자의 종을 직접 확인해 선택해주세요.'):'환자 미연결 · 계산할 동물을 선택해주세요.';details();fluidDetails();},
    resetPreset(){clearMed();el('drug').value='';el('detail').replaceChildren();fe('ref-fluid').value='';fe('fluid-purpose').value='';fluidDetails();},
    reportSource(f){if(f===med&&applied){const d=ref.drugs.find(x=>x.id===applied.id);return '\n'+d.warning+'\n출처 '+ref.sources[d.source].url+'\n출처 확인 '+ref.checked;}if(f===fluid&&fluidApplied)return '\n출처 '+fluidApplied.source.url+'\n출처 확인 '+ref.checked;return '';},
    context(f,v){
