@@ -19,7 +19,7 @@ test('edit links focus the appropriate wizard input and return to a fresh output
 });
 test('context shows actual selected education separately from entered procedure and updates after editing',()=>{
  const f=fixture();f.ctx.renderBuilderContext();assert.equal(f.node('builderContextEducation').textContent,'스케일링·발치 후 관리');assert.equal(f.node('builderContextProcedure').textContent,'스케일링');
- f.ctx.beginBuilderEdit('education');f.ctx.currentTemplateId='other';f.ctx.renderBuilderContext();assert.equal(f.node('builderContextEducation').textContent,'교육자료 선택 필요');f.ctx.clinicSetEducationChoice('other');f.ctx.renderBuilderContext();assert.equal(f.node('builderContextEducation').textContent,'다른 교육자료');assert.equal(f.node('builderEditReturn').hidden,false);
+ f.ctx.beginBuilderEdit('education');f.ctx.currentTemplateId='other';f.ctx.renderBuilderContext();assert.equal(f.node('builderContextEducation').textContent,'보호자 안내자료 선택 필요');f.ctx.clinicSetEducationChoice('other');f.ctx.renderBuilderContext();assert.equal(f.node('builderContextEducation').textContent,'다른 교육자료');assert.equal(f.node('builderEditReturn').hidden,false);
  f.ctx.caseInfo.procedure='';f.ctx.caseInfo.patientName='';f.ctx.renderBuilderContext();assert.equal(f.node('builderContextProcedure').textContent,'미입력');assert.equal(f.node('builderContextPatient').textContent,'환자명 미입력');
 });
 test('return shortcut is cleared when the patient or login changes',()=>{
