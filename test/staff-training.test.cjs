@@ -49,6 +49,22 @@ async function pageFor(t,f,role='owner',width=1280){
  return page;
 }
 async function approved(f,actor=f.owner,title='시험 직원 교육'){const d=await f.create(actor,{title});await f.publish(d.versionId,actor);return d;}
+browserTest('source picker searches and filters the complete 68-item library without an AI call',async t=>{
+ const f=fixture(t);for(let i=1;i<46;i++){const id='central-'+i;f.sqlite.prepare('INSERT INTO master_content_documents VALUES(?,?,?,?)').run(id,JSON.stringify(f.central),'1','published');f.sqlite.prepare('INSERT INTO master_content_registry VALUES(?,?,?,?)').run(id,'중앙 자료 '+i,'시험','published');}
+ const p=await pageFor(t,f,'hq');await p.getByRole('button',{name:'교육자료 만들기',exact:true}).click();await p.locator('[name=sourceContentId] option[value="builtin:cruciate"]').waitFor({state:'attached'});
+ assert.equal(await p.locator('[name=sourceContentId] option').count(),69);assert.match(await p.locator('[data-source-count]').innerText(),/전체 68개 · 기본 자료 22개 · 중앙 게시 자료 46개/);
+ await p.getByLabel('원본 검색',{exact:true}).fill('전십자인대 수술');assert.equal(await p.locator('[name=sourceContentId] option').count(),2);await p.getByLabel('교육 원본',{exact:true}).selectOption('builtin:cruciate');assert.equal(await p.getByRole('button',{name:'AI 교육 초안 생성',exact:true}).isEnabled(),true);
+ await p.getByLabel('원본 출처',{exact:true}).selectOption('central');assert.equal(await p.getByLabel('교육 원본',{exact:true}).inputValue(),'');assert.equal(await p.getByRole('button',{name:'AI 교육 초안 생성',exact:true}).isEnabled(),false);assert.match(await p.locator('[data-source-count]').innerText(),/현재 조건 0개/);
+ await p.getByRole('button',{name:'검색·필터 초기화',exact:true}).click();assert.equal(await p.locator('[name=sourceContentId] option').count(),69);await p.getByLabel('원본 출처',{exact:true}).selectOption('central');assert.equal(await p.locator('[name=sourceContentId] option').count(),47);assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+browserTest('built-in manual creation keeps its source type and remains a reviewable draft',async t=>{
+ const f=fixture(t),p=await pageFor(t,f,'hq');await p.getByRole('button',{name:'교육자료 만들기',exact:true}).click();await p.getByLabel('교육 원본',{exact:true}).selectOption('builtin:kidney');await p.getByRole('button',{name:'수동 초안 만들기',exact:true}).click();await p.getByRole('button',{name:'내용 수정',exact:true}).waitFor();
+ await p.getByText('원본·참고 근거 1개',{exact:true}).click();assert.match(await p.locator('.st-sources').first().innerText(),/기본 자료 · 원본 기준/);assert.equal(f.sqlite.prepare('SELECT status FROM staff_training_versions').get().status,'draft');assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM staff_training_generation_jobs').get().n,0);
+});
+for(const width of [390,1280])browserTest('source picker remains readable without horizontal overflow '+width,async t=>{
+ const f=fixture(t),p=await pageFor(t,f,'hq',width);await p.getByRole('button',{name:'교육자료 만들기',exact:true}).click();await p.locator('[data-source-count]').waitFor();await p.getByLabel('원본 출처',{exact:true}).selectOption('builtin');await p.getByLabel('교육 원본',{exact:true}).selectOption('builtin:pancreatitis');
+ assert.ok(await p.locator('dialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1));assert.ok(await p.getByLabel('교육 원본',{exact:true}).evaluate(e=>parseFloat(getComputedStyle(e).fontSize)>=16));mkdirSync(resolve(root,'../outputs'),{recursive:true});await p.screenshot({path:resolve(root,`../outputs/training-source-picker-${width}.png`),fullPage:true});
+});
 browserTest('library and my courses do not call AI or show drafts',async t=>{
  const f=fixture(t);await f.create();await approved(f,f.hq);const p=await pageFor(t,f,'staff');
  assert.equal(await p.locator('.st-card').count(),1);

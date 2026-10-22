@@ -83,7 +83,7 @@
   }
   const request=(p,body,method='POST')=>adapter.request(p,{method,body:JSON.stringify(body)});
   function sourceView(sources){
-   return `<details class="st-sources"><summary>원본·참고 근거 ${sources.length}개</summary>${sources.map(s=>`<article><b>${esc(s.title)}</b><p>${s.contentId?'중앙 원본 · v'+esc(s.version):s.kind==='web_search_summary'?'AI 검색 요약 · 원문 확인 필요 · 검색일 '+shortDate(s.retrievedAt):'검토용 참고자료'} · ${sourceLabel(s.id)}</p>${s.url&&/^https?:\/\//.test(s.url)?`<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">근거 원문 열기</a>`:''}<p>${esc(s.excerpt||s.content?.description||'')}</p>${s.content?.sections?`<ul>${s.content.sections.flatMap(x=>x.items.map(i=>`<li>${esc(i)}</li>`)).join('')}</ul>`:''}</article>`).join('')}</details>`;
+   return `<details class="st-sources"><summary>원본·참고 근거 ${sources.length}개</summary>${sources.map(s=>`<article><b>${esc(s.title)}</b><p>${s.contentId?(s.kind==='builtin'?'기본 자료 · 원본 기준 '+esc(s.version):'중앙 게시 자료 · v'+esc(s.version)):s.kind==='web_search_summary'?'AI 검색 요약 · 원문 확인 필요 · 검색일 '+shortDate(s.retrievedAt):'검토용 참고자료'} · ${sourceLabel(s.id)}</p>${s.url&&/^https?:\/\//.test(s.url)?`<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">근거 원문 열기</a>`:''}<p>${esc(s.excerpt||s.content?.description||'')}</p>${s.content?.sections?`<ul>${s.content.sections.flatMap(x=>x.items.map(i=>`<li>${esc(i)}</li>`)).join('')}</ul>`:''}</article>`).join('')}</details>`;
   }
   async function openDocument(id,assignmentId=''){
    const current=identity,seq=++sequence;notice('교육자료를 여는 중입니다.');
@@ -166,19 +166,30 @@
   }
   async function createDialog(){
    const current=identity,seq=++sequence;
-   notice('승인된 보호자 원본을 불러오는 중입니다.');
+   notice('기본 자료와 중앙 게시 원본을 불러오는 중입니다.');
    try{
     const d=await adapter.request('/sources',{method:'GET'});
     if(seq!==sequence||current!==(adapter.identity?.()||''))return;
     const body=`<form data-create><label>자료 종류<select name="kind"><option value="education">보호자 원본에서 직원 교육 생성</option>${!adapter.common?`<option value="sop" ${tab==='sop'?'selected':''}>우리 병원 SOP 직접 작성</option>`:''}</select></label>
      <label>교육 제목<input name="title" maxlength="240" placeholder="원본 선택 시 제목을 자동으로 사용합니다."></label>
      <label>분류<input name="category" maxlength="80" placeholder="예: 수술 · 신입 직원 · 접수"></label>
-     <label data-source-wrap>승인된 보호자 원본<select name="sourceContentId"><option value="">원본을 선택하세요</option>${d.sources.map(s=>`<option value="${esc(s.content_id)}">${esc(s.title)} · v${esc(s.version)}</option>`).join('')}</select></label>
+     <fieldset data-source-wrap><legend>교육 원본 선택</legend><div class="st-source-filters"><label>원본 검색<input type="search" data-source-search placeholder="질환·수술명 또는 분류로 검색"></label><label>원본 출처<select data-source-type aria-label="원본 출처"><option value="all">전체 출처</option><option value="builtin">기본 자료</option><option value="central">중앙 게시 자료</option></select></label></div><p class="st-muted" data-source-count role="status" aria-live="polite"></p><label>교육 원본<select name="sourceContentId" aria-label="교육 원본" aria-describedby="stSourceHint"></select></label><p class="st-muted" id="stSourceHint">기본 자료와 중앙에 게시된 보호자 안내자료를 사용합니다. 선택한 원문은 교육 초안과 함께 보관됩니다.</p><button type="button" class="st-button" data-source-reset>검색·필터 초기화</button></fieldset>
      <p class="st-muted">환자별 자료 대신 공통 원문을 사용합니다. 원문에 없는 전문 지식은 근거를 추가한 뒤 검토합니다.</p>
      <details class="st-sources"><summary>임상 참고 근거 추가 (선택)</summary><p>이용 가능한 자료의 필요한 부분만 입력하세요. 근거의 임상 타당성은 승인 시 의료진이 확인합니다.</p>${[1,2,3].map(n=>`<fieldset data-reference><legend>참고 근거 ${n}</legend><label>자료명<input data-ref-title maxlength="240"></label><label>원문 주소 또는 서지정보<input data-ref-url placeholder="https:// 주소 (선택)"><input data-ref-citation placeholder="교재 판·장·페이지 또는 가이드라인 발행연도"></label><label>활용할 원문 내용<textarea data-ref-excerpt rows="3" maxlength="5500"></textarea></label><label class="st-choice"><input type="checkbox" data-ref-rights> 이 내용을 교육 제작에 이용할 권한을 확인했습니다.</label></fieldset>`).join('')}</details>
      <div class="st-actions">${btn('수동 초안 만들기','manual','',true)}${btn('AI 교육 초안 생성','generate')}</div><p class="st-muted">AI 생성은 요청할 때만 실행됩니다. 동일 원본·근거의 기존 결과를 우선 사용하며, 하루 ${data.limits?.dailyGenerations||5}회까지 생성할 수 있습니다.</p></form>`;
-    showDialog(adapter.common?'공통 교육자료 만들기':'교육자료 만들기',body,true);notice('');
-    const kind=dialog.querySelector('[name=kind]');const sync=()=>{dialog.querySelector('[data-source-wrap]').hidden=kind.value==='sop';dialog.querySelector('[data-st=generate]').hidden=kind.value==='sop';};kind.addEventListener('change',sync);sync();
+    if(!showDialog(adapter.common?'공통 교육자료 만들기':'교육자료 만들기',body,true))return;notice('');
+    const form=dialog.querySelector('[data-create]'),kind=form.elements.kind,select=form.elements.sourceContentId,search=form.querySelector('[data-source-search]'),type=form.querySelector('[data-source-type]');
+    const sources=d.sources.map(s=>({...s,sourceType:s.sourceType==='builtin'?'builtin':'central'}));
+    const sync=()=>{const sop=kind.value==='sop';form.querySelector('[data-source-wrap]').hidden=sop;form.querySelector('[data-st=generate]').hidden=sop;for(const a of ['manual','generate'])form.querySelector('[data-st='+a+']').disabled=!sop&&!select.value;};
+    const filter=()=>{
+     const before=select.value,words=search.value.normalize('NFKC').toLocaleLowerCase('ko').trim().split(/\s+/).filter(Boolean),matches=sources.filter(s=>(type.value==='all'||s.sourceType===type.value)&&words.every(w=>(s.title+' '+s.category).normalize('NFKC').toLocaleLowerCase('ko').includes(w)));
+     select.innerHTML='<option value="">'+(matches.length?'원본을 선택하세요':'조건에 맞는 원본이 없습니다')+'</option>'+['builtin','central'].map(k=>{const rows=matches.filter(s=>s.sourceType===k);return rows.length?`<optgroup label="${k==='builtin'?'기본 자료':'중앙 게시 자료'} · ${rows.length}개">${rows.map(s=>`<option value="${esc(s.content_id)}">${esc(s.title)}${k==='central'?' · v'+esc(s.version):''}</option>`).join('')}</optgroup>`:'';}).join('');
+     select.value=matches.some(s=>s.content_id===before)?before:'';
+     const builtin=sources.filter(s=>s.sourceType==='builtin').length;
+     form.querySelector('[data-source-count]').textContent=`전체 ${sources.length}개 · 기본 자료 ${builtin}개 · 중앙 게시 자료 ${sources.length-builtin}개 · 현재 조건 ${matches.length}개${before&&!select.value?' · 검색 조건이 바뀌어 원본 선택이 해제됐습니다.':''}`;
+     form.querySelector('[data-source-reset]').hidden=!search.value&&type.value==='all';sync();
+    };
+    kind.addEventListener('change',sync);select.addEventListener('change',sync);search.addEventListener('input',filter);type.addEventListener('change',filter);form.querySelector('[data-source-reset]').addEventListener('click',()=>{search.value='';type.value='all';filter();search.focus();});filter();
    }catch(e){notice(e.message||'원본 목록을 불러오지 못했습니다.',true);}
   }
   function creationBody(){
