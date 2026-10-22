@@ -23,3 +23,6 @@ body:has(#training.active-view) #clinicSyncStatus[data-state="idle"]{display:non
 /* Keep source traceability available without interrupting default reading. */
 .st-reading-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0;color:var(--st-muted);font-size:14px;line-height:1.6}.st-reading-tools .st-button{flex:none}.st-reading .st-citation[hidden]{display:none}.st-reading .st-citation{margin-top:6px;line-height:1.65;overflow-wrap:anywhere}.st-sources article{overflow-wrap:anywhere}
 @media(max-width:600px){.st-reading-tools{align-items:flex-start}.st-reading-tools .st-button{min-height:44px}}
+
+/* Reversible education management. */
+.st-button[data-danger]{color:#a42735;border-color:#d5a3aa;background:#fff7f8}.st-button[data-danger]:hover{background:#ffecef}.st-lifecycle-title{font-size:19px;line-height:1.6}.st-lifecycle-counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:20px 0}.st-lifecycle-counts>div{padding:12px;border:1px solid var(--st-line);border-radius:12px;text-align:center}.st-lifecycle-counts dt{font-size:14px;color:var(--st-muted)}.st-lifecycle-counts dd{margin:4px 0 0;font-size:20px;font-weight:750}.st-dialog [data-lifecycle] .st-actions{justify-content:flex-end}
