@@ -1048,7 +1048,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 .billing-contract-comparison{margin:16px 0;border:1px solid var(--line);border-radius:12px;padding:14px;background:#f8faff;line-height:1.65;font-size:14px}.billing-contract-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.billing-contract-columns span,.billing-contract-columns strong,.billing-contract-columns small{display:block}.billing-contract-columns strong{font-size:19px;margin:5px 0;color:#143d83}.billing-contract-comparison p{font-size:13px}.billing-contract-comparison summary{cursor:pointer;padding:8px 0;font-weight:700}.billing-catalog-row{padding:10px 0;border-top:1px solid var(--line)}.billing-catalog-row b,.billing-catalog-row span,.billing-catalog-row small{display:block}#billingReadStatus[data-state="error"]{color:#9a372d;background:#fff3f0;padding:12px;border-radius:10px}@media(max-width:600px){.billing-contract-columns{grid-template-columns:minmax(0,1fr)}.billing-contract-columns>div+div{border-top:1px solid var(--line);padding-top:12px}}
 </style>
 <link rel="stylesheet" href="staff-training.css?v=training-manage-20261022">
-<link rel="stylesheet" href="practice-tools.css?v=20261022a">
+<link rel="stylesheet" href="practice-tools.css?v=20261022b">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -1227,7 +1227,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 
       <section id="practice" class="view"><div id="practiceRoot"></div></section>
       <section id="training" class="view"><div id="staffTrainingRoot"></div></section>
-<section id="dashboard" class="view active-view">
+<section id="dashboard" class="view active-view"><div id="practiceTodayRoot" hidden></div>
         <div class="hero-panel">
           <div>
             <p class="eyebrow">오늘의 CARESTEP</p>
@@ -3766,6 +3766,7 @@ function clinicPermissionRequirements(method,path,body={}){
  method=String(method||'GET').toUpperCase();path=String(path).split('?')[0];const get=method==='GET',one=x=>[x];
  if(/^\/saas\/training(?:\/|$)/.test(path))return one('training.read'); // Detailed training actions enforce their own separate rights.
  if(/^\/saas\/operations(?:\/|$)/.test(path))return one('operations.read');
+ if(/^\/saas\/practice(?:\/|$)/.test(path))return one('materials.read');
  if(/^\/saas\/intakes(?:\/|$)/.test(path))return one(get?'records.read':'records.edit');
  // A closed route list: an unclassified request cannot inherit broad access.
  if((get&&/^\/saas\/(me|entitlements|deployment-status|legal\/(docs|status)|sessions)$/.test(path))||
@@ -5448,7 +5449,7 @@ function showApp(){
   renderAll();carestepSafeCall('permissions',()=>applySaasPermissions());carestepSafeCall('account_render',()=>renderSaasAccount());carestepSafeCall('history_init',()=>carestepInitHistory(carestepActiveView()));
   setTimeout(()=>{try{refreshDailyWorkflowIndicators(false);}catch(e){console.error('[CARESTEP RECOVERY] daily_indicators',e);}},0);
 }
-function showLogin(){window.CarestepPractice?.clear();globalThis.CarestepTraining?.clear();window.ClinicReliability?.clearPrivate();r19GoogleStatusScope=''; clearFollowupScopedDetails();carestepResetHistoryForLogin(); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
+function showLogin(){document.getElementById('practiceTodayRoot')?.replaceChildren();window.CarestepPractice?.clear();globalThis.CarestepTraining?.clear();window.ClinicReliability?.clearPrivate();r19GoogleStatusScope=''; clearFollowupScopedDetails();carestepResetHistoryForLogin(); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
 
 /* v9.0.2 HOTFIX 25 · IN-APP BROWSER BACK NAVIGATION
    CARESTEP behaves like a single-page app, so browser Back should move through CARESTEP views
@@ -5531,7 +5532,7 @@ function go(view,options={}){
   $('viewTitle').textContent=titles[view]||'';
   announceClinicView(view,titles[view]||'');
   renderScreenHelp(view);
-  if(view==='dashboard')setTimeout(()=>refreshClinicActionCenter(false),0);
+  if(view==='dashboard'){void window.carestepPracticeToday?.();setTimeout(()=>refreshClinicActionCenter(false),0);}
   if(view==='patients'&&typeof window.crmOpen==='function')setTimeout(()=>window.crmOpen(),0);
   if(view==='training')window.CarestepTraining?.open();
   if(view==='practice')window.CarestepPractice?.open();
@@ -10428,8 +10429,8 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-organization.js?v=clarity-20261020b"></script>
 <script src="staff-training.js?v=training-manage-20261022"></script>
 <script src="staff-training-clinic.js?v=20261020a"></script>
-<script src="practice-calculators.js?v=20261022a"></script>
-<script src="practice-tools.js?v=20261022a"></script>
-<script src="practice-clinic.js?v=20261022a"></script>
+<script src="practice-calculators.js?v=20261022b"></script>
+<script src="practice-tools.js?v=20261022b"></script>
+<script src="practice-clinic.js?v=20261022b"></script>
 </body>
 </html>
