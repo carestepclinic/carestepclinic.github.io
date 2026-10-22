@@ -4,7 +4,9 @@
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const status=s=>({draft:'작성 중',review:'검토 대기',published:'승인됨',withdrawn:'공개 중단'})[s]||'확인 필요';
  const keys=['clinical','nursing','counseling'];
- const sourceLabel=id=>id==='guardian'?'보호자 원본':/^ref\d+$/.test(id)?'참고 근거 '+id.slice(3):'참고 근거';
+ const sourceLabel=id=>id==='guardian'?'보호자 원본':/^ref\d+$/.test(id)?'참고 근거 '+id.slice(3):/_w\d+$/.test(id)?'외부 검색 근거':'추가 참고 근거';
+ const supplementTopics={pathology:'병태생리·등급',diagnosis:'검사·진단의 이해',surgery:'수술 원리·수술 전후 관리',nursing:'간호 관찰·통증 평가·보고',counseling:'보호자 상담·재진 안내',medication:'약물 관리·주의사항'};
+ const supplementStatus=s=>({running:'생성 중',ready:'검토 가능',applied:'반영 완료',failed:'생성 미완료'})[s]||'확인 필요';
  const labels=kind=>kind==='sop'?['업무 목적·기준','절차·확인사항','응대·보고']:['임상 핵심','간호·보고 체크리스트','보호자 상담'];
  const shortDate=s=>s?String(s).slice(0,10):'기한 없음';
  function filterCourses(data,tab,query='',category=''){
@@ -14,7 +16,7 @@
  function mount(root,adapter){
   if(!root)throw Error('Training root missing');
   root.classList.add('staff-training');
-  let data=null,tab=adapter.common?'manage':'library',query='',category='',sequence=0,identity='',busy=false,dialog=null,dirty=false,activeDoc=null,activeAssignment=null,requestKey='',message='';
+  let data=null,tab=adapter.common?'manage':'library',query='',category='',sequence=0,identity='',busy=false,dialog=null,dirty=false,activeDoc=null,activeAssignment=null,activeSupplement=null,requestKey='',message='';
   const ready=()=>!adapter.isReady||adapter.isReady();
   const actor=()=>data?.actor||{capabilities:{}};
   const btn=(text,action,extra='',primary=false)=>`<button type="button" class="st-button ${primary?'st-primary':''}" data-st="${action}" ${extra}>${esc(text)}</button>`;
@@ -60,7 +62,7 @@
   function closeDialog(){
    if(busy){notice('처리 결과를 확인하고 있습니다.');return false;}
    if(dirty&&!global.confirm('저장하지 않은 변경사항을 취소하고 닫을까요?'))return false;
-   const old=dialog;dialog=null;dirty=false;activeDoc=null;activeAssignment=null;
+   const old=dialog;dialog=null;dirty=false;activeDoc=null;activeAssignment=null;activeSupplement=null;
    if(old){old.close();old.remove();}return true;
   }
   function showDialog(title,body,wide=false){
@@ -68,7 +70,7 @@
    dialog=document.createElement('dialog');dialog.className='st-dialog'+(wide?' st-wide':'');dialog.setAttribute('aria-labelledby','stDialogTitle');
    dialog.innerHTML=`<header><h2 id="stDialogTitle">${esc(title)}</h2>${btn('닫기','close')}</header><p class="st-status" data-dialog-status role="status" aria-live="polite"></p><div class="st-dialog-body">${body}</div>`;
    dialog.addEventListener('cancel',e=>{e.preventDefault();closeDialog();});
-   dialog.addEventListener('click',handle);dialog.addEventListener('input',()=>{if(dialog?.querySelector('[data-editor]'))dirty=true;});
+   dialog.addEventListener('click',handle);dialog.addEventListener('input',()=>{if(dialog?.querySelector('[data-editor],[data-supplement-create],[data-supplement-apply]'))dirty=true;});
    document.body.append(dialog);dialog.showModal();return true;
   }
   async function mutate(action){
@@ -81,7 +83,7 @@
   }
   const request=(p,body,method='POST')=>adapter.request(p,{method,body:JSON.stringify(body)});
   function sourceView(sources){
-   return `<details class="st-sources"><summary>원본·참고 근거 ${sources.length}개</summary>${sources.map(s=>`<article><b>${esc(s.title)}</b><p>${s.contentId?'중앙 원본 · v'+esc(s.version):'검토용 참고자료'} · ${sourceLabel(s.id)}</p>${s.url&&/^https?:\/\//.test(s.url)?`<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">근거 원문 열기</a>`:''}<p>${esc(s.excerpt||s.content?.description||'')}</p>${s.content?.sections?`<ul>${s.content.sections.flatMap(x=>x.items.map(i=>`<li>${esc(i)}</li>`)).join('')}</ul>`:''}</article>`).join('')}</details>`;
+   return `<details class="st-sources"><summary>원본·참고 근거 ${sources.length}개</summary>${sources.map(s=>`<article><b>${esc(s.title)}</b><p>${s.contentId?'중앙 원본 · v'+esc(s.version):s.kind==='web_search_summary'?'AI 검색 요약 · 원문 확인 필요 · 검색일 '+shortDate(s.retrievedAt):'검토용 참고자료'} · ${sourceLabel(s.id)}</p>${s.url&&/^https?:\/\//.test(s.url)?`<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">근거 원문 열기</a>`:''}<p>${esc(s.excerpt||s.content?.description||'')}</p>${s.content?.sections?`<ul>${s.content.sections.flatMap(x=>x.items.map(i=>`<li>${esc(i)}</li>`)).join('')}</ul>`:''}</article>`).join('')}</details>`;
   }
   async function openDocument(id,assignmentId=''){
    const current=identity,seq=++sequence;notice('교육자료를 여는 중입니다.');
@@ -95,14 +97,57 @@
    if(aid&&!mine?.completed_at)await request('/assignments/'+encodeURIComponent(aid)+'/open',{});
     if(seq!==sequence||current!==(adapter.identity?.()||''))return;
     const body=`<div class="st-doc-meta"><span class="st-tag">${d.common?'공통 교육':'우리 병원'} · v${d.version}</span><span class="st-tag">${status(d.status)}</span>${d.reviewedAt?`<span>승인 ${shortDate(d.reviewedAt)}</span>`:''}</div>
-     ${d.body.gaps.length?`<aside class="st-warning"><b>추가 검토 필요</b><ul>${d.body.gaps.map(g=>`<li>${esc(g)}</li>`).join('')}</ul></aside>`:''}
+     ${d.body.gaps.length?`<aside class="st-warning"><b>추가 검토 필요</b><ul>${d.body.gaps.map(g=>`<li>${esc(g)}</li>`).join('')}</ul>${canEdit&&d.kind==='education'&&d.supplementEnabled&&['draft','review'].includes(d.status)?btn('부족한 내용 AI 보완','supplement-create','',true):''}</aside>`:''}
      <div class="st-reading">${d.body.sections.map((s,i)=>`<section><h3>${names[i]}</h3>${s.items.length?`<ul${s.key==='nursing'?' class="st-checklist"':''}>${s.items.map(x=>`<li>${esc(x.text)}${x.sourceIds?.length?` <small>근거: ${x.sourceIds.map(sourceLabel).join(', ')}</small>`:''}</li>`).join('')}</ul>`:'<p class="st-muted">작성할 내용이 없습니다.</p>'}</section>`).join('')}</div>${sourceView(d.sources)}
      <div class="st-actions">${btn('자료 다운로드','download')}${canEdit&&['draft','review'].includes(d.status)?btn('내용 수정','edit'):''}${canEdit&&d.status==='draft'?btn('검토 요청','review','',true):''}${canReview&&d.status==='review'?btn('검토 후 승인','approve','',true):''}${canReview&&['published','withdrawn'].includes(d.status)?btn('새 버전 작성','revise'):''}${canReview&&d.status==='published'?btn('공개 중단','withdraw'):''}${canLearn&&!aid?btn('내 교육으로 시작','enroll','',true):''}</div>
      ${aid&&canLearn?`<section class="st-assessment"><h3>${mine?.completed_at?'이수한 교육':'학습 확인'}</h3>${mine?.completed_at?`<p>${shortDate(mine.completed_at)} · ${mine.score}점으로 이수했습니다.</p>`:`<p>${d.body.quiz.length?'5문항 중 4문항 이상 정답이면 이수됩니다.':'자료 내용을 확인한 후 이수를 기록합니다.'}</p><form data-quiz>${d.body.quiz.map((q,i)=>`<fieldset><legend>${i+1}. ${esc(q.question)}</legend>${q.options.map((o,j)=>`<label class="st-choice"><input type="radio" name="answer${i}" value="${j}" required> ${esc(o)}</label>`).join('')}</fieldset>`).join('')}<label class="st-choice"><input type="checkbox" name="confirmRead" required> 교육자료를 읽고 내용을 확인했습니다.</label>${btn(d.body.quiz.length?'답안 제출':'이수 기록','attempt','',true)}</form><div data-feedback></div>`}</section>`:''}
+     ${canEdit&&d.kind==='education'?`<section class="st-supplement-entry"><h3>교육 내용 보완</h3><p>부족한 항목을 선택하면 근거를 찾아 별도 보완안을 만듭니다. 검토한 내용만 기존 초안에 추가할 수 있습니다.</p>${d.supplementEnabled&&['draft','review'].includes(d.status)?(d.body.gaps.length?'':btn('부족한 내용 AI 보완','supplement-create','',true)):`<p class="st-muted">${d.supplementEnabled?'새 버전을 작성한 뒤 보완할 수 있습니다.':'AI 보완 저장 공간 적용이 필요합니다.'}</p>`}${d.supplements?.length?`<details open class="st-sources"><summary>보완 이력 ${d.supplements.length}개</summary>${d.supplements.map(s=>`<div class="st-actions st-supplement-history"><span>${shortDate(s.created_at)} · ${supplementStatus(s.status)}${s.base_revision!==d.revision&&s.status==='ready'?' · 이전 본문 기준':''}</span>${btn('보완안 열기','supplement-open',`data-id="${esc(s.id)}"`)}</div>`).join('')}</details>`:''}</section>`:''}
      ${d.editable&&d.body.quiz.length?`<details class="st-sources"><summary>검토자용 평가문항·정답</summary>${d.body.quiz.map((q,i)=>`<p><b>${i+1}. ${esc(q.question)}</b><br>${q.options.map((o,j)=>`${j+1}. ${esc(o)}`).join(' / ')}<br>정답: ${esc(q.options[q.answer])}<br>${esc(q.explanation)} · 근거 ${q.sourceIds.map(sourceLabel).join(', ')}</p>`).join('')}</details>`:''}
-     ${d.audit?.length?`<details class="st-sources"><summary>작성·검토 이력</summary>${d.audit.map(x=>`<p>${esc(x.at.replace('T',' ').slice(0,16))} · ${esc(({create:'초안 생성',edit:'내용 수정',review:'검토 요청',publish:'승인·공개',revise:'새 버전 작성',withdraw:'공개 중단',assign:'교육 배정',enroll:'학습 시작'})[x.action]||x.action)} · ${esc(x.detail?.reviewerName||x.actor)}</p>`).join('')}</details>`:''}`;
+     ${d.audit?.length?`<details class="st-sources"><summary>작성·검토 이력</summary>${d.audit.map(x=>`<p>${esc(x.at.replace('T',' ').slice(0,16))} · ${esc(({create:'초안 생성',edit:'내용 수정',review:'검토 요청',publish:'승인·공개',revise:'새 버전 작성',withdraw:'공개 중단',assign:'교육 배정',enroll:'학습 시작',supplement_generate:'AI 보완안 생성',supplement_apply:'보완안 선택 반영'})[x.action]||x.action)} · ${esc(x.detail?.reviewerName||x.actor)}</p>`).join('')}</details>`:''}`;
     if(!showDialog(d.title,body,true))return;activeDoc=d;activeAssignment=aid;requestKey=global.crypto.randomUUID().replaceAll('-','');notice('');
    }catch(e){notice(e.message||'자료를 열지 못했습니다.',true);}
+  }
+  function supplementCreate(){
+   const d=activeDoc;
+   const form=`<p><b>${esc(d.title)}</b> · 현재 초안은 유지되고 생성 결과는 보완 이력에 저장됩니다.</p><form data-supplement-create>
+    ${d.body.gaps.length?`<fieldset><legend>현재 부족한 정보</legend>${d.body.gaps.map((g,i)=>`<label class="st-choice"><input type="checkbox" name="gap" value="${i}" checked>${esc(g)}</label>`).join('')}</fieldset>`:''}
+    <fieldset><legend>추가로 보완할 영역</legend><div class="st-topic-grid">${Object.entries(supplementTopics).map(([k,v])=>`<label class="st-choice"><input type="checkbox" name="topic" value="${k}">${v}</label>`).join('')}</div></fieldset>
+    <label class="st-choice"><input type="checkbox" name="webSearch" checked>학회·수의과대학·임상 참고자료에서 근거 검색</label><p class="st-muted">검색에는 공통 원본의 질환명과 교육 영역을 사용합니다. 검색 결과의 정확성과 적용 범위는 의료진이 확인합니다.</p>
+    <details class="st-sources"><summary>병원 참고 근거 추가 (선택)</summary><p>병원 고유 절차나 추가로 참고할 자료를 입력하세요. 개인정보는 포함하지 마세요.</p>${[1,2,3].map(n=>`<fieldset data-reference><legend>참고 근거 ${n}</legend><label>자료명<input data-ref-title maxlength="240"></label><label>원문 주소<input data-ref-url placeholder="https:// 주소 (선택)"></label><label>활용할 내용·서지정보<textarea data-ref-excerpt maxlength="5500" rows="4"></textarea></label><label class="st-choice"><input type="checkbox" data-ref-rights> 교육 제작에 이용할 권한을 확인했습니다.</label></fieldset>`).join('')}</details>
+    <div class="st-warning"><label class="st-choice"><input type="checkbox" name="confirmSend"> 선택한 교육 내용·참고자료를 기존 OpenAI 연결로 전송하고, AI 작성·검색 사용료가 발생함을 확인했습니다.</label><p class="st-muted">검색을 포함하면 근거 검색과 초안 작성으로 나누어 처리합니다. 같은 본문·선택·근거의 보완안은 재사용합니다.</p></div>
+    <div class="st-actions">${btn('AI 보완 초안 작성','supplement-generate','',true)}${btn('기존 자료로 돌아가기','supplement-back')}</div></form>`;
+   if(showDialog('부족한 내용 AI 보완',form,true))activeDoc=d;
+  }
+  function supplementCreateBody(){
+   const f=dialog.querySelector('[data-supplement-create]');return {revision:activeDoc.revision,topics:[...f.querySelectorAll('[name=topic]:checked')].map(x=>x.value),gapIndexes:[...f.querySelectorAll('[name=gap]:checked')].map(x=>Number(x.value)),webSearch:f.elements.webSearch.checked,confirmSend:f.elements.confirmSend.checked,references:[...f.querySelectorAll('[data-reference]')].filter(r=>r.querySelector('[data-ref-title]').value||r.querySelector('[data-ref-excerpt]').value).map(r=>({title:r.querySelector('[data-ref-title]').value,url:r.querySelector('[data-ref-url]').value,excerpt:r.querySelector('[data-ref-excerpt]').value,rightsConfirmed:r.querySelector('[data-ref-rights]').checked}))};
+  }
+  function supplementLinks(ids,sources){return `<span class="st-item-sources">${ids.map(id=>{const s=sources.find(x=>x.id===id);if(!s)return '';return s.url&&/^https?:\/\//.test(s.url)?`<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>`:`<span>${esc(s.title)}</span>`;}).join(' · ')}</span>`;}
+  function supplementResult(d,s){
+   const usable=s.status==='ready'&&!s.stale,p=s.proposal,names=labels(d.kind);
+   let content=`<div class="st-doc-meta"><span class="st-tag">${supplementStatus(s.status)}</span><span>기준 본문 수정 ${s.baseRevision}회 · ${shortDate(s.createdAt)}</span></div>`;
+   if(s.status==='running')content+='<p class="st-warning">AI 요청을 처리 중입니다. 잠시 후 보완 이력에서 다시 열어주세요. 중복 생성은 실행되지 않습니다.</p>';
+   if(s.status==='failed')content+=`<p class="st-warning">${esc(s.error)} 같은 요청은 자동 재실행되지 않습니다. 참고 근거를 추가하거나 내용을 직접 작성할 수 있습니다.</p>`;
+   if(s.status==='ready'&&s.stale)content+='<p class="st-warning">기존 자료가 변경됐습니다. 이 보완안은 참고용으로 확인하고, 최신 초안에서 보완을 다시 요청해주세요.</p>';
+   if(p.items?.length){
+    content+=`<form data-supplement-apply><p>기존 문장은 유지됩니다. 추가할 내용과 근거를 확인한 후 선택해주세요.</p><div class="st-compare"><section><h3>현재 교육자료</h3>${d.body.sections.map((section,i)=>`<details open><summary>${names[i]}</summary><ul>${section.items.map(x=>`<li>${esc(x.text)}</li>`).join('')}</ul></details>`).join('')}</section><section><h3>AI 보완 제안</h3>${usable?btn('추가 내용 전체 선택','supplement-select-all'):''}${p.items.map(x=>`<article class="st-proposal-item"><span class="st-tag">${names[keys.indexOf(x.section)]}</span><label class="st-choice">${usable?`<input type="checkbox" name="item" value="${esc(x.id)}">`:''}<span>${esc(x.text)}</span></label>${supplementLinks(x.sourceIds,s.sources)}</article>`).join('')}</section></div>
+     ${p.remainingGaps?.length?`<aside class="st-warning"><b>보완 후에도 확인할 내용</b><ul>${p.remainingGaps.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></aside>`:''}
+     <details class="st-sources"><summary>평가문항 비교 · 기존 ${d.body.quiz.length}개 / 보완 5개</summary><div class="st-compare"><section><h3>기존 문항</h3>${d.body.quiz.map((q,i)=>`<p>${i+1}. ${esc(q.question)}</p>`).join('')}</section><section><h3>보완 문항</h3>${p.quiz.map((q,i)=>`<article><b>${i+1}. ${esc(q.question)}</b><ol>${q.options.map(x=>`<li>${esc(x)}</li>`).join('')}</ol><p>정답: ${esc(q.options[q.answer])}<br>${esc(q.explanation)}</p>${supplementLinks(q.sourceIds,s.sources)}</article>`).join('')}</section></div></details>
+     ${sourceView(s.sources)}
+     ${usable?`<fieldset><legend>반영 옵션</legend><label class="st-choice"><input type="checkbox" name="replaceQuiz" disabled>평가문항 5개도 보완 문항으로 교체</label><p class="st-muted">평가문항 교체는 추가 내용을 모두 선택했을 때 가능합니다.</p>${s.selection.gapIndexes.length?`<b>보완이 끝난 검토 항목</b><p class="st-muted">관련 내용을 모두 선택하고 충분히 보완됐다고 확인한 항목만 체크하세요.</p>${s.selection.gapIndexes.map(i=>`<label class="st-choice"><input type="checkbox" name="resolvedGap" value="${i}" disabled>${esc(d.body.gaps[i])}</label>`).join('')}`:''}<label class="st-choice"><input type="checkbox" name="confirmReviewed">선택한 보완 내용과 연결된 근거를 확인했습니다.</label></fieldset><div class="st-apply-bar"><p data-selection-summary role="status">추가 내용 0개 선택</p>${btn('선택한 내용 초안에 반영','supplement-apply','',true)}</div>`:''}</form>`;
+   }
+   content+=`<div class="st-actions">${btn('기존 자료로 돌아가기','supplement-back')}</div>`;
+   if(showDialog('AI 보완안 비교·반영',content,true)){activeDoc=d;activeSupplement=s;dialog.addEventListener('change',syncSupplementSelection);}
+  }
+  function syncSupplementSelection(){
+   const s=activeSupplement,f=dialog?.querySelector('[data-supplement-apply]');if(!s||!f)return;
+   const selected=[...f.querySelectorAll('[name=item]:checked')].map(x=>x.value),quiz=f.querySelector('[name=replaceQuiz]');
+   if(quiz){quiz.disabled=selected.length!==s.proposal.items.length;if(quiz.disabled)quiz.checked=false;}
+   for(const input of f.querySelectorAll('[name=resolvedGap]')){const related=s.proposal.items.filter(x=>x.gapIndexes.includes(Number(input.value)));input.disabled=!related.length||related.some(x=>!selected.includes(x.id));if(input.disabled)input.checked=false;}
+   const summary=f.querySelector('[data-selection-summary]');if(summary)summary.textContent=`추가 내용 ${selected.length}개 · 문항 ${quiz?.checked?'교체':'유지'} · 검토 항목 해소 ${f.querySelectorAll('[name=resolvedGap]:checked').length}개`;
+  }
+  async function openSupplement(id){
+   const d=activeDoc,current=identity,seq=++sequence;notice('보완안을 불러오고 있습니다.');
+   try{const r=await adapter.request('/supplements/'+encodeURIComponent(id),{method:'GET'});if(seq!==sequence||current!==(adapter.identity?.()||''))return;supplementResult(d,r.supplement);notice('');}catch(e){notice(e.message,true);}
   }
   function refsInputs(selected,sources){return `<div class="st-reference-checks">${sources.map(s=>`<label class="st-choice"><input type="checkbox" value="${esc(s.id)}" ${selected.includes(s.id)?'checked':''}>${esc(s.title)} <small>(${sourceLabel(s.id)})</small></label>`).join('')||'<span class="st-muted">병원 SOP · 내부 기준을 검토해주세요.</span>'}</div>`;}
   function editDocument(){
@@ -157,6 +202,23 @@
    if(a==='tab'){tab=b.dataset.tab;message='';render();return;}
    if(a==='clear'){query='';category='';render();return;}
    if(a==='document'||a==='learn'){await openDocument(id,b.dataset.assignment||'');return;}
+   if(a==='supplement-create'){supplementCreate();return;}
+   if(a==='supplement-open'){await openSupplement(id);return;}
+   if(a==='supplement-back'){const d=activeDoc;if(closeDialog())await openDocument(d.id);return;}
+   if(a==='supplement-select-all'){dialog.querySelectorAll('[name=item]').forEach(x=>{x.checked=true;});dirty=true;syncSupplementSelection();return;}
+   if(a==='supplement-generate'){
+    const d=activeDoc,body=supplementCreateBody();
+    if(!body.topics.length&&!body.gapIndexes.length){notice('보완할 항목을 하나 이상 선택해주세요.',true);return;}
+    if(!body.confirmSend){notice('AI 전달 내용과 사용료 안내를 확인해주세요.',true);return;}
+    if(!body.webSearch&&!body.references.length){notice('외부 근거 검색을 선택하거나 참고자료를 추가해주세요.',true);return;}
+    notice(body.webSearch?'근거 검색과 보완 초안 작성을 진행합니다. 완료되면 비교 화면을 엽니다.':'입력한 근거로 보완 초안을 작성합니다.');
+    await mutate(async current=>{const r=await request('/versions/'+d.id+'/supplements',body);if(!current())return;dirty=false;busy=false;supplementResult(d,r.supplement);notice('');});return;
+   }
+   if(a==='supplement-apply'){
+    const d=activeDoc,s=activeSupplement,f=dialog.querySelector('[data-supplement-apply]'),body={revision:s.baseRevision,itemIds:[...f.querySelectorAll('[name=item]:checked')].map(x=>x.value),resolvedGapIndexes:[...f.querySelectorAll('[name=resolvedGap]:checked')].map(x=>Number(x.value)),replaceQuiz:f.elements.replaceQuiz.checked,confirmReviewed:f.elements.confirmReviewed.checked};
+    if(!body.itemIds.length||!body.confirmReviewed){notice('추가할 내용과 출처 확인을 선택해주세요.',true);return;}
+    await completeMutation(()=>request('/supplements/'+s.id+'/apply',body),()=>openDocument(d.id));return;
+   }
    if(a==='create'){await createDialog();return;}
    if(a==='edit'){editDocument();return;}
    if(a==='assign'){assignDialog(id);return;}
@@ -204,7 +266,7 @@
   root.addEventListener('change',e=>{if(e.target.matches('[data-category]')){category=e.target.value;renderList();}});
   global.addEventListener('beforeunload',e=>{if(dirty||busy){e.preventDefault();e.returnValue='';}});
   function clear(){
-   ++sequence;data=null;identity='';dirty=false;activeDoc=null;activeAssignment=null;query='';category='';message='';
+   ++sequence;data=null;identity='';dirty=false;activeDoc=null;activeAssignment=null;activeSupplement=null;query='';category='';message='';
    if(dialog){dialog.close();dialog.remove();dialog=null;}shell();
   }
   return {open:load,close:closeDialog,clear};

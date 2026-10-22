@@ -6,12 +6,13 @@ const {pathToFileURL}=require('node:url');
 const http=require('node:http');
 const {chromium}=require('playwright');
 const root=resolve(__dirname,'..'),workerFixture=resolve(process.env.TRAINING_WORKER_ROOT||resolve(root,'../onboard-worker'),'test/helpers/training-fixture.mjs');
-let browser,server,origin,fixture;
+let browser,server,origin,fixture,supplementProvider;
 const fixtures=new Map();
 const browserTest=existsSync(workerFixture)?test:test.skip;
 before(async()=>{
  if(!existsSync(workerFixture))return;
  ({fixture}=await import(pathToFileURL(workerFixture).href));
+ ({supplementProvider}=await import(pathToFileURL(resolve(workerFixture,'../supplement-provider.mjs')).href));
  browser=await chromium.launch({headless:true,...(process.env.HQ_TEST_BROWSER?{executablePath:process.env.HQ_TEST_BROWSER}:{})});
  server=http.createServer(async(req,res)=>{
   const u=new URL(req.url,'http://localhost'),name=u.pathname.slice(1),f=fixtures.get(u.searchParams.get('test'));
@@ -30,7 +31,7 @@ window.app=StaffTraining.mount(document.getElementById('root'),{common:params.ge
    if(!f){res.writeHead(404);res.end();return;}
    const role=u.searchParams.get('role')||'owner',actor=f[role]||f.owner,chunks=[];for await(const chunk of req)chunks.push(chunk);
    const body=chunks.length?JSON.parse(Buffer.concat(chunks).toString('utf8')):null;
-   try{const d=await f.api(u.pathname.slice(4)||'/',req.method,body,actor);res.setHeader('Content-Type','application/json');res.end(JSON.stringify(d));}catch(e){res.writeHead(e.statusCode||500,{'Content-Type':'application/json'});res.end(JSON.stringify({error:e.message}));}return;
+   try{const d=await f.api(u.pathname.slice(4)||'/',req.method,body,actor,f.provider||{});res.setHeader('Content-Type','application/json');res.end(JSON.stringify(d));}catch(e){res.writeHead(e.statusCode||500,{'Content-Type':'application/json'});res.end(JSON.stringify({error:e.message}));}return;
   }
   if(!/^[a-zA-Z0-9._-]+\.(js|css|html|woff2)$/.test(name)||!existsSync(resolve(root,name))){res.writeHead(404);res.end();return;}
   res.setHeader('Content-Type',({'.js':'text/javascript','.css':'text/css','.html':'text/html','.woff2':'font/woff2'})[extname(name)]);res.end(readFileSync(resolve(root,name)));
@@ -182,6 +183,24 @@ browserTest('real HQ navigation loads the education center through the current r
  await p.locator('#nav [data-view=training]').click();await p.locator('#training .st-tabs').waitFor();
  assert.match(await p.locator('#training').innerText(),/직원 공통 교육 관리/);
 });
+async function supplementationPage(t,width=1280){
+ const f=fixture(t),d=await f.create(f.hq,{title:'직원 교육 보완 · 화면 검증용',body:{...f.body(),gaps:['병태생리·관찰 기준을 확인해주세요.','병원 보고 절차를 확인해주세요.']}});f.provider=supplementProvider(f);
+ const p=await pageFor(t,f,'hq',width);await p.getByRole('button',{name:'자료·검토 열기',exact:true}).click();await p.getByRole('button',{name:'부족한 내용 AI 보완',exact:true}).click();return {f,d,p};
+}
+async function generateSupplement(p){await p.locator('[name=confirmSend]').check();await p.getByRole('button',{name:'AI 보완 초안 작성',exact:true}).click();await p.getByRole('heading',{name:'AI 보완안 비교·반영',exact:true}).waitFor();}
+browserTest('supplement generation requires acknowledgement and survives reload without changing the course',async t=>{
+ const {f,d,p}=await supplementationPage(t);await p.getByRole('button',{name:'AI 보완 초안 작성',exact:true}).click();assert.match(await p.locator('[data-dialog-status]').innerText(),/사용료 안내/);assert.equal(f.provider.calls.length,0);await generateSupplement(p);assert.equal(f.provider.calls.length,2);assert.equal((await f.doc(d.versionId,f.hq)).document.revision,1);assert.equal(await p.locator('[name=item]:checked').count(),0);
+ await p.reload();await p.locator('.st-tabs').waitFor();await p.getByRole('button',{name:'자료·검토 열기',exact:true}).click();await p.getByRole('button',{name:'보완안 열기',exact:true}).click();await p.locator('[data-supplement-apply]').waitFor();assert.equal(f.provider.calls.length,2);
+});
+for(const width of [390,1280])browserTest('supplement comparison and explicit selective apply '+width,async t=>{
+ const {f,d,p}=await supplementationPage(t,width);await generateSupplement(p);assert.equal(await p.locator('[name=replaceQuiz]').isEnabled(),false);await p.locator('[name=item]').first().check();assert.equal(await p.locator('[name=resolvedGap]').first().isEnabled(),false);assert.equal(await p.locator('[name=replaceQuiz]').isEnabled(),false);
+ await p.getByRole('button',{name:'추가 내용 전체 선택',exact:true}).click();assert.equal(await p.locator('[name=resolvedGap]').first().isEnabled(),true);await p.locator('[name=resolvedGap]').first().check();await p.locator('[name=replaceQuiz]').check();await p.locator('[name=confirmReviewed]').check();
+ assert.ok(await p.locator('dialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1));assert.ok(await p.locator('.st-compare').first().evaluate(e=>e.scrollWidth<=e.clientWidth+1));mkdirSync(resolve(root,'../outputs'),{recursive:true});await p.screenshot({path:resolve(root,`../outputs/training-supplement-${width}.png`),fullPage:true});
+ await p.getByRole('button',{name:'선택한 내용 초안에 반영',exact:true}).click();await p.getByRole('button',{name:'내용 수정',exact:true}).waitFor();const doc=(await f.doc(d.versionId,f.hq)).document;assert.equal(doc.revision,2);assert.equal(doc.status,'draft');assert.equal(doc.body.sections[0].items[0].text,'시험 원본의 확인 내용');assert.equal(doc.body.sections[0].items.length,2);assert.match(doc.body.quiz[0].question,/보완된/);assert.deepEqual([...doc.body.gaps],['병원 보고 절차를 확인해주세요.']);
+});
+browserTest('partial supplementation preserves questions and review gaps',async t=>{const {f,d,p}=await supplementationPage(t);await generateSupplement(p);await p.locator('[name=item]').first().check();await p.locator('[name=confirmReviewed]').check();await p.getByRole('button',{name:'선택한 내용 초안에 반영',exact:true}).click();await p.getByRole('button',{name:'내용 수정',exact:true}).waitFor();const doc=(await f.doc(d.versionId,f.hq)).document;assert.equal(doc.body.gaps.length,2);assert.equal(doc.body.quiz[0].question,'시험 문항 0');assert.equal(doc.body.sections[1].items.length,1);});
+browserTest('stale supplement remains readable but has no apply controls',async t=>{const {f,d,p}=await supplementationPage(t);await generateSupplement(p);await f.api('/versions/'+d.versionId,'PUT',{revision:1,body:f.body()},f.hq);await p.getByRole('button',{name:'기존 자료로 돌아가기',exact:true}).click();await p.getByRole('button',{name:'보완안 열기',exact:true}).click();await p.getByRole('heading',{name:'AI 보완안 비교·반영',exact:true}).waitFor();assert.match(await p.locator('dialog').innerText(),/기존 자료가 변경/);assert.equal(await p.getByRole('button',{name:'선택한 내용 초안에 반영',exact:true}).count(),0);});
+browserTest('failed supplement is visible in history without claiming an empty or completed result',async t=>{const {f,p}=await supplementationPage(t);f.provider=supplementProvider(f,{fail:true});await p.locator('[name=confirmSend]').check();await p.getByRole('button',{name:'AI 보완 초안 작성',exact:true}).click();await p.getByRole('dialog').getByText('AI 요청을 완료하지 못했습니다. 모델의 검색 지원과 연결 상태를 확인해주세요. 자동 재요청하지 않습니다.',{exact:true}).waitFor();await p.reload();await p.locator('.st-tabs').waitFor();await p.getByRole('button',{name:'자료·검토 열기',exact:true}).click();await p.getByRole('button',{name:'보완안 열기',exact:true}).click();await p.getByRole('heading',{name:'AI 보완안 비교·반영',exact:true}).waitFor();assert.match(await p.locator('dialog').innerText(),/생성 미완료/);assert.equal(f.provider.calls.length,1);});
 browserTest('clearing a session closes private documents and discards pending results',async t=>{
  const f=fixture(t);await approved(f);const p=await pageFor(t,f,'staff');
  await p.getByRole('button',{name:'자료 보기',exact:true}).click();await p.locator('dialog').waitFor();assert.equal(await p.locator('dialog').count(),1);
