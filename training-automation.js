@@ -3,12 +3,13 @@
  'use strict';
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const labels={queued:'대기',running:'생성 중',completed:'초안 생성 완료',reused:'기존 자료 재사용',failed:'생성 미완료',stale:'원본 변경 확인',cancelled:'대기 중지'};
- let dialog=null,adapter=null,owner='',preview=null,state=null,working=false,epoch=0,timer=null,openDocument=null;
+ let dialog=null,adapter=null,owner='',preview=null,state=null,working=false,epoch=0,timer=null,openDocument=null,pendingConfirm=null;
  const button=(text,action,extra='')=>`<button type="button" class="st-button" data-ta="${action}" ${extra}>${text}</button>`;
  function current(e=epoch){return e===epoch&&owner===(adapter?.identity?.()||'')&&(!adapter?.isReady||adapter.isReady());}
  async function api(path,body){const e=epoch,r=await adapter.request('/automation'+path,body===undefined?{method:'GET'}:{method:'POST',body:JSON.stringify(body)});if(!current(e))throw Error('로그인이 변경됐습니다. 다시 열어주세요.');return r;}
  function notice(text,error=false){const el=dialog?.querySelector('[data-ta-notice]');if(el){el.textContent=text;el.classList.toggle('st-error',error);}}
- function close(){epoch++;clearTimeout(timer);timer=null;dialog?.close();dialog?.remove();dialog=null;preview=null;state=null;working=false;}
+ function confirmRetry(message){return new Promise(resolve=>{const done=value=>{pendingConfirm=null;box.remove();resolve(value);};const box=document.createElement('section');box.className='st-callout';box.setAttribute('role','group');box.setAttribute('aria-label','재생성 확인');const text=document.createElement('p');text.textContent=message;box.append(text);for(const [label,value] of [['확인하고 생성 재개',true],['취소',false]]){const control=document.createElement('button');control.type='button';control.className='st-button';control.textContent=label;control.addEventListener('click',()=>{done(value);},{once:true});box.append(control);}dialog.querySelector('[data-ta-notice]').after(box);pendingConfirm=done;box.querySelector('button').focus();});}
+ function close(){pendingConfirm?.(false);epoch++;clearTimeout(timer);timer=null;dialog?.close();dialog?.remove();dialog=null;preview=null;state=null;working=false;}
  function progress(){if(!dialog||!state)return;const c=state.counts,host=dialog.querySelector('[data-ta-progress]'),scroll=host.querySelector('.ta-items')?.scrollTop||0;
  host.innerHTML=`<div class="ta-counts" role="status"><b>완료 ${c.completed+c.reused}개</b><span>새 초안 ${c.completed} · 재사용 ${c.reused}</span><span>대기 ${c.queued} · 생성 중 ${c.running}</span><span>미완료 ${c.failed} · 원본 확인 ${c.stale} · 중지 ${c.cancelled}</span></div><div class="st-actions">${button('진행 현황 새로고침','refresh')}${button(working?'생성 진행 중':'지금 생성 이어가기','process',working||!c.queued?'disabled':'')}${button('대기 작업 중지','cancel',!c.queued?'disabled':'')}${button('미완료·중지 일괄 재개','retry-all',!c.failed&&!c.cancelled?'disabled':'')}</div><div class="ta-items">${state.items.map(x=>`<article class="ta-item"><div><b>${esc(x.title)}</b><p>원본 ${esc(x.sourceVersion)} · ${esc(labels[x.status])}</p>${x.error?`<p class="st-muted">${esc(x.error)}</p>`:''}</div><div>${x.versionId?button('교육자료 열기','document',`data-id="${esc(x.versionId)}"`):''}${['failed','cancelled'].includes(x.status)?button('다시 생성','retry',`data-id="${esc(x.id)}"`):''}</div></article>`).join('')||'<p>등록된 자동 생성 작업이 없습니다.</p>'}</div>`;host.querySelector('.ta-items').scrollTop=scroll;if(state.items.length)host.parentNode.insertBefore(host,dialog.querySelector('[data-ta-selection]')); 
  }
@@ -21,6 +22,7 @@
  }
  async function click(event){const b=event.target.closest('[data-ta]');if(!b||b.disabled)return;const a=b.dataset.ta;
   if(a==='close'){close();return;}
+  if(pendingConfirm)return;
   if(a==='document'){const id=b.dataset.id,open=openDocument;close();await open?.(id);return;}
   if(a==='process'){process();return;}
   b.disabled=true;
@@ -28,8 +30,8 @@
    if(a==='refresh'){await refresh();preview=await api('/preview');selection();}
    if(a==='enqueue'){if(!dialog.querySelector('[data-ta-consent]').checked)throw Error('AI 전송·사용료 안내를 확인해주세요.');state=await api('/enqueue',{confirmSend:true,sources:preview.sources.map(s=>({id:s.id,hash:s.hash,version:s.version}))});progress();notice('대상 원본을 등록했습니다. 이미 등록한 작업은 중복 처리하지 않습니다.');process();}
    if(a==='cancel'){state=await api('/cancel',{});progress();notice('대기 중인 작업을 중지했습니다. 이미 생성 중인 작업은 결과를 저장합니다.');}
-   if(a==='retry-all'){const ids=state.items.filter(x=>['failed','cancelled'].includes(x.status)).map(x=>x.id);if(!global.confirm(ids.length+'개 미완료·중지 자료를 다시 처리할까요? 기존 결과는 재사용하며 새 생성에는 추가 사용료가 발생합니다.'))return;state=await api('/retry',{confirmSend:true,ids});progress();process();}
-   if(a==='retry'){if(!global.confirm('이 원본의 AI 생성을 다시 요청할까요? 기존 결과가 있으면 재사용하며, 새 생성에는 추가 사용료가 발생합니다.'))return;state=await api('/'+encodeURIComponent(b.dataset.id)+'/retry',{confirmSend:true});progress();process();}
+   if(a==='retry-all'){const ids=state.items.filter(x=>['failed','cancelled'].includes(x.status)).map(x=>x.id),e=epoch;if(!await confirmRetry(ids.length+'개 미완료·중지 자료를 다시 처리할까요? 기존 결과는 재사용하며 새 생성에는 추가 사용료가 발생합니다.')||!current(e))return;state=await api('/retry',{confirmSend:true,ids});progress();process();}
+   if(a==='retry'){const id=b.dataset.id,e=epoch;if(!await confirmRetry('이 원본의 AI 생성을 다시 요청할까요? 기존 결과가 있으면 재사용하며, 새 생성에는 추가 사용료가 발생합니다.')||!current(e))return;state=await api('/'+encodeURIComponent(id)+'/retry',{confirmSend:true});progress();process();}
   }catch(error){notice(error.message,true);}finally{b.disabled=false;}
  }
  async function open(a,onDocument){close();adapter=a;owner=a.identity?.()||'';openDocument=onDocument;const e=epoch;
