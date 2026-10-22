@@ -333,7 +333,7 @@
    ++sequence;data=null;identity='';dirty=false;activeDoc=null;activeAssignment=null;activeSupplement=null;query='';category='';courseType='';message='';
    if(dialog){dialog.close();dialog.remove();dialog=null;}shell();
   }
-  return {open:load,close:closeDialog,clear};
+  return {open:load,close:closeDialog,clear,selectSop(){tab='sop';query='';category='';}};
  }
  global.StaffTraining={mount,filterCourses};
 })(globalThis);
