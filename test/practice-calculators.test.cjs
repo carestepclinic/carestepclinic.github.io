@@ -1,0 +1,5 @@
+const test=require('node:test'),assert=require('node:assert/strict'),c=require('../practice-calculators.js');
+test('SI 단위와 왕복 환산',()=>{assert.equal(c.convert('1','g','mg'),1000);assert.equal(c.convert('1','mg','mcg'),1000);assert.equal(c.convert('0.025','L','mL'),25);assert.equal(c.convert('2000','mcg','mg'),2);assert.equal(c.convert(c.convert(2,'kg','mg'),'mg','kg'),2);});
+test('1회 처방량과 농도 환산, 과도한 반올림 방지',()=>{assert.deepEqual(c.dose('5','2','10'),{mg:10,mL:1});assert.equal(c.dose('0.1','0.01','100').mL,0.00001);assert.equal(c.format(0.00001),'0.00001');});
+test('희석은 성분량과 최종 부피 보존',()=>{for(const [stock,target,v] of [[100,20,50],[10,0.1,100],[0.5,0.25,2]]){const r=c.dilute(stock,target,v);assert.ok(Math.abs(r.stockML*stock-target*v)<1e-8);assert.equal(r.stockML+r.diluentML,v);}});
+test('공란·0·음수·NaN·무한대·잘못된 단위·한도 초과 차단',()=>{for(const x of ['',0,-1,'Infinity','NaN','1,000','1e5','0/1','<script>'])assert.throws(()=>c.dose(x,1,1));assert.throws(()=>c.convert(1,'mg','mL'));assert.throws(()=>c.convert(1,'x','mg'));assert.throws(()=>c.dose(201,1,1));assert.throws(()=>c.dilute(1,2,10));assert.throws(()=>c.dilute(1,1,10));assert.throws(()=>c.dose(1,1,0));});
