@@ -5,6 +5,7 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
 export const uiFiles = new Set([
+  'training-automation.js','training-automation.css',
   'guardian-studio.js','guardian-studio.css',
   'staff-training.js','staff-training.css','staff-training-clinic.js','staff-training-hq.js',
   'clinic-reliability.js', 'clinic-organization.js', 'clinic-organization.css', 'home-display.js', 'deployment-status.js', 'home-insights.js', 'home-insights.css', 'home-navigation.js', 'home-navigation.css', 'home-readability.css', 'pretendard-variable-1.3.9.woff2', 'PRETENDARD-LICENSE.txt',

@@ -39,7 +39,7 @@
    const mine=data.assignments.filter(a=>a.user_id===actor().userId),pending=mine.filter(a=>!a.completed_at&&a.status==='published').length;
    host.innerHTML=`<nav class="st-tabs" aria-label="교육센터 메뉴">${tabs.map(([id,label])=>`<button type="button" data-st="tab" data-tab="${id}" aria-current="${tab===id?'page':'false'}">${label}${id==='mine'&&pending?` <span>${pending}</span>`:''}</button>`).join('')}</nav>
     ${tab==='mine'?`<div class="st-summary"><b>학습할 교육 ${pending}개</b><span>이수 ${mine.filter(a=>a.completed_at).length}개 · 읽던 자료와 이수 기록은 서버에 저장됩니다.</span></div>`:''}
-    ${tab!=='mine'?`<div class="st-toolbar"><label>교육자료 검색<input type="search" data-search placeholder="질환·실무 주제·교육 제목" value="${esc(query)}"></label><label>분류<select data-category><option value="">전체 분류</option>${[...new Set(data.courses.map(x=>x.category).filter(Boolean))].sort().map(c=>`<option ${c===category?'selected':''}>${esc(c)}</option>`).join('')}</select></label>${tab!=='sop'?`<label>교육 종류<select data-course-type aria-label="교육 종류"><option value="">전체 교육</option><option value="disease" ${courseType==='disease'?'selected':''}>질환·증상 교육</option><option value="practice" ${courseType==='practice'?'selected':''}>병원 실무 교육</option></select></label>`:''}${can.edit&&((adapter.common&&tab==='manage')||(!adapter.common&&tab==='sop'))?btn(tab==='sop'?'SOP 작성':'교육자료 만들기','create','',true):''}</div>`:''}
+    ${tab!=='mine'?`<div class="st-toolbar"><label>교육자료 검색<input type="search" data-search placeholder="질환·실무 주제·교육 제목" value="${esc(query)}"></label><label>분류<select data-category><option value="">전체 분류</option>${[...new Set(data.courses.map(x=>x.category).filter(Boolean))].sort().map(c=>`<option ${c===category?'selected':''}>${esc(c)}</option>`).join('')}</select></label>${tab!=='sop'?`<label>교육 종류<select data-course-type aria-label="교육 종류"><option value="">전체 교육</option><option value="disease" ${courseType==='disease'?'selected':''}>질환·증상 교육</option><option value="practice" ${courseType==='practice'?'selected':''}>병원 실무 교육</option></select></label>`:''}${adapter.common&&can.edit&&tab==='manage'?btn('일괄 생성·진행 현황','automation'):''}${can.edit&&((adapter.common&&tab==='manage')||(!adapter.common&&tab==='sop'))?btn(tab==='sop'?'SOP 작성':'교육자료 만들기','create','',true):''}</div>`:''}
     ${tab==='manage'&&!adapter.common?`<p class="st-info">승인된 자료를 직원에게 배정하고 이수 현황을 확인하세요. 공통 교육자료는 HQ에서 제작·관리합니다.</p>${can.manage?'<section class="st-report"><h2>직원별 교육 현황</h2><div data-report></div></section>':''}<h2 class="st-list-title">배정할 교육자료</h2>`:''}<div data-list></div>`;
    renderList();renderReport();
   }
@@ -187,7 +187,7 @@
      <fieldset data-source-wrap><legend>교육 원본 선택</legend><div class="st-source-filters"><label>원본 검색<input type="search" data-source-search placeholder="질환·수술명 또는 분류로 검색"></label><label>원본 출처<select data-source-type aria-label="원본 출처"><option value="all">전체 출처</option><option value="builtin">기본 자료</option><option value="central">중앙 게시 자료</option></select></label></div><p class="st-muted" data-source-count role="status" aria-live="polite"></p><label>교육 원본<select name="sourceContentId" aria-label="교육 원본" aria-describedby="stSourceHint"></select></label><p class="st-muted" id="stSourceHint">기본 자료와 중앙에 게시된 보호자 안내자료를 사용합니다. 선택한 원문은 교육 초안과 함께 보관됩니다.</p><button type="button" class="st-button" data-source-reset>검색·필터 초기화</button></fieldset>
      <p class="st-muted" data-source-help>환자별 자료 대신 공통 원문을 사용합니다. 원문에 없는 전문 지식은 근거를 추가한 뒤 검토합니다.</p>
      <details class="st-sources"><summary>참고 근거 직접 추가 (선택)</summary><p>이용 가능한 자료의 필요한 부분만 입력하세요. 근거의 임상 타당성은 승인 시 의료진이 확인합니다.</p>${[1,2,3].map(n=>`<fieldset data-reference><legend>참고 근거 ${n}</legend><label>자료명<input data-ref-title maxlength="240"></label><label>원문 주소 또는 서지정보<input data-ref-url placeholder="https:// 주소 (선택)"><input data-ref-citation placeholder="교재 판·장·페이지 또는 가이드라인 발행연도"></label><label>활용할 원문 내용<textarea data-ref-excerpt rows="3" maxlength="5500"></textarea></label><label class="st-choice"><input type="checkbox" data-ref-rights> 이 내용을 교육 제작에 이용할 권한을 확인했습니다.</label></fieldset>`).join('')}</details>
-     <div data-practice-consent hidden class="st-warning"><label class="st-choice"><input type="checkbox" name="confirmSend">주제·참고자료를 기존 OpenAI 연결로 전송하고 AI 작성·검색 사용료가 발생함을 확인했습니다.</label><p class="st-muted">개인정보와 병원 비밀정보를 입력하지 마세요. 생성 결과는 승인 전 초안으로 저장됩니다.</p></div><div class="st-actions">${btn('수동 초안 만들기','manual')}${btn('AI 교육 초안 생성','generate','',true)}</div><p class="st-muted">AI 생성은 요청할 때만 실행됩니다. 동일 원본·근거의 기존 결과를 우선 사용하며, 하루 ${data.limits?.dailyGenerations||5}회까지 생성할 수 있습니다.</p></form>`;
+     <div data-practice-consent hidden class="st-warning"><label class="st-choice"><input type="checkbox" name="confirmSend">주제·참고자료를 기존 OpenAI 연결로 전송하고 AI 작성·검색 사용료가 발생함을 확인했습니다.</label><p class="st-muted">개인정보와 병원 비밀정보를 입력하지 마세요. 생성 결과는 승인 전 초안으로 저장됩니다.</p></div><div class="st-actions">${btn('수동 초안 만들기','manual')}${btn('AI 교육 초안 생성','generate','',true)}</div><p class="st-muted">AI 생성은 요청할 때만 실행됩니다. 동일 원본·근거의 기존 결과를 우선 사용하며, ${data.limits?.dailyGenerations===0?'CARESTEP 하루 생성 횟수 제한은 없습니다. 연결된 AI 서비스의 한도와 사용료는 별도로 적용됩니다.':'하루 '+(data.limits?.dailyGenerations||5)+'회까지 생성할 수 있습니다.'}</p></form>`;
     if(!showDialog(adapter.common?'공통 교육자료 만들기':'교육자료 만들기',body,true))return;notice('');
     const form=dialog.querySelector('[data-create]'),kind=form.elements.kind,select=form.elements.sourceContentId,search=form.querySelector('[data-source-search]'),type=form.querySelector('[data-source-type]');
     const sources=d.sources.map(s=>({...s,sourceType:s.sourceType==='builtin'?'builtin':'central'}));
@@ -245,6 +245,7 @@
     if(!body.itemIds.length||!body.confirmReviewed){notice('추가할 내용과 출처 확인을 선택해주세요.',true);return;}
     await completeMutation(()=>request('/supplements/'+s.id+'/apply',body),()=>openDocument(d.id));return;
    }
+   if(a==='automation'){if(dialog&&!closeDialog())return;await global.TrainingAutomation.open(adapter,openDocument);return;}
    if(a==='create'){await createDialog();return;}
    if(a==='edit'){editDocument();return;}
    if(a==='assign'){assignDialog(id);return;}
@@ -294,6 +295,7 @@
   root.addEventListener('change',e=>{if(e.target.matches('[data-category]')){category=e.target.value;renderList();}if(e.target.matches('[data-course-type]')){courseType=e.target.value;renderList();}});
   global.addEventListener('beforeunload',e=>{if(dirty||busy){e.preventDefault();e.returnValue='';}});
   function clear(){
+   if(adapter.common)global.TrainingAutomation?.close();
    ++sequence;data=null;identity='';dirty=false;activeDoc=null;activeAssignment=null;activeSupplement=null;query='';category='';courseType='';message='';
    if(dialog){dialog.close();dialog.remove();dialog=null;}shell();
   }
