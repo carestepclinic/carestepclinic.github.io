@@ -153,13 +153,22 @@ browserTest('real CLINIC document loads training module and navigates without a 
  const context=await browser.newContext();t.after(()=>context.close());await context.route('**/*',r=>r.request().url().startsWith(origin)?r.continue():r.abort());
  const p=await context.newPage();await p.goto(origin+'/index.html');
  await p.evaluate(()=>{
-  saasMode='auth';saasMe={role:'staff',clinic:{id:'synthetic'},user:{id:'staff'},permissions:{mode:'custom',keys:['training.read']}};
+  saasMode='auth';saasSessionMeta={id:'synthetic-session'};saasMe={role:'staff',clinic:{id:'synthetic'},user:{id:'staff'},permissions:{mode:'custom',keys:['training.read']}};
   saasRequest=async()=>({ok:true,actor:{userId:'staff',capabilities:{read:true}},courses:[],assignments:[],members:[],limits:{}});
   showApp();go('training');
  });
  await p.locator('#training .st-tabs').waitFor();
  assert.equal(await p.locator('#viewTitle').innerText(),'직원 교육센터');
  assert.equal(await p.locator('#training').evaluate(e=>e.classList.contains('active-view')),true);
+ await p.locator('#r61-patient-context').waitFor({state:'attached'});
+ assert.equal(await p.locator('#r61-patient-context').isVisible(),false);
+ await p.locator('#clinicSyncStatus').waitFor({state:'attached'});
+ assert.equal(await p.locator('#clinicSyncStatus').isVisible(),false);
+ await p.evaluate(()=>{document.getElementById('clinicSyncStatus').dataset.state='error';});
+ assert.equal(await p.locator('#clinicSyncStatus').isVisible(),true);
+ await p.evaluate(()=>{document.getElementById('clinicSyncStatus').dataset.state='idle';saasMe.permissions={mode:'default'};saasMe.role='owner';go('patients');});
+ assert.equal(await p.locator('#r61-patient-context').isVisible(),true);
+ assert.equal(await p.locator('#clinicSyncStatus').isVisible(),true);
 });
 browserTest('real HQ navigation loads the education center through the current router',async t=>{
  const context=await browser.newContext();t.after(()=>context.close());await context.route('**/*',r=>r.request().url().startsWith(origin)?r.continue():r.abort());
