@@ -31,5 +31,18 @@
  function potassium(v){const w=weight(v.weight),concentration=nonnegative(v.concentration,'최종 총 칼륨 농도'),rate=number(v.rate,'수액 속도'),other=nonnegative(v.other,'다른 정맥 라인의 칼륨 공급량'),hourly=concentration*rate/1000+other,perKg=hourly/w;if(!Number.isFinite(perKg))throw Error('입력 단위를 확인해주세요.');return {hourly,perKg,exceeds:perKg>0.5};}
  function rer(value){return finite(70*Math.pow(weight(value),0.75));}
  function nutrition(v){const energy=rer(v.weight),multiplier=number(v.multiplier,'수의사가 정한 RER 배수'),target=finite(energy*multiplier),other=nonnegative(v.other,'다른 음식 열량');if(other>=target)throw Error('다른 음식 열량이 목표 이상입니다. 추가 급여 계획을 확인해주세요.');const density=number(v.density,'제품 열량');if(!['kcal/g','kcal/kg','kcal/mL','kcal/can'].includes(v.unit))throw Error('제품 열량 단위를 확인해주세요.');const meals=number(v.meals,'하루 급여 횟수');if(!Number.isInteger(meals)||meals>24)throw Error('급여 횟수는 1~24회 정수로 입력해주세요.');const amount=finite((target-other)/(v.unit==='kcal/kg'?density/1000:density));return {rer:energy,target,remaining:target-other,amount,perMeal:amount/meals,unit:({'kcal/g':'g','kcal/kg':'g','kcal/mL':'mL','kcal/can':'캔'})[v.unit]};}
- const api={convert,dose,dilute,format,prescription,fluid,course,cri,potassium,rer,nutrition};if(typeof module!=='undefined')module.exports=api;g.PracticeCalculators=api;
+ function bounded(v,label,min,max,signed=false){const text=String(v??'').trim();if(!(signed?/^-?(?:\d+\.?\d*|\.\d+)$/:/^(?:\d+\.?\d*|\.\d+)$/).test(text))throw Error(label+'을 올바른 숫자로 입력해주세요.');const n=Number(text);if(!Number.isFinite(n)||n<min||n>max)throw Error(label+'의 단위·입력값을 확인해주세요 ('+min+'~'+max+').');return n;}
+ // These are input bounds, not species-specific reference intervals or treatment thresholds.
+ function anionGap(v){const na=bounded(v.na,'Na',1,300),cl=bounded(v.cl,'Cl',1,300),hco3=bounded(v.hco3,'HCO₃',0,100);if(!['withK','withoutK'].includes(v.method))throw Error('AG 계산식을 선택해주세요.');const k=v.method==='withK'?bounded(v.k,'K',0,30):0;return {gap:na+k-cl-hco3,withK:v.method==='withK'};}
+ function bicarbonate(v){
+  const w=weight(v.weight);if(!['hco3','be'].includes(v.method))throw Error('보정 기준을 선택해주세요.');
+  const be=v.method==='be',measured=bounded(v.measured,be?'측정 BE':'측정 HCO₃',be?-60:0,be?0:60,be),target=bounded(v.target,be?'목표 BE':'목표 HCO₃',be?-60:0,be?0:60,be),deficit=target-measured;
+  if(deficit<=0)throw Error('목표값은 측정값보다 커야 합니다. 이 계산은 중탄산 보충 계획에 사용합니다.');
+  const factor=number(v.factor,'선택한 분포계수'),fraction=number(v.fraction,'이번 보정 비율');if(factor>1||fraction>100)throw Error('분포계수는 1 이하, 보정 비율은 100% 이하로 입력해주세요.');
+  if(!['0.5','1'].includes(String(v.stock)))throw Error('실제 제품의 중탄산 농도를 선택해주세요.');
+  const stock=Number(v.stock),estimated=finite(w*factor*deficit),amount=finite(estimated*fraction/100),stockML=finite(amount/stock),volume=number(v.volume,'희석 후 최종 부피'),minutes=number(v.minutes,'계획한 주입 시간');
+  if(volume<=stockML)throw Error('최종 부피는 원액량보다 커야 합니다. 희석 조제 계획을 확인해주세요.');
+  return {deficit,estimated,amount,stockML,diluentML:finite(volume-stockML),concentration:finite(amount/volume),rate:finite(volume*60/minutes),perKg:finite(amount/w),hourlyPerKg:finite(amount/w*60/minutes)};
+ }
+ const api={convert,dose,dilute,format,prescription,fluid,course,cri,potassium,rer,nutrition,anionGap,bicarbonate};if(typeof module!=='undefined')module.exports=api;g.PracticeCalculators=api;
 })(typeof window==='undefined'?globalThis:window);
