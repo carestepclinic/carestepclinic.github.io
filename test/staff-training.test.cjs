@@ -6,13 +6,14 @@ const {pathToFileURL}=require('node:url');
 const http=require('node:http');
 const {chromium}=require('playwright');
 const root=resolve(__dirname,'..'),workerFixture=resolve(process.env.TRAINING_WORKER_ROOT||resolve(root,'../onboard-worker'),'test/helpers/training-fixture.mjs');
-let browser,server,origin,fixture,supplementProvider;
+let browser,server,origin,fixture,supplementProvider,practiceProvider,practiceConfig,practiceReference;
 const fixtures=new Map();
 const browserTest=existsSync(workerFixture)?test:test.skip;
 before(async()=>{
  if(!existsSync(workerFixture))return;
  ({fixture}=await import(pathToFileURL(workerFixture).href));
  ({supplementProvider}=await import(pathToFileURL(resolve(workerFixture,'../supplement-provider.mjs')).href));
+ ({practiceProvider,practiceConfig,practiceReference}=await import(pathToFileURL(resolve(workerFixture,'../practice-provider.mjs')).href));
  browser=await chromium.launch({headless:true,...(process.env.HQ_TEST_BROWSER?{executablePath:process.env.HQ_TEST_BROWSER}:{})});
  server=http.createServer(async(req,res)=>{
   const u=new URL(req.url,'http://localhost'),name=u.pathname.slice(1),f=fixtures.get(u.searchParams.get('test'));
@@ -39,6 +40,25 @@ window.app=StaffTraining.mount(document.getElementById('root'),{common:params.ge
  await new Promise(r=>server.listen(0,'127.0.0.1',r));origin='http://127.0.0.1:'+server.address().port;
 });
 after(async()=>{await browser?.close();if(server)await new Promise(r=>server.close(r));});
+browserTest('clinic management offers assignment and SOP without content creation or AI',async t=>{
+ const f=fixture(t);await approved(f,f.hq);const p=await pageFor(t,f);
+ await p.getByRole('button',{name:'교육 관리',exact:true}).click();assert.equal(await p.getByRole('button',{name:'교육자료 만들기',exact:true}).count(),0);assert.equal(await p.getByRole('button',{name:'직원 배정',exact:true}).count(),1);assert.match(await p.locator('[data-content]').innerText(),/HQ에서 제작/);
+ await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();await p.getByRole('button',{name:'SOP 작성',exact:true}).click();assert.equal(await p.locator('[name=sourceContentId]').count(),0);assert.equal(await p.getByRole('button',{name:'AI 교육 초안 생성',exact:true}).count(),0);
+ await p.getByLabel('SOP 제목').fill('시험 마감 절차');await p.getByRole('button',{name:'수동 초안 만들기',exact:true}).click();await p.getByRole('button',{name:'내용 수정',exact:true}).waitFor();assert.equal(f.sqlite.prepare("SELECT COUNT(*) n FROM staff_training_courses WHERE kind='sop'").get().n,1);assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM staff_training_generation_jobs').get().n,0);
+});
+for(const width of [390,1280])browserTest('HQ creates an independent practice draft with no guardian source '+width,async t=>{
+ const f=fixture(t);f.provider=practiceProvider(f);const p=await pageFor(t,f,'hq',width);await p.getByRole('button',{name:'교육자료 만들기',exact:true}).click();await p.getByLabel('제작 방식',{exact:true}).selectOption('practice');await p.getByLabel('교육 제목·주제',{exact:true}).fill('입원 환자 인수인계');
+ assert.equal(await p.locator('[data-source-wrap]').isVisible(),false);assert.equal(await p.getByLabel('대상 직원',{exact:true}).inputValue(),'신입 직원');await p.getByLabel('교육 수준',{exact:true}).selectOption('실무');
+ await p.getByRole('button',{name:'AI 교육 초안 생성',exact:true}).click();assert.match(await p.locator('[data-dialog-status]').innerText(),/사용료 안내/);assert.equal(f.provider.calls.length,0);assert.ok(await p.locator('dialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
+ mkdirSync(resolve(root,'../outputs'),{recursive:true});await p.screenshot({path:resolve(root,`../outputs/training-practice-form-${width}.png`),fullPage:true});
+ await p.locator('[name=confirmSend]').check();await p.getByRole('button',{name:'AI 교육 초안 생성',exact:true}).click();await p.getByRole('button',{name:'내용 수정',exact:true}).waitFor();assert.equal(f.provider.calls.length,2);assert.equal(await p.locator('.st-reading>section').count(),6);assert.match(await p.locator('dialog').innerText(),/업무 체크리스트/);assert.equal(f.sqlite.prepare('SELECT source_content_id FROM staff_training_versions').get().source_content_id,'');
+ await p.getByRole('button',{name:'내용 수정',exact:true}).click();assert.equal(await p.locator('[data-section]').count(),6);await p.getByRole('button',{name:'초안 저장',exact:true}).click();await p.getByRole('button',{name:'검토 요청',exact:true}).waitFor();const row=f.sqlite.prepare('SELECT body_json,status FROM staff_training_versions').get();assert.equal(JSON.parse(row.body_json).format,'practice');assert.equal(JSON.parse(row.body_json).config.level,'실무');assert.equal(row.status,'draft');
+});
+browserTest('published practice and disease courses can be filtered and practice is assignable',async t=>{
+ const f=fixture(t);await approved(f,f.hq,'질환 시험 교육');const d=await f.api('/generate-topic','POST',{config:practiceConfig,confirmSend:true,webSearch:false,references:[practiceReference]},f.hq,practiceProvider(f));await f.publish(d.versionId,f.hq);
+ const p=await pageFor(t,f);await p.getByLabel('교육 종류',{exact:true}).selectOption('practice');assert.equal(await p.locator('.st-card').count(),1);assert.match(await p.locator('.st-card').innerText(),/입원 환자 인수인계/);await p.getByRole('button',{name:'직원 배정',exact:true}).click();await p.getByLabel('시험 직원',{exact:true}).check();await p.getByRole('button',{name:'선택 직원에게 배정',exact:true}).click();await p.getByRole('dialog').waitFor({state:'hidden'});assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM staff_training_assignments').get().n,1);
+ await p.getByLabel('교육 종류',{exact:true}).selectOption('disease');assert.equal(await p.locator('.st-card').count(),1);assert.match(await p.locator('.st-card').innerText(),/질환 시험 교육/);assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM staff_training_generation_jobs').get().n,1);
+});
 async function pageFor(t,f,role='owner',width=1280){
  const id=Math.random().toString(36).slice(2);fixtures.set(id,f);t.after(()=>fixtures.delete(id));
  const context=await browser.newContext({viewport:{width,height:1000}});
@@ -88,8 +108,8 @@ browserTest('real browser self-enrollment, assessment and completion persist on 
  assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM staff_training_attempts').get().n,1);
 });
 browserTest('five-question editor, review and explicit approval publish a manual draft',async t=>{
- const f=fixture(t),p=await pageFor(t,f);
- await p.getByRole('button',{name:'교육 관리',exact:true}).click();
+ const f=fixture(t),p=await pageFor(t,f,'hq');
+ 
  await p.getByRole('button',{name:'교육자료 만들기',exact:true}).click();
  await p.locator('[name=sourceContentId]').selectOption('source');
  await p.locator('[name=title]').fill('직접 작성한 시험 교육');
@@ -109,7 +129,7 @@ browserTest('five-question editor, review and explicit approval publish a manual
  await p.getByRole('button',{name:'검토 요청',exact:true}).click();
  await p.getByRole('button',{name:'검토 후 승인',exact:true}).click();
  for(const key of ['clinical','evidence','privacy','rights'])await p.locator('[data-approve] [name='+key+']').check();
- await p.getByRole('button',{name:'승인하고 공개',exact:true}).click();
+ await p.getByLabel('검토 의료진 이름').fill('시험 검토자');await p.getByRole('button',{name:'승인하고 공개',exact:true}).click();
  await p.getByRole('button',{name:'공개 중단',exact:true}).waitFor();
  assert.equal(f.sqlite.prepare("SELECT COUNT(*) n FROM staff_training_versions WHERE status='published'").get().n,1);
  assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM staff_training_generation_jobs').get().n,0);
@@ -139,14 +159,14 @@ browserTest('failed load is not rendered as an empty library and can recover',as
  await p.evaluate(()=>failLoad=false);await p.getByRole('button',{name:'다시 불러오기',exact:true}).click();await p.locator('.st-tabs').waitFor();
 });
 browserTest('dialog escapes content and confirms loss of unsaved edits',async t=>{
- const f=fixture(t),d=await f.create(f.owner,{title:'<img src=x onerror=alert(1)>'}),p=await pageFor(t,f);
- await p.getByRole('button',{name:'교육 관리',exact:true}).click();await p.getByRole('button',{name:'자료·검토 열기',exact:true}).click();
+ const f=fixture(t),d=await f.create(f.hq,{title:'<img src=x onerror=alert(1)>'}),p=await pageFor(t,f,'hq');
+ await p.getByRole('button',{name:'자료·검토 열기',exact:true}).click();
  assert.equal(await p.locator('dialog img').count(),0);
  await p.getByRole('button',{name:'내용 수정',exact:true}).click();await p.locator('[data-items]').first().fill('수정 내용');
  p.once('dialog',d=>d.dismiss());await p.getByRole('button',{name:'닫기',exact:true}).click();
  assert.equal(await p.locator('dialog').isVisible(),true);
  p.once('dialog',d=>d.accept());await p.getByRole('button',{name:'닫기',exact:true}).click();
- assert.equal(await p.locator('dialog').count(),0);assert.equal((await f.doc(d.versionId)).document.revision,1);
+ assert.equal(await p.locator('dialog').count(),0);assert.equal((await f.doc(d.versionId,f.hq)).document.revision,1);
 });
 for(const width of [390,1280])browserTest('responsive reading and library layout '+width,async t=>{
  const f=fixture(t);await approved(f,f.hq,'수술 후 관찰·보고 교육 · 화면 검증용');await approved(f,f.owner,'보호자 상담 교육 · 화면 검증용');const p=await pageFor(t,f,'staff',width);

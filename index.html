@@ -1047,7 +1047,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <style>
 .billing-contract-comparison{margin:16px 0;border:1px solid var(--line);border-radius:12px;padding:14px;background:#f8faff;line-height:1.65;font-size:14px}.billing-contract-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.billing-contract-columns span,.billing-contract-columns strong,.billing-contract-columns small{display:block}.billing-contract-columns strong{font-size:19px;margin:5px 0;color:#143d83}.billing-contract-comparison p{font-size:13px}.billing-contract-comparison summary{cursor:pointer;padding:8px 0;font-weight:700}.billing-catalog-row{padding:10px 0;border-top:1px solid var(--line)}.billing-catalog-row b,.billing-catalog-row span,.billing-catalog-row small{display:block}#billingReadStatus[data-state="error"]{color:#9a372d;background:#fff3f0;padding:12px;border-radius:10px}@media(max-width:600px){.billing-contract-columns{grid-template-columns:minmax(0,1fr)}.billing-contract-columns>div+div{border-top:1px solid var(--line);padding-top:12px}}
 </style>
-<link rel="stylesheet" href="staff-training.css?v=sources-20261022a">
+<link rel="stylesheet" href="staff-training.css?v=hq-practice-20261022b">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -3735,7 +3735,7 @@ const CLINIC_PERMISSIONS = [
  ['materials.read','자료·복약 일정 조회'],['materials.edit','자료 작성·수정'],['materials.publish','자료·복약 일정 HOME 게시·철회'],
  ['followup.read','후속관리·상담 조회'],['followup.manage','상담 답변·일정 관리'],
  ['messages.read','문자 발송 결과 조회'],['messages.send','문자 발송·재시도·실패 정리'],
- ['training.read','직원 교육 열람·이수'],['training.edit','교육자료 작성'],['training.review','교육자료 검토·승인'],['training.manage','교육 배정·이수 관리'],
+ ['training.read','직원 교육 열람·이수'],['training.edit','병원 SOP 작성'],['training.review','병원 SOP 검토·승인'],['training.manage','교육 배정·이수 관리'],
  ['stats.read','운영 통계 조회'],['settings.manage','병원·연동·발송 설정'],['billing.manage','결제·구독 관리'],['team.manage','직원 초대·상태 관리']
 ];
 const CLINIC_PERMISSION_DEPENDENCIES = {
@@ -10418,7 +10418,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="home-access-clinic.js?v=clarity-20261020f"></script>
 <script src="clinic-care.js?v=clarity-20261020g"></script>
 <script src="clinic-organization.js?v=clarity-20261020b"></script>
-<script src="staff-training.js?v=sources-20261022a"></script>
+<script src="staff-training.js?v=hq-practice-20261022b"></script>
 <script src="staff-training-clinic.js?v=20261020a"></script>
 </body>
 </html>
