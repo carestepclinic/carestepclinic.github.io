@@ -6,7 +6,7 @@ const http=require('node:http');
 const {chromium}=require('playwright');
 let browser,server,origin;
 const root=resolve(__dirname,'..');
-const allowed=new Set(['hq.html','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
+const allowed=new Set(['guardian-studio.js','guardian-studio.css','hq.html','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
 before(async()=>{
   server=http.createServer((req,res)=>{
     const file=new URL(req.url,'http://localhost').pathname.slice(1);
