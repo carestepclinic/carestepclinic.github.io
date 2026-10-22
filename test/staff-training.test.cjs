@@ -209,3 +209,8 @@ browserTest('clearing a session closes private documents and discards pending re
  await p.evaluate(async()=>{slow=true;const pending=app.open();syntheticIdentity='session-c';app.clear();await pending;});
  assert.equal(await p.locator('.st-card').count(),0);
 });
+browserTest('failed composition can reuse evidence with new acknowledgement and no repeated search',async t=>{
+ const {f,d,p}=await supplementationPage(t);f.provider=supplementProvider(f,{mutate:r=>r.items=[]});await p.locator('[name=confirmSend]').check();await p.getByRole('button',{name:'AI 보완 초안 작성',exact:true}).click();await p.getByRole('dialog').getByText(/AI가 추가할 보완 내용을 제안하지 않았습니다/).waitFor();
+ await p.reload();await p.locator('.st-tabs').waitFor();await p.getByRole('button',{name:'자료·검토 열기',exact:true}).click();await p.getByRole('button',{name:'보완안 열기',exact:true}).click();await p.getByRole('button',{name:'저장된 근거로 다시 작성',exact:true}).click();
+ assert.equal(await p.locator('[name=webSearch]').isChecked(),false);assert.equal(await p.locator('[name=webSearch]').isEnabled(),false);assert.equal(await p.locator('[name=confirmSend]').isChecked(),false);f.provider=supplementProvider(f);await generateSupplement(p);assert.equal(f.provider.calls.length,1);assert.equal(f.provider.calls[0].tools,undefined);assert.equal((await f.doc(d.versionId,f.hq)).document.revision,1);
+});

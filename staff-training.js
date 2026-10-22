@@ -107,19 +107,19 @@
     if(!showDialog(d.title,body,true))return;activeDoc=d;activeAssignment=aid;requestKey=global.crypto.randomUUID().replaceAll('-','');notice('');
    }catch(e){notice(e.message||'자료를 열지 못했습니다.',true);}
   }
-  function supplementCreate(){
+  function supplementCreate(reuse=null){
    const d=activeDoc;
-   const form=`<p><b>${esc(d.title)}</b> · 현재 초안은 유지되고 생성 결과는 보완 이력에 저장됩니다.</p><form data-supplement-create>
+   const form=`<p><b>${esc(d.title)}</b> · 현재 초안은 유지되고 생성 결과는 보완 이력에 저장됩니다.</p><form data-supplement-create data-reuse="${esc(reuse?.id||'')}">${reuse?'<p class="st-info">저장된 검색 근거를 재사용합니다. 새 검색 없이 AI 작성만 요청하며 작성 사용료가 발생합니다.</p>':''}
     ${d.body.gaps.length?`<fieldset><legend>현재 부족한 정보</legend>${d.body.gaps.map((g,i)=>`<label class="st-choice"><input type="checkbox" name="gap" value="${i}" checked>${esc(g)}</label>`).join('')}</fieldset>`:''}
     <fieldset><legend>추가로 보완할 영역</legend><div class="st-topic-grid">${Object.entries(supplementTopics).map(([k,v])=>`<label class="st-choice"><input type="checkbox" name="topic" value="${k}">${v}</label>`).join('')}</div></fieldset>
-    <label class="st-choice"><input type="checkbox" name="webSearch" checked>학회·수의과대학·임상 참고자료에서 근거 검색</label><p class="st-muted">검색에는 공통 원본의 질환명과 교육 영역을 사용합니다. 검색 결과의 정확성과 적용 범위는 의료진이 확인합니다.</p>
+    <label class="st-choice"><input type="checkbox" name="webSearch" ${reuse?'disabled':'checked'}>학회·수의과대학·임상 참고자료에서 근거 검색</label><p class="st-muted">검색에는 공통 원본의 질환명과 교육 영역을 사용합니다. 검색 결과의 정확성과 적용 범위는 의료진이 확인합니다.</p>
     <details class="st-sources"><summary>병원 참고 근거 추가 (선택)</summary><p>병원 고유 절차나 추가로 참고할 자료를 입력하세요. 개인정보는 포함하지 마세요.</p>${[1,2,3].map(n=>`<fieldset data-reference><legend>참고 근거 ${n}</legend><label>자료명<input data-ref-title maxlength="240"></label><label>원문 주소<input data-ref-url placeholder="https:// 주소 (선택)"></label><label>활용할 내용·서지정보<textarea data-ref-excerpt maxlength="5500" rows="4"></textarea></label><label class="st-choice"><input type="checkbox" data-ref-rights> 교육 제작에 이용할 권한을 확인했습니다.</label></fieldset>`).join('')}</details>
     <div class="st-warning"><label class="st-choice"><input type="checkbox" name="confirmSend"> 선택한 교육 내용·참고자료를 기존 OpenAI 연결로 전송하고, AI 작성·검색 사용료가 발생함을 확인했습니다.</label><p class="st-muted">검색을 포함하면 근거 검색과 초안 작성으로 나누어 처리합니다. 같은 본문·선택·근거의 보완안은 재사용합니다.</p></div>
     <div class="st-actions">${btn('AI 보완 초안 작성','supplement-generate','',true)}${btn('기존 자료로 돌아가기','supplement-back')}</div></form>`;
    if(showDialog('부족한 내용 AI 보완',form,true))activeDoc=d;
   }
   function supplementCreateBody(){
-   const f=dialog.querySelector('[data-supplement-create]');return {revision:activeDoc.revision,topics:[...f.querySelectorAll('[name=topic]:checked')].map(x=>x.value),gapIndexes:[...f.querySelectorAll('[name=gap]:checked')].map(x=>Number(x.value)),webSearch:f.elements.webSearch.checked,confirmSend:f.elements.confirmSend.checked,references:[...f.querySelectorAll('[data-reference]')].filter(r=>r.querySelector('[data-ref-title]').value||r.querySelector('[data-ref-excerpt]').value).map(r=>({title:r.querySelector('[data-ref-title]').value,url:r.querySelector('[data-ref-url]').value,excerpt:r.querySelector('[data-ref-excerpt]').value,rightsConfirmed:r.querySelector('[data-ref-rights]').checked}))};
+   const f=dialog.querySelector('[data-supplement-create]');return {revision:activeDoc.revision,reuseSupplementId:f.dataset.reuse||'',topics:[...f.querySelectorAll('[name=topic]:checked')].map(x=>x.value),gapIndexes:[...f.querySelectorAll('[name=gap]:checked')].map(x=>Number(x.value)),webSearch:f.elements.webSearch.checked,confirmSend:f.elements.confirmSend.checked,references:[...f.querySelectorAll('[data-reference]')].filter(r=>r.querySelector('[data-ref-title]').value||r.querySelector('[data-ref-excerpt]').value).map(r=>({title:r.querySelector('[data-ref-title]').value,url:r.querySelector('[data-ref-url]').value,excerpt:r.querySelector('[data-ref-excerpt]').value,rightsConfirmed:r.querySelector('[data-ref-rights]').checked}))};
   }
   function supplementLinks(ids,sources){return `<span class="st-item-sources">${ids.map(id=>{const s=sources.find(x=>x.id===id);if(!s)return '';return s.url&&/^https?:\/\//.test(s.url)?`<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>`:`<span>${esc(s.title)}</span>`;}).join(' · ')}</span>`;}
   function supplementResult(d,s){
@@ -127,6 +127,7 @@
    let content=`<div class="st-doc-meta"><span class="st-tag">${supplementStatus(s.status)}</span><span>기준 본문 수정 ${s.baseRevision}회 · ${shortDate(s.createdAt)}</span></div>`;
    if(s.status==='running')content+='<p class="st-warning">AI 요청을 처리 중입니다. 잠시 후 보완 이력에서 다시 열어주세요. 중복 생성은 실행되지 않습니다.</p>';
    if(s.status==='failed')content+=`<p class="st-warning">${esc(s.error)} 같은 요청은 자동 재실행되지 않습니다. 참고 근거를 추가하거나 내용을 직접 작성할 수 있습니다.</p>`;
+   if(s.status==='failed'&&s.sources.some(x=>x.kind==='web_search_summary'))content+=`${sourceView(s.sources)}${!s.stale?btn('저장된 근거로 다시 작성','supplement-reuse','',true):''}`;
    if(s.status==='ready'&&s.stale)content+='<p class="st-warning">기존 자료가 변경됐습니다. 이 보완안은 참고용으로 확인하고, 최신 초안에서 보완을 다시 요청해주세요.</p>';
    if(p.items?.length){
     content+=`<form data-supplement-apply><p>기존 문장은 유지됩니다. 추가할 내용과 근거를 확인한 후 선택해주세요.</p><div class="st-compare"><section><h3>현재 교육자료</h3>${d.body.sections.map((section,i)=>`<details open><summary>${names[i]}</summary><ul>${section.items.map(x=>`<li>${esc(x.text)}</li>`).join('')}</ul></details>`).join('')}</section><section><h3>AI 보완 제안</h3>${usable?btn('추가 내용 전체 선택','supplement-select-all'):''}${p.items.map(x=>`<article class="st-proposal-item"><span class="st-tag">${names[keys.indexOf(x.section)]}</span><label class="st-choice">${usable?`<input type="checkbox" name="item" value="${esc(x.id)}">`:''}<span>${esc(x.text)}</span></label>${supplementLinks(x.sourceIds,s.sources)}</article>`).join('')}</section></div>
@@ -203,6 +204,7 @@
    if(a==='clear'){query='';category='';render();return;}
    if(a==='document'||a==='learn'){await openDocument(id,b.dataset.assignment||'');return;}
    if(a==='supplement-create'){supplementCreate();return;}
+   if(a==='supplement-reuse'){supplementCreate(activeSupplement);return;}
    if(a==='supplement-open'){await openSupplement(id);return;}
    if(a==='supplement-back'){const d=activeDoc;if(closeDialog())await openDocument(d.id);return;}
    if(a==='supplement-select-all'){dialog.querySelectorAll('[name=item]').forEach(x=>{x.checked=true;});dirty=true;syncSupplementSelection();return;}
@@ -210,8 +212,8 @@
     const d=activeDoc,body=supplementCreateBody();
     if(!body.topics.length&&!body.gapIndexes.length){notice('보완할 항목을 하나 이상 선택해주세요.',true);return;}
     if(!body.confirmSend){notice('AI 전달 내용과 사용료 안내를 확인해주세요.',true);return;}
-    if(!body.webSearch&&!body.references.length){notice('외부 근거 검색을 선택하거나 참고자료를 추가해주세요.',true);return;}
-    notice(body.webSearch?'근거 검색과 보완 초안 작성을 진행합니다. 완료되면 비교 화면을 엽니다.':'입력한 근거로 보완 초안을 작성합니다.');
+    if(!body.webSearch&&!body.references.length&&!body.reuseSupplementId){notice('외부 근거 검색을 선택하거나 참고자료를 추가해주세요.',true);return;}
+    notice(body.webSearch?'근거 검색과 보완 초안 작성을 진행합니다. 완료되면 비교 화면을 엽니다.':body.reuseSupplementId?'저장된 근거로 보완 초안을 작성합니다. 새 검색은 실행하지 않습니다.':'입력한 근거로 보완 초안을 작성합니다.');
     await mutate(async current=>{const r=await request('/versions/'+d.id+'/supplements',body);if(!current())return;dirty=false;busy=false;supplementResult(d,r.supplement);notice('');});return;
    }
    if(a==='supplement-apply'){
