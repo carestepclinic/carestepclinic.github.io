@@ -8,6 +8,7 @@ export const uiFiles = new Set([
   'practice-calculator-simple.js','practice-acid-base.js','practice-calculator-workspace.js','practice-reference.js','practice-reference-ui.js','practice-calculators.js','practice-tools.js','practice-clinic.js','practice-intake.js','practice-tools.css','intake.html',
   'training-automation.js','training-automation.css',
   'guardian-studio.js','guardian-studio.css',
+  'staff-training-pdf.js','pretendard-regular-1.3.9.ttf','pdf-lib-1.17.1.min.js','pdf-fontkit-1.1.1.min.js','PDF-LIB-LICENSE.txt','PDF-FONTKIT-LICENSE.txt',
   'staff-training.js','staff-training.css','staff-training-clinic.js','staff-training-hq.js',
   'clinic-reliability.js', 'clinic-organization.js', 'clinic-organization.css', 'home-display.js', 'deployment-status.js', 'home-insights.js', 'home-insights.css', 'home-navigation.js', 'home-navigation.css', 'home-readability.css', 'pretendard-variable-1.3.9.woff2', 'PRETENDARD-LICENSE.txt',
   'home-reminders.js', 'clinic-read-flow.js', 'carestep-ui.css', 'clinic-care.js', 'home-care.js', 'index.html', 'hq-ux.js', 'hq-ux.css', 'hq.html', 'home.html', 'carestep-workflow.css', 'home-access-clinic.js', 'home-access-clinic.css', 'r61-clinic.js', 'r61-route.js', 'r65-clinic.js',
