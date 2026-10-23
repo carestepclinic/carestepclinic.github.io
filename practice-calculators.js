@@ -11,7 +11,14 @@
  function weight(v){const n=number(v,'체중');if(n>200)throw Error('체중은 200 kg 이하로 입력해주세요.');return n;}
  function mass(v,unit){if(!['mg','mcg'].includes(unit))throw Error('질량 단위를 확인해주세요.');return finite(number(v,'처방량·함량')*(unit==='mcg'?0.001:1));}
  function course(v){const total=v.totalDoses!==undefined&&v.totalDoses!==''?number(v.totalDoses,'총 투여 횟수'):number(v.times,'하루 투여 횟수')*number(v.days,'투약 일수');if(!Number.isInteger(total)||total>10000)throw Error('총 투여 횟수는 1~10,000회 정수로 입력해주세요.');if((v.totalDoses===undefined||v.totalDoses==='')&&(!Number.isInteger(Number(v.times))||!Number.isInteger(Number(v.days))))throw Error('횟수와 일수는 정수로 입력해주세요.');return total;}
- function prescription(v){const w=weight(v.weight),basis=v.doseBasis||'kg';if(!['kg','fixed'].includes(basis))throw Error('용량 기준을 확인해주세요.');const mg=finite((basis==='fixed'?1:w)*mass(v.dose,v.doseUnit)),strength=mass(v.strength,v.strengthUnit),amount=finite(mg/strength);if(!['liquid','tablet'].includes(v.form))throw Error('제형을 확인해주세요.');const totalDoses=course(v);return {mg,amount,totalDoses,total:finite(amount*totalDoses),unit:v.form==='tablet'?'정':'mL'};}
+ function prescription(v){
+  const w=weight(v.weight),basis=v.doseBasis||'kg';if(!['kg','fixed','bsa'].includes(basis))throw Error('용량 기준을 확인해주세요.');
+  let factor=basis==='fixed'?1:w;if(basis==='bsa'){factor=number(v.bsa,'의료진이 확인한 체표면적');if(factor>5)throw Error('체표면적 단위 m²와 입력값을 확인해주세요.');}
+  const activity=v.doseUnit==='U'||v.strengthUnit==='U';if(activity&&(v.doseUnit!=='U'||v.strengthUnit!=='U'))throw Error('U(활성단위)와 mg·mcg는 서로 환산할 수 없습니다.');
+  const totalAmount=finite(factor*(activity?number(v.dose,'1회 활성단위'):mass(v.dose,v.doseUnit))),strength=activity?number(v.strength,'제품 활성단위 함량'):mass(v.strength,v.strengthUnit),amount=finite(totalAmount/strength);
+  if(!['liquid','tablet'].includes(v.form))throw Error('제형을 확인해주세요.');const totalDoses=course(v);
+  return {...(activity?{activity:totalAmount}:{mg:totalAmount}),amount,totalDoses,total:finite(amount*totalDoses),unit:v.form==='tablet'?'정':'mL'};
+ }
  function fluid(v){let rate;if(v.mode==='weight')rate=finite(weight(v.weight)*number(v.rate,'처방 속도'));else if(v.mode==='rate')rate=number(v.rate,'시간당 주입량');else if(v.mode==='volume')rate=finite(number(v.volume,'총 주입량')/number(v.hours,'주입 시간'));else throw Error('수액 계산 방식을 선택해주세요.');const volume=v.mode==='volume'?number(v.volume,'총 주입량'):v.volume!==''&&v.volume!==undefined?number(v.volume,'남은 수액량'):null;const hours=v.mode==='volume'?number(v.hours,'주입 시간'):v.hours!==''&&v.hours!==undefined?number(v.hours,'계산할 시간'):null;let drops=null;if(v.factor!==''&&v.factor!==undefined){const f=number(v.factor,'점적계수');if(!Number.isInteger(f)||f>200)throw Error('세트에 표시된 점적계수를 확인해주세요.');drops=finite(rate*f/60);}return {rate:finite(rate),volume:hours?finite(rate*hours):null,hours:volume?finite(volume/rate):null,drops};}
  // Convert a prescribed CRI to an hourly mass/activity rate. U is never converted to mg.
  function cri(v){
