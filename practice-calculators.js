@@ -51,5 +51,41 @@
   if(volume<=stockML)throw Error('최종 부피는 원액량보다 커야 합니다. 희석 조제 계획을 확인해주세요.');
   return {deficit,estimated,amount,stockML,diluentML:finite(volume-stockML),concentration:finite(amount/volume),rate:finite(volume*60/minutes),perKg:finite(amount/w),hourlyPerKg:finite(amount/w*60/minutes)};
  }
- const api={convert,dose,dilute,format,prescription,fluid,course,cri,potassium,rer,nutrition,anionGap,bicarbonate};if(typeof module!=='undefined')module.exports=api;g.PracticeCalculators=api;
+ // All calcium quantities below are ELEMENTAL calcium, never calcium salt mass.
+ function calcium(v){
+  const w=weight(v.weight),d=number(v.dose,'처방 원소칼슘 용량'),stock=number(v.stock,'제품의 원소칼슘 함량');
+  if(!['single','continuous'].includes(v.mode))throw Error('칼슘 투여 방식을 선택해주세요.');
+  const hours=v.mode==='single'?number(v.minutes,'완속 주입 시간')/60:number(v.hours,'지속정주 계획 시간');
+  const amount=finite(w*d*(v.mode==='continuous'?hours:1)),stockML=finite(amount/stock),volume=number(v.volume,'약물 포함 최종 부피');
+  if(volume<stockML)throw Error('최종 부피가 필요한 원액량보다 작습니다. 원소칼슘 함량·희석 조건을 확인해주세요.');
+  return {amount,stockML,diluentML:volume-stockML,concentration:finite(amount/volume),rate:finite(volume/hours),hourly:finite(amount/hours),hourlyPerKg:finite(amount/hours/w),hours};
+ }
+ // RBC estimate assumes no ongoing loss/hemolysis. It is not a transfusion trigger.
+ function transfusion(v){
+  const w=weight(v.weight);if(!['dog','cat'].includes(v.species))throw Error('개 또는 고양이를 선택해주세요.');
+  if(!['packed','whole','plasma','other'].includes(v.product))throw Error('수혈 제제를 선택해주세요.');
+  let volume,bloodVolume=null,coefficientOutside=false;
+  if(v.mode==='pcv'){
+   if(!['packed','whole'].includes(v.product))throw Error('PCV 계산은 적혈구·전혈 제제에만 사용합니다.');
+   const current=bounded(v.current,'환자 PCV (%)',1,100),target=bounded(v.target,'목표 PCV (%)',1,100),unit=bounded(v.unitPcv,'제제 PCV (%)',1,100);
+   if(target<=current)throw Error('목표 PCV는 현재 PCV보다 커야 합니다.');
+   if(target>=unit)throw Error('목표 PCV는 제제 PCV보다 낮게 설정하고 제제 검사값을 확인해주세요.');
+   bloodVolume=bounded(v.bloodVolume,'선택한 추정 혈액량 (mL/kg)',20,150);
+   const range=v.species==='dog'?[80,90]:[40,60];coefficientOutside=bloodVolume<range[0]||bloodVolume>range[1];
+   volume=finite(w*bloodVolume*(target-current)/unit);
+  }else if(v.mode==='dose')volume=finite(w*number(v.dose,'의료진이 정한 제제 용량'));
+  else if(v.mode==='volume')volume=number(v.volume,'의료진이 정한 총 수혈량');
+  else throw Error('수혈량 계산 방식을 선택해주세요.');
+  const hours=number(v.hours,'총 계획 시간');let initialRate=0,initialVolume=0,initialHours=0;
+  if(v.initial===true||v.initial==='on'){
+   initialRate=finite(w*number(v.initialRate,'초기 처방 속도'));
+   initialHours=number(v.initialMinutes,'초기 관찰 시간')/60;
+   if(initialHours>=hours)throw Error('총 시간에는 초기 관찰 시간이 포함됩니다. 총 시간을 더 길게 설정해주세요.');
+   initialVolume=finite(initialRate*initialHours);
+   if(initialVolume>=volume)throw Error('초기 주입량이 총 수혈량 이상입니다. 초기 속도·시간을 다시 확인해주세요.');
+  }
+  const remaining=finite(volume-initialVolume),remainingHours=hours-initialHours,rate=finite(remaining/remainingHours);
+  return {volume,perKg:finite(volume/w),bloodVolume,coefficientOutside,hours,initialRate,initialVolume,initialHours,remaining,remainingHours,rate,ratePerKg:finite(rate/w),overFourHours:hours>4};
+ }
+ const api={convert,dose,dilute,format,prescription,fluid,course,cri,potassium,rer,nutrition,anionGap,bicarbonate,calcium,transfusion};if(typeof module!=='undefined')module.exports=api;g.PracticeCalculators=api;
 })(typeof window==='undefined'?globalThis:window);
