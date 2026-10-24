@@ -131,3 +131,127 @@ body:has(#practice.active-view) #r61-patient-context{display:none}
 .pt-strength-dialog{width:min(1120px,96vw);max-width:96vw}.pt-strength-filters{display:grid;grid-template-columns:minmax(180px,2fr) minmax(150px,1fr) minmax(130px,1fr);gap:12px;align-items:end}.pt-strength-filters label,.pt-strength-row label{display:flex;flex-direction:column;gap:6px}.pt-strength-row{display:grid;grid-template-columns:minmax(150px,1fr) minmax(280px,2fr) auto;gap:18px;padding:20px 0;border-bottom:1px solid #dce4f3;align-items:start}.pt-strength-row small{display:block;color:#526582;margin-top:6px;overflow-wrap:anywhere}.pt-strength-row a{display:block;margin:8px 0;overflow-wrap:anywhere}.pt-strength-row input,.pt-strength-row select{min-height:42px;max-width:100%;width:100%;box-sizing:border-box}.pt-strength-manual{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.pt-strength-footer{background:#f5f8ff;border:1px solid #dce4f3;border-radius:12px;padding:16px;margin-top:20px}.pt-strength-actions{display:flex;flex-direction:column;gap:8px}.pt-strength-row .pt-help{margin:8px 0}.pt-strength-dialog .pt-tabs{margin:16px 0}.pt-strength-dialog button{min-height:40px}.pt-strength-dialog [data-st-status]{padding:10px;background:#f4f7fc;border-radius:8px}.pt-strength-dialog [data-st-rows]{min-height:80px}@media(max-width:700px){.pt-strength-filters,.pt-strength-row{grid-template-columns:1fr}.pt-strength-row{gap:10px}.pt-strength-actions{flex-direction:row}.pt-strength-dialog{padding:16px}.pt-strength-dialog .pt-heading h2{font-size:20px}}
 
 .pt-strength-filters>button{grid-column:1/-1;justify-self:start}.pt-strength-row .pt-badge{margin-top:10px}.pt-strength-dialog [data-st-info]{line-height:1.8}
+
+/* Daily calculation first; setup and reference material remain available nearby. */
+.pt .pt-calculator-focused{--calc-line:#d6e0ed;--calc-muted:#496078;padding-bottom:96px}
+.pt-calculator-focused .pt-compact-context{padding:12px 16px;margin:0 0 14px}
+.pt-calculator-focused .pt-compact-context>.pt-heading{display:none}
+.pt-calculator-focused .pt-compact-context [data-common-inputs]{grid-template-columns:minmax(100px,170px) minmax(120px,200px);gap:12px}
+.pt-calculator-focused .pt-compact-context label{margin:0}
+.pt-calculator-focused .pt-patient-context{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:8px 0 0;margin:8px 0 0}
+.pt-calculator-focused .pt-patient-context [data-patient-summary]{font-size:14px;font-weight:650;flex:1 0 180px}
+.pt-calculator-focused .pt-patient-context button{font-size:14px;padding:6px 10px}
+.pt-calculator-focused [data-weight-status]{font-size:14px;margin:0}
+.pt-calculator-focused [data-weight-status]:empty{display:none}
+.pt-calculator-focused [data-patient-picker],.pt-calculator-focused .pt-weight-review{flex-basis:100%}
+.pt-calculator-focused .pt-calc-layout{grid-template-columns:180px minmax(0,1fr);gap:18px}
+.pt-calculator-focused .pt-calc-nav,.pt-calculator-focused .pt-calc-main,.pt-calculator-focused .pt-drug-hub>*{min-width:0}
+.pt-calculator-focused input,.pt-calculator-focused select,.pt-calculator-focused textarea,.pt-calculator-focused output{scroll-margin-block:110px}
+.pt-calculator-focused .pt-calc-nav label{margin-top:0;font-size:14px}
+.pt-calculator-focused .pt-calc-menu{margin:10px 0;gap:6px}
+.pt-calculator-focused .pt-calc-menu button{padding:8px 10px;min-height:44px;font-size:15px}
+.pt-calculator-focused .pt-calc-menu small{display:none}
+.pt-calculator-focused .pt-calc-main .pt-card{padding:16px}
+.pt-calculator-focused .pt-calc-main h3{font-size:20px;margin-bottom:12px}
+.pt-calculator-focused .pt-calc-main label{font-size:16px;line-height:1.5;margin:6px 0}
+.pt-calculator-focused .pt-help,.pt-calculator-focused small{font-size:14px;color:var(--calc-muted);line-height:1.6}
+.pt-calculator-focused .pt-drug-hub{display:grid;grid-template-columns:1fr auto;gap:6px 12px;margin:0 0 14px;padding:0 0 12px;border-bottom:1px solid var(--calc-line)}
+.pt-calculator-focused .pt-quick-products{grid-column:1/-1;border:0;background:transparent;padding:0}
+.pt-calculator-focused .pt-quick-products label{margin:0}
+.pt-calculator-focused [data-quick-product-count]{margin:5px 0}
+.pt-calculator-focused [data-quick-product-status]:empty,.pt-calculator-focused [data-domestic-applied]:empty{display:none}
+.pt-calculator-focused [data-domestic-applied]{grid-column:1/-1}
+.pt-calculator-focused .pt-drug-management>summary{font-size:14px;padding:7px 10px;border:1px solid var(--calc-line);border-radius:9px;background:#fff;min-height:44px}
+.pt-calculator-focused .pt-drug-management[open]{grid-column:1/-1;grid-row:3;background:#f6f8fb;border-radius:10px;padding:10px}
+.pt-calculator-focused .pt-library{margin:0!important;padding:0!important;border:0;background:transparent}
+.pt-calculator-focused .pt-library>.pt-heading>div{display:none}
+.pt-calculator-focused .pt-library .pt-heading{display:block}
+.pt-calculator-focused .pt-library [data-library-open]{font-size:14px;padding:8px 10px;width:100%}
+.pt-calculator-focused .pt-drug-reference:has([data-library-content]:not([hidden])){grid-column:1/-1}
+.pt-calculator-focused .pt-library [data-library-content]{padding-top:12px}
+.pt-calculator-focused .pt-cri-reference{margin-bottom:10px}
+.pt-calculator-focused .pt-cri-reference:empty{display:none}
+.pt-calculator-focused .pt-protocol-bar{border-top:1px solid var(--calc-line);padding-top:10px;margin:12px 0 6px;gap:5px 12px}
+.pt-calculator-focused .pt-protocol-bar>label{font-size:14px}
+.pt-calculator-focused .pt-protocol-bar>p:empty{display:none}
+.pt-calculator-focused .pt-protocol-bar>p{font-size:14px;margin:0}
+.pt-calculator-focused .pt-setting-summary{background:#f7f9fc;padding:10px 12px;margin:8px 0}
+.pt-calculator-focused .pt-advanced{margin:8px 0;background:#fff}
+.pt-calculator-focused .pt-advanced[open]{background:#f7f9fc;padding-bottom:10px}
+.pt-calculator-focused .pt-field-help,.pt-calculator-focused .pt-calculator-help{font-size:14px;margin:12px 0;color:var(--calc-muted)}
+.pt-calculator-focused .pt-field-help summary,.pt-calculator-focused .pt-calculator-help summary{min-height:36px;cursor:pointer;padding:6px 0}
+.pt-calculator-focused .pt-remaining{background:transparent;padding:8px 0;margin:8px 0}
+.pt-calculator-focused .pt-secondary-entry{background:#fff!important;color:#264f9e!important;margin:12px 0 0;width:auto;font-size:14px}
+.pt-calculator-focused .pt-result-key-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;white-space:normal}
+.pt-calculator-focused .pt-result-key{display:block;border:1px solid #bfd3f6;border-radius:10px;background:#f2f7ff;padding:16px;font-size:24px;font-weight:750;line-height:1.5;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.pt-calculator-focused output:has(.pt-result-key-grid){background:transparent;border:0;padding:0}
+.pt-calculator-focused .pt-result-details{margin-top:10px;font-size:14px;color:#30475d}
+.pt-calculator-focused .pt-result-details summary{cursor:pointer;min-height:40px;padding:8px 0}
+.pt-calculator-focused .pt-result-details>div{padding:12px;background:#f7f9fc;border-radius:10px}
+.pt-calculator-focused .pt-calc-dock{position:sticky;bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #bfcee0;border-radius:12px;background:#fff;padding:10px 12px;box-shadow:0 5px 22px #203b5b1a;z-index:12;margin-top:20px}
+.pt-calculator-focused .pt-calc-dock>div{display:flex;gap:8px;flex-shrink:0}
+.pt-calculator-focused [data-dock-context]{border:0;padding:4px;text-align:left;font-size:14px;line-height:1.5;min-width:0}
+.pt-calculator-focused .pt-calc-dock[hidden]{display:none!important}
+.pt-calculator-focused .pt-rx-review{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 0;border-block:1px solid var(--calc-line);margin:12px 0}
+.pt-calculator-focused .pt-rx-review button{font-size:14px;min-height:40px}
+.pt-calculator-focused .pt-rx-review span{font-size:14px;font-weight:600}
+.pt-calculator-focused .pt-rx-result-detail{font-size:14px;margin-top:8px}
+.pt-calculator-focused .pt-rx-result-detail summary{cursor:pointer;min-height:40px;padding:8px 0}
+.pt-calculator-focused [data-review-state=pending]{border-left:3px solid #b77b28}
+.pt-calculator-focused [data-review-state=ready]{border-left:3px solid #4b8a72}
+.pt-calculator-focused [data-rx-error]:empty{display:none}
+
+/* Searchable strength list with one expandable editor per ingredient. */
+.pt.pt-strength-dialog{display:flex;flex-direction:column;overflow:hidden;max-height:92dvh;padding:16px}
+.pt-strength-dialog>.pt-heading{flex-shrink:0;padding-bottom:10px}
+.pt-strength-scroll{overflow-y:auto;min-height:0;flex:1;padding-right:4px;scroll-padding:12px}
+.pt-strength-scroll>p:first-child{font-size:14px;margin:0 0 6px}
+.pt-strength-dialog .pt-tabs{margin:6px 0}
+.pt-strength-dialog .pt-tabs button{font-size:14px}
+.pt-strength-dialog .pt-strength-filters{gap:4px 10px}
+.pt-strength-dialog .pt-strength-filters label{margin:6px 0;font-size:14px}
+.pt-strength-dialog .pt-strength-filters>button{font-size:14px;margin-top:4px}
+.pt-strength-dialog [data-st-info]{font-size:14px;margin:6px 0}
+.pt-strength-dialog [data-st-status]{font-size:14px;padding:6px 10px;margin:6px 0}
+.pt-strength-dialog .pt-strength-row{display:block;padding:0;border:1px solid #dce4ef;border-radius:10px;margin:8px 0}
+.pt-strength-row>summary{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;padding:12px;list-style:revert}
+.pt-strength-row>summary>div{min-width:0}
+.pt-strength-row>summary b{font-size:16px}
+.pt-strength-row>summary small{font-size:14px;margin:2px 0}
+.pt-strength-row:not([open])>summary .pt-help,.pt-strength-row:not([open])>summary .pt-badge{display:none}
+.pt-strength-state{font-size:14px;font-weight:600;color:#315277;flex-shrink:0;max-width:45%;overflow-wrap:anywhere}
+.pt-strength-row>div{padding:0 12px 12px}
+.pt-strength-row .pt-strength-actions{flex-direction:row}
+.pt-strength-dialog .pt-strength-footer{flex-shrink:0;padding:10px 12px;margin:8px 0 0;border-radius:10px}
+.pt-strength-footer .pt-choice{font-size:14px;margin:4px 0 8px}
+.pt-strength-footer [data-st-selection]{font-size:13px;margin:5px 0 0}
+.pt-strength-dialog>[data-status]:empty{display:none}
+@media(max-width:800px){
+ .pt-calculator-focused .pt-calc-layout{grid-template-columns:minmax(0,1fr);gap:8px}
+ .pt-calculator-focused .pt-compact-context [data-common-inputs]{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .pt-calculator-focused .pt-calc-nav{position:static}
+ .pt-calculator-focused .pt-calc-nav>label{margin:0;font-size:14px}
+ .pt-calculator-focused .pt-calc-nav>label input{margin-top:4px;min-height:40px;padding:6px 10px}
+ .pt-calculator-focused .pt-calc-menu{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:6px;margin:8px 0;padding-bottom:6px;scroll-padding:6px}
+ .pt-calculator-focused .pt-calc-menu button{flex:0 0 auto;text-align:center;white-space:nowrap;padding:8px 12px;font-size:14px}
+ .pt-calculator-focused .pt-calc-dock{position:fixed;left:10px;right:10px;bottom:max(8px,env(safe-area-inset-bottom));gap:6px;flex-direction:column;align-items:stretch;padding:8px 10px;margin:0}
+ .pt-calculator-focused .pt-calc-dock>div{display:grid;grid-template-columns:1fr 1fr}
+ .pt-calculator-focused [data-dock-context]{font-size:13px;min-height:24px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .pt-calculator-focused .pt-calc-main .pt-card{padding:12px}
+ .pt-calculator-focused .pt-compact-context{padding:10px 12px}
+ .pt-calculator-focused .pt-patient-context{padding-top:6px;gap:4px 8px}
+ .pt-calculator-focused .pt-patient-context [data-patient-summary]{flex-basis:100%}
+ .pt-calculator-focused .pt-patient-context button{min-height:40px}
+ .pt-calculator-focused .pt-result-key{font-size:22px;padding:12px}
+ .pt-calculator-focused .pt-drug-hub{grid-template-columns:1fr 1fr;gap:6px}
+ .pt-calculator-focused .pt-drug-management>summary{font-size:14px;padding:8px 6px}
+ .pt-calculator-focused .pt-protocol-bar{gap:4px}
+ .pt-calculator-focused .pt-protocol-bar>label{min-width:160px}
+ .pt.pt-strength-dialog{padding:12px;width:96vw;max-height:94dvh}
+ .pt-strength-dialog .pt-strength-filters{grid-template-columns:1fr 1fr}
+ .pt-strength-filters>label:first-child{grid-column:1/-1}
+ .pt-strength-row>summary{align-items:start;padding:10px;gap:8px}
+ .pt-strength-state{max-width:40%;font-size:13px}
+ .pt-strength-footer [data-st-save]{width:100%}
+}
+@media print{.pt-calc-dock,.pt-rx-review{display:none!important}}

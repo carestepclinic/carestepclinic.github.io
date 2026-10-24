@@ -34,7 +34,7 @@
     shell.querySelector('[data-library-import]')?.addEventListener('click',importDialog);
     if(!ready.length){el('status').textContent=r.libraries.length?'자료를 등록 중입니다. 원장·관리자가 같은 파일로 이어서 등록할 수 있습니다.':'등록된 병원 전용 약물 자료가 없습니다.';library=null;return;}
     const choice=shell.querySelector('[data-library-choice]');choice.onchange=()=>openLibrary(choice.value);await openLibrary(choice.value);
-   }catch(e){if(alive()&&seq===serial){el('status').textContent=e.message;const retry=document.createElement('button');retry.textContent='다시 불러오기';retry.onclick=load;el('controls').append(retry);}}
+   }catch(e){if(alive()&&seq===serial){el('status').textContent=e.message;const retry=document.createElement('button');retry.type='button';retry.textContent='다시 불러오기';retry.onclick=load;el('controls').append(retry);}}
   }
   async function openLibrary(id){
    const seq=++serial;entry=null;library=null;clearContext();el('detail').replaceChildren();el('list').textContent='목차를 불러오는 중…';

@@ -9,8 +9,8 @@ var app=PracticeTools.mount(document.getElementById('root'),{ready:()=>true,iden
 </script>`);}try{res.end(readFileSync(resolve(root,path.slice(1))));}catch{res.statusCode=404;res.end();}}).listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));origin='http://127.0.0.1:'+server.address().port;});
 after(async()=>{await browser.close();server.close();});
 async function page(t,width=1280){const p=await browser.newPage({viewport:{width,height:1000}});t.after(()=>p.close());p.setDefaultTimeout(7000);const errors=[];p.on('pageerror',e=>errors.push(e.message));t.after(()=>assert.deepEqual(errors,[]));await p.goto(origin+'/fixture');await p.locator('[data-ref-species]').selectOption('dog');await p.locator('[data-common-weight]').fill('10');return p;}
-async function open(p){await p.locator('[data-calc=dose] [data-strength-open]').click();await p.locator('[data-st-option]').first().waitFor();await p.locator('[data-st-species]').selectOption('both');}
-async function choose(p,n=0,value='0'){await p.locator('[data-st-option]').nth(n).selectOption(value);}
+async function open(p){await p.locator('[data-drug-management]').evaluate(x=>x.open=true);await p.locator('[data-calc=dose] [data-strength-open]').click();await p.locator('.pt-strength-row').first().waitFor();await p.locator('.pt-strength-row').first().evaluate(x=>x.open=true);await p.locator('[data-st-species]').selectOption('both');}
+async function choose(p,n=0,value='0'){await p.locator('[data-st-option]').nth(n).evaluate(x=>x.closest('.pt-strength-row').open=true);await p.locator('[data-st-option]').nth(n).selectOption(value);}
 async function save(p){await p.locator('[data-st-confirm]').check();await p.locator('[data-st-save]').click();await p.getByText(/함량 저장 완료/).waitFor();}
 async function close(p){await p.locator('dialog [data-close]').click();}
 async function paste(p,text){await p.getByRole('button',{name:'처방 붙여넣어 자동 계산',exact:true}).click();await p.locator('[data-rx-text]').fill(text);await p.locator('[data-calc=batch] output').getByRole('heading',{name:/자동 계산 완료/}).waitFor();}
