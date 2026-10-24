@@ -5,6 +5,7 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
 export const uiFiles = new Set([
+  'practice-strengths.js','practice-strength-catalog.json',
   'practice-calculator-ease.js','practice-products.js','practice-prescription.js','practice-prescription-ui.js',
   'practice-calcium-transfusion.js',
   'practice-library.js','practice-library-dose.js',
@@ -55,7 +56,7 @@ export function checkUI(root, paths) {
       }
       checks.push(`html-wrapper-and-${i}-inline-script-syntax`);
     }
-    if (path.endsWith('.webmanifest')) { JSON.parse(source); checks.push('json-syntax'); }
+    if (path.endsWith('.webmanifest') || path.endsWith('.json')) { JSON.parse(source); checks.push('json-syntax'); }
     return {file: path, bytes: bytes.length, checks};
   });
 }
