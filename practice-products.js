@@ -19,11 +19,24 @@
    const alive=()=>o.alive()&&d.isConnected&&generation===epoch&&initialSpecies===species.value;
    el('query').value=seed||'';
    function details(p){
-    chosen=p;const opt=p.selection?.option,blocked=[...(p.selection?.reasons||[])];
-    if(oralOnly&&opt?.route!=='oral')blocked.push('처방 일괄 계산에는 경구제만 적용할 수 있습니다.');
+    chosen=p;const opt=p.selection?.option,blocked=[...new Set((p.selection?.reasons||[]).map(x=>x==='허가 상태 확인'?'허가 상태 확인 필요':x))];
+    const injection=opt?.route==='injection'||/주사|injection/i.test(p.name+' '+(p.englishName||'')+' '+(p.chart||''));
+    if(oralOnly&&injection)blocked.push('처방 일괄 계산에는 경구제만 적용할 수 있습니다.');
     if(p.source==='QIA'&&p.speciesMentioned?.length&&['dog','cat'].includes(initialSpecies)&&!p.speciesMentioned.includes(initialSpecies==='dog'?'개':'고양이'))blocked.push('현재 동물 종류와 허가 대상동물이 다릅니다. 원문을 확인해주세요.');
     el('detail').innerHTML=`<h3>${esc(p.name)}</h3><p>${esc(p.manufacturer)} · ${p.source==='MFDS'?'인체용':'동물용'}</p><p>성분: ${esc(p.ingredientEnglish.join(' · '))}</p><p>허가 ${esc(p.permitStatus)} · 현재 공급 여부 미확인</p><p>출처 확인일 ${esc(p.checkedAt)} · <a href="${esc(p.sourceUrl)}" target="_blank" rel="noopener noreferrer">공식 제품 정보 열기</a></p><ul>${p.components.map(c=>`<li>${esc(c.ingredient)} · ${esc(c.amountRaw)} ${esc(c.unitRaw)}<br>기준: ${esc(c.basisRaw||'미확인')}${c.equivalenceRaw?'<br>환산 기준: '+esc(c.equivalenceRaw):''}</li>`).join('')}</ul>${p.issues.length?'<p class="pt-help">'+p.issues.map(esc).join(' · ')+'</p>':''}${blocked.length||!opt?'<div class="pt-notice"><b>자동 입력 보류</b><p>'+blocked.map(esc).join(' · ')+'</p><p>제품 원문을 확인한 뒤 계산기에 직접 입력해주세요.</p></div>':`<p class="pt-product-strength">입력할 함량: <b>${esc(opt.value)} mg/${opt.form==='tablet'?'정':'mL'}</b> · ${opt.route==='injection'?'주사제':'경구제'}</p><label class="pt-choice"><input type="checkbox" data-product-confirm>원처방의 약물과 제품 성분·함량·투여경로를 대조했습니다.</label><button type="button" data-product-apply disabled class="pt-primary">확인한 함량 입력</button>`}`;
     const button=el('apply');if(button){el('confirm').onchange=e=>button.disabled=!e.target.checked;button.onclick=()=>{if(!alive()||!o.guard()||!guard()||chosen!==p)return;if(apply(p)!==false)o.close();else el('status').textContent='현재 처방 단위에는 이 함량을 적용할 수 없습니다. 처방 단위를 확인해주세요.';};}
+    // Administrative source flags do not remove the existing manual calculator.
+    // Keep them visible, leave the value empty, and distinguish typed facts from source autofill.
+    const c=p.components?.[0],administrative=new Set(['허가 상태 확인 필요','수출용 표시']);
+    if(!opt&&blocked.length&&blocked.every(x=>administrative.has(x))&&p.ingredientEnglish.length===1&&p.components.length===1&&c.normalization==='structured'&&['tablet','mL'].includes(c.per)&&!(c.issues||[]).length){
+     const manual=document.createElement('details');manual.innerHTML=`<summary class="pt-summary">제품 표시를 확인해 함량 직접 입력</summary><p>등록 정보의 ${esc(p.permitStatus)}${blocked.includes('수출용 표시')?'·수출용':''} 표시는 유지됩니다. 실제 보유 제품의 성분·함량·사용 가능 여부를 확인한 경우에만 입력하세요.</p><label>제품 표시의 ${c.per==='tablet'?'1정':'1mL'}당 함량 · mg<input data-product-manual-value inputmode="decimal" autocomplete="off" placeholder="제품 포장에 표시된 함량" maxlength="20"></label><label class="pt-choice"><input type="checkbox" data-product-manual-confirm>실제 보유 제품의 성분·함량·제형·사용 가능 여부를 직접 확인했습니다.</label><button type="button" data-product-manual-apply disabled>직접 확인한 함량 입력</button><p data-product-manual-status role="status"></p>`;
+     el('detail').append(manual);const field=el('manual-value'),check=el('manual-confirm'),submit=el('manual-apply');
+     const value=()=>/^\d+(?:\.\d+)?$/.test(field.value.trim())?Number(field.value.trim()):NaN;
+     const valid=()=>Number.isFinite(value())&&value()>0&&value()<=1e6;
+     field.oninput=()=>{check.checked=false;submit.disabled=true;el('manual-status').textContent=field.value&&!valid()?'0보다 크고 1,000,000 이하인 함량을 숫자로 입력해주세요.':'';};
+     check.onchange=()=>{submit.disabled=!check.checked||!valid();};
+     submit.onclick=()=>{if(!alive()||!o.guard()||!guard()||chosen!==p||!check.checked||!valid())return;const entered={...p,manualEntry:true,manualReasons:blocked.slice(),selection:{reasons:blocked.slice(),option:{value:value(),unit:'mg',form:c.per==='tablet'?'tablet':'liquid',route:injection?'injection':'oral',ingredient:c.strengthBasis}}};if(apply(entered)!==false)o.close();else el('manual-status').textContent='현재 처방 단위에는 이 함량을 적용할 수 없습니다. 처방 단위를 확인해주세요.';};
+    }
    }
    async function search(next=false){
     const q=el('query').value.trim(),token=++seq;offset=next?offset+30:0;chosen=null;el('detail').replaceChildren();el('list').replaceChildren();el('more').hidden=true;el('status').textContent='제품 정보를 불러오는 중…';
@@ -46,8 +59,8 @@
     await request('/'+r.id+'/complete',{method:'POST',body:'{}'});status.textContent=doc.items.length+'개 제품 DB 등록 완료 · 제품 검색에 반영했습니다.';
    }catch(e){status.textContent='등록 중단: '+e.message+' 같은 파일로 이어서 등록할 수 있습니다.';}finally{button.disabled=input.disabled=false;}};
   }
-  bar.querySelector('button').onclick=()=>open('',p=>{if(med.elements.doseUnit.value==='U'){note.textContent='활성단위 U 처방에는 mg 함량을 적용할 수 없습니다.';return false;}o.clear();const x=p.selection.option;med.elements.form.value=x.form;med.elements.form.dispatchEvent(new Event('change',{bubbles:true}));med.elements.strengthUnit.value=x.unit;med.elements.strengthUnit.dispatchEvent(new Event('change',{bubbles:true}));med.elements.concentration.value=x.value;med.elements.concentration.dispatchEvent(new Event('input',{bubbles:true}));active=p;note.textContent=p.name+' · '+x.value+' mg/'+(x.form==='tablet'?'정':'mL')+' · 출처 확인 '+p.checkedAt;o.refresh();},()=>true);
-  return {open,reset,report(f,text){return f===med&&active&&Number(med.elements.concentration.value)===active.selection.option.value&&med.elements.form.value===active.selection.option.form&&med.elements.strengthUnit.value==='mg'?`국내 제품: ${active.name}\n함량 출처: ${active.sourceUrl} · ${active.checkedAt}\n${text}`:text;}};
+  bar.querySelector('button').onclick=()=>open('',p=>{if(med.elements.doseUnit.value==='U'){note.textContent='활성단위 U 처방에는 mg 함량을 적용할 수 없습니다.';return false;}o.clear();const x=p.selection.option;med.elements.form.value=x.form;med.elements.form.dispatchEvent(new Event('change',{bubbles:true}));med.elements.strengthUnit.value=x.unit;med.elements.strengthUnit.dispatchEvent(new Event('change',{bubbles:true}));med.elements.concentration.value=x.value;med.elements.concentration.dispatchEvent(new Event('input',{bubbles:true}));active=p;note.textContent=p.name+' · '+x.value+' mg/'+(x.form==='tablet'?'정':'mL')+(p.manualEntry?' · 제품 표시 직접 확인 · 허가 '+p.permitStatus+(p.manualReasons.includes('수출용 표시')?' · 수출용 표시':''):' · 출처 확인 '+p.checkedAt);o.refresh();},()=>true);
+  return {open,reset,report(f,text){return f===med&&active&&Number(med.elements.concentration.value)===active.selection.option.value&&med.elements.form.value===active.selection.option.form&&med.elements.strengthUnit.value==='mg'?`국내 제품: ${active.name}\n${active.manualEntry?'함량: 사용자 직접 입력·제품 표시 확인 · 허가 '+active.permitStatus+' · '+active.manualReasons.join(' · '):'함량 출처: '+active.sourceUrl+' · '+active.checkedAt}\n${text}`:text;}};
  }
  g.PracticeProducts={mount};
 })(window);
