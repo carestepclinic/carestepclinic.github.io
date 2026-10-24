@@ -101,3 +101,17 @@ body:has(#practice.active-view) #r61-patient-context{display:none}
 .pt-register-footer .pt-bar{margin:4px 0}.pt-register-footer [role=status]{font-size:14px;font-weight:650}
 .pt-register-footer p:empty{display:none}
 @media(max-width:640px){.pt .pt-intake-filters{grid-template-columns:1fr 1fr}.pt-intake-filters label:nth-child(2){grid-column:1/-1;grid-row:1}.pt .pt-status-filters[aria-label="문진 상태"]{grid-template-columns:repeat(3,minmax(0,1fr))}.pt .pt-calc-common [data-common-inputs]{grid-template-columns:1fr 1fr;gap:10px}.pt .pt-calc-common{padding:14px}.pt .pt-saved-product{grid-template-columns:minmax(0,1fr)}.pt-saved-actions{grid-template-columns:1fr}.pt .pt-product-dialog{padding:16px}.pt-product-dialog>.pt-heading{top:-16px}.pt-product-dialog>.pt-heading h2{font-size:20px}.pt-product-dialog>.pt-bar{top:44px}.pt-product-registering [data-product-detail],.pt-product-registering [data-product-register-fields]{grid-template-columns:1fr}.pt .pt-register-footer{bottom:-16px}.pt-register-footer button{width:100%}.pt-product-dialog input,.pt-product-dialog select{font-size:16px}.pt .pt-calc-highlight{font-size:19px}}
+
+/* Calculator quick entry */
+.pt .pt-quick-products{flex:1 0 100%;min-width:0;padding:14px;background:#f5f8ff;border:1px solid #d6e1f4;border-radius:14px}
+.pt .pt-quick-products>label{display:block;font-weight:700}.pt .pt-quick-products input{margin-top:7px}
+.pt [data-quick-product-results]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pt .pt-quick-product{min-width:0}.pt .pt-quick-product button{width:100%;text-align:left;white-space:normal;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:5px;min-height:60px}
+.pt .pt-quick-product small{font-weight:400;line-height:1.5;color:#405576}.pt .pt-quick-product p{font-size:13px;margin:5px 0}
+.pt .pt-input-shortcuts,.pt .pt-recent-protocols,.pt .pt-remaining{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.pt .pt-input-shortcuts{margin-top:7px}.pt .pt-input-shortcuts button{padding:7px 10px;min-height:36px;min-width:42px;font-size:14px}
+.pt .pt-input-shortcuts button[aria-pressed=true]{background:#e8efff;border-color:#315bdb;color:#173b9d}
+.pt .pt-recent-protocols{grid-column:1/-1;margin:7px 0}.pt .pt-recent-protocols small{flex-basis:100%;color:#526582}.pt .pt-recent-protocols button{white-space:normal;text-align:left}
+.pt .pt-remaining{padding:12px;margin:12px 0;background:#f5f8fc;border-radius:10px;font-size:14px}.pt .pt-remaining>span{font-weight:600;margin-right:6px}.pt .pt-remaining button{padding:6px 10px;min-height:36px;font-size:14px}
+.pt .pt-weight-review{background:#fff8e9;padding:12px;border:1px solid #efdaad;border-radius:10px;line-height:1.6}
+@media(max-width:600px){.pt [data-quick-product-results]{grid-template-columns:1fr}.pt .pt-quick-products{padding:10px}.pt .pt-remaining>span{flex-basis:100%}}

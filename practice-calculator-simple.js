@@ -46,6 +46,7 @@
    if(s.kind==='bicarbonate'&&p.body.monitoring)s.f.elements.plan.value=p.body.monitoring;
    s.active=p;s.applied=snapshot(s);s.select.value=p.id;s.reviewBox.hidden=!!s.f.elements.confirmed;s.review.required=!s.f.elements.confirmed;s.advanced.open=false;invalidate(s);s.status.textContent='병원 서식을 불러왔습니다. 이번 환자의 값과 적용 조건을 확인하세요.';
    if(s.kind==='dose'&&p.body.singleDose)s.status.textContent+=' 단회 투여 1회분입니다.';
+   b.dispatchEvent(new CustomEvent('practice-protocol-applied',{detail:{id:p.id}}));
   }
   async function fresh(){const r=await o.request('/practice/presets?protocols=1');if(!o.alive())return null;loaded(r);return r;}
   function referenceInfo(){const drug=g.PracticeReference.drugs.find(x=>x.id===b.querySelector('[data-ref-drug]')?.value),profile=drug?.profiles.find(x=>x.id===b.querySelector('[data-ref-profile]')?.value);return {drug,profile};}
@@ -77,7 +78,7 @@
     if(!o.guard())return;calculate?.call(f,e);render(s);
    };render(s);
   }
-  function loaded(r){version=r.protocolsVersion||0;canManage=!!r.canManage&&version===1;items=r.items||[];for(const s of states.values())menu(s);}
+  function loaded(r){version=r.protocolsVersion||0;canManage=!!r.canManage&&version===1;items=r.items||[];for(const s of states.values())menu(s);b.dispatchEvent(new CustomEvent('practice-protocols-loaded',{detail:{items}}));}
   function reset(){generation++;for(const s of states.values()){resetForm(s);drop(s);menu(s);}}
   species.addEventListener('change',reset);weight.addEventListener('input',()=>{for(const s of states.values())invalidate(s);});b.querySelector('[data-use-weight]').addEventListener('click',()=>{for(const s of states.values())invalidate(s);});
   b.addEventListener('click',e=>{if(e.target.closest('[data-ref-apply],[data-fluid-apply]')){const kind=e.target.closest('[data-ref-apply]')?'dose':'fluid';drop(states.get(kind));states.get(kind).advanced.open=false;}for(const s of states.values())render(s);});
