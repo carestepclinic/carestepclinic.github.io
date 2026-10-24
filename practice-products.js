@@ -23,20 +23,21 @@
    const alive=()=>o.alive()&&d.isConnected&&generation===epoch&&initialSpecies===species.value;
    el('query').value=seed||'';
    async function applyProduct(p,status,options={}){
-    if(!alive()||!o.guard()||!guard())return;const selectedAtStart=chosen,searchAtStart=seq;
+    const report=text=>{status.textContent=text;if(status!==el('status'))el('status').textContent=text;};
+    if(!alive()||!o.guard()||!guard()){report('환자·동물 종류 또는 병원 연결이 변경되었습니다. 이 창을 닫고 다시 열어 등록해주세요.');return;}const selectedAtStart=chosen,searchAtStart=seq;
     const unit=p.selection?.option?.unit||p.registration?.unit;const unitMismatch=!oralOnly&&((med.elements.doseUnit.value==='U')!==(unit==='U'));
-    if(!options.saveOnly&&unitMismatch){status.textContent='현재 처방 단위에는 이 함량을 적용할 수 없습니다. 처방 단위를 확인해주세요.';return;}
+    if(!options.saveOnly&&unitMismatch){report('현재 처방 단위에는 이 함량을 적용할 수 없습니다. 처방 단위를 확인해주세요.');return;}
     const save=el('save');
     if((save?.checked||options.forceSave)&&(!p.presetId||options.forceSave)){
      const aliases=el('aliases').value.split(',').map(x=>x.trim()).filter(Boolean),sv=el('save-species').value;
-     if(!aliases.length||aliases.length>12||aliases.some(x=>x.length>120)||!sv){status.textContent='자동 연결할 약물명·약칭과 적용 동물 종류를 확인해주세요.';return;}
-     const x=p.registration||p.selection.option;status.textContent='우리 병원 약품으로 저장 중…';
+     if(!aliases.length||aliases.length>12||aliases.some(x=>x.length>120)||!sv){report('자동 연결할 약물명·약칭과 적용 동물 종류를 확인해주세요.');return;}
+     const x=p.registration||p.selection.option;report('우리 병원 약품으로 저장 중…');
      try{const result=await o.request('/practice/formulary',{method:'POST',body:JSON.stringify({productId:p.id,sourceHash:p.sourceHash,value:x.value,unit:x.unit,kind:x.form,route:x.route,verification:p.manualEntry?'label':'source',aliases,species:sv==='both'?['dog','cat']:[sv],confirm:true,reactivate:!!el('reactivate')?.checked,...(p.registration?{entryMode:'manual',calculatorReady:p.registration.ready,calculationBasis:p.calculationBasis,verification:p.registration.ready?'label':'inventory',revision:options.revision}:{} )})});p.presetId=result.id;await o.reloadPresets?.();}
-     catch(e){if(alive()){status.textContent='병원 약품 저장 실패 · '+e.message;if(e.message.includes('보관 처리')&&!el('reactivate')){const label=document.createElement('label');label.className='pt-choice';label.innerHTML='<input type="checkbox" data-product-reactivate>보관된 제품을 이번 확인 내용으로 다시 등록합니다.';el('detail').append(label);}}return;}
+     catch(e){if(alive()){report('병원 약품 저장 실패 · '+e.message);if(e.message.includes('보관 처리')&&!el('reactivate')){const label=document.createElement('label');label.className='pt-choice';label.innerHTML='<input type="checkbox" data-product-reactivate>보관된 제품을 이번 확인 내용으로 다시 등록합니다.';el('detail').append(label);}}return;}
     }
     if(!alive()||!o.guard()||!guard()||chosen!==selectedAtStart||seq!==searchAtStart)return;
-    if(options.saveOnly){status.textContent='우리 병원 사용 약품에 저장했습니다.'+(p.registration?.ready===false?' 계산 함량은 나중에 등록할 수 있습니다.':'');savedList();return true;}
-    if(apply(p)!==false)o.close();else status.textContent='현재 처방 단위에는 이 함량을 적용할 수 없습니다. 처방 단위를 확인해주세요.';
+    if(options.saveOnly){report('우리 병원 사용 약품에 저장했습니다.'+(p.registration?.ready===false?' 계산 함량은 나중에 등록할 수 있습니다.':''));savedList();return true;}
+    if(apply(p)!==false)o.close();else report('현재 처방 단위에는 이 함량을 적용할 수 없습니다. 처방 단위를 확인해주세요.');
    }
    function saveControls(p){
     if(!o.presets?.().canManage)return;
@@ -65,13 +66,36 @@
     el('register-kind').value=v&&v.kind!=='inventory'?v.kind:opt?.form||(/캡슐|capsule/i.test(p.name)?'capsule':p.components[0]?.per==='tablet'?'tablet':'');
     el('register-value').value=v?.value||opt?.value||'';el('register-unit').value=v?.unit||opt?.unit||'mg';el('register-route').value=m?.route==='other'?'':m?.route||opt?.route||'';
     const check=el('register-confirm'),save=el('register-save'),applyButton=el('register-apply');let busy=false;
-    const valid=()=>el('aliases').value.trim()&&el('save-species').value&&(!el('register-ready').checked||(el('register-basis').value.trim()&&['tablet','capsule','liquid'].includes(el('register-kind').value)&&/^\d+(?:\.\d+)?$/.test(el('register-value').value.trim())&&Number(el('register-value').value)>0&&Number(el('register-value').value)<=1e6&&['oral','injection'].includes(el('register-route').value)&&(el('register-route').value!=='injection'||el('register-kind').value==='liquid')));
-    function refresh(){const ready=el('register-ready').checked,unit=el('register-unit').value,compatible=ready&&(oralOnly?el('register-route').value==='oral'&&unit!=='U':(med.elements.doseUnit.value==='U')===(unit==='U'));el('register-fields').hidden=!ready;save.disabled=busy||!check.checked||!valid();applyButton.disabled=busy||!check.checked||!valid()||!compatible||!!mode.manage;}
-    for(const input of el('detail').querySelectorAll('input,select'))input.addEventListener('input',()=>{if(input!==check)check.checked=false;refresh();});check.onchange=refresh;refresh();
-    async function submit(saveOnly){if(busy||!alive()||!check.checked||!valid()||!guard()||!o.guard())return;const ready=el('register-ready').checked,form=ready?el('register-kind').value:'inventory',route=ready?el('register-route').value:'other',unit=ready?el('register-unit').value:'',value=ready?Number(el('register-value').value):0;
+    const announce=text=>{el('register-status').textContent=text;el('status').textContent=text;};
+    function invalidField(){
+     const aliases=el('aliases').value.split(',').map(x=>x.trim()).filter(Boolean);
+     if(!aliases.length||aliases.length>12||aliases.some(x=>x.length>120||/[<>\r\n]/.test(x)))return [el('aliases'),'자동 연결할 약물명·약칭을 1~12개 입력해주세요. 각 이름은 120자 이하입니다.'];
+     if(!el('save-species').value)return [el('save-species'),'적용 동물 종류를 선택해주세요.'];
+     if(el('register-ready').checked){
+      if(!el('register-basis').value.trim()||/[<>\r\n]/.test(el('register-basis').value))return [el('register-basis'),'계산 기준 성분·조합을 확인해주세요.'];
+      if(!['tablet','capsule','liquid'].includes(el('register-kind').value))return [el('register-kind'),'제형을 선택해주세요. 정제는 1정당 함량을 입력합니다.'];
+      const value=el('register-value').value.trim();
+      if(!/^\d+(?:\.\d+)?$/.test(value)||Number(value)<=0||Number(value)>1e6)return [el('register-value'),'함량은 단위 없이 숫자만 입력해주세요. 예: 2.5 (0 초과, 1,000,000 이하)'];
+      if(!['oral','injection'].includes(el('register-route').value))return [el('register-route'),'투여 경로를 선택해주세요.'];
+      if(el('register-route').value==='injection'&&el('register-kind').value!=='liquid')return [el('register-kind'),'주사제는 액상 · 1mL당 함량으로 설정해주세요.'];
+     }
+     if(!check.checked)return [check,'등록할 제품과 입력한 계산 정보를 확인한 뒤 마지막 확인란을 체크해주세요.'];
+     return null;
+    }
+    function refresh(){const ready=el('register-ready').checked,unit=el('register-unit').value,compatible=ready&&(oralOnly?el('register-route').value==='oral'&&unit!=='U':(med.elements.doseUnit.value==='U')===(unit==='U'));el('register-fields').hidden=!ready;save.disabled=busy;applyButton.disabled=busy||!compatible||!!mode.manage;}
+    for(const input of el('detail').querySelectorAll('input,select'))input.addEventListener('input',()=>{input.removeAttribute('aria-invalid');if(input!==check)check.checked=false;refresh();});check.onchange=refresh;refresh();
+    async function submit(saveOnly){
+     if(busy)return;
+     if(!alive()||!guard()||!o.guard()){announce('환자·동물 종류 또는 병원 연결이 변경되었습니다. 이 창을 닫고 다시 열어 등록해주세요.');return;}
+     const invalid=invalidField();if(invalid){announce(invalid[1]);invalid[0].setAttribute('aria-invalid','true');invalid[0].focus();return;}
+     const ready=el('register-ready').checked,form=ready?el('register-kind').value:'inventory',route=ready?el('register-route').value:'other',unit=ready?el('register-unit').value:'',value=ready?Number(el('register-value').value):0;
      const entered={...p,calculationBasis:ready?el('register-basis').value.trim():'',manualEntry:true,manualReasons:[...(p.selection?.reasons||[])],registration:{ready,form,route,unit,value},selection:{option:ready?{value,unit,form,route}:null}};
-     const sv=el('save-species').value,sp=sv==='both'?['cat','dog']:[sv],revision=prior?.body.formulary&&JSON.stringify(prior.body.formulary.species.slice().sort())===JSON.stringify(sp)?prior?.revision:undefined;busy=true;save.disabled=applyButton.disabled=true;
-     const ok=await applyProduct(entered,el('register-status'),{forceSave:true,saveOnly:saveOnly||!ready,revision});busy=false;if(alive()&&check.isConnected&&chosen===p){if(ok){const found=o.presets().items.find(x=>x.id===entered.presetId);if(found)prior=found;check.checked=false;}refresh();}
+     const sv=el('save-species').value,sp=sv==='both'?['cat','dog']:[sv],revision=prior?.body.formulary&&JSON.stringify(prior.body.formulary.species.slice().sort())===JSON.stringify(sp)?prior?.revision:undefined;busy=true;refresh();
+     try{
+      const ok=await applyProduct(entered,el('register-status'),{forceSave:true,saveOnly:saveOnly||!ready,revision});
+      if(alive()&&check.isConnected&&chosen===p&&ok){const found=o.presets().items.find(x=>x.id===entered.presetId);if(found)prior=found;check.checked=false;if(!sp.includes(initialSpecies))announce('우리 병원 사용 약품에 저장했습니다. '+(sv==='cat'?'고양이':sv==='dog'?'개':'개·고양이')+'용으로 등록되어 해당 동물 종류에서 확인할 수 있습니다.');}
+     }catch(e){if(d.isConnected)announce('저장을 마치지 못했습니다. '+(e?.message||'창을 다시 열어 확인해주세요.'));}
+     finally{busy=false;if(alive()&&check.isConnected&&chosen===p)refresh();}
     }
     save.onclick=()=>submit(true);applyButton.onclick=()=>submit(false);
    }
