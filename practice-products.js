@@ -83,11 +83,11 @@
      return null;
     }
     function refresh(){const ready=el('register-ready').checked,unit=el('register-unit').value,compatible=ready&&(oralOnly?el('register-route').value==='oral'&&unit!=='U':(med.elements.doseUnit.value==='U')===(unit==='U'));el('register-fields').hidden=!ready;save.disabled=busy;applyButton.disabled=busy||!compatible||!!mode.manage;}
-    for(const input of el('detail').querySelectorAll('input,select'))input.addEventListener('input',()=>{input.removeAttribute('aria-invalid');if(input!==check)check.checked=false;refresh();});check.onchange=refresh;refresh();
+    for(const input of el('detail').querySelectorAll('input,select'))input.addEventListener('input',()=>{input.removeAttribute('aria-invalid');input.setCustomValidity('');if(input!==check)check.checked=false;refresh();});check.onchange=refresh;refresh();
     async function submit(saveOnly){
      if(busy)return;
      if(!alive()||!guard()||!o.guard()){announce('환자·동물 종류 또는 병원 연결이 변경되었습니다. 이 창을 닫고 다시 열어 등록해주세요.');return;}
-     const invalid=invalidField();if(invalid){announce(invalid[1]);invalid[0].setAttribute('aria-invalid','true');invalid[0].focus();return;}
+     const invalid=invalidField();if(invalid){announce(invalid[1]);invalid[0].setAttribute('aria-invalid','true');invalid[0].setCustomValidity(invalid[1]);invalid[0].focus();invalid[0].reportValidity();return;}
      const ready=el('register-ready').checked,form=ready?el('register-kind').value:'inventory',route=ready?el('register-route').value:'other',unit=ready?el('register-unit').value:'',value=ready?Number(el('register-value').value):0;
      const entered={...p,calculationBasis:ready?el('register-basis').value.trim():'',manualEntry:true,manualReasons:[...(p.selection?.reasons||[])],registration:{ready,form,route,unit,value},selection:{option:ready?{value,unit,form,route}:null}};
      const sv=el('save-species').value,sp=sv==='both'?['cat','dog']:[sv],revision=prior?.body.formulary&&JSON.stringify(prior.body.formulary.species.slice().sort())===JSON.stringify(sp)?prior?.revision:undefined;busy=true;refresh();
