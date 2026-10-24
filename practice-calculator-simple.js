@@ -16,7 +16,7 @@
   const species=b.querySelector('[data-ref-species]'),weight=b.querySelector('[data-common-weight]'),states=new Map();let version=0,canManage=false,items=[],generation=0;
   const v=(f,k)=>f.elements[k]?.value||'';
   function settings(f){const k=f.dataset.calc,a=(n,unit='')=>v(f,n)?v(f,n)+unit:'미설정';switch(k){
-   case 'dose':return [`처방 ${a('dose')} ${v(f,'doseUnit')}${v(f,'doseBasis')==='fixed'?'/마리/회':v(f,'doseBasis')==='bsa'?'/m²/회':'/kg/회'}`,`제품 ${a('concentration')} ${v(f,'strengthUnit')}/${v(f,'form')==='tablet'?'정':'mL'}`,`${v(f,'courseMode')==='total'?'총 '+a('totalDoses')+'회':a('times')+'회/일'} · ${v(f,'form')==='tablet'?'정제':'액상'}`];
+   case 'dose':return [`처방 ${a('dose')} ${v(f,'doseUnit')}${v(f,'doseBasis')==='fixed'?'/마리/회':v(f,'doseBasis')==='bsa'?'/m²/회':'/kg/회'}`,`제품 ${a('concentration')} ${v(f,'strengthUnit')}/${({tablet:'정',capsule:'캡슐',liquid:'mL'})[v(f,'form')]}`,`${v(f,'courseMode')==='total'?'총 '+a('totalDoses')+'회':a('times')+'회/일'} · ${({tablet:'정제',capsule:'캡슐',liquid:'액상'})[v(f,'form')]}`];
    case 'fluid':return [f.elements.mode.selectedOptions[0]?.textContent||'방식 선택',`속도 ${a('rate')} ${v(f,'mode')==='weight'?'mL/kg/hr':'mL/hr'}`,`세트 ${v(f,'factor')?a('factor',' gtt/mL'):'점적 계산 안 함'}`];
    case 'cri':return [a('drug'),`목표 ${a('dose')} ${v(f,'doseUnit')||'단위 미설정'}`,`원액 ${a('stock')} ${v(f,'stockUnit')||'단위 미설정'}/mL`,`최종 ${a('volume',' mL')} · ${a('diluent')}`];
    case 'potassium':return [`최종 K ${a('concentration',' mEq/L')}`,`주입 ${a('rate',' mL/hr')}`,`다른 라인 ${a('other',' mEq/hr')}`];

@@ -44,7 +44,7 @@
   if(!String(row.drug||'').trim())throw Error('약물명을 입력해주세요.');
   if(row.route!=='PO')throw Error('경구(PO) 처방인지 확인해주세요.');
   if(!['mg','mcg'].includes(row.doseUnit))throw Error('처방 단위를 확인해주세요.');
-  if(!['tablet','liquid'].includes(row.form))throw Error('정제 또는 액상을 선택해주세요.');
+  if(!['tablet','capsule','liquid'].includes(row.form))throw Error('정제·캡슐·액상 중 제형을 선택해주세요.');
   if(!['mg','mcg'].includes(row.strengthUnit))throw Error('제품 함량 단위를 확인해주세요.');
   for(const [key,label,max] of [['times','하루 횟수',24],['days','투약 일수',366]])if(!/^\d+$/.test(String(row[key]))||Number(row[key])<1||Number(row[key])>max)throw Error(label+'를 1~'+max+' 사이 정수로 입력해주세요.');
   if(!validNumber(row.strength)||Number(row.strength)>1e6)throw Error('제품의 1정 또는 1mL당 함량을 확인해주세요.');
