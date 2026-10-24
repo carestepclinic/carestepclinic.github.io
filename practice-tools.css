@@ -45,3 +45,14 @@
 .pt-rx-total strong { font-size:20px; color:#164edb; }
 @media(max-width:800px){.pt-rx-fields{grid-template-columns:repeat(2,minmax(0,1fr));}.pt-rx-row,.pt-rx-common{padding:14px;}}
 @media(max-width:480px){.pt-rx-fields{grid-template-columns:minmax(0,1fr);}.pt-rx .pt-heading{align-items:flex-start;}.pt-rx input,.pt-rx select,.pt-rx textarea{font-size:16px;}}
+/* Official product chooser: readable metadata without expanding the calculator. */
+.pt-product-entry{padding:12px 0;border-bottom:1px solid #dbe3f3;margin-bottom:14px}
+.pt-product-query{flex:1;min-width:180px}
+.pt-product-layout{display:grid;grid-template-columns:minmax(220px,2fr) minmax(280px,3fr);gap:20px;align-items:start}
+.pt-product-layout section{min-width:0;overflow-wrap:anywhere}
+.pt-product-layout [data-product-list]{max-height:58vh;overflow:auto;display:grid;gap:8px;padding:2px}
+.pt .pt-product-card{text-align:left;display:grid;gap:6px;width:100%;white-space:normal;padding:14px;line-height:1.5}
+.pt .pt-product-card span,.pt .pt-product-card small{color:#4c6180;font-size:13px}
+.pt-product-strength{padding:12px;background:#edf4ff;border-radius:10px}
+.pt-product-layout li{margin-bottom:12px;line-height:1.6}
+@media(max-width:640px){.pt-product-layout{grid-template-columns:1fr}.pt-product-layout [data-product-list]{max-height:28vh}.pt-product-query{width:100%;min-width:0}}
