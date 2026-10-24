@@ -1,10 +1,11 @@
-"""Rebuild public ingredient strengths from complete official MFDS list/detail JSON. No handbook input.
+"""Rebuild public ingredient strengths from complete official MFDS list/detail JSON. Merge the reviewed name-only supplement; no handbook text or dosing input.
 Example: python tools/build-strength-catalog.py --raw /path/to/raw --output practice-strength-catalog.json --audit /tmp/audit.json
 Source/license: https://www.data.go.kr/data/15095677/openapi.do
 """
 import json,re,math,hashlib,argparse
 from pathlib import Path
 from collections import Counter
+from strength_reference_catalog import merge_references
 parser=argparse.ArgumentParser()
 parser.add_argument('--raw',required=True);parser.add_argument('--output',required=True);parser.add_argument('--audit',required=True)
 args=parser.parse_args()
@@ -138,8 +139,9 @@ def build():
         rows.append(g)
     rows.sort(key=lambda x:x['english'].casefold())
     doc={'format':'carestep-ingredient-strengths/v1','version':'20261024-1','checkedAt':'2026-10-23','source':{'name':'식품의약품안전처 의약품 제품 허가정보','url':'https://www.data.go.kr/data/15095677/openapi.do','license':'이용허락범위 제한 없음'},'notice':'허가정보의 함량 후보입니다. 현재 유통·재고 및 개·고양이 사용 적합성을 뜻하지 않습니다. 병원에서 실제 사용하는 제형·함량을 확인한 뒤 저장하세요.','ingredients':rows}
+    doc=merge_references(doc)
     target=Path(args.output)
     target.write_text(json.dumps(doc,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
-    summary={'sourceProducts':len(listing),'includedProducts':included,'ingredients':len(rows),'options':sum(len(g['options']) for g in rows),'excluded':dict(excluded),'bytes':target.stat().st_size,'source':'complete MFDS list/detail feed; no handbook or clinic records'}
+    summary={'sourceProducts':len(listing),'includedProducts':included,'ingredients':len(doc['ingredients']),'officialIngredients':len(rows),'referenceNames':doc['nameSupplement']['addedItems'],'options':sum(len(g['options']) for g in rows),'excluded':dict(excluded),'bytes':target.stat().st_size,'source':'complete MFDS list/detail feed plus reviewed drug names; no handbook doses or clinic records'}
     Path(args.audit).write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8');print(json.dumps(summary,ensure_ascii=False))
 if __name__=='__main__':build()

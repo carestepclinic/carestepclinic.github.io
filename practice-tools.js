@@ -66,7 +66,7 @@
    b.querySelector('[data-common-weight]')?.addEventListener('input',()=>{med.elements.bsa.value='';});
    simple=g.PracticeCalculatorSimple.mount(b,{alive,guard:()=>{if(!alive())return false;if((a.patient()?.id||'')!==initialPatientId){clearResults();void advancedCalculator();return false;}return true;},clear:clearResults,request:(...args)=>a.request(...args),modal,close,resetReference:()=>referenceUI?.resetPreset(),privateContext:kind=>privateLibrary?.context(kind)});
    domestic=g.PracticeProducts?.mount(b,{presets:()=>presets,reloadPresets:loadPresets,editStrength:p=>strengths?.edit(p),alive,guard:()=>alive()&&(a.patient()?.id||'')===initialPatientId,clear:clearResults,request:(...args)=>a.request(...args),modal,close,refresh:()=>simple?.refresh()});
-   strengths=g.PracticeStrengths?.mount(b,{alive,presets:()=>presets,reload:loadPresets,request:(...args)=>a.request(...args),modal,close});
+   strengths=g.PracticeStrengths?.mount(b,{alive,presets:()=>presets,reload:loadPresets,request:(...args)=>a.request(...args),modal,close,openProducts:seed=>domestic?.open(seed,()=>false,alive,false,{manage:true})});
    privateLibrary=g.PracticeLibrary?.mount(b,{alive,clear:clearResults,request:(...args)=>a.request(...args),modal,close,showKind,resetReference:()=>referenceUI?.resetPreset(),dropProtocols:()=>simple?.reset(),refresh:()=>simple?.refresh()});
    ease=g.PracticeCalculatorEase?.mount(b,{identity:a.preferencesIdentity?.()||k,clear:clearResults,weightUsed:()=>workspace?.weightUsed(),productIssue:p=>domestic?.savedIssue(p)||'',applyProduct:(p,guard)=>domestic.applySaved(p,guard)});
   }
