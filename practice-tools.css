@@ -123,3 +123,6 @@ body:has(#practice.active-view) #r61-patient-context{display:none}
 .pt .pt-rx-output:empty{display:none}.pt .pt-rx-output{margin:16px 0}
 .pt .pt-rx-output h4{font-size:18px}.pt .pt-rx-result{padding:14px}
 .pt .pt-rx [data-result-actions]:not([hidden]){padding:12px;margin-bottom:20px;border-bottom:1px solid #d6e1f4}
+
+/* Show the blood-volume estimate while keeping coefficient edits optional. */
+.pt .pt-blood-estimate{margin:14px 0;padding:14px 16px;background:#f2f6ff;border:1px solid #d6e1f4;border-radius:12px;line-height:1.6}.pt .pt-blood-estimate>span{display:block;font-weight:600}.pt .pt-blood-estimate>strong{display:block;font-size:24px;color:#1844ad}.pt .pt-blood-estimate p{margin:4px 0}.pt .pt-blood-settings{margin:10px 0}.pt .pt-blood-settings>label{max-width:360px}
