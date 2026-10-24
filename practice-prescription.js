@@ -4,15 +4,22 @@
  const c=typeof module!=='undefined'&&module.exports?require('./practice-calculators.js'):g.PracticeCalculators;
  const decimal=/^(?:\d+(?:\.\d*)?|\.\d+)$/;
  const validNumber=v=>decimal.test(String(v).trim())&&Number(v)>0&&Number.isFinite(Number(v));
+ function doseNumber(value){
+  const text=String(value??'').normalize('NFKC').replace(/⁄/g,'/').trim();
+  if(validNumber(text))return Number(text);
+  const fraction=text.match(/^(\d+)\s*\/\s*(\d+)$/);
+  if(fraction&&Number(fraction[1])>0&&Number(fraction[2])>0&&Number(fraction[1])<=1e9&&Number(fraction[2])<=1e9)return Number(fraction[1])/Number(fraction[2]);
+  throw Error('1회 처방량을 양수 또는 분수로 입력해주세요. 예: 0.25, 1/4');
+ }
  function parseLine(original){
-  const row={original:original.trim(),drug:'',dose:'',doseUnit:'mg',route:'',times:'',days:'',issues:[]};
-  const s=row.original.normalize('NFKC');
-  const match=s.match(/^(.+?)\s+(\d+(?:\.\d+)?|\.\d+)\s*(mg|mcg|μg|T|tabs?|tablets?|정)\s*\/\s*kg(?![a-z])\s*(.*)$/i);
-  if(!match){row.issues.push('약물명과 1회 체중당 용량을 확인해주세요. 예: 약물명 0.5 mg/kg 또는 0.5 T/kg');return row;}
-  row.drug=match[1].trim();row.dose=match[2];row.doseUnit=/^(?:t|tabs?|tablets?|정)$/i.test(match[3])?'T':match[3].toLowerCase()==='mg'?'mg':'mcg';
+  const row={original:original.trim(),drug:'',dose:'',doseUnit:'mg',doseBasis:'',route:'',times:'',days:'',issues:[]};
+  const s=row.original.normalize('NFKC').replace(/⁄/g,'/');
+  const match=s.match(/^(.+?)\s+(\d+\s*\/\s*\d+|\d+(?:\.\d+)?|\.\d+)\s*(mg|mcg|μg|T|tabs?|tablets?|정)\s*\/\s*(kg|head|animal|마리)(?![a-z가-힣])\s*(.*)$/i);
+  if(!match){row.issues.push('약물명·1회 용량·기준을 확인해주세요. 예: 약물명 0.5 mg/kg 또는 약물명 1/4 T/head');return row;}
+  row.drug=match[1].trim();row.dose=match[2].replace(/\s/g,'');row.doseBasis=match[4].toLowerCase()==='kg'?'kg':'fixed';row.doseUnit=/^(?:t|tabs?|tablets?|정)$/i.test(match[3])?'T':match[3].toLowerCase()==='mg'?'mg':'mcg';
   // Do not take the second number of a range, a product strength, or a combination as a dose.
   if(/[\d.,~\-–—/]$/.test(row.drug)||/\d\s*(?:mg|mcg|μg|ml|%)\b/i.test(row.drug)||/[<>/=]/.test(row.drug)){row.dose='';row.issues.push('용량 범위·제품 함량·복합 성분을 한 용량으로 읽을 수 없습니다. 한 약물의 1회 용량을 명확히 입력해주세요.');}
-  let tail=match[4].trim();
+  let tail=match[5].trim();
   tail=tail.replace(/^\/(?:dose|회)(?=\s|$)/i,'').trim();
   const seen={};
   function take(key,value){if(seen[key])row.issues.push('같은 줄의 '+({route:'경로',times:'횟수',days:'기간'}[key])+'가 중복되어 있습니다.');seen[key]=true;row[key]=String(value);}
@@ -26,7 +33,7 @@
    else {row.issues.push('해석하지 못한 문구: '+tail);break;}
    tail=tail.slice(m[0].length).trim();
   }
-  if(!validNumber(row.dose))row.issues.push('처방량은 0보다 큰 수여야 합니다.');
+  try{doseNumber(row.dose);}catch(e){row.issues.push(e.message);}
   return row;
  }
  function parse(text){
@@ -48,7 +55,8 @@
   if(!['mg','mcg','T'].includes(row.strengthUnit))throw Error('제품 함량 단위를 확인해주세요.');
   for(const [key,label,max] of [['times','하루 횟수',24],['days','투약 일수',366]])if(!/^\d+$/.test(String(row[key]))||Number(row[key])<1||Number(row[key])>max)throw Error(label+'를 1~'+max+' 사이 정수로 입력해주세요.');
   if(!validNumber(row.strength)||Number(row.strength)>1e6)throw Error('제품의 1정 또는 1mL당 함량을 확인해주세요.');
-  return c.prescription({weight,doseBasis:'kg',dose:row.dose,doseUnit:row.doseUnit,strength:row.strength,strengthUnit:row.strengthUnit,form:row.form,times:row.times,days:row.days});
+  const doseBasis=row.doseBasis??'kg';if(!['kg','fixed'].includes(doseBasis))throw Error('처방 기준을 kg당 또는 마리당으로 선택해주세요.');
+  return c.prescription({weight,doseBasis,dose:doseNumber(row.dose),doseUnit:row.doseUnit,strength:row.strength,strengthUnit:row.strengthUnit,form:row.form,times:row.times,days:row.days});
  }
  const api={parse,parseLine,common,calculate};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else g.PracticePrescription=api;

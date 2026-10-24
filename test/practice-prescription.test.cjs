@@ -17,3 +17,15 @@ test('fractional tablets remain unrounded and micrograms conserve mass',()=>{con
 for(const patch of [{times:''},{days:''},{days:'1.5'},{days:'0'},{days:'367'},{times:'25'},{times:'2.5'},{route:''},{route:'IV'},{strength:''},{strength:'0'},{strength:'1e3'},{doseUnit:'U'},{form:''},{strengthUnit:'mL'},{dose:'-5'},{dose:0}])test('missing or invalid value stays blocked '+JSON.stringify(patch),()=>assert.throws(()=>rx.calculate({...valid,...patch},5)));
 test('invalid weight, empty input and oversized input cannot yield results',()=>{for(const w of ['',0,-1,201,'NaN'])assert.throws(()=>rx.calculate(valid,w));for(const s of ['',Array(32).join('X\n'),'x'.repeat(12001)])assert.throws(()=>rx.parse(s));});
 test('unknown suffix needs explicit review after editing; readable source is preserved',()=>{const r=rx.parseLine('Synthetic 2 mg/kg PO BID 3 days note');assert.ok(r.issues.length);assert.throws(()=>rx.calculate({...r,form:'tablet',strength:3,strengthUnit:'mg'},5));assert.equal(rx.calculate({...r,reviewed:true,form:'tablet',strength:3,strengthUnit:'mg'},5).total,20);assert.match(r.original,/note$/);});
+
+for(const text of ['lefotil 1/4 T/head po bid for 14 days','lefotil 1 / 4 T/HEAD po bid for 14 days','lefotil ¼ T/head po bid for 14 days','lefotil 0.25 T/마리 경구 하루 2회 14일','lefotil 0.25 T/animal/회 PO BID 14days'])test('per-animal count keeps seven tablets regardless of weight: '+text,()=>{
+ const row={...rx.parseLine(text),form:'tablet',strength:1,strengthUnit:'T'};assert.deepEqual(row.issues,[]);assert.equal(row.drug,'lefotil');assert.equal(row.doseBasis,'fixed');for(const w of [2,4.4,10]){const r=rx.calculate(row,w);assert.equal(r.amount,.25);assert.equal(r.total,7);}assert.equal(row.original,text);
+});
+test('fractional mg and mcg fixed doses preserve mass and differ from per-kg doses',()=>{
+ const a={...rx.parseLine('Synthetic 1/2 mg/head PO BID 14 days'),form:'capsule',strength:100,strengthUnit:'mg'};assert.equal(rx.calculate(a,4.4).total,.14);assert.equal(rx.calculate({...a,dose:'500',doseUnit:'mcg'},8).total,.14);
+ const b={...rx.parseLine('Synthetic 1/4 T/kg PO BID 14 days'),form:'tablet',strength:1,strengthUnit:'T'};assert.equal(b.doseBasis,'kg');assert.ok(Math.abs(rx.calculate(b,4.4).total-30.8)<1e-10);
+});
+for(const dose of ['1/0','0/4','-1/4','1/-4','1/2/3','1 1/2','1/2-1','1/2+1','1/2~1','1e2/4'])test('ambiguous or invalid fraction is blocked: '+dose,()=>{const r={...rx.parseLine('Synthetic '+dose+' T/head PO BID 14 days'),form:'tablet',strength:1,strengthUnit:'T'};assert.throws(()=>rx.calculate(r,4.4));});
+test('manual review cannot bypass an invalid fixed dose or missing dose basis',()=>{
+ const row={...rx.parseLine('Synthetic 1/0 T/head PO BID 14 days'),form:'tablet',strength:1,strengthUnit:'T',reviewed:true};assert.throws(()=>rx.calculate(row,4.4));assert.equal(rx.calculate({...row,dose:'1/4'},4.4).total,7);assert.throws(()=>rx.calculate({...row,dose:'1/4',doseBasis:''},4.4));assert.throws(()=>rx.calculate({...row,dose:'1/4',doseBasis:'head'},4.4));
+});
