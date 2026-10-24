@@ -12,7 +12,7 @@
   throw Error('1회 처방량을 양수 또는 분수로 입력해주세요. 예: 0.25, 1/4');
  }
  function parseLine(original){
-  const row={original:original.trim(),drug:'',dose:'',doseUnit:'mg',doseBasis:'',route:'',times:'',days:'',issues:[]};
+  const row={original:original.trim(),drug:'',dose:'',doseUnit:'mg',doseBasis:'',route:'',times:'',days:'',timing:'',issues:[]};
   const s=row.original.normalize('NFKC').replace(/⁄/g,'/');
   const match=s.match(/^(.+?)\s+(\d+\s*\/\s*\d+|\d+(?:\.\d+)?|\.\d+)\s*(mg|mcg|ug|μg|T|tabs?|tablets?|정)\s*\/\s*(kg|head|animal|마리)(?![a-z가-힣])\s*(.*)$/i);
   if(!match){row.issues.push('약물명·1회 용량·기준을 확인해주세요. 예: 약물명 0.5 mg/kg 또는 약물명 1/4 T/head');return row;}
@@ -22,7 +22,7 @@
   let tail=match[5].trim();
   tail=tail.replace(/^\/(?:dose|회)(?=\s|$)/i,'').trim();
   const seen={};
-  function take(key,value){if(seen[key])row.issues.push('같은 줄의 '+({route:'경로',times:'횟수',days:'기간'}[key])+'가 중복되어 있습니다.');seen[key]=true;row[key]=String(value);}
+  function take(key,value){if(seen[key])row.issues.push('같은 줄의 '+({route:'경로',times:'횟수',days:'기간',timing:'복용 시간'}[key])+'가 중복되어 있습니다.');seen[key]=true;row[key]=String(value);}
   while(tail){
    let m;
    if((m=tail.match(/^(po|경구)(?=\s|$)/i)))take('route','PO');
@@ -30,6 +30,7 @@
    else if((m=tail.match(/^q\s*(\d+)\s*h(?=\s|$)/i))){const h=Number(m[1]);if(![4,6,8,12,24].includes(h))row.issues.push('이 투여 간격은 하루 정수 횟수로 계산할 수 없습니다. 원처방을 확인해주세요.');else take('times',24/h);}
    else if((m=tail.match(/^하루\s*(\d+)\s*회(?=\s|$)/)))take('times',m[1]);
    else if((m=tail.match(/^(?:for\s+)?(\d+)\s*(days?|일|weeks?|주)(?=\s|$)/i)))take('days',Number(m[1])*((/^week|주/i).test(m[2])?7:1));
+   else if((m=tail.match(/^\((아침|점심|저녁|취침\s*전)\)(?=\s|$)/)))take('timing',m[1].replace(/\s+/g,' '));
    else {row.issues.push('해석하지 못한 문구: '+tail);break;}
    tail=tail.slice(m[0].length).trim();
   }

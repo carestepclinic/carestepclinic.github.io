@@ -37,3 +37,16 @@ for(const unit of ['ug','UG','mcg','μg','µg'])test('misoprostol microgram spel
 for(const line of ['misoprostol 200 ug 5 ug/kg po bid for 14 days','misoprostol 2-5 ug/kg po bid for 14 days','misoprostol 5 ugg/kg po bid for 14 days'])test('ug support keeps ambiguous or unsupported doses blocked: '+line,()=>{
  const row={...rx.parseLine(line),form:'tablet',strength:'200',strengthUnit:'mcg'};assert.ok(row.issues.length);assert.throws(()=>rx.calculate(row,4));
 });
+
+for(const timing of ['아침','점심','저녁','취침 전'])test('bounded timing note is preserved without deriving a schedule: '+timing,()=>{
+ const row=rx.parseLine('Synthetic 6 mg/head po sid for 28 days ('+timing+')');assert.deepEqual(row.issues,[]);assert.equal(row.timing,timing);assert.equal(row.times,'1');assert.equal(row.doseBasis,'fixed');
+ const result=rx.calculate({...row,form:'tablet',strength:75,strengthUnit:'mg'},10);assert.ok(Math.abs(result.total-2.24)<1e-12);
+ const missing=rx.parseLine('Synthetic 6 mg/head ('+timing+')');assert.equal(missing.route,'');assert.equal(missing.times,'');assert.equal(missing.days,'');assert.throws(()=>rx.calculate({...missing,form:'tablet',strength:75,strengthUnit:'mg'},10));
+});
+for(const note of ['(저녁 PRN)','(아침·저녁)','(중단)','(저녁) (아침)','(저녁) PRN','(저녁) then BID'])test('clinical instructions inside or after a timing note remain blocked: '+note,()=>{
+ const row=rx.parseLine('Synthetic 6 mg/head po sid for 28 days '+note);assert.ok(row.issues.length);assert.throws(()=>rx.calculate({...row,form:'tablet',strength:75,strengthUnit:'mg'},10));
+});
+test('common BID schedule leaves the separate SID evening row and its note intact',()=>{
+ const rows=rx.parse('First 1 mg/kg\nSecond 2 mg/head\nThird 3 mg/kg po bid for 28 days\nFourth 6 mg/head po sid for 28 days (저녁)'),out=rx.common(rows,{route:'PO',times:'2',days:'28'});
+ assert.deepEqual(out.map(x=>x.times),['2','2','2','1']);assert.deepEqual(out.map(x=>x.timing),['','','','저녁']);assert.deepEqual(out.map(x=>x.doseBasis),['kg','fixed','kg','fixed']);assert.equal(rows[0].times,'');
+});
