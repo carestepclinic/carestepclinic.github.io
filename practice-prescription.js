@@ -1,4 +1,4 @@
-/* Deterministic prescription input. No network calls, inferred regimens, or persistent patient data. */
+/* Deterministic prescription input. No network calls or persistent patient data. Blank lines delimit shared-regimen groups. */
 (function(g){
  'use strict';
  const c=typeof module!=='undefined'&&module.exports?require('./practice-calculators.js'):g.PracticeCalculators;
@@ -39,10 +39,26 @@
  }
  function parse(text){
   if(typeof text!=='string'||text.length>12000)throw Error('처방은 12,000자 이내로 입력해주세요.');
-  const lines=text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const groups=text.trim().split(/\r?\n[\t ]*\r?\n(?:[\t ]*\r?\n)*/).map(block=>block.split(/\r?\n/).map(x=>x.trim()).filter(Boolean)).filter(x=>x.length);
+  const lines=groups.flat();
   if(!lines.length)throw Error('약물별로 한 줄씩 처방을 입력해주세요.');
   if(lines.length>30)throw Error('한 번에 약물 30개까지 계산할 수 있습니다.');
-  return lines.map(parseLine);
+  return groups.flatMap((lines,groupIndex)=>{
+   const rows=lines.map(line=>({...parseLine(line),groupNumber:groupIndex+1,groupFields:[]})),last=rows.at(-1);
+   const valid=row=>!row.issues.length&&row.route==='PO'&&/^\d+$/.test(row.times)&&Number(row.times)>=1&&Number(row.times)<=24&&/^\d+$/.test(row.days)&&Number(row.days)>=1&&Number(row.days)<=366;
+   if(!valid(last))return rows;
+   const signatures=new Set(rows.filter(valid).map(row=>[row.route,row.times,row.days,row.timing].join('|')));
+   for(const row of rows.slice(0,-1)){
+    if(row.issues.length)continue;
+    const missing=['route','times','days'].filter(key=>!row[key]);
+    if(signatures.size>1){if(missing.length)row.issues.push('한 묶음에 서로 다른 용법이 있습니다. 빈 줄로 묶음을 나누거나 약물별 용법을 입력·확인해주세요.');continue;}
+    const compatible=['route','times','days'].every(key=>!row[key]||row[key]===last[key]);
+    for(const key of missing){row[key]=last[key];row.groupFields.push(key);}
+    if(compatible&&!row.timing&&last.timing){row.timing=last.timing;row.groupFields.push('timing');}
+    if(row.groupFields.length)row.groupFrom=last.drug;
+   }
+   return rows;
+  });
  }
  function common(rows,values){
   return rows.map(row=>{const next={...row,commonFields:[...(row.commonFields||[])]};for(const key of ['route','times','days'])if(!next[key]&&values[key]){next[key]=String(values[key]);next.commonFields.push(key);}return next;});
