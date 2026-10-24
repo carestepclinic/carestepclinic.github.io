@@ -14,11 +14,11 @@
  function parseLine(original){
   const row={original:original.trim(),drug:'',dose:'',doseUnit:'mg',doseBasis:'',route:'',times:'',days:'',issues:[]};
   const s=row.original.normalize('NFKC').replace(/⁄/g,'/');
-  const match=s.match(/^(.+?)\s+(\d+\s*\/\s*\d+|\d+(?:\.\d+)?|\.\d+)\s*(mg|mcg|μg|T|tabs?|tablets?|정)\s*\/\s*(kg|head|animal|마리)(?![a-z가-힣])\s*(.*)$/i);
+  const match=s.match(/^(.+?)\s+(\d+\s*\/\s*\d+|\d+(?:\.\d+)?|\.\d+)\s*(mg|mcg|ug|μg|T|tabs?|tablets?|정)\s*\/\s*(kg|head|animal|마리)(?![a-z가-힣])\s*(.*)$/i);
   if(!match){row.issues.push('약물명·1회 용량·기준을 확인해주세요. 예: 약물명 0.5 mg/kg 또는 약물명 1/4 T/head');return row;}
   row.drug=match[1].trim();row.dose=match[2].replace(/\s/g,'');row.doseBasis=match[4].toLowerCase()==='kg'?'kg':'fixed';row.doseUnit=/^(?:t|tabs?|tablets?|정)$/i.test(match[3])?'T':match[3].toLowerCase()==='mg'?'mg':'mcg';
   // Do not take the second number of a range, a product strength, or a combination as a dose.
-  if(/[\d.,~\-–—/]$/.test(row.drug)||/\d\s*(?:mg|mcg|μg|ml|%)\b/i.test(row.drug)||/[<>/=]/.test(row.drug)){row.dose='';row.issues.push('용량 범위·제품 함량·복합 성분을 한 용량으로 읽을 수 없습니다. 한 약물의 1회 용량을 명확히 입력해주세요.');}
+  if(/[\d.,~\-–—/]$/.test(row.drug)||/\d\s*(?:mg|mcg|ug|μg|ml|%)\b/i.test(row.drug)||/[<>/=]/.test(row.drug)){row.dose='';row.issues.push('용량 범위·제품 함량·복합 성분을 한 용량으로 읽을 수 없습니다. 한 약물의 1회 용량을 명확히 입력해주세요.');}
   let tail=match[5].trim();
   tail=tail.replace(/^\/(?:dose|회)(?=\s|$)/i,'').trim();
   const seen={};
