@@ -56,3 +56,48 @@
 .pt-product-strength{padding:12px;background:#edf4ff;border-radius:10px}
 .pt-product-layout li{margin-bottom:12px;line-height:1.6}
 @media(max-width:640px){.pt-product-layout{grid-template-columns:1fr}.pt-product-layout [data-product-list]{max-height:28vh}.pt-product-query{width:100%;min-width:0}}
+/* Practical tools: compact context, readable medicine rows and focused registration. */
+body:has(#practice.active-view) #clinicSyncStatus[data-state="idle"]{display:none}
+body:has(#practice.active-view) #r61-patient-context{display:none}
+.pt .pt-tool-intro p{margin:0 0 8px}.pt>.pt-tabs{margin-top:6px}
+.pt .pt-template-readiness{padding:14px 18px;border:1px solid #ccdaed;background:#f4f8ff;border-radius:12px;margin:14px 0}
+.pt .pt-template-readiness .pt-bar{justify-content:space-between;margin-bottom:0}
+.pt .pt-template-readiness p{font-size:14px;color:#52677e}
+.pt .pt-status-filters[aria-label="문진 상태"]{grid-template-columns:repeat(5,minmax(0,1fr))}
+.pt .pt-intake-filters{grid-template-columns:1fr 2fr 1fr 1fr;gap:12px;align-items:end}
+.pt .pt-intake-filters button{justify-self:start}
+.pt .pt-calc-common{padding:16px 20px}.pt .pt-calc-common h3{margin:0}
+.pt .pt-calc-common>[data-ref-patient]{display:none}
+.pt .pt-library{padding:12px 16px}.pt .pt-library>.pt-heading{align-items:center;flex-wrap:wrap}.pt .pt-library>.pt-heading h3{font-size:16px;margin:0}.pt .pt-library>.pt-heading p{margin:4px 0;font-size:14px}.pt .pt-library [data-library-content]:not([hidden]){margin-top:16px}
+.pt .pt-calc-common [data-common-inputs]{grid-template-columns:minmax(150px,1fr) minmax(150px,1fr);max-width:620px;gap:20px}
+.pt .pt-patient-context{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px}
+.pt .pt-patient-context [data-patient-summary]{font-weight:700;flex:1 1 100%}
+.pt .pt-patient-context [data-weight-status]{font-size:14px;flex:1 1 100%;margin:0}
+.pt .pt-patient-context [data-weight-status]:empty{display:none}
+.pt .pt-patient-context [data-patient-picker]{flex:1 1 100%}
+.pt .pt-calc-rer{text-align:left;display:flex;align-items:baseline;flex-wrap:wrap;gap:10px;background:#edf4ff;border-radius:10px;padding:10px 14px;margin:14px 0}
+.pt .pt-calc-rer strong{font-size:24px}.pt .pt-calc-rer small,.pt .pt-calc-menu small{font-size:14px}
+.pt .pt-calc-main .pt-output{font-size:16px;font-weight:400}.pt .pt-calc-highlight{font-size:21px;font-weight:750;color:#174ebd}
+.pt .pt-product-dialog{width:min(1080px,calc(100vw - 24px));max-width:none;scroll-padding-top:140px}
+.pt-product-dialog>.pt-heading{margin-bottom:8px}.pt .pt-product-tabs{margin:8px 0;padding:6px;background:#f0f4fa;border-radius:10px}
+.pt-product-tabs button{flex:1}.pt-product-dialog>.pt-bar{position:sticky;top:48px;z-index:1;background:#fff;padding:8px 0;margin:0;border-bottom:1px solid #e1e8f1}
+.pt-product-dialog>.pt-bar label{margin:0}.pt-product-dialog .pt-product-query{min-width:160px}
+.pt-product-dialog .pt-product-filter{max-width:320px;margin:12px 0}
+.pt-product-dialog [data-product-status]:empty{display:none}
+.pt .pt-saved-product{display:grid;grid-template-columns:minmax(0,1fr) 235px;gap:12px 24px;padding:16px 0;border-top:1px solid #dce5ef;align-items:start}
+.pt-saved-info{min-width:0;display:grid;gap:4px}.pt-saved-info>b,.pt-saved-info>strong{font-size:16px;line-height:1.6}
+.pt-saved-info>strong{color:#194ba8}.pt-saved-info>details{font-size:14px}.pt-saved-info>details summary{cursor:pointer;min-height:36px;padding:6px 0}
+.pt-saved-info .pt-critical{font-size:14px;color:#8c3d14;background:#fff4e6;padding:8px;border-radius:6px}
+.pt-saved-info ul{padding-left:20px}.pt-saved-actions{display:grid;gap:8px}.pt-saved-actions p{margin:0}
+.pt .pt-product-card span,.pt .pt-product-card small{font-size:14px}.pt .pt-product-card b{font-size:16px}
+.pt-product-dialog.pt-product-registering{width:min(900px,calc(100vw - 24px));scroll-padding-top:80px}
+.pt-product-registering>p,.pt-product-registering>.pt-product-tabs,.pt-product-registering>.pt-bar,.pt-product-registering>.pt-product-filter,.pt-product-registering>[data-product-saved],.pt-product-registering>[data-product-more],.pt-product-registering .pt-product-layout>[data-product-list]{display:none!important}
+.pt-product-registering .pt-product-layout{display:block}.pt-product-registering [data-product-detail]{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}
+.pt-product-registering [data-product-detail]>h3,.pt-product-registering [data-product-detail]>p,.pt-product-registering [data-product-detail]>details,.pt-product-registering .pt-choice,.pt-product-registering [data-product-register-fields],.pt-product-registering .pt-register-footer{grid-column:1/-1}
+.pt-product-back{justify-self:start;grid-column:1/-1;margin:0 0 12px}
+.pt-product-registering [data-product-register-fields]{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}
+.pt-product-registering [data-product-register-fields]>p{grid-column:1/-1}
+.pt .pt-register-footer{position:sticky;bottom:-24px;background:#fff;border-top:1px solid #cbd9eb;padding:12px 0 18px;margin-top:16px;z-index:2}
+.pt-register-footer .pt-bar{margin:4px 0}.pt-register-footer [role=status]{font-size:14px;font-weight:650}
+.pt-register-footer p:empty{display:none}
+@media(max-width:640px){.pt .pt-intake-filters{grid-template-columns:1fr 1fr}.pt-intake-filters label:nth-child(2){grid-column:1/-1;grid-row:1}.pt .pt-status-filters[aria-label="문진 상태"]{grid-template-columns:repeat(3,minmax(0,1fr))}.pt .pt-calc-common [data-common-inputs]{grid-template-columns:1fr 1fr;gap:10px}.pt .pt-calc-common{padding:14px}.pt .pt-saved-product{grid-template-columns:minmax(0,1fr)}.pt-saved-actions{grid-template-columns:1fr}.pt .pt-product-dialog{padding:16px}.pt-product-dialog>.pt-heading{top:-16px}.pt-product-dialog>.pt-heading h2{font-size:20px}.pt-product-dialog>.pt-bar{top:44px}.pt-product-registering [data-product-detail],.pt-product-registering [data-product-register-fields]{grid-template-columns:1fr}.pt .pt-register-footer{bottom:-16px}.pt-register-footer button{width:100%}.pt-product-dialog input,.pt-product-dialog select{font-size:16px}.pt .pt-calc-highlight{font-size:19px}}

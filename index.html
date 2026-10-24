@@ -1048,7 +1048,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 .billing-contract-comparison{margin:16px 0;border:1px solid var(--line);border-radius:12px;padding:14px;background:#f8faff;line-height:1.65;font-size:14px}.billing-contract-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.billing-contract-columns span,.billing-contract-columns strong,.billing-contract-columns small{display:block}.billing-contract-columns strong{font-size:19px;margin:5px 0;color:#143d83}.billing-contract-comparison p{font-size:13px}.billing-contract-comparison summary{cursor:pointer;padding:8px 0;font-weight:700}.billing-catalog-row{padding:10px 0;border-top:1px solid var(--line)}.billing-catalog-row b,.billing-catalog-row span,.billing-catalog-row small{display:block}#billingReadStatus[data-state="error"]{color:#9a372d;background:#fff3f0;padding:12px;border-radius:10px}@media(max-width:600px){.billing-contract-columns{grid-template-columns:minmax(0,1fr)}.billing-contract-columns>div+div{border-top:1px solid var(--line);padding-top:12px}}
 </style>
 <link rel="stylesheet" href="staff-training.css?v=training-manage-20261022">
-<link rel="stylesheet" href="practice-tools.css?v=20261023products">
+<link rel="stylesheet" href="practice-tools.css?v=20261024ux1">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -4702,7 +4702,7 @@ function renderEmrSyncCenter(){
 async function loadEmrSyncStatus(showToast=false){if(saasMode!=='auth'||!saasMe||!saasPermission('settings.manage',['owner','admin'].includes(saasMe.role||''))){emrSyncState=null;renderEmrSyncCenter();return false;}emrSyncLoading=true;renderEmrSyncCenter();try{emrSyncState=await saasRequest('/saas/emr-sync-status');if(showToast)toast('EMR 동기화 상태를 새로고침했습니다.');return true;}catch(e){emrSyncState=null;if(showToast)toast(e.message||'EMR 동기화 상태를 불러오지 못했습니다.');return false;}finally{emrSyncLoading=false;renderEmrSyncCenter();}}
 async function copyEmrCommand(kind){const commands={pause:'schtasks /Change /TN "CARESTEP eFriends Sync" /DISABLE',retry:'schtasks /Run /TN "CARESTEP eFriends Sync"',resume:'schtasks /Change /TN "CARESTEP eFriends Sync" /ENABLE'},value=commands[kind]||'';if(!value)return;try{await navigator.clipboard.writeText(value);toast('PowerShell 명령을 복사했습니다.');}catch{toast('명령을 복사하지 못했습니다.');}}
 
-const CARESTEP_SCREEN_HELP={dashboard:'오늘 처리할 상담·예방·후속관리·발송 오류를 우선순위대로 확인합니다.',patients:'환자를 한 번 선택하면 기본정보, 기록, 후속관리 계획과 상담을 한 작업공간에서 처리합니다.',library:'질환·수술명으로 검색하거나 최근 사용 자료를 선택하세요. 자료 종류·진료 분류는 필요할 때 펼칩니다.',builder:'환자 → 퇴원지시 → 복약 → 재진 → 출력 순서로 진행합니다.',followup:'후속관리 계획을 선택하면 HOME·Calendar·외부 발송 상태를 함께 관리합니다.',onboarding:'완료되지 않은 단계의 이유를 확인하고 바로 옆 해결 버튼을 누르세요.',settings:'병원 운영 설정을 목적별 카테고리에서 선택합니다.',account:'내 계정, 직원·권한, 결제와 보안을 탭별로 관리합니다.',voice:'사용 중 필요한 자료나 기능을 CARESTEP 운영팀에 요청합니다.',pilot:'월간 사용량과 운영 성과를 확인합니다.'};
+const CARESTEP_SCREEN_HELP={practice:'업무 체크리스트·사전문진·임상 계산기를 선택하세요. 계산용 환자는 계산기 안에서 확인합니다.',dashboard:'오늘 처리할 상담·예방·후속관리·발송 오류를 우선순위대로 확인합니다.',patients:'환자를 한 번 선택하면 기본정보, 기록, 후속관리 계획과 상담을 한 작업공간에서 처리합니다.',library:'질환·수술명으로 검색하거나 최근 사용 자료를 선택하세요. 자료 종류·진료 분류는 필요할 때 펼칩니다.',builder:'환자 → 퇴원지시 → 복약 → 재진 → 출력 순서로 진행합니다.',followup:'후속관리 계획을 선택하면 HOME·Calendar·외부 발송 상태를 함께 관리합니다.',onboarding:'완료되지 않은 단계의 이유를 확인하고 바로 옆 해결 버튼을 누르세요.',settings:'병원 운영 설정을 목적별 카테고리에서 선택합니다.',account:'내 계정, 직원·권한, 결제와 보안을 탭별로 관리합니다.',voice:'사용 중 필요한 자료나 기능을 CARESTEP 운영팀에 요청합니다.',pilot:'월간 사용량과 운영 성과를 확인합니다.'};
 function renderScreenHelp(view){const bar=$('screenHelpBar'),copy=CARESTEP_SCREEN_HELP[view]||'현재 화면의 주요 업무를 확인하세요.';if(!bar)return;bar.querySelector('span').innerHTML=`<b>화면 도움말</b> · ${escapeHtml(copy)}`;const btn=$('openScreenGuide');if(btn)btn.textContent=view==='onboarding'?'가이드 다시 보기':'빠른 시작 가이드';}
 let onboardingTourIndex=0,onboardingTourSample=false;
 const ONBOARDING_TOUR_STEPS=[
@@ -10435,14 +10435,14 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="practice-calculators.js?v=20261024tablet1"></script>
 <script src="practice-acid-base.js?v=20261023a"></script>
 <script src="practice-calcium-transfusion.js?v=20261023ct"></script>
-<script src="practice-calculator-workspace.js?v=20261023ct"></script>
+<script src="practice-calculator-workspace.js?v=20261024ux1"></script>
 <script src="practice-calculator-simple.js?v=20261024allproducts"></script>
 <script src="practice-library-dose.js?v=20261023dose"></script>
 <script src="practice-library.js?v=20261023dose"></script>
 <script src="practice-prescription.js?v=20261024tablet1"></script>
-<script src="practice-products.js?v=20261024tablet1"></script>
+<script src="practice-products.js?v=20261024ux1"></script>
 <script src="practice-prescription-ui.js?v=20261024tablet1"></script>
-<script src="practice-tools.js?v=20261024tablet1"></script>
+<script src="practice-tools.js?v=20261024ux1"></script>
 <script src="practice-clinic.js?v=20261023a"></script>
 </body>
 </html>
