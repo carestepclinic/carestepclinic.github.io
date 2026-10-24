@@ -115,3 +115,11 @@ body:has(#practice.active-view) #r61-patient-context{display:none}
 .pt .pt-remaining{padding:12px;margin:12px 0;background:#f5f8fc;border-radius:10px;font-size:14px}.pt .pt-remaining>span{font-weight:600;margin-right:6px}.pt .pt-remaining button{padding:6px 10px;min-height:36px;font-size:14px}
 .pt .pt-weight-review{background:#fff8e9;padding:12px;border:1px solid #efdaad;border-radius:10px;line-height:1.6}
 @media(max-width:600px){.pt [data-quick-product-results]{grid-template-columns:1fr}.pt .pt-quick-products{padding:10px}.pt .pt-remaining>span{flex-basis:100%}}
+
+/* Prescription paste, clinic matching and results in one flow. */
+.pt .pt-rx-entry{background:#2454ed!important;color:#fff!important;margin:0 0 14px;width:100%;text-align:left}
+.pt .pt-rx-common-settings{border:1px solid #d6e1f4;border-radius:12px;margin:14px 0;padding:6px 12px}
+.pt .pt-rx-common-settings .pt-rx-common{margin:8px 0;border:0;padding:8px;background:#f5f8ff}
+.pt .pt-rx-output:empty{display:none}.pt .pt-rx-output{margin:16px 0}
+.pt .pt-rx-output h4{font-size:18px}.pt .pt-rx-result{padding:14px}
+.pt .pt-rx [data-result-actions]:not([hidden]){padding:12px;margin-bottom:20px;border-bottom:1px solid #d6e1f4}

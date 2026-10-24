@@ -56,7 +56,7 @@
   }
   for(const event of ['input','change','click','reset'])b.addEventListener(event,()=>queueMicrotask(refresh));
   renderProducts();renderProtocols();refresh();
-  return {loaded(r){items=r.items||[];ready=true;renderProducts();renderProtocols();refresh();},failed(){items=[];ready=true;renderProducts();status.textContent='병원 약품을 불러오지 못했습니다. 다시 열거나 제품 값을 직접 입력해주세요.';},recordWeight,manualWeight,reset};
+  return {loaded(r){items=r.items||[];ready=true;renderProducts();renderProtocols();refresh();},failed(){items=[];ready=true;renderProducts();status.textContent='병원 약품을 불러오지 못했습니다. 다시 열거나 제품 값을 직접 입력해주세요.';},recordWeight,manualWeight,reset,weightStatus(){return record&&!confirm.checked?'상단의 기록 체중과 측정일을 확인해주세요.':'';}};
  }
  g.PracticeCalculatorEase={mount};
 })(window);
