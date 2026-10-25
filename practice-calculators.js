@@ -82,7 +82,7 @@
   }else if(v.mode==='dose')volume=finite(w*number(v.dose,'의료진이 정한 제제 용량'));
   else if(v.mode==='volume')volume=number(v.volume,'의료진이 정한 총 수혈량');
   else throw Error('수혈량 계산 방식을 선택해주세요.');
-  const hours=number(v.hours,'총 계획 시간');let initialRate=0,initialVolume=0,initialHours=0;
+  const hours=number(v.hours,'총 계획 시간'),elapsedMinutes=nonnegative(v.elapsedMinutes===undefined?'0':v.elapsedMinutes,'개봉 후 경과시간');let initialRate=0,initialVolume=0,initialHours=0;
   if(v.initial===true||v.initial==='on'){
    initialRate=finite(w*number(v.initialRate,'초기 처방 속도'));
    initialHours=number(v.initialMinutes,'초기 관찰 시간')/60;
@@ -94,7 +94,7 @@
   const factor=v.factor===undefined?20:number(v.factor,'수혈 세트 점적계수');
   if(![10,15,20,60].includes(factor))throw Error('세트에 표시된 점적계수 10·15·20·60 방울/mL 중에서 선택해주세요.');
   const gravity=r=>({dropsPerMinute:finite(r*factor/60),secondsPerDrop:finite(3600/(r*factor))});
-  return {volume,perKg:finite(volume/w),bloodVolume,coefficientOutside,hours,initialRate,initialVolume,initialHours,remaining,remainingHours,rate,ratePerKg:finite(rate/w),overFourHours:hours>4,factor,gravity:gravity(rate),initialGravity:initialHours?gravity(initialRate):null};
+  return {volume,perKg:finite(volume/w),bloodVolume,coefficientOutside,hours,initialRate,initialVolume,initialHours,remaining,remainingHours,rate,ratePerKg:finite(rate/w),overFourHours:hours+elapsedMinutes/60>4+1e-9,factor,gravity:gravity(rate),initialGravity:initialHours?gravity(initialRate):null};
  }
  function display(n){n=Number(n);if(!Number.isFinite(n))return '값 확인 필요';if(n===0)return '0';const places=Math.min(12,Math.max(3,3-Math.floor(Math.log10(Math.abs(n))))),rounded=Number(n.toFixed(places));return (Math.abs(rounded-n)>Math.abs(n)*1e-10?'≈ ':'')+String(rounded===0?n.toPrecision(4):rounded);}
  const api={convert,dose,dilute,format,display,prescription,fluid,course,cri,potassium,rer,nutrition,anionGap,bicarbonate,calcium,transfusion};if(typeof module!=='undefined')module.exports=api;g.PracticeCalculators=api;

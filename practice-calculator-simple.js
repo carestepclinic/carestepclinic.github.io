@@ -86,6 +86,7 @@
   }
   function loaded(r){version=r.protocolsVersion||0;canManage=!!r.canManage&&version===1;items=r.items||[];for(const s of states.values())menu(s);b.dispatchEvent(new CustomEvent('practice-protocols-loaded',{detail:{items}}));}
   function reset(){generation++;for(const s of states.values()){resetForm(s);drop(s);menu(s);}}
+  b.addEventListener('practice-cri-selected',()=>{const s=states.get('cri');if(s)drop(s);});
   species.addEventListener('change',reset);weight.addEventListener('input',()=>{for(const s of states.values())invalidate(s);});b.querySelector('[data-use-weight]').addEventListener('click',()=>{for(const s of states.values())invalidate(s);});
   b.addEventListener('click',e=>{if(e.target.closest('[data-ref-apply],[data-fluid-apply]')){const kind=e.target.closest('[data-ref-apply]')?'dose':'fluid';drop(states.get(kind));states.get(kind).advanced.open=false;}for(const s of states.values())render(s);});
   for(const key of ['ref-drug','ref-profile','ref-manual','ref-fluid','fluid-purpose'])b.addEventListener(key==='ref-manual'?'click':'change',e=>{if(e.target.matches('[data-'+key+']'))drop(states.get(['ref-fluid','fluid-purpose'].includes(key)?'fluid':'dose'));});

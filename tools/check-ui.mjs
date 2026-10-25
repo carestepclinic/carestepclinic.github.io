@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 export const uiFiles = new Set([
   'practice-strengths.js','practice-ingredients.js','practice-strength-catalog.json',
   'practice-calculator-ease.js','practice-products.js','practice-prescription.js','practice-prescription-ui.js',
-  'practice-calcium-transfusion.js','practice-emergency.js',
+  'practice-calcium-transfusion.js','practice-emergency.js', 'practice-cri-presets.js',
   'practice-library.js','practice-library-dose.js',
   'practice-calculator-simple.js','practice-acid-base.js','practice-calculator-workspace.js','practice-reference.js','practice-reference-ui.js','practice-calculators.js','practice-tools.js','practice-clinic.js','practice-intake.js','practice-tools.css','intake.html',
   'training-automation.js','training-automation.css',
