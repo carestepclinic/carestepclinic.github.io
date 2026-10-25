@@ -255,3 +255,5 @@ body:has(#practice.active-view) #r61-patient-context{display:none}
  .pt-strength-footer [data-st-save]{width:100%}
 }
 @media print{.pt-calc-dock,.pt-rx-review{display:none!important}}
+
+.pt-strength-auto{display:flex;align-items:center;gap:12px;margin:10px 0}.pt-strength-auto>button{flex-shrink:0}.pt-strength-auto .pt-help{margin:0}@media(max-width:600px){.pt-strength-auto{align-items:stretch;flex-direction:column;gap:5px}}
