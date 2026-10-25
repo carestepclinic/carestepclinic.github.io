@@ -359,3 +359,6 @@ body:has(#practice.active-view) #r61-patient-context{display:none}
 .pt-image-review-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}.pt-image-review-grid>*{min-width:0}.pt-image-review-grid canvas{display:block;width:auto;max-width:100%;max-height:450px;background:white;border:1px solid #d8e2f3}.pt-image-review-grid textarea{min-height:260px}@media(max-width:700px){.pt-image-review-grid{grid-template-columns:minmax(0,1fr)}.pt-image-review-grid canvas{max-height:240px}.pt-image-review-grid textarea{min-height:200px}}
 
 .pt-image-zoom{max-width:100%;overflow:auto;max-height:450px;margin-top:8px}.pt-image-zoom[data-zoom=true] canvas{min-width:800px;max-width:none;max-height:none;width:100%}@media(max-width:700px){.pt-image-zoom{max-height:340px}}
+
+/* Reserve a full screen while a new clinic tab is loading, even below mobile navigation. */
+#appView main.main{min-height:100vh;min-height:100dvh}
