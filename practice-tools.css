@@ -307,3 +307,5 @@ body:has(#practice.active-view) #r61-patient-context{display:none}
 
 /* Emergency bag preparation and blood-set gravity results */
 .pt-transfusion-gravity{padding:14px;border:1px solid #d5e0f2;border-radius:12px;background:#f6f9ff;margin:16px 0}.pt-transfusion-gravity h4{margin:0 0 10px}.pt-emergency [data-em-result] b{overflow-wrap:anywhere}.pt-emergency [data-em-result]>span,.pt-emergency [data-em-result]>small{display:block;margin-top:6px}.pt-emergency [data-em-result]>b{display:block;margin-top:8px}
+
+@media(max-width:640px){.pt [data-calc="transfusion"] .pt-result-key-grid{grid-template-columns:minmax(0,1fr)}}

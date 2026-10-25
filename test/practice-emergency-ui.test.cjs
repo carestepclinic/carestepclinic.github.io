@@ -53,3 +53,8 @@ test('printed preparation includes final bag volume rate diluent and unconfirmed
  const p=await page(t);await p.locator('[data-kind=emergency]').click();await p.locator('[data-em-open=dobutamine]').click();const c=card(p,'dobutamine');await c.locator('[data-em-rate]').fill('10');await c.locator('[data-em-diluent]').selectOption('ns');
  const opened=p.waitForEvent('popup');await p.getByRole('button',{name:'응급 계산표 인쇄'}).click();const print=await opened;t.after(()=>print.close());await print.waitForLoadState();const text=await print.locator('body').innerText();assert.match(text,/원액 0.24 mL/);assert.match(text,/최종 100 mL/);assert.match(text,/확인 전 계획 주입속도 10 mL/);assert.match(text,/N[/]S/);
 });
+
+test('integrated transfusion mobile summary keeps each gravity phase on a full width card',async t=>{
+ const p=await page(t,520);await p.locator('[data-kind=transfusion]').click();const f=p.locator('[data-calc=transfusion]');await f.locator('[name=product]').selectOption('plasma');await f.locator('[name=dose]').fill('12');await f.locator('[name=hours]').fill('2');await f.locator('[name=initial]').check();await f.locator('[name=initialRate]').fill('1');await f.locator('[name=initialMinutes]').fill('15');await f.locator('[name=confirmed]').check();await f.getByRole('button',{name:'계산',exact:true}).click();
+ await f.locator('.pt-result-key-grid').waitFor();const cards=await f.locator('.pt-result-key').first().boundingBox();const grid=await f.locator('.pt-result-key-grid').boundingBox();assert.ok(cards.width>grid.width*.95);assert.match(await f.locator('output').innerText(),/초기 중력 점적: 약 18초/);assert.match(await f.locator('output').innerText(),/이후 중력 점적: 약 2.681초/);await p.screenshot({path:resolve(root,'../blood-gravity-integrated.png'),fullPage:true});
+});

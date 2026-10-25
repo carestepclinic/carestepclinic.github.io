@@ -32,7 +32,7 @@
  const groups=[['cpr','심정지 · CPR'],['reversal','약물 관련 심정지 · 길항'],['other','발작 · 저혈당'],['cri','저혈압 · 수축력 저하 · 지속주입']];
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const fmt=n=>{if(!Number.isFinite(n))return '—';const s=Number(n.toPrecision(5)).toString();return s.startsWith('.')?'0'+s:s;};
- const num=(v,label,max=1e6)=>{if(!/^(?:\d+\.?\d*|\.\d+)$/.test(String(v).trim())||!Number.isFinite(Number(v))||Number(v)<=0||Number(v)>max)throw Error(label+'을 올바르게 입력해주세요.');return Number(v);};
+ const num=(v,label,max=1e6)=>{if(!/^(?:\d+\.?\d*|\.\d+)$/.test(String(v).trim())||!Number.isFinite(Number(v))||Number(v)<=0||Number(v)>max)throw Error(label+' 입력값을 확인해주세요.');return Number(v);};
  function calculate(id,v){
   const d=drugs.find(x=>x.id===id);if(!d||!d.dose[v.species])throw Error('이 종에는 해당 자동 용량을 제공하지 않습니다.');
   const w=num(v.weight,'체중 · kg',200),dose=num(v.dose,'기준 용량'),stockValue=num(v.stock,'원액 농도');
