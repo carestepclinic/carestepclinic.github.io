@@ -121,6 +121,6 @@
   const doseBasis=row.doseBasis??'kg';if(!['kg','fixed'].includes(doseBasis))throw Error('처방 기준을 kg당 또는 마리당으로 선택해주세요.');
   return {...c.prescription({weight,doseBasis,dose:doseNumber(row.dose),doseUnit:row.doseUnit,strength:row.strength,strengthUnit:row.strengthUnit,form:row.form,totalDoses:doseDays.length*Number(row.times)}),doseDays};
  }
- const api={parse,parseLine,common,calculate,reflow,scheduleDays,frequency,calendar};
+ const api={doseNumber,parse,parseLine,common,calculate,reflow,scheduleDays,frequency,calendar};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else g.PracticePrescription=api;
 })(typeof window!=='undefined'?window:globalThis);
