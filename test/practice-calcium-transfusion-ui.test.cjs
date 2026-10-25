@@ -51,3 +51,19 @@ test('recorded patient weight updates total blood volume and still requires meas
  const p=await page(t);await p.goto(origin+'/fixture?ease');await p.evaluate(()=>{selected={id:'patient1',name:'Synthetic',species:'cat'};app.calculator();});await p.waitForFunction(()=>document.querySelector('[data-common-weight]').value==='4');const f=await blood(p);await f.locator('[name=product]').selectOption('packed');assert.equal(await f.locator('[name=bloodVolume]').inputValue(),'60');assert.equal(await f.locator('[data-blood-total]').innerText(),'240 mL');
  await fields(f,{current:'15',target:'25',unitPcv:'60',hours:'3'});await calculate(f);assert.match(await f.locator('output').innerText(),/기록 체중/);assert.equal(await f.locator('[data-result-actions]').isVisible(),false);await p.locator('[data-record-weight-confirm]').check();await calculate(f);assert.match(await f.locator('output').innerText(),/예상 필요량 40 mL/);await p.locator('[data-manual]').click();assert.equal(await p.locator('[data-common-weight]').inputValue(),'');await f.locator('[name=product]').selectOption('packed');assert.match(await f.locator('[data-blood-total]').innerText(),/동물 종류/);await p.locator('[data-ref-species]').selectOption('cat');await f.locator('[name=product]').selectOption('packed');assert.match(await f.locator('[data-blood-total]').innerText(),/체중 입력/);
 });
+
+for(const width of [390,1280])test('blood gravity shows separate 20-drop timings and invalidates after factor changes '+width,async t=>{
+ const p=await page(t,width),f=await blood(p);await bloodPlan(f);await f.locator('[name=initial]').check();await fields(f,{initialRate:'1',initialMinutes:'15'});await calculate(f);
+ let out=await f.locator('output').innerText();assert.match(out,/세트 20 방울/);assert.match(out,/초기 중력 점적: 약 18초마다 1방울/);assert.match(out,/이후 중력 점적: 약 3.356초마다 1방울/);
+ assert.match(await f.innerText(),/일반 수액세트만으로 수혈하는 안내가 아닙니다/);
+ assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));await p.screenshot({path:resolve(root,'../blood-gravity-'+width+'.png'),fullPage:true});
+ await p.evaluate(()=>Object.defineProperty(navigator,'clipboard',{value:{writeText:async text=>window.copied=text},configurable:true}));await f.locator('[data-checked]').check();await f.locator('[data-copy]').click();assert.match(await p.evaluate(()=>copied),/초기 중력 점적: 약 18초/);
+ await f.locator('[name=factor]').selectOption('60');assert.equal(await f.locator('output').innerText(),'');assert.equal(await f.locator('[name=confirmed]').isChecked(),false);await calculate(f);
+ out=await f.locator('output').innerText();assert.match(out,/초기 중력 점적: 약 6초/);assert.match(out,/초기 15분: 10 mL/);assert.match(out,/예상 필요량 150 mL/);
+ await f.locator('[name=initial]').uncheck();await calculate(f);out=await f.locator('output').innerText();assert.match(out,/계획 중력 점적: 약 1.2초/);assert.doesNotMatch(out,/초기 중력|이후 중력/);
+ await p.locator('[data-common-weight]').fill('4');assert.equal(await f.locator('output').innerText(),'');
+});
+test('fast gravity rate warns about manual adjustment without changing prescription',async t=>{
+ const p=await page(t),f=await blood(p);await f.locator('[name=product]').selectOption('plasma');await f.locator('[name=prescriptionMode]').selectOption('volume');await fields(f,{volume:'400',hours:'1'});await calculate(f);
+ const text=await f.locator('output').innerText();assert.match(text,/계획 속도 400 mL/);assert.match(text,/약 0.45초마다 1방울/);assert.match(text,/1초 미만인 구간은 수동 조절이 어렵/);
+});

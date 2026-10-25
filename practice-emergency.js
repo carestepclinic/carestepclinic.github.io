@@ -39,9 +39,16 @@
   const range=d.range?.[v.species];if(range?(dose<range[0]||dose>range[1]):dose!==d.dose[v.species])throw Error('선택한 근거 범위 밖입니다. 개별 처방은 경구제·주사제 또는 CRI 계산기를 이용해주세요.');
   if(d.group==='cri'){
    const hourly=w*dose*60/1000,result={hourly,stockRate:hourly/stockValue};
+   if(v.mixMode==='prepare'){
+    const volume=num(v.volume,'약물 포함 최종 부피'),rate=num(v.rate,'계획한 펌프 속도');
+    const concentration=hourly/rate,stockML=concentration*volume/stockValue;
+    if(!Number.isFinite(stockML)||stockML<=0||stockML>=volume)throw Error('필요 원액량이 최종 부피 이상이거나 계산 범위를 벗어납니다. 농도·속도·최종 부피를 확인해주세요.');
+    return {...result,stockML,volume,concentration,rate,diluentML:volume-stockML,hours:volume/rate,prepare:true};
+   }
+   if(v.mixMode&&v.mixMode!=='pump')throw Error('희석 계산 방식을 선택해주세요.');
    if(v.stockML!==''&&v.stockML!==undefined||v.volume!==''&&v.volume!==undefined){
     const stockML=num(v.stockML,'혼합한 원액량'),volume=num(v.volume,'약물 포함 최종 부피');if(stockML>=volume)throw Error('최종 부피는 원액량보다 커야 합니다.');
-    const concentration=stockValue*stockML/volume;return {...result,stockML,volume,concentration,rate:hourly/concentration,diluentML:volume-stockML};
+    const concentration=stockValue*stockML/volume;return {...result,stockML,volume,concentration,rate:hourly/concentration,diluentML:volume-stockML,hours:volume/(hourly/concentration)};
    }
    return result;
   }
@@ -65,14 +72,25 @@
   for(const [id,title] of groups){const section=document.createElement('section');section.dataset.emGroup=id;section.innerHTML='<h4>'+title+'</h4><div class="pt-emergency-grid"></div>';panel.querySelector('[data-em-groups]').append(section);
    for(const d of drugs.filter(x=>x.group===id)){
     const card=document.createElement('article');card.className='pt-emergency-card';card.dataset.emDrug=d.id;
-    card.innerHTML='<header><h5>'+d.name+' <span>'+d.ko+'</span></h5><b>'+d.route+'</b></header><p class="pt-em-indication">'+d.note+'</p><label>기준 용량 · '+d.unit+'/kg'+(id==='cri'?'/min':'/회')+'<input data-em-dose inputmode="decimal" autocomplete="off" '+(d.range?'':'readonly')+'></label><small data-em-dose-note></small><div class="pt-em-result" data-em-result aria-live="polite"></div><details data-em-settings><summary>농도·'+(id==='cri'?'희석 설정':'계산 기준')+'</summary><label>원액 농도 선택<select data-em-stock-choice></select></label><label>실제 원액 · '+(d.unit==='U'?'U':'mg')+'/mL<input data-em-stock inputmode="decimal" autocomplete="off"></label><small data-em-stock-note></small>'+(id==='cri'?'<div class="pt-grid"><label>혼합할 원액 · mL<input data-em-stock-ml inputmode="decimal" autocomplete="off" placeholder="예: 실제 원액량"></label><label>약물 포함 최종 부피 · mL<input data-em-volume inputmode="decimal" autocomplete="off" placeholder="약물 + 희석액"></label></div><label class="pt-choice"><input type="checkbox" data-em-mix-confirm>조제량·희석액 적합성·주입 경로를 확인했습니다.</label><p class="pt-help">기존 백에 약물을 그대로 더한 부피와 구분하세요. 제품별 안정성·혼합 가능 여부, 펌프 최소 속도·사강을 확인합니다.</p>':'')+'<div data-em-source></div></details>';
+    card.innerHTML='<header><h5>'+d.name+' <span>'+d.ko+'</span></h5><b>'+d.route+'</b></header><p class="pt-em-indication">'+d.note+'</p><label>기준 용량 · '+d.unit+'/kg'+(id==='cri'?'/min':'/회')+'<input data-em-dose inputmode="decimal" autocomplete="off" '+(d.range?'':'readonly')+'></label><small data-em-dose-note></small><div class="pt-em-result" data-em-result aria-live="polite"></div><details data-em-settings><summary>농도·'+(id==='cri'?'희석 설정':'계산 기준')+'</summary><label>원액 농도 선택<select data-em-stock-choice></select></label><label>실제 원액 · '+(d.unit==='U'?'U':'mg')+'/mL<input data-em-stock inputmode="decimal" autocomplete="off"></label><small data-em-stock-note></small>'+(id==='cri'?'<label>희석 계산 방식<select data-em-mix-mode><option value="prepare">주입속도 지정 → 필요한 원액량 계산</option><option value="pump">원액량 직접 입력 → 주입속도 계산</option></select></label><div class="pt-grid"><label>약물 포함 최종 수액량<select data-em-bag><option value="100">100 mL</option><option value="500">500 mL</option><option value="custom">직접 입력</option></select></label><label data-em-custom-volume hidden>약물 포함 최종 부피 · mL<input data-em-volume value="100" inputmode="decimal" autocomplete="off"></label><label data-em-rate-label>의료진이 정한 펌프 속도 · mL/hr<input data-em-rate inputmode="decimal" autocomplete="off" placeholder="환자 수액 계획에 맞춰 입력"></label><label data-em-stock-ml-label hidden>혼합할 원액 · mL<input data-em-stock-ml inputmode="decimal" autocomplete="off" placeholder="실제 원액량"></label><label>제품 지침에서 확인한 희석액<select data-em-diluent><option value="">희석액 선택</option><option value="ns">N/S · 0.9% 생리식염수</option><option value="d5w">D5W · 5% 포도당</option><option value="other">기타 · 제품 지침 확인</option></select></label></div><p class="pt-help" data-em-diluent-note></p><label class="pt-choice"><input type="checkbox" data-em-mix-confirm>조제량·희석액 적합성·주입 경로를 확인했습니다.</label><p class="pt-help">100·500 mL는 약물을 포함한 최종 목표 부피입니다. 백에서 원액량만큼 빼고 넣는 방식이며 실제 충전량·과충전 여부를 확인하세요. 다른 약물과 한 백에 혼합하는 계산이 아닙니다. 제품별 안정성·사용 가능 시간, 전체 수액량·펌프 최소 속도·사강을 확인합니다.</p>':'')+'<div data-em-source></div></details>';
     section.querySelector('.pt-emergency-grid').append(card);const c={d,el:card,dose:card.querySelector('[data-em-dose]'),stock:card.querySelector('[data-em-stock]'),choice:card.querySelector('[data-em-stock-choice]'),out:card.querySelector('[data-em-result]'),options:[],touched:false};cards.set(d.id,c);
     const row=document.createElement('tr');row.dataset.emRow=d.id;row.innerHTML='<th scope="row">'+d.name+'<small>'+d.ko+' · '+d.route+'</small><small>'+shortNotes[d.id]+'</small></th><td data-em-q-dose></td><td data-em-q-stock></td><td data-em-q-result></td><td><button type="button" data-em-open="'+d.id+'" aria-label="'+d.name+' 농도·근거 설정">설정·근거</button></td>';quick.querySelector('tbody').append(row);c.row=row;
     row.querySelector('button').onclick=()=>{detailId=detailId===d.id?'':d.id;layoutDetails();if(detailId){card.querySelector('[data-em-settings]').open=true;card.scrollIntoView({block:'center',behavior:'instant'});card.querySelector('[data-em-stock-choice]').focus({preventScroll:true});}};
     c.choice.onchange=()=>{c.touched=true;const x=c.options.find(x=>x.id===c.choice.value);c.stock.value=x?x.value:'';invalidateMix(c);stockNote(c);refresh();};
     card.addEventListener('input',e=>{if(e.target===c.stock){c.choice.value='manual';c.touched=true;stockNote(c);}if(e.target!==card.querySelector('[data-em-mix-confirm]'))invalidateMix(c);refresh();});
     card.querySelector('[data-em-mix-confirm]')?.addEventListener('change',refresh);
+    card.addEventListener('change',e=>{if(e.target.matches('[data-em-mix-mode],[data-em-bag],[data-em-diluent]')){if(e.target.matches('[data-em-mix-mode]')){card.querySelector('[data-em-stock-ml]').value='';card.querySelector('[data-em-rate]').value='';}if(e.target.matches('[data-em-bag]'))card.querySelector('[data-em-volume]').value=e.target.value==='custom'?'':e.target.value;invalidateMix(c);mixLayout(c);refresh();}});
+    mixLayout(c);
    }
+  }
+  function mixLayout(c){
+   if(c.d.group!=='cri')return;
+   const el=c.el,prepare=el.querySelector('[data-em-mix-mode]').value==='prepare';
+   el.querySelector('[data-em-rate-label]').hidden=!prepare;
+   el.querySelector('[data-em-stock-ml-label]').hidden=prepare;
+   el.querySelector('[data-em-custom-volume]').hidden=el.querySelector('[data-em-bag]').value!=='custom';
+   const diluent=el.querySelector('[data-em-diluent]').value;
+   el.querySelector('[data-em-diluent-note]').textContent=c.d.id==='norepinephrine'?'노르에피네프린 농축제는 포도당 함유 희석액을 요구하고 N/S 단독을 권장하지 않는 제품이 있습니다. '+(diluent==='ns'?'선택한 실제 제품이 N/S 단독 희석을 허용하는지 반드시 확인하세요.':'실제 제품 허가사항으로 희석액·사용 가능 시간을 확인하세요.'):'도부타민·도파민은 N/S 또는 D5W가 허용되는 제품이 있으나 실제 제품 지침의 농도·희석액·사용 가능 시간을 확인하세요.';
   }
   function invalidateMix(c){const check=c.el.querySelector('[data-em-mix-confirm]');if(check)check.checked=false;}
   function stockNote(c){const x=c.options.find(x=>x.id===c.choice.value);c.el.querySelector('[data-em-stock-note]').textContent=x?(x.clinic?'병원 저장값':'공통 함량 목록 · 실제 앰플 확인')+(x.note?' · '+x.note:''):'직접 입력 · 실제 주사제의 1mL당 함량을 확인하세요.';c.el.querySelector('[data-em-source]').innerHTML=(x?link(x.sourceUrl,'함량 출처'):'')+' '+c.d.refs.map(k=>link(sources[k].url,sources[k].name)).join(' · ');}
@@ -83,13 +101,23 @@
   function refresh(){if(!o.guard())return;const sp=species.value,valid=['dog','cat'].includes(sp),problem=valid?weightProblem():'상단에서 개 또는 고양이를 선택해주세요.';panel.querySelector('[data-em-context]').textContent=problem||((sp==='dog'?'개':'고양이')+' · '+weight.value+' kg · 아래 원액 농도 기준의 계산값');
    for(const c of cards.values()){const d=c.d,enabled=!!d.dose[sp];c.el.dataset.available=String(enabled);c.dose.disabled=!enabled;
     if(!enabled||problem){c.out.textContent=!valid?problem:!enabled?(d.id==='amiodarone'?'개 자동 계산 제외 · 제품 첨가제와 대체 약물 확인':'이 종의 CPR 자동 용량 없음 · 개 용량을 적용하지 마세요.'):problem;c.out.className='pt-em-result pt-em-pending';updateQuick(c);continue;}
-    try{const cri=d.group==='cri',v={species:sp,weight:weight.value,dose:c.dose.value,stock:c.stock.value,stockML:c.el.querySelector('[data-em-stock-ml]')?.value,volume:c.el.querySelector('[data-em-volume]')?.value},r=calculate(d.id,v);c.out.className='pt-em-result';
-     if(cri){const confirmed=c.el.querySelector('[data-em-mix-confirm]').checked;c.out.innerHTML='<span>시간당 약물량 <b>'+fmt(r.hourly)+' mg/hr</b></span>'+(r.rate&&confirmed?'<strong>펌프 '+fmt(r.rate)+' mL/hr</strong><span>원액 '+fmt(r.stockML)+' mL + 희석액 '+fmt(r.diluentML)+' mL = 최종 '+fmt(r.volume)+' mL</span><span>조제 후 '+fmt(r.concentration)+' mg/mL</span>':'<strong>1시간분 원액 '+fmt(r.stockRate)+' mL</strong><span class="pt-em-setup">희석 후 주입 · 펌프 속도는 희석 설정·확인 필요</span>')+'<small>원액 환산 '+fmt(r.stockRate)+' mL/hr · 직접 주입 속도 아님</small>';}
+    try{const cri=d.group==='cri',v={species:sp,weight:weight.value,dose:c.dose.value,stock:c.stock.value,stockML:c.el.querySelector('[data-em-stock-ml]')?.value,volume:c.el.querySelector('[data-em-volume]')?.value,mixMode:c.el.querySelector('[data-em-mix-mode]')?.value,rate:c.el.querySelector('[data-em-rate]')?.value},r=calculate(d.id,v);c.out.className='pt-em-result';
+     if(cri){
+      const diluent=c.el.querySelector('[data-em-diluent]'),confirmed=c.el.querySelector('[data-em-mix-confirm]').checked&&!!diluent.value;
+      const recipe=r.rate?'원액 '+fmt(r.stockML)+' mL + 희석액 '+fmt(r.diluentML)+' mL = 최종 '+fmt(r.volume)+' mL':'';
+      c.out.innerHTML='<span>시간당 약물량 <b>'+fmt(r.hourly)+' mg/hr</b></span>'+
+       (r.rate?'<strong>'+(confirmed?'펌프 '+fmt(r.rate)+' mL/hr':r.prepare?'조제안 · 필요 원액 '+fmt(r.stockML)+' mL':'조제안 · 원액 '+fmt(r.stockML)+' mL')+'</strong><span class="pt-em-setup">'+recipe+(diluent.value?' · '+esc(diluent.selectedOptions[0].textContent):' · 희석액 선택 필요')+(!confirmed?' · 계획 '+fmt(r.rate)+' mL/hr · 확인 전':'')+'</span>'+
+       '<span>'+(confirmed?'확인한':'확인 전 계획')+' 주입속도 '+fmt(r.rate)+' mL/hr · 조제 후 '+fmt(r.concentration)+' mg/mL</span><span>전량 소요시간 '+fmt(r.hours)+'시간 · 조제액 사용 가능 시간과 다릅니다.</span>'+
+       (!confirmed?'<b>희석액·조제량 확인 후 펌프 설정에 적용하세요.</b>':'')+
+       (r.hours>24?'<small>전량 소요시간이 24시간을 넘습니다. 제품별 안정성에 따라 백 교체·폐기 계획을 별도로 정하고, 전량 소진을 위해 속도를 높이지 마세요.</small>':''):
+       '<strong>1시간분 원액 '+fmt(r.stockRate)+' mL</strong><span class="pt-em-setup">희석 후 주입 · 펌프 속도는 희석 설정·확인 필요</span>')+
+       '<small>원액 환산 '+fmt(r.stockRate)+' mL/hr · 직접 주입 속도 아님</small>';
+     }
      else c.out.innerHTML='<span>1회 약물량 '+fmt(r.amount)+' '+d.unit+'</span><strong>'+(d.dilution?'희석 전 원액 ':'준비할 원액 ')+fmt(r.volume)+' mL</strong><small>'+fmt(Number(c.dose.value))+' '+d.unit+'/kg × '+weight.value+' kg ÷ '+fmt(Number(c.stock.value))+' '+d.unit+'/mL</small>'+(r.volume<0.1?'<small class="pt-em-measure">0.1 mL 미만 · 주사기 눈금에 맞는 희석·측정 계획 확인</small>':'');
     }catch(e){c.out.className='pt-em-result pt-em-pending';c.out.textContent=e.message;}updateQuick(c);
    }
   }
-  function contextChanged(){const changed=lastSpecies!==species.value;lastSpecies=species.value;for(const c of cards.values()){if(changed){c.dose.value=c.d.dose[species.value]??'';c.touched=false;loadOptions(c);c.el.querySelectorAll('[data-em-stock-ml],[data-em-volume]').forEach(x=>x.value='');}invalidateMix(c);c.el.querySelector('[data-em-dose-note]').textContent=c.d.range?.[species.value]?'참고 범위 '+c.d.range[species.value].join('–')+' '+c.d.unit+'/kg'+(c.d.group==='cri'?'/min':'/회')+' · 환자 반응에 맞춰 선택':'지침의 고정 기준 · 해당 적응증에만 적용';}refresh();}
+  function contextChanged(){const changed=lastSpecies!==species.value;lastSpecies=species.value;for(const c of cards.values()){if(changed){c.dose.value=c.d.dose[species.value]??'';c.touched=false;loadOptions(c);c.el.querySelectorAll('[data-em-stock-ml],[data-em-rate]').forEach(x=>x.value='');}invalidateMix(c);c.el.querySelector('[data-em-dose-note]').textContent=c.d.range?.[species.value]?'참고 범위 '+c.d.range[species.value].join('–')+' '+c.d.unit+'/kg'+(c.d.group==='cri'?'/min':'/회')+' · 환자 반응에 맞춰 선택':'지침의 고정 기준 · 해당 적응증에만 적용';}refresh();}
   for(const c of cards.values()){c.dose.value=c.d.dose[species.value]??'';loadOptions(c);}contextChanged();layoutDetails();
   weight.addEventListener('input',()=>{for(const c of cards.values())invalidateMix(c);refresh();});species.addEventListener('change',contextChanged);b.addEventListener('change',e=>{if(e.target.matches('[data-record-weight-confirm]'))refresh();});
   panel.querySelectorAll('[data-em-filter]').forEach(button=>button.onclick=()=>{filter=button.dataset.emFilter;detailId='';layoutDetails();panel.querySelectorAll('[data-em-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x===button)));});

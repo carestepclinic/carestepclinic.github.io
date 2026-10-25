@@ -91,7 +91,10 @@
    if(initialVolume>=volume)throw Error('초기 주입량이 총 수혈량 이상입니다. 초기 속도·시간을 다시 확인해주세요.');
   }
   const remaining=finite(volume-initialVolume),remainingHours=hours-initialHours,rate=finite(remaining/remainingHours);
-  return {volume,perKg:finite(volume/w),bloodVolume,coefficientOutside,hours,initialRate,initialVolume,initialHours,remaining,remainingHours,rate,ratePerKg:finite(rate/w),overFourHours:hours>4};
+  const factor=v.factor===undefined?20:number(v.factor,'수혈 세트 점적계수');
+  if(![10,15,20,60].includes(factor))throw Error('세트에 표시된 점적계수 10·15·20·60 방울/mL 중에서 선택해주세요.');
+  const gravity=r=>({dropsPerMinute:finite(r*factor/60),secondsPerDrop:finite(3600/(r*factor))});
+  return {volume,perKg:finite(volume/w),bloodVolume,coefficientOutside,hours,initialRate,initialVolume,initialHours,remaining,remainingHours,rate,ratePerKg:finite(rate/w),overFourHours:hours>4,factor,gravity:gravity(rate),initialGravity:initialHours?gravity(initialRate):null};
  }
  function display(n){n=Number(n);if(!Number.isFinite(n))return '값 확인 필요';if(n===0)return '0';const places=Math.min(12,Math.max(3,3-Math.floor(Math.log10(Math.abs(n))))),rounded=Number(n.toFixed(places));return (Math.abs(rounded-n)>Math.abs(n)*1e-10?'≈ ':'')+String(rounded===0?n.toPrecision(4):rounded);}
  const api={convert,dose,dilute,format,display,prescription,fluid,course,cri,potassium,rer,nutrition,anionGap,bicarbonate,calcium,transfusion};if(typeof module!=='undefined')module.exports=api;g.PracticeCalculators=api;
