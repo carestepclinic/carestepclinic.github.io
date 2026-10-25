@@ -251,7 +251,7 @@ browserTest('assignment dialog identifies staff and updates completion managemen
  await p.locator('[name=dueDate]').fill('2026-12-01');
  await p.getByRole('button',{name:'선택 직원에게 배정',exact:true}).click();
  await p.getByRole('button',{name:'교육 관리',exact:true}).click();
- await p.locator('[data-report] table').waitFor();
+ await p.getByRole('button',{name:'이수 현황',exact:true}).click();await p.locator('[data-report] table').waitFor();
  assert.match(await p.locator('[data-report]').innerText(),/시험 직원/);
  assert.match(await p.locator('[data-report]').innerText(),/2026-12-01/);
 });

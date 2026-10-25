@@ -1054,8 +1054,8 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <style>
 .billing-contract-comparison{margin:16px 0;border:1px solid var(--line);border-radius:12px;padding:14px;background:#f8faff;line-height:1.65;font-size:14px}.billing-contract-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.billing-contract-columns span,.billing-contract-columns strong,.billing-contract-columns small{display:block}.billing-contract-columns strong{font-size:19px;margin:5px 0;color:#143d83}.billing-contract-comparison p{font-size:13px}.billing-contract-comparison summary{cursor:pointer;padding:8px 0;font-weight:700}.billing-catalog-row{padding:10px 0;border-top:1px solid var(--line)}.billing-catalog-row b,.billing-catalog-row span,.billing-catalog-row small{display:block}#billingReadStatus[data-state="error"]{color:#9a372d;background:#fff3f0;padding:12px;border-radius:10px}@media(max-width:600px){.billing-contract-columns{grid-template-columns:minmax(0,1fr)}.billing-contract-columns>div+div{border-top:1px solid var(--line);padding-top:12px}}
 </style>
-<link rel="stylesheet" href="staff-training.css?v=20261025workflow1">
-<link rel="stylesheet" href="practice-tools.css?v=20261025flow1">
+<link rel="stylesheet" href="staff-training.css?v=20261025tools2">
+<link rel="stylesheet" href="practice-tools.css?v=20261025tools2">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -5528,6 +5528,7 @@ function announceClinicView(view,title){let live=$('clinicViewAnnouncement');if(
 
 function go(view,options={}){
   const previousView=document.querySelector('.view.active-view')?.id;
+  if(previousView!==view){if(previousView==='practice'&&window.CarestepPractice?.leave?.()===false)return;if(previousView==='training'&&window.CarestepTraining?.leave?.()===false)return;}
   if(currentCasePhase==='completed'&&(view==='library'||view==='builder'))beginNewCase(false,true);
   if(!saasCanView(view)){const featureByView={library:'library',builder:'builder',followup:'followupAutomation',voice:'customerVoice',pilot:'pilotAnalytics'};toast(featureByView[view]&&roleUiCanView(view)?saasFeatureMessage(featureByView[view]):'현재 역할에 필요한 화면만 표시하고 있습니다.');view=roleUiProfile().defaultView;}
   if(['practice','training','dashboard','patients','library','builder','followup','onboarding','settings','account','voice','pilot'].includes(view)){try{sessionStorage.setItem(SAAS_LAST_VIEW_SESSION_KEY,view);}catch{}}
@@ -10436,7 +10437,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="home-access-clinic.js?v=clarity-20261020f"></script>
 <script src="clinic-care.js?v=clarity-20261020g"></script>
 <script src="clinic-organization.js?v=clarity-20261020b"></script>
-<script src="staff-training.js?v=20261025rximage4"></script>
+<script src="staff-training.js?v=20261025tools2"></script>
 <script src="staff-training-clinic.js?v=20261020a"></script>
 <script src="practice-intake.js?v=20261023a"></script>
 <script src="practice-reference.js?v=20261023a"></script>
@@ -10459,7 +10460,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-tab-position.js?v=20261025rximage4"></script>
 <script src="practice-prescription-ui.js?v=20261025flow1"></script>
 <script src="practice-calculator-ease.js?v=20261025flow1"></script>
-<script src="practice-tools.js?v=20261025flow1"></script>
+<script src="practice-tools.js?v=20261025tools2"></script>
 <script src="practice-clinic.js?v=20261023a"></script>
 </body>
 </html>
