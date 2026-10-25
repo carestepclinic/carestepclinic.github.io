@@ -54,6 +54,7 @@
   async function fresh(){const r=await o.request('/practice/presets?protocols=1');if(!o.alive())return null;loaded(r);return r;}
   function referenceInfo(){const drug=g.PracticeReference.drugs.find(x=>x.id===b.querySelector('[data-ref-drug]')?.value),profile=drug?.profiles.find(x=>x.id===b.querySelector('[data-ref-profile]')?.value);return {drug,profile};}
   function save(s,edit=false){
+   if(s.kind==='cri'&&['undiluted','intermittent'].includes(v(s.f,'mode'))){s.status.textContent='원액·간헐 주입은 이번 계산에서 사용합니다. 병원 서식 저장은 희석 CRI에서 지원합니다.';return;}
    if(!o.alive()||!canManage)return;if(!['dog','cat'].includes(species.value)){s.status.textContent='동물 종류를 먼저 선택해주세요.';return;}
    const old=edit?s.active:null,{drug,profile}=referenceInfo(),prior=old?.body||{},defaults=snapshot(s),selectedSpecies=species.value;
    if(s.kind==='dose'&&(prior.singleDose||profile?.single)&&!defaults.times)defaults.times='1';

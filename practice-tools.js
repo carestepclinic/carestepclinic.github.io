@@ -102,7 +102,7 @@
    strengths=g.PracticeStrengths?.mount(b,{alive,presets:()=>presets,reload:loadPresets,request:(...args)=>a.request(...args),modal,close,openProducts:seed=>domestic?.open(seed,()=>false,alive,false,{manage:true})});
    privateLibrary=g.PracticeLibrary?.mount(b,{alive,clear:clearResults,request:(...args)=>a.request(...args),modal,close,showKind,resetReference:()=>referenceUI?.resetPreset(),dropProtocols:()=>simple?.reset(),refresh:()=>simple?.refresh()});
    ease=g.PracticeCalculatorEase?.mount(b,{alive,identity:a.preferencesIdentity?.()||k,clear:clearResults,weightUsed:()=>{workspace?.weightUsed();emergency?.refresh();},productIssue:p=>domestic?.savedIssue(p)||'',applyProduct:(p,guard)=>domestic.applySaved(p,guard)});calculatorDispose=ease?.dispose;
-   criQuick=g.PracticeCRIPresets?.mount(b,{clear:clearResults,guard:()=>alive()&&(a.patient()?.id||'')===initialPatientId,refresh:()=>simple?.refresh()});criQuick?.loaded(presets);
+   criQuick=g.PracticeCRIPresets?.mount(b,{clear:clearResults,guard:()=>alive()&&(a.patient()?.id||'')===initialPatientId,refresh:()=>simple?.refresh()});criQuick?.loaded(presets);g.PracticePotassiumMix?.mount(b,{clear:clearResults});
    emergency=g.PracticeEmergency?.mount(b,{guard:()=>alive()&&(a.patient()?.id||'')===initialPatientId});
    const reset=document.createElement('button');reset.type='button';reset.className='pt-reset-calculation';reset.textContent='계산 입력 초기화';reset.onclick=()=>{if(!g.confirm('현재 계산 입력과 결과를 초기화할까요? 병원에 저장한 약품·기본 함량은 유지됩니다.'))return;dropCalculator();shell();calculator();};b.prepend(reset);
   }

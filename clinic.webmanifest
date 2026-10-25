@@ -1,0 +1,16 @@
+{
+  "id": "./index.html",
+  "name": "CARESTEP CLINIC",
+  "short_name": "CLINIC",
+  "description": "동물병원 업무와 직원 교육을 위한 CARESTEP CLINIC",
+  "lang": "ko-KR",
+  "start_url": "./index.html?source=clinic-app",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#2455ed",
+  "icons": [
+    {"src":"clinic-icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"clinic-icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}

@@ -28,11 +28,19 @@
  function fluid(v){let rate;if(v.mode==='weight')rate=finite(weight(v.weight)*number(v.rate,'처방 속도'));else if(v.mode==='rate')rate=number(v.rate,'시간당 주입량');else if(v.mode==='volume')rate=finite(number(v.volume,'총 주입량')/number(v.hours,'주입 시간'));else throw Error('수액 계산 방식을 선택해주세요.');const volume=v.mode==='volume'?number(v.volume,'총 주입량'):v.volume!==''&&v.volume!==undefined?number(v.volume,'남은 수액량'):null;const hours=v.mode==='volume'?number(v.hours,'주입 시간'):v.hours!==''&&v.hours!==undefined?number(v.hours,'계산할 시간'):null;let drops=null;if(v.factor!==''&&v.factor!==undefined){const f=number(v.factor,'점적계수');if(!Number.isInteger(f)||f>200)throw Error('세트에 표시된 점적계수를 확인해주세요.');drops=finite(rate*f/60);}return {rate:finite(rate),volume:hours?finite(rate*hours):null,hours:volume?finite(volume/rate):null,drops};}
  // Convert a prescribed CRI to an hourly mass/activity rate. U is never converted to mg.
  function cri(v){
-  const w=weight(v.weight),d=number(v.dose,'처방 CRI 용량');
+  const w=weight(v.weight),d=number(v.dose,'처방 주입 용량');
+  if(v.mode==='intermittent'){
+   if(!['mg/kg/dose','g/kg/dose'].includes(v.doseUnit)||!['mg','mcg'].includes(v.stockUnit))throw Error('간헐 주입은 mg/kg/회 또는 g/kg/회 및 질량 농도로 입력해주세요.');
+   const amount=finite(w*d*(v.doseUnit==='g/kg/dose'?1000:1)),stock=number(v.stock,'제품 농도')*(v.stockUnit==='mcg'?0.001:1),stockML=finite(amount/stock),minutes=number(v.minutes,'1회 주입 시간');
+   const volume=v.volume===undefined||v.volume===''?stockML:number(v.volume,'약물 포함 최종 부피');if(volume<stockML)throw Error('최종 부피가 필요한 약물 부피보다 작습니다.');
+   return {amount,stockML,volume,minutes,rate:finite(volume*60/minutes),diluentML:volume-stockML,concentration:amount/volume,unit:'mg'};
+  }
   const spec={'mcg/kg/min':['mg',0.001,60],'mcg/kg/hr':['mg',0.001,1],'mg/kg/min':['mg',1,60],'mg/kg/hr':['mg',1,1],'U/kg/hr':['U',1,1]}[v.doseUnit];
   if(!spec)throw Error('CRI 용량 단위를 선택해주세요.');
   if(!['mg','mcg','U'].includes(v.stockUnit)||(spec[0]==='U')!==(v.stockUnit==='U'))throw Error('U와 mg·mcg는 서로 환산할 수 없습니다. 제품 단위를 확인해주세요.');
-  const stock=number(v.stock,'원액 농도')*(v.stockUnit==='mcg'?0.001:1),hourly=finite(w*d*spec[1]*spec[2]),stockRate=finite(hourly/stock),volume=number(v.volume,'약물 포함 최종 부피');
+  const stock=number(v.stock,'원액 농도')*(v.stockUnit==='mcg'?0.001:1),hourly=finite(w*d*spec[1]*spec[2]),stockRate=finite(hourly/stock);
+  if(v.mode==='undiluted'){const volume=v.volume===undefined||v.volume===''?null:number(v.volume,'원액 준비량');return {hourly,stockRate,stockML:volume,volume,concentration:stock,rate:stockRate,diluentML:0,hours:volume?volume/stockRate:null,unit:spec[0]};}
+  const volume=number(v.volume,'약물 포함 최종 부피');
   let rate,concentration,stockML;
   if(v.mode==='prepare'){rate=number(v.rate,'설정할 펌프 속도');concentration=finite(hourly/rate);stockML=finite(concentration*volume/stock);}
   else if(v.mode==='pump'){stockML=number(v.stockML,'혼합한 원액량');concentration=finite(stockML*stock/volume);rate=finite(hourly/concentration);}
@@ -41,6 +49,14 @@
   return {hourly,stockRate,stockML,concentration,rate,diluentML:finite(volume-stockML),hours:finite(volume/rate),unit:spec[0]};
  }
  function nonnegative(v,label){if(/^(?:\d+\.?\d*|\.\d+)$/.test(String(v).trim())&&Number(v)===0)return 0;return number(v,label);}
+ function potassiumMix(v){
+  const added=nonnegative(v.added,'추가할 K 농도'),bag=number(v.bag,'기본 수액량'),stock=number(v.kstock,'KCl 원액 농도'),base=nonnegative(v.baseK,'기본 수액 K 농도');
+  const addedMEq=added*bag/1000,stockML=addedMEq/stock;
+  if(stockML>=bag)throw Error('KCl 원액량이 수액량 이상입니다. 농도·단위를 확인해주세요.');
+  if(!['add','final'].includes(v.mixMode))throw Error('첨가 방식을 선택해주세요.');
+  const baseML=v.mixMode==='final'?bag-stockML:bag,volume=v.mixMode==='final'?bag:bag+stockML,totalMEq=addedMEq+base*baseML/1000,concentration=totalMEq*1000/volume;
+  return {addedMEq,stockML,baseML,volume,totalMEq,concentration};
+ }
  function potassium(v){const w=weight(v.weight),concentration=nonnegative(v.concentration,'최종 총 칼륨 농도'),rate=number(v.rate,'수액 속도'),other=nonnegative(v.other,'다른 정맥 라인의 칼륨 공급량'),hourly=concentration*rate/1000+other,perKg=hourly/w;if(!Number.isFinite(perKg))throw Error('입력 단위를 확인해주세요.');return {hourly,perKg,exceeds:perKg>0.5};}
  function rer(value){return finite(70*Math.pow(weight(value),0.75));}
  function nutrition(v){const energy=rer(v.weight),multiplier=number(v.multiplier,'수의사가 정한 RER 배수'),target=finite(energy*multiplier),other=nonnegative(v.other,'다른 음식 열량');if(other>=target)throw Error('다른 음식 열량이 목표 이상입니다. 추가 급여 계획을 확인해주세요.');const density=number(v.density,'제품 열량');if(!['kcal/g','kcal/kg','kcal/mL','kcal/can'].includes(v.unit))throw Error('제품 열량 단위를 확인해주세요.');const meals=number(v.meals,'하루 급여 횟수');if(!Number.isInteger(meals)||meals>24)throw Error('급여 횟수는 1~24회 정수로 입력해주세요.');const amount=finite((target-other)/(v.unit==='kcal/kg'?density/1000:density));return {rer:energy,target,remaining:target-other,amount,perMeal:amount/meals,unit:({'kcal/g':'g','kcal/kg':'g','kcal/mL':'mL','kcal/can':'캔'})[v.unit]};}
@@ -97,5 +113,5 @@
   return {volume,perKg:finite(volume/w),bloodVolume,coefficientOutside,hours,initialRate,initialVolume,initialHours,remaining,remainingHours,rate,ratePerKg:finite(rate/w),overFourHours:hours+elapsedMinutes/60>4+1e-9,factor,gravity:gravity(rate),initialGravity:initialHours?gravity(initialRate):null};
  }
  function display(n){n=Number(n);if(!Number.isFinite(n))return '값 확인 필요';if(n===0)return '0';const places=Math.min(12,Math.max(3,3-Math.floor(Math.log10(Math.abs(n))))),rounded=Number(n.toFixed(places));return (Math.abs(rounded-n)>Math.abs(n)*1e-10?'≈ ':'')+String(rounded===0?n.toPrecision(4):rounded);}
- const api={convert,dose,dilute,format,display,prescription,fluid,course,cri,potassium,rer,nutrition,anionGap,bicarbonate,calcium,transfusion};if(typeof module!=='undefined')module.exports=api;g.PracticeCalculators=api;
+ const api={convert,dose,dilute,format,display,prescription,fluid,course,cri,potassiumMix,potassium,rer,nutrition,anionGap,bicarbonate,calcium,transfusion};if(typeof module!=='undefined')module.exports=api;g.PracticeCalculators=api;
 })(typeof window==='undefined'?globalThis:window);
