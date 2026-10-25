@@ -3,7 +3,7 @@
  'use strict';
  function mount(){
   if(document.getElementById('clinicInstall'))return;
-  const host=document.querySelector('.topbar-actions');if(!host)return;
+  const host=document.querySelector('.topbar > div:first-child')||document.querySelector('.topbar-actions');if(!host)return;host.classList.add('clinic-install-heading');
   const button=document.createElement('button');button.id='clinicInstall';button.type='button';button.className='btn';button.textContent='CLINIC 앱 설치';host.append(button);
   let prompt=null,installed=false;
   const standalone=matchMedia('(display-mode: standalone)');

@@ -17,3 +17,17 @@ test('open-product elapsed time is included in four-hour limit without altering 
  const v={species:'dog',weight:10,product:'plasma',mode:'volume',volume:100,hours:3.5,initial:true,initialRate:0.5,initialMinutes:15,factor:20,elapsedMinutes:30};
  const r=c.transfusion(v);assert.equal(r.overFourHours,false);const late=c.transfusion({...v,elapsedMinutes:31});assert.equal(late.overFourHours,true);assert.equal(late.rate,r.rate);assert.throws(()=>c.transfusion({...v,elapsedMinutes:-1}));assert.throws(()=>c.transfusion({...v,elapsedMinutes:'abc'}));
 });
+
+const {profileFor,doseStatus}=require('../practice-cri-presets.js');
+for(const species of ['dog','cat'])test('reference profiles have explicit indication, species, route units and bounded choices '+species,()=>{
+ for(const d of drugs){const p=profileFor(d.id,species);if(d.id==='lidocaine'&&species==='cat'){assert.equal(p,null);continue;}assert.ok(p.indication);assert.match(p.source.url,/^https:\/\//);assert.equal(p.species,species);assert.equal(p.unit,d.unit);assert.ok(p.min>0&&p.max>=p.min);assert.equal(p.start,p.min);for(const value of p.values)assert.equal(doseStatus(p,value,p.unit),'within');assert.equal(doseStatus(p,p.min/2,p.unit),'outside');assert.equal(doseStatus(p,p.max*2,p.unit),'outside');assert.equal(doseStatus(p,'',p.unit),'empty');assert.equal(doseStatus(p,Infinity,p.unit),'empty');assert.equal(doseStatus(p,p.start,'U/kg/hr'),'unit');}
+ assert.equal(profileFor('fentanyl','rabbit'),null);
+});
+test('species reference doses and converted units agree with cited tables',()=>{
+ for(const [id,dog,cat] of [['fentanyl',[3,6],[2,3]],['dobutamine',[1,15],[.5,5]],['furosemide',[.25,1],[.25,.6]],['propofol',[.2,.4],[.1,.3]],['morphine',[.12,.3],[.05,.1]]])for(const [sp,expected] of [['dog',dog],['cat',cat]]){const p=profileFor(id,sp);assert.deepEqual([p.min,p.max],expected);}
+ assert.equal(profileFor('ketamine','dog').min,2*60/1000);assert.equal(profileFor('lidocaine','dog').max,50*60/1000);assert.equal(profileFor('mannitol','cat').minutes,15);assert.equal(profileFor('metronidazole','cat').minutes,undefined);
+});
+test('species profiles produce independently calculated infusion volumes',()=>{
+ for(const [species,weight,hourly,stockML] of [['dog',10,.03,12],['cat',4,.008,3.2]]){const p=profileFor('fentanyl',species),r=c.cri({mode:'prepare',weight,dose:p.start,doseUnit:p.unit,stock:50,stockUnit:'mcg',volume:100,rate:5});assert.ok(Math.abs(r.hourly-hourly)<1e-9);assert.ok(Math.abs(r.stockML-stockML)<1e-9);}
+ for(const [species,weight,rate] of [['dog',10,12],['cat',4,2.4]]){const p=profileFor('propofol',species),r=c.cri({mode:'undiluted',weight,dose:p.start,doseUnit:p.unit,stock:10,stockUnit:'mg'});assert.ok(Math.abs(r.rate-rate)<1e-9);}
+});
