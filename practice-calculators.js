@@ -16,9 +16,9 @@
   let factor=basis==='fixed'?1:w;if(basis==='bsa'){factor=number(v.bsa,'의료진이 확인한 체표면적');if(factor>5)throw Error('체표면적 단위 m²와 입력값을 확인해주세요.');}
   const tablets=v.doseUnit==='T'||v.strengthUnit==='T';
   if(tablets){
-   if(v.doseUnit!=='T'||v.strengthUnit!=='T'||v.form!=='tablet'||number(v.strength,'정 수 기준')!==1||basis==='bsa')throw Error('정(T) 계산은 정제·1정 기준으로 설정해주세요. mg·mcg·U와 환산하지 않으며 체표면적 기준은 지원하지 않습니다.');
-   const amount=finite(factor*number(v.dose,'1회 처방 정 수')),totalDoses=course(v);
-   return {tablets:amount,amount,totalDoses,total:finite(amount*totalDoses),unit:'정'};
+   if(v.doseUnit!=='T'||v.strengthUnit!=='T'||!['tablet','capsule'].includes(v.form)||number(v.strength,'개수 기준')!==1||basis==='bsa')throw Error('개수(T) 계산은 경구 정제·캡슐의 1개 기준으로 설정해주세요. mg·mcg·U와 환산하지 않으며 체표면적 기준은 지원하지 않습니다.');
+   const amount=finite(factor*number(v.dose,'1회 처방 개수')),totalDoses=course(v);
+   return {tablets:amount,amount,totalDoses,total:finite(amount*totalDoses),unit:v.form==='capsule'?'캡슐':'정'};
   }
   const activity=v.doseUnit==='U'||v.strengthUnit==='U';if(activity&&(v.doseUnit!=='U'||v.strengthUnit!=='U'))throw Error('U(활성단위)와 mg·mcg는 서로 환산할 수 없습니다.');
   const totalAmount=finite(factor*(activity?number(v.dose,'1회 활성단위'):mass(v.dose,v.doseUnit))),strength=activity?number(v.strength,'제품 활성단위 함량'):mass(v.strength,v.strengthUnit),amount=finite(totalAmount/strength);

@@ -87,3 +87,14 @@ test('a known product needs an explicit saved alias; adding the alias preserves 
  const p=await page(t);await seedSchedules(p);await p.evaluate(()=>stored[0].body.formulary.aliases=['Diltiazem Hydrochloride']);await p.locator('[data-kind=batch]').click();await paste(p,'diltiazem 1 mg/kg po bid for 28 days');await output(p).getByRole('heading',{name:/계산 완료 0\/1/}).waitFor();assert.equal(await row(p).locator('[data-rx-field=strength]').inputValue(),'');
  await p.evaluate(()=>{stored[0].body.formulary.aliases.push('diltiazem');stored[0].revision++;});await p.locator('[data-rx-parse]').click();await output(p).getByRole('heading',{name:/계산 완료 1\/1/}).waitFor();assert.equal(await row(p).locator('[data-rx-field=strength]').inputValue(),'30');
 });
+
+
+for(const width of [390,1280])test('same-strength UDCA and confirmed SAMe capsule counts finish together '+width,async t=>{
+ const p=await page(t,width);await seedFixed(p);await p.evaluate(()=>{
+ const make=(id,alias,value,kind,unit,basis='')=>({id,revision:1,body:{title:'확인 제품 '+id,kind,value,unit,formulary:{version:1,aliases:[alias],species:['dog','cat'],route:'oral',calculatorReady:true,calculationBasis:basis,verification:'label',permitStatus:'확인',warnings:[]}}});
+ stored=[make('u1','UDCA',200,'tablet','mg','우르소데옥시콜산'),make('u2','UDCA',200,'tablet','mg'),make('cap','SAMe',1,'capsule','T','헤파플러스 제품 전체 · 캡슐 수'),make('old','S-Adenosyl-L-Methionine',200,'tablet','mg')];});
+ const before=await p.evaluate(()=>JSON.stringify(stored));await p.locator('[data-common-weight]').fill('5');await p.locator('[data-kind=batch]').click();await paste(p,'UDCA 10 mg/kg\nSAMe 1/4 T/head po bid for 12 days');
+ await output(p).getByRole('heading',{name:/자동 계산 완료 2\/2/}).waitFor();const text=await output(p).innerText();assert.match(await row(p,0).locator('[data-rx-field=product]').inputValue(),/UDCA · 공통 함량/);assert.match(text,/전체 필요량 6 정/);assert.match(text,/전체 필요량 6 캡슐/);assert.match(text,/1회 약물량 0.25 캡슐/);assert.equal(await row(p,1).locator('[data-rx-field=form]').inputValue(),'capsule');assert.equal(await p.evaluate(()=>JSON.stringify(stored)),before);
+ await output(p).screenshot({path:resolve(root,'../udca-same-result-'+width+'.png')});await p.locator('[data-common-weight]').fill('10');await output(p).getByText('전체 필요량 12 정',{exact:true}).waitFor();assert.match(await output(p).innerText(),/전체 필요량 6 캡슐/);assert.ok(await form(p).evaluate(e=>e.scrollWidth<=e.clientWidth+1));await p.screenshot({path:resolve(root,'../udca-same-'+width+'.png'),fullPage:true});
+ await p.evaluate(()=>{stored[1].body.value=100;stored[1].revision++;});await form(p).locator('button[type=submit]').click();await output(p).getByRole('heading',{name:/계산 완료 1\/2/}).waitFor();assert.match(await output(p).innerText(),/제품.*다시 선택/);assert.equal(await p.evaluate(()=>calls.filter(x=>x.method!=='GET').length),0);
+});

@@ -25,3 +25,19 @@ test('426 added names have stable accepted manual IDs and no invented strength, 
  const loki=added.find(x=>x.english==='Lokivetmab');assert.ok(S.searchNames(loki).some(x=>x==='로키베트맙'));
  for(const name of ['Triple Antibiotic','Tiletamine/Zolazepam','Bromides','Isoflurane','Latanoprost'])assert.equal(added.find(x=>x.english===name).setupMode,'product',name);
 });
+
+
+test('same UDCA calculation facts coalesce without mutating stored products',()=>{
+ const item=(id,basis='')=>({id,revision:1,body:{title:'UDCA product '+id,kind:'tablet',value:200,unit:'mg',formulary:{version:1,aliases:['UDCA','Ursodeoxycholic Acid'],species:['cat','dog'],route:'oral',calculatorReady:true,calculationBasis:basis,warnings:[]}}});
+ const a=item('a','우르소데옥시콜산'),b=item('b'),before=JSON.stringify([a,b]),found=P.candidates([a,b],'UDCA','dog','oral','mg');
+ const choice=P.autoCandidate(found,'UDCA');assert.equal(choice.equivalent.count,2);assert.equal(choice.body.value,200);assert.equal(JSON.stringify([a,b]),before);assert.equal(P.autoCandidate(found.slice().reverse(),'UDCA').equivalent.signature,choice.equivalent.signature);
+ for(const patch of [{value:100},{kind:'capsule'},{unit:'mcg'},{formulary:{...b.body.formulary,calculationBasis:'다른 성분'}},{formulary:{...b.body.formulary,warnings:['장용형']}},{formulary:{...b.body.formulary,calculationBasis:'복합제 총량'}}])assert.equal(P.autoCandidate([a,{...b,body:{...b.body,...patch}}],'UDCA'),null);
+ assert.equal(P.autoCandidate([{...a,body:{...a.body,unit:'T',value:1}},{...b,body:{...b.body,unit:'T',value:1}}],'UDCA'),null);
+});
+test('capsule-count alias matches count prescriptions only and never borrows a mass strength',()=>{
+ const count=S.adapt({items:[preset('cap',{name:'Capsule product',aliases:['SAMe'],calculationBasis:'제품 전체 · 캡슐 수'},{kind:'capsule',unit:'T',value:1})]}).items[0];
+ assert.equal(P.candidates([count],'SAMe','dog','oral','T').length,1);assert.equal(P.candidates([count],'SAMe','dog','oral','mg').length,0);
+ const R=require('../practice-prescription.js'),row=R.parse('SAMe 1/4 T/head po bid for 12 days')[0],result=R.calculate({...row,form:'capsule',strength:'1',strengthUnit:'T'},5);
+ assert.equal(result.amount,.25);assert.equal(result.total,6);assert.equal(result.unit,'캡슐');
+ assert.throws(()=>R.calculate({...row,form:'capsule',strength:'200',strengthUnit:'mg'},5));assert.throws(()=>R.calculate({...row,form:'liquid',strength:'1',strengthUnit:'T'},5));
+});

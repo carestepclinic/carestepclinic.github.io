@@ -17,6 +17,7 @@
   const match=s.match(/^(.+?)\s+(\d+\s*\/\s*\d+|\d+(?:\.\d+)?|\.\d+)\s*(mg|mcg|ug|μg|T|tabs?|tablets?|정)\s*\/\s*(kg|head|animal|마리)(?![a-z가-힣])\s*(.*)$/i);
   if(!match){row.issues.push('약물명·1회 용량·기준을 확인해주세요. 예: 약물명 0.5 mg/kg 또는 약물명 1/4 T/head');return row;}
   row.drug=match[1].trim();row.dose=match[2].replace(/\s/g,'');row.doseBasis=match[4].toLowerCase()==='kg'?'kg':'fixed';row.doseUnit=/^(?:t|tabs?|tablets?|정)$/i.test(match[3])?'T':match[3].toLowerCase()==='mg'?'mg':'mcg';
+  if(/^(?:tabs?|tablets?|정)$/i.test(match[3]))row.countForm='tablet';
   // Do not take the second number of a range, a product strength, or a combination as a dose.
   if(/[\d.,~\-–—/]$/.test(row.drug)||/\d\s*(?:mg|mcg|ug|μg|ml|%)\b/i.test(row.drug)||/[<>/=]/.test(row.drug)){row.dose='';row.issues.push('용량 범위·제품 함량·복합 성분을 한 용량으로 읽을 수 없습니다. 한 약물의 1회 용량을 명확히 입력해주세요.');}
   let tail=match[5].trim();
@@ -69,6 +70,7 @@
   if(row.route!=='PO')throw Error('경구(PO) 처방인지 확인해주세요.');
   if(!['mg','mcg','T'].includes(row.doseUnit))throw Error('처방 단위를 확인해주세요.');
   if(!['tablet','capsule','liquid'].includes(row.form))throw Error('정제·캡슐·액상 중 제형을 선택해주세요.');
+  if(row.doseUnit==='T'&&row.countForm&&row.form!==row.countForm)throw Error('원문은 정제 개수입니다. 캡슐 개수로 사용하려면 원처방의 단위를 확인해주세요.');
   if(!['mg','mcg','T'].includes(row.strengthUnit))throw Error('제품 함량 단위를 확인해주세요.');
   for(const [key,label,max] of [['times','하루 횟수',24],['days','투약 일수',366]])if(!/^\d+$/.test(String(row[key]))||Number(row[key])<1||Number(row[key])>max)throw Error(label+'를 1~'+max+' 사이 정수로 입력해주세요.');
   if(!validNumber(row.strength)||Number(row.strength)>1e6)throw Error('제품의 1정 또는 1mL당 함량을 확인해주세요.');
