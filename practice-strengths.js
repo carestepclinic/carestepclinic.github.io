@@ -16,12 +16,11 @@
  function routeRows(entries,extraRoutes=new Map()){
   return entries.flatMap(x=>{if(x.setupMode==='product')return [x];const routes=[...new Set([...(x.options||[]).map(v=>v.route).filter(v=>routeNames[v]),...(extraRoutes.get(x.id)||[])])];return routes.length?routes.map(route=>({...x,route,rowId:x.id+'|'+route,options:(x.options||[]).filter(v=>v.route===route)})):[x];});
  }
- function existingFor(items,x,species){
-  return items.find(p=>{const m=p.body?.strength||p.body?.formulary;if(!m||m.route!==x.route||!m.species?.some(v=>species.includes(v)))return false;return m.ingredientId===x.id||aliases(x).some(a=>[p.body.title,...(m.aliases||[])].some(n=>key(n)===key(a)));});
- }
+ function existingIndex(items,species){const index={oral:{ids:new Set(),names:new Set()},injection:{ids:new Set(),names:new Set()}};for(const p of items){const m=p.body?.strength||p.body?.formulary;if(!m||!index[m.route]||!m.species?.some(v=>species.includes(v)))continue;const bucket=index[m.route];if(m.ingredientId)bucket.ids.add(m.ingredientId);for(const n of [p.body.title,...(m.aliases||[])])if(n)bucket.names.add(key(n));}return index;}
+ function existingFor(index,x){const bucket=index[x.route];return !!bucket&&(bucket.ids.has(x.id)||aliases(x).some(a=>bucket.names.has(key(a))));}
  function planSingles(entries,items,species){
-  const plan={selected:[],existing:0,multiple:0,missing:0};
-  for(const x of routeRows(entries)){if(x.setupMode==='product'||!x.options?.length){plan.missing++;continue;}if(existingFor(items,x,species)){plan.existing++;continue;}if(x.options.length!==1){plan.multiple++;continue;}const v=x.options[0];if(!Number.isFinite(v.value)||v.value<=0||!['tablet','capsule','liquid'].includes(v.kind)||!['mg','mcg','U','T'].includes(v.unit)||!routeNames[v.route]||!releases[v.release]||(v.route==='injection'&&(v.kind!=='liquid'||v.release!=='standard'))){plan.missing++;continue;}plan.selected.push({x,option:v});}
+  const plan={selected:[],existing:0,multiple:0,missing:0},index=existingIndex(items,species);
+  for(const x of routeRows(entries)){if(x.setupMode==='product'||!x.options?.length){plan.missing++;continue;}if(existingFor(index,x)){plan.existing++;continue;}if(x.options.length!==1){plan.multiple++;continue;}const v=x.options[0];if(!Number.isFinite(v.value)||v.value<=0||!['tablet','capsule','liquid'].includes(v.kind)||!['mg','mcg','U','T'].includes(v.unit)||!routeNames[v.route]||!releases[v.release]||(v.route==='injection'&&(v.kind!=='liquid'||v.release!=='standard'))){plan.missing++;continue;}plan.selected.push({x,option:v});}
   return plan;
  }
  let catalogPromise;
