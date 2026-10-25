@@ -34,7 +34,7 @@
 
   const mobileNav=document.createElement('label');mobileNav.className='pt-mobile-calc-select';mobileNav.textContent='계산기 바로 이동';
   const mobileSelect=document.createElement('select');mobileSelect.dataset.calcJump='';mobileSelect.innerHTML=menus.map(([id,title])=>'<option value="'+id+'">'+title+'</option>').join('');mobileSelect.value='med';mobileNav.append(mobileSelect);work.before(mobileNav);
-  function selectKind(id){o.showKind(id);mobileSelect.value=id;if(matchMedia('(max-width:800px)').matches){const active=main.querySelector('[data-kind-panel]:not([hidden])');active?.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}}
+  function selectKind(id){o.showKind(id);mobileSelect.value=id;g.CarestepTabPosition?.reveal(matchMedia('(max-width:800px)').matches?mobileNav:nav);}
   mobileSelect.onchange=()=>selectKind(mobileSelect.value);
   nav.querySelectorAll('[data-kind]').forEach(btn=>btn.onclick=()=>selectKind(btn.dataset.kind));
   function syncMobileMenu(){const buttons=[...nav.querySelectorAll('[data-kind]')],current=buttons.find(x=>x.getAttribute('aria-pressed')==='true');if(buttons.map(x=>x.dataset.kind).join('|')!==[...mobileSelect.options].map(x=>x.value).join('|'))mobileSelect.replaceChildren(...buttons.map(x=>new Option(x.querySelector('b')?.textContent||x.textContent,x.dataset.kind)));if(current)mobileSelect.value=current.dataset.kind;}

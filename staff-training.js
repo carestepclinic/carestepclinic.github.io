@@ -40,7 +40,7 @@
   const btn=(text,action,extra='',primary=false)=>`<button type="button" class="st-button ${primary?'st-primary':''}" data-st="${action}" ${extra}>${esc(text)}</button>`;
   function notice(text,error=false){message=text;const el=root.querySelector('[data-status]');if(el){el.textContent=text;el.classList.toggle('st-error',error);}const de=dialog?.querySelector('[data-dialog-status]');if(de){de.textContent=text;de.classList.toggle('st-error',error);}}
   function remember(){tabState[tab]={query,category,courseType,sort,view};}
-  function switchTab(value){remember();tab=value;const state=tabState[tab]||{};query=state.query||'';category=state.category||'';courseType=state.courseType||'';sort=state.sort||'number';view=state.view||(tab==='sop'?'list':'cards');message='';render();}
+  function switchTab(value){remember();tab=value;const state=tabState[tab]||{};query=state.query||'';category=state.category||'';courseType=state.courseType||'';sort=state.sort||'number';view=state.view||(tab==='sop'?'list':'cards');message='';render();global.CarestepTabPosition?.reveal(host.querySelector('.st-tabs'));}
   function tabCourses(){return filterCourses(data,tab,'','','');}
   function shell(){
    root.innerHTML=`<header class="st-heading"><div><span class="st-eyebrow">${adapter.common?'CARESTEP HQ':'CARESTEP CLINIC'}</span><h1>${adapter.common?'직원 공통 교육 관리':'직원 교육센터'}</h1><p>${adapter.common?'승인한 공통 교육자료를 각 병원 교육센터에 제공합니다.':'환자 선택 없이 교육자료를 찾고, 배정된 교육을 이어서 학습하세요.'}</p></div>${btn('새로고침','refresh')}</header><p data-status class="st-status" role="status" aria-live="polite"></p><div data-content></div>`;
