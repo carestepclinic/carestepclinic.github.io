@@ -93,5 +93,6 @@
   const remaining=finite(volume-initialVolume),remainingHours=hours-initialHours,rate=finite(remaining/remainingHours);
   return {volume,perKg:finite(volume/w),bloodVolume,coefficientOutside,hours,initialRate,initialVolume,initialHours,remaining,remainingHours,rate,ratePerKg:finite(rate/w),overFourHours:hours>4};
  }
- const api={convert,dose,dilute,format,prescription,fluid,course,cri,potassium,rer,nutrition,anionGap,bicarbonate,calcium,transfusion};if(typeof module!=='undefined')module.exports=api;g.PracticeCalculators=api;
+ function display(n){n=Number(n);if(!Number.isFinite(n))return '값 확인 필요';if(n===0)return '0';const places=Math.min(12,Math.max(3,3-Math.floor(Math.log10(Math.abs(n))))),rounded=Number(n.toFixed(places));return (Math.abs(rounded-n)>Math.abs(n)*1e-10?'≈ ':'')+String(rounded===0?n.toPrecision(4):rounded);}
+ const api={convert,dose,dilute,format,display,prescription,fluid,course,cri,potassium,rer,nutrition,anionGap,bicarbonate,calcium,transfusion};if(typeof module!=='undefined')module.exports=api;g.PracticeCalculators=api;
 })(typeof window==='undefined'?globalThis:window);

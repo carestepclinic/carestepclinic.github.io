@@ -64,6 +64,12 @@
   const med=b.querySelector('[data-calc=dose]'),common=b.querySelector('.pt-calc-common'),nav=b.querySelector('.pt-calc-nav');
   if(!med||!common||!nav)return null;
   b.classList.add('pt-calculator-focused');
+  const toolbar=document.createElement('section');toolbar.className='pt-calc-view-tools';toolbar.innerHTML='<strong>임상 계산기</strong><div><button type="button" data-calc-nav-toggle aria-expanded="true">계산기 메뉴 접기</button><button type="button" data-calc-expand aria-pressed="false">계산기 넓게 보기</button></div>';b.prepend(toolbar);
+  const collapse=toolbar.querySelector('[data-calc-nav-toggle]'),expand=toolbar.querySelector('[data-calc-expand]');
+  collapse.onclick=()=>{const hidden=b.classList.toggle('pt-nav-collapsed');collapse.setAttribute('aria-expanded',String(!hidden));collapse.textContent=hidden?'계산기 메뉴 펼치기':'계산기 메뉴 접기';};
+  function expanded(value){b.classList.toggle('pt-calculator-expanded',value);expand.setAttribute('aria-pressed',String(value));expand.textContent=value?'기본 화면으로':'계산기 넓게 보기';}
+  expand.onclick=()=>expanded(!b.classList.contains('pt-calculator-expanded'));
+  b.addEventListener('keydown',e=>{if(e.key==='Escape'&&b.classList.contains('pt-calculator-expanded')&&!document.querySelector('dialog[open]')){expanded(false);expand.focus();}});
   const setText=(el,value)=>{if(el&&el.textContent!==value)el.textContent=value;};
   const setFlag=(el,key,value)=>{if(el[key]!==value)el[key]=value;};
   const species=b.querySelector('[data-ref-species]'),weight=b.querySelector('[data-common-weight]');
@@ -135,7 +141,9 @@
    setFlag(dock,'hidden',!b.offsetWidth||!!document.querySelector('dialog[open]')||typing&&maxHeight-height>160);
    decorateResults();
    const form=activeForm(),out=form?.querySelector('output'),submit=form&&[...form.querySelectorAll('button')].find(x=>x.type==='submit');
-   setFlag(calculate,'disabled',!form||!!submit?.disabled);setText(calculate,form?.dataset.calc==='batch'?'전체 계산':'계산');
+   setFlag(calculate,'disabled',!form||!!submit?.disabled);setFlag(calculate,'hidden',form?.dataset.calc==='batch');setText(calculate,'계산');
+   const batch=b.querySelector('[data-calc=batch]'),primary=batch?.querySelector('[data-rx-parse]');
+   if(primary){const state=batch.dataset.calculationState;setText(primary,state==='loading'?'계산 중…':state==='complete'?'다시 계산':'처방 계산');setFlag(primary,'disabled',state==='loading');batch.setAttribute('aria-busy',String(state==='loading'));}
    setFlag(result,'disabled',!out?.textContent.trim());
   }
   function schedule(){if(!disposed&&!frame)frame=requestAnimationFrame(refreshLayout);}
@@ -145,8 +153,8 @@
   for(const event of ['resize','scroll','click'])listen(window,event,schedule);
   listen(window.visualViewport,'resize',schedule);
   listen(library,'keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT')e.preventDefault();});
-  const observer=new MutationObserver(schedule);observer.observe(b,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','disabled','aria-pressed']});
-  function dispose(){if(disposed)return;disposed=true;observer.disconnect();controller.abort();if(frame)cancelAnimationFrame(frame);dock.remove();}
+  const observer=new MutationObserver(schedule);observer.observe(b,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','disabled','aria-pressed','data-calculation-state']});
+  function dispose(){if(disposed)return;disposed=true;b.classList.remove('pt-calculator-expanded','pt-nav-collapsed');observer.disconnect();controller.abort();if(frame)cancelAnimationFrame(frame);dock.remove();}
   refreshLayout();return {dispose};
  }
  g.PracticeCalculatorEase={mount};

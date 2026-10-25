@@ -39,7 +39,7 @@
    if(!kind){total.textContent='동물 종류 선택 후 표시';return;}
    if(!valid(coefficient)||Number(coefficient)<20||Number(coefficient)>150){total.textContent='혈액량 계수를 확인해주세요.';return;}
    if(!valid(weight)||Number(weight)<=0||Number(weight)>200){total.textContent=weight?'체중을 확인해주세요.':'체중 입력 후 표시';return;}
-   total.textContent=c.format(Number(weight)*Number(coefficient))+' mL';formula.textContent='체중 '+weight+' kg × '+coefficient+' mL/kg';
+   total.textContent=c.display(Number(weight)*Number(coefficient))+' mL';formula.textContent='체중 '+weight+' kg × '+coefficient+' mL/kg';
   }
   function tfLayout(){
    const product=tf.elements.product.value,red=['packed','whole'].includes(product),prescribed=['plasma','other'].includes(product);
@@ -64,7 +64,7 @@
    f.onsubmit=e=>{e.preventDefault();if(!o.guard())return;const out=f.querySelector('output');try{
     if(!['dog','cat'].includes(o.species.value))throw Error('상단에서 개 또는 고양이를 선택해주세요.');
     if(!f.elements.confirmed.checked)throw Error('입력값과 적용·모니터링 계획을 먼저 확인해주세요.');
-    if(f===tf)tfLayout();const v={...Object.fromEntries(new FormData(f)),weight:o.weight.value,species:o.species.value},fmt=c.format;let text,blocked=false;
+    if(f===tf)tfLayout();const v={...Object.fromEntries(new FormData(f)),weight:o.weight.value,species:o.species.value},fmt=c.display;let text,blocked=false;
     if(f===ca){if(!v.product.trim()||!v.diluent.trim())throw Error('제품명과 희석액·조제 조건을 입력해주세요.');const r=c.calcium(v);text=`칼슘 ${v.mode==='single'?'단회 완속 정주':'지속정주'} · IV\n제품 ${v.product} · 원소칼슘 ${v.stock} mg/mL\n체중 ${v.weight} kg × 처방 ${v.dose} 원소칼슘 ${v.mode==='single'?'mg/kg/회':'mg/kg/hr'}\n계획 시간 ${v.mode==='single'?v.minutes+'분':v.hours+'시간'}\n총 원소칼슘 ${fmt(r.amount)} mg\n필요 원액 ${fmt(r.stockML)} mL\n계산상 희석액 ${fmt(r.diluentML)} mL · ${v.diluent}\n약물 포함 최종 ${v.volume} mL · 원소칼슘 ${fmt(r.concentration)} mg/mL\n펌프 설정 속도 ${fmt(r.rate)} mL/hr\n원소칼슘 공급 ${fmt(r.hourly)} mg/hr · ${fmt(r.hourlyPerKg)} mg/kg/hr\n계산상 계획 분량이며 조제 후 사용 가능 시간을 뜻하지 않습니다. ECG·심박수·주사 부위 및 재검 계획을 확인하세요.\n근거 ${sources.calcium}\n제품 함량 확인 ${sources.product}`;}
     else{const r=c.transfusion({...v,initial:tf.elements.initial.checked}),product=tf.elements.product.selectedOptions[0].textContent;blocked=r.overFourHours;let basis=v.mode==='pcv'?`현재 PCV ${v.current}% → 목표 ${v.target}% · 제제 ${v.unitPcv}%\n적용 혈액량 계수 ${v.bloodVolume} mL/kg (${coefficientManual?'직접 입력':'종별 기본값'})\n환자 추정 총혈액량 ${fmt(Number(v.weight)*Number(v.bloodVolume))} mL`:v.mode==='dose'?`처방 ${v.dose} mL/kg`:`의료진 지정 총량 ${v.volume} mL`;text=`${product} · 체중 ${v.weight} kg\n${basis}\n${v.mode==='pcv'?'예상 필요량':'계획 수혈량'} ${fmt(r.volume)} mL · ${fmt(r.perKg)} mL/kg\n총 계획 ${v.hours}시간 (초기 관찰 포함)\n${tf.elements.initial.checked?`초기 ${v.initialMinutes}분: ${fmt(r.initialRate)} mL/hr (${v.initialRate} mL/kg/hr) · ${fmt(r.initialVolume)} mL\n이후 ${fmt(r.remainingHours)}시간: ${fmt(r.rate)} mL/hr (${fmt(r.ratePerKg)} mL/kg/hr) · ${fmt(r.remaining)} mL`:`계획 속도 ${fmt(r.rate)} mL/hr (${fmt(r.ratePerKg)} mL/kg/hr)\n일정 속도로 환산한 값입니다. 시작 시 관찰과 실제 속도 변경은 의료진이 결정합니다.`}\n${r.coefficientOutside?'선택한 혈액량 계수가 MSD 참고 범위 밖입니다. 사용할 문헌·환자별 근거를 다시 확인하세요.\n':''}${blocked?'4시간을 초과하는 계획입니다. 제제 사용기한·분할 계획을 재검토하세요. 자동으로 속도를 높이지 않으며 결과 복사·인쇄는 보류합니다.\n':''}${v.mode==='pcv'?'예상 PCV 상승과 실제 반응은 다를 수 있습니다. ':''}과부하·수혈 반응을 관찰하고 재검하세요.\n근거 ${sources.blood}\n제제 취급 ${sources.handling}`;}
     render(f,(v.species==='dog'?'개':'고양이')+'\n'+text,blocked);
