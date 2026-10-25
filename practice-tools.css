@@ -362,3 +362,33 @@ body:has(#practice.active-view) #r61-patient-context{display:none}
 
 /* Reserve a full screen while a new clinic tab is loading, even below mobile navigation. */
 #appView main.main{min-height:100vh;min-height:100dvh}
+
+/* CRI setup and adult nutrition planning. */
+.pt-cri-duration small{font-size:13px;font-weight:400;line-height:1.5;color:#496078}
+.pt-cri-flow{grid-column:1/-1;background:#eef5ff;border:1px solid #c4d8f4;border-radius:10px;padding:12px;font-weight:650;line-height:1.6}
+.pt [name=rate][readonly]{background:#eef5ff;color:#244c82}
+.pt-nutrition-plan{grid-column:1/-1;border:1px solid #d6e0ed;background:#f7faff;border-radius:12px;padding:14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px}
+.pt-nutrition-plan>label:first-child,.pt-nutrition-plan>p,.pt-nutrition-plan>details{grid-column:1/-1}
+.pt-nutrition-plan>p{margin:5px 0;line-height:1.6}.pt-nutrition-plan [data-nutrition-summary]{font-weight:650}
+.pt-nutrition-plan details{font-size:14px}.pt-nutrition-plan [hidden]{display:none!important}
+/* Direct crop selection keeps the original still while only the crop box moves. */
+.pt-image .pt-image-crop{display:block}.pt-crop-editor{display:flex;flex-direction:column;min-width:0;width:100%}
+.pt-crop-stage{position:relative;align-self:center;max-width:100%;line-height:0;overflow:hidden;touch-action:none;user-select:none;background:#17253a;margin:8px 0 12px}
+.pt .pt-crop-stage canvas{display:block;max-width:100%;max-height:60vh;max-height:60dvh;width:auto;height:auto;border:0;background:white;pointer-events:none}
+.pt-crop-selection{position:absolute;border:2px solid #1f65ef;box-sizing:border-box;box-shadow:0 0 0 9999px #0716268c;cursor:move;touch-action:none}
+.pt-crop-selection:focus-visible{outline:3px solid #ffbf47;outline-offset:-5px}
+.pt-crop-grid{position:absolute;inset:0;background:linear-gradient(to right,transparent 33%,#fff8 33%,#fff8 calc(33% + 1px),transparent calc(33% + 1px),transparent 66%,#fff8 66%,#fff8 calc(66% + 1px),transparent calc(66% + 1px)),linear-gradient(to bottom,transparent 33%,#fff8 33%,#fff8 calc(33% + 1px),transparent calc(33% + 1px),transparent 66%,#fff8 66%,#fff8 calc(66% + 1px),transparent calc(66% + 1px));pointer-events:none}
+.pt .pt-crop-selection button{position:absolute;width:44px;height:44px;min-height:44px;min-width:44px;border:0;background:transparent;padding:0;border-radius:0;touch-action:none}
+.pt-crop-selection button:before{content:'';position:absolute;width:18px;height:18px;border:2px solid white;background:#1f65ef;border-radius:4px;box-shadow:0 1px 4px #0005}
+.pt-crop-selection [data-corner=nw]{top:-2px;left:-2px;cursor:nwse-resize}.pt-crop-selection [data-corner=ne]{top:-2px;right:-2px;cursor:nesw-resize}.pt-crop-selection [data-corner=sw]{bottom:-2px;left:-2px;cursor:nesw-resize}.pt-crop-selection [data-corner=se]{bottom:-2px;right:-2px;cursor:nwse-resize}
+.pt-crop-selection [data-corner=nw]:before{left:0;top:0}.pt-crop-selection [data-corner=ne]:before{right:0;top:0}.pt-crop-selection [data-corner=sw]:before{left:0;bottom:0}.pt-crop-selection [data-corner=se]:before{right:0;bottom:0}
+.pt-crop-stage[data-drawing=true],.pt-crop-stage[data-drawing=true] .pt-crop-selection{cursor:crosshair}
+.pt-crop-editor [data-draw][aria-pressed=true]{background:#2454ed;color:white}
+.pt-crop-editor .pt-help{margin:6px 0;font-size:14px;line-height:1.6}
+.pt-crop-sliders{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;padding:10px 0}.pt-crop-sliders label{display:block}.pt-crop-sliders input{width:100%;padding:0}.pt-crop-sliders [data-label]{float:right}
+.pt-image details>summary{min-height:40px;padding:8px 0;cursor:pointer}
+.pt-image .pt-crop-output canvas{max-width:100%;max-height:340px;display:block;width:auto;height:auto;background:white}
+.pt.pt-crop-dialog{width:min(1100px,96vw);max-width:96vw;max-height:96vh;max-height:96dvh;overflow:auto;padding:18px;border-radius:14px}
+.pt-crop-dialog::backdrop{background:#0b172acc}.pt-crop-dialog .pt-crop-stage canvas{max-height:calc(96vh - 220px);max-height:calc(96dvh - 220px)}
+.pt-crop-dialog .pt-bar{flex-wrap:wrap}.pt-crop-dialog [data-enlarge]{background:#2454ed;color:white}
+@media(max-width:700px){.pt-nutrition-plan{grid-template-columns:minmax(0,1fr)}.pt-crop-editor>.pt-bar{display:grid;grid-template-columns:1fr 1fr;gap:6px}.pt.pt-crop-dialog{padding:10px}.pt-crop-editor button{font-size:14px}.pt-cri-flow{font-size:14px}}

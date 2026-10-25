@@ -1,6 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {drugs,options}=require('../practice-cri-presets.js'),c=require('../practice-calculators.js'),catalog=require('../practice-strength-catalog.json');
 const fent=drugs.find(x=>x.id==='fentanyl');
+test('diluent candidates are source-linked and exclude ready-to-use or unknown infusions',()=>{const {dilutionFor}=require('../practice-cri-presets.js');for(const id of ['propofol','mannitol','metronidazole','unknown'])assert.equal(dilutionFor(id),null);for(const id of ['norepinephrine','lidocaine'])assert.equal(dilutionFor(id).value,'D5W');for(const d of drugs.filter(d=>!d.mode)){assert.match(dilutionFor(d.id).source,/^https:/);assert.ok(dilutionFor(d.id).note);}assert.equal(dilutionFor('furosemide').value,'N/S');assert.match(dilutionFor('furosemide').note,/침전/);});
 const item=(id,over={})=>({id,body:{kind:'liquid',value:25,unit:'mcg',strength:{ingredientId:fent.ingredient,route:'injection',release:'standard',species:['dog'],calculationBasis:'Fentanyl',...over}}});
 test('common injectable candidates are traceable to public catalog or existing reviewed emergency source',()=>{
  const em=require('node:fs').readFileSync(require('node:path').join(__dirname,'../practice-emergency.js'),'utf8');
