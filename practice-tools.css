@@ -297,3 +297,6 @@ body:has(#practice.active-view) #r61-patient-context{display:none}
 .pt-rx-visible-issue{margin:0 16px 12px}
 @media(max-width:600px){.pt-rx-inline-strength{padding:0 12px 12px}.pt-rx-inline-strength .pt-bar>*{width:100%}}
 @media print{.pt-rx-inline-strength{display:none}}
+
+/* Local work continuity and incremental list feedback. */
+.pt [data-body][hidden],.pt [inert][hidden]{display:none!important}.pt-loading{min-height:140px;display:grid;place-content:center;color:#536981}.pt-load-more{padding:16px 0;text-align:center}.pt-load-more p{font-size:14px;color:#536981;line-height:1.6}.pt-reset-calculation{margin:0 0 14px auto;display:block;min-height:44px}.pt [data-notice]:not(:empty){padding:10px 14px;border-radius:12px;background:#edf3ff;font-size:15px;line-height:1.6}

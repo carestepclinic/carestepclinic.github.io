@@ -23,19 +23,30 @@
    .filter(c=>!courseType||(courseType==='practice'?c.format==='practice':c.kind==='education'&&c.format!=='practice'))
    .filter(c=>(!category||c.category===category)&&(!query||[c.title,c.category,c.common?'공통':'우리 병원'].join(' ').toLowerCase().includes(query.toLowerCase())));
  }
+ function sortCourses(rows,order='number'){
+  const name=(a,b)=>String(a.title).localeCompare(String(b.title),'ko',{numeric:true})||String(a.course_id).localeCompare(String(b.course_id))||b.version-a.version;
+  return [...rows].sort(order==='recent'?(a,b)=>String(b.groupUpdatedAt||b.updated_at).localeCompare(String(a.groupUpdatedAt||a.updated_at))||name(a,b):name);
+ }
+ function groupCourses(rows){
+  const groups=new Map();for(const row of rows){if(!groups.has(row.course_id))groups.set(row.course_id,[]);groups.get(row.course_id).push(row);}
+  return [...groups.values()].map(versions=>{versions.sort((a,b)=>b.version-a.version);const published=versions.find(v=>v.status==='published'&&v.current_version_id===v.id);return {...(published||versions[0]),versions,groupUpdatedAt:versions.map(v=>v.updated_at||'').sort().at(-1)};});
+ }
  function mount(root,adapter){
   if(!root)throw Error('Training root missing');
   root.classList.add('staff-training');
-  let data=null,tab=adapter.common?'manage':'library',query='',category='',courseType='',sequence=0,identity='',busy=false,dialog=null,dirty=false,activeDoc=null,activeAssignment=null,activeSupplement=null,requestKey='',message='';
+  let data=null,tab=adapter.common?'manage':'library',query='',category='',courseType='',sequence=0,identity='',busy=false,dialog=null,dirty=false,activeDoc=null,activeAssignment=null,activeSupplement=null,requestKey='',message='',sort='number',view='',tabState={},returnFocus=null;
   const ready=()=>!adapter.isReady||adapter.isReady();
   const actor=()=>data?.actor||{capabilities:{}};
   const btn=(text,action,extra='',primary=false)=>`<button type="button" class="st-button ${primary?'st-primary':''}" data-st="${action}" ${extra}>${esc(text)}</button>`;
   function notice(text,error=false){message=text;const el=root.querySelector('[data-status]');if(el){el.textContent=text;el.classList.toggle('st-error',error);}const de=dialog?.querySelector('[data-dialog-status]');if(de){de.textContent=text;de.classList.toggle('st-error',error);}}
+  function remember(){tabState[tab]={query,category,courseType,sort,view};}
+  function switchTab(value){remember();tab=value;const state=tabState[tab]||{};query=state.query||'';category=state.category||'';courseType=state.courseType||'';sort=state.sort||'number';view=state.view||(tab==='sop'?'list':'cards');message='';render();}
+  function tabCourses(){return filterCourses(data,tab,'','','');}
   function shell(){
    root.innerHTML=`<header class="st-heading"><div><span class="st-eyebrow">${adapter.common?'CARESTEP HQ':'CARESTEP CLINIC'}</span><h1>${adapter.common?'직원 공통 교육 관리':'직원 교육센터'}</h1><p>${adapter.common?'승인한 공통 교육자료를 각 병원 교육센터에 제공합니다.':'환자 선택 없이 교육자료를 찾고, 배정된 교육을 이어서 학습하세요.'}</p></div>${btn('새로고침','refresh')}</header><p data-status class="st-status" role="status" aria-live="polite"></p><div data-content></div>`;
   }
   function render(){
-   shell();notice(message);const host=root.querySelector('[data-content]');
+   const expanded=[...root.querySelectorAll('.st-card-manage[open]')].map(e=>e.dataset.course);shell();notice(message);const host=root.querySelector('[data-content]');
    if(!data){host.innerHTML='<div class="st-empty">직원 교육자료를 불러오고 있습니다.</div>';return;}
    const can=actor().capabilities;
    if((tab==='manage'&&!can.edit&&!can.review&&!can.manage)||(tab==='trash'&&!can.edit&&!can.review))tab='library';
@@ -45,9 +56,9 @@
    host.innerHTML=`<nav class="st-tabs" aria-label="교육센터 메뉴">${tabs.map(([id,label])=>`<button type="button" data-st="tab" data-tab="${id}" aria-current="${tab===id?'page':'false'}">${label}${id==='mine'&&pending?` <span>${pending}</span>`:''}</button>`).join('')}</nav>
     ${tab==='trash'?'<p class="st-info">삭제한 자료는 직원에게 표시되지 않습니다. 본문과 이수 기록은 보존되며, 복원해도 자동으로 다시 공개되지 않습니다.</p>':''}
     ${tab==='mine'?`<div class="st-summary"><b>학습할 교육 ${pending}개</b><span>이수 ${mine.filter(a=>a.completed_at).length}개 · 읽던 자료와 이수 기록은 서버에 저장됩니다.</span></div>`:''}
-    ${tab!=='mine'?`<div class="st-toolbar"><label>교육자료 검색<input type="search" data-search placeholder="질환·실무 주제·교육 제목" value="${esc(query)}"></label><label>분류<select data-category><option value="">전체 분류</option>${[...new Set(data.courses.map(x=>x.category).filter(Boolean))].sort().map(c=>`<option ${c===category?'selected':''}>${esc(c)}</option>`).join('')}</select></label>${!['sop','trash'].includes(tab)?`<label>교육 종류<select data-course-type aria-label="교육 종류"><option value="">전체 교육</option><option value="disease" ${courseType==='disease'?'selected':''}>질환·증상 교육</option><option value="practice" ${courseType==='practice'?'selected':''}>병원 실무 교육</option></select></label>`:''}${adapter.common&&can.edit&&tab==='manage'?btn('일괄 생성·진행 현황','automation'):''}${can.edit&&((adapter.common&&tab==='manage')||(!adapter.common&&tab==='sop'))?btn(tab==='sop'?'SOP 작성':'교육자료 만들기','create','',true):''}</div>`:''}
+    ${tab!=='mine'?`<div class="st-toolbar"><label>교육자료 검색<input type="search" data-search placeholder="질환·실무 주제·교육 제목" value="${esc(query)}"></label><label>분류<select data-category><option value="">전체 분류</option>${[...new Set(tabCourses().map(x=>x.category).filter(Boolean))].sort().map(c=>`<option ${c===category?'selected':''}>${esc(c)}</option>`).join('')}</select></label><label>정렬<select data-sort><option value="number" ${sort==='number'?'selected':''}>번호·제목순</option><option value="recent" ${sort==='recent'?'selected':''}>최근 수정순</option></select></label><label>보기<select data-layout><option value="cards" ${(view||'cards')==='cards'&&tab!=='sop'?'selected':''}>카드</option><option value="list" ${view==='list'||!view&&tab==='sop'?'selected':''}>목록</option></select></label>${!['sop','trash'].includes(tab)?`<label>교육 종류<select data-course-type aria-label="교육 종류"><option value="">전체 교육</option><option value="disease" ${courseType==='disease'?'selected':''}>질환·증상 교육</option><option value="practice" ${courseType==='practice'?'selected':''}>병원 실무 교육</option></select></label>`:''}${adapter.common&&can.edit&&tab==='manage'?btn('일괄 생성·진행 현황','automation'):''}${can.edit&&((adapter.common&&tab==='manage')||(!adapter.common&&tab==='sop'))?btn(tab==='sop'?'SOP 작성':'교육자료 만들기','create','',true):''}</div>`:''}
     ${tab==='manage'&&!adapter.common?`<p class="st-info">승인된 자료를 직원에게 배정하고 이수 현황을 확인하세요. 공통 교육자료는 HQ에서 제작·관리합니다.</p>${can.manage?'<section class="st-report"><h2>직원별 교육 현황</h2><div data-report></div></section>':''}<h2 class="st-list-title">배정할 교육자료</h2>`:''}<div data-list></div>`;
-   renderList();renderReport();
+   renderList();renderReport();root.querySelectorAll('.st-card-manage').forEach(e=>{e.open=expanded.includes(e.dataset.course);});
   }
   function renderList(){
    const host=root.querySelector('[data-list]');if(!host||!data)return;
@@ -56,33 +67,41 @@
     host.innerHTML=rows.length?`<div class="st-grid">${rows.map(a=>`<article class="st-card"><span class="st-tag ${a.completed_at?'st-approved':''}">${a.completed_at?'이수 완료':a.status==='deleted'?'자료 삭제됨':a.status!=='published'?'공개 중단':a.opened_at?'학습 중':'학습 전'}</span><h2>${esc(a.title)}</h2><p>v${a.version} · ${a.completed_at?'이수일 '+shortDate(a.completed_at):'기한 '+shortDate(a.due_date)}</p>${a.score!=null?`<p>최근 점수 ${a.score}점</p>`:''}${a.status==='deleted'?'<p>자료 삭제됨 · 기존 이수 기록은 보존됩니다.</p>':''}${a.status==='published'?btn(a.completed_at?'다시 보기':'학습 이어가기','learn',`data-id="${esc(a.version_id)}" data-assignment="${esc(a.id)}"`,!a.completed_at):'<p>관리자에게 최신 교육자료를 확인해주세요.</p>'}</article>`).join('')}</div>`:'<div class="st-empty"><b>아직 배정된 교육이 없습니다.</b><p>교육자료실에서 원하는 자료를 선택해 학습을 시작할 수도 있습니다.</p></div>';
     return;
    }
-   const rows=filterCourses(data,tab,query,category,['sop','trash'].includes(tab)?'':courseType);
+   const filtered=filterCourses(data,tab,query,category,['sop','trash'].includes(tab)?'':courseType);
+   const rows=sortCourses(tab==='sop'?groupCourses(filtered):filtered,sort);
    if(tab==='trash'){
     host.innerHTML='<p class="st-count">'+rows.length+'개 자료</p>'+(rows.length?'<div class="st-grid">'+rows.map(c=>`<article class="st-card"><span class="st-tag">삭제됨 · ${c.common?'공통':'우리 병원'}</span><h2>${esc(c.title)}</h2><p>${esc(typeLabel(c))} · 삭제 ${shortDate(c.deleted_at)}</p><p>${c.course_deleted_at?'자료 전체':'v'+c.version+' 버전'} · 이수 기록 보존</p>${canDelete(c)?btn('복원',c.course_deleted_at?'restore-course':'restore-version',`data-course="${esc(c.course_id)}" data-id="${esc(c.id)}"`):'<p>공개 검토 권한이 있는 관리자에게 복원을 요청해주세요.</p>'}</article>`).join('')+'</div>':'<div class="st-empty">삭제한 자료가 없습니다.</div>');return;
    }
-   host.innerHTML=`<p class="st-count">${rows.length}개 자료${query||category?' · 검색 결과':''}</p>`+(rows.length?`<div class="st-grid">${rows.map(c=>`<article class="st-card"><div class="st-card-tags"><span class="st-tag">${esc(typeLabel(c))} · ${c.common?'공통':'우리 병원'}</span><span class="st-tag ${c.status==='published'?'st-approved':''}">${status(c.status)} · v${c.version}</span></div><h2>${esc(c.title)}</h2><p>${esc(c.category||'미분류')} · 수정 ${shortDate(c.updated_at)}</p><div class="st-actions">${btn(adapter.common&&tab==='manage'||tab==='sop'&&c.owned&&(actor().capabilities.edit||actor().capabilities.review)?'자료·검토 열기':'자료 보기','document',`data-id="${esc(c.id)}"`,true)}${c.owned&&(adapter.common||c.kind==='sop')&&actor().capabilities.edit?btn('수정','edit-course',`data-id="${esc(c.id)}"`):''}${c.owned&&(adapter.common||c.kind==='sop')&&actor().capabilities.review&&c.status==='withdrawn'?btn('다시 공개','reopen-publication',`data-id="${esc(c.id)}"`):''}${canDelete(c)?btn('버전 삭제','delete-version',`data-id="${esc(c.id)}" data-danger`):''}${!adapter.common&&c.status==='published'&&c.current_version_id===c.id&&actor().capabilities.manage?btn('직원 배정','assign',`data-id="${esc(c.id)}"`):''}</div></article>`).join('')}</div>`:`<div class="st-empty"><b>${query||category?'조건에 맞는 자료가 없습니다.':tab==='manage'&&adapter.common?'작성한 교육자료가 없습니다.':'아직 공개된 자료가 없습니다.'}</b><p>${tab==='manage'&&adapter.common?'보호자 원본을 활용하거나 실무 주제로 공통 교육자료를 만드세요.':tab==='sop'?'병원에서 사용하는 업무 절차와 확인사항을 직접 작성해 관리하세요.':'HQ에서 검토·승인한 자료와 병원의 승인된 자료가 여기에 표시됩니다.'}</p>${query||category?btn('검색 초기화','clear'):''}</div>`);
+   const active=[query&&'검색: '+query,category,courseType&&({disease:'질환·증상 교육',practice:'병원 실무 교육'})[courseType]].filter(Boolean);
+   host.innerHTML=(active.length?'<div class="st-filter-state"><span>'+active.map(esc).join(' · ')+'</span>'+btn('조건 해제','clear')+'</div>':'')+
+    '<p class="st-count">'+rows.length+'개 자료'+(active.length?' · 검색 결과':'')+'</p>'+(rows.length?'<div class="st-grid '+((view|| (tab==='sop'?'list':'cards'))==='list'?'st-list-view':'')+'">'+rows.map(c=>courseCard(c)).join('')+'</div>':'<div class="st-empty"><b>'+(active.length?'조건에 맞는 자료가 없습니다.':'아직 표시할 자료가 없습니다.')+'</b><p>'+(active.length?'현재 탭의 검색 조건을 해제하거나 바꿔주세요.':tab==='sop'?'병원에서 사용하는 업무 절차를 작성하고 검토 후 공개하세요.':'HQ에서 공개한 교육자료를 여기에서 확인할 수 있습니다.')+'</p>'+(active.length?btn('검색 초기화','clear'):'')+'</div>');
   }
+  function courseCard(c){
+   const own=c.owned&&(adapter.common||c.kind==='sop'),can=actor().capabilities,versions=c.versions||[c],draft=versions.find(v=>['draft','review'].includes(v.status));
+   return '<article class="st-card"><div class="st-card-main"><div class="st-card-tags"><span class="st-tag">'+esc(typeLabel(c))+' · '+(c.common?'공통':'우리 병원')+'</span><span class="st-tag '+(c.status==='published'?'st-approved':'')+'">'+status(c.status)+' · v'+c.version+'</span>'+(draft&&draft.id!==c.id?'<span class="st-tag st-draft">'+status(draft.status)+' · v'+draft.version+'</span>':'')+'</div><h2>'+esc(c.title)+'</h2><p>'+esc(c.category||'미분류')+' · 수정 '+shortDate(c.updated_at)+'</p></div><div class="st-actions">'+btn(own?'자료·검토 열기':'자료 보기','document','data-id="'+esc(c.id)+'"',true)+(!adapter.common&&c.status==='published'&&c.current_version_id===c.id&&can.manage?btn('직원 배정','assign','data-id="'+esc(c.id)+'"'):'')+(own&&can.edit?btn(draft?'수정본 이어쓰기':['published','withdrawn'].includes(c.status)?'수정본 작성':'내용 수정','edit-course','data-id="'+esc(draft?.id||c.id)+'"'):'')+(own&&(can.edit||can.review)?'<details class="st-card-manage" data-course="'+esc(c.course_id)+'"><summary>버전 관리 · '+versions.length+'개</summary><div>'+versions.map(v=>'<section><b>v'+v.version+' · '+status(v.status)+'</b><div class="st-actions">'+btn('이 버전 열기','document','data-id="'+esc(v.id)+'"')+(can.review&&v.status==='withdrawn'?btn('다시 공개','reopen-publication','data-id="'+esc(v.id)+'"'):'')+(canDelete(v)?btn('버전 삭제','delete-version','data-id="'+esc(v.id)+'" data-danger'):'')+'</div></section>').join('')+'</div></details>':'')+'</div></article>';
+  }
+
   function renderReport(){
    const host=root.querySelector('[data-report]');if(!host)return;
    host.innerHTML=data.assignments.length?`<div class="st-table-wrap" tabindex="0" aria-label="직원별 교육 현황"><table><thead><tr><th>직원</th><th>교육자료</th><th>기한</th><th>학습 상태</th></tr></thead><tbody>${data.assignments.map(a=>`<tr><td>${esc(a.display_name)}</td><td>${esc(a.title)} <small>v${a.version}</small></td><td>${shortDate(a.due_date)}</td><td>${a.completed_at?'이수 · '+a.score+'점':a.status==='deleted'?'자료 삭제됨':a.status!=='published'?'공개 중단':a.opened_at?'학습 중':'학습 전'}</td></tr>`).join('')}</tbody></table></div>`:'<p class="st-empty">교육자료의 ‘직원 배정’을 누르면 이수 현황을 확인할 수 있습니다.</p>';
   }
   async function load(){
    const current=adapter.identity?.()||'';
-   if(current!==identity){identity=current;data=null;query='';category='';courseType='';if(dialog){dirty=false;closeDialog();}}
+   if(current!==identity){identity=current;tabState={};sort='number';view='';data=null;query='';category='';courseType='';if(dialog){dirty=false;closeDialog();}}
    if(!ready()){data=null;shell();notice('병원 직원 계정으로 로그인하면 교육센터를 사용할 수 있습니다.');return;}
-   const seq=++sequence;shell();root.querySelector('[data-content]').innerHTML='<div class="st-empty" aria-busy="true">교육자료와 내 교육을 불러오는 중입니다…</div>';
+   const seq=++sequence;if(!data){shell();root.querySelector('[data-content]').innerHTML='<div class="st-empty st-loading" aria-busy="true">교육자료와 내 교육을 불러오는 중입니다…</div>';}else notice('목록을 업데이트하는 중입니다. 기존 자료를 계속 볼 수 있습니다.');
    try{const result=await adapter.request('/',{method:'GET'});if(seq!==sequence||current!==(adapter.identity?.()||''))return;data=result;message='';render();}
-   catch(e){if(seq!==sequence)return;data=null;shell();notice(e.message||'교육자료를 불러오지 못했습니다.',true);root.querySelector('[data-content]').innerHTML=btn('다시 불러오기','refresh');}
+   catch(e){if(seq!==sequence)return;if(!data){shell();root.querySelector('[data-content]').innerHTML=btn('다시 불러오기','refresh');}notice((e.message||'교육자료를 불러오지 못했습니다.')+(data?' 기존 목록을 유지했습니다. 새로고침으로 다시 확인해주세요.':''),true);}
   }
   function closeDialog(){
    if(busy){notice('처리 결과를 확인하고 있습니다.');return false;}
    if(dirty&&!global.confirm('저장하지 않은 변경사항을 취소하고 닫을까요?'))return false;
    const old=dialog;dialog=null;dirty=false;activeDoc=null;activeAssignment=null;activeSupplement=null;
-   if(old){old.close();old.remove();}return true;
+   if(old){old.close();old.remove();returnFocus?.focus?.();}return true;
   }
   function showDialog(title,body,wide=false){
    if(dialog&&!closeDialog())return false;
-   dialog=document.createElement('dialog');dialog.className='st-dialog'+(wide?' st-wide':'');dialog.setAttribute('aria-labelledby','stDialogTitle');
+   returnFocus=document.activeElement;dialog=document.createElement('dialog');dialog.className='st-dialog'+(wide?' st-wide':'');dialog.setAttribute('aria-labelledby','stDialogTitle');
    dialog.innerHTML=`<header><h2 id="stDialogTitle">${esc(title)}</h2>${btn('닫기','close')}</header><p class="st-status" data-dialog-status role="status" aria-live="polite"></p><div class="st-dialog-body">${body}</div>`;
    dialog.addEventListener('cancel',e=>{e.preventDefault();closeDialog();});
    dialog.addEventListener('click',handle);dialog.addEventListener('input',()=>{if(dialog?.querySelector('[data-editor],[data-supplement-create],[data-supplement-apply]'))dirty=true;});
@@ -112,12 +131,14 @@
    if(aid&&canLearn&&!mine?.completed_at)await request('/assignments/'+encodeURIComponent(aid)+'/open',{});
     if(seq!==sequence||current!==(adapter.identity?.()||''))return;
     const body=`<div class="st-doc-meta"><span class="st-tag">${esc(typeLabel(d))} · ${d.common?'공통':'우리 병원'} · v${d.version}</span><span class="st-tag">${status(d.status)}</span>${d.reviewedAt?`<span>승인 ${shortDate(d.reviewedAt)}</span>`:''}</div>
+     <div class="st-reading-actions">${btn('PDF 다운로드','download')}${canLearn&&!aid?btn('내 교육으로 시작','enroll','',true):''}${aid&&canLearn?btn('학습 확인으로 이동','section','data-section="stAssessment"'):''}</div>
+     <nav class="st-doc-toc" aria-label="교육자료 목차">${d.body.sections.map((section,i)=>btn(names[i],'section','data-section="stSection'+i+'"')).join('')}</nav>
      ${d.generating?'<p class="st-info" role="status">AI가 초안을 작성 중입니다. 잠시 후 닫고 새로고침하면 결과를 확인할 수 있습니다.</p>':''}${d.body.config?`<p class="st-info">${esc(d.body.config.audience)} · ${esc(d.body.config.level)} · ${esc(d.body.config.topic)}</p>`:''}
      ${d.body.gaps.length?`<aside class="st-warning"><b>추가 검토 필요</b><ul>${d.body.gaps.map(g=>`<li>${esc(g)}</li>`).join('')}</ul>${canEdit&&d.kind==='education'&&d.supplementEnabled&&['draft','review'].includes(d.status)?btn('부족한 내용 AI 보완','supplement-create','',true):''}</aside>`:''}
-     ${d.body.sections.some(s=>s.items.some(x=>x.sourceIds?.length))?`<div class="st-reading-tools"><span>참고 근거는 본문 아래에서 확인할 수 있습니다.</span>${btn('문장별 근거 보기','toggle-citations','aria-expanded="false" aria-controls="stDocumentReading"')}</div>`:''}<div class="st-reading" id="stDocumentReading">${d.body.sections.map((s,i)=>`<section><h3>${names[i]}</h3>${s.items.length?`<ul${['nursing','checklist'].includes(s.key)?' class="st-checklist"':''}>${s.items.map(x=>`<li>${esc(x.text)}${x.sourceIds?.length?` <small class="st-citation" data-item-sources hidden>근거: ${supplementLinks(x.sourceIds,d.sources)}</small>`:''}</li>`).join('')}</ul>`:'<p class="st-muted">작성할 내용이 없습니다.</p>'}</section>`).join('')}</div>${sourceView(d.sources)}
-     <div class="st-actions">${btn('PDF 다운로드','download')}${canEdit&&['draft','review'].includes(d.status)?btn('내용 수정','edit'):''}${canEdit&&d.status==='draft'?btn('검토 요청','review','',true):''}${canReview&&d.status==='review'?btn('검토 후 승인','approve','',true):''}${canReview&&d.status==='withdrawn'?btn('다시 공개','approve','',true):''}${canEdit&&['published','withdrawn'].includes(d.status)?btn('수정본 만들기','revision-dialog'):''}${canReview&&d.status==='published'?btn('공개 중단','withdraw'):''}${canDelete(data.courses.find(c=>c.id===d.id))?btn('버전 삭제','delete-version',`data-id="${esc(d.id)}" data-danger`):''}${canLearn&&!aid?btn('내 교육으로 시작','enroll','',true):''}</div>
+     ${d.body.sections.some(s=>s.items.some(x=>x.sourceIds?.length))?`<div class="st-reading-tools"><span>참고 근거는 본문 아래에서 확인할 수 있습니다.</span>${btn('문장별 근거 보기','toggle-citations','aria-expanded="false" aria-controls="stDocumentReading"')}</div>`:''}<div class="st-reading" id="stDocumentReading">${d.body.sections.map((s,i)=>`<section id="stSection${i}" tabindex="-1"><h3>${names[i]}</h3>${s.items.length?`<ul${['nursing','checklist'].includes(s.key)?' class="st-checklist"':''}>${s.items.map(x=>`<li>${esc(x.text)}${x.sourceIds?.length?` <small class="st-citation" data-item-sources hidden>근거: ${supplementLinks(x.sourceIds,d.sources)}</small>`:''}</li>`).join('')}</ul>`:'<p class="st-muted">작성할 내용이 없습니다.</p>'}</section>`).join('')}</div>${sourceView(d.sources)}
+     <div class="st-actions">${canEdit&&['draft','review'].includes(d.status)?btn('내용 수정','edit'):''}${canEdit&&d.status==='draft'?btn('검토 요청','review','',true):''}${canReview&&d.status==='review'?btn('검토 후 승인','approve','',true):''}${canReview&&d.status==='withdrawn'?btn('다시 공개','approve','',true):''}${canEdit&&['published','withdrawn'].includes(d.status)?btn('수정본 만들기','revision-dialog'):''}${canReview&&d.status==='published'?btn('공개 중단','withdraw'):''}${canDelete(data.courses.find(c=>c.id===d.id))?btn('버전 삭제','delete-version',`data-id="${esc(d.id)}" data-danger`):''}</div>
      ${!adapter.common&&d.common?'<p class="st-info">공통 교육자료의 수정·삭제는 HQ에서 관리합니다.</p>':''}
-     ${aid&&canLearn?`<section class="st-assessment"><h3>${mine?.completed_at?'이수한 교육':'학습 확인'}</h3>${mine?.completed_at?`<p>${shortDate(mine.completed_at)} · ${mine.score}점으로 이수했습니다.</p>`:`<p>${d.body.quiz.length?'5문항 중 4문항 이상 정답이면 이수됩니다.':'자료 내용을 확인한 후 이수를 기록합니다.'}</p><form data-quiz>${d.body.quiz.map((q,i)=>`<fieldset><legend>${i+1}. ${esc(q.question)}</legend>${q.options.map((o,j)=>`<label class="st-choice"><input type="radio" name="answer${i}" value="${j}" required> ${esc(o)}</label>`).join('')}</fieldset>`).join('')}<label class="st-choice"><input type="checkbox" name="confirmRead" required> 교육자료를 읽고 내용을 확인했습니다.</label>${btn(d.body.quiz.length?'답안 제출':'이수 기록','attempt','',true)}</form><div data-feedback></div>`}</section>`:''}
+     ${aid&&canLearn?`<section class="st-assessment" id="stAssessment" tabindex="-1"><h3>${mine?.completed_at?'이수한 교육':'학습 확인'}</h3>${mine?.completed_at?`<p>${shortDate(mine.completed_at)} · ${mine.score}점으로 이수했습니다.</p>`:`<p>${d.body.quiz.length?'5문항 중 4문항 이상 정답이면 이수됩니다.':'자료 내용을 확인한 후 이수를 기록합니다.'}</p><form data-quiz>${d.body.quiz.map((q,i)=>`<fieldset><legend>${i+1}. ${esc(q.question)}</legend>${q.options.map((o,j)=>`<label class="st-choice"><input type="radio" name="answer${i}" value="${j}" required> ${esc(o)}</label>`).join('')}</fieldset>`).join('')}<label class="st-choice"><input type="checkbox" name="confirmRead" required> 교육자료를 읽고 내용을 확인했습니다.</label>${btn(d.body.quiz.length?'답안 제출':'이수 기록','attempt','',true)}</form><div data-feedback></div>`}</section>`:''}
      ${adapter.common&&canEdit&&d.kind==='education'?`<section class="st-supplement-entry"><h3>교육 내용 보완</h3><p>부족한 항목을 선택하면 근거를 찾아 별도 보완안을 만듭니다. 검토한 내용만 기존 초안에 추가할 수 있습니다.</p>${d.supplementEnabled&&['draft','review'].includes(d.status)?(d.body.gaps.length?'':btn('부족한 내용 AI 보완','supplement-create','',true)):`<p class="st-muted">${d.supplementEnabled?'새 버전을 작성한 뒤 보완할 수 있습니다.':'AI 보완 저장 공간 적용이 필요합니다.'}</p>`}${d.supplements?.length?`<details open class="st-sources"><summary>보완 이력 ${d.supplements.length}개</summary>${d.supplements.map(s=>`<div class="st-actions st-supplement-history"><span>${shortDate(s.created_at)} · ${supplementStatus(s.status)}${s.base_revision!==d.revision&&s.status==='ready'?' · 이전 본문 기준':''}</span>${btn('보완안 열기','supplement-open',`data-id="${esc(s.id)}"`)}</div>`).join('')}</details>`:''}</section>`:''}
      ${d.editable&&d.body.quiz.length?`<details class="st-sources"><summary>검토자용 평가문항·정답</summary>${d.body.quiz.map((q,i)=>`<p><b>${i+1}. ${esc(q.question)}</b><br>${q.options.map((o,j)=>`${j+1}. ${esc(o)}`).join(' / ')}<br>정답: ${esc(q.options[q.answer])}<br>${esc(q.explanation)} · 근거 ${q.sourceIds.map(sourceLabel).join(', ')}</p>`).join('')}</details>`:''}
      ${d.audit?.length?`<details class="st-sources"><summary>작성·검토 이력</summary>${d.audit.map(x=>`<p>${esc(x.at.replace('T',' ').slice(0,16))} · ${esc(({create:'초안 생성',practice_generate:'실무 교육 초안 생성',edit:'내용 수정',review:'검토 요청',publish:'승인·공개',republish:'검토·재공개',revise:'수정본 작성',delete:'자료 전체 삭제',restore:'자료 전체 복원',version_delete:'버전 삭제',version_restore:'버전 복원',withdraw:'공개 중단',assign:'교육 배정',enroll:'학습 시작',supplement_generate:'AI 보완안 생성',supplement_apply:'보완안 선택 반영'})[x.action]||x.action)} · ${esc(x.detail?.reviewerName||x.actor)}</p>`).join('')}</details>`:''}`;
@@ -256,7 +277,8 @@
    if(a==='toggle-citations'){const show=b.getAttribute('aria-expanded')!=='true';dialog.querySelectorAll('[data-item-sources]').forEach(x=>{x.hidden=!show;});b.setAttribute('aria-expanded',String(show));b.textContent=show?'문장별 근거 숨기기':'문장별 근거 보기';return;}
    if(a==='close'){closeDialog();return;}
    if(a==='refresh'){if(dialog&&!closeDialog())return;await load();return;}
-   if(a==='tab'){tab=b.dataset.tab;message='';render();return;}
+   if(a==='tab'){switchTab(b.dataset.tab);return;}
+   if(a==='section'){const target=dialog?.querySelector('#'+b.dataset.section);target?.scrollIntoView({block:'start',behavior:'auto'});target?.focus({preventScroll:true});return;}
    if(a==='clear'){query='';category='';courseType='';render();return;}
    if(a==='reopen-publication'){await openDocument(id,'',false,true);return;}
    if(a==='edit-course'){await openDocument(id,'',true);return;}
@@ -339,15 +361,15 @@
   }
   root.addEventListener('click',handle);
   root.addEventListener('input',e=>{if(e.target.matches('[data-search]')){query=e.target.value;renderList();}});
-  root.addEventListener('change',e=>{if(e.target.matches('[data-category]')){category=e.target.value;renderList();}if(e.target.matches('[data-course-type]')){courseType=e.target.value;renderList();}});
+  root.addEventListener('change',e=>{if(e.target.matches('[data-category]')){category=e.target.value;renderList();}if(e.target.matches('[data-course-type]')){courseType=e.target.value;renderList();}if(e.target.matches('[data-sort]')){sort=e.target.value;renderList();}if(e.target.matches('[data-layout]')){view=e.target.value;renderList();}});
   global.addEventListener('beforeunload',e=>{if(dirty||busy){e.preventDefault();e.returnValue='';}});
   function clear(){
    if(adapter.common)global.TrainingAutomation?.close();
-   ++sequence;data=null;identity='';dirty=false;activeDoc=null;activeAssignment=null;activeSupplement=null;query='';category='';courseType='';message='';
+   ++sequence;tabState={};sort='number';view='';data=null;identity='';dirty=false;activeDoc=null;activeAssignment=null;activeSupplement=null;query='';category='';courseType='';message='';
    if(dialog){dialog.close();dialog.remove();dialog=null;}shell();
   }
-  return {open:load,close:closeDialog,clear,selectSop(){tab='sop';query='';category='';}};
+  return {open:load,close:closeDialog,clear,selectSop(){remember();tab='sop';query='';category='';courseType='';sort='number';view='list';}};
  }
- global.StaffTraining={mount,filterCourses};
+ global.StaffTraining={mount,filterCourses,sortCourses,groupCourses};
 })(globalThis);
 
