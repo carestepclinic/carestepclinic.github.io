@@ -20,7 +20,8 @@ test('selected patient weight fills all calculators, requires one measurement co
 });
 test('manual weight wins over a delayed patient lookup, and missing date stays explicit',async t=>{
  const p=await page(t);await p.evaluate(()=>{selected={id:'p1',name:'시험',species:'dog'};weightDelay=250;recordedWeight={weight:8.2,weightDate:''};app.calculator();});await p.locator('[data-common-weight]').fill('12');await p.waitForTimeout(320);assert.equal(await p.locator('[data-common-weight]').inputValue(),'12');assert.equal(await p.locator('[data-record-weight-confirm]').isVisible(),false);
- await p.evaluate(()=>{weightDelay=0;app.calculator();});await p.waitForFunction(()=>document.querySelector('[data-common-weight]').value==='8.2');assert.match(await p.locator('[data-weight-status]').innerText(),/측정일 확인 필요/);assert.equal(await p.locator('[data-record-weight-confirm]').isChecked(),false);
+ await p.evaluate(()=>app.calculator());assert.equal(await p.locator('[data-common-weight]').inputValue(),'12'); // Same-context navigation keeps the clinician-entered weight.
+ await p.evaluate(()=>{weightDelay=0;app.clear();app.calculator();});await p.waitForFunction(()=>document.querySelector('[data-common-weight]').value==='8.2');assert.match(await p.locator('[data-weight-status]').innerText(),/측정일 확인 필요/);assert.equal(await p.locator('[data-record-weight-confirm]').isChecked(),false);
 });
 test('record confirmation is invalidated by species and does not gate unit conversion or volume-based fluid',async t=>{
  const p=await page(t);await p.goto(origin+'/fixture?patient=1');await p.locator('[data-record-weight-confirm]').check();await p.locator('[data-ref-species]').evaluate(e=>{e.value='cat';e.dispatchEvent(new Event('change',{bubbles:true}));});assert.equal(await p.locator('[data-record-weight-confirm]').isChecked(),false);await p.locator('[data-kind=convert]').click();const f=p.locator('[data-calc=convert]');await f.locator('[name=value]').fill('1');await f.getByRole('button',{name:'환산',exact:true}).click();assert.match(await f.locator('output').innerText(),/1000/);
@@ -68,3 +69,4 @@ test('tablet-count saved medicine needs explicit T choice and preserves count ca
 test('blank CRI units are listed and focusable alongside numerical inputs',async t=>{
  const p=await page(t);await p.locator('[data-kind=cri]').click();const f=p.locator('[data-calc=cri]');await f.locator('[data-remaining=cri]').getByRole('button',{name:'처방 단위',exact:true}).click();assert.equal(await f.locator('[name=doseUnit]').evaluate(e=>e===document.activeElement),true);assert.equal(await f.locator('[data-settings=cri]').evaluate(e=>e.open),true);
 });
+
