@@ -27,7 +27,7 @@
   function snapshot(s){return Object.fromEntries(specs[s.kind].shared.filter(k=>v(s.f,k)!=='').map(k=>[k,v(s.f,k)]));}
   function altered(s){return s.active&&JSON.stringify(snapshot(s))!==JSON.stringify(s.applied);}
   function render(s,collapseComplete=false){
-   const missing=[...s.advanced.querySelectorAll('input[required],select')].some(x=>!x.disabled&&!x.closest('[hidden]')&&!x.value.trim());
+   const missing=[...s.advanced.querySelectorAll('input[required],select')].some(x=>!x.disabled&&!x.closest('label[hidden]')&&!x.value.trim());
    if(missing)s.advanced.open=true;else if(collapseComplete)s.advanced.open=false;
    s.summary.hidden=!s.active;
    s.summary.querySelector('[data-setting-values]').replaceChildren(...settings(s.f).map(text=>{const span=document.createElement('span');span.textContent=text;return span;}));

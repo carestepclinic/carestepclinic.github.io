@@ -68,6 +68,8 @@
   const collapse=toolbar.querySelector('[data-calc-nav-toggle]'),expand=toolbar.querySelector('[data-calc-expand]');
   collapse.onclick=()=>{const hidden=b.classList.toggle('pt-nav-collapsed');collapse.setAttribute('aria-expanded',String(!hidden));collapse.textContent=hidden?'계산기 메뉴 펼치기':'계산기 메뉴 접기';};
   function expanded(value){b.classList.toggle('pt-calculator-expanded',value);expand.setAttribute('aria-pressed',String(value));expand.textContent=value?'기본 화면으로':'계산기 넓게 보기';}
+  const options=document.createElement('details');options.className='pt-view-options';options.innerHTML='<summary>화면·입력 관리</summary>';toolbar.append(options);options.append(toolbar.querySelector('.pt-bar')||collapse.parentElement);
+  queueMicrotask(()=>{const reset=b.querySelector('.pt-reset-calculation');if(reset)options.append(reset);});
   expand.onclick=()=>expanded(!b.classList.contains('pt-calculator-expanded'));
   b.addEventListener('keydown',e=>{if(e.key==='Escape'&&b.classList.contains('pt-calculator-expanded')&&!document.querySelector('dialog[open]')){expanded(false);expand.focus();}});
   const setText=(el,value)=>{if(el&&el.textContent!==value)el.textContent=value;};
@@ -75,6 +77,9 @@
   const species=b.querySelector('[data-ref-species]'),weight=b.querySelector('[data-common-weight]');
   const patient=b.querySelector('[data-patient-summary]'),unlink=b.querySelector('[data-manual]');
   common.classList.add('pt-compact-context');
+  const patientDetails=document.createElement('details');patientDetails.className='pt-patient-options';patientDetails.innerHTML='<summary>환자 연결·측정일 확인</summary>';common.append(patientDetails);for(const node of [...common.children])if(node!==patientDetails&&!node.matches('[data-common-inputs],.pt-heading'))patientDetails.append(node);
+  function patientReview(){if(b.querySelector('[data-record-weight-confirm]')?.closest('label')?.hidden===false)patientDetails.open=true;}const patientObserver=new MutationObserver(patientReview);patientObserver.observe(patientDetails,{subtree:true,attributes:true,attributeFilter:['hidden']});
+
   const intro=b.querySelector(':scope > .pt-notice');
   if(intro){const help=document.createElement('details');help.className='pt-calculator-help';help.innerHTML='<summary>계산기 사용 안내</summary>';help.append(intro);b.append(help);}
 
@@ -95,6 +100,9 @@
   for(const form of b.querySelectorAll('form[data-calc]:not([data-calc=batch])')){
    // Put reusable setup after the daily inputs. Empty setup summaries are hidden by Simple.
    const bar=form.querySelector('.pt-protocol-bar'),settings=form.querySelector('[data-settings]');
+   const names={dose:'제품 함량·투약 조건',fluid:'수액 계산 방식·점적 세트',cri:'CRI 조제 조건',potassium:'칼륨 계산 조건',nutrition:'급여 제품·횟수',ag:'AG 계산 방식',bicarbonate:'중탄산 보정 조건'};
+   if(settings)setText(settings.querySelector('summary'),names[form.dataset.calc]||'상세 계산 조건');
+   const submit=form.querySelector('button.pt-primary');if(settings&&submit)submit.before(settings);
    if(bar&&settings)settings.before(bar);
    const summary=form.querySelector('.pt-setting-summary');if(summary&&bar)bar.after(summary);
    const explanation=[...form.children].filter(x=>x.matches('p.pt-help')&&x.textContent.length>140);
@@ -155,7 +163,7 @@
   listen(window.visualViewport,'resize',schedule);
   listen(library,'keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT')e.preventDefault();});
   const observer=new MutationObserver(schedule);observer.observe(b,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','disabled','aria-pressed','data-calculation-state']});
-  function dispose(){if(disposed)return;disposed=true;b.classList.remove('pt-calculator-expanded','pt-nav-collapsed');observer.disconnect();controller.abort();if(frame)cancelAnimationFrame(frame);dock.remove();}
+  function dispose(){if(disposed)return;disposed=true;b.classList.remove('pt-calculator-expanded','pt-nav-collapsed');observer.disconnect();patientObserver.disconnect();controller.abort();if(frame)cancelAnimationFrame(frame);dock.remove();}
   refreshLayout();return {dispose};
  }
  g.PracticeCalculatorEase={mount};

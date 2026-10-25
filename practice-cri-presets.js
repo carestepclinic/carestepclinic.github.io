@@ -185,7 +185,7 @@
    const weight=Number(b.querySelector('[data-common-weight]').value);let rate=Number(fields.rate.value),detail='';
    if(mode!=='prepare'){try{const result=g.PracticeCalculators.cri({...Object.fromEntries(new FormData(f)),weight});rate=result.rate;detail='처방량·제품 농도'+(mode==='intermittent'?'·주입 시간':'·조제 내역')+'으로 계산';}catch{rate=0;}}
    else if(automatic)detail=fields.volume.value+' mL ÷ '+hours.value+'시간';
-   flow.textContent=rate>0&&Number.isFinite(rate)?'펌프 속도 '+g.PracticeCalculators.display(rate)+' mL/hr'+(detail?' · '+detail:'')+(weight>0?' · 이 약물 라인 '+g.PracticeCalculators.display(rate/weight)+' mL/kg/hr':'')+' · 다른 수액과 합한 총 공급량·펌프 정확도 확인':'환자별 수액 계획에 맞춰 속도 또는 조제액 사용 시간을 선택하세요.';
+   flow.dataset.mode=automatic?'automatic':'manual';flow.textContent=(automatic?'시간 기준 자동 계산 · ':'처방 입력 기준 · ')+(rate>0&&Number.isFinite(rate)?'펌프 속도 '+g.PracticeCalculators.display(rate)+' mL/hr'+(detail?' · '+detail:'')+(weight>0?' · 이 약물 라인 '+g.PracticeCalculators.display(rate/weight)+' mL/kg/hr':'')+' · 다른 수액과 합한 총 공급량·펌프 정확도 확인':'환자별 수액 계획에 맞춰 속도 또는 조제액 사용 시간을 선택하세요.');
    const d=selected&&fields.drug.value===selected.name&&!['undiluted','intermittent'].includes(mode)?dilutionFor(selected.id):null;f.criSetupContext={hours:automatic?hours.value:'',volume:fields.volume.value,dilution:d&&fields.diluent.value===d.value?d:null};
    for(const {field,host} of quick)for(const button of host.children)button.setAttribute('aria-pressed',String(button.dataset.criQuick===field.value));syncing=false;
   }

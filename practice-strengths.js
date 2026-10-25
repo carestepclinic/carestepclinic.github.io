@@ -24,7 +24,7 @@
   return plan;
  }
  let catalogPromise;
- async function catalog(){if(!catalogPromise)catalogPromise=fetch('practice-strength-catalog.json?v=20261024-2',{credentials:'omit',cache:'no-cache'}).then(async r=>{if(!r.ok)throw Error('공통 함량 목록을 불러오지 못했습니다.');const d=await r.json();if(d.format!=='carestep-ingredient-strengths/v1'||!Array.isArray(d.ingredients))throw Error('함량 목록 형식을 확인해주세요.');return d;}).catch(e=>{catalogPromise=null;throw e;});return catalogPromise;}
+ async function catalog(){if(!catalogPromise)catalogPromise=fetch('practice-strength-catalog.json?v=20261024-2',{credentials:'omit',cache:'force-cache'}).then(async r=>{if(!r.ok)throw Error('공통 함량 목록을 불러오지 못했습니다.');const d=await r.json();if(d.format!=='carestep-ingredient-strengths/v1'||!Array.isArray(d.ingredients))throw Error('함량 목록 형식을 확인해주세요.');return d;}).catch(e=>{catalogPromise=null;throw e;});return catalogPromise;}
  function mount(b,o){
   let records={items:[],canManage:false},doc=null;
   const button=document.createElement('button');button.type='button';button.dataset.strengthOpen='';button.textContent='성분별 기본 함량 설정';b.querySelector('.pt-product-entry').prepend(button);

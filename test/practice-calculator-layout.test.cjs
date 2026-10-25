@@ -21,8 +21,8 @@ for(const width of [390,1280])test('daily inputs, required product settings and 
  assert.ok((await dose.locator('[name=dose]').boundingBox()).y<900);assert.equal(await dose.locator('[name=doseUnit]').isVisible(),true);assert.equal(await dose.locator('[name=concentration]').isVisible(),true);assert.equal(await p.locator('[data-manual]').isVisible(),false);
  assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));
  await p.locator('[data-quick-product-search]').fill('Synthetic');await p.locator('[data-quick-product]').click();assert.equal(await dose.locator('[name=concentration]').inputValue(),'20');assert.equal(await dose.locator('[data-settings]').evaluate(x=>x.open),false);
- await p.locator('[data-kind=cri]').click();for(const name of ['drug','doseUnit','stock','stockUnit','volume','diluent'])assert.equal(await p.locator('[data-calc=cri] [name='+name+']').isVisible(),true,name);
- assert.equal(await p.locator('[data-library-open]').isVisible(),true);await p.locator('[data-kind=acid]').click();assert.equal(await p.locator('[data-library-open]').isVisible(),false);
+ await openKind(p,'cri');await waitFrame(p);for(const name of ['drug','doseUnit','stock','stockUnit','volume','diluent'])assert.equal(await p.locator('[data-calc=cri] [name='+name+']').isVisible(),true,name);
+ assert.equal(await p.locator('[data-library-open]').isVisible(),true);await openKind(p,'acid');assert.equal(await p.locator('[data-library-open]').isVisible(),false);
  assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));assert.equal(await p.evaluate(()=>calls.some(x=>x.method!=='GET')),false);
 });
 
@@ -47,7 +47,7 @@ test('strength modal reveals the first row, edits one ingredient and keeps save 
 });
 
 test('batch review filters preserve all rows, focus unresolved entries and clear only after validation',async t=>{
- const p=await page(t);await p.locator('[data-kind=batch]').click();const source='Synthetic 2 mg/kg PO BID for 3 days\nUnknown 1 mg/kg PO BID for 3 days';await p.locator('[data-rx-text]').fill(source);await p.getByRole('heading',{name:'자동 계산 완료 1/2단계 · 미완료 약물 확인 필요 · 약물 2종',exact:true}).waitFor();
+ const p=await page(t);await openKind(p,'batch');const source='Synthetic 2 mg/kg PO BID for 3 days\nUnknown 1 mg/kg PO BID for 3 days';await p.locator('[data-rx-text]').fill(source);await p.getByRole('heading',{name:'자동 계산 완료 1/2단계 · 미완료 약물 확인 필요 · 약물 2종',exact:true}).waitFor();
  await p.locator('[data-rx-filter=pending]').click();assert.equal(await p.locator('[data-rx-row="0"]').isVisible(),false);assert.equal(await p.locator('[data-rx-row="1"]').isVisible(),true);await p.locator('[data-rx-next]').click();assert.equal(await p.locator('[data-rx-row="1"]').evaluate(x=>x===document.activeElement),true);
  const row=p.locator('[data-rx-row="1"]');await row.locator('[data-rx-field=product]').fill('시험 액상');await row.locator('[data-rx-field=form]').selectOption('liquid');await row.locator('[data-rx-field=strength]').fill('5');await p.getByRole('heading',{name:'자동 계산 완료 2/2단계 · 약물 2종',exact:true}).waitFor();assert.equal(await p.locator('[data-rx-next]').isDisabled(),true);assert.equal(await p.locator('[data-rx-row]:visible').count(),0);assert.equal(await p.locator('[data-rx-text]').inputValue(),source);
  await p.locator('[data-rx-filter=all]').click();assert.equal(await p.locator('[data-rx-row]:visible').count(),2);assert.equal(await p.locator('.pt-rx-result-detail').first().evaluate(x=>x.open),false);assert.equal(await p.locator('[data-calc=batch] [data-copy]').isDisabled(),true);
@@ -60,7 +60,7 @@ for(const width of [390,1280])test('full CLINIC shell stays within the viewport 
 });
 
 test('important infusion warnings stay visible beside compact results',async t=>{
- const p=await page(t);await p.locator('[data-kind=potassium]').click();const f=p.locator('[data-calc=potassium]');await f.locator('[name=concentration]').fill('20');await f.locator('[name=rate]').fill('10');await f.locator('[name=confirmed]').check();await f.getByRole('button',{name:'계산',exact:true}).click();await f.locator('.pt-result-key-grid').waitFor();
+ const p=await page(t);await openKind(p,'potassium');const f=p.locator('[data-calc=potassium]');await f.locator('[name=concentration]').fill('20');await f.locator('[name=rate]').fill('10');await f.locator('[name=confirmed]').check();await f.getByRole('button',{name:'계산',exact:true}).click();await f.locator('.pt-result-key-grid').waitFor();
  assert.equal(await f.locator('.pt-result-details').evaluate(x=>x.open),false);assert.match(await f.locator('output').innerText(),/급속 주입 금지/);assert.match(await f.locator('output').innerText(),/적합함을 보장하지/);
 });
 
@@ -68,3 +68,5 @@ test('important infusion warnings stay visible beside compact results',async t=>
 test('reference retry inside drug search never submits the calculation form',async t=>{
  const p=await page(t);await p.evaluate(()=>{referenceFail=true;window.accidentalSubmits=0;document.querySelector('[data-calc=dose]').addEventListener('submit',()=>window.accidentalSubmits++);});await p.locator('[data-library-open]').click();const retry=p.locator('.pt-library').getByRole('button',{name:'다시 불러오기',exact:true});await retry.waitFor();assert.equal(await retry.getAttribute('type'),'button');await p.evaluate(()=>referenceFail=false);await retry.click();assert.equal(await p.evaluate(()=>accidentalSubmits),0);assert.equal(await p.locator('[data-calc=dose] output').innerText(),'');
 });
+
+async function openKind(p,kind){if(p.viewportSize().width<=800)await p.locator('[data-calc-jump]').selectOption(kind);else await p.locator('[data-kind='+kind+']').click();}
