@@ -4,10 +4,10 @@
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const unitName=form=>({tablet:'정',capsule:'캡슐',liquid:'mL'}[form]||'');
  const key=v=>String(v||'').normalize('NFKC').trim().replace(/\s+/g,' ').toLowerCase();
- function candidates(items,drug,species,route='oral',doseUnit){const k=key(drug);if(!k)return [];const named=items.filter(p=>{const f=p.body?.formulary;return f?.version===1&&f.route===route&&f.species.includes(species)&&[p.body.title,...f.aliases].some(a=>p.body.strength?g.PracticeStrengths?.key(a)===g.PracticeStrengths?.key(drug):key(a)===k);});const existing=named.filter(p=>!p.body.strength);return (existing.length?existing:named).filter(p=>!p.formularyIssue&&p.body.formulary.calculatorReady!==false&&['tablet','capsule','liquid'].includes(p.body.kind)&&['mg','mcg','T'].includes(p.body.unit)&&(!doseUnit||unitsCompatible(doseUnit,p.body.unit)));}
+ function candidates(items,drug,species,route='oral',doseUnit){if(g.PracticeIngredients)return g.PracticeIngredients.candidates(items,drug,species,route,doseUnit);const k=key(drug);if(!k)return [];const named=items.filter(p=>{const f=p.body?.formulary;return f?.version===1&&f.route===route&&f.species.includes(species)&&[p.body.title,...f.aliases].some(a=>p.body.strength?g.PracticeStrengths?.key(a)===g.PracticeStrengths?.key(drug):key(a)===k);});const existing=named.filter(p=>!p.body.strength);return (existing.length?existing:named).filter(p=>!p.formularyIssue&&p.body.formulary.calculatorReady!==false&&['tablet','capsule','liquid'].includes(p.body.kind)&&['mg','mcg','T'].includes(p.body.unit)&&(!doseUnit||unitsCompatible(doseUnit,p.body.unit)));}
  // Coalesce calculation facts, never merge or overwrite clinic product records.
  function autoCandidate(found,drug){
-  if(found.length===1)return found[0];if(found.length<2)return null;
+  if(found.some(p=>p.ingredientChoiceRequired))return null;if(found.length===1)return found[0];if(found.length<2)return null;
   const norm=v=>key(v).replace(/[^a-z0-9가-힣]/g,''),udca=new Set(['udca','ursodiol','ursodeoxycholicacid','우르소데옥시콜산']);
   function fact(p){const b=p.body,m=b.formulary,basis=norm(m.calculationBasis),label=[b.title,m.calculationBasis,...(m.warnings||[])].join(' ');
    if(!['mg','mcg'].includes(b.unit)||m.route!=='oral'||!['tablet','capsule','liquid'].includes(b.kind)||b.strength&&b.strength.release!=='standard'||/서방|장용|지속|방출|extended|enteric|modified|sustained|controlled|복합|조합|총량|제품 전체|\+|\//i.test(label))return null;
@@ -24,6 +24,7 @@
  const unitsCompatible=(a,b)=>(a==='T')===(b==='T')&&(a==='U')===(b==='U');
  const hash=async s=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)))].map(x=>x.toString(16).padStart(2,'0')).join('');
  function mount(b,o){
+  if(g.PracticeIngredients)void g.PracticeIngredients.load().catch(()=>{});
   const request=(path,options)=>o.request('/practice/products'+path,options),med=b.querySelector('[data-calc=dose]'),species=b.querySelector('[data-ref-species]');let active=null,generation=0,editSerial=0;
   const bar=document.createElement('div');bar.className='pt-product-entry';bar.innerHTML='<button type="button" data-domestic-open>국내 제품·함량 찾기</button><button type="button" data-formulary-open>우리 병원 사용 약품</button><p data-domestic-applied class="pt-help" role="status"></p>';med.querySelector('h3').after(bar);
   const note=bar.querySelector('[data-domestic-applied]');

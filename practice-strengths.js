@@ -80,5 +80,5 @@
   }
   return {open,loaded:r=>{records=adapt(r);},edit:p=>open('',p)};
  }
- g.PracticeStrengths={adapt,aliases,searchNames,matches,key,routeRows,planSingles,mount};
+ g.PracticeStrengths={catalog,adapt,aliases,searchNames,matches,key,routeRows,planSingles,mount};
 })(window);
