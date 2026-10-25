@@ -414,3 +414,15 @@ body:has(#practice.active-view) #globalNewCase,body:has(#practice.active-view) #
 .pt .pt-intake-actions{font-size:14px}.pt .pt-intake-actions>div{padding:10px;border:1px solid #d4dfed;border-radius:10px;background:#fff}.pt .pt-intake-actions>summary{font-weight:650}.pt .pt-toolbar .pt-bar:has(.pt-intake-actions){align-items:center}
 /* Medication selection, exact-versus-preparable quantities and shared schedules. */
 .pt-medication-flow{padding:16px;border:1px solid #bacfe5;border-radius:12px;background:#f3f8fd;margin:14px 0}.pt-medication-flow h4{margin:0 0 12px;font-size:16px}.pt-medication-flow label{display:block;margin:10px 0}.pt-medication-flow select,.pt-medication-flow input{width:100%;min-width:0;min-height:44px}.pt-dispense,.pt-cri-other{border:1px solid #d2dde9;border-radius:10px;padding:12px;margin:14px 0}.pt-dispense summary,.pt-cri-other summary{cursor:pointer;font-weight:650;min-height:30px}.pt-dispense [data-dispense-result] p{line-height:1.8;padding:8px;background:#f4f8fc;border-radius:8px;overflow-wrap:anywhere}.pt-rx-shared-preview{font-size:14px;line-height:1.7;color:#31506c}.pt-setting-summary [data-setting-values]{font-size:14px}.pt .pt-medication-flow select{white-space:normal}.pt-cri-flow{line-height:1.8;overflow-wrap:anywhere}@media(max-width:600px){.pt-medication-flow{padding:12px}.pt-dispense .pt-grid{grid-template-columns:minmax(0,1fr)}.pt-dispense button{width:100%}}
+
+/* Reusable prescribing tools: progressive fields and readable clinical comparisons. */
+.pt-rx-reuse{padding:16px;margin:12px 0;border:1px solid var(--line,#dce4ed);border-radius:12px;background:var(--soft,#f6f9fc)}
+.pt-rx-reuse h4{margin:0 0 10px}.pt-rx-reuse .pt-bar{flex-wrap:wrap;gap:8px}.pt-rx-reuse button{min-height:42px}
+.pt-medication-checks,.pt-preparation,.pt-strength-compare{margin:12px 0;padding:12px 16px;border:1px solid #d9e2ee;border-radius:12px;background:#fff}
+.pt-medication-checks summary,.pt-preparation summary,.pt-strength-compare summary{cursor:pointer;font-weight:650;line-height:1.6;min-height:32px}
+.pt-medication-checks p{font-size:14px;line-height:1.65;margin:8px 0;overflow-wrap:anywhere}.pt-medication-checks [data-checks-result]{max-height:240px;overflow:auto}
+.pt-compare-stock{display:grid!important;grid-template-columns:24px minmax(0,1fr) 130px;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid #e3e9f0}
+.pt-compare-stock input[type=checkbox]{width:20px!important;height:20px!important}.pt-stage{margin:12px 0}.pt-stage input,.pt-stage select{min-width:0}
+.pt-modal pre.pt-pre,.pt-dialog pre.pt-pre,dialog pre.pt-pre{white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;font-size:14px;line-height:1.7;max-height:300px;overflow:auto}
+[data-expiry-result]{display:block;margin:12px 0;line-height:1.7;overflow-wrap:anywhere}[data-rx-reuse-status]:empty{display:none}
+@media(max-width:520px){.pt-rx-reuse,.pt-medication-checks,.pt-preparation,.pt-strength-compare{padding:12px}.pt-rx-reuse .pt-bar button{flex:1 1 140px}.pt-compare-stock{grid-template-columns:24px minmax(0,1fr)}.pt-compare-stock select{grid-column:2;width:100%}.pt-stage .pt-grid{grid-template-columns:1fr}}

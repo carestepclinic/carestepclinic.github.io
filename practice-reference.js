@@ -4,6 +4,10 @@
  const checked='2026-10-22';
  const daily=id=>'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid='+id;
  const sources={
+  enrofloxacin:{title:'Dechra · ENROQUIN 미국 허가문서',url:daily('5b17309c-5f00-4af3-97bc-d84805261439')},
+  grapiprant:{title:'Elanco · GALLIPRANT 미국 허가문서',url:daily('a38cc5c6-93e8-4c90-aabc-33bc8423beab')},
+  robenacoxib:{title:'Elanco · ONSIOR 주사제 미국 허가문서',url:daily('f4f307a0-88b5-4740-b198-35edef954bf1')},
+  pimobendan:{title:'Boehringer Ingelheim · VETMEDIN 미국 허가문서',url:daily('5441e5b2-cdc0-477a-bd9a-ec5f8d912281')},
   clavamox:{title:'Zoetis · CLAVAMOX 미국 제품 정보',url:'https://www.zoetisus.com/products/petcare/clavamox/'},
   cephalexin:{title:'Virbac · RILEXINE 미국 허가문서',url:daily('84506621-8429-4b65-a7b4-1c9375dcbd89')},
   clindamycin:{title:'Zoetis · ANTIROBE AQUADROPS 미국 허가문서',url:daily('a2224602-6f04-4b83-968a-8c193230998f')},
@@ -19,6 +23,11 @@
  const beta='페니실린·세팔로스포린 과민반응 병력 금기. 세균 감염·감수성 및 환자 상태를 확인하세요.';
  const antiemetic='구토 원인을 평가하세요. 위장관 폐색·독물 섭취에서 안전성 미확인. 간기능·병용약·번식/임신/수유 여부를 확인하세요.';
  const drugs=[
+  {id:'enrofloxacin',name:'엔로플록사신 · 정제',generic:'enrofloxacin',product:'ENROQUIN Flavored',category:'oral',form:'tablet',strengths:[22.7,68,136],source:'enrofloxacin',checked:'2026-10-25',warning:'퀴놀론 과민반응 금기. 성장기 관절·발작 병력 및 감수성을 확인하세요. 고양이는 망막 독성에 특히 주의하며 총 5 mg/kg/일을 넘기지 않는 이 문서의 용법입니다. 국내 제품과 함량·허가조건을 대조하세요.',profiles:[profile('dog-daily','dog','감수성 세균 감염 · 하루 1회','PO',5,20,1,{maxDays:30,note:'범위 내 용량을 수의사가 선택합니다. 일일 총량을 1회 투여하는 용법.'}),profile('dog-twice','dog','감수성 세균 감염 · 12시간 간격','PO',2.5,10,2,{maxDays:30,note:'문서의 5–20 mg/kg/일을 2회 균등 분할한 1회량.'}),profile('cat-daily','cat','감수성 세균 감염 · 하루 1회','PO',5,5,1,{maxDays:30,note:'고양이 1일 총량 5 mg/kg. 치료 반응과 망막 위험을 평가합니다.'}),profile('cat-twice','cat','감수성 세균 감염 · 12시간 간격','PO',2.5,2.5,2,{maxDays:30,note:'문서의 고양이 5 mg/kg/일을 2회 균등 분할.'})]},
+  {id:'grapiprant',name:'그라피프란트 · 정제',generic:'grapiprant',product:'GALLIPRANT',category:'oral',form:'tablet',strengths:[20,60,100],source:'grapiprant',checked:'2026-10-25',warning:'개 골관절염 제품. NSAID·스테로이드 병용 금지. 탈수·신장·간·위장관 위험과 검사값 확인. 9개월 미만·3.6 kg 미만·임신/수유/번식 안전성 미확인. 100 mg 정제는 분할하지 않습니다. 20/60 mg 제품의 반정 및 체중표를 확인하세요.',profiles:[profile('dog','dog','골관절염 통증·염증 · 9개월 이상','PO',2,2,1,{minMonths:9,minWeight:3.6,note:'최소 유효량·최단 기간. 계산량과 제품 체중별 정제표를 별도로 대조합니다.'})]},
+  {id:'robenacoxib-injection',name:'로베나콕시브 · 주사제',generic:'robenacoxib',product:'ONSIOR Injection',category:'injection',form:'liquid',strengths:[20],source:'robenacoxib',checked:'2026-10-25',warning:'피하주사 전용. NSAID·스테로이드 병용 금지. 탈수·신장·간·위장관 위험, 식욕과 수술 중 모니터링 확인. 정제와 주사제 용량은 다릅니다. 두 제형을 전환하더라도 합계 하루 1회·최대 3일입니다.',profiles:[profile('cat','cat','정형외과·중성화 수술 후 통증 · 4개월 이상','SC',2,2,1,{maxDays:3,minMonths:4,note:'첫 투여는 수술 약 30분 전. 고양이 2.5 kg 미만 안전성 미평가 조건 확인.'}),profile('dog','dog','연부조직 수술 후 통증 · 4개월 이상','SC',2,2,1,{maxDays:3,minMonths:4,note:'첫 투여는 수술 약 45분 전. 수술 전후 투여 일수를 모두 합산합니다.'})]},
+  {id:'pimobendan',name:'피모벤단 · 정제',generic:'pimobendan',product:'VETMEDIN Chewable',category:'oral',form:'tablet',strengths:[1.25,2.5,5,10],source:'pimobendan',checked:'2026-10-25',warning:'개용 제품. MMVD 단계·심장 확장 또는 MMVD/DCM 관련 CHF 진단 확인. Stage A/B1, 비후성 심근병증·대동맥 협착 등 심박출량 증가가 부적절한 경우에 적용하지 않습니다. 6개월 미만·임신/수유 등의 안전성 미평가.',profiles:[profile('b2','dog','확진된 Stage B2 MMVD · 균등 2회 분할','PO',.25,.25,2,{minMonths:6,note:'문서의 0.5 mg/kg/일을 2회 균등 분할한 예시. 약 12시간 간격. 심초음파·방사선 기준을 확인합니다.'}),profile('chf','dog','MMVD/DCM 관련 울혈성 심부전 · 균등 2회 분할','PO',.25,.25,2,{minMonths:6,note:'문서의 0.5 mg/kg/일을 2회 균등 분할. 다른 병용 치료는 개별 결정. 반정 단위 조제와 임상 반응 확인.'})]},
+
   {id:'amoxclav-tablet',name:'아목시실린/클라불란산 · 정제',generic:'amoxicillin clavulanate',product:'CLAVAMOX CHEWABLE',category:'oral',form:'tablet',strengths:[62.5,125,250,375],source:'clavamox',warning:beta+' 함량은 4:1 복합제 합계입니다. 이 제품은 분할량만 투여하지 않고 정제 전체를 사용하도록 표시되어 있습니다.',profiles:amoxProfiles},
   {id:'amoxclav-drops',name:'아목시실린/클라불란산 · 경구액',generic:'amoxicillin clavulanate',product:'CLAVAMOX Drops',category:'oral',form:'liquid',strengths:[62.5],source:'clavamox',warning:beta+' 재구성 후 62.5 mg/mL(두 성분 합계). 냉장 보관·10일 이내 사용 조건을 확인하세요.',profiles:amoxProfiles},
   {id:'cephalexin',name:'세팔렉신 · 정제',generic:'cephalexin',product:'RILEXINE',category:'oral',form:'tablet',strengths:[150,300,600],source:'cephalexin',warning:beta+' 이 문서는 개의 이차성 표재성 농피증에 한정되며 고양이 용량으로 적용하지 않습니다.',profiles:[profile('dog','dog','감수성 S. pseudintermedius에 의한 이차성 표재성 농피증','PO',22,22,2,{note:'제품 문서의 치료 기간은 28일. 배양·감수성 및 임상 반응에 따라 수의사가 치료 계획을 결정합니다.'})]},

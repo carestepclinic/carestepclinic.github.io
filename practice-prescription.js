@@ -32,6 +32,7 @@
    else if((m=tail.match(/^(eod|qod|격일)(?=\s|$)/i))){take('times',1);row.intervalDays='2';}
    else if((m=tail.match(/^q\s*(\d+)\s*h(?=\s|$)/i))){const h=Number(m[1]);if(h===48){take('times',1);row.intervalDays='2';}else if(![4,6,8,12,24].includes(h))row.issues.push('이 투여 간격은 하루 정수 횟수로 계산할 수 없습니다. 원처방을 확인해주세요.');else take('times',24/h);}
    else if((m=tail.match(/^하루\s*(\d+)\s*회(?=\s|$)/)))take('times',m[1]);
+   else if((m=tail.match(/^(2)일째부터(?=\s|$)/))){if(row.firstDoseDay!=='1')row.issues.push('격일 시작일이 중복되었습니다.');row.firstDoseDay='2';}
    else if((m=tail.match(/^(?:for\s+)?(\d+)\s*(days?|일|weeks?|주)(?=\s|$)/i)))take('days',Number(m[1])*((/^week|주/i).test(m[2])?7:1));
    else if((m=tail.match(/^\((아침|점심|저녁|취침\s*전)\)(?=\s|$)/)))take('timing',m[1].replace(/\s+/g,' '));
    else {row.issues.push('해석하지 못한 문구: '+tail);break;}
