@@ -97,3 +97,15 @@ test('mobile setup avoids a second long list; back restores the same filter',asy
  const c=await emcard(p);assert.equal(await p.locator('.pt-em-quick').isVisible(),false);
  await c.locator('[data-em-back]').click();assert.equal(await p.locator('.pt-em-quick').isVisible(),true);assert.equal(await c.isVisible(),false);
 });
+
+test('clinic concentration source does not duplicate the saved origin label',()=>{
+ const drug=emergency.drugs.find(d=>d.id==='dobutamine');
+ const opts=emergency.concentrationOptions(drug,[{id:'s1',body:{title:'도부타민',kind:'liquid',unit:'mg',value:50,strength:{ingredientId:drug.ingredientId,route:'injection',release:'standard',species:['dog']}}}],'dog');
+ assert.equal(opts[0].note,'도부타민');assert.equal(opts[0].clinic,true);
+});
+test('missing species explanation is shared while product restrictions remain',async t=>{
+ const p=await page(t);await kind(p,'med');await p.locator('[data-ref-species]').selectOption('');
+ await p.waitForFunction(()=>[...document.querySelectorAll('[data-protocol-status]')].filter(x=>/상단에서 동물 종류/.test(x.textContent)).every(x=>x.hidden));
+ const common=p.locator('.pt-flow-context'); // shared context is independent from the disabled product controls
+ assert.equal(await p.locator('[data-protocol-status]').filter({hasText:'상단에서 동물 종류'}).evaluateAll(xs=>xs.every(x=>x.hidden)),true);
+});

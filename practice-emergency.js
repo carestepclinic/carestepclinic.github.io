@@ -70,7 +70,7 @@
  }
  function concentrationOptions(d,items,species){
   // Clinic defaults are an exact ingredient/route/species match. Never borrow an oral or combination product.
-  const clinic=(items||[]).filter(p=>{const m=p.body?.strength;return !p.formularyIssue&&m?.ingredientId===d.ingredientId&&m.route==='injection'&&m.release==='standard'&&m.species?.includes(species)&&p.body.kind==='liquid'&&['mg','mcg','U'].includes(p.body.unit)&&(d.unit==='U')===(p.body.unit==='U')&&Number(p.body.value)>0&&Number.isFinite(Number(p.body.value));}).map(p=>({id:'clinic:'+p.id,value:Number(p.body.value)*(p.body.unit==='mcg'?0.001:1),sourceUrl:p.body.strength.sourceUrl||'',note:'병원 저장 · '+p.body.title,clinic:true}));
+  const clinic=(items||[]).filter(p=>{const m=p.body?.strength;return !p.formularyIssue&&m?.ingredientId===d.ingredientId&&m.route==='injection'&&m.release==='standard'&&m.species?.includes(species)&&p.body.kind==='liquid'&&['mg','mcg','U'].includes(p.body.unit)&&(d.unit==='U')===(p.body.unit==='U')&&Number(p.body.value)>0&&Number.isFinite(Number(p.body.value));}).map(p=>({id:'clinic:'+p.id,value:Number(p.body.value)*(p.body.unit==='mcg'?0.001:1),sourceUrl:p.body.strength.sourceUrl||'',note:p.body.title,clinic:true}));
   // Dextrose catalog contains an inconsistent 10% entry at 1000 mg/mL; never import it or its derived defaults.
   const safe=clinic.filter(x=>d.id!=='dextrose'||d.stocks.some(s=>s.value===x.value));
   return [...safe,...d.stocks.map((s,i)=>({...s,id:'common:'+i}))];

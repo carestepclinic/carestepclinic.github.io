@@ -100,7 +100,7 @@
     if(remaining){const status=remaining.querySelector('span');if(status?.textContent==='필수 입력 완료 · 계산으로 결과 확인')text(status,'입력 완료');hide(remaining,!!f.querySelector('output')?.textContent.trim()&&!remaining.querySelector('button'));}
    }
    // A missing shared field is explained once in the common context bar.
-   for(const x of all('[data-protocol-status],[data-quick-note]'))hide(x,!!missing&&/상단에서 동물 종류|종을 선택/.test(x.textContent));
+   for(const x of all('[data-protocol-status],[data-quick-product-status],.pt-quick-product > .pt-help'))hide(x,!!missing&&/상단에서 동물 종류|종을 선택/.test(x.textContent));
   }
   const schedule=()=>{if(!frame&&!disposed)frame=requestAnimationFrame(refresh);};
   const observer=new MutationObserver(schedule);observer.observe(b,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','aria-pressed']});
