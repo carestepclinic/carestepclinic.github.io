@@ -119,7 +119,7 @@
    rxWorkflow=g.PracticeRxWorkflow?.mount(b,{batch,request:calculatorRequest,guard:()=>alive()&&(a.patient()?.id||'')===initialPatientId,patient:()=>selected,weightInfo:()=>weightInfo,products:async()=>g.PracticeStrengths.adapt(await fetchPresets()),modal,close});
 
    function sendClinical(payload){if(!alive())return;clinicalCarry={...payload,patient:selected?{...selected}:null};tab='clinical';void open();}
-   prescriptionSafety=g.PracticePrescriptionSafety?.mount(b,{batch});
+   prescriptionSafety=g.PracticePrescriptionSafety?.mount(b,{batch,request:calculatorRequest,guard:alive});
    medicationAssist=g.PracticeMedicationAssist?.mount(b,{request:calculatorRequest,guard:()=>alive()&&(a.patient()?.id||'')===initialPatientId,patient:()=>selected,product:()=>domestic?.current(),products:async()=>g.PracticeStrengths.adapt(await fetchPresets()),batch,modal,close});
    preparation=g.PracticePreparation?.mount(b,{guard:()=>alive()&&(a.patient()?.id||'')===initialPatientId,reload:loadPresets,clear:clearResults,request:calculatorRequest,modal,close});
    g.PracticeCalciumGuided?.mount(b,{clear:clearResults});
