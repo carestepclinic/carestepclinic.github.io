@@ -41,13 +41,13 @@ async function readyManager(p){await p.evaluate(()=>{manager=true;app.clear();ap
 for(const width of [390,1280])test('automatic rate and recipe, review, fluid contribution and minimum pump '+width,async t=>{
  const p=await page(t,width);const c=await emcard(p),out=c.locator('[data-em-result]');
  assert.equal(await c.locator('[data-em-mix-mode]').inputValue(),'concentration');
- assert.match(await out.innerText(),/예상 펌프 0.6 mL\/hr/);assert.match(await out.innerText(),/원액 2 mL/);
- await c.locator('[data-em-bag]').selectOption('500');assert.match(await out.innerText(),/원액 10 mL/);assert.match(await out.innerText(),/희석액 490 mL/);assert.match(await out.innerText(),/0.6 mL\/hr/);
+ assert.match(await out.innerText(),/예상 펌프 6 mL\/hr/);assert.match(await out.innerText(),/원액 0.2 mL/);
+ await c.locator('[data-em-bag]').selectOption('500');assert.match(await out.innerText(),/원액 1 mL/);assert.match(await out.innerText(),/희석액 499 mL/);assert.match(await out.innerText(),/6 mL\/hr/);
  await c.locator('[data-em-diluent]').selectOption('ns');await c.locator('[data-em-mix-confirm]').check();assert.match(await out.locator('strong').innerText(),/^펌프 /);
- await c.locator('.pt-em-optional summary').click();await c.locator('[data-em-pump-min]').fill('1');assert.match(await out.innerText(),/최소 정확 주입속도 미만/);
+ await c.locator('.pt-em-optional summary').click();await c.locator('[data-em-pump-min]').fill('10');assert.match(await out.innerText(),/최소 정확 주입속도 미만/);
  assert.match(await p.locator('[data-em-row=dobutamine]').innerText(),/최소 정확 주입속도 미만/);
- await c.locator('[data-em-other-rate]').fill('2');assert.match(await out.innerText(),/다른 라인 포함 2.6 mL\/hr/);
- await c.locator('[data-em-dose]').fill('4');assert.match(await out.innerText(),/1.2 mL\/hr/);assert.equal(await c.locator('[data-em-mix-confirm]').isChecked(),false);
+ await c.locator('[data-em-other-rate]').fill('2');assert.match(await out.innerText(),/다른 라인 포함 8 mL\/hr/);
+ await c.locator('[data-em-dose]').fill('4');assert.match(await out.innerText(),/12 mL\/hr/);assert.equal(await c.locator('[data-em-mix-confirm]').isChecked(),false);
  assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth));
  await p.screenshot({path:resolve(root,'../pump-setup-'+width+'.png'),fullPage:true});
  assert.equal(await p.evaluate(()=>calls.some(c=>c.method!=='GET')),false);
@@ -83,13 +83,13 @@ test('input changed during save is not overwritten or marked saved',async t=>{
  await c.locator('[data-em-diluent]').selectOption('ns');await c.locator('[data-em-mix-confirm]').check();await p.evaluate(()=>saveDelay=200);await c.locator('[data-em-save]').click();
  await p.waitForFunction(()=>calls.some(c=>c.method==='POST'));await c.locator('[data-em-concentration]').fill('0.5');
  await p.waitForFunction(()=>document.querySelector('[data-em-drug=dobutamine] [data-em-save-state]').textContent.includes('이후 수정'));
- assert.equal(await c.locator('[data-em-concentration]').inputValue(),'0.5');assert.equal(await p.evaluate(()=>JSON.parse(stored[0].body.note.split('CARESTEP_SETUP_V1:')[1]).values.concentration),'1');
+ assert.equal(await c.locator('[data-em-concentration]').inputValue(),'0.5');assert.equal(await p.evaluate(()=>JSON.parse(stored[0].body.note.split('CARESTEP_SETUP_V1:')[1]).values.concentration),'0.1');
 });
 test('read-only and load failure disable persistence while retaining local reference calculations',async t=>{
  const p=await page(t);let c=await emcard(p);assert.equal(await c.locator('[data-em-save]').isDisabled(),true);
  await p.evaluate(()=>{failProducts=true;app.clear();app.calculator();});await p.locator('[data-ref-species]').selectOption('dog');await p.locator('[data-common-weight]').fill('5');c=await emcard(p);
  assert.match(await c.locator('[data-em-save-state]').innerText(),/불러오기 실패/);assert.equal(await c.locator('[data-em-save]').isDisabled(),true);
- assert.match(await c.locator('[data-em-result]').innerText(),/0.6 mL\/hr/);
+ assert.match(await c.locator('[data-em-result]').innerText(),/6 mL\/hr/);
 });
 
 test('mobile setup avoids a second long list; back restores the same filter',async t=>{
@@ -109,3 +109,5 @@ test('missing species explanation is shared while product restrictions remain',a
  const common=p.locator('.pt-flow-context'); // shared context is independent from the disabled product controls
  assert.equal(await p.locator('[data-protocol-status]').filter({hasText:'상단에서 동물 종류'}).evaluateAll(xs=>xs.every(x=>x.hidden)),true);
 });
+
+test('three-drug quick table uses reduced preparation defaults at 3 kg',async t=>{const p=await page(t);await p.locator('[data-common-weight]').fill('3');await kind(p,'emergency');await p.locator('[data-em-filter=cri]').click();for(const [id,stock,rate] of [['dobutamine','0.2','3.6'],['norepinephrine','0.16','11.25'],['dopamine','0.4','5.625']]){const text=await p.locator('[data-em-row='+id+']').innerText();assert.ok(text.includes('원액 '+stock+' mL'));assert.ok(text.includes('예상 펌프 '+rate+' mL/hr'));}assert.equal(await p.evaluate(()=>calls.some(c=>c.method!=='GET')),false);});
