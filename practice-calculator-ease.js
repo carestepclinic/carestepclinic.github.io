@@ -47,7 +47,7 @@
   const remaining=[];for(const f of b.querySelectorAll('form[data-calc]:not([data-calc=batch])')){const button=f.querySelector('button.pt-primary'),host=document.createElement('div');host.className='pt-remaining';host.dataset.remaining=f.dataset.calc;button.before(host);remaining.push({f,host,previous:null});}
   function refresh(){
    for(const {field,host} of chips)for(const button of host.children)button.setAttribute('aria-pressed',button.dataset.quickValue===field.value);
-   for(const state of remaining){const {f,host}=state;const fields=[...f.querySelectorAll('input[required],select[name],textarea[required]')].filter(x=>!x.disabled&&x.type!=='hidden'&&!x.closest('[hidden]')&&(x.type==='checkbox'?!x.checked:!x.value.trim()));
+   for(const state of remaining){const {f,host}=state;const fields=[...f.querySelectorAll('input[required],select[name],textarea[required]')].filter(x=>!x.disabled&&x.type!=='hidden'&&!x.closest('[hidden]')&&!(x.closest('[data-calc-records]')&&!x.required)&&(x.type==='checkbox'?!x.checked:!x.value.trim()));
     if(usesWeight(f)){if(!species.value)fields.unshift(species);if(!weight.value.trim())fields.unshift(weight);if(record&&!confirm.checked)fields.push(confirm);}
     if(state.previous&&fields.length===state.previous.length&&fields.every((x,i)=>x===state.previous[i]))continue;state.previous=fields;
     host.replaceChildren();const label=document.createElement('span');const checks=fields.filter(x=>x.type==='checkbox').length;label.textContent=fields.length?`남은 입력 ${fields.length-checks}개${checks?' · 확인 '+checks+'개':''}`:'필수 입력 완료 · 계산으로 결과 확인';host.append(label);

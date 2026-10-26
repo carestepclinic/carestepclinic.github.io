@@ -460,3 +460,21 @@ body:has(#practice.active-view) #globalNewCase,body:has(#practice.active-view) #
 .pt-calcium-guided>.pt-ca-assessment{margin:12px 0;padding:12px 16px;border:1px solid #dce5f2;border-radius:12px;background:#f7faff}.pt-ca-assessment[open]>summary{margin-bottom:14px}.pt-ca-assessment>summary{font-size:14px;line-height:1.6}
 
 .pt .pt-calcium-guided .pt-result-key-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.pt-calcium-guided .pt-ca-pump{order:-1}@media(max-width:760px){.pt .pt-calcium-guided .pt-result-key-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* Stage-based transfusion results and concise bicarbonate setup. */
+.pt-transfusion-result{white-space:normal;display:block}
+.pt-tf-total{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 20px;background:#edf3ff;border:1px solid #b8cbff;border-radius:12px;padding:18px;margin:0 0 14px}
+.pt-tf-total strong{font-size:28px;color:#1948cb;font-variant-numeric:tabular-nums}
+.pt-tf-total>span:last-child{flex-basis:100%;color:#425575}
+.pt-tf-stages{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.pt-tf-stage{border:1px solid #cbd8ef;border-radius:12px;padding:18px;background:#fff;min-width:0}
+.pt-tf-stage h4{font-size:17px;margin:0 0 16px}
+.pt-tf-pump,.pt-tf-drip{display:flex;flex-direction:column;gap:5px}
+.pt-tf-pump strong{font-size:25px;line-height:1.35;color:#1748cc;font-variant-numeric:tabular-nums}
+.pt-tf-secondary{font-size:14px;color:#425575}
+.pt-tf-drip{border-top:1px solid #dbe4f3;padding-top:12px;margin-top:14px;font-size:14px}
+.pt-tf-drip b{font-size:18px}.pt-tf-drip small{font-size:13px}
+.pt-tf-timeline{white-space:pre-line;padding:12px;background:#f3f6fc;border-radius:8px}
+.pt-bc-quick{margin:16px 0}.pt-bc-infusion{padding:16px;border:1px solid #d6e1f4;border-radius:12px;margin:14px 0}
+.pt-bc-quick input:not([type=checkbox]),.pt-bc-quick select,.pt-bc-infusion input{font-size:16px}
+@media(max-width:650px){.pt-tf-stages{grid-template-columns:1fr}.pt-tf-total strong{font-size:25px}.pt-tf-pump strong{font-size:24px}.pt-tf-stage{padding:16px}}

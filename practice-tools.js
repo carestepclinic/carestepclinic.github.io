@@ -117,6 +117,7 @@
    medicationAssist=g.PracticeMedicationAssist?.mount(b,{request:(...args)=>a.request(...args),guard:()=>alive()&&(a.patient()?.id||'')===initialPatientId,patient:()=>selected,product:()=>domestic?.current(),products:async()=>g.PracticeStrengths.adapt(await fetchPresets()),batch,modal,close});
    preparation=g.PracticePreparation?.mount(b,{guard:()=>alive()&&(a.patient()?.id||'')===initialPatientId,reload:loadPresets,clear:clearResults,request:(...args)=>a.request(...args),modal,close});
    g.PracticeCalciumGuided?.mount(b,{clear:clearResults});
+   g.PracticeAcidBase?.simplify(b,{clear:clearResults});
    b.addEventListener('practice-cri-selected',()=>privateLibrary?.clearContext());
    emergency=g.PracticeEmergency?.mount(b,{guard:()=>alive()&&(a.patient()?.id||'')===initialPatientId});
    const reset=document.createElement('button');reset.type='button';reset.className='pt-reset-calculation';reset.textContent='계산 입력 초기화';reset.onclick=()=>{if(!g.confirm('현재 계산 입력과 결과를 초기화할까요? 병원에 저장한 약품·기본 함량은 유지됩니다.'))return;dropCalculator();shell();calculator();};b.prepend(reset);
