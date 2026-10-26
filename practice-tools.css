@@ -519,3 +519,77 @@ body:has(#practice.active-view) #globalNewCase,body:has(#practice.active-view) #
 
 /* Prescription arithmetic stays available; reference departures remain visible. */
 .pt-dose-review{display:block;padding:10px 12px;border-left:3px solid #c68b21;background:#fff7e6;color:#775015;border-radius:6px;font-size:14px;line-height:1.65}.pt-anesthesia [data-an-dose-reset],.pt-emergency [data-em-dose-reset]{align-self:flex-start;margin:0 0 10px;font-size:14px}
+
+/* Compact calculator workspace: use available width, keep clinical checks visible. */
+#practiceRoot:has(.pt-calculator-focused:not([hidden])){max-width:none}
+#appView:has(#practice.active-view .pt-calculator-focused:not([hidden])) .main{padding-left:20px;padding-right:20px}
+.pt:has(.pt-calculator-focused:not([hidden]))>.pt-tabs{margin:8px 0 12px;padding:4px}
+.pt:has(.pt-calculator-focused:not([hidden]))>[data-notice]{margin:4px 0 8px;font-size:14px;padding:6px 10px}
+.pt-calculator-focused .pt-calc-layout{grid-template-columns:164px minmax(0,1fr);gap:16px}
+.pt-calculator-focused .pt-calc-menu{gap:5px;margin:8px 0}
+.pt-calculator-focused .pt-calc-menu button{min-height:44px;padding:8px 10px;font-size:14px}
+.pt-calculator-focused .pt-compact-context{display:grid;grid-template-columns:minmax(280px,380px) minmax(0,1fr);align-items:center;gap:4px 20px;padding:10px 14px;margin:4px 0 10px}
+.pt-calculator-focused .pt-compact-context [data-common-inputs]{grid-column:1;grid-row:1 / span 2;grid-template-columns:1fr 1fr;gap:12px}
+.pt-calculator-focused .pt-patient-options{grid-column:2;margin:0}
+.pt-calculator-focused .pt-patient-options[open]{grid-column:1/-1;grid-row:3}
+.pt-calculator-focused .pt-settings-status{grid-column:2;padding:4px 0;background:transparent;margin:0;font-size:13px;line-height:1.5}
+.pt-calculator-focused .pt-compact-context>[data-presets-retry]{grid-column:1/-1}
+.pt-calculator-focused .pt-calc-main>.pt-preparation-review{margin:0 0 8px}
+.pt-calculator-focused .pt-emergency-heading{align-items:center;gap:12px;margin-bottom:6px}
+.pt-calculator-focused .pt-emergency-heading h3{margin:0;font-size:20px}
+.pt-calculator-focused .pt-emergency-heading button{min-height:44px;flex-shrink:0}
+.pt-calculator-focused .pt-emergency>.pt-notice{margin:6px 0;padding:8px 12px}
+.pt-calculator-focused .pt-emergency>[data-em-context]{margin:8px 0;font-size:14px}
+.pt-calculator-focused .pt-emergency>nav{gap:6px;margin:8px 0}
+.pt-calculator-focused .pt-emergency>nav button{font-size:14px;min-height:44px;padding:8px 10px}
+.pt-calculator-focused .pt-em-quick>.pt-help{margin:6px 0}
+.pt-calculator-focused .pt-section-help{margin:6px 0;font-size:14px;line-height:1.6}
+.pt-calculator-focused .pt-section-help>summary{cursor:pointer;min-height:32px;display:list-item;padding:4px 0}
+.pt-calculator-focused .pt-section-help p{margin:6px 0}
+.pt-calculator-focused .pt-anesthesia>h3{margin:4px 0 8px;font-size:20px}
+.pt-calculator-focused .pt-anesthesia>.pt-notice{padding:8px 12px;margin:6px 0}
+.pt-calculator-focused .pt-anesthesia>[data-an-context]{margin:8px 0}
+.pt-calculator-focused .pt-anesthesia>nav{margin:8px 0;gap:6px}
+.pt-calculator-focused .pt-an-finder{gap:8px 12px;margin:8px 0}
+.pt-calculator-focused .pt-an-finder>label{margin:0}
+.pt-calculator-focused .pt-an-plan-summary{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 14px;margin:8px 0}
+.pt-calculator-focused .pt-an-plan-summary h4{align-self:center;font-size:16px}
+.pt-calculator-focused .pt-an-plan-summary [data-an-copy]{grid-column:2;grid-row:1;min-height:44px;font-size:14px}
+.pt-calculator-focused .pt-an-plan-summary [data-an-plan]{grid-column:1/-1;margin:0;max-height:none;overflow:visible}
+.pt-calculator-focused .pt-an-plan-summary [data-an-copy-status]:empty{display:none}
+.pt-calculator-focused .pt-an-card{padding:16px}
+.pt-calculator-focused .pt-an-card p{margin:8px 0}
+@media(max-width:1000px){
+ .pt-calculator-focused .pt-compact-context{grid-template-columns:minmax(0,1fr)}
+ .pt-calculator-focused .pt-compact-context [data-common-inputs]{grid-row:auto;grid-column:1;max-width:380px}
+ .pt-calculator-focused .pt-patient-options,.pt-calculator-focused .pt-settings-status{grid-column:1}
+}
+@media(max-width:800px){
+ #appView:has(#practice.active-view .pt-calculator-focused:not([hidden])) .main{padding-left:12px;padding-right:12px}
+ .pt-calculator-focused .pt-calc-layout{grid-template-columns:minmax(0,1fr);gap:0}
+ .pt-calculator-focused .pt-calc-nav{display:none}
+ .pt-calculator-focused .pt-mobile-calc-select{position:static;box-shadow:none;margin:6px 0;padding:4px 8px}
+ .pt-calculator-focused .pt-compact-context{padding:8px 10px;gap:4px}
+ .pt-calculator-focused .pt-compact-context [data-common-inputs]{max-width:none}
+ .pt-calculator-focused .pt-settings-status{font-size:13px}
+ .pt-calculator-focused .pt-emergency-heading{flex-wrap:wrap}
+ .pt-calculator-focused .pt-emergency-heading h3{font-size:18px}
+ .pt-calculator-focused .pt-emergency>nav{display:flex;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}
+ .pt-calculator-focused .pt-emergency>nav button{flex:0 0 auto;white-space:nowrap}
+ .pt-calculator-focused .pt-an-finder{display:grid;grid-template-columns:1fr 1fr}
+ .pt-calculator-focused .pt-an-finder>label{min-width:0}
+ .pt-calculator-focused .pt-an-finder>.pt-choice{grid-column:1/-1}
+ .pt-calculator-focused .pt-an-plan-summary{padding:10px}
+}
+@media print{.pt-calculator-focused .pt-calc-nav,.pt-calculator-focused .pt-mobile-calc-select{display:none!important}}
+
+.pt:has(.pt-calculator-focused:not([hidden]))>[data-notice]:empty{display:none}
+.pt-calculator-focused .pt-emergency>[data-em-context]{padding:2px 0;margin:6px 0}
+.pt-calculator-focused .pt-medication-checks{padding:8px 12px;margin:0 0 10px}
+.pt-calculator-focused .pt-medication-checks>summary{min-height:28px}
+@media(max-width:800px){
+ .pt-calculator-focused .pt-emergency-heading{display:flex;flex-wrap:nowrap;align-items:center}
+ .pt-calculator-focused .pt-emergency-heading>div{min-width:0}
+ .pt-calculator-focused .pt-emergency-heading>button{font-size:14px;padding:8px 10px;margin:0}
+ .pt-calculator-focused .pt-emergency-heading h3{font-size:17px}
+}
