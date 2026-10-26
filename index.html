@@ -3521,12 +3521,19 @@ function inferUnifiedCategory(item={},raw=''){
   if(/고양이|feline|\bfic\b|flutd|전발치|백혈병|요도폐색/.test(text)&&! /강아지|반려견|canine|\bdog\b/.test(text))return '고양이특화';
   return LEGACY_CATEGORY_MAP[direct]||'입원퇴원';
 }
-function templateSpeciesLabel(item={}){
-  const explicit=Array.isArray(item.species)?item.species.join(' '):String(item.species||'');
-  const text=(explicit||[item.title||item.name||'',item.short||''].join(' ')).toLowerCase();
-  const dog=/강아지|반려견|개 전용|canine|\bdogs?\b/.test(text),cat=/고양이|반려묘|feline|\bcats?\b/.test(text);
-  return dog&&cat?'강아지·고양이 공용':dog?'강아지 대상':cat?'고양이 대상':'대상 동물 확인';
+function educationSpeciesValue(value){
+ const text=(Array.isArray(value)?value.join(' '):String(value||'')).trim().toLowerCase();
+ if(/^(both|all|공통|공용)$/.test(text))return '강아지·고양이';
+ const dog=/강아지|반려견|개 전용|canine|\bdogs?\b|(^|[\s,·/])개($|[\s,·/])/.test(text),cat=/고양이|반려묘|feline|\bcats?\b/.test(text);
+ return dog&&cat?'강아지·고양이':dog?'강아지':cat?'고양이':'';
 }
+function templateSpeciesLabel(item={}){
+ const raw=Array.isArray(item.species)?item.species.join(' '):String(item.species||'');
+ const species=educationSpeciesValue(raw||[item.title||item.name||'',item.short||''].join(' '));
+ return species==='강아지·고양이'?'강아지·고양이 공통':species?species+' 대상':'대상 동물 확인';
+}
+function templateSpeciesSearchText(item){const label=templateSpeciesLabel(item);return label==='대상 동물 확인'?'':[label,label.includes('강아지')?'개 반려견 dog canine':'',label.includes('고양이')?'반려묘 cat feline':''].filter(Boolean).join(' ');}
+
 function templatePurpose(t={}){if(t._studio&&!t._studioCentral)return 'clinic';const text=`${t.id||''} ${t.title||''} ${t.short||''}`.toLowerCase(),category=inferUnifiedCategory(t,t.category);if(category==='수술시술'||/수술|시술|절제|발치|스케일링|중성화/.test(text))return 'procedure';if(category==='입원퇴원'||/퇴원|입원|회복관리/.test(text))return 'discharge';return 'education';}
 const templateBaseCategories=new Map(templates.map(t=>[t.id,inferUnifiedCategory(t,t.category)]));
 let categoryOverrides={};
@@ -5746,7 +5753,7 @@ function weightedDiseaseSearchScore(raw,{primary='',secondary='',description='',
 function templateSearchFields(t){
   return {
     primary:[t.title,t.short,t.id].filter(Boolean).join(' '),
-    secondary:[t.category].filter(Boolean).join(' '),
+    secondary:[t.category,templateSpeciesSearchText(t)].filter(Boolean).join(' '),
     description:t.description||'',
     // 상세 질문/실수/추적항목은 검색 노이즈가 커서 질환 검색 대상에서 제외합니다.
     extra:''
@@ -8145,7 +8152,7 @@ function syncPublishedStudioItems(){
   centralStudioItems.filter(x=>x.workflowStatus==='published'&&x.vetReviewed).forEach(doc=>merged.set(doc.template?.id,doc));
   [...merged.values()].forEach(doc=>{
     if(!doc?.template?.id)return;
-    const t=JSON.parse(JSON.stringify(doc.template));t.short=normalizeStudioShort(t,doc.meta||{});t._studio=true;t._studioDocId=doc.docId;t._studioCentral=!!doc._central;t.status='live';templates.push(t);
+    const t=JSON.parse(JSON.stringify(doc.template));t.species=doc.meta?.species||doc.journey?.species||t.species||'';t.short=normalizeStudioShort(t,doc.meta||{});t._studio=true;t._studioDocId=doc.docId;t._studioCentral=!!doc._central;t.status='live';templates.push(t);
     const p=JSON.parse(JSON.stringify(doc.profile||{}));p._studio=true;p._studioCentral=!!doc._central;journeyProfiles[t.id]=p;studioPublishedRuntimeIds.push(t.id);templateBaseCategories.set(t.id,t.category||'기타');
   });
   applyCategoryOverrides();
