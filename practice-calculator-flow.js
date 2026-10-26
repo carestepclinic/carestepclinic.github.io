@@ -53,7 +53,7 @@
    for(const child of [...f.childNodes])if(child!==title)entry.append(child);
    f.append(entry,result);f.classList.add('pt-flow-form');
    const head=document.createElement('h4');head.textContent='계산 결과';result.append(head);const remaining=entry.querySelector('.pt-remaining');if(remaining)result.append(remaining);result.append(submit,output);
-   const empty=document.createElement('p');empty.className='pt-flow-empty pt-help';empty.textContent='입력값을 확인하고 계산해주세요.';output.before(empty);if(actions)result.append(actions);
+   const empty=document.createElement('p');empty.className='pt-flow-empty pt-help';empty.textContent='';empty.hidden=true;output.before(empty);if(actions)result.append(actions);
   }
   const k=q('[data-k-preparation] > details');if(k)k.open=false;
   // Consolidate general explanatory details without folding clinical warnings or unit labels.
@@ -94,7 +94,13 @@
    b.classList.toggle('pt-flow-missing-context',!!missing);
    if(emSelect){const selected=emNav.querySelector('[aria-pressed=true]');if(selected&&emSelect.value!==selected.dataset.emFilter)emSelect.value=selected.dataset.emFilter;const count=all('[data-em-row]').filter(x=>!x.hidden).length;for(const opt of emSelect.options){const btn=emNav.querySelector('[data-em-filter="'+opt.value+'"]');text(opt,btn.textContent+(opt.selected?' · '+count+'개':''));}}
    if(rxSave)hide(rxSave,rx.querySelector('[data-result-actions]').hidden||!rx.querySelector('output')?.textContent.trim());
-   for(const f of all('.pt-flow-form'))hide(f.querySelector('.pt-flow-empty'),!!f.querySelector('output')?.textContent.trim());
+   for(const f of all('.pt-flow-form')){
+    hide(f.querySelector('.pt-flow-empty'),true);
+    const remaining=f.querySelector('.pt-remaining');
+    if(remaining){const status=remaining.querySelector('span');if(status?.textContent==='필수 입력 완료 · 계산으로 결과 확인')text(status,'입력 완료');hide(remaining,!!f.querySelector('output')?.textContent.trim()&&!remaining.querySelector('button'));}
+   }
+   // A missing shared field is explained once in the common context bar.
+   for(const x of all('[data-protocol-status],[data-quick-note]'))hide(x,!!missing&&/상단에서 동물 종류|종을 선택/.test(x.textContent));
   }
   const schedule=()=>{if(!frame&&!disposed)frame=requestAnimationFrame(refresh);};
   const observer=new MutationObserver(schedule);observer.observe(b,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','aria-pressed']});

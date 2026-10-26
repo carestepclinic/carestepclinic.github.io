@@ -668,3 +668,17 @@ body:has(#practice.active-view) #globalNewCase,body:has(#practice.active-view) #
 .pt .pt-streamlined [data-value-origin][hidden]{display:none}
 .pt .pt-streamlined .pt-flow-result .pt-remaining{margin:4px 0 12px;font-size:14px}
 @media(min-width:1250px){.pt .pt-streamlined .pt-flow-form:not([data-calc=convert]):not([data-calc=dilute]):not([data-calc=ag])>.pt-flow-result{position:sticky;top:16px}}
+
+/* Concentration-based emergency setup: one primary rate, one recipe. */
+.pt-em-result>strong{font-size:1.15rem;line-height:1.45}
+.pt-em-result>details{font-size:.85rem;margin-top:6px}
+.pt-em-result>details span,.pt-em-result>details small{display:block}
+.pt-em-optional{margin:8px 0}
+.pt-emergency-card [data-em-save-state]:empty{display:none}
+.pt-emergency-card [data-em-dilution-origin]{margin:6px 0}
+.pt-emergency-card .pt-grid{gap:10px}
+.pt-emergency-card [data-em-save-state]{overflow-wrap:anywhere}
+@media(min-width:900px){.pt-emergency-grid:has(.pt-emergency-card:not([hidden]) [data-em-concentration]){grid-template-columns:minmax(0,1fr)}.pt-emergency-card:has([data-em-concentration]) [data-em-settings]>.pt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.pt-em-config-back{display:none}
+@media(max-width:700px){.pt-em-config-open .pt-em-quick{display:none}.pt-em-config-back{display:inline-flex;margin-bottom:10px}.pt-em-config-open [data-em-groups]>section>h4{display:none}}

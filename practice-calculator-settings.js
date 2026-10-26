@@ -2,12 +2,12 @@
 (function(g){
  'use strict';
  const prefix='CARESTEP_SETUP_V1:';
- const specs={potassium:{title:'칼륨 제품·수액',keys:['bag','kstock','baseK','mixMode'],required:['bag','kstock','baseK','mixMode']},transfusion:{title:'수혈 세트',keys:['factor'],required:['factor']},bicarbonate:{title:'중탄산 제품',keys:['stock'],required:['stock']},cri:{title:'CRI 제품·조제',keys:['stock','stockUnit','volume','diluent','pumpMin'],required:['stock','stockUnit']}};
+ const specs={emergency:{title:'응급 CRI 희석',keys:['concentration','stock','volume','diluent','pumpMin'],required:['concentration','stock','volume','diluent']},potassium:{title:'칼륨 제품·수액',keys:['bag','kstock','baseK','mixMode'],required:['bag','kstock','baseK','mixMode']},transfusion:{title:'수혈 세트',keys:['factor'],required:['factor']},bicarbonate:{title:'중탄산 제품',keys:['stock'],required:['stock']},cri:{title:'CRI 제품·조제',keys:['stock','stockUnit','volume','diluent','pumpMin'],required:['stock','stockUnit']}};
  function isSaved(p){return String(p?.body?.note||'').startsWith(prefix);}
  function partition(r){return {...r,setupItems:r.setupItems||r.items?.filter(isSaved)||[],items:(r.items||[]).filter(p=>!isSaved(p))};}
  function checked(kind,key,values){
   const spec=specs[kind];if(!spec||!key||key.length>100)throw Error('저장할 계산 종류를 확인해주세요.');
-  if(kind==='cri'&&!/^cri:[a-z0-9-]+:(prepare|pump|undiluted|intermittent)$/.test(key)||kind!=='cri'&&key!==kind)throw Error('약물·투여 방식을 확인해주세요.');
+  if(kind==='cri'&&!/^cri:[a-z0-9-]+:(prepare|pump|undiluted|intermittent)$/.test(key)||kind==='emergency'&&!/^emergency:(dobutamine|norepinephrine|dopamine)$/.test(key)||!['cri','emergency'].includes(kind)&&key!==kind)throw Error('약물·투여 방식을 확인해주세요.');
   const out={};for(const name of spec.keys){const value=String(values[name]??'').trim();if(!value){if(spec.required.includes(name))throw Error('저장할 제품·장비 설정을 먼저 입력해주세요.');continue;}
    if(name==='stockUnit'){if(!['mg','mcg','U'].includes(value))throw Error('원액 단위를 확인해주세요.');}
    else if(name==='mixMode'){if(!['add','final'].includes(value))throw Error('첨가 방식을 확인해주세요.');}
@@ -16,6 +16,7 @@
    if(kind==='bicarbonate'&&name==='stock'&&!['1','0.5'].includes(value))throw Error('중탄산 제품 표시 농도를 확인해주세요.');
    if(kind==='transfusion'&&+value>200)throw Error('세트 점적계수를 확인해주세요.');out[name]=value;
   }
+  if(kind==='emergency'&&(+out.concentration>=+out.stock||!['ns','d5w','other'].includes(out.diluent)))throw Error('희석 농도·원액·희석액을 확인해주세요.');
   return out;
  }
  function fact(p){if(!isSaved(p)||p.body.kind!=='liquid'||p.body.unit!=='mg'||Number(p.body.value)!==1)return null;try{const m=JSON.parse(p.body.note.slice(prefix.length));if(m.v!==1)return null;return {...m,values:checked(m.kind,m.key,m.values)};}catch{return null;}}
