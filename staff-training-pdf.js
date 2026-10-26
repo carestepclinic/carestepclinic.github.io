@@ -78,6 +78,8 @@
   paragraph(d.title,{size:21,leading:29,gap:12});
   paragraph('v'+d.version+' · '+(status[d.status]||'상태 확인 필요')+(d.reviewedAt?' · 승인 '+String(d.reviewedAt).slice(0,10):''),{size:9.5,color:muted,leading:16,gap:16});
   if(d.body.config)paragraph(d.body.config.audience+' · '+d.body.config.level,{size:10,color:muted});
+  const guidance=[...new Set((d.body.gapReviews||[]).filter(r=>r.disposition==='guidance').map(r=>r.note))];
+  if(guidance.length){heading('적용 전 확인사항');for(const text of guidance)paragraph(text,{bullet:true});}
   if(d.body.gaps?.length){heading('추가 검토 필요');for(const text of d.body.gaps)paragraph(text,{bullet:true});}
   const sopLabels={clinical:'업무 목적·기준',nursing:'절차·확인사항',counseling:'응대·보고'};
   for(const section of d.body.sections){
