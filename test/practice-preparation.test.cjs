@@ -56,13 +56,13 @@ test('loading volume is separate and is invalidated by stock or weight edits',as
  assert.match(await f.locator('[data-loading-result]').innerText(),/0.2 mL/);assert.match(await f.locator('[data-loading-result]').innerText(),/합산하지 않음/);await p.locator('[data-common-weight]').fill('6');assert.equal(await f.locator('[data-loading-result]').innerText(),'');assert.equal(await f.locator('[data-loading-check]').isChecked(),false);
 });
 test('load retry keeps manually entered dose and remains available outside medicine panel',async t=>{
- const p=await page(t);await p.evaluate(()=>{failProducts=true;app.clear();app.calculator();});await p.locator('[data-presets-retry]').waitFor({state:'visible'});await p.locator('[data-ref-species]').selectOption('dog');await kind(p,'cri');const f=p.locator('[data-calc=cri]');await f.locator('[name=dose]').fill('7');await p.evaluate(()=>failProducts=false);await p.locator('[data-presets-retry]').click();await p.locator('[data-presets-retry]').waitFor({state:'hidden'});assert.equal(await f.locator('[name=dose]').inputValue(),'7');
+ const p=await page(t);await p.evaluate(()=>{failProducts=true;app.clear();app.calculator();});await p.locator('[data-presets-retry]').waitFor({state:'visible'});await p.locator('[data-ref-species]').selectOption('dog');await kind(p,'cri');const f=p.locator('[data-calc=cri]');await f.locator('[data-cri-manual]').click();await f.locator('[name=dose]').fill('7');await p.evaluate(()=>failProducts=false);await p.locator('[data-presets-retry]').click();await p.locator('[data-presets-retry]').waitFor({state:'hidden'});assert.equal(await f.locator('[name=dose]').inputValue(),'7');
 });
 
 async function bridge(p,multiple=false){
  await inject(p,[{id:'med1',revision:1,body:{kind:'tablet',title:'Synthetic 20mg',value:20,unit:'mg',formulary:{version:1,calculatorReady:true,productId:'test',aliases:['Synthetic'],species:['dog'],route:'oral',warnings:[]}}},...(multiple?[{id:'med2',revision:1,body:{kind:'tablet',title:'Synthetic 40mg',value:40,unit:'mg',formulary:{version:1,calculatorReady:true,productId:'test2',aliases:['Synthetic'],species:['dog'],route:'oral',warnings:[]}}}]:[])]);
  await p.evaluate(()=>referenceData={id:'entry',title:'Synthetic',aliases:[],group:'systemic',printedPage:1,page:1,endPage:1,errata:false,boundaryVerified:true,sections:[{heading:'Dosages',text:'DOGS:\nTest indication (extra-label): 3–8 mg/kg PO every 12 hours.'}]});
- await kind(p,'med');await p.locator('[data-library-open]').click();await p.locator('[data-reference-id=entry]').click();await p.locator('[data-dose-load]').click();
+ await kind(p,'med');await p.locator('[data-library-open]').click();await p.locator('[data-reference-id=entry]').click();await p.locator('[data-dose-choice]').fill('3');await p.locator('[data-dose-load]').click();
 }
 test('reference regimen connects a single hospital strength and opens a sourced review form',async t=>{
  const p=await page(t);await bridge(p);const f=p.locator('[data-calc=dose]');await p.waitForFunction(()=>document.querySelector('[data-calc=dose] [name=concentration]').value==='20');
