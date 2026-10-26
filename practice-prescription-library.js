@@ -38,19 +38,23 @@
  function mount(host,o){
   if(!o.request)return null;
   const box=document.createElement('section');box.className='pt-private-safety';box.setAttribute('aria-label','Plumb’s 안전성 참고자료');
-  box.innerHTML='<div class="pt-heading"><h4>Plumb’s · 병원 등록 안전성 자료</h4><button type="button" data-private-reload>자료 다시 불러오기</button></div><p class="pt-help">등록된 전체 약물 목차에서 연결합니다. 금기·주의·상호작용은 등록 원문으로 제공하며, 처방 조합의 자동 판정 결과와는 구분합니다.</p><p data-private-status role="status" aria-live="polite"></p><div data-private-drugs></div>';
+  box.innerHTML='<div class="pt-heading"><h4>Plumb’s · 병원 등록 안전성 자료</h4><button type="button" data-private-reload>자료 다시 불러오기</button></div><p class="pt-help">한국어 요약과 근거 원문을 연결합니다. 약물명이 모호하면 아래에서 원문 항목을 선택해주세요.</p><p data-private-status role="status" aria-live="polite"></p><div data-private-summary></div><details data-private-originals><summary>약물 연결·영문 원문 보기</summary><div data-private-drugs></div></details>';
   host.querySelector('.pt-drug-references').before(box);
   const client=createClient(o.request,()=>alive()),list=box.querySelector('[data-private-drugs]'),status=box.querySelector('[data-private-status]');
+  let summaryView=null;
   let disposed=false,generation=0,rows=[],signature='',catalog=null,choice=new Map(),cards=new Map(),timer=null;
   const alive=()=>!disposed&&host.isConnected&&(!o.guard||o.guard());
   const active=()=>alive()&&!host.closest('[data-kind-panel]')?.hidden;
+  summaryView=g.PracticePrescriptionSummary?.mount(box.querySelector('[data-private-summary]'),{request:o.request,guard:alive});
+  if(!summaryView)box.querySelector('[data-private-summary]').textContent='한국어 요약 화면을 불러오지 못했습니다. 새로고침해주세요.';
+  function updateSummary(){if(!catalog)return;const selected=[],missing=[];for(const row of rows){const item=catalog.items.find(e=>e.key===choice.get(rowKey(row)));if(item)selected.push(item);else missing.push(row.drug||'미확인 약물');}summaryView?.update(selected,missing);box.querySelector('[data-private-originals]').open=missing.length>0;}
   function clearCards(){generation++;cards.clear();list.replaceChildren();}
   function picker(card,row,found){
    const details=document.createElement('details');details.className='pt-private-picker';details.open=!automatic(found,row);
    details.innerHTML='<summary>약물 연결·변경</summary><label>전체 목차 검색<input type="search" data-private-search placeholder="성분명·제품명·등록 별칭"></label><label>연결할 원문 항목<select data-private-choice><option value="">항목 선택</option></select></label><button type="button" data-private-connect>선택한 항목 연결</button><p data-private-pick-status></p>';
    card.append(details);const search=details.querySelector('input'),select=details.querySelector('select'),info=details.querySelector('p');
    function options(){const q=normalize(search.value),all=q?catalog.items.filter(e=>normalize(e.title+' '+e.aliases+' '+e.libraryTitle).includes(q)):found.length?found:catalog.items;const selected=choice.get(rowKey(row));select.replaceChildren(new Option('항목 선택',''));for(const item of all.slice(0,100))select.add(new Option(item.title+' · '+(groups[item.group]||item.group)+' · '+item.libraryTitle,item.key));if(selected&&all.some(e=>e.key===selected))select.value=selected;info.textContent=all.length>100?all.length+'개 검색됨 · 앞 100개 표시. 검색어를 더 입력해 범위를 좁혀주세요.':all.length+'개 후보';}
-   search.oninput=options;options();details.querySelector('button').onclick=()=>{const meta=catalog.items.find(e=>e.key===select.value);if(!meta){info.textContent='연결할 원문 항목을 선택해주세요.';return;}choice.set(rowKey(row),meta.key);details.open=false;void read(card,meta,generation);};
+   search.oninput=options;options();details.querySelector('button').onclick=()=>{const meta=catalog.items.find(e=>e.key===select.value);if(!meta){info.textContent='연결할 원문 항목을 선택해주세요.';return;}choice.set(rowKey(row),meta.key);details.open=false;updateSummary();void read(card,meta,generation);};
   }
   async function read(card,meta,token){
    const target=card.querySelector('[data-private-content]');target.textContent='금기·주의·상호작용 원문을 불러오는 중…';card.dataset.entryKey=meta.key;
@@ -58,7 +62,7 @@
     target.replaceChildren();const source=document.createElement('p');source.className='pt-help';source.textContent=meta.libraryTitle+' · '+entry.title+' · '+(groups[entry.group]||entry.group)+' · 책 '+meta.printedPage+'쪽 / PDF '+meta.page+'–'+meta.endPage+'쪽 · 등록 확인 '+meta.checkedAt;target.append(source);
     if(meta.errata||entry.errata){const warning=document.createElement('p');warning.className='pt-error';warning.textContent='공식 정오표 수정 대상입니다. 적용 전 수정 내용을 함께 확인하세요.';target.append(warning);const link=document.createElement('a');link.href='https://plumbs.com/handbook-errata-10th-edition/';link.target='_blank';link.rel='noopener noreferrer';link.textContent='공식 정오표 확인';target.append(link);}
     const note=document.createElement('p');note.className='pt-help';note.textContent='병원 내부 등록 원문 · 문서의 동물종·경로·조건을 함께 확인하세요. 원문 연결만으로 이 처방의 안전성이 판정되지는 않습니다.';target.append(note);
-    for(const section of sections(entry)){const detail=document.createElement('details');detail.dataset.privateSection=section.heading;detail.open=['Contraindications/Precautions/Warnings','Drug Interactions'].includes(section.heading);const summary=document.createElement('summary');summary.textContent=section.label+(section.text?'':' · 등록 원문 구역 없음');detail.append(summary);const text=document.createElement('div');text.className='pt-private-text';text.textContent=section.text||'해당 제목의 원문 구역이 등록돼 있지 않습니다. 금기·주의사항이 없다는 뜻은 아닙니다.';detail.append(text);target.append(detail);}
+    for(const section of sections(entry)){const detail=document.createElement('details');detail.dataset.privateSection=section.heading;detail.open=false;const summary=document.createElement('summary');summary.textContent=section.label+(section.text?'':' · 등록 원문 구역 없음');detail.append(summary);const text=document.createElement('div');text.className='pt-private-text';text.textContent=section.text||'해당 제목의 원문 구역이 등록돼 있지 않습니다. 금기·주의사항이 없다는 뜻은 아닙니다.';detail.append(text);target.append(detail);}
    }catch(e){if(!active()||token!==generation||card.dataset.entryKey!==meta.key)return;target.textContent='원문 조회 실패 · '+(e.message||'다시 시도해주세요.');const retry=document.createElement('button');retry.type='button';retry.textContent='이 약물 다시 불러오기';retry.onclick=()=>void read(card,meta,token);target.append(retry);}
   }
   async function render(){
@@ -71,17 +75,17 @@
      picker(card,row,found);
     }
     // Bound requests; fetch only the prescribed drugs, never the entire handbook.
-    let next=0;await Promise.all(Array.from({length:Math.min(3,work.length)},async()=>{while(next<work.length&&active()&&token===generation){const fn=work[next++];await fn();}}));
+    updateSummary();let next=0;await Promise.all(Array.from({length:Math.min(3,work.length)},async()=>{while(next<work.length&&active()&&token===generation){const fn=work[next++];await fn();}}));
    }catch(e){if(active()&&token===generation){status.textContent='병원 약물 자료 연결 실패 · '+(e.message||'다시 불러와주세요.');}}
   }
   function update(nextRows){
    const unique=[...new Map((nextRows||[]).map(r=>[rowKey(r),r])).values()],next=JSON.stringify(unique.map(r=>[rowKey(r),[...names(r)].sort()]));rows=unique;
-   if(next===signature)return;signature=next;clearTimeout(timer);clearCards();box.hidden=!rows.length;
-   if(!rows.length){choice.clear();status.textContent='';return;}timer=setTimeout(()=>void render(),180);
+   if(next===signature)return;signature=next;clearTimeout(timer);clearCards();summaryView?.update([],[]);box.hidden=!rows.length;
+   if(!rows.length){choice.clear();summaryView?.update([],[]);status.textContent='';return;}timer=setTimeout(()=>void render(),180);
   }
-  const reload=()=>{if(!alive())return;clearTimeout(timer);client.reset();catalog=null;choice.clear();clearCards();void render();};box.querySelector('[data-private-reload]').onclick=reload;
+  const reload=()=>{if(!alive())return;clearTimeout(timer);client.reset();summaryView?.update([],[]);catalog=null;choice.clear();clearCards();void render();};box.querySelector('[data-private-reload]').onclick=reload;
   const panel=host.closest('[data-kind-panel]'),visibility=new MutationObserver(()=>{if(active()&&rows.length){clearTimeout(timer);clearCards();void render();}});if(panel)visibility.observe(panel,{attributes:true,attributeFilter:['hidden']});
-  box.hidden=true;return {update,dispose(){disposed=true;generation++;clearTimeout(timer);visibility.disconnect();client.dispose();catalog=null;rows=[];choice.clear();cards.clear();box.remove();}};
+  box.hidden=true;return {update,dispose(){disposed=true;generation++;summaryView?.dispose();clearTimeout(timer);visibility.disconnect();client.dispose();catalog=null;rows=[];choice.clear();cards.clear();box.remove();}};
  }
  const api={normalize,names,candidates,automatic,sections,createClient,mount};if(typeof module==='object'&&module.exports)module.exports=api;else g.PracticePrescriptionLibrary=api;
 })(typeof window==='undefined'?globalThis:window);
