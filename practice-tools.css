@@ -516,3 +516,6 @@ body:has(#practice.active-view) #globalNewCase,body:has(#practice.active-view) #
 .pt-cri-await-input>.pt-hospital-setup{display:none!important}
 @media(max-width:600px){.pt-an-card .pt-grid{grid-template-columns:minmax(0,1fr)}.pt-an-finder{display:block}.pt-an-finder>label{min-width:0}.pt-an-plan-summary [data-an-plan]{max-height:180px}.pt-calculator-focused .pt-calc-main .pt-bar button{min-height:44px}.pt-calculator-focused .pt-result-key-grid{grid-template-columns:minmax(0,1fr)}.pt-calculator-focused .pt-anesthesia .pt-an-card .pt-grid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:600px){.pt-an-card .pt-grid{grid-template-columns:1fr 1fr}.pt-an-result{font-size:21px}.pt-calculator-focused .pt-grid{min-width:0}.pt-calculator-focused :is(label,input,select){min-width:0}}
+
+/* Prescription arithmetic stays available; reference departures remain visible. */
+.pt-dose-review{display:block;padding:10px 12px;border-left:3px solid #c68b21;background:#fff7e6;color:#775015;border-radius:6px;font-size:14px;line-height:1.65}.pt-anesthesia [data-an-dose-reset],.pt-emergency [data-em-dose-reset]{align-self:flex-start;margin:0 0 10px;font-size:14px}

@@ -1,10 +1,10 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const a=require('../practice-anesthesia.js'),f=require('../practice-fluid-plan.js');
 const v={species:'dog',weight:5,profile:'stable',dose:2,stock:10};
-test('induction volume uses mg not maintenance mg/kg/min',()=>{assert.equal(a.calculate('propofol',v).mL,1);assert.equal(a.calculate('alfaxalone',{...v,species:'cat'}).mL,1);assert.throws(()=>a.calculate('alfaxalone',{...v,species:'cat',dose:1}));});
+test('induction volume uses mg not maintenance mg/kg/min',()=>{assert.equal(a.calculate('propofol',v).mL,1);assert.equal(a.calculate('alfaxalone',{...v,species:'cat'}).mL,1);assert.match(a.calculate('alfaxalone',{...v,species:'cat',dose:1}).warnings[0],/문헌 범위 밖/);});
 test('micrograms are converted to mg before volume',()=>{const r=a.calculate('dexmedetomidine',{...v,dose:3,stock:.5});assert.equal(r.mL,.03);assert.equal(r.amount,15);});
-test('species, unstable patients, out-of-range and invalid numbers are held',()=>{for(const bad of [{species:'rabbit'},{profile:'individual'},{weight:0},{weight:Infinity},{stock:0},{dose:200},{dose:'abc'},{weight:201}])assert.throws(()=>a.calculate('propofol',{...v,...bad}));});
-test('acepromazine total and hydromorphone feline limits',()=>{assert.throws(()=>a.calculate('acepromazine',{...v,species:'cat',weight:15,dose:.1,stock:2}));assert.throws(()=>a.calculate('hydromorphone',{...v,species:'cat',dose:.2,stock:2}));});
+test('unsupported species and invalid numeric inputs remain blocked',()=>{for(const bad of [{species:'rabbit'},{weight:0},{weight:Infinity},{stock:0},{dose:1000001},{dose:'abc'},{weight:201}])assert.throws(()=>a.calculate('propofol',{...v,...bad}));});
+test('acepromazine total and hydromorphone feline limits',()=>{assert.throws(()=>a.calculate('acepromazine',{...v,species:'cat',weight:15,dose:.1,stock:2}));assert.match(a.calculate('hydromorphone',{...v,species:'cat',dose:.2,stock:2}).warnings[0],/문헌 범위 밖/);});
 test('ketamine requires and separately calculates the benzodiazepine',()=>{assert.throws(()=>a.calculate('ketamine',{...v,stock:50}));const r=a.calculate('ketamine',{...v,stock:50,companionDose:.1,companionStock:5});assert.equal(r.mL,.2);assert.equal(r.companionML,.1);});
 const product=(patch={})=>({id:'x',revision:1,body:{kind:'liquid',value:20,unit:'mg',strength:{ingredientId:'mfds-bd11aec3c2ce50c8e483',species:['dog','cat'],route:'injection',release:'standard',...patch}}});
 test('hospital concentrations require exact ingredient, species, formulation and route',()=>{const d=a.drugs.find(x=>x.id==='propofol');assert.equal(a.stockOptions(d,[product()],'dog')[0].value,20);for(const patch of [{route:'oral'},{release:'modified'},{species:['dog']},{ingredientId:'other'}])assert.equal(a.stockOptions(d,[product(patch)],'cat').length,0);assert.deepEqual(a.stockOptions(a.drugs.find(x=>x.id==='dexmedetomidine'),[product()],'dog'),[]);});
@@ -15,7 +15,7 @@ test('new premedication purposes and combination route stay species specific',()
  assert.equal(a.calculate('diazepam',{...v,dose:.1,stock:5}).mL,.1);
  assert.equal(a.calculate('medetomidine',{...v,dose:10,stock:1}).mL,.05);
  assert.equal(a.calculate('medetomidine',{...v,species:'cat',dose:50,stock:1}).mL,.25);
- assert.throws(()=>a.calculate('medetomidine',{...v,species:'cat',dose:10,stock:1}));
+ assert.match(a.calculate('medetomidine',{...v,species:'cat',dose:10,stock:1}).warnings[0],/文献|문헌 범위 밖/);
  assert.equal(a.drugs.find(d=>d.id==='diazepam').route,'IV');
  assert.equal(a.drugs.find(d=>d.id==='ketamine-medetomidine').route,'IM');
 });
@@ -24,7 +24,8 @@ test('ketamine medetomidine calculates two separate volumes with mcg conversion'
  assert.equal(dog.mL,.5);assert.equal(dog.companionMg,.2);assert.equal(dog.companionML,.2);
  const cat=a.calculate('ketamine-medetomidine',{...v,species:'cat',dose:2.5,stock:50,companionDose:80,companionStock:1});
  assert.equal(cat.mL,.25);assert.equal(cat.companionML,.4);
- for(const bad of [{companionDose:80},{companionDose:.04},{companionStock:0},{dose:2.5}])assert.throws(()=>a.calculate('ketamine-medetomidine',{...v,dose:5,stock:50,companionDose:40,companionStock:1,...bad}));
+ assert.throws(()=>a.calculate('ketamine-medetomidine',{...v,dose:5,stock:50,companionDose:40,companionStock:0}));
+ for(const patch of [{companionDose:80},{companionDose:.04},{dose:2.5}])assert.ok(a.calculate('ketamine-medetomidine',{...v,dose:5,stock:50,companionDose:40,companionStock:1,...patch}).warnings.length);
 });
 test('saved concentration serializes only stock facts and atomically carries companion stock',()=>{
  const d=a.drugs.find(x=>x.id==='ketamine-medetomidine'),body=a.stockBody(d,'100','1'),p={id:'x',revision:1,body};
@@ -42,3 +43,5 @@ test('saved stock rejects corrupted values, wrong route/basis and duplicates',()
  assert.throws(()=>a.savedFact({...p,body:{...body,note:body.note.replace('"IM / IV"','"PO"')}},d));
  assert.throws(()=>a.savedFact({...p,body:{...body,note:body.note.replace('"active"','"other"')}},d));
 });
+
+test('individual planning does not block valid arithmetic and departures remain explicit',()=>{const r=a.calculate('propofol',{...v,profile:'individual',dose:1});assert.equal(r.mL,.5);assert.match(r.warnings[0],/문헌 범위 밖/);assert.deepEqual(a.calculate('propofol',v).warnings,[]);for(const patch of [{dose:0},{dose:-1},{dose:'NaN'},{stock:0}])assert.throws(()=>a.calculate('propofol',{...v,...patch}));});
