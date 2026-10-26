@@ -478,3 +478,23 @@ body:has(#practice.active-view) #globalNewCase,body:has(#practice.active-view) #
 .pt-bc-quick{margin:16px 0}.pt-bc-infusion{padding:16px;border:1px solid #d6e1f4;border-radius:12px;margin:14px 0}
 .pt-bc-quick input:not([type=checkbox]),.pt-bc-quick select,.pt-bc-infusion input{font-size:16px}
 @media(max-width:650px){.pt-tf-stages{grid-template-columns:1fr}.pt-tf-total strong{font-size:25px}.pt-tf-pump strong{font-size:24px}.pt-tf-stage{padding:16px}}
+
+/* Unified clinical reading scale and progressive entry. */
+.pt-calculator-focused{--pt-body:16px;--pt-help:14px;font-size:var(--pt-body);line-height:1.6}
+.pt-calculator-focused :is(.pt-help,small,.pt-notice,.pt-error,.pt-cri-flow,.pt-library-text){font-size:var(--pt-help);line-height:1.65}
+.pt-calculator-focused :is(input,select,textarea,button){font:inherit}
+.pt-calculator-focused input,.pt-calculator-focused select{min-height:44px}
+.pt-calculator-focused :is(.pt-output,.pt-an-result){font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.pt-value-origin{display:block;font-weight:400;color:#496180;margin-top:4px}
+.pt-cri-await-input > :not(h3):not(.pt-cri-presets):not(.pt-protocol-bar){display:none!important}
+.pt-anesthesia [data-an-cards]{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));gap:16px;margin:16px 0}
+.pt-an-card{min-width:0;display:flex;flex-direction:column;margin:0}
+.pt-an-card h4{font-size:18px;margin:8px 0}
+.pt-an-card [data-an-selected]{min-height:0}
+.pt-an-card .pt-choice{margin-top:auto}
+.pt-an-result{display:block;white-space:pre-line;padding:14px;border-radius:12px;background:#edf3ff;color:#174ac9;font-weight:700;font-size:22px;line-height:1.5;margin:12px 0}
+.pt-an-result.pt-error{font-size:14px;color:#a1382c;background:#fff3ef;font-weight:400}
+.pt-anesthesia [data-an-plan]{white-space:pre-line}
+.pt-fluid-plan output{white-space:pre-line;font-size:18px;font-weight:600}
+.pt-fluid-plan output:empty{display:none}
+@media(max-width:600px){.pt-an-card .pt-grid{grid-template-columns:1fr 1fr}.pt-an-result{font-size:21px}.pt-calculator-focused .pt-grid{min-width:0}.pt-calculator-focused :is(label,input,select){min-width:0}}

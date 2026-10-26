@@ -85,7 +85,7 @@
   const box=document.createElement('section');box.className='pt-cri-presets';
   box.innerHTML='<h4>1. 약물 선택</h4><p class="pt-help">종별 참고 범위·단위를 표시하고, 용량은 직접 선택합니다. 아래 사용 목적과 실제 제품 함량을 확인한 뒤 계산하세요. 부하 투여량은 포함하지 않습니다.</p><details data-cri-picker open><summary>정맥 주입 약물 찾기</summary><label>약물 검색<input type="search" data-cri-search placeholder="예: 펜타닐, furosemide" autocomplete="off"></label><nav class="pt-bar" aria-label="CRI 약물 분류">'+[['all','전체'],['circulation','순환'],['pain','진통'],['seizure','발작'],['gi','위장관'],['diuretic','이뇨'],['anesthesia','마취'],['intermittent','간헐 주입']].map(([id,label])=>'<button type="button" data-cri-group="'+id+'" aria-pressed="'+(id==='all')+'">'+label+'</button>').join('')+'</nav><div class="pt-cri-choices"></div><p data-cri-empty hidden>일치하는 약물이 없습니다. 검색어 또는 분류를 변경해주세요.</p></details><p data-cri-status role="status"></p><div data-cri-reference hidden><div class="pt-cri-regimen"><h4>2. 용법 확인</h4><strong data-cri-indication></strong><p data-cri-range></p><div data-cri-dose-field></div><div class="pt-bar" data-cri-dose-buttons aria-label="참고 용량 빠른 선택"></div><p data-cri-dose-status role="status"></p><p class="pt-help">참고 범위에서 이번 환자에게 적용할 용량을 선택하세요. 하한값도 모든 환자의 권장 시작량은 아닙니다.</p><details><summary>투여 조건·모니터링·근거</summary><p data-cri-note></p><a data-cri-source target="_blank" rel="noopener noreferrer">투여 근거 확인</a><p class="pt-help">확인 2026-10-25 · 환자 반응에 맞춰 조정 · 혼합약물 조제식 아님</p></details></div><label>주사제 함량<select data-cri-stock></select></label><p class="pt-help" data-cri-stock-note></p></div><button type="button" data-cri-manual>다른 약물 직접 입력</button>';
   f.querySelector('h3').after(box);
-  let records=[],selected=null,profile=null,choices=[],filter='all',touched=false,applying=false;
+  let records=[],selected=null,profile=null,choices=[],filter='all',touched=false,applying=false,manualEntry=false;
   const fields=f.elements,status=box.querySelector('[data-cri-status]'),stockSelect=box.querySelector('[data-cri-stock]'),picker=box.querySelector('[data-cri-picker]'),query=box.querySelector('[data-cri-search]');
   const doseLabel=fields.dose.closest('label'),doseHome=doseLabel.parentElement,doseNext=doseLabel.nextSibling;
   const valid=()=>['dog','cat'].includes(species.value);
@@ -143,7 +143,7 @@
   }
   function choose(d){
    if(!valid()||d.species&&!d.species.includes(species.value)||!o.guard())return;
-   applying=true;b.dispatchEvent(new CustomEvent('practice-cri-selected'));selected=d;touched=false;
+   manualEntry=false;applying=true;b.dispatchEvent(new CustomEvent('practice-cri-selected'));selected=d;touched=false;
    for(const key of ['dose','stockML','rate','diluent','note','minutes'])fields[key].value='';
    fields.drug.value=d.name;fields.mode.value=d.mode||'prepare';fields.mode.dispatchEvent(new Event('change',{bubbles:true}));
    fields.doseUnit.value=d.unit;fields.volume.value=d.mode?'':'100';bag.value=d.mode?'custom':'100';
@@ -153,7 +153,7 @@
    hours.value='';fields.rate.readOnly=false;applyDilution();applying=false;doseFeedback();refreshQuick();renderSaved();loadingState();
   }
   function reset(){
-   selected=null;profile=null;f.criReferenceContext=null;touched=false;hours.value='';fields.rate.readOnly=false;f.criSetupContext=null;dilutionHelp.replaceChildren();
+   manualEntry=false;selected=null;profile=null;f.criReferenceContext=null;touched=false;hours.value='';fields.rate.readOnly=false;f.criSetupContext=null;dilutionHelp.replaceChildren();
    doseHome.insertBefore(doseLabel,doseNext?.parentElement===doseHome?doseNext:null);doseLabel.firstChild.textContent='이번 주입 용량';
    box.querySelector('[data-cri-reference]').hidden=true;stockSelect.replaceChildren();status.textContent='';
    picker.open=true;picker.querySelector('summary').textContent='정맥 주입 약물 찾기';query.value='';filter='all';
@@ -163,12 +163,12 @@
   box.querySelectorAll('[data-cri-group]').forEach(btn=>btn.onclick=()=>{filter=btn.dataset.criGroup;box.querySelectorAll('[data-cri-group]').forEach(x=>x.setAttribute('aria-pressed',String(x===btn)));render();});
   query.addEventListener('input',render);query.addEventListener('keydown',e=>{if(e.key==='Enter')e.preventDefault();});
   stockSelect.onchange=()=>{if(!o.guard())return;touched=true;applying=true;applyStock();applying=false;refreshQuick();};
-  box.querySelector('[data-cri-manual]').onclick=()=>{if(!o.guard())return;b.dispatchEvent(new CustomEvent('practice-cri-selected'));for(const key of ['drug','note','dose','doseUnit','stock','stockUnit','rate','stockML','diluent','minutes'])fields[key].value='';reset();clear();applying=true;notify();applying=false;const advanced=f.querySelector('[data-settings]');if(advanced)advanced.open=true;fields.drug.focus();};
+  box.querySelector('[data-cri-manual]').onclick=()=>{if(!o.guard())return;b.dispatchEvent(new CustomEvent('practice-cri-selected'));for(const key of ['drug','note','dose','doseUnit','stock','stockUnit','rate','stockML','diluent','minutes'])fields[key].value='';reset();manualEntry=true;refreshQuick();clear();applying=true;notify();applying=false;const advanced=f.querySelector('[data-settings]');if(advanced)advanced.open=true;fields.drug.focus();};
   const prepHeading=document.createElement('h4');prepHeading.textContent='3. 조제 설정';doseHome.prepend(prepHeading);
   const bagLabel=document.createElement('label');bagLabel.textContent='약물 포함 최종 수액량';
   const bag=document.createElement('select');bag.dataset.criBag='';bag.innerHTML='<option value="20">20 mL · 시린지</option><option value="50">50 mL · 시린지</option><option value="100">100 mL</option><option value="500">500 mL</option><option value="custom" selected>직접 입력</option>';
-  bagLabel.append(bag);prepHeading.after(bagLabel);
-  bag.onchange=()=>{fields.volume.value=bag.value==='custom'?'':bag.value;fields.volume.dispatchEvent(new Event('input',{bubbles:true}));if(bag.value==='custom'){const advanced=f.querySelector('[data-settings]');if(advanced)advanced.open=true;fields.volume.focus();}};
+  bagLabel.append(bag);prepHeading.after(bagLabel);bagLabel.after(fields.volume.closest('label'));
+  bag.onchange=()=>{fields.volume.value=bag.value==='custom'?fields.volume.value:bag.value;fields.volume.dispatchEvent(new Event('input',{bubbles:true}));if(bag.value==='custom'){const advanced=f.querySelector('[data-settings]');if(advanced)advanced.open=true;fields.volume.focus();}};
   const quick=[];
   function shortcuts(field,values,label){
    const host=document.createElement('div');host.className='pt-cri-shortcuts';host.setAttribute('role','group');host.setAttribute('aria-label',label);
@@ -189,6 +189,7 @@
   hours.onchange=()=>{clear();refreshQuick();};
   function refreshQuick(){
    if(syncing)return;syncing=true;
+   const ready=manualEntry||!!fields.drug.value&&(!selected||!!fields.dose.value);f.classList.toggle('pt-cri-await-input',!ready);f.dataset.criStep=!valid()?'species':!fields.drug.value?'drug':!ready?'regimen':'prepare';
    const mode=fields.mode.value,automatic=mode==='prepare'&&!!hours.value;
    schedule.hidden=mode!=='prepare';dilutionHelp.hidden=['undiluted','intermittent'].includes(mode);fields.rate.readOnly=automatic;
    if(automatic){const volume=Number(fields.volume.value),value=Number.isFinite(volume)&&volume>0?String(volume/Number(hours.value)):'';if(fields.rate.value!==value){fields.rate.value=value;fields.rate.dispatchEvent(new Event('input',{bubbles:true}));}}
@@ -222,7 +223,7 @@
   });
   f.addEventListener('reset',()=>queueMicrotask(reset));species.addEventListener('change',reset);b.addEventListener('practice-protocol-applied',e=>{if(e.detail.calculator!=='cri')return;queueMicrotask(()=>{reset();const h=g.PracticeMedicationFlow?.unpack(e.detail.protocol?.body.note).meta.hours;if(h){if(![...hours.options].some(x=>x.value===String(h)))hours.add(new Option(h+'시간 동안 주입',h));hours.value=h;refreshQuick();}});});
   b.addEventListener('practice-protocols-loaded',e=>{records=[...records.filter(p=>p.body?.kind!=='protocol'),...e.detail.items.filter(p=>p.body?.kind==='protocol')];renderSaved();});
-  render();return {loaded(r){records=r.items||[];renderSaved();if(selected&&!touched){applying=true;load();applying=false;refreshQuick();}},reset};
+  refreshQuick();render();return {loaded(r){records=r.items||[];renderSaved();if(selected&&!touched){applying=true;load();applying=false;refreshQuick();}},reset};
  }
  function describe(f){const p=f.criReferenceContext,x=f.criSetupContext;const setup=(x?.totalRate!==null&&x?.totalRate!==undefined?'\n다른 정맥 라인 '+x.otherRate+' mL/hr · 전체 정맥 주입 '+g.PracticeCalculators.display(x.totalRate)+' mL/hr':'\n전체 정맥 주입량: 다른 라인 미확인')+(x?.hours?'\n속도 설정: 최종 '+x.volume+' mL ÷ '+x.hours+'시간 · 사용 가능 시간은 별도 확인':'')+(x?.dilution?'\n희석액 후보: '+x.dilution.value+' · 실제 제품 조건 확인\n희석 근거 '+x.dilution.source:'');if(!p)return setup;return '참고 용법: '+p.indication+' · '+(p.species==='cat'?'고양이':'개')+'\n문헌 범위 '+p.min+'–'+p.max+' '+p.unit+(p.state==='outside'?' · 범위 밖 수의사 조정값':'')+'\n근거 '+p.source.label+' '+p.source.url+'\n부하 투여량 제외 · 확인 '+p.checked+setup;}
  const api={drugs,options,mount,profileFor,doseStatus,describe,dilutionFor};g.PracticeCRIPresets=api;if(typeof module!=='undefined')module.exports=api;
