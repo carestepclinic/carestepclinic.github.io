@@ -52,7 +52,7 @@ test('saved transfusion set and planned midnight timeline retain time limits',as
 });
 test('loading volume is separate and is invalidated by stock or weight edits',async t=>{
  const p=await page(t);await kind(p,'cri');const f=p.locator('[data-calc=cri]');await f.locator('[data-cri-drug=fentanyl]').click();await f.locator('.pt-loading-dose').evaluate(e=>e.open=true);
- await f.locator('[data-loading-unit]').selectOption('mcg');await f.locator('[data-loading-dose]').fill('2');await f.locator('[data-loading-check]').check();await f.locator('[data-loading-run]').click();
+ await f.locator('[data-loading-unit]').selectOption('mcg');await f.locator('[data-loading-dose]').fill('2');await f.locator('[data-loading-prior]').selectOption('no');await f.locator('[data-loading-check]').check();await f.locator('[data-loading-run]').click();
  assert.match(await f.locator('[data-loading-result]').innerText(),/0.2 mL/);assert.match(await f.locator('[data-loading-result]').innerText(),/합산하지 않음/);await p.locator('[data-common-weight]').fill('6');assert.equal(await f.locator('[data-loading-result]').innerText(),'');assert.equal(await f.locator('[data-loading-check]').isChecked(),false);
 });
 test('load retry keeps manually entered dose and remains available outside medicine panel',async t=>{

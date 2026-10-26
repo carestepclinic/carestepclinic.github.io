@@ -158,7 +158,7 @@
    setFlag(dock,'hidden',!b.offsetWidth||!!document.querySelector('dialog[open]')||typing&&maxHeight-height>160);
    decorateResults();
    const form=activeForm(),out=form?.querySelector('output'),submit=form&&[...form.querySelectorAll('button')].find(x=>x.type==='submit');
-   setFlag(calculate,'disabled',!form||!!submit?.disabled);setFlag(calculate,'hidden',form?.dataset.calc==='batch'||activePanel()?.dataset.kindPanel==='emergency');setFlag(result,'hidden',activePanel()?.dataset.kindPanel==='emergency');setText(calculate,'계산');
+   setFlag(calculate,'disabled',!form||!!submit?.disabled);setFlag(calculate,'hidden',form?.dataset.calc==='batch'||['emergency','anesthesia'].includes(activePanel()?.dataset.kindPanel));setFlag(result,'hidden',['emergency','anesthesia'].includes(activePanel()?.dataset.kindPanel));setText(calculate,'계산');
    const batch=b.querySelector('[data-calc=batch]'),primary=batch?.querySelector('[data-rx-parse]');
    if(primary){const state=batch.dataset.calculationState;setText(primary,state==='loading'?'계산 중…':state==='complete'?'다시 계산':'처방 계산');setFlag(primary,'disabled',state==='loading');batch.setAttribute('aria-busy',String(state==='loading'));}
    setFlag(result,'disabled',!out?.textContent.trim());

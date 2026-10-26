@@ -1,0 +1,7 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),{pathToFileURL}=require('node:url'),{resolve}=require('node:path'),settings=require('../practice-calculator-settings.js');
+test('hospital settings use the existing encrypted API with revision and hospital isolation',async t=>{
+ const {fixture}=await import(pathToFileURL(resolve(process.env.TRAINING_WORKER_ROOT,'test/helpers/practice-fixture.mjs')).href),f=await fixture(t);
+ const cases=[['potassium','potassium',{bag:'500',kstock:'2',baseK:'0',mixMode:'final'}],['transfusion','transfusion',{factor:'20'}],['bicarbonate','bicarbonate',{stock:'1'}],['cri','cri:dobutamine:prepare',{stock:'50',stockUnit:'mg',volume:'100',diluent:'N/S',pumpMin:'0.1'}]];
+ for(const [kind,key,values] of cases){const body=settings.body(kind,key,values),r=await f.extras('/presets','POST',body),saved=(await f.extras('/presets')).items.find(x=>x.id===r.id);assert.deepEqual(settings.fact(saved).values,values);await f.extras('/presets/'+r.id,'PUT',{...body,revision:saved.revision});await assert.rejects(f.extras('/presets/'+r.id,'PUT',{...body,revision:saved.revision}),e=>e.statusCode===409);await assert.rejects(f.extras('/presets','POST',body,f.staff),e=>e.statusCode===403);await assert.rejects(f.extras('/presets/'+r.id,'PUT',{...body,revision:2},f.other),e=>e.statusCode===404);}
+ assert.equal((await f.extras('/presets','GET',undefined,f.other)).items.length,0);assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM care_calc_presets WHERE body_cipher LIKE ?').get('enc:%').n,4);
+});
