@@ -5,6 +5,7 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
 export const uiFiles = new Set([
+ 'clinical-workspace.js','clinical-workspace.css','clinical-protocol-starters.js',
  'practice-calculator-flow.js','practice-calculator-settings.js',
  'practice-anesthesia.js','practice-fluid-plan.js',
  'practice-calcium-guided.js','practice-preparation.js','practice-medication-flow.js','practice-rx-workflow.js','practice-medication-assist.js',

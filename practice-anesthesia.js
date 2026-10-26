@@ -65,7 +65,7 @@
    cards.set(d.id,{d,card,dose:card.querySelector('[data-an-dose]'),stock:card.querySelector('[data-an-stock]'),choice:card.querySelector('[data-an-choice]'),out:card.querySelector('output'),coDose:card.querySelector('[data-an-companion-dose]'),coStock:card.querySelector('[data-an-companion-stock]'),state:card.querySelector('[data-an-save-state]'),save:card.querySelector('[data-an-save]'),reload:card.querySelector('[data-an-reload]'),selected:card.querySelector('[data-an-selected]'),touched:false,doseTouched:false,product:null,saved:null,blocked:''});
   }
   const status=panel.querySelector('[data-an-context]'),plan=document.createElement('section');plan.className='pt-card';
-  plan.innerHTML='<h4>선택한 마취 계획</h4><p data-an-plan>선택한 약물이 없습니다.</p><button type="button" data-an-copy disabled>확인한 계획 복사</button><p data-an-copy-status role="status"></p>';panel.querySelector('[data-an-cards]').before(plan);plan.classList.add('pt-an-plan-summary');plan.querySelector('[data-an-plan]').setAttribute('aria-live','polite');
+  plan.innerHTML='<h4>선택한 마취 계획</h4><p data-an-plan>선택한 약물이 없습니다.</p><button type="button" data-an-copy disabled>확인한 계획 복사</button><p data-an-copy-status role="status"></p>';panel.querySelector('[data-an-cards]').before(plan);plan.classList.add('pt-an-plan-summary');plan.querySelector('[data-an-plan]').setAttribute('aria-live','polite');if(o.clinicalPlan){const savePlan=document.createElement('button');savePlan.type='button';savePlan.textContent='수술 세션에 계산 초안 연결';savePlan.onclick=()=>exportPlan(true);plan.append(savePlan);}
   const jump=document.createElement('button');jump.type='button';jump.textContent='선택 약물 확인';jump.dataset.anJump='';jump.onclick=()=>{finder.querySelector('input[type=checkbox]').checked=true;filterCards();plan.scrollIntoView({block:'nearest'});};panel.querySelector('[data-an-context]').after(jump);
   const origin=c=>c.card.querySelector('[data-an-origin]');
   function failed(){ready=false;loadFailed=true;canManage=false;for(const c of cards.values()){c.save.disabled=true;c.state.textContent='불러오기 실패 · 입력값 유지 · 상단에서 다시 불러오기';}}
@@ -131,14 +131,15 @@
    c.choice.onchange=()=>{const p=stockOptions(c.d,items,species.value).find(x=>x.id===c.choice.value);c.product=p||null;c.stock.value=p?.value??c.d.stock??'';c.touched=true;origin(c).textContent=p?'병원 약품 · '+p.title:'문헌·제품 참고';c.state.textContent='선택한 농도를 유지하려면 저장하세요.';c.selected.checked=false;generation++;update();};
    c.save.onclick=()=>saveCard(c);c.reload.onclick=()=>reloadCard(c);
   }
-  plan.querySelector('button').onclick=async()=>{
+  plan.querySelector('[data-an-copy]').onclick=()=>exportPlan(false);
+  async function exportPlan(toClinical){
    const seq=generation;plan.querySelector('[data-an-copy-status]').textContent='병원 농도 최신 상태 확인 중…';
    try{const raw=await o.fresh(),r=partition(raw);if(!o.guard()||seq!==generation)throw Error('입력이 변경됐습니다. 다시 확인해주세요.');
     for(const c of cards.values())if(c.selected.checked){
      if(c.saved&&!c.touched){const latest=savedFor(r.anesthesiaItems,c.d);if(!latest||!sameRevision(latest.record,c.saved)||latest.value!==+c.stock.value||c.coStock&&latest.companionStock!==+c.coStock.value)throw Error('저장된 농도가 변경됐습니다. 저장값을 다시 불러와주세요.');}
      if(c.product){const p=stockOptions(c.d,r.items,species.value).find(x=>x.id===c.product.id);if(!p||p.revision!==c.product.revision||p.value!==+c.stock.value)throw Error('저장된 제품이 변경됐습니다. 농도를 다시 확인해주세요.');}
     }
-    update();if(plan.querySelector('button').disabled)throw Error('선택한 용량을 확인해주세요.');await navigator.clipboard.writeText(report);plan.querySelector('[data-an-copy-status]').textContent='확인한 계획을 복사했습니다.';
+    update();if(plan.querySelector('button').disabled)throw Error('선택한 용량을 확인해주세요.');if(toClinical)o.clinicalPlan({summary:report,species:species.value,weight:Number(weight.value)});else{await navigator.clipboard.writeText(report);plan.querySelector('[data-an-copy-status]').textContent='확인한 계획을 복사했습니다.';}
    }catch(e){plan.querySelector('[data-an-copy-status]').textContent=e.message;}
   };
   function filterCards(){const purpose=finder.querySelector('[data-an-purpose]').value,pain=['butorphanol','methadone','buprenorphine','hydromorphone'];const group=panel.querySelector('[data-an-group][aria-pressed=true]')?.dataset.anGroup||'all',query=finder.querySelector('[data-an-search]').value.toLowerCase().trim(),only=finder.querySelector('[data-an-selected-only]').checked;let count=0;for(const c of cards.values()){c.card.hidden=(purpose==='pain'&&!pain.includes(c.d.id)||purpose==='sedation'&&(c.d.group!=='premed'||pain.includes(c.d.id))||purpose==='iv'&&(c.d.group!=='induction'||c.d.route!=='IV')||purpose==='im'&&(c.d.group!=='induction'||c.d.route!=='IM'))||(group!=='all'&&c.d.group!==group)||!c.d.name.toLowerCase().includes(query)||(only&&!c.selected.checked);if(!c.card.hidden)count++;}finder.querySelector('[data-an-empty]').hidden=count>0;}

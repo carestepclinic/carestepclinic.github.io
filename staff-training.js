@@ -400,7 +400,7 @@
    ++sequence;tabState={};mineFilter='all';mineQuery='';reportQuery='';reportMember='';reportState='all';reportDue='all';reportPage=0;manageView='assign';sort='number';view='';data=null;identity='';dirty=false;activeDoc=null;activeAssignment=null;activeSupplement=null;query='';category='';courseType='';message='';
    if(dialog){dialog.close();dialog.remove();dialog=null;}shell();
   }
-  return {open:load,close:closeDialog,leave(){if(!closeDialog())return false;remember();++sequence;return true;},clear,selectSop(){remember();tab='sop';query='';category='';courseType='';sort='number';view='list';}};
+  return {open:load,openVersion:id=>openDocument(id),close:closeDialog,leave(){if(!closeDialog())return false;remember();++sequence;return true;},clear,selectSop(){remember();tab='sop';query='';category='';courseType='';sort='number';view='list';}};
  }
  global.StaffTraining={mount,filterCourses,sortCourses,groupCourses};
 })(globalThis);
