@@ -7,15 +7,16 @@
  const headings=[['Contraindications/Precautions/Warnings','금기·주의사항'],['Drug Interactions','병용·상호작용'],['Prescriber Highlights','처방 핵심 사항'],['Adverse Effects','이상반응'],['Reproductive/Nursing Safety','임신·수유'],['Monitoring','모니터링'],['Laboratory Considerations','검사 시 고려사항']];
  function sections(entry){return headings.map(([heading,label])=>({heading,label,text:(entry.sections||[]).filter(s=>normalize(s.heading)===normalize(heading)).map(s=>s.text).filter(x=>typeof x==='string'&&x.trim()).join('\n\n')}));}
  function names(row,resolve=g.PracticeIngredients?.resolve){
-  const values=[row.drug,row.ingredient,row.calculationIngredient].filter(Boolean),out=new Set(values.map(normalize));
+  const basis=row.requiresProductReview?[]:String(row.calculationBasis||'').split(/\s+·\s+/);
+  const values=[row.drug,row.ingredient,row.calculationIngredient,...basis].filter(Boolean),out=new Set(values.map(normalize));
   // Use exact ingredient aliases only. Broad discovery/referenceNames may include combination products.
   for(const value of values){const family=resolve?.(value);if(family){out.add(normalize(family.english));if(!family.complex)for(const alias of family.aliases||[])out.add(normalize(alias));}}
   for(const [alias,name] of [['pds','prednisolone'],['udca','ursodiol'],['ursodeoxycholicacid','ursodiol']])if(out.has(alias))out.add(name);
   out.delete('');return out;
  }
  function candidates(index,row,resolve){const keys=names(row,resolve);return index.filter(e=>[e.title,...String(e.aliases||'').split(/[;|\n,]/)].some(v=>keys.has(normalize(v))));}
- function automatic(found,row={}){const e=found[0];return found.length===1&&e.group==='systemic'&&(!/[+\/]|\s(?:and|with)\s/i.test(e.title)||names(row).has(normalize(e.title)))?e:null;}
- function rowKey(row){return JSON.stringify([normalize(row.drug),normalize(row.ingredient),normalize(row.calculationIngredient),row.route||'']);}
+ function automatic(found,row={}){const e=found[0],compound=v=>/[+\/]|\s(?:and|with)\s/i.test(v||'');if(found.length!==1||e.group!=='systemic')return null;if((compound(row.drug)||g.PracticeIngredients?.resolve(row.drug)?.complex)&&!names({...row,calculationBasis:''}).has(normalize(e.title)))return null;return !compound(e.title)||names(row).has(normalize(e.title))?e:null;}
+ function rowKey(row){return JSON.stringify([normalize(row.drug),normalize(row.ingredient),normalize(row.calculationIngredient),normalize(row.calculationBasis),!!row.requiresProductReview,row.route||'']);}
  function createClient(request,guard=()=>true){
   let epoch=0,disposed=false,indexPromise=null;const entries=new Map();
   const valid=(token)=>!disposed&&epoch===token&&guard();
@@ -45,16 +46,16 @@
   let disposed=false,generation=0,rows=[],signature='',catalog=null,choice=new Map(),cards=new Map(),timer=null;
   const alive=()=>!disposed&&host.isConnected&&(!o.guard||o.guard());
   const active=()=>alive()&&!host.closest('[data-kind-panel]')?.hidden;
-  summaryView=g.PracticePrescriptionSummary?.mount(box.querySelector('[data-private-summary]'),{request:o.request,guard:alive});
+  summaryView=g.PracticePrescriptionSummary?.mount(box.querySelector('[data-private-summary]'),{request:o.request,guard:alive,onConnect:drug=>{const row=rows.find(r=>(r.drug||'미확인 약물')===drug),card=row&&cards.get(rowKey(row));if(!card)return;box.querySelector('[data-private-originals]').open=true;card.querySelector('.pt-private-picker').open=true;card.scrollIntoView({block:'center',behavior:'smooth'});card.querySelector('[data-private-search]').focus({preventScroll:true});}});
   if(!summaryView)box.querySelector('[data-private-summary]').textContent='한국어 요약 화면을 불러오지 못했습니다. 새로고침해주세요.';
-  function updateSummary(){if(!catalog)return;const selected=[],missing=[];for(const row of rows){const item=catalog.items.find(e=>e.key===choice.get(rowKey(row)));if(item)selected.push(item);else missing.push(row.drug||'미확인 약물');}summaryView?.update(selected,missing);box.querySelector('[data-private-originals]').open=missing.length>0;}
+  function updateSummary(){if(!catalog)return;const selected=[],missing=[];for(const row of rows){const key=rowKey(row),item=catalog.items.find(e=>e.key===choice.get(key))||automatic(candidates(catalog.items,row),row);if(item){choice.set(key,item.key);selected.push(item);}else missing.push(row.drug||'미확인 약물');}summaryView?.update(selected,missing);}
   function clearCards(){generation++;cards.clear();list.replaceChildren();}
   function picker(card,row,found){
    const details=document.createElement('details');details.className='pt-private-picker';details.open=!automatic(found,row);
    details.innerHTML='<summary>약물 연결·변경</summary><label>전체 목차 검색<input type="search" data-private-search placeholder="성분명·제품명·등록 별칭"></label><label>연결할 원문 항목<select data-private-choice><option value="">항목 선택</option></select></label><button type="button" data-private-connect>선택한 항목 연결</button><p data-private-pick-status></p>';
    card.append(details);const search=details.querySelector('input'),select=details.querySelector('select'),info=details.querySelector('p');
    function options(){const q=normalize(search.value),all=q?catalog.items.filter(e=>normalize(e.title+' '+e.aliases+' '+e.libraryTitle).includes(q)):found.length?found:catalog.items;const selected=choice.get(rowKey(row));select.replaceChildren(new Option('항목 선택',''));for(const item of all.slice(0,100))select.add(new Option(item.title+' · '+(groups[item.group]||item.group)+' · '+item.libraryTitle,item.key));if(selected&&all.some(e=>e.key===selected))select.value=selected;info.textContent=all.length>100?all.length+'개 검색됨 · 앞 100개 표시. 검색어를 더 입력해 범위를 좁혀주세요.':all.length+'개 후보';}
-   search.oninput=options;options();details.querySelector('button').onclick=()=>{const meta=catalog.items.find(e=>e.key===select.value);if(!meta){info.textContent='연결할 원문 항목을 선택해주세요.';return;}choice.set(rowKey(row),meta.key);details.open=false;updateSummary();void read(card,meta,generation);};
+   search.oninput=options;options();details.querySelector('button').onclick=()=>{const meta=catalog.items.find(e=>e.key===select.value);if(!meta){info.textContent='연결할 원문 항목을 선택해주세요.';return;}choice.set(rowKey(row),meta.key);details.open=false;box.querySelector('[data-private-originals]').open=false;updateSummary();void read(card,meta,generation);};
   }
   async function read(card,meta,token){
    const target=card.querySelector('[data-private-content]');target.textContent='금기·주의·상호작용 원문을 불러오는 중…';card.dataset.entryKey=meta.key;
@@ -80,7 +81,7 @@
   }
   function update(nextRows){
    const unique=[...new Map((nextRows||[]).map(r=>[rowKey(r),r])).values()],next=JSON.stringify(unique.map(r=>[rowKey(r),[...names(r)].sort()]));rows=unique;
-   if(next===signature)return;signature=next;clearTimeout(timer);clearCards();summaryView?.update([],[]);box.hidden=!rows.length;
+   if(next===signature)return;signature=next;clearTimeout(timer);clearCards();if(catalog)updateSummary();else summaryView?.update([],[]);box.hidden=!rows.length;
    if(!rows.length){choice.clear();summaryView?.update([],[]);status.textContent='';return;}timer=setTimeout(()=>void render(),180);
   }
   const reload=()=>{if(!alive())return;clearTimeout(timer);client.reset();summaryView?.update([],[]);catalog=null;choice.clear();clearCards();void render();};box.querySelector('[data-private-reload]').onclick=reload;
