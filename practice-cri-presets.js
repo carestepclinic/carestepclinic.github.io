@@ -83,12 +83,20 @@
  function mount(b,o){
   const f=b.querySelector('[data-calc=cri]'),species=b.querySelector('[data-ref-species]');if(!f||!species)return null;
   const box=document.createElement('section');box.className='pt-cri-presets';
-  box.innerHTML='<h4>1. 약물 선택</h4><p class="pt-help">종별 참고 용량·단위를 채웁니다. 아래 사용 목적과 실제 제품 함량을 확인한 뒤 계산하세요. 부하 투여량은 포함하지 않습니다.</p><details data-cri-picker open><summary>정맥 주입 약물 찾기</summary><label>약물 검색<input type="search" data-cri-search placeholder="예: 펜타닐, furosemide" autocomplete="off"></label><nav class="pt-bar" aria-label="CRI 약물 분류">'+[['all','전체'],['circulation','순환'],['pain','진통'],['seizure','발작'],['gi','위장관'],['diuretic','이뇨'],['anesthesia','마취'],['intermittent','간헐 주입']].map(([id,label])=>'<button type="button" data-cri-group="'+id+'" aria-pressed="'+(id==='all')+'">'+label+'</button>').join('')+'</nav><div class="pt-cri-choices"></div><p data-cri-empty hidden>일치하는 약물이 없습니다. 검색어 또는 분류를 변경해주세요.</p></details><p data-cri-status role="status"></p><div data-cri-reference hidden><div class="pt-cri-regimen"><h4>2. 용법 확인</h4><strong data-cri-indication></strong><p data-cri-range></p><div data-cri-dose-field></div><div class="pt-bar" data-cri-dose-buttons aria-label="참고 용량 빠른 선택"></div><p data-cri-dose-status role="status"></p><p class="pt-help">참고 범위에서 이번 환자에게 적용할 용량을 선택하세요. 하한값도 모든 환자의 권장 시작량은 아닙니다.</p><details><summary>투여 조건·모니터링·근거</summary><p data-cri-note></p><a data-cri-source target="_blank" rel="noopener noreferrer">투여 근거 확인</a><p class="pt-help">확인 2026-10-25 · 환자 반응에 맞춰 조정 · 혼합약물 조제식 아님</p></details></div><label>주사제 함량<select data-cri-stock></select></label><p class="pt-help" data-cri-stock-note></p></div><button type="button" data-cri-manual>다른 약물 직접 입력</button>';
+  box.innerHTML='<h4>1. 약물 선택</h4><p class="pt-help">종별 참고 범위·단위를 표시하고, 용량은 직접 선택합니다. 아래 사용 목적과 실제 제품 함량을 확인한 뒤 계산하세요. 부하 투여량은 포함하지 않습니다.</p><details data-cri-picker open><summary>정맥 주입 약물 찾기</summary><label>약물 검색<input type="search" data-cri-search placeholder="예: 펜타닐, furosemide" autocomplete="off"></label><nav class="pt-bar" aria-label="CRI 약물 분류">'+[['all','전체'],['circulation','순환'],['pain','진통'],['seizure','발작'],['gi','위장관'],['diuretic','이뇨'],['anesthesia','마취'],['intermittent','간헐 주입']].map(([id,label])=>'<button type="button" data-cri-group="'+id+'" aria-pressed="'+(id==='all')+'">'+label+'</button>').join('')+'</nav><div class="pt-cri-choices"></div><p data-cri-empty hidden>일치하는 약물이 없습니다. 검색어 또는 분류를 변경해주세요.</p></details><p data-cri-status role="status"></p><div data-cri-reference hidden><div class="pt-cri-regimen"><h4>2. 용법 확인</h4><strong data-cri-indication></strong><p data-cri-range></p><div data-cri-dose-field></div><div class="pt-bar" data-cri-dose-buttons aria-label="참고 용량 빠른 선택"></div><p data-cri-dose-status role="status"></p><p class="pt-help">참고 범위에서 이번 환자에게 적용할 용량을 선택하세요. 하한값도 모든 환자의 권장 시작량은 아닙니다.</p><details><summary>투여 조건·모니터링·근거</summary><p data-cri-note></p><a data-cri-source target="_blank" rel="noopener noreferrer">투여 근거 확인</a><p class="pt-help">확인 2026-10-25 · 환자 반응에 맞춰 조정 · 혼합약물 조제식 아님</p></details></div><label>주사제 함량<select data-cri-stock></select></label><p class="pt-help" data-cri-stock-note></p></div><button type="button" data-cri-manual>다른 약물 직접 입력</button>';
   f.querySelector('h3').after(box);
   let records=[],selected=null,profile=null,choices=[],filter='all',touched=false,applying=false;
   const fields=f.elements,status=box.querySelector('[data-cri-status]'),stockSelect=box.querySelector('[data-cri-stock]'),picker=box.querySelector('[data-cri-picker]'),query=box.querySelector('[data-cri-search]');
   const doseLabel=fields.dose.closest('label'),doseHome=doseLabel.parentElement,doseNext=doseLabel.nextSibling;
   const valid=()=>['dog','cat'].includes(species.value);
+  const saved=document.createElement('section');saved.className='pt-cri-saved';saved.hidden=true;picker.after(saved);
+  function renderSaved(){saved.replaceChildren();const candidates=records.filter(p=>p.body?.kind==='protocol'&&p.body.calculator==='cri'&&p.body.species===species.value&&selected&&(g.PracticeMedicationFlow?.unpack(p.body.note).meta.criId===selected.id||p.body.defaults.drug===selected.name));saved.hidden=!candidates.length;if(!candidates.length)return;const title=document.createElement('b');title.textContent='이 약물의 병원 조제 서식';saved.append(title);for(const p of candidates){const button=document.createElement('button');button.type='button';button.textContent=p.body.title+' · '+p.body.indication;button.onclick=()=>{const select=f.querySelector('[data-protocol]');select.value=p.id;select.dispatchEvent(new Event('change',{bubbles:true}));};saved.append(button);}}
+  const loading=document.createElement('details');loading.className='pt-loading-dose';loading.hidden=true;loading.innerHTML='<summary>부하 투여 검토 · 유지주입과 별도</summary><p class="pt-help">기존 전처치·유도약 투여 여부와 환자 상태를 먼저 확인합니다. 아래는 수의사가 정한 부하 용량의 원액 환산이며 자동 투여 권고가 아닙니다. 투여 시간·희석·모니터링은 원내 지침을 적용하세요.</p><div class="pt-grid"><label>확인한 부하 용량<input data-loading-dose inputmode="decimal"></label><label>부하 용량 단위<select data-loading-unit><option value="mg">mg/kg/회</option><option value="mcg">mcg/kg/회</option></select></label></div><label class="pt-choice"><input data-loading-check type="checkbox">기존 투여·부하 용량·IV 경로·실제 원액·투여 계획을 확인했습니다.</label><button type="button" data-loading-run>부하 원액량 계산</button><p data-loading-result role="status"></p><a href="https://www.canadianveterinarians.net/media/hhlgn5sl/constant-rate-infusions-2023.pdf" target="_blank" rel="noopener noreferrer">CVMA · 부하 투여와 유지주입 구분</a>';box.append(loading);
+  loading.querySelector('[data-loading-run]').onclick=()=>{const out=loading.querySelector('[data-loading-result]');try{if(!o.guard()||!selected||!['fentanyl','morphine','ketamine'].includes(selected.id)||!valid())throw Error('약물과 동물 종류를 먼저 선택해주세요.');if(!loading.querySelector('[data-loading-check]').checked)throw Error('부하 투여 계획을 먼저 확인해주세요.');const dose=Number(loading.querySelector('[data-loading-dose]').value)*(loading.querySelector('[data-loading-unit]').value==='mcg'?0.001:1),stock=Number(fields.stock.value)*(fields.stockUnit.value==='mcg'?0.001:1);if(!['mg','mcg'].includes(fields.stockUnit.value))throw Error('원액 단위를 확인해주세요.');const result=g.PracticeCalculators.dose(b.querySelector('[data-common-weight]').value,dose,stock);out.textContent='부하 투여 원액 '+g.PracticeCalculators.display(result.mL)+' mL · '+g.PracticeCalculators.display(result.mg)+' mg · 유지주입 조제량에 합산하지 않음 · 희석·완속 투여 계획 별도 확인';}catch(e){out.textContent=e.message;}};
+  function clearLoading(){loading.querySelector('[data-loading-result]').textContent='';loading.querySelector('[data-loading-check]').checked=false;}
+  for(const ev of ['input','change'])b.addEventListener(ev,e=>{if(e.target.matches('[data-loading-check]'))return;clearLoading();});
+  function loadingState(){loading.hidden=!selected||!['fentanyl','morphine','ketamine'].includes(selected.id);loading.open=false;loading.querySelector('[data-loading-dose]').value='';clearLoading();}
+
   function clear(){fields.confirmed.checked=false;o.clear();}
   function notify(){fields.drug.dispatchEvent(new Event('input',{bubbles:true}));o.refresh?.();}
   function render(){
@@ -104,7 +112,7 @@
    el.textContent=state==='outside'?'문헌 범위를 벗어난 직접 조정값입니다. 적응증·단위·처방 근거를 다시 확인하세요.':state==='empty'?'주입 용량을 입력하거나 참고 용량을 선택해주세요.':state==='unit'?'변경한 단위에는 위 참고 범위를 적용하지 않습니다.':'참고 범위 내 입력값 · 환자별 적합성은 별도 확인';
    el.className=state==='outside'?'pt-error':'pt-help';
    box.querySelectorAll('[data-cri-dose-value]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.criDoseValue===fields.dose.value)));
-   f.criReferenceContext=profile&&selected&&fields.drug.value===selected.name&&fields.doseUnit.value===profile.unit?{...profile,state}:null;
+   f.criReferenceContext=profile&&selected&&fields.drug.value===selected.name&&fields.doseUnit.value===profile.unit?{...profile,id:selected.id,state}:null;
   }
   function showProfile(){
    profile=profileFor(selected.id,species.value);
@@ -142,7 +150,7 @@
    box.querySelector('[data-cri-reference]').hidden=false;showProfile();load();render();
    status.textContent=d.mode==='intermittent'?'1회 주입 · 반복 간격은 별도 처방':d.mode==='undiluted'?'원액 지속주입 · 추가 희석 없음':'희석 지속주입 · 최종 부피와 펌프 속도 선택';
    picker.open=false;picker.querySelector('summary').textContent=d.name+' · 약물 변경';picker.querySelector('summary').focus({preventScroll:true});
-   hours.value='';fields.rate.readOnly=false;applyDilution();applying=false;doseFeedback();refreshQuick();
+   hours.value='';fields.rate.readOnly=false;applyDilution();applying=false;doseFeedback();refreshQuick();renderSaved();loadingState();
   }
   function reset(){
    selected=null;profile=null;f.criReferenceContext=null;touched=false;hours.value='';fields.rate.readOnly=false;f.criSetupContext=null;dilutionHelp.replaceChildren();
@@ -150,15 +158,16 @@
    box.querySelector('[data-cri-reference]').hidden=true;stockSelect.replaceChildren();status.textContent='';
    picker.open=true;picker.querySelector('summary').textContent='정맥 주입 약물 찾기';query.value='';filter='all';
    box.querySelectorAll('[data-cri-group]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.criGroup==='all')));
-   render();bag.value=['20','50','100','500'].includes(fields.volume.value)?fields.volume.value:'custom';refreshQuick();
+   render();bag.value=['20','50','100','500'].includes(fields.volume.value)?fields.volume.value:'custom';refreshQuick();renderSaved();loadingState();
   }
   box.querySelectorAll('[data-cri-group]').forEach(btn=>btn.onclick=()=>{filter=btn.dataset.criGroup;box.querySelectorAll('[data-cri-group]').forEach(x=>x.setAttribute('aria-pressed',String(x===btn)));render();});
   query.addEventListener('input',render);query.addEventListener('keydown',e=>{if(e.key==='Enter')e.preventDefault();});
   stockSelect.onchange=()=>{if(!o.guard())return;touched=true;applying=true;applyStock();applying=false;refreshQuick();};
   box.querySelector('[data-cri-manual]').onclick=()=>{if(!o.guard())return;b.dispatchEvent(new CustomEvent('practice-cri-selected'));for(const key of ['drug','note','dose','doseUnit','stock','stockUnit','rate','stockML','diluent','minutes'])fields[key].value='';reset();clear();applying=true;notify();applying=false;const advanced=f.querySelector('[data-settings]');if(advanced)advanced.open=true;fields.drug.focus();};
+  const prepHeading=document.createElement('h4');prepHeading.textContent='3. 조제 설정';doseHome.prepend(prepHeading);
   const bagLabel=document.createElement('label');bagLabel.textContent='약물 포함 최종 수액량';
   const bag=document.createElement('select');bag.dataset.criBag='';bag.innerHTML='<option value="20">20 mL · 시린지</option><option value="50">50 mL · 시린지</option><option value="100">100 mL</option><option value="500">500 mL</option><option value="custom" selected>직접 입력</option>';
-  bagLabel.append(bag);doseHome.prepend(bagLabel);
+  bagLabel.append(bag);prepHeading.after(bagLabel);
   bag.onchange=()=>{fields.volume.value=bag.value==='custom'?'':bag.value;fields.volume.dispatchEvent(new Event('input',{bubbles:true}));if(bag.value==='custom'){const advanced=f.querySelector('[data-settings]');if(advanced)advanced.open=true;fields.volume.focus();}};
   const quick=[];
   function shortcuts(field,values,label){
@@ -212,7 +221,8 @@
    if(profile)doseFeedback();refreshQuick();
   });
   f.addEventListener('reset',()=>queueMicrotask(reset));species.addEventListener('change',reset);b.addEventListener('practice-protocol-applied',e=>{if(e.detail.calculator!=='cri')return;queueMicrotask(()=>{reset();const h=g.PracticeMedicationFlow?.unpack(e.detail.protocol?.body.note).meta.hours;if(h){if(![...hours.options].some(x=>x.value===String(h)))hours.add(new Option(h+'시간 동안 주입',h));hours.value=h;refreshQuick();}});});
-  render();return {loaded(r){records=r.items||[];if(selected&&!touched){applying=true;load();applying=false;refreshQuick();}},reset};
+  b.addEventListener('practice-protocols-loaded',e=>{records=[...records.filter(p=>p.body?.kind!=='protocol'),...e.detail.items.filter(p=>p.body?.kind==='protocol')];renderSaved();});
+  render();return {loaded(r){records=r.items||[];renderSaved();if(selected&&!touched){applying=true;load();applying=false;refreshQuick();}},reset};
  }
  function describe(f){const p=f.criReferenceContext,x=f.criSetupContext;const setup=(x?.totalRate!==null&&x?.totalRate!==undefined?'\n다른 정맥 라인 '+x.otherRate+' mL/hr · 전체 정맥 주입 '+g.PracticeCalculators.display(x.totalRate)+' mL/hr':'\n전체 정맥 주입량: 다른 라인 미확인')+(x?.hours?'\n속도 설정: 최종 '+x.volume+' mL ÷ '+x.hours+'시간 · 사용 가능 시간은 별도 확인':'')+(x?.dilution?'\n희석액 후보: '+x.dilution.value+' · 실제 제품 조건 확인\n희석 근거 '+x.dilution.source:'');if(!p)return setup;return '참고 용법: '+p.indication+' · '+(p.species==='cat'?'고양이':'개')+'\n문헌 범위 '+p.min+'–'+p.max+' '+p.unit+(p.state==='outside'?' · 범위 밖 수의사 조정값':'')+'\n근거 '+p.source.label+' '+p.source.url+'\n부하 투여량 제외 · 확인 '+p.checked+setup;}
  const api={drugs,options,mount,profileFor,doseStatus,describe,dilutionFor};g.PracticeCRIPresets=api;if(typeof module!=='undefined')module.exports=api;

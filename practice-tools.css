@@ -426,3 +426,30 @@ body:has(#practice.active-view) #globalNewCase,body:has(#practice.active-view) #
 .pt-modal pre.pt-pre,.pt-dialog pre.pt-pre,dialog pre.pt-pre{white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;font-size:14px;line-height:1.7;max-height:300px;overflow:auto}
 [data-expiry-result]{display:block;margin:12px 0;line-height:1.7;overflow-wrap:anywhere}[data-rx-reuse-status]:empty{display:none}
 @media(max-width:520px){.pt-rx-reuse,.pt-medication-checks,.pt-preparation,.pt-strength-compare{padding:12px}.pt-rx-reuse .pt-bar button{flex:1 1 140px}.pt-compare-stock{grid-template-columns:24px minmax(0,1fr)}.pt-compare-stock select{grid-column:2;width:100%}.pt-stage .pt-grid{grid-template-columns:1fr}}
+
+/* Reusable preparation facts and compact calculator navigation. */
+.pt-preparation-picker,.pt-cri-saved{padding:14px;background:#f6f9ff;border:1px solid #cddbf1;border-radius:12px;margin:12px 0}
+.pt .pt-preparation-picker label,.pt .pt-cri-saved b{display:block}
+.pt .pt-preparation-picker p{overflow-wrap:anywhere}
+.pt .pt-cri-saved button{margin:8px 8px 0 0}
+.pt .pt-cri-regimen [data-cri-dose-buttons] button,.pt .pt-cri-shortcuts button{white-space:normal;word-break:keep-all;overflow-wrap:normal;font-size:14px;min-width:160px}
+.pt .pt-k-facts{margin:12px 0}.pt .pt-reference-current{background:#e7f0ff;outline:2px solid #5278d5;outline-offset:-2px;font-weight:700}
+.pt .pt-reference-current td:first-child::before{content:"검사값 해당 · ";color:#174cb9}
+.pt .pt-preparation-picker select,.pt select[data-nutrition-product],.pt select[data-transfusion-set]{width:100%}
+.pt .pt-k-preview,.pt [data-k-preview]{white-space:pre-line;line-height:1.7}
+.pt .pt-result-key-grid{font-variant-numeric:tabular-nums}
+.pt .pt-calc-main h3{font-size:19px;line-height:1.45}.pt .pt-calc-main h4{font-size:16px;line-height:1.5}
+.pt .pt-calc-main label{font-size:14px;line-height:1.6}.pt .pt-calc-main .pt-help{font-size:13px;line-height:1.7}
+.pt-clinic-menu-toggle{display:none}
+@media(max-width:760px){
+ #appView:has(#practice.active-view .pt-calculator-focused) .sidebar{padding:10px 14px;position:static;height:auto}
+ #appView:has(#practice.active-view .pt-calculator-focused) .sidebar:not(.pt-mobile-menu-open)>:not(.pt-clinic-menu-toggle){display:none}
+ #appView:has(#practice.active-view .pt-calculator-focused) .pt-clinic-menu-toggle{display:block;width:100%;min-height:44px;text-align:left;background:#202e47;color:white;border:1px solid #4c6082;border-radius:9px;font:inherit;font-weight:700;padding:10px 14px}
+ #appView:has(#practice.active-view .pt-calculator-focused) .sidebar.pt-mobile-menu-open .nav-list{max-height:60vh;overflow:auto}
+}
+@media(max-width:800px){
+ .pt-calculator-focused .pt-mobile-calc-select{position:sticky;top:0;z-index:25;background:#edf3ff;box-shadow:0 2px 6px #163d6c14}
+ .pt .pt-cri-regimen [data-cri-dose-buttons]{grid-template-columns:minmax(0,1fr)}
+ .pt .pt-cri-regimen [data-cri-dose-buttons] button{min-width:0}
+ .pt .pt-calc-main h3{font-size:18px}
+}

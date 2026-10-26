@@ -43,7 +43,7 @@
   function quick(field,values,label){if(!field)return;const host=document.createElement('div');host.className='pt-input-shortcuts';host.setAttribute('role','group');host.setAttribute('aria-label',label);field.after(host);for(const value of values){const button=document.createElement('button');button.type='button';button.dataset.quickValue=String(value);button.textContent=String(value)+(field.name==='times'||field.dataset.rxCommon==='times'?'회':'일');button.onclick=()=>{field.value=String(value);field.dispatchEvent(new Event('input',{bubbles:true}));field.dispatchEvent(new Event('change',{bubbles:true}));refresh();};host.append(button);}chips.push({field,host});}
   quick(med.elements.times,[1,2,3,4],'하루 투여 횟수 선택');quick(med.elements.days,[3,5,7,14,28],'처방 일수 선택');
   quick(b.querySelector('[data-rx-common=times]'),[1,2,3,4],'공통 하루 투여 횟수 선택');quick(b.querySelector('[data-rx-common=days]'),[3,5,7,14,28],'공통 처방 일수 선택');
-  const labels={dose:'1회 처방량',concentration:'제품 함량',times:'하루 횟수',days:'투약 일수',totalDoses:'총 투여 횟수',bsa:'체표면적',confirmed:'계산 조건 확인',protocolConfirmed:'서식 적용 확인',doseUnit:'처방 단위',stockUnit:'제품 단위'};
+  const labels={dose:'1회 용량',concentration:'제품 함량',times:'하루 횟수',days:'투약 일수',totalDoses:'총 투여 횟수',bsa:'체표면적',confirmed:'계산 조건 확인',protocolConfirmed:'서식 적용 확인',doseUnit:'처방 단위',stockUnit:'제품 단위'};
   const remaining=[];for(const f of b.querySelectorAll('form[data-calc]:not([data-calc=batch])')){const button=f.querySelector('button.pt-primary'),host=document.createElement('div');host.className='pt-remaining';host.dataset.remaining=f.dataset.calc;button.before(host);remaining.push({f,host,previous:null});}
   function refresh(){
    for(const {field,host} of chips)for(const button of host.children)button.setAttribute('aria-pressed',button.dataset.quickValue===field.value);
@@ -51,19 +51,26 @@
     if(usesWeight(f)){if(!species.value)fields.unshift(species);if(!weight.value.trim())fields.unshift(weight);if(record&&!confirm.checked)fields.push(confirm);}
     if(state.previous&&fields.length===state.previous.length&&fields.every((x,i)=>x===state.previous[i]))continue;state.previous=fields;
     host.replaceChildren();const label=document.createElement('span');const checks=fields.filter(x=>x.type==='checkbox').length;label.textContent=fields.length?`남은 입력 ${fields.length-checks}개${checks?' · 확인 '+checks+'개':''}`:'필수 입력 완료 · 계산으로 결과 확인';host.append(label);
-    for(const field of fields){const button=document.createElement('button');button.type='button';button.textContent=field===weight?'체중':field===species?'동물 종류':field===confirm?'기록 체중 확인':labels[field.name]||field.closest('label')?.childNodes[0]?.textContent?.trim()||field.name;button.onclick=()=>focus(field);host.append(button);}
+    for(const field of fields){const button=document.createElement('button');button.type='button';button.textContent=field===weight?'체중':field===species?'동물 종류':field===confirm?'기록 체중 확인':(field.name==='dose'&&f.dataset.calc==='cri'?(f.elements.mode.value==='intermittent'?'1회 주입 용량':'목표 주입 용량'):labels[field.name])||field.closest('label')?.childNodes[0]?.textContent?.trim()||field.name;button.onclick=()=>focus(field);host.append(button);}
    }
   }
   for(const event of ['input','change','click','reset'])b.addEventListener(event,()=>queueMicrotask(refresh));
   renderProducts();renderProtocols();refresh();
-  const presentation=organize(b,o);
-  return {dispose:presentation?.dispose,loaded(r){items=r.items||[];ready=true;renderProducts();renderProtocols();refresh();},failed(){items=[];ready=true;renderProducts();status.textContent='병원 약품을 불러오지 못했습니다. 다시 열거나 제품 값을 직접 입력해주세요.';},recordWeight,manualWeight,reset,weightStatus(){return record&&!confirm.checked?'상단의 기록 체중과 측정일을 확인해주세요.':'';}};
+  const retry=document.createElement('button');retry.type='button';retry.hidden=true;retry.textContent='병원 설정 연결 실패 · 다시 불러오기';retry.dataset.presetsRetry='';b.querySelector('.pt-calc-common')?.append(retry);retry.onclick=async()=>{retry.disabled=true;retry.textContent='병원 설정 불러오는 중…';status.textContent='병원 설정을 다시 불러오는 중…';try{await o.reload?.();}finally{if(retry.isConnected){retry.disabled=false;retry.textContent='병원 설정 연결 실패 · 다시 불러오기';}}};
+  const presentation=organize(b,o);b.querySelector('.pt-calc-common')?.append(retry);
+  return {dispose:presentation?.dispose,loaded(r){items=r.items||[];ready=true;renderProducts();renderProtocols();refresh();retry.hidden=true;if(status.textContent.includes('불러오는 중'))status.textContent='병원 설정을 불러왔습니다.';},failed(){items=[];ready=true;renderProducts();status.textContent='병원 약품 연결 실패 · 입력값은 유지됩니다. 다시 불러오거나 직접 입력해주세요.';retry.hidden=false;},recordWeight,manualWeight,reset,weightStatus(){return record&&!confirm.checked?'상단의 기록 체중과 측정일을 확인해주세요.':'';}};
  }
  // Presentation changes reuse the existing inputs, validations and submit handlers.
  function organize(b,o){
   const med=b.querySelector('[data-calc=dose]'),common=b.querySelector('.pt-calc-common'),nav=b.querySelector('.pt-calc-nav');
   if(!med||!common||!nav)return null;
   b.classList.add('pt-calculator-focused');
+  const sidebar=document.querySelector('#appView .sidebar'),menuButton=document.createElement('button');
+  menuButton.type='button';menuButton.className='pt-clinic-menu-toggle';menuButton.textContent='CLINIC 메뉴 열기';menuButton.setAttribute('aria-expanded','false');
+  const menu=sidebar?.querySelector('.nav-list');if(menu){if(!menu.id)menu.id='clinic-main-navigation';menuButton.setAttribute('aria-controls',menu.id);}
+  sidebar?.prepend(menuButton);
+  menuButton.onclick=()=>{const open=sidebar.classList.toggle('pt-mobile-menu-open');menuButton.setAttribute('aria-expanded',String(open));menuButton.textContent=open?'CLINIC 메뉴 닫기':'CLINIC 메뉴 열기';};
+
   const toolbar=document.createElement('section');toolbar.className='pt-calc-view-tools';toolbar.innerHTML='<strong>임상 계산기</strong><div><button type="button" data-calc-nav-toggle aria-expanded="true">계산기 메뉴 접기</button><button type="button" data-calc-expand aria-pressed="false">계산기 넓게 보기</button></div>';b.prepend(toolbar);
   const collapse=toolbar.querySelector('[data-calc-nav-toggle]'),expand=toolbar.querySelector('[data-calc-expand]');
   collapse.onclick=()=>{const hidden=b.classList.toggle('pt-nav-collapsed');collapse.setAttribute('aria-expanded',String(!hidden));collapse.textContent=hidden?'계산기 메뉴 펼치기':'계산기 메뉴 접기';};
@@ -113,6 +120,7 @@
   const dock=document.createElement('section');dock.className='pt-calc-dock';dock.setAttribute('aria-label','현재 환자와 계산 작업');dock.innerHTML='<button type="button" data-dock-context></button><div><button type="button" data-dock-calculate class="pt-primary">계산</button><button type="button" data-dock-result disabled>결과 보기</button></div>';
   b.append(dock);
   const context=dock.querySelector('[data-dock-context]'),calculate=dock.querySelector('[data-dock-calculate]'),result=dock.querySelector('[data-dock-result]');
+  let pendingResult=null;
   let focusedForm=null,disposed=false,frame=0,maxHeight=window.visualViewport?.height||innerHeight;
   const activePanel=()=>b.querySelector('[data-kind-panel]:not([hidden])');
   const visible=f=>f&&f.isConnected&&!f.closest('[hidden]')&&f.getClientRects().length>0;
@@ -154,16 +162,21 @@
    const batch=b.querySelector('[data-calc=batch]'),primary=batch?.querySelector('[data-rx-parse]');
    if(primary){const state=batch.dataset.calculationState;setText(primary,state==='loading'?'계산 중…':state==='complete'?'다시 계산':'처방 계산');setFlag(primary,'disabled',state==='loading');batch.setAttribute('aria-busy',String(state==='loading'));}
    setFlag(result,'disabled',!out?.textContent.trim());
+   if(pendingResult){const p=pendingResult,target=p.form.querySelector('output');if(Date.now()-p.at>10000||target?.classList.contains('pt-error'))pendingResult=null;else if(target?.classList.contains('pt-output')&&target.textContent.trim()&&target.textContent!==p.before&&activeForm()===p.form){pendingResult=null;reveal(target);}}
+
   }
   function schedule(){if(!disposed&&!frame)frame=requestAnimationFrame(refreshLayout);}
   const controller=new AbortController(),listen=(target,event,fn)=>target?.addEventListener(event,fn,{signal:controller.signal});
+  listen(b,'submit',e=>{const f=e.target.closest('form[data-calc]');if(f)pendingResult={form:f,at:Date.now(),before:f.querySelector('output')?.textContent||''};schedule();});
+  listen(b,'input',()=>{pendingResult=null;});
+  listen(b,'change',()=>{pendingResult=null;});
   listen(b,'focusin',e=>{focusedForm=e.target.closest('form[data-calc]')||focusedForm;schedule();});
   for(const event of ['input','change','click','reset'])listen(b,event,schedule);
   for(const event of ['resize','scroll','click'])listen(window,event,schedule);
   listen(window.visualViewport,'resize',schedule);
   listen(library,'keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT')e.preventDefault();});
   const observer=new MutationObserver(schedule);observer.observe(b,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','disabled','aria-pressed','data-calculation-state']});
-  function dispose(){if(disposed)return;disposed=true;b.classList.remove('pt-calculator-expanded','pt-nav-collapsed');observer.disconnect();patientObserver.disconnect();controller.abort();if(frame)cancelAnimationFrame(frame);dock.remove();}
+  function dispose(){if(disposed)return;disposed=true;b.classList.remove('pt-calculator-expanded','pt-nav-collapsed');menuButton.remove();sidebar?.classList.remove('pt-mobile-menu-open');observer.disconnect();patientObserver.disconnect();controller.abort();if(frame)cancelAnimationFrame(frame);dock.remove();}
   refreshLayout();return {dispose};
  }
  g.PracticeCalculatorEase={mount};
