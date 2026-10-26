@@ -77,6 +77,13 @@
  function calcium(v){
   const w=weight(v.weight),d=number(v.dose,'처방 원소칼슘 용량'),stock=number(v.stock,'제품의 원소칼슘 함량');
   if(!['single','continuous'].includes(v.mode))throw Error('칼슘 투여 방식을 선택해주세요.');
+  if(v.caMethod&&!['duration','concentration'].includes(v.caMethod))throw Error('칼슘 계산 방식을 확인해주세요.');
+  if(v.mode==='continuous'&&v.caMethod==='concentration'){
+   const concentration=number(v.finalConcentration,'조제 후 원소칼슘 농도'),volume=number(v.volume,'조제할 최종 부피');
+   if(concentration>stock)throw Error('조제 후 농도는 원액 농도보다 클 수 없습니다.');
+   const amount=finite(concentration*volume),stockML=finite(amount/stock),hourly=finite(w*d),rate=finite(hourly/concentration);
+   return {amount,stockML,diluentML:volume-stockML,concentration,rate,hourly,hourlyPerKg:d,hours:finite(volume/rate),concentrationMode:true};
+  }
   const hours=v.mode==='single'?number(v.minutes,'완속 주입 시간')/60:number(v.hours,'지속정주 계획 시간');
   const amount=finite(w*d*(v.mode==='continuous'?hours:1)),stockML=finite(amount/stock),volume=number(v.volume,'약물 포함 최종 부피');
   if(volume<stockML)throw Error('최종 부피가 필요한 원액량보다 작습니다. 원소칼슘 함량·희석 조건을 확인해주세요.');

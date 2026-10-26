@@ -453,3 +453,10 @@ body:has(#practice.active-view) #globalNewCase,body:has(#practice.active-view) #
  .pt .pt-cri-regimen [data-cri-dose-buttons] button{min-width:0}
  .pt .pt-calc-main h3{font-size:18px}
 }
+
+/* Calcium: reuse product facts; patient assessment never sets a dose. */
+.pt-calcium-guided>section,.pt-calcium-guided>.pt-ca-product{margin:16px 0;padding:16px;border:1px solid #dce5f2;border-radius:14px;background:#fff;min-width:0}.pt-calcium-guided .pt-ca-assessment{background:#f7faff}.pt-calcium-guided h4{margin:0 0 12px;font-size:16px}.pt-ca-choices{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.pt-ca-choices button{min-height:40px;font-size:14px}.pt-calcium-guided [data-ca-source],.pt-calcium-guided [data-ca-assessment],.pt-calcium-guided [data-ca-trend]{font-size:14px;line-height:1.65;overflow-wrap:anywhere}.pt-calcium-guided [data-ca-symptom-note]:not(:empty){background:#fff3ed;color:#8f2818;padding:10px;border-radius:8px}.pt-ca-product>summary{overflow-wrap:anywhere;line-height:1.65}.pt-ca-product .pt-preparation-picker{margin:12px 0}.pt-calcium-guided>div.pt-grid:empty{display:none}@media(max-width:760px){.pt-calcium-guided>section,.pt-calcium-guided>.pt-ca-product{padding:12px}.pt-calcium-guided .pt-grid{grid-template-columns:minmax(0,1fr)}.pt-calcium-guided input,.pt-calcium-guided select{font-size:16px}.pt-calcium-guided [data-ca-minutes]{min-width:60px}.pt-ca-choices button{min-height:44px}}
+
+.pt-calcium-guided>.pt-ca-assessment{margin:12px 0;padding:12px 16px;border:1px solid #dce5f2;border-radius:12px;background:#f7faff}.pt-ca-assessment[open]>summary{margin-bottom:14px}.pt-ca-assessment>summary{font-size:14px;line-height:1.6}
+
+.pt .pt-calcium-guided .pt-result-key-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.pt-calcium-guided .pt-ca-pump{order:-1}@media(max-width:760px){.pt .pt-calcium-guided .pt-result-key-grid{grid-template-columns:minmax(0,1fr)}}

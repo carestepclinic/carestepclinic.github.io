@@ -51,7 +51,7 @@
     if(usesWeight(f)){if(!species.value)fields.unshift(species);if(!weight.value.trim())fields.unshift(weight);if(record&&!confirm.checked)fields.push(confirm);}
     if(state.previous&&fields.length===state.previous.length&&fields.every((x,i)=>x===state.previous[i]))continue;state.previous=fields;
     host.replaceChildren();const label=document.createElement('span');const checks=fields.filter(x=>x.type==='checkbox').length;label.textContent=fields.length?`남은 입력 ${fields.length-checks}개${checks?' · 확인 '+checks+'개':''}`:'필수 입력 완료 · 계산으로 결과 확인';host.append(label);
-    for(const field of fields){const button=document.createElement('button');button.type='button';button.textContent=field===weight?'체중':field===species?'동물 종류':field===confirm?'기록 체중 확인':(field.name==='dose'&&f.dataset.calc==='cri'?(f.elements.mode.value==='intermittent'?'1회 주입 용량':'목표 주입 용량'):labels[field.name])||field.closest('label')?.childNodes[0]?.textContent?.trim()||field.name;button.onclick=()=>focus(field);host.append(button);}
+    for(const field of fields){const button=document.createElement('button');button.type='button';button.textContent=field===weight?'체중':field===species?'동물 종류':field===confirm?'기록 체중 확인':(field.name==='dose'&&['cri','calcium'].includes(f.dataset.calc)?(['intermittent','single'].includes(f.elements.mode.value)?'1회 주입 용량':'시간당 주입 용량'):labels[field.name])||field.closest('label')?.childNodes[0]?.textContent?.trim()||field.name;button.onclick=()=>focus(field);host.append(button);}
    }
   }
   for(const event of ['input','change','click','reset'])b.addEventListener(event,()=>queueMicrotask(refresh));
