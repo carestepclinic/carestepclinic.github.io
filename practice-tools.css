@@ -682,3 +682,8 @@ body:has(#practice.active-view) #globalNewCase,body:has(#practice.active-view) #
 
 .pt-em-config-back{display:none}
 @media(max-width:700px){.pt-em-config-open .pt-em-quick{display:none}.pt-em-config-back{display:inline-flex;margin-bottom:10px}.pt-em-config-open [data-em-groups]>section>h4{display:none}}
+
+/* Inline prescription screening; history entry is independent of patient registration. */
+.pt-rx-safety{margin:16px 0;padding:18px;border:1px solid #b8c9d8;border-radius:12px;background:#f8fafc;color:#1e293b;line-height:1.65;overflow-wrap:anywhere}
+.pt-rx-safety[hidden]{display:none}.pt-rx-safety h4{margin:0 0 8px;font-size:17px}.pt-rx-safety small{font-size:12px;color:#475569}.pt-rx-safety article{padding:10px 12px;margin:8px 0;border-left:4px solid #64748b;background:white;border-radius:5px}.pt-rx-safety .pt-safety-warning{border-color:#b42318;background:#fff1ee}.pt-rx-safety .pt-safety-review{border-color:#b45309;background:#fffbeb}.pt-rx-safety a{color:#174c8f;text-decoration:underline}.pt-rx-safety summary{padding:10px 0;cursor:pointer;font-weight:650}.pt-safety-checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.pt-safety-checks label{display:grid;gap:5px}.pt-safety-checks select{min-height:44px;width:100%;font:inherit}.pt-calc-main:has([data-kind-panel="batch"]:not([hidden]))>.pt-medication-checks{display:none}
+@media(max-width:480px){.pt-rx-safety{padding:12px}.pt-safety-checks{grid-template-columns:1fr}}
