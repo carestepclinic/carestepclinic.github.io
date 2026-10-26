@@ -60,7 +60,7 @@
    const co=d.companion,card=document.createElement('article');card.className='pt-card pt-an-card';card.dataset.anDrug=d.id;
    card.innerHTML='<small>'+(d.group==='premed'?'전처치·진정':'유도·병용')+' · '+d.route+'</small><h4>'+esc(d.name)+'</h4><p data-an-range></p><div class="pt-grid"><label>'+(co?'케타민 ':'이번 ')+'용량 · '+d.unit+'/kg<input data-an-dose inputmode="decimal"></label><label>'+esc(d.stockLabel||(co?'케타민 농도 · mg/mL':'제품 농도 · mg/mL'))+'<input data-an-stock inputmode="decimal"></label></div><p data-an-origin class="pt-help"></p><label data-an-choice-label hidden>병원 제품<select data-an-choice></select></label>'+
     (co?'<div class="pt-grid"><label>병용 '+esc(co.name)+' · '+co.unit+'/kg<input data-an-companion-dose inputmode="decimal"></label><label>'+esc(co.name)+' 농도 · mg/mL<input data-an-companion-stock inputmode="decimal"></label></div><p data-an-companion-range class="pt-help"></p>':'')+
-    '<p class="pt-help" data-an-dose-state role="status"></p><button type="button" data-an-dose-reset>문헌 초기값으로 되돌리기</button><div class="pt-bar"><button type="button" data-an-save disabled>병원 기본값 저장</button><button type="button" data-an-reload>저장값 불러오기</button></div><p class="pt-help" data-an-save-state role="status">병원 저장 설정 확인 중…</p><output class="pt-an-result" aria-live="polite"></output><p>'+esc(d.note)+'</p><details><summary>용법·제품 근거</summary><a href="'+sources[d.ref]+'" target="_blank" rel="noopener noreferrer">용법 참고</a>'+(d.stockSource?' · <a href="'+d.stockSource+'" target="_blank" rel="noopener noreferrer">농도 참고</a>':'')+'</details><label class="pt-choice"><input type="checkbox" data-an-selected>이번 계획에 선택 · 용량·경로·실제 제품 확인</label>';
+    '<p class="pt-help" data-an-dose-state role="status"></p><button type="button" data-an-dose-reset>문헌 초기값으로 되돌리기</button><div class="pt-bar"><button type="button" data-an-save disabled>제품 농도 저장</button><button type="button" data-an-reload>저장 농도 불러오기</button></div><p class="pt-help" data-an-save-state role="status">병원 저장 설정 확인 중…</p><output class="pt-an-result" aria-live="polite"></output><p>'+esc(d.note)+'</p><details><summary>용법·제품 근거</summary><a href="'+sources[d.ref]+'" target="_blank" rel="noopener noreferrer">용법 참고</a>'+(d.stockSource?' · <a href="'+d.stockSource+'" target="_blank" rel="noopener noreferrer">농도 참고</a>':'')+'</details><label class="pt-choice"><input type="checkbox" data-an-selected>이번 계획에 선택 · 용량·경로·실제 제품 확인</label>';
    panel.querySelector('[data-an-cards]').append(card);
    cards.set(d.id,{d,card,dose:card.querySelector('[data-an-dose]'),stock:card.querySelector('[data-an-stock]'),choice:card.querySelector('[data-an-choice]'),out:card.querySelector('output'),coDose:card.querySelector('[data-an-companion-dose]'),coStock:card.querySelector('[data-an-companion-stock]'),state:card.querySelector('[data-an-save-state]'),save:card.querySelector('[data-an-save]'),reload:card.querySelector('[data-an-reload]'),selected:card.querySelector('[data-an-selected]'),touched:false,doseTouched:false,product:null,saved:null,blocked:''});
   }
@@ -76,14 +76,14 @@
    try{const saved=savedFor(savedRows,c.d);
     if(saved){c.saved=saved.record;c.stock.value=saved.value;if(c.coStock)c.coStock.value=saved.companionStock;origin(c).textContent='저장된 병원 농도 · '+(saved.record.approver_name||'병원 의료진')+' · '+(saved.record.updated_at||'저장 완료');}
     else{c.product=options.length===1?options[0]:null;c.choice.value=c.product?.id||'';c.stock.value=options.length>1?'':c.product?.value??c.d.stock??'';if(c.coStock)c.coStock.value=c.d.companion.stock;origin(c).textContent=c.product?'병원 약품 · '+c.product.title:options.length>1?'병원 농도가 여러 개입니다. 실제 제품을 선택하세요.':'문헌·제품 참고 · 실제 농도 대조 필요';}
-    c.state.textContent=!ready?(loadFailed?'불러오기 실패 · 상단에서 다시 불러오기':'병원 설정을 불러오는 중…'):canManage?(saved?'저장됨 · 개·고양이 공통 · 이 카드에서 다음에도 사용':'실제 제품의 농도를 확인한 후 저장하세요. 이 카드에만 적용됩니다.'):'농도 저장은 원장·관리자·수의사 권한이 필요합니다.';
+    c.state.textContent=!ready?(loadFailed?'불러오기 실패 · 상단에서 다시 불러오기':'병원 설정을 불러오는 중…'):canManage?(saved?'저장됨 · 개·고양이 공통':'제품·장비 기본값 · 미저장'):'농도 저장은 원장·관리자·수의사 권한이 필요합니다.';
    }catch(e){c.blocked=e.message;c.stock.value='';if(c.coStock)c.coStock.value='';c.state.textContent=e.message;origin(c).textContent='저장 설정 확인 필요';}
    c.touched=false;
   }
   function update(){
    if(!o.guard())return;report='';status.textContent=valid()?((species.value==='dog'?'개':'고양이')+' · '+(weight.value||'체중 미입력')+' kg'):'상단에서 동물 종류와 체중을 선택해주세요.';
    const lines=[];let bad=false;
-   for(const c of cards.values()){const {d,card}=c;const doseState=card.querySelector('[data-an-dose-state]');doseState.className='pt-help';doseState.textContent=c.doseTouched?'수의사 수정값 · 이번 환자의 계산에만 적용':'문헌 초기값 · 환자별 처방은 별도 결정';try{
+   for(const c of cards.values()){const {d,card}=c;const doseState=card.querySelector('[data-an-dose-state]');doseState.className='pt-help';doseState.textContent=c.doseTouched?'이번 계산값 · 수의사 수정':'처방 용법 참고 · 문헌 초기값';try{
     if(c.blocked)throw Error(c.blocked);
     const wc=b.querySelector('[data-record-weight-confirm]');if(wc&&!wc.closest('label').hidden&&!wc.checked)throw Error('기록 체중을 먼저 확인해주세요.');
     const r=calculate(d.id,{species:species.value,weight:weight.value,dose:c.dose.value,stock:c.stock.value,companionDose:c.coDose?.value,companionStock:c.coStock?.value});
@@ -112,7 +112,7 @@
     const fresh=await o.fresh();if(!o.guard()||seq!==generation||sig!==signature(c))throw Error('입력이 변경되어 저장하지 않았습니다. 값을 확인하고 다시 저장하세요.');
     if(!fresh.canManage)throw Error('농도 저장 권한이 없습니다.');
     const latest=savedFor(partition(fresh).anesthesiaItems,c.d);
-    if(!sameRevision(old,latest?.record))throw Error('다른 화면에서 농도가 변경됐습니다. 저장값 불러오기 후 다시 확인하세요.');
+    if(!sameRevision(old,latest?.record))throw Error('다른 화면에서 농도가 변경됐습니다. 저장 농도 불러오기 후 다시 확인하세요.');
     if(latest&&latest.value===body.value&&latest.companionStock===(c.d.companion?JSON.parse(body.note.slice(stockPrefix.length)).companionStock:null)){c.state.textContent='이미 같은 농도로 저장되어 있습니다.';return;}
     sent=true;
     await o.request('/practice/presets'+(old?'/'+encodeURIComponent(old.id):''),{method:old?'PUT':'POST',body:JSON.stringify({...body,...(old?{revision:old.revision}:{})})});
@@ -122,12 +122,12 @@
     const changed=seq!==generation||sig!==signature(c);loaded(r);c.saved=saved.record;
     if(!changed){c.touched=false;setStock(c);c.state.textContent='병원에 저장했습니다. 다음 접속·다른 기기에서도 이 카드에 적용됩니다.';}else{c.touched=true;c.state.textContent='요청한 농도는 저장됐습니다. 이후 수정한 현재 입력은 아직 저장되지 않았습니다.';}
     c.selected.checked=false;generation++;update();o.changed?.(r);
-   }catch(e){if(o.guard())c.state.textContent=(sent?'저장 상태 확인 필요 · 저장값 불러오기로 확인해주세요. ':'')+e.message;}
+   }catch(e){if(o.guard())c.state.textContent=(sent?'저장 상태 확인 필요 · 저장 농도 불러오기로 확인해주세요. ':'')+e.message;}
    finally{saving=false;if(o.guard()){for(const x of cards.values()){x.save.disabled=!canManage;x.reload.disabled=false;}update();}}
   }
   for(const c of cards.values()){
    c.card.querySelector('[data-an-dose-reset]').onclick=()=>{if(!o.guard())return;const r=c.d.range[species.value],co=c.d.companion;c.dose.value=r?.[0]??'';if(co)c.coDose.value=co.range[species.value]?.[0]??'';c.doseTouched=false;c.selected.checked=false;generation++;update();};
-   c.card.addEventListener('input',e=>{generation++;if(e.target===c.dose||e.target===c.coDose)c.doseTouched=true;if(e.target===c.stock||e.target===c.coStock){c.touched=true;c.product=null;c.choice.value='';origin(c).textContent='직접 수정값 · 이번 계산만 변경';c.state.textContent='이번 계산만 변경했습니다. 병원 기본값 저장을 눌러야 다음에도 유지됩니다. 아직 저장하지 않았습니다.';}if(!e.target.matches('[data-an-selected]'))c.selected.checked=false;update();});
+   c.card.addEventListener('input',e=>{generation++;if(e.target===c.dose||e.target===c.coDose)c.doseTouched=true;if(e.target===c.stock||e.target===c.coStock){c.touched=true;c.product=null;c.choice.value='';origin(c).textContent='직접 수정값 · 이번 계산만 변경';c.state.textContent='이번 계산만 변경했습니다. 제품 농도 저장을 눌러야 다음에도 유지됩니다. 아직 저장하지 않았습니다.';}if(!e.target.matches('[data-an-selected]'))c.selected.checked=false;update();});
    c.choice.onchange=()=>{const p=stockOptions(c.d,items,species.value).find(x=>x.id===c.choice.value);c.product=p||null;c.stock.value=p?.value??c.d.stock??'';c.touched=true;origin(c).textContent=p?'병원 약품 · '+p.title:'문헌·제품 참고';c.state.textContent='선택한 농도를 유지하려면 저장하세요.';c.selected.checked=false;generation++;update();};
    c.save.onclick=()=>saveCard(c);c.reload.onclick=()=>reloadCard(c);
   }

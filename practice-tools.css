@@ -593,3 +593,78 @@ body:has(#practice.active-view) #globalNewCase,body:has(#practice.active-view) #
  .pt-calculator-focused .pt-emergency-heading>button{font-size:14px;padding:8px 10px;margin:0}
  .pt-calculator-focused .pt-emergency-heading h3{font-size:17px}
 }
+/* A single shell for all practical-tool tabs; switching tabs must not move the gutters. */
+#appView:has(#practice.active-view) .main{padding-left:20px;padding-right:20px}
+#practiceRoot.pt{max-width:none;width:100%;margin-inline:auto;box-sizing:border-box}
+#practiceRoot>.pt-tabs{width:100%;box-sizing:border-box}
+.pt .pt-streamlined{--pt-flow-gap:16px}
+.pt .pt-streamlined :is(input,select,textarea,button){font:inherit}
+.pt .pt-streamlined :is(input,select,textarea){font-size:16px}
+.pt .pt-streamlined h3{font-size:18px;line-height:1.4;margin:0 0 12px}
+.pt .pt-streamlined h4{font-size:16px;line-height:1.4;margin:0 0 8px}
+.pt .pt-streamlined .pt-help{font-size:14px;line-height:1.5}
+.pt .pt-flow-context{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:8px 12px;background:#fff7e7;border:1px solid #e9d1a4;border-radius:10px;margin:8px 0}
+.pt .pt-flow-context[hidden]{display:none}
+.pt .pt-streamlined.pt-flow-missing-context .pt-em-quick,
+.pt .pt-streamlined.pt-flow-missing-context [data-em-context],
+.pt .pt-streamlined.pt-flow-missing-context [data-an-context],
+.pt .pt-streamlined.pt-flow-missing-context .pt-an-result{display:none}
+.pt .pt-streamlined .pt-calc-dock{display:none}
+.pt .pt-streamlined .pt-flow-form{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;container-type:inline-size}
+.pt .pt-streamlined .pt-flow-form>h3{grid-column:1/-1;margin-bottom:0}
+.pt .pt-flow-entry,.pt .pt-flow-result{min-width:0}
+.pt .pt-flow-result{background:#f6f8ff;border:1px solid #d4dfff;border-radius:12px;padding:14px;align-self:start}
+.pt .pt-flow-result>button.pt-primary{min-width:120px;margin:0 0 8px}
+.pt .pt-flow-result output{margin-top:8px;overflow-wrap:anywhere}
+.pt .pt-flow-result .pt-result-key-grid{grid-template-columns:1fr!important}
+.pt .pt-flow-result [data-result-actions]{margin-top:12px}
+.pt .pt-flow-result [data-result-actions] .pt-bar{gap:8px}
+.pt .pt-flow-empty{margin:4px 0}
+.pt .pt-streamlined .pt-flow-entry>.pt-grid{margin:8px 0;gap:10px 14px}
+.pt .pt-streamlined .pt-flow-entry>label{margin:8px 0}
+.pt .pt-streamlined .pt-flow-entry>details{margin:10px 0}
+.pt .pt-streamlined .pt-flow-entry .pt-quick-products{margin:0 0 12px}
+.pt .pt-flow-regimen,.pt .pt-flow-rx-load,.pt .pt-flow-references{border:1px solid #d8e2ef;border-radius:10px;padding:8px 12px;margin:10px 0}
+.pt .pt-flow-regimen>summary,.pt .pt-flow-rx-load>summary,.pt .pt-flow-references>summary{cursor:pointer;min-height:28px;line-height:28px;font-size:14px;font-weight:600}
+.pt .pt-flow-regimen .pt-medication-flow{border:0;background:transparent;margin:8px 0 0;padding:0}
+.pt .pt-flow-rx-load .pt-rx-reuse{border:0;background:transparent;margin:8px 0 0;padding:0}
+.pt .pt-flow-rx-save{margin:12px 0 0;padding:12px;border:1px solid #d8e2ef;border-radius:10px}
+.pt .pt-streamlined .pt-rx-reuse [hidden],.pt .pt-streamlined .pt-flow-rx-save[hidden]{display:none}
+.pt .pt-streamlined [data-an-cards]{display:grid;grid-template-columns:1fr;gap:10px}
+.pt .pt-streamlined .pt-an-card{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:14px;align-items:start}
+.pt .pt-streamlined .pt-an-card[hidden]{display:none}
+.pt .pt-streamlined .pt-an-card p{margin:6px 0;line-height:1.5}
+.pt .pt-streamlined .pt-an-card .pt-grid{gap:10px}
+.pt .pt-streamlined .pt-an-card label{margin:0}
+.pt .pt-flow-an-header,.pt .pt-flow-an-inputs,.pt .pt-flow-an-result{min-width:0}
+.pt .pt-flow-an-header>small,.pt .pt-flow-an-note{font-size:14px}
+.pt .pt-flow-an-header>h4{margin:5px 0 8px}
+.pt .pt-streamlined .pt-flow-an-result output{display:block;margin:0 0 10px;padding:10px;font-size:18px;font-weight:700;background:#f2f6ff;border-radius:8px;line-height:1.5;white-space:pre-line}
+.pt .pt-streamlined .pt-flow-an-result output.pt-error{background:#fff0ed}
+.pt .pt-flow-an-manage{margin-top:8px;font-size:14px}
+.pt .pt-flow-an-manage>summary{cursor:pointer;line-height:1.5;padding:8px 0}
+.pt .pt-flow-an-manage .pt-bar{margin-top:8px}
+.pt .pt-flow-em-filter{display:none}
+.pt .pt-streamlined .pt-k-mix details:not([open]){margin-bottom:8px}
+@media(min-width:1250px){
+ .pt .pt-streamlined .pt-flow-form:not([data-calc=convert]):not([data-calc=dilute]):not([data-calc=ag]){grid-template-columns:minmax(0,1.3fr) minmax(300px,1fr);gap:16px}
+ .pt .pt-streamlined .pt-an-card{grid-template-columns:minmax(0,1fr) minmax(260px,1.1fr) minmax(220px,.85fr);gap:16px}
+}
+@media(max-width:800px){
+ #appView:has(#practice.active-view) .main{padding-left:12px;padding-right:12px}
+ .pt .pt-streamlined .pt-card{padding:12px}
+ .pt .pt-streamlined .pt-flow-result{padding:12px}
+ .pt .pt-streamlined .pt-flow-result>button.pt-primary{width:100%}
+ .pt .pt-flow-em-filter{display:block;margin:8px 0}
+ .pt .pt-flow-em-filter select{display:block;width:100%;margin-top:4px}
+ .pt .pt-streamlined nav[aria-label="응급약물 분류"]{display:none}
+ .pt .pt-flow-context{align-items:flex-start;flex-wrap:wrap}
+ .pt .pt-streamlined .pt-an-card{gap:8px}
+}
+
+.pt .pt-streamlined .pt-cri-await-input>.pt-flow-entry{display:block!important}
+.pt .pt-streamlined .pt-cri-await-input>.pt-flow-entry>:not(.pt-cri-presets):not(.pt-protocol-bar){display:none!important}
+
+.pt .pt-streamlined [data-value-origin][hidden]{display:none}
+.pt .pt-streamlined .pt-flow-result .pt-remaining{margin:4px 0 12px;font-size:14px}
+@media(min-width:1250px){.pt .pt-streamlined .pt-flow-form:not([data-calc=convert]):not([data-calc=dilute]):not([data-calc=ag])>.pt-flow-result{position:sticky;top:16px}}

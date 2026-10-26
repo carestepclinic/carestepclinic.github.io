@@ -16,7 +16,7 @@ async function inject(p,rows){await p.evaluate(rows=>{stored=rows;manager=true;a
 
 
 for(const width of [390,1280])test('anesthesia reference volumes and responsive stage selection '+width,async t=>{
- const p=await page(t,width);await kind(p,'anesthesia');const card=p.locator('[data-an-drug=propofol]');assert.match(await card.locator('output').innerText(),/1 mL/);assert.equal(await p.locator('[data-an-drug]').count(),14);await card.locator('[data-an-stock]').fill('20');assert.match(await card.locator('output').innerText(),/0.5 mL/);await card.locator('[data-an-selected]').check();assert.equal(await p.locator('[data-an-copy]').isEnabled(),true);await p.locator('[data-common-weight]').fill('10');assert.equal(await card.locator('[data-an-selected]').isChecked(),false);assert.equal(await p.locator('[data-an-profile]').count(),0);await card.locator('[data-an-dose]').fill('1');assert.match(await card.locator('output').innerText(),/입력 용량 환산 0.5 mL/);assert.match(await card.locator('[data-an-dose-state]').innerText(),/문헌 범위 밖/);await card.locator('[data-an-selected]').check();assert.match(await p.locator('[data-an-plan]').innerText(),/수의사 수정값.*문헌 범위 밖/);assert.equal(await p.locator('[data-an-copy]').isEnabled(),true);await card.screenshot({path:resolve(root,'../anesthesia-adjusted-'+width+'.png')});await card.locator('[data-an-dose-reset]').click();assert.equal(await card.locator('[data-an-dose]').inputValue(),'2');assert.equal(await card.locator('[data-an-stock]').inputValue(),'20');assert.equal(await card.locator('[data-an-selected]').isChecked(),false);await p.locator('[data-an-group=induction]').click();assert.equal(await p.locator('[data-an-drug]:visible').count(),5);assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));await p.locator('[data-kind-panel=anesthesia]').screenshot({path:resolve(root,'../anesthesia-'+width+'.png')});
+ const p=await page(t,width);await kind(p,'anesthesia');const card=p.locator('[data-an-drug=propofol]');assert.match(await card.locator('output').innerText(),/1 mL/);assert.equal(await p.locator('[data-an-drug]').count(),14);await card.locator('[data-an-stock]').fill('20');assert.match(await card.locator('output').innerText(),/0.5 mL/);await card.locator('[data-an-selected]').check();assert.equal(await p.locator('[data-an-copy]').isEnabled(),true);await p.locator('[data-common-weight]').fill('10');assert.equal(await card.locator('[data-an-selected]').isChecked(),false);assert.equal(await p.locator('[data-an-profile]').count(),0);await card.locator('[data-an-dose]').fill('1');assert.match(await card.locator('output').innerText(),/입력 용량 환산 0.5 mL/);assert.match(await card.locator('[data-an-dose-state]').innerText(),/문헌 범위 밖/);await card.locator('[data-an-selected]').check();assert.match(await p.locator('[data-an-plan]').innerText(),/이번 계산값.*문헌 범위 밖/);assert.equal(await p.locator('[data-an-copy]').isEnabled(),true);await card.screenshot({path:resolve(root,'../anesthesia-adjusted-'+width+'.png')});await card.locator('.pt-flow-an-manage>summary').evaluate(e=>{e.parentElement.open=true;});await card.locator('[data-an-dose-reset]').click();assert.equal(await card.locator('[data-an-dose]').inputValue(),'2');assert.equal(await card.locator('[data-an-stock]').inputValue(),'20');assert.equal(await card.locator('[data-an-selected]').isChecked(),false);await p.locator('[data-an-group=induction]').click();assert.equal(await p.locator('[data-an-drug]:visible').count(),5);assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));await p.locator('[data-kind-panel=anesthesia]').screenshot({path:resolve(root,'../anesthesia-'+width+'.png')});
 });
 test('feline doses reset on species change and micrograms retain units',async t=>{
  const p=await page(t);await kind(p,'anesthesia');await p.locator('[data-ref-species]').selectOption('cat');assert.equal(await p.locator('[data-an-drug=alfaxalone] [data-an-dose]').inputValue(),'2');const d=p.locator('[data-an-drug=dexmedetomidine]');await d.locator('[data-an-stock]').fill('0.5');assert.match(await d.locator('output').innerText(),/0.03 mL.*15 mcg/);await p.locator('[data-ref-species]').selectOption('dog');assert.equal(await d.locator('[data-an-stock]').inputValue(),'');
@@ -36,29 +36,29 @@ test('tab switches restore the prior reading position',async t=>{
 
 test('undiluted CRI exhaustion is displayed as hours and minutes',async t=>{const p=await page(t);await kind(p,'cri');const f=p.locator('[data-calc=cri]');await f.locator('[data-cri-drug=propofol]').click();await f.locator('[data-cri-dose-value="0.2"]').click();await f.locator('[data-settings]').evaluate(e=>e.open=true);await f.locator('[name=stock]').fill('10');await f.locator('[name=volume]').fill('22.5');await f.locator('[name=confirmed]').check();await f.locator('button.pt-primary').click();assert.match(await f.locator('output').textContent(),/3시간 45분/);assert.doesNotMatch(await f.locator('output').textContent(),/3.75시간/);});
 
-async function enableSave(p){await p.evaluate(()=>{manager=true;app.clear();app.calculator();});await p.locator('[data-ref-species]').selectOption('dog');await p.locator('[data-common-weight]').fill('5');await kind(p,'anesthesia');await p.locator('[data-an-drug=propofol] [data-an-save]').waitFor({state:'visible'});}
+async function enableSave(p){await p.evaluate(()=>{manager=true;app.clear();app.calculator();});await p.locator('[data-ref-species]').selectOption('dog');await p.locator('[data-common-weight]').fill('5');await kind(p,'anesthesia');await p.locator('[data-an-drug=propofol] [data-an-save]').waitFor({state:'attached'});}
 async function reopen(p){await p.evaluate(()=>{app.clear();app.calculator();});await p.locator('[data-ref-species]').selectOption('dog');await p.locator('[data-common-weight]').fill('5');await kind(p,'anesthesia');}
 test('explicit save persists across reopening, updates same record and leaves dose transient',async t=>{
  const p=await page(t);await enableSave(p);const c=p.locator('[data-an-drug=propofol]');
- await c.locator('[data-an-stock]').fill('20');await c.locator('[data-an-dose]').fill('4');await c.locator('[data-an-save]').click();
+ await c.locator('[data-an-stock]').fill('20');await c.locator('[data-an-dose]').fill('4');await c.locator('.pt-flow-an-manage>summary').evaluate(e=>{e.parentElement.open=true;});await c.locator('[data-an-save]').click();
  await p.waitForFunction(()=>stored.some(x=>x.body.note?.includes('CARESTEP_ANESTHESIA_STOCK')));
  await p.waitForFunction(()=>!document.querySelector('[data-an-drug=propofol] [data-an-save]').disabled);
  assert.match(await c.locator('[data-an-save-state]').innerText(),/저장/);
  await reopen(p);assert.equal(await c.locator('[data-an-stock]').inputValue(),'20');assert.equal(await c.locator('[data-an-dose]').inputValue(),'2');assert.match(await c.locator('[data-an-origin]').innerText(),/저장된 병원/);
- await c.locator('[data-an-stock]').fill('30');await c.locator('[data-an-save]').click();await p.waitForFunction(()=>stored[0]?.revision===2);
+ await c.locator('[data-an-stock]').fill('30');await c.locator('.pt-flow-an-manage>summary').evaluate(e=>{e.parentElement.open=true;});await c.locator('[data-an-save]').click();await p.waitForFunction(()=>stored[0]?.revision===2);
  assert.equal(await p.evaluate(()=>stored.length),1);await reopen(p);assert.equal(await c.locator('[data-an-stock]').inputValue(),'30');
  // No leakage into ordinary medication choices.
  assert.doesNotMatch(await p.locator('[data-preset]').innerHTML(),/마취 농도/);
 });
 test('unsaved stock changes disappear on reopen and saved values survive species reset',async t=>{
  const p=await page(t);await enableSave(p);const c=p.locator('[data-an-drug=propofol]');
- await c.locator('[data-an-stock]').fill('20');await c.locator('[data-an-save]').click();await p.waitForFunction(()=>stored.length===1);
+ await c.locator('[data-an-stock]').fill('20');await c.locator('.pt-flow-an-manage>summary').evaluate(e=>{e.parentElement.open=true;});await c.locator('[data-an-save]').click();await p.waitForFunction(()=>stored.length===1);
  await reopen(p);await c.locator('[data-an-stock]').fill('30');await reopen(p);assert.equal(await c.locator('[data-an-stock]').inputValue(),'20');
  await p.locator('[data-ref-species]').selectOption('cat');assert.equal(await c.locator('[data-an-stock]').inputValue(),'20');
 });
 test('combination saves both concentrations in one record and restores species-specific doses',async t=>{
  const p=await page(t,390);await enableSave(p);const c=p.locator('[data-an-drug=ketamine-medetomidine]');
- await c.locator('[data-an-stock]').fill('100');await c.locator('[data-an-companion-stock]').fill('2');await c.locator('[data-an-save]').click();await p.waitForFunction(()=>stored.length===1);await reopen(p);
+ await c.locator('[data-an-stock]').fill('100');await c.locator('[data-an-companion-stock]').fill('2');await c.locator('.pt-flow-an-manage>summary').evaluate(e=>{e.parentElement.open=true;});await c.locator('[data-an-save]').click();await p.waitForFunction(()=>stored.length===1);await reopen(p);
  assert.equal(await c.locator('[data-an-stock]').inputValue(),'100');assert.equal(await c.locator('[data-an-companion-stock]').inputValue(),'2');
  assert.match(await c.locator('output').textContent(),/케타민 0.25 mL/);assert.match(await c.locator('output').textContent(),/메데토미딘 염산염 0.1 mL/);
  await p.locator('[data-ref-species]').selectOption('cat');assert.equal(await c.locator('[data-an-companion-dose]').inputValue(),'80');assert.match(await c.locator('output').textContent(),/메데토미딘 염산염 0.2 mL/);
@@ -67,27 +67,27 @@ test('combination saves both concentrations in one record and restores species-s
 });
 test('write permission and invalid stock cannot save',async t=>{
  const p=await page(t);await kind(p,'anesthesia');const c=p.locator('[data-an-drug=propofol]');assert.equal(await c.locator('[data-an-save]').isEnabled(),false);
- await enableSave(p);await c.locator('[data-an-stock]').fill('0');await c.locator('[data-an-save]').click();assert.match(await c.locator('[data-an-save-state]').textContent(),/농도 입력값을 확인/);assert.equal(await p.evaluate(()=>calls.filter(x=>x.path==='/practice/presets'&&x.method==='POST').length),0);
+ await enableSave(p);await c.locator('[data-an-stock]').fill('0');await c.locator('.pt-flow-an-manage>summary').evaluate(e=>{e.parentElement.open=true;});await c.locator('[data-an-save]').click();assert.match(await c.locator('[data-an-save-state]').textContent(),/농도 입력값을 확인/);assert.equal(await p.evaluate(()=>calls.filter(x=>x.path==='/practice/presets'&&x.method==='POST').length),0);
 });
 test('save failure never reports saved and reloading recovers persisted value',async t=>{
  const p=await page(t);await enableSave(p);const c=p.locator('[data-an-drug=propofol]');await p.evaluate(()=>saveFail=true);
- await c.locator('[data-an-stock]').fill('20');await c.locator('[data-an-save]').click();await c.locator('[data-an-save-state]').filter({hasText:'저장 연결 실패'}).waitFor();
+ await c.locator('[data-an-stock]').fill('20');await c.locator('.pt-flow-an-manage>summary').evaluate(e=>{e.parentElement.open=true;});await c.locator('[data-an-save]').click();await c.locator('[data-an-save-state]').filter({hasText:'저장 연결 실패'}).waitFor();
  assert.equal(await p.evaluate(()=>stored.length),0);assert.equal(await c.locator('[data-an-stock]').inputValue(),'20');
- await p.evaluate(()=>saveFail=false);await c.locator('[data-an-reload]').click();await c.locator('[data-an-origin]').filter({hasText:'문헌'}).waitFor();assert.equal(await c.locator('[data-an-stock]').inputValue(),'10');
+ await p.evaluate(()=>saveFail=false);await c.locator('.pt-flow-an-manage>summary').evaluate(e=>{e.parentElement.open=true;});await c.locator('[data-an-reload]').click();await c.locator('[data-an-origin]').filter({hasText:'문헌'}).waitFor();assert.equal(await c.locator('[data-an-stock]').inputValue(),'10');
 });
 test('another editor revision prevents overwriting and reload makes next save explicit',async t=>{
- const p=await page(t);await enableSave(p);const c=p.locator('[data-an-drug=propofol]');await c.locator('[data-an-stock]').fill('20');await c.locator('[data-an-save]').click();await p.waitForFunction(()=>stored.length===1);await reopen(p);
- await p.evaluate(()=>{stored[0].revision=2;stored[0].body.value=25;});await c.locator('[data-an-stock]').fill('30');await c.locator('[data-an-save]').click();await c.locator('[data-an-save-state]').filter({hasText:'다른 화면'}).waitFor();assert.equal(await p.evaluate(()=>stored[0].body.value),25);
- await c.locator('[data-an-reload]').click();await p.waitForFunction(()=>document.querySelector('[data-an-drug=propofol] [data-an-stock]').value==='25');
+ const p=await page(t);await enableSave(p);const c=p.locator('[data-an-drug=propofol]');await c.locator('[data-an-stock]').fill('20');await c.locator('.pt-flow-an-manage>summary').evaluate(e=>{e.parentElement.open=true;});await c.locator('[data-an-save]').click();await p.waitForFunction(()=>stored.length===1);await reopen(p);
+ await p.evaluate(()=>{stored[0].revision=2;stored[0].body.value=25;});await c.locator('[data-an-stock]').fill('30');await c.locator('.pt-flow-an-manage>summary').evaluate(e=>{e.parentElement.open=true;});await c.locator('[data-an-save]').click();await c.locator('[data-an-save-state]').filter({hasText:'다른 화면'}).waitFor();assert.equal(await p.evaluate(()=>stored[0].body.value),25);
+ await c.locator('.pt-flow-an-manage>summary').evaluate(e=>{e.parentElement.open=true;});await c.locator('[data-an-reload]').click();await p.waitForFunction(()=>document.querySelector('[data-an-drug=propofol] [data-an-stock]').value==='25');
 });
 test('editing while a save is pending keeps newer edit visibly unsaved',async t=>{
  const p=await page(t);await enableSave(p);const c=p.locator('[data-an-drug=propofol]');await p.evaluate(()=>saveDelay=200);
- await c.locator('[data-an-stock]').fill('20');await c.locator('[data-an-save]').click();await p.waitForFunction(()=>calls.some(x=>x.path==='/practice/presets'&&x.method==='POST'));await c.locator('[data-an-stock]').fill('30');
+ await c.locator('[data-an-stock]').fill('20');await c.locator('.pt-flow-an-manage>summary').evaluate(e=>{e.parentElement.open=true;});await c.locator('[data-an-save]').click();await p.waitForFunction(()=>calls.some(x=>x.path==='/practice/presets'&&x.method==='POST'));await c.locator('[data-an-stock]').fill('30');
  await p.waitForFunction(()=>stored.length===1);await p.waitForFunction(()=>!document.querySelector('[data-an-drug=propofol] [data-an-save]').disabled);
  assert.equal(await c.locator('[data-an-stock]').inputValue(),'30');assert.equal(await p.evaluate(()=>stored[0].body.value),20);assert.match(await c.locator('[data-an-save-state]').textContent(),/아직 저장/);
 });
 test('saved pair appears in a second browser context using the same hospital records',async t=>{
- const p=await page(t);await enableSave(p);const c=p.locator('[data-an-drug=ketamine]');await c.locator('[data-an-stock]').fill('100');await c.locator('[data-an-companion-stock]').fill('2');await c.locator('[data-an-save]').click();await p.waitForFunction(()=>stored.length===1);
+ const p=await page(t);await enableSave(p);const c=p.locator('[data-an-drug=ketamine]');await c.locator('[data-an-stock]').fill('100');await c.locator('[data-an-companion-stock]').fill('2');await c.locator('.pt-flow-an-manage>summary').evaluate(e=>{e.parentElement.open=true;});await c.locator('[data-an-save]').click();await p.waitForFunction(()=>stored.length===1);
  const records=await p.evaluate(()=>stored),p2=await page(t);await inject(p2,records);await kind(p2,'anesthesia');assert.equal(await p2.locator('[data-an-drug=ketamine] [data-an-stock]').inputValue(),'100');assert.equal(await p2.locator('[data-an-drug=ketamine] [data-an-companion-stock]').inputValue(),'2');
 });
 
@@ -96,6 +96,6 @@ test('duplicate saved cards are held instead of choosing an arbitrary concentrat
  await inject(p,rows);await kind(p,'anesthesia');const c=p.locator('[data-an-drug=propofol]');assert.equal(await c.locator('[data-an-stock]').inputValue(),'');assert.match(await c.locator('output').textContent(),/여러 개/);
 });
 test('copy validates saved concentration revision before putting a plan on clipboard',async t=>{
- const p=await page(t);await enableSave(p);const c=p.locator('[data-an-drug=propofol]');await c.locator('[data-an-stock]').fill('20');await c.locator('[data-an-save]').click();await p.waitForFunction(()=>stored.length===1);await reopen(p);
+ const p=await page(t);await enableSave(p);const c=p.locator('[data-an-drug=propofol]');await c.locator('[data-an-stock]').fill('20');await c.locator('.pt-flow-an-manage>summary').evaluate(e=>{e.parentElement.open=true;});await c.locator('[data-an-save]').click();await p.waitForFunction(()=>stored.length===1);await reopen(p);
  await c.locator('[data-an-selected]').check();await p.evaluate(()=>{stored[0].revision++;stored[0].body.value=30;});await p.locator('[data-an-copy]').click();await p.locator('[data-an-copy-status]').filter({hasText:'저장된 농도가 변경'}).waitFor();
 });
