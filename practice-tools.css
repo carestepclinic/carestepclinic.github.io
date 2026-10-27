@@ -596,7 +596,10 @@ body:has(#practice.active-view) #globalNewCase,body:has(#practice.active-view) #
 /* A single shell for all practical-tool tabs; switching tabs must not move the gutters. */
 #appView:has(#practice.active-view) .main{padding-left:20px;padding-right:20px}
 #practiceRoot.pt{max-width:none;width:100%;margin-inline:auto;box-sizing:border-box}
-#practiceRoot>.pt-tabs{width:100%;box-sizing:border-box}
+#practiceRoot>.pt-tabs{width:100%;box-sizing:border-box;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+#practiceRoot>.pt-tabs button{min-width:0;white-space:normal}
+@media(max-width:1000px){#practiceRoot>.pt-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:480px){#practiceRoot>.pt-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .pt .pt-streamlined{--pt-flow-gap:16px}
 .pt .pt-streamlined :is(input,select,textarea,button){font:inherit}
 .pt .pt-streamlined :is(input,select,textarea){font-size:16px}
