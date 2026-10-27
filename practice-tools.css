@@ -714,3 +714,16 @@ body:has(#practice.active-view) #globalNewCase,body:has(#practice.active-view) #
 .pt-ko-card label input[type=checkbox] { width:auto; flex:0 0 auto; margin-top:5px; }
 .pt-private-safety > details { margin-top:14px; }
 @media(max-width:600px){.pt-ko-safety .pt-bar{width:100%;flex-wrap:wrap}.pt-ko-safety button{white-space:normal}.pt-ko-card{padding:12px}}
+
+/* One layout across checklist, intake, calculator and clinical tools. */
+#practiceRoot{width:100%;max-width:none;margin:0;padding:0}
+#practiceRoot>.pt-tabs{margin:0 0 16px;gap:6px}
+#practiceRoot .pt-section-intro{margin:0 0 12px}#practiceRoot .pt-section-intro h3{font-size:20px;margin:0 0 4px}
+#practiceRoot .pt-status-filters{gap:6px;margin:12px 0}#practiceRoot .pt-status-filters button{min-height:44px;padding:8px 12px}#practiceRoot .pt-status-filters strong{font-size:20px;font-variant-numeric:tabular-nums}
+#practiceRoot .pt-help,#practiceRoot small{font-size:14px;line-height:1.5}#practiceRoot input:not([type=checkbox]),#practiceRoot select{font-size:16px;min-height:44px}
+.pt-clinical-bridge{padding:10px 12px;border:1px solid #b9ccee;background:#f4f7ff;border-radius:10px;margin-bottom:12px}.pt-clinical-bridge summary{cursor:pointer;font-weight:600}.pt-clinical-bridge p{margin:8px 0}
+#practiceRoot .pt-search-scope:has([data-search-all][hidden]){display:block}
+@media(max-width:760px){#practiceRoot>.pt-tabs{display:flex;overflow-x:auto;flex-wrap:nowrap;padding:4px;scroll-padding:4px}#practiceRoot>.pt-tabs button{flex:0 0 auto;min-height:44px;white-space:nowrap;padding:8px 14px}#practiceRoot .pt-status-filters{display:flex;overflow-x:auto;padding-bottom:4px}#practiceRoot .pt-status-filters button{flex:0 0 auto;gap:12px}#practiceRoot .pt-filter-grid{gap:8px}#practiceRoot .pt-intake-filters{grid-template-columns:1fr}#practiceRoot .pt-toolbar{gap:8px}}
+
+.pt-mobile-global-menu{display:none}
+@media(max-width:760px){body:has(#practice.active-view) .sidebar{height:auto;min-height:0;padding:10px 12px;position:static}body:has(#practice.active-view) .sidebar-brand{margin:0;display:flex;align-items:center;gap:10px}body:has(#practice.active-view) .pt-mobile-global-menu{display:block;margin-left:auto;min-height:44px;padding:8px 12px;color:#fff;background:#24334e;border:1px solid #52617a;border-radius:8px;font:inherit}body:has(#practice.active-view) .sidebar:not(.pt-menu-expanded) .nav-list,body:has(#practice.active-view) .sidebar:not(.pt-menu-expanded) .sidebar-foot{display:none}body:has(#practice.active-view) .sidebar.pt-menu-expanded .nav-list{margin-top:12px}}
