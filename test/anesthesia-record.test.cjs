@@ -22,3 +22,9 @@ test('graph does not interpolate unmeasured long gaps or missing values and safe
  const connected=graph('heartRate',[row(0,{heartRate:100}),row(5,{heartRate:120})],start,60);assert.match(connected,/ar-trace/);
  assert.match(graph('diastolic',[row(0,{diastolic:180})],start,60),/data-hi="180"/);
 });
+
+test('latest settings merge only explicit fields by clinical time after amendments and cancellation',()=>{
+ const {latestSettings}=require('../anesthesia-record.js');const r=(id,revision,at,settings,extra={})=>({id,revision,kind:'anesthesia.entry',body:{recordId:id,type:'marker',marker:'settings',observedAt:at,settings,...extra}});
+ const events=[r('a',2,'2026-10-26T01:00:00Z',{agent:'Synthetic',concentration:2,ventilation:'spontaneous'}),r('b',3,'2026-10-26T01:10:00Z',{ventilation:'mechanical'}),r('c',4,'2026-10-26T01:05:00Z',{agent:'Synthetic',concentration:0}),r('b',5,'2026-10-26T01:10:00Z',{ventilation:'assisted'}, {voided:true})];
+ const result=latestSettings(records(events));assert.match(result.agent.text,/0%/);assert.equal(result.ventilation.text,'자발호흡');assert.equal(result.agent.at,'2026-10-26T01:05:00Z');
+});
