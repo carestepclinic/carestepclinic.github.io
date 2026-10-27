@@ -109,5 +109,31 @@
 .cl-ward-patient .cl-card{margin:10px 0}
 .cl-ward-patient .cl-task{padding:12px}
 .cl-state-cancelled{opacity:.75}
+.cl-workspace{font-variant-numeric:tabular-nums}
+.cl-workspace .cl-vital-grid small,.cl-room .cl-vital-grid span,.cl-room .cl-vital-grid small,.cl-room small,.cl-room-monitor,.cl-care-team,.cl-background{font-size:13px;line-height:1.45}
+.cl-workspace .cl-toolbar p{margin:4px 0}
+.cl-workspace .cl-patient-summary{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px}
+.cl-patient-summary h3{margin:0}.cl-patient-summary span{font-size:14px}
+.cl-workspace .cl-patient-sticky{padding:10px;background:#fff;border:1px solid #d8e1ed;border-radius:12px;position:static}
+.cl-patient-sticky>.cl-care-team{margin:4px 0;display:block}
+.cl-patient-manage{margin:6px 0}.cl-patient-manage>summary{cursor:pointer;color:#315476;font-size:14px;padding:8px 0}
+.cl-patient-manage .cl-identity .cl-care-team{display:none}
+.cl-workspace .cl-ward-tabs{margin:8px 0 0}
+.cl-mobile-patient{display:none}
+.cl-hospital-timeline{display:grid;gap:8px}
+.cl-workspace .cl-schedule-row{display:grid;grid-template-columns:minmax(140px,1fr) minmax(220px,3fr) 110px;align-items:center;text-align:left;gap:12px;background:white;padding:12px;border:1px solid #d1ddec;border-radius:10px;color:#143859}
+.cl-schedule-row small{display:block;font-size:13px;font-weight:400;margin-top:4px}
+.cl-workspace .cl-schedule-late{border-left:4px solid #bc2534}.cl-schedule-late>strong{color:#b62030}
+.cl-check-row{padding:12px 0;border-bottom:1px solid #d8e1ed}.cl-check-row p{margin:4px 0}
+.cl-check-row button{margin:5px 6px 0 0}.cl-pending-checks p{margin:6px 0}
+.cl-workspace .cl-ward-split{grid-template-columns:200px minmax(0,1fr)}
+@media(max-width:760px){.cl-mobile-patient{display:block;margin-bottom:10px}.cl-mobile-patient select{width:100%}.cl-workspace .cl-schedule-row{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}.cl-schedule-row>strong{grid-column:1/-1}.cl-workspace .cl-patient-sticky{position:static}.cl-workspace .cl-patient-summary{gap:4px}.cl-workspace .cl-patient-manage .cl-identity{display:block}.cl-workspace .cl-ward-split{display:block}.cl-ward-detail>.cl-toolbar>div:first-child{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.cl-ward-detail>.cl-toolbar h3{margin:0}}
 @media(max-width:1000px){.cl-ward-split{grid-template-columns:190px minmax(0,1fr)}}
 @media(max-width:760px){.cl-ward-split{display:block}.cl-board-side{display:none}.cl-patient-sticky{position:sticky;top:0}.cl-workspace .cl-filters{grid-template-columns:1fr 1fr}.cl-workspace .cl-filters>label:first-child{grid-column:1/-1}.cl-ward-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.cl-ward-tabs button{padding:9px 5px}.cl-workspace .cl-vital-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cl-patient-sticky>.cl-actions{margin:4px 0}.cl-ward-detail>.cl-toolbar{position:static}.cl-workspace input,.cl-workspace select,.cl-dialog input,.cl-dialog select{font-size:16px}}
+
+@media(max-width:760px){.cl-workspace .cl-patient-sticky{position:static}}
+
+.cl-workspace[data-ward-detail=true]>.cl-toolbar>div>p{display:none}
+.cl-workspace[data-ward-detail=true]>.cl-toolbar [data-cl-action=calculate-only],.cl-workspace[data-ward-detail=true]>.cl-toolbar [data-cl-action=new]{display:none}
+
+.cl-workspace .cl-mobile-patient{display:none}@media(max-width:760px){.cl-workspace .cl-mobile-patient{display:grid}}
