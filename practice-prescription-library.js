@@ -39,7 +39,7 @@
  function mount(host,o){
   if(!o.request)return null;
   const box=document.createElement('section');box.className='pt-private-safety';box.setAttribute('aria-label','Plumb’s 안전성 참고자료');
-  box.innerHTML='<div class="pt-heading"><h4>Plumb’s · 병원 등록 안전성 자료</h4><button type="button" data-private-reload>자료 다시 불러오기</button></div><p class="pt-help">한국어 요약과 근거 원문을 연결합니다. 약물명이 모호하면 아래에서 원문 항목을 선택해주세요.</p><p data-private-status role="status" aria-live="polite"></p><div data-private-summary></div><details data-private-originals><summary>약물 연결·영문 원문 보기</summary><div data-private-drugs></div></details>';
+  box.innerHTML='<div class="pt-heading"><h4>Plumb’s · 병원 등록 안전성 자료</h4><button type="button" data-private-prepare>전체 약물 DB 준비</button><button type="button" data-private-reload>자료 다시 불러오기</button></div><p class="pt-help">한국어 요약과 근거 원문을 연결합니다. 약물명이 모호하면 아래에서 원문 항목을 선택해주세요.</p><p data-private-status role="status" aria-live="polite"></p><div data-private-summary></div><details data-private-originals><summary>약물 연결·영문 원문 보기</summary><div data-private-drugs></div></details>';
   host.querySelector('.pt-drug-references').before(box);
   const client=createClient(o.request,()=>alive()),list=box.querySelector('[data-private-drugs]'),status=box.querySelector('[data-private-status]');
   let summaryView=null;
@@ -48,6 +48,7 @@
   const active=()=>alive()&&!host.closest('[data-kind-panel]')?.hidden;
   summaryView=g.PracticePrescriptionSummary?.mount(box.querySelector('[data-private-summary]'),{request:o.request,guard:alive,onConnect:drug=>{const row=rows.find(r=>(r.drug||'미확인 약물')===drug),card=row&&cards.get(rowKey(row));if(!card)return;box.querySelector('[data-private-originals]').open=true;card.querySelector('.pt-private-picker').open=true;card.scrollIntoView({block:'center',behavior:'smooth'});card.querySelector('[data-private-search]').focus({preventScroll:true});}});
   if(!summaryView)box.querySelector('[data-private-summary]').textContent='한국어 요약 화면을 불러오지 못했습니다. 새로고침해주세요.';
+  box.querySelector('[data-private-prepare]').onclick=()=>g.ClinicalKnowledge?.openQueue({request:(p,v)=>o.request('/practice'+p,v),guard:alive},'safety');
   function updateSummary(){if(!catalog)return;const selected=[],missing=[];for(const row of rows){const key=rowKey(row),item=catalog.items.find(e=>e.key===choice.get(key))||automatic(candidates(catalog.items,row),row);if(item){choice.set(key,item.key);selected.push(item);}else missing.push(row.drug||'미확인 약물');}summaryView?.update(selected,missing);}
   function clearCards(){generation++;cards.clear();list.replaceChildren();}
   function picker(card,row,found){

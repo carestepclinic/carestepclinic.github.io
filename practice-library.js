@@ -9,9 +9,9 @@
   let library=null,entry=null,serial=0,active=null,bridgeSerial=0,pdf=null,pdfHash='',disposed=false;
   const alive=()=>!disposed&&o.alive(),request=(path,options)=>o.request('/practice/references'+path,options);
   const shell=document.createElement('section');shell.className='pt-card pt-library';
-  shell.innerHTML='<div class="pt-heading"><div><h3>약물 참고자료 · 우리 병원</h3><p class="pt-help">병원 검토 서식 우선 · 원문은 종·적응증·경로·범위 대조</p></div><button type="button" data-library-open>Plumb’s 약물 찾기</button></div><div data-library-content hidden><p data-library-status role="status"></p><div data-library-controls></div><div class="pt-library-layout"><div data-library-list></div><section data-library-detail aria-live="polite"></section></div></div>';
+  shell.innerHTML='<div class="pt-heading"><div><h3>약물 참고자료 · 우리 병원</h3><p class="pt-help">병원 검토 서식 우선 · 원문은 종·적응증·경로·범위 대조</p></div><button type="button" data-library-knowledge>한국어 약물 DB 준비·현황</button><button type="button" data-library-open>Plumb’s 약물 찾기</button></div><div data-library-content hidden><p data-library-status role="status"></p><div data-library-controls></div><div class="pt-library-layout"><div data-library-list></div><section data-library-detail aria-live="polite"></section></div></div>';
   b.querySelector('.pt-calc-common').after(shell);
-  const el=k=>shell.querySelector('[data-library-'+k+']');
+  const el=k=>shell.querySelector('[data-library-'+k+']');el('knowledge').onclick=()=>g.ClinicalKnowledge?.openQueue({request:(p,v)=>o.request('/practice'+p,v),guard:alive},'safety');
   function clearContext(){bridgeSerial++;const previous=active;active=null;for(const f of b.querySelectorAll('[data-calc=dose],[data-calc=cri]')){if(previous?.kind===f.dataset.calc)for(const key of ['dose','concentration','stock','times','days','totalDoses','volume','rate','stockML','bsa'])if(f.elements[key])f.elements[key].value='';f.querySelector('[data-private-context]')?.remove();delete f.dataset.privateSource;delete f.dataset.privateTitle;}o.clear();o.refresh?.();}
   function context(kind){return active&&(!kind||active.kind===kind)?{title:active.title,source:active.source,indication:active.profile?.title||'',route:active.profile?.route||'',monitoring:'원문 용법·환자별 주의사항 재확인'}:null;}
   function importDialog(){
