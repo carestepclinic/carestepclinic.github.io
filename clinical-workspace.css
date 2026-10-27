@@ -71,3 +71,43 @@
 .cl-care-staff{display:flex;flex-wrap:wrap;gap:6px 16px}.cl-care-staff>span{display:flex;flex-wrap:wrap;gap:4px 8px;min-width:0}.cl-care-staff b{font-size:12px;color:#52677e;font-weight:500}.cl-care-staff>span>span{overflow-wrap:anywhere}
 .cl-care-team-compact .cl-care-staff{display:grid;grid-template-columns:1fr;gap:4px}.cl-care-team-compact .cl-care-staff>span{display:grid;grid-template-columns:86px minmax(0,1fr)}
 .cl-identity>div:first-child{min-width:0;flex:1}.cl-care-team-form{border-top:1px solid #dce5ef;margin-top:12px;padding-top:8px}
+/* Inpatient workflow: compact overview, persistent patient context. */
+.cl-workspace .cl-alert{color:#a21c25;background:#fff0f0;padding:4px 6px;border-radius:5px}
+.cl-workspace .cl-ok{color:#14654a;background:#e5f5ee;padding:4px 6px;border-radius:5px}
+.cl-workspace .cl-muted{color:#56677d;background:#edf2f7;padding:4px 6px;border-radius:5px}
+.cl-workspace .cl-stale{color:#815414;background:#fff5df;padding:4px 6px;border-radius:5px}
+.cl-precautions,.cl-io-totals{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0;font-size:12px}
+.cl-ward-split{display:grid;grid-template-columns:250px minmax(0,1fr);gap:14px;align-items:start}
+.cl-board-side{position:sticky;top:12px;max-height:85vh;overflow:auto;overscroll-behavior:contain}
+.cl-board-side .cl-room-groups,.cl-board-side .cl-room-grid{display:grid;grid-template-columns:1fr!important;gap:5px}
+.cl-board-side .cl-room{min-height:0;padding:9px;width:100%}
+.cl-board-side .cl-room .cl-care-team,.cl-board-side .cl-room .cl-vital-grid,.cl-board-side .cl-room .cl-room-monitor,.cl-board-side .cl-room .cl-precautions,.cl-board-side .cl-room>small,.cl-board-side .cl-room>span:not(.cl-room-top){display:none}
+.cl-board-side .cl-room strong{margin:3px 0;font-size:14px}
+.cl-board-side .cl-room-group{padding:7px}
+.cl-ward-detail{min-width:0}
+.cl-ward-patient{min-width:0}
+.cl-patient-sticky{background:#f4f7fb;padding:8px 0;z-index:3}
+.cl-patient-sticky h3{margin:0 0 5px}
+.cl-ward-tabs{margin:8px 0 0}
+.cl-ward-tabs button{min-height:42px}
+.cl-workspace .cl-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:10px 0}
+.cl-workspace .cl-vital-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.cl-workspace .cl-vital-grid small{display:block;font-size:11px;line-height:1.5}
+.cl-room .cl-vital-grid{grid-template-columns:repeat(2,minmax(0,1fr));width:100%;gap:5px}
+.cl-room .cl-vital-grid>div{padding:5px;min-width:0}
+.cl-room .cl-vital-grid strong{font-size:18px;margin:2px 0}
+.cl-room .cl-vital-grid span{font-size:11px}
+.cl-room .cl-vital-grid small{font-size:10px}
+.cl-med-dose{font-size:15px;margin:8px 0}
+.cl-med-dose strong,.cl-med-dose b{color:#184dca}
+.cl-med-dose small{display:block;font-size:12px}
+.cl-workspace .cl-table-scroll{overflow:auto;max-height:380px}
+.cl-workspace .cl-table-scroll table{border-collapse:collapse;width:100%;min-width:650px}
+.cl-table-scroll td,.cl-table-scroll th{padding:8px;border-bottom:1px solid #d8e1ed;text-align:left}
+.cl-background:empty{display:none}
+.cl-background{font-size:12px;color:#536c8b}
+.cl-ward-patient .cl-card{margin:10px 0}
+.cl-ward-patient .cl-task{padding:12px}
+.cl-state-cancelled{opacity:.75}
+@media(max-width:1000px){.cl-ward-split{grid-template-columns:190px minmax(0,1fr)}}
+@media(max-width:760px){.cl-ward-split{display:block}.cl-board-side{display:none}.cl-patient-sticky{position:sticky;top:0}.cl-workspace .cl-filters{grid-template-columns:1fr 1fr}.cl-workspace .cl-filters>label:first-child{grid-column:1/-1}.cl-ward-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.cl-ward-tabs button{padding:9px 5px}.cl-workspace .cl-vital-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cl-patient-sticky>.cl-actions{margin:4px 0}.cl-ward-detail>.cl-toolbar{position:static}.cl-workspace input,.cl-workspace select,.cl-dialog input,.cl-dialog select{font-size:16px}}
