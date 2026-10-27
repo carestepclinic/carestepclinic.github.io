@@ -3,6 +3,25 @@ const C=require('../clinical-workspace.js'),starters=require('../clinical-protoc
 const row=(drug,patch={})=>({drug,dose:1,doseUnit:'mg',doseBasis:'kg',route:'PO',times:2,days:7,startDay:1,intervalDays:1,strength:10,strengthUnit:'mg',form:'tablet',...patch});
 const checks=Object.fromEntries(['allergy','medications','renal','hepatic','hydration','pregnancy'].map(k=>[k,'absent']));
 
+for(const width of [320,390,1440,1920])test('ward cards show editable complaint and care team without changing measurements '+width,async t=>{
+ const {p,api,errors}=await fixture(t,width,true);await api('/rooms','POST',{requestKey:'care-team-rooms-001',rooms:[{name:'강아지 01',kind:'dog'},{name:'고양이 01',kind:'cat'},{name:'대형견 01',kind:'large_dog'}]});
+ await p.locator('[data-cl-action=refresh]').click();await wardSettled(p);await p.locator('.cl-room').first().click();await p.locator('[data-cl-action=room-admit]').click();const d=p.locator('.cl-dialog');
+ await d.locator('[name=quickName]').fill('합성 입원 환자');await d.locator('[name=chiefComplaint]').fill('반복 구토와 식욕 저하 · 합성 시험');await d.locator('[name=veterinarianId]').selectOption('owner');await d.locator('[name=technicianId]').selectOption('staff');await wardSave(p,'입원 등록');
+ assert.match(await p.locator('.cl-identity .cl-care-team').innerText(),/반복 구토/);const c=(await api('/cases')).items[0];const initial=c.body.careTeam;
+ await p.locator('[data-cl-action=ward-vitals]').click();await d.locator('[name=weightKG]').fill('5.1');await wardSave(p);
+ await p.locator('[data-cl-action=care-team]').click();assert.equal(await d.locator('[name=technicianId]').inputValue(),'staff');await d.locator('[name=chiefComplaint]').fill('식욕 회복 여부와 구토 경과 관찰 · 합성 시험');await d.locator('[name=technicianId]').selectOption('');await wardSave(p);
+ const updated=(await api('/cases/'+c.id));assert.equal(updated.item.body.latestObservations.vitals.values.weightKG,5.1);assert.equal(updated.events[0].body.previous.technicianId,'staff');
+ await p.locator('[data-cl-action=rooms-back]').click();const card=p.locator('.cl-room.occupied');assert.match(await card.innerText(),/CC/);assert.match(await card.innerText(),/식욕 회복/);assert.ok((await card.innerText()).includes(initial.veterinarianName));assert.match(await card.innerText(),/담당 테크니션\s+미지정/);assert.match(await card.innerText(),/5.1/);
+ assert.ok(await p.locator('.cl-workspace').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
+ await p.screenshot({path:path.resolve(root,'../ward-care-team-'+width+'.png'),fullPage:true});assert.deepEqual(errors,[]);
+});
+
+test('legacy ward card shows missing care information and escapes complaint HTML',async t=>{
+ const {p,api,id,errors}=await fixture(t);assert.match(await p.locator('.cl-identity .cl-care-team').innerText(),/미입력/);
+ await p.locator('[data-cl-action=care-team]').click();const d=p.locator('.cl-dialog');await d.locator('[name=chiefComplaint]').fill('<img src=x onerror=alert(1)> 합성');await wardSave(p);
+ assert.equal(await p.locator('.cl-care-team img').count(),0);assert.match(await p.locator('.cl-identity .cl-care-team').innerText(),/<img/);assert.equal((await api('/cases/'+id)).item.body.careTeam.chiefComplaint,'<img src=x onerror=alert(1)> 합성');assert.deepEqual(errors,[]);
+});
+
 for(const width of [320,390,768,1440])test('direct clinical tabs share one navigation and reuse loaded data '+width,async t=>{
  const {p,requests,errors}=await fixture(t,width,true,false);
  const nav=p.locator('#practiceRoot>.pt-tabs');
