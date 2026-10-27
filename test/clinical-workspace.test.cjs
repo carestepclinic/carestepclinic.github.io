@@ -142,3 +142,31 @@ test('failed room load stays occupied, allows return and retries without unrelat
  await p.locator('.cl-room').first().click();await wardSettled(p);assert.match(await p.locator('.cl-message').innerText(),/네트워크 오류/);assert.equal(await p.locator('[data-cl-action=room-admit]').count(),0);
  await p.locator('[data-cl-action=rooms-back]').click();f.clinicalHandler=null;await p.locator('.cl-room').first().click();await wardSettled(p);assert.equal(await p.locator('.cl-ward-sections').count(),1);assert.deepEqual(errors,[]);
 });
+
+for(const width of [320,390,1024,1440,1920])test('three ward sections retain dog cat large-dog order and responsive geometry '+width,async t=>{
+ const {p,api,errors}=await fixture(t,width,true);await p.locator('[data-cl-action=rooms-setup]').click();await wardSave(p);
+ const groups=p.locator('[data-room-kind]');assert.deepEqual(await groups.evaluateAll(es=>es.map(e=>e.dataset.roomKind)),['dog','cat','large_dog']);
+ for(const [kind,count] of [['dog',8],['cat',2],['large_dog',1]])assert.equal(await p.locator('[data-room-kind='+kind+'] .cl-room').count(),count);
+ const bounds=await groups.evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};}));
+ if(width>800){assert.ok(bounds[0].right<=bounds[1].x);assert.ok(bounds[1].right<=bounds[2].x);assert.ok(Math.abs(bounds[0].y-bounds[2].y)<1);}else{assert.ok(bounds[0].bottom<=bounds[1].y);assert.ok(bounds[1].bottom<=bounds[2].y);}
+ assert.ok(await p.locator('.cl-workspace').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
+ const rs=(await api('/rooms')).items,r=rs.find(r=>r.kind==='cat');const c=await api('/cases','POST',{requestKey:'section-cat-case-001',roomId:r.id,roomRevision:r.revision,kind:'admission',species:'cat',quickPatient:{name:'합성 고양이'}});
+ let d=await api('/cases/'+c.id);await api('/cases/'+c.id+'/events','POST',{requestKey:'section-cat-vitals-001',revision:d.item.revision,kind:'observation',data:{category:'vitals',observedAt:'2026-10-26T03:00:00Z',values:{weightKG:4,temperature:38.4,heartRate:160}}});
+ await p.locator('[data-cl-action=refresh]').click();await wardSettled(p);const cat=p.locator('[data-room-kind=cat]');assert.match(await cat.locator('header').innerText(),/입원 1실/);
+ const emptyHeight=(await cat.locator('.cl-room.vacant').boundingBox()).height,occupiedHeight=(await cat.locator('.cl-room.occupied').boundingBox()).height;assert.ok(emptyHeight<occupiedHeight);
+ await p.locator('.cl-room-groups').screenshot({path:path.resolve(root,'../ward-sections-'+width+'.png')});assert.deepEqual(errors,[]);
+});
+
+test('room transition shows loading immediately and restores source card position without refetch',async t=>{
+ const {p,f,api,caseIds,requests,errors}=await summaryFixture(t,390);
+ await api('/rooms','POST',{requestKey:'scroll-rooms-001',rooms:Array.from({length:8},(_,i)=>({name:'추가방 '+i,kind:'dog'}))});await p.locator('[data-cl-action=refresh]').click();await wardSettled(p);
+ let release;f.clinicalHandler=(url,m,b)=>url==='/clinical/cases/'+caseIds[0]?new Promise(resolve=>{release=()=>f.extras(url,m,b).then(resolve);}):f.extras(url,m,b);
+ const card=p.locator('.cl-room').first(),id=await card.getAttribute('data-id');await card.scrollIntoViewIfNeeded();const position=await p.evaluate(()=>scrollY),count=requests.length;
+ await card.click();await p.locator('.cl-room-loading').waitFor();assert.ok(await p.locator('.cl-ward-detail').evaluate(e=>e.getBoundingClientRect().top>=-1&&e.getBoundingClientRect().top<innerHeight));
+ release();await wardSettled(p);await p.locator('[data-cl-action=rooms-back]').click();assert.equal(await p.evaluate(()=>document.activeElement?.dataset.id),id);assert.ok(Math.abs(await p.evaluate(()=>scrollY)-position)<3);assert.equal(requests.length-count,1);assert.deepEqual(errors,[]);
+});
+
+test('empty species sections remain explicit when only cat rooms are configured',async t=>{
+ const {p,api}=await fixture(t,1280,true);await api('/rooms','POST',{requestKey:'section-only-cat-001',rooms:[{name:'고양이 전용',kind:'cat'}]});await p.locator('[data-cl-action=refresh]').click();await wardSettled(p);
+ assert.equal(await p.locator('[data-room-kind]').count(),3);assert.match(await p.locator('[data-room-kind=dog]').innerText(),/등록된 입원실이 없습니다/);assert.equal(await p.locator('[data-room-kind=cat] .cl-room').count(),1);
+});
