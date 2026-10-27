@@ -28,3 +28,13 @@ test('latest settings merge only explicit fields by clinical time after amendmen
  const events=[r('a',2,'2026-10-26T01:00:00Z',{agent:'Synthetic',concentration:2,ventilation:'spontaneous'}),r('b',3,'2026-10-26T01:10:00Z',{ventilation:'mechanical'}),r('c',4,'2026-10-26T01:05:00Z',{agent:'Synthetic',concentration:0}),r('b',5,'2026-10-26T01:10:00Z',{ventilation:'assisted'}, {voided:true})];
  const result=latestSettings(records(events));assert.match(result.agent.text,/0%/);assert.equal(result.ventilation.text,'자발호흡');assert.equal(result.agent.at,'2026-10-26T01:05:00Z');
 });
+
+test('incremental cache merges amendments once and retains earlier records',()=>{
+ const {mergeEvents}=require('../anesthesia-record.js');const a={id:'a',revision:2},b={id:'b',revision:3},c={id:'c',revision:4};const previous=[a,b];assert.deepEqual(mergeEvents(previous,[b,c]),[a,b,c]);assert.deepEqual(previous,[a,b]);
+});
+test('oxygen and simultaneous infusion settings are read by clinical time, including zero and cancellation',()=>{
+ const {latestSettings,latestInfusions}=require('../anesthesia-record.js');const rows=[{marker:'settings',settings:{oxygen:'1 L/min'},observedAt:'2026-10-26T01:00:00Z',revision:1},{marker:'settings',settings:{oxygen:'2 L/min'},observedAt:'2026-10-26T01:05:00Z',voided:true},{marker:'infusion',administration:{name:'A',rate:10},observedAt:'2026-10-26T01:00:00Z',revision:2},{marker:'infusion',administration:{name:'B',rate:2},observedAt:'2026-10-26T01:02:00Z',revision:3},{marker:'infusion',administration:{name:'A',rate:0},observedAt:'2026-10-26T01:05:00Z',revision:4}];assert.equal(latestSettings(rows).oxygen.text,'1 L/min');assert.deepEqual(latestInfusions(rows).map(r=>[r.name,r.rate]),[['A',0],['B',2]]);assert.equal(latestInfusions(rows.filter(r=>r.observedAt<'2026-10-26T01:04:00Z'))[0].rate,10);
+});
+test('recency is per metric; no clinical threshold is inferred for missing or stale readings',()=>{
+ const {metricRecency}=require('../anesthesia-record.js'),rows=[{type:'measurement',observedAt:'2026-10-26T01:00:00Z',values:{heartRate:100,spo2:98}},{type:'measurement',observedAt:'2026-10-26T01:09:00Z',values:{heartRate:110}}],now=Date.parse('2026-10-26T01:10:00Z');assert.equal(metricRecency(rows,'heartRate',now,5).stale,false);assert.equal(metricRecency(rows,'spo2',now,5).stale,true);assert.equal(metricRecency(rows,'spo2',now).stale,false);assert.equal(metricRecency(rows,'etco2',now,5).record,undefined);
+});
