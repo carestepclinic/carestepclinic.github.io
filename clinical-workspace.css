@@ -158,3 +158,14 @@
 
 .cl-workspace .cl-ward-detail>.cl-toolbar>div:first-child{flex:1;min-width:0}.cl-workspace .cl-ward-detail>.cl-toolbar h3,.cl-workspace .cl-ward-detail>.cl-toolbar>div:first-child>span{display:none}.cl-workspace .cl-ward-detail .cl-mobile-patient{flex:1;min-width:min(100%,230px);max-width:480px;margin:0;font-size:14px}
 @media(min-width:1200px){.cl-measure-layout{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:12px;align-items:start}.cl-measure-layout>.cl-card{margin:0}.cl-measure-layout>details,.cl-measure-layout>.cl-card:last-child{grid-column:1/-1}.cl-measure-layout .cl-monitor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cl-measure-layout .cl-vital-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.cl-save-status:empty{display:none}.cl-save-status{padding:8px 12px;background:#e5f5ee;color:#14654a;border-radius:8px;font-size:14px}
+.cl-workspace .cl-surgery-stages{grid-template-columns:repeat(5,minmax(0,1fr))}
+.cl-workspace[data-compact=true] .cl-room .cl-vital-grid,.cl-workspace[data-compact=true] .cl-room .cl-room-monitor,.cl-workspace[data-compact=true] .cl-room>small{display:none}
+.cl-workspace[data-compact=true] .cl-room.occupied{min-height:130px}
+.cl-workspace .cl-patient-sticky{position:sticky;top:8px;z-index:5;box-shadow:0 3px 10px #17324d0c}
+.cl-patient-sticky>.cl-care-team,.cl-patient-sticky>.cl-patient-manage{font-size:14px}
+.cl-target{outline:3px solid #2857e8;outline-offset:3px}
+.cl-handoff-list p{padding:8px;background:#f4f7fb;border-radius:6px}
+@media(max-width:760px){.cl-workspace .cl-patient-sticky{position:sticky;top:0}.cl-workspace .cl-patient-summary{background:white;padding:4px 0}.cl-workspace .cl-task .cl-actions{display:flex;flex-wrap:wrap}.cl-workspace .cl-surgery-stages{display:flex}.cl-workspace .cl-card{padding:12px}}
+
+.cl-workspace .cl-patient-sticky:has(.cl-patient-manage[open]){position:static}
