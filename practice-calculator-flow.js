@@ -28,6 +28,7 @@
    if(query&&primary){query.closest('label').hidden=true;mirror=()=>{query.value=primary.value;query.dispatchEvent(new Event('input',{bubbles:true}));};primary.addEventListener('input',mirror);}
    hide(regimen.querySelector('h4'),true);
   }
+  const drugSettings=q('.pt-drug-management');if(drugSettings){drugSettings.classList.add('pt-drug-settings');text(drugSettings.querySelector('summary'),'약품·계산 설정');q('.pt-calc-view-tools')?.after(drugSettings);for(const button of all('[data-strength-open]'))if(!drugSettings.contains(button))button.remove();}
   const productDetails=q('.pt-medication-products');
   if(productDetails){productDetails.open=false;text(productDetails.querySelector('summary'),'함량 직접 입력·약품 관리');}
 

@@ -6,13 +6,13 @@ async function openPage(t,width=1680){
  const p=await browser.newPage({viewport:{width,height:1000}}),errors=[];p.setDefaultTimeout(6000);p.on('pageerror',e=>errors.push(e.message));t.after(async()=>{await p.close();assert.deepEqual(errors,[]);});
  await p.route('**/*',r=>r.request().url().startsWith(origin)?r.continue():r.abort());await p.goto(origin+'/index.html');
  await p.evaluate(()=>{saasMode='auth';saasSessionMeta={id:'flow-test'};saasMe={role:'owner',clinic:{id:'synthetic'},user:{id:'owner'}};saasRequest=async path=>path.includes('/presets')?{items:[{id:'cf_carprofen',revision:1,body:{kind:'tablet',title:'시험 카프로펜 25mg',value:25,unit:'mg',formulary:{version:1,calculatorReady:true,route:'oral',species:['dog'],aliases:['carprofen'],calculationBasis:'carprofen',warnings:[],sourceUrl:'https://example.test/label',checkedAt:'2026-10-25'}}}],canManage:true,protocolsVersion:1,strengthsVersion:1}:path.includes('/references')?{libraries:[],canManage:false}:{ok:true,runs:[],templates:[],members:[],items:[],manager:true,userId:'owner'};showApp();go('practice');});
- await p.getByRole('button',{name:'임상 계산기',exact:true}).click();return p;
+ await navigatePractice(p,'임상 계산기');return p;
 }
 async function openKind(p,kind){if(p.viewportSize().width<=800)await p.locator('[data-calc-jump]').selectOption(kind);else await p.locator('.pt-calc-menu [data-kind="'+kind+'"]').click();await p.waitForTimeout(100);}
 async function context(p){await p.locator('[data-ref-species]').selectOption('dog');await p.locator('[data-common-weight]').fill('5');}
-for(const width of [390,1024,1680])test('three practical tabs share gutters and preserve calculator state '+width,async t=>{
+for(const width of [390,1024,1680])test('categorized work areas share gutters and preserve calculator state '+width,async t=>{
  const p=await openPage(t,width);await context(p);await openKind(p,'med');await p.locator('[data-calc=dose] [name=dose]').fill('1.25');const boxes=[];
- for(const tab of ['업무 체크리스트','사전문진','임상 계산기']){await p.getByRole('button',{name:tab,exact:true}).click();await p.waitForTimeout(150);boxes.push(await p.locator('#practiceRoot>.pt-tabs').boundingBox());assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));}
+ for(const tab of ['업무 체크리스트','사전문진','임상 계산기']){await navigatePractice(p,tab);await p.waitForTimeout(150);boxes.push(await p.locator('#practiceRoot').boundingBox());assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));}
  assert.ok(boxes.every(x=>Math.abs(x.x-boxes[0].x)<1&&Math.abs(x.width-boxes[0].width)<1));assert.equal(await p.locator('[data-calc=dose] [name=dose]').inputValue(),'1.25');
  await p.screenshot({path:path.join(root,'../calculator-flow-shell-'+width+'.png')});
 });
@@ -37,3 +37,5 @@ test('mobile emergency filter, potassium reference and input-result sequence',as
  await openKind(p,'potassium');assert.equal(await p.locator('[data-k-preparation]>details').evaluate(e=>e.open),false);assert.equal(await p.locator('[data-k-reference-status]').count(),1);
  await openKind(p,'fluid');const f=p.locator('[data-calc=fluid]'),input=await f.locator('.pt-flow-entry').boundingBox(),result=await f.locator('.pt-flow-result').boundingBox();assert.ok(result.y>=input.y+input.height);assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));await p.screenshot({path:path.join(root,'../calculator-flow-fluid-390.png')});
 });
+
+async function navigatePractice(p,label){const keys={'임상 계산기':'calc','사전문진':'intake','업무 체크리스트':'ops'},nav=p.locator('.clinic-navigation');if(await nav.count()){if(!await nav.isVisible())await p.locator('[data-practice-menu]').click();const button=nav.locator('[data-tab="'+keys[label]+'"]'),group=button.locator('xpath=ancestor::details[1]');if(!await group.evaluate(d=>d.open))await group.locator('summary').first().click();await button.click();}else await p.getByRole('button',{name:label,exact:true}).click();}

@@ -46,18 +46,18 @@
   function trainingControls(){const toolbar=root.querySelector('.st-toolbar');if(!toolbar)return;const details=document.createElement('details');details.className='st-filter-options';details.innerHTML='<summary>정렬·보기</summary><div></div>';for(const key of ['sort','layout']){const label=toolbar.querySelector('[data-'+key+']')?.closest('label');if(label)details.lastElementChild.append(label);}toolbar.append(details);}
   function tabCourses(){return filterCourses(data,tab,'','','');}
   function shell(){
-   root.innerHTML=`<header class="st-heading"><div><span class="st-eyebrow">${adapter.common?'CARESTEP HQ':'CARESTEP CLINIC'}</span><h1>${adapter.common?'직원 공통 교육 관리':'직원 교육센터'}</h1><p>${adapter.common?'승인한 공통 교육자료를 각 병원 교육센터에 제공합니다.':'환자 선택 없이 교육자료를 찾고, 배정된 교육을 이어서 학습하세요.'}</p></div>${btn('새로고침','refresh')}</header><p data-status class="st-status" role="status" aria-live="polite"></p><div data-content></div>`;
+   root.innerHTML=`<header class="st-heading"><div><span class="st-eyebrow">${adapter.common?'CARESTEP HQ':'CARESTEP CLINIC'}</span><h1>${adapter.common?'직원 공통 교육 관리':'직원 교육'}</h1><p>${adapter.common?'승인한 공통 교육자료를 각 병원 교육센터에 제공합니다.':'환자 선택 없이 교육자료를 찾고, 배정된 교육을 이어서 학습하세요.'}</p></div>${btn('새로고침','refresh')}</header><p data-status class="st-status" role="status" aria-live="polite"></p><div data-content></div>`;
   }
   function render(){
    const expanded=[...root.querySelectorAll('.st-card-manage[open]')].map(e=>e.dataset.course);shell();notice(message);const host=root.querySelector('[data-content]');
    if(!data){host.innerHTML='<div class="st-empty">직원 교육자료를 불러오고 있습니다.</div>';return;}
    const can=actor().capabilities;
    if((tab==='manage'&&!can.edit&&!can.review&&!can.manage)||(tab==='trash'&&!can.edit&&!can.review))tab='library';
-   const tabs=adapter.common?[['manage','공통 교육 관리'],['library','공개 자료']]:[['library','교육자료실'],['mine','내 교육'],['sop','우리 병원 SOP'],...(can.edit||can.review||can.manage?[['manage','교육 관리']]:[])];
+   const tabs=adapter.common?[['manage','공통 교육 관리'],['library','공개 자료']]:[['mine','내 교육'],['library','교육자료실'],['sop','병원 SOP'],...(can.edit||can.review||can.manage?[['manage','교육 배정·이수']]:[])];
    if(can.edit||can.review)tabs.push(['trash','삭제한 자료']);
    const mine=data.assignments.filter(a=>a.user_id===actor().userId),pending=mine.filter(a=>!a.completed_at&&a.status==='published').length;
    host.innerHTML=`<nav class="st-tabs" aria-label="교육센터 메뉴">${tabs.map(([id,label])=>`<button type="button" data-st="tab" data-tab="${id}" aria-current="${tab===id?'page':'false'}">${label}${id==='mine'&&pending?` <span>${pending}</span>`:''}</button>`).join('')}</nav>
-    ${tab==='sop'?'<p class="st-info">병원 업무절차(SOP)를 작성·검토하고 직원에게 공유합니다.</p>':''}
+    ${tab==='sop'?'<p class="st-info">병원 SOP는 직원이 따라야 할 업무 절차입니다. 실제 수행·완료 기록은 병원 운영의 업무 체크리스트에서 관리합니다.</p>':''}
     ${tab==='trash'?'<p class="st-info">삭제한 자료는 직원에게 표시되지 않습니다. 본문과 이수 기록은 보존되며, 복원해도 자동으로 다시 공개되지 않습니다.</p>':''}
     ${tab==='manage'&&!adapter.common?'<nav class="st-subtabs" aria-label="교육 관리 작업">'+btn('교육 배정','manage-view','data-view="assign" aria-pressed="'+(manageView==='assign')+'"')+btn('이수 현황','manage-view','data-view="report" aria-pressed="'+(manageView==='report')+'"')+'</nav>':''}
     ${tab==='mine'?`<div class="st-summary"><b>학습할 교육 ${pending}개</b><span>이수 ${mine.filter(a=>a.completed_at).length}개 · 읽던 자료와 이수 기록은 서버에 저장됩니다.</span></div>`:''}

@@ -12,7 +12,7 @@ const browserTest=existsSync(workerFixture)?test:test.skip;
 async function stopPublication(f,id,actor=f.owner){return f.api('/versions/'+id+'/withdraw','POST',{revision:(await f.doc(id,actor)).document.revision},actor);}
 for(const width of [390,1280])browserTest('withdrawn SOP can be republished explicitly from the card without changing version or history '+width,async t=>{
  const f=fixture(t),d=await localSop(f,'01. 진료 시작·마감 점검');await f.publish(d.versionId);const aid=await f.enroll(d.versionId);await f.attempt(aid,[]);await f.enroll(d.versionId,f.owner);await stopPublication(f,d.versionId);
- const history=f.sqlite.prepare('SELECT * FROM staff_training_attempts').all(),body=(await f.doc(d.versionId)).document.body,p=await pageFor(t,f,'owner',width);await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();
+ const history=f.sqlite.prepare('SELECT * FROM staff_training_attempts').all(),body=(await f.doc(d.versionId)).document.body,p=await pageFor(t,f,'owner',width);await p.getByRole('button',{name:'병원 SOP',exact:true}).click();
  assert.equal(await p.getByRole('button',{name:'다시 공개',exact:true,includeHidden:true}).count(),1);await versionAction(p,'다시 공개');await p.getByRole('heading',{name:'기존 버전 다시 공개',exact:true}).waitFor();
  assert.match(await p.getByRole('dialog').innerText(),/새 수정본은 만들지 않으며/);assert.ok(await p.locator('dialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
  await p.getByRole('button',{name:'확인 후 다시 공개',exact:true}).click();assert.deepEqual(await p.evaluate(()=>writes),[]);await p.getByRole('button',{name:'닫기',exact:true}).click();assert.equal((await f.doc(d.versionId)).document.status,'withdrawn');
@@ -22,22 +22,22 @@ for(const width of [390,1280])browserTest('withdrawn SOP can be republished expl
  await p.getByRole('button',{name:'확인 후 다시 공개',exact:true}).click();await p.getByRole('button',{name:'공개 중단',exact:true}).waitFor();
  assert.equal((await f.doc(d.versionId)).document.current,true);assert.equal((await f.doc(d.versionId)).document.version,1);assert.deepEqual((await f.doc(d.versionId)).document.body,body);assert.deepEqual(f.sqlite.prepare('SELECT * FROM staff_training_attempts').all(),history);
  assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM staff_training_versions').get().n,1);assert.equal((await p.evaluate(()=>writes.filter(x=>x.endsWith('/republish')))).length,1);
- await p.getByRole('button',{name:'닫기',exact:true}).click();assert.match(await p.locator('.st-card').innerText(),/승인됨 · v1/);await p.reload();await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();assert.equal(await p.getByRole('button',{name:'다시 공개',exact:true,includeHidden:true}).count(),0);
+ await p.getByRole('button',{name:'닫기',exact:true}).click();assert.match(await p.locator('.st-card').innerText(),/승인됨 · v1/);await p.reload();await p.getByRole('button',{name:'병원 SOP',exact:true}).click();assert.equal(await p.getByRole('button',{name:'다시 공개',exact:true,includeHidden:true}).count(),0);
 });
 browserTest('republish is hidden from learners and edit-only staff, and HQ requires reviewer name',async t=>{
  const f=fixture(t),d=await localSop(f);await f.publish(d.versionId);await stopPublication(f,d.versionId);f.editor={...f.staff,permissions:{mode:'custom',keys:['training.read','training.edit']}};
- for(const role of ['staff','editor']){const p=await pageFor(t,f,role);await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();assert.equal(await p.getByRole('button',{name:'다시 공개',exact:true,includeHidden:true}).count(),0);if(role==='editor'){await p.getByRole('button',{name:'자료·검토 열기',exact:true}).click();assert.equal(await p.getByRole('button',{name:'다시 공개',exact:true,includeHidden:true}).count(),0);}}
+ for(const role of ['staff','editor']){const p=await pageFor(t,f,role);await p.getByRole('button',{name:'병원 SOP',exact:true}).click();assert.equal(await p.getByRole('button',{name:'다시 공개',exact:true,includeHidden:true}).count(),0);if(role==='editor'){await p.getByRole('button',{name:'자료·검토 열기',exact:true}).click();assert.equal(await p.getByRole('button',{name:'다시 공개',exact:true,includeHidden:true}).count(),0);}}
  const common=await approved(f,f.hq);await stopPublication(f,common.versionId,f.hq);const p=await pageFor(t,f,'hq');await versionAction(p,'다시 공개');for(const key of ['clinical','evidence','privacy','rights'])await p.locator('[data-approve] [name='+key+']').check();await p.getByRole('button',{name:'확인 후 다시 공개',exact:true}).click();assert.deepEqual(await p.evaluate(()=>writes),[]);
  await p.getByLabel('검토 의료진 이름').fill('시험 수의사');await p.getByRole('button',{name:'확인 후 다시 공개',exact:true}).click();await p.getByRole('button',{name:'공개 중단',exact:true}).waitFor();assert.ok((await f.doc(common.versionId,f.hq)).document.audit.some(x=>x.action==='republish'&&x.detail.reviewerName==='시험 수의사'));
 });
 browserTest('republish conflict and stale confirmation leave the original withdrawn',async t=>{
- const f=fixture(t),d=await localSop(f);await f.publish(d.versionId);await stopPublication(f,d.versionId);const v2=await f.api('/versions/'+d.versionId+'/revise','POST',{revision:(await f.doc(d.versionId)).document.revision});await f.publish(v2.versionId);const p=await pageFor(t,f);await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();await versionAction(p,'다시 공개');await p.locator('[data-dialog-status]').getByText('다른 버전이 공개 중입니다. 현재 공개 버전을 먼저 확인해주세요.',{exact:true}).waitFor();assert.equal(await p.locator('[data-approve]').count(),0);assert.deepEqual(await p.evaluate(()=>writes),[]);
+ const f=fixture(t),d=await localSop(f);await f.publish(d.versionId);await stopPublication(f,d.versionId);const v2=await f.api('/versions/'+d.versionId+'/revise','POST',{revision:(await f.doc(d.versionId)).document.revision});await f.publish(v2.versionId);const p=await pageFor(t,f);await p.getByRole('button',{name:'병원 SOP',exact:true}).click();await versionAction(p,'다시 공개');await p.locator('[data-dialog-status]').getByText('다른 버전이 공개 중입니다. 현재 공개 버전을 먼저 확인해주세요.',{exact:true}).waitFor();assert.equal(await p.locator('[data-approve]').count(),0);assert.deepEqual(await p.evaluate(()=>writes),[]);
  await stopPublication(f,v2.versionId);await p.getByRole('button',{name:'닫기',exact:true}).click();await p.getByRole('button',{name:'새로고침',exact:true}).click();await versionAction(p,'다시 공개',d.versionId);
  for(const key of ['clinical','evidence','privacy','rights'])await p.locator('[data-approve] [name='+key+']').check();f.sqlite.prepare('UPDATE staff_training_versions SET revision=revision+1 WHERE id=?').run(d.versionId);await p.getByRole('button',{name:'확인 후 다시 공개',exact:true}).click();await p.locator('[data-dialog-status]').getByText('자료가 변경되었습니다. 새로고침해주세요.',{exact:true}).waitFor();assert.equal((await f.doc(d.versionId)).document.status,'withdrawn');assert.equal(await p.getByRole('button',{name:'확인 후 다시 공개',exact:true}).isEnabled(),true);
 });
 browserTest('SOP version delete keeps its published sibling visible and version trash restores only the selected draft',async t=>{
  const f=fixture(t),d=await localSop(f);await f.publish(d.versionId);const doc=(await f.doc(d.versionId)).document,v2=await f.api('/versions/'+d.versionId+'/revise','POST',{revision:doc.revision});
- const p=await pageFor(t,f);await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();
+ const p=await pageFor(t,f);await p.getByRole('button',{name:'병원 SOP',exact:true}).click();
  await versionAction(p,'버전 삭제',v2.versionId);assert.match(await p.getByRole('dialog').innerText(),/v2만 삭제/);assert.match(await p.getByRole('dialog').innerText(),/다른 버전 1개/);
  await p.locator('[name=confirm]').check();await p.getByRole('button',{name:'삭제 확정',exact:true}).click();await p.getByRole('dialog').waitFor({state:'hidden'});
  assert.equal(await p.locator('.st-card').count(),1);assert.match(await p.locator('.st-card').innerText(),/승인됨 · v1/);assert.equal((await f.doc(d.versionId)).document.current,true);
@@ -51,7 +51,7 @@ for(const kind of ['disease','practice','sop'])browserTest('real Korean PDF down
  if(kind==='sop')body.quiz=[];else for(const q of body.quiz)q.explanation='INTERNAL ANSWER SECRET';
  const d=kind==='practice'?await f.c.trainingSaveNew(f.DB,actor,{kind:'education',title:'한글 교육자료 '+kind,body,sources:[await f.c.trainingSource(f.DB,'source')]}):await f.create(actor,{kind:kind==='sop'?'sop':'education',title:'한글 교육자료 '+kind,body});
  const p=await pageFor(t,f,kind==='sop'?'owner':'hq',390),external=[],debug=[];p.on('request',r=>{debug.push(r.url());if(!r.url().startsWith(origin))external.push(r.url());});p.on('pageerror',e=>debug.push(e.message));
- if(kind==='sop')await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();
+ if(kind==='sop')await p.getByRole('button',{name:'병원 SOP',exact:true}).click();
  await p.getByRole('button',{name:'자료·검토 열기',exact:true}).click();const before=(await f.doc(d.versionId,actor)).document;
  const event=p.waitForEvent('download');await p.getByRole('button',{name:'PDF 다운로드',exact:true}).click();const download=await event.catch(async e=>{throw Error(await p.locator('[data-dialog-status]').innerText()+' / '+JSON.stringify(debug)+' / '+e.message);});assert.match(download.suggestedFilename(),/_v1\.pdf$/);
  const dest=resolve(root,'../../tmp/pdfs/training-'+kind+'.pdf');mkdirSync(resolve(root,'../../tmp/pdfs'),{recursive:true});await download.saveAs(dest);const buffer=readFileSync(dest);assert.equal(buffer.subarray(0,5).toString(),'%PDF-');
@@ -61,7 +61,7 @@ for(const kind of ['disease','practice','sop'])browserTest('real Korean PDF down
  assert.deepEqual(external,[]);assert.deepEqual(await p.evaluate(()=>writes),[]);assert.deepEqual((await f.doc(d.versionId,actor)).document,before);await pdf.destroy();
 });
 browserTest('PDF font download failure is visible and retry succeeds without a text fallback',async t=>{
- const f=fixture(t);await localSop(f);const p=await pageFor(t,f);await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();await p.getByRole('button',{name:'자료·검토 열기',exact:true}).click();
+ const f=fixture(t);await localSop(f);const p=await pageFor(t,f);await p.getByRole('button',{name:'병원 SOP',exact:true}).click();await p.getByRole('button',{name:'자료·검토 열기',exact:true}).click();
  await p.route('**/pretendard-regular-1.3.9.ttf',r=>r.fulfill({status:503,body:'Unavailable'}));await p.getByRole('button',{name:'PDF 다운로드',exact:true}).click();await p.locator('[data-dialog-status]').getByText('PDF 한글 글꼴을 불러오지 못했습니다. 연결을 확인하고 다시 다운로드해주세요.',{exact:true}).waitFor();
  assert.equal(await p.getByRole('button',{name:'PDF 다운로드',exact:true}).isEnabled(),true);await p.unroute('**/pretendard-regular-1.3.9.ttf');const event=p.waitForEvent('download');await p.getByRole('button',{name:'PDF 다운로드',exact:true}).click();assert.match((await event).suggestedFilename(),/\.pdf$/);
 });
@@ -72,25 +72,25 @@ async function localSop(f,title='출근 준비와 업무 인수인계'){
 async function courseLifecycle(f,d,action,actor=f.owner){const i=await f.api('/courses/'+d.courseId+'/impact','GET',undefined,actor);return f.api('/courses/'+d.courseId+'/'+action,'POST',{revisionToken:i.revisionToken,confirm:true,confirmAllVersions:true},actor);}
 for(const width of [390,1280])browserTest('SOP delete confirmation, cancellation, trash and restore '+width,async t=>{
  const f=fixture(t),d=await localSop(f);await f.publish(d.versionId);const aid=await f.enroll(d.versionId);await f.attempt(aid,[]);
- const p=await pageFor(t,f,'owner',width);await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();await versionAction(p,'버전 삭제');
+ const p=await pageFor(t,f,'owner',width);await p.getByRole('button',{name:'병원 SOP',exact:true}).click();await versionAction(p,'버전 삭제');
  const dialog=p.getByRole('dialog');await dialog.waitFor();assert.match(await dialog.innerText(),/선택한 버전\s+v1/);assert.match(await dialog.innerText(),/이수 완료\s+1건/);assert.ok(await dialog.evaluate(e=>e.scrollWidth<=e.clientWidth+1));
  await p.getByRole('button',{name:'삭제 확정',exact:true}).click();assert.deepEqual(await p.evaluate(()=>writes),[]);
  mkdirSync(resolve(root,'../outputs'),{recursive:true});await p.screenshot({path:resolve(root,`../outputs/training-delete-confirm-${width}.png`),fullPage:true});
  await p.getByRole('button',{name:'취소',exact:true}).focus();await p.keyboard.press('Enter');await dialog.waitFor({state:'hidden'});assert.equal(await p.locator('.st-card').count(),1);
  await versionAction(p,'버전 삭제');await p.locator('[data-lifecycle] [name=confirm]').check();await p.getByRole('button',{name:'삭제 확정',exact:true}).click();await dialog.waitFor({state:'hidden'});await p.waitForFunction(()=>document.querySelectorAll('.st-card').length===0);assert.equal(await p.locator('.st-card').count(),0);
  await p.getByRole('button',{name:'삭제한 자료',exact:true}).click();assert.equal(await p.locator('.st-card').count(),1);await p.getByRole('button',{name:'복원',exact:true}).click();await p.locator('[data-lifecycle] [name=confirm]').check();await p.getByRole('button',{name:'버전 복원',exact:true}).click();await dialog.waitFor({state:'hidden'});await p.waitForFunction(()=>document.querySelectorAll('.st-card').length===0);assert.equal(await p.locator('.st-card').count(),0);
- await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();assert.match(await p.locator('.st-card').innerText(),/공개 중단/);assert.equal((await f.doc(d.versionId)).document.status,'withdrawn');assert.equal(f.sqlite.prepare('SELECT score FROM staff_training_assignments').get().score,100);
+ await p.getByRole('button',{name:'병원 SOP',exact:true}).click();assert.match(await p.locator('.st-card').innerText(),/공개 중단/);assert.equal((await f.doc(d.versionId)).document.status,'withdrawn');assert.equal(f.sqlite.prepare('SELECT score FROM staff_training_assignments').get().score,100);
  assert.equal((await p.evaluate(()=>writes)).filter(x=>x.endsWith('/delete')).length,1);assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth));
 });
 browserTest('published SOP edit creates draft, keeps approved material and reopens an existing draft',async t=>{
  const f=fixture(t),d=await localSop(f);await f.publish(d.versionId);f.editor={...f.staff,permissions:{mode:'custom',keys:['training.read','training.edit']}};
- const p=await pageFor(t,f,'editor');await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();assert.equal(await p.getByRole('button',{name:'버전 삭제',exact:true}).count(),0);await p.getByRole('button',{name:'수정본 작성',exact:true}).click();await p.getByRole('button',{name:'수정본 만들고 편집',exact:true}).click();await p.locator('[data-editor]').waitFor();
+ const p=await pageFor(t,f,'editor');await p.getByRole('button',{name:'병원 SOP',exact:true}).click();assert.equal(await p.getByRole('button',{name:'버전 삭제',exact:true}).count(),0);await p.getByRole('button',{name:'수정본 작성',exact:true}).click();await p.getByRole('button',{name:'수정본 만들고 편집',exact:true}).click();await p.locator('[data-editor]').waitFor();
  await p.locator('[data-items]').first().fill('담당자의 업무 인계 내용을 확인합니다.');await p.getByRole('button',{name:'초안 저장',exact:true}).click();await p.getByRole('button',{name:'내용 수정',exact:true}).waitFor();assert.equal(await p.getByRole('button',{name:'검토 후 승인',exact:true}).count(),0);
  const versions=f.sqlite.prepare('SELECT id,status,body_json FROM staff_training_versions ORDER BY version').all();assert.equal(versions.length,2);assert.equal(versions[0].status,'published');assert.equal(versions[1].status,'draft');assert.match(versions[1].body_json,/업무 인계/);assert.doesNotMatch(versions[0].body_json,/업무 인계/);
  await p.getByRole('button',{name:'닫기',exact:true}).click();await p.getByRole('button',{name:'수정본 이어쓰기',exact:true}).click();await p.locator('[data-editor]').waitFor();assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM staff_training_versions').get().n,2);
 });
 browserTest('stale delete confirmation and network failure preserve visible material',async t=>{
- const f=fixture(t),d=await localSop(f),p=await pageFor(t,f);await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();await versionAction(p,'버전 삭제');await p.locator('[data-lifecycle]').waitFor();
+ const f=fixture(t),d=await localSop(f),p=await pageFor(t,f);await p.getByRole('button',{name:'병원 SOP',exact:true}).click();await versionAction(p,'버전 삭제');await p.locator('[data-lifecycle]').waitFor();
  const doc=(await f.doc(d.versionId)).document;await f.api('/versions/'+d.versionId,'PUT',{revision:doc.revision,body:doc.body});await p.locator('[name=confirm]').check();await p.getByRole('button',{name:'삭제 확정',exact:true}).click();await p.getByText('자료 상태가 변경되었거나 확인이 누락됐습니다. 다시 열어 확인해주세요.',{exact:true}).first().waitFor();assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM staff_training_course_lifecycle').get().n,0);
  await p.getByRole('button',{name:'취소',exact:true}).click();assert.equal(await p.locator('.st-card').count(),1);await versionAction(p,'버전 삭제');await p.locator('[name=confirm]').check();await p.route('**/api/versions/*/delete?*',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({error:'시험 연결 오류'})}));await p.getByRole('button',{name:'삭제 확정',exact:true}).click();await p.locator('[data-dialog-status]').getByText('시험 연결 오류',{exact:true}).waitFor();assert.equal(await p.getByRole('dialog').isVisible(),true);assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM staff_training_course_lifecycle').get().n,0);
 });
@@ -103,7 +103,7 @@ browserTest('common course management remains HQ-only and deleted learning histo
 browserTest('trash deduplicates versions and active AI disables deletion',async t=>{
  const f=fixture(t),d=await localSop(f);await f.publish(d.versionId);const doc=(await f.doc(d.versionId)).document;await f.api('/versions/'+d.versionId+'/revise','POST',{revision:doc.revision});await courseLifecycle(f,d,'delete');
  const p=await pageFor(t,f);await p.getByRole('button',{name:'삭제한 자료',exact:true}).click();assert.equal(await p.locator('.st-card').count(),1);await p.getByRole('button',{name:'복원',exact:true}).click();assert.match(await p.getByRole('dialog').innerText(),/전체 버전\s+2개/);await p.getByRole('button',{name:'취소',exact:true}).click();
- const other=await localSop(f,'생성 중인 시험 자료');f.sqlite.prepare("INSERT INTO staff_training_generation_jobs VALUES('busy','a','busy','owner','running',?,?, '{}','2026-10-22','2026-10-22')").run(other.courseId,other.versionId);await p.getByRole('button',{name:'새로고침',exact:true}).click();await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();await versionAction(p,'버전 삭제');assert.equal(await p.getByRole('button',{name:'삭제 확정',exact:true}).isDisabled(),true);assert.match(await p.getByRole('dialog').innerText(),/AI 작성·보완 처리 중/);
+ const other=await localSop(f,'생성 중인 시험 자료');f.sqlite.prepare("INSERT INTO staff_training_generation_jobs VALUES('busy','a','busy','owner','running',?,?, '{}','2026-10-22','2026-10-22')").run(other.courseId,other.versionId);await p.getByRole('button',{name:'새로고침',exact:true}).click();await p.getByRole('button',{name:'병원 SOP',exact:true}).click();await versionAction(p,'버전 삭제');assert.equal(await p.getByRole('button',{name:'삭제 확정',exact:true}).isDisabled(),true);assert.match(await p.getByRole('dialog').innerText(),/AI 작성·보완 처리 중/);
 });
 before(async()=>{
  if(!existsSync(workerFixture))return;
@@ -152,8 +152,8 @@ for(const role of ['staff','hq'])for(const width of [390,1280])browserTest('read
 });
 browserTest('clinic management offers assignment and SOP without content creation or AI',async t=>{
  const f=fixture(t);await approved(f,f.hq);const p=await pageFor(t,f);
- await p.getByRole('button',{name:'교육 관리',exact:true}).click();assert.equal(await p.getByRole('button',{name:'교육자료 만들기',exact:true}).count(),0);assert.equal(await p.getByRole('button',{name:'직원 배정',exact:true}).count(),1);assert.match(await p.locator('[data-content]').innerText(),/HQ에서 제작/);
- await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();await p.getByRole('button',{name:'SOP 작성',exact:true}).click();assert.equal(await p.locator('[name=sourceContentId]').count(),0);assert.equal(await p.getByRole('button',{name:'AI 교육 초안 생성',exact:true}).count(),0);
+ await p.getByRole('button',{name:'교육 배정·이수',exact:true}).click();assert.equal(await p.getByRole('button',{name:'교육자료 만들기',exact:true}).count(),0);assert.equal(await p.getByRole('button',{name:'직원 배정',exact:true}).count(),1);assert.match(await p.locator('[data-content]').innerText(),/HQ에서 제작/);
+ await p.getByRole('button',{name:'병원 SOP',exact:true}).click();await p.getByRole('button',{name:'SOP 작성',exact:true}).click();assert.equal(await p.locator('[name=sourceContentId]').count(),0);assert.equal(await p.getByRole('button',{name:'AI 교육 초안 생성',exact:true}).count(),0);
  await p.getByLabel('SOP 제목').fill('시험 마감 절차');await p.getByRole('button',{name:'수동 초안 만들기',exact:true}).click();await p.getByRole('button',{name:'내용 수정',exact:true}).waitFor();assert.equal(f.sqlite.prepare("SELECT COUNT(*) n FROM staff_training_courses WHERE kind='sop'").get().n,1);assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM staff_training_generation_jobs').get().n,0);
 });
 for(const width of [390,1280])browserTest('HQ creates an independent practice draft with no guardian source '+width,async t=>{
@@ -201,7 +201,7 @@ browserTest('library and my courses do not call AI or show drafts',async t=>{
  await p.getByRole('button',{name:'내 교육',exact:true}).click();
  assert.match(await p.locator('[data-list]').innerText(),/아직 배정된 교육이 없습니다/);
  assert.deepEqual(await p.evaluate(()=>writes),[]);
- assert.equal(await p.getByRole('button',{name:'교육 관리',exact:true}).count(),0);
+ assert.equal(await p.getByRole('button',{name:'교육 배정·이수',exact:true}).count(),0);
 });
 browserTest('real browser self-enrollment, assessment and completion persist on reload',async t=>{
  const f=fixture(t);await approved(f);const p=await pageFor(t,f,'staff',390);
@@ -250,14 +250,14 @@ browserTest('assignment dialog identifies staff and updates completion managemen
  await p.getByLabel('시험 직원',{exact:true}).check();
  await p.locator('[name=dueDate]').fill('2026-12-01');
  await p.getByRole('button',{name:'선택 직원에게 배정',exact:true}).click();
- await p.getByRole('button',{name:'교육 관리',exact:true}).click();
+ await p.getByRole('button',{name:'교육 배정·이수',exact:true}).click();
  await p.getByRole('button',{name:'이수 현황',exact:true}).click();await p.locator('[data-report] table').waitFor();
  assert.match(await p.locator('[data-report]').innerText(),/시험 직원/);
  assert.match(await p.locator('[data-report]').innerText(),/2026-12-01/);
 });
 browserTest('SOP entry disables AI and requires an explicit title',async t=>{
  const f=fixture(t),p=await pageFor(t,f);
- await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();await p.getByRole('button',{name:'SOP 작성',exact:true}).click();
+ await p.getByRole('button',{name:'병원 SOP',exact:true}).click();await p.getByRole('button',{name:'SOP 작성',exact:true}).click();
  assert.equal(await p.getByRole('button',{name:'AI 교육 초안 생성',exact:true}).isVisible(),false);
  await p.getByRole('button',{name:'수동 초안 만들기',exact:true}).click();
  assert.match(await p.locator('[data-dialog-status]').innerText(),/SOP 제목/);
@@ -305,7 +305,7 @@ browserTest('real CLINIC document loads training module and navigates without a 
   showApp();go('training');
  });
  await p.locator('#training .st-tabs').waitFor();
- assert.equal(await p.locator('#viewTitle').innerText(),'직원 교육센터');
+ assert.equal(await p.locator('#viewTitle').innerText(),'직원 교육');
  assert.equal(await p.locator('#training').evaluate(e=>e.classList.contains('active-view')),true);
  await p.locator('#r61-patient-context').waitFor({state:'attached'});
  assert.equal(await p.locator('#r61-patient-context').isVisible(),false);
@@ -383,14 +383,14 @@ async function versionAction(p,name,id){const button=p.locator('.st-card-manage'
 
 for(const width of [390,1280])browserTest('workflow SOP groups versions and keeps numeric order across delete and restore '+width,async t=>{
  const f=fixture(t),one=await localSop(f,'01. 진료 시작·마감 점검'),two=await localSop(f,'02. 접수'),ten=await localSop(f,'10. 감염 관리');for(const d of [one,two,ten])await f.publish(d.versionId);
- const v2=await f.api('/versions/'+one.versionId+'/revise','POST',{revision:(await f.doc(one.versionId)).document.revision});const p=await pageFor(t,f,'owner',width);await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();
+ const v2=await f.api('/versions/'+one.versionId+'/revise','POST',{revision:(await f.doc(one.versionId)).document.revision});const p=await pageFor(t,f,'owner',width);await p.getByRole('button',{name:'병원 SOP',exact:true}).click();
  assert.deepEqual(await p.locator('.st-card h2').allTextContents(),['01. 진료 시작·마감 점검','02. 접수','10. 감염 관리']);assert.equal(await p.locator('.st-card').count(),3);assert.match(await p.locator('.st-card').first().innerText(),/작성 중 · v2/);assert.equal(await p.getByRole('button',{name:'수정본 이어쓰기',exact:true}).count(),1);
  await versionAction(p,'버전 삭제',v2.versionId);await p.locator('[name=confirm]').check();await p.getByRole('button',{name:'삭제 확정',exact:true}).click();await p.getByRole('dialog').waitFor({state:'hidden'});assert.equal(await p.locator('.st-card h2').first().innerText(),'01. 진료 시작·마감 점검');
- await p.getByRole('button',{name:'삭제한 자료',exact:true}).click();await p.getByRole('button',{name:'복원',exact:true}).click();await p.locator('[name=confirm]').check();await p.getByRole('button',{name:'버전 복원',exact:true}).click();await p.getByRole('dialog').waitFor({state:'hidden'});await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();assert.equal(await p.locator('.st-card').count(),3);assert.equal((await f.doc(one.versionId)).document.current,true);
+ await p.getByRole('button',{name:'삭제한 자료',exact:true}).click();await p.getByRole('button',{name:'복원',exact:true}).click();await p.locator('[name=confirm]').check();await p.getByRole('button',{name:'버전 복원',exact:true}).click();await p.getByRole('dialog').waitFor({state:'hidden'});await p.getByRole('button',{name:'병원 SOP',exact:true}).click();assert.equal(await p.locator('.st-card').count(),3);assert.equal((await f.doc(one.versionId)).document.current,true);
  assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth));await p.screenshot({path:resolve(root,'../workflow-sop-'+width+'.png'),fullPage:true});
 });
 browserTest('workflow filters are isolated by tab and categories only include relevant materials',async t=>{
- const f=fixture(t),sop=await localSop(f,'01. 업무'),edu=await approved(f,f.hq,'교육 자료');await f.publish(sop.versionId);const p=await pageFor(t,f);await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();await p.getByLabel('교육자료 검색').fill('01.');await p.locator('[data-category]').selectOption({index:1});await p.getByRole('button',{name:'교육자료실',exact:true}).click();assert.equal(await p.getByLabel('교육자료 검색').inputValue(),'');assert.equal(await p.locator('[data-category]').inputValue(),'');assert.match(await p.locator('.st-card h2').innerText(),/교육 자료/);await p.getByRole('button',{name:'우리 병원 SOP',exact:true}).click();assert.equal(await p.getByLabel('교육자료 검색').inputValue(),'01.');assert.equal(await p.locator('.st-card').count(),1);await p.getByRole('button',{name:'조건 해제',exact:true}).click();assert.equal(await p.getByLabel('교육자료 검색').inputValue(),'');assert.equal(await p.locator('[data-category]').inputValue(),'');
+ const f=fixture(t),sop=await localSop(f,'01. 업무'),edu=await approved(f,f.hq,'교육 자료');await f.publish(sop.versionId);const p=await pageFor(t,f);await p.getByRole('button',{name:'병원 SOP',exact:true}).click();await p.getByLabel('교육자료 검색').fill('01.');await p.locator('[data-category]').selectOption({index:1});await p.getByRole('button',{name:'교육자료실',exact:true}).click();assert.equal(await p.getByLabel('교육자료 검색').inputValue(),'');assert.equal(await p.locator('[data-category]').inputValue(),'');assert.match(await p.locator('.st-card h2').innerText(),/교육 자료/);await p.getByRole('button',{name:'병원 SOP',exact:true}).click();assert.equal(await p.getByLabel('교육자료 검색').inputValue(),'01.');assert.equal(await p.locator('.st-card').count(),1);await p.getByRole('button',{name:'조건 해제',exact:true}).click();assert.equal(await p.getByLabel('교육자료 검색').inputValue(),'');assert.equal(await p.locator('[data-category]').inputValue(),'');
 });
 browserTest('workflow loading preserves prior cards on refresh failure and session clearing removes them',async t=>{
  const f=fixture(t);await approved(f,f.hq,'보존할 교육');const p=await pageFor(t,f);await p.evaluate(()=>{slow=true;failLoad=true;});await p.getByRole('button',{name:'새로고침',exact:true}).click();await p.getByText(/기존 목록을 유지했습니다/).waitFor();assert.match(await p.locator('.st-card').innerText(),/보존할 교육/);await p.evaluate(()=>{syntheticIdentity='next-session';app.clear();});assert.equal(await p.locator('.st-card').count(),0);

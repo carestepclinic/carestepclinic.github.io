@@ -1058,6 +1058,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="clinical-workspace.css?v=20261028-surgery3">
 <link rel="stylesheet" href="anesthesia-record.css?v=20261028-flow2">
 <link rel="stylesheet" href="practice-tools.css?v=20261027experience1">
+<link rel="stylesheet" href="clinic-navigation.css?v=20261028-nav1">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -1153,57 +1154,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
           <span>Clinic</span>
         </div>
       </div>
-      <nav class="nav-list" aria-label="CARESTEP 메뉴">
-        <button class="nav-item nav-home active" data-view="dashboard">
-          <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5v8a1.5 1.5 0 0 1-1.5 1.5h-5v-6h-5v6h-5A1.5 1.5 0 0 1 3 19.5z"/></svg></span>
-          <span class="nav-copy"><b>오늘 업무</b><small>처리할 일 · 최근 환자</small></span>
-        </button>
-
-        <div class="nav-section-label">주요 업무</div>
-        <button class="nav-item nav-main" data-view="patients">
-          <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20v-2.5A3.5 3.5 0 0 1 7.5 14h5a3.5 3.5 0 0 1 3.5 3.5V20"/><circle cx="10" cy="8" r="4"/><path d="M17 8h4M19 6v4"/></svg></span>
-          <span class="nav-copy"><b>환자 관리</b><small>환자 검색 · 건강기록</small></span>
-        </button>
-        <details id="clinicMaterialNav" class="clinic-nav-category" open><summary>자료</summary>
-        <button class="nav-item nav-main" data-view="library">
-          <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M8 4v13a3 3 0 0 0 3 3"/></svg></span>
-          <span class="nav-copy"><b>자료 찾기</b><small>보호자 안내자료 · 최근 사용</small></span>
-        </button>
-        <button class="nav-item nav-main" data-view="builder">
-          <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5M9 13h6M12 10v6"/></svg></span>
-          <span class="nav-copy"><b>자료 작성</b><small>작성 · 출력 · HOME 게시</small></span>
-        </button>
-        </details>
-        <button class="nav-item nav-main" data-view="practice"><span class="nav-icon" aria-hidden="true">✓</span><span class="nav-copy"><b>실무 도구</b><small>업무 체크 · 사전문진 · 계산기</small></span></button>
-        <button class="nav-item nav-main" data-view="training"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h7l1 2 1-2h7v16h-7l-1 1-1-1H4zM12 6v15M6 9h3M15 9h3M6 13h3M15 13h3"/></svg></span><span class="nav-copy"><b>직원 교육센터</b><small>교육자료 · 내 교육 · 병원 SOP</small></span></button>
-        <button class="nav-item nav-main" data-view="followup">
-          <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5h14v14H5z"/><path d="M8 9h8M8 13h5M8 17h3"/></svg></span>
-          <span class="nav-copy"><b>상담·후속관리</b><small>회복관리 · 문자 · 일정</small></span>
-          <span id="navFollowupBadge" class="nav-task-badge hidden" title="오늘 확인할 후속관리">0</span>
-        </button>
-
-        <div class="nav-divider"></div>
-        <div class="nav-manage">
-          <button id="navManageToggle" class="nav-group-toggle" type="button" aria-expanded="false" aria-controls="navManageGroup">
-            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/><path d="m4.9 6.3 1.4-1.4 2 1a8 8 0 0 1 1.7-.7l.7-2.2h2.6l.7 2.2a8 8 0 0 1 1.7.7l2-1 1.4 1.4-1 2a8 8 0 0 1 .7 1.7l2.2.7v2.6l-2.2.7a8 8 0 0 1-.7 1.7l1 2-1.4 1.4-2-1a8 8 0 0 1-1.7.7l-.7 2.2h-2.6l-.7-2.2a8 8 0 0 1-1.7-.7l-2 1-1.4-1.4 1-2a8 8 0 0 1-.7-1.7L3 13.3v-2.6l2.2-.7a8 8 0 0 1 .7-1.7z"/></svg></span>
-            <span class="nav-copy"><b>병원 관리</b><small>설정 · 직원 · 통계</small></span>
-            <span class="nav-chevron" aria-hidden="true">⌄</span>
-          </button>
-          <div id="navManageGroup" class="nav-submenu">
-            <button class="nav-item nav-sub" data-view="onboarding"><span class="nav-sub-dot"></span><span class="nav-copy"><b>처음 사용 설정</b><small>병원 개통 확인</small></span><span id="onboardingNavBadge" class="onboarding-nav-badge">0/6</span></button>
-            <button class="nav-item nav-sub" data-view="settings"><span class="nav-sub-dot"></span><span class="nav-copy"><b>병원·연동 설정</b><small>병원정보 · 자동 발송 · 연동</small></span></button>
-            <button class="nav-item nav-sub" data-view="account"><span class="nav-sub-dot"></span><span class="nav-copy"><b>계정·직원·권한</b><small>내 계정 · 직원 · 결제</small></span></button>
-            <button class="nav-item nav-sub" data-view="voice"><span class="nav-sub-dot"></span><span class="nav-copy"><b>문의 · 요청</b><small>질환 · 기능 · 고객문의</small></span></button>
-            <button class="nav-item nav-sub" data-view="pilot"><span class="nav-sub-dot"></span><span class="nav-copy"><b>운영 통계</b><small>월간 성과 · 사용량</small></span></button>
-          </div>
-        </div>
-
-        <div class="nav-operator operator-only hidden">
-          <div class="nav-section-label">운영자</div>
-          <button class="nav-item nav-sub" data-view="contentStudio"><span class="nav-sub-dot"></span><span class="nav-copy"><b>AI Content Studio</b><small>중앙 콘텐츠 제작</small></span></button>
-          <button class="nav-item nav-sub" data-view="admin"><span class="nav-sub-dot"></span><span class="nav-copy"><b>운영자 도구</b><small>관리 기능</small></span></button>
-        </div>
-      </nav>
+      <nav class="nav-list clinic-navigation" aria-label="CARESTEP 메뉴"><button class="nav-item nav-home nav-main" data-view="dashboard" ><span class="nav-copy"><b>오늘 업무</b></span></button><details class="clinic-nav-group " data-nav-group="patients" ><summary>환자·문진</summary><div class="nav-submenu" ><button class="nav-item nav-sub" data-view="patients" ><span class="nav-copy"><b>환자·보호자</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="intake"><span class="nav-copy"><b>사전문진</b></span></button></div></details><details class="clinic-nav-group " data-nav-group="clinical" ><summary>진료</summary><div class="nav-submenu" ><button class="nav-item nav-sub" data-view="practice" data-tab="calc"><span class="nav-copy"><b>임상 계산기</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="ward"><span class="nav-copy"><b>입원·처치 보드</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="surgery"><span class="nav-copy"><b>마취·수술</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="protocols"><span class="nav-copy"><b>진료 프로토콜</b></span></button></div></details><details class="clinic-nav-group " data-nav-group="guardian" id="clinicMaterialNav"><summary>보호자 안내·후속관리</summary><div class="nav-submenu" ><button class="nav-item nav-sub" data-view="library" ><span class="nav-copy"><b>보호자 안내자료</b></span></button><button class="nav-item nav-sub" data-view="followup" ><span class="nav-copy"><b>상담·후속관리</b></span><span id="navFollowupBadge" class="nav-task-badge hidden">0</span></button></div></details><button class="nav-item nav-main" data-view="training" ><span class="nav-copy"><b>직원 교육</b></span></button><details class="clinic-nav-group " data-nav-group="operations" ><summary>병원 운영</summary><div class="nav-submenu" ><button class="nav-item nav-sub" data-view="practice" data-tab="ops"><span class="nav-copy"><b>업무 체크리스트</b></span></button><button class="nav-item nav-sub" data-view="pilot" ><span class="nav-copy"><b>운영 통계</b></span></button></div></details><div class="nav-divider"></div><details class="clinic-nav-group nav-manage" data-nav-group="settings" id="clinicSettingsNav"><summary>설정·계정</summary><div class="nav-submenu" id=navManageGroup><button class="nav-item nav-sub" data-view="onboarding" ><span class="nav-copy"><b>처음 사용 설정</b></span><span id="onboardingNavBadge" class="onboarding-nav-badge">0/6</span></button><button class="nav-item nav-sub" data-view="settings" ><span class="nav-copy"><b>병원·연동 설정</b></span></button><button class="nav-item nav-sub" data-view="account" data-nav-account="team"><span class="nav-copy"><b>직원·권한</b></span></button><button class="nav-item nav-sub" data-view="account" data-nav-account="billing"><span class="nav-copy"><b>요금제·결제</b></span></button><button class="nav-item nav-sub" data-view="account" data-nav-account="security"><span class="nav-copy"><b>보안·데이터</b></span></button><button class="nav-item nav-sub" data-view="account" data-nav-account="my"><span class="nav-copy"><b>내 계정</b></span></button><button class="nav-item nav-sub" data-view="account" data-nav-account="legal"><span class="nav-copy"><b>약관·탈퇴</b></span></button><button class="nav-item nav-sub" data-view="voice" ><span class="nav-copy"><b>문의·요청</b></span></button></div></details><div class="nav-operator operator-only hidden"><div class="nav-section-label">운영자</div><button class="nav-item nav-sub" data-view="contentStudio" ><span class="nav-copy"><b>AI Content Studio</b></span></button><button class="nav-item nav-sub" data-view="admin" ><span class="nav-copy"><b>운영자 도구</b></span></button></div></nav>
       <div class="sidebar-foot">
         <span id="saasPlanPill" class="plan-pill">PILOT · SAAS</span>
         <button id="logoutBtn" class="text-btn">로그아웃</button>
@@ -1370,8 +1321,8 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 
       <section id="library" class="view">
         <div class="section-head">
-          <div><p class="eyebrow"></p><h3>자료 찾기</h3><p class="muted">질환·수술명을 검색하거나 최근 사용 자료를 선택하세요.</p></div>
-          <input id="searchInput" class="input search" type="search" aria-label="보호자 자료 검색" placeholder="질환·수술·퇴원관리 검색" />
+          <div><p class="eyebrow"></p><h3>보호자 안내자료</h3><p class="muted">질환·수술명을 검색하거나 최근 사용 자료를 선택하세요.</p></div>
+          <button type="button" class="btn btn-primary" data-go="builder" data-nav-create-material>새 안내자료 작성</button><input id="searchInput" class="input search" type="search" aria-label="보호자 자료 검색" placeholder="질환·수술·퇴원관리 검색" />
         </div>
         <div class="workflow-next-note"><b>다음 할 일</b><span>보호자 안내자료를 찾은 뒤 카드의 <strong>“이 자료로 만들기 →”</strong>를 누르면 새 자료 작성으로 이어집니다.</span></div>
         <section id="clinicLibraryRecent" class="clinic-library-recent" aria-label="최근 사용 자료"></section><div class="clinic-library-filter-status"><span id="clinicLibraryActiveFilters" role="status">전체 자료</span><button id="clinicLibraryReset" class="btn btn-secondary" type="button">검색·필터 초기화</button></div><details id="clinicLibraryFilters" class="clinic-library-filters"><summary>자료 종류·진료 분류로 좁히기</summary><div class="library-filter-block"><div class="library-filter-label"><b>자료 종류</b><span>필요한 자료 종류만 선택할 수 있습니다.</span></div><div class="purpose-filter-row"><button class="purpose-chip active" type="button" data-purpose="all">전체 자료</button><button class="purpose-chip" type="button" data-purpose="education">질환 교육</button><button class="purpose-chip" type="button" data-purpose="procedure">수술·시술 안내</button><button class="purpose-chip" type="button" data-purpose="discharge">입원·퇴원관리</button><button class="purpose-chip" type="button" data-purpose="clinic">병원 직접 제작</button><button class="purpose-chip journey-link" type="button" data-go="followup">회복관리 일정 →</button></div></div>
@@ -4047,7 +3998,7 @@ function applySaasPermissions(){
   const visibleManage=[...document.querySelectorAll('#navManageGroup .nav-item')].some(n=>!n.classList.contains('saas-hidden'));document.querySelector('.nav-manage')?.classList.toggle('role-ui-hidden',!visibleManage);document.querySelector('.nav-divider')?.classList.toggle('role-ui-hidden',!visibleManage);
   renderRoleWorkspace();applyAccountRoleVisibility();
   renderSubscriptionAccess();
-  applyOperatorUi();
+  applyOperatorUi();window.ClinicNavigation?.permissions();
 }
 function saasCloudKey(){return saasMe?.clinic?.id?`carestep_cloud_bound_${saasMe.clinic.id}`:'';}
 function saasCloudBound(){const k=saasCloudKey();return !!(k&&localStorage.getItem(k)==='1');}
@@ -4327,11 +4278,12 @@ async function withdrawAccount(){const password=$('withdrawPassword')?.value||''
 const ACCOUNT_TAB_STORAGE_KEY='carestep_account_tab_v902_hotfix';
 const ACCOUNT_TABS=new Set(['my','team','billing','security','legal']);
 function setAccountTab(tab='my',focusId=''){
-  const next=ACCOUNT_TABS.has(tab)?tab:'my';
+  const next=ACCOUNT_TABS.has(tab)&&(!window.ClinicNavigation||window.ClinicNavigation.accountAllowed(tab))?tab:'my';
   document.querySelectorAll('[data-account-tab]').forEach(b=>{const on=b.dataset.accountTab===next;b.classList.toggle('active',on);b.setAttribute('aria-selected',on?'true':'false');b.tabIndex=on?0:-1;});
   document.querySelectorAll('[data-account-pane]').forEach(p=>{const on=p.dataset.accountPane===next;p.classList.toggle('active',on);p.hidden=!on;});
   try{localStorage.setItem(ACCOUNT_TAB_STORAGE_KEY,next);}catch{}
   if(next==='billing'&&saasMode==='auth'&&!billingOverviewLoading)loadBillingOverview(false);
+  if(carestepActiveView()==='account'){window.ClinicNavigation?.sync('account');carestepRecordHistory('account');}
   if(focusId)setTimeout(()=>{const el=$(focusId);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});try{el.focus({preventScroll:true});}catch{el.focus();}}},90);
 }
 function initAccountUx(){
@@ -5477,7 +5429,7 @@ function carestepActiveView(){return document.querySelector('.view.active-view')
 function carestepHistorySafeView(view){return CARESTEP_HISTORY_VIEWS.has(String(view||''))?String(view):'dashboard';}
 function carestepHistoryState(view,guard=false){
   const prev=history.state&&typeof history.state==='object'?history.state:{};
-  return {...prev,[CARESTEP_HISTORY_STATE_KEY]:true,carestepView:carestepHistorySafeView(view),carestepGuard:!!guard};
+  return {...prev,[CARESTEP_HISTORY_STATE_KEY]:true,carestepView:carestepHistorySafeView(view),carestepGuard:!!guard,carestepRoute:window.ClinicNavigation?.route(view)||{}};
 }
 function carestepInitHistory(view='dashboard'){
   if(carestepHistoryInitialized)return;
@@ -5485,7 +5437,7 @@ function carestepInitHistory(view='dashboard'){
   if(state?.[CARESTEP_HISTORY_STATE_KEY]){carestepHistoryInitialized=true;return;}
   // Keep one same-document guard behind the current CARESTEP entry so a single Back press never drops out of the app.
   history.replaceState({...state,[CARESTEP_HISTORY_STATE_KEY]:true,carestepView:'dashboard',carestepGuard:true},document.title,window.location.href);
-  history.pushState({[CARESTEP_HISTORY_STATE_KEY]:true,carestepView:safe,carestepGuard:false},document.title,window.location.href);
+  history.pushState({[CARESTEP_HISTORY_STATE_KEY]:true,carestepView:safe,carestepGuard:false,carestepRoute:window.ClinicNavigation?.route(safe)||{}},document.title,window.location.href);
   carestepHistoryInitialized=true;
 }
 function carestepRecordHistory(view,mode='push'){
@@ -5493,20 +5445,20 @@ function carestepRecordHistory(view,mode='push'){
   const safe=carestepHistorySafeView(view);
   if(!carestepHistoryInitialized){carestepInitHistory(safe);return;}
   const state=history.state&&typeof history.state==='object'?history.state:{};
-  if(state?.[CARESTEP_HISTORY_STATE_KEY]&&state.carestepView===safe&&!state.carestepGuard)return;
-  const next={...state,[CARESTEP_HISTORY_STATE_KEY]:true,carestepView:safe,carestepGuard:false};
+  const route=window.ClinicNavigation?.route(safe)||{};if(state?.[CARESTEP_HISTORY_STATE_KEY]&&state.carestepView===safe&&!state.carestepGuard&&JSON.stringify(state.carestepRoute||{})===JSON.stringify(route))return;
+  const next={...state,[CARESTEP_HISTORY_STATE_KEY]:true,carestepView:safe,carestepGuard:false,carestepRoute:route};
   if(mode==='replace')history.replaceState(next,document.title,window.location.href);
   else history.pushState(next,document.title,window.location.href);
 }
 function carestepResetHistoryForLogin(){
   carestepHistoryApplying=false;carestepHistoryInitialized=false;
   const state=history.state&&typeof history.state==='object'?{...history.state}:{};
-  if(state?.[CARESTEP_HISTORY_STATE_KEY]){delete state[CARESTEP_HISTORY_STATE_KEY];delete state.carestepView;delete state.carestepGuard;try{history.replaceState(state,document.title,window.location.href);}catch{}}
+  if(state?.[CARESTEP_HISTORY_STATE_KEY]){delete state[CARESTEP_HISTORY_STATE_KEY];delete state.carestepView;delete state.carestepGuard;delete state.carestepRoute;try{history.replaceState(state,document.title,window.location.href);}catch{}}
 }
-function carestepApplyHistoryView(view){
+function carestepApplyHistoryView(view,route={}){
   const safe=carestepHistorySafeView(view);
   carestepHistoryApplying=true;
-  try{go(saasCanView(safe)?safe:'dashboard',{historyMode:'none'});}finally{carestepHistoryApplying=false;}
+  try{if(go(saasCanView(safe)?safe:'dashboard',{historyMode:'none',practiceTab:route.practiceTab,accountTab:route.accountTab})===false)history.replaceState(carestepHistoryState(carestepActiveView()),document.title,window.location.href);}finally{carestepHistoryApplying=false;}
 }
 window.addEventListener('popstate',event=>{
   if(!carestepHistoryInitialized||$('appView')?.classList.contains('hidden'))return;
@@ -5521,23 +5473,19 @@ window.addEventListener('popstate',event=>{
     }
     return;
   }
-  carestepApplyHistoryView(state.carestepView||'dashboard');
+  carestepApplyHistoryView(state.carestepView||'dashboard',state.carestepRoute||{});
 });
 
-const SECONDARY_NAV_VIEWS=new Set(['onboarding','settings','account','voice','pilot']);
-function setManageNavOpen(open){
-  const toggle=$('navManageToggle'),group=$('navManageGroup');if(!toggle||!group)return;
-  toggle.classList.toggle('open',!!open);group.classList.toggle('open',!!open);toggle.setAttribute('aria-expanded',open?'true':'false');
-}
-function syncSidebarNavGroup(view){if(SECONDARY_NAV_VIEWS.has(view))setManageNavOpen(true);if(['library','builder'].includes(view)&&$('clinicMaterialNav'))$('clinicMaterialNav').open=true;}
-function toggleManageNav(){const group=$('navManageGroup');setManageNavOpen(!group?.classList.contains('open'));}
+function syncSidebarNavGroup(view){window.ClinicNavigation?.sync(view);}
 
 
 function announceClinicView(view,title){let live=$('clinicViewAnnouncement');if(!live){live=document.createElement('p');live.id='clinicViewAnnouncement';live.className='care-sr-only';live.setAttribute('role','status');live.setAttribute('aria-live','polite');document.body.append(live);}live.textContent=title+' 화면으로 이동했습니다.';const heading=$('viewTitle'),origin=document.activeElement;if(heading){heading.setAttribute('tabindex','-1');requestAnimationFrame(()=>{if(document.querySelector('.view.active-view')?.id!==view||document.querySelector('dialog[open]')||(document.activeElement!==origin&&document.activeElement!==document.body))return;heading.focus({preventScroll:true});});}document.querySelectorAll('.nav-item').forEach(n=>{if(n.dataset.view===view)n.setAttribute('aria-current','page');else n.removeAttribute('aria-current');});}
 
 function go(view,options={}){
   const previousView=document.querySelector('.view.active-view')?.id;
-  if(previousView!==view){if(previousView==='practice'&&window.CarestepPractice?.leave?.()===false)return;if(previousView==='training'&&window.CarestepTraining?.leave?.()===false)return;}
+  if(previousView!==view){if(previousView==='practice'&&window.CarestepPractice?.leave?.()===false)return false;if(previousView==='training'&&window.CarestepTraining?.leave?.()===false)return false;}
+  if(options.practiceTab&&view==='practice'&&window.CarestepPractice?.prepareTab(options.practiceTab)===false)return false;
+  if(options.accountTab&&view==='account'&&!window.ClinicNavigation?.accountAllowed(options.accountTab))return false;
   if(currentCasePhase==='completed'&&(view==='library'||view==='builder'))beginNewCase(false,true);
   if(!saasCanView(view)){const featureByView={library:'library',builder:'builder',followup:'followupAutomation',voice:'customerVoice',pilot:'pilotAnalytics'};toast(featureByView[view]&&roleUiCanView(view)?saasFeatureMessage(featureByView[view]):'현재 역할에 필요한 화면만 표시하고 있습니다.');view=roleUiProfile().defaultView;}
   if(['practice','training','dashboard','patients','library','builder','followup','onboarding','settings','account','voice','pilot'].includes(view)){try{sessionStorage.setItem(SAAS_LAST_VIEW_SESSION_KEY,view);}catch{}}
@@ -5546,7 +5494,7 @@ function go(view,options={}){
   $(view).classList.add('active-view');
   const nav=document.querySelector(`.nav-item[data-view="${view}"]`); if(nav) nav.classList.add('active');
   syncSidebarNavGroup(view);
-  const titles={practice:'실무 도구',training:'직원 교육센터',dashboard:'오늘 업무',patients:'환자 관리',library:'자료 찾기',builder:'자료 작성',followup:'상담·후속관리',onboarding:'처음 사용 설정',settings:'병원·연동 설정',account:'계정·직원·권한',contentStudio:'AI Content Studio',voice:'문의 · 요청',pilot:'운영 통계',admin:'운영자 도구'};
+  const titles={practice:'진료',training:'직원 교육',dashboard:'오늘 업무',patients:'환자·보호자',library:'보호자 안내자료',builder:'안내자료 작성',followup:'상담·후속관리',onboarding:'처음 사용 설정',settings:'병원·연동 설정',account:'설정·계정',contentStudio:'AI Content Studio',voice:'문의 · 요청',pilot:'운영 통계',admin:'운영자 도구'};
   $('viewTitle').textContent=titles[view]||'';
   announceClinicView(view,titles[view]||'');
   renderScreenHelp(view);
@@ -5561,11 +5509,12 @@ function go(view,options={}){
   if(view==='contentStudio'){studioHydrateCentralKey();renderStudioCloudStatus();}
   if(view==='pilot'&&saasMode==='auth'&&saasMe)setTimeout(()=>loadMonthlyOperationsReport(false),0);
   if(view==='onboarding'&&saasMode==='auth'&&saasMe)setTimeout(()=>loadOnboardingStatus(false,false),0);
-  if(view==='account'){let tab='my';try{tab=localStorage.getItem(ACCOUNT_TAB_STORAGE_KEY)||'my';}catch{}setAccountTab(tab);saasRefreshAccount(false);}
+  if(view==='account'){let tab=options.accountTab||'my';if(!options.accountTab)try{tab=localStorage.getItem(ACCOUNT_TAB_STORAGE_KEY)||'my';}catch{}setAccountTab(tab);saasRefreshAccount(false);}
   if(view==='dashboard')setTimeout(()=>refreshDailyWorkflowIndicators(false),0);
-  renderGlobalCaseBadge();
+  renderGlobalCaseBadge();window.ClinicNavigation?.sync(view);
   carestepRecordHistory(view,options.historyMode||'push');
   if(previousView!==view)window.CarestepTabPosition?.top();
+  window.ClinicNavigation?.collapseMobile();return true;
 }
 
 function hospitalName(){ return hospital.name || '우리 병원'; }
@@ -9744,8 +9693,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('caseResetModal')
 $('saasRefreshSessions')?.addEventListener('click',()=>{saasLoadSessions();saasLoadDiagnostics();});
 $('saasSwitchClinicBtn')?.addEventListener('click',saasSwitchClinic);
 $('saasCreateInvite')?.addEventListener('click',saasCreateInvite);
-document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=>go(b.dataset.view)));
-$('navManageToggle')?.addEventListener('click',toggleManageNav);
+document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=>go(b.dataset.view,{practiceTab:b.dataset.tab,accountTab:b.dataset.navAccount})));
+
 document.addEventListener('click',event=>{const button=event.target?.closest?.('[data-go]');if(!button||button.disabled||event.defaultPrevented)return;event.preventDefault();go(button.dataset.go);});
 document.querySelectorAll('[data-settings-action]').forEach(b=>b.addEventListener('click',()=>openSettingsCategory(b.dataset.settingsAction)));
 $('refreshEmrSync')?.addEventListener('click',()=>loadEmrSyncStatus(true));
@@ -10448,7 +10397,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="home-access-clinic.js?v=clarity-20261020f"></script>
 <script src="clinic-care.js?v=clarity-20261020g"></script>
 <script src="clinic-organization.js?v=clarity-20261020b"></script>
-<script src="staff-training.js?v=20261026clinical1"></script>
+<script src="staff-training.js?v=20261028-nav1"></script>
 <script src="staff-training-clinic.js?v=20261020a"></script>
 <script src="practice-intake.js?v=20261023a"></script>
 <script src="practice-reference.js?v=20261025reuse1"></script>
@@ -10479,7 +10428,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="practice-anesthesia.js?v=20261026quick1"></script>
 <script src="practice-fluid-plan.js?v=20261026ux3"></script>
 <script src="practice-calculator-settings.js?v=20261026pump1"></script>
-<script src="practice-calculator-flow.js?v=20261026pump2"></script>
+<script src="practice-calculator-flow.js?v=20261028-nav1"></script>
 <script src="clinical-protocol-starters.js?v=20261027wardux1"></script>
 <link rel="stylesheet" href="clinical-knowledge.css?v=20261027knowledge1">
 <script src="clinical-knowledge.js?v=20261027protocolrepair1"></script>
@@ -10487,11 +10436,12 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="anesthesia-record.js?v=20261028-flow2"></script>
 <script src="clinical-compact.js?v=20261028-flow2"></script>
 <script src="clinical-efficiency.js?v=20261028-flow2"></script>
-<script src="clinical-workspace.js?v=20261028-surgery3"></script>
+<script src="clinical-workspace.js?v=20261028-nav1"></script>
 <script src="practice-prescription-summary.js?v=20261027knowledge1"></script>
 <script src="practice-prescription-library.js?v=20261027knowledge1"></script>
 <script src="practice-prescription-safety.js?v=20261026korean1"></script>
-<script src="practice-tools.js?v=20261027experience1"></script>
-<script src="practice-clinic.js?v=20261026clinical1"></script>
+<script src="clinic-navigation.js?v=20261028-nav1"></script>
+<script src="practice-tools.js?v=20261028-nav1"></script>
+<script src="practice-clinic.js?v=20261028-nav1"></script>
 </body>
 </html>
