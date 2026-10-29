@@ -293,3 +293,19 @@ body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-sectio
 :is(.cl-workspace,.cl-dialog,.ar-sheet) label{font-size:14px;font-weight:600;line-height:1.5}
 :is(.cl-workspace,.cl-dialog,.ar-sheet) :is(small,.cl-help){font-size:13px;line-height:1.5}
 :is(.cl-workspace,.cl-dialog,.ar-sheet) input[type=number]{font-variant-numeric:tabular-nums}
+/* Ward overview: keep clinical exceptions visible; management stays in More. */
+.cl-simple .cl-background[hidden]{display:none!important}
+.cl-simple .cl-sync-error{color:#9a3412;background:#fff7ed;padding:6px 10px;border-radius:6px}
+.cl-simple .cl-vacant-rooms{margin:8px 0;border:1px solid #d8e0e8;border-radius:8px;padding:0 10px}
+.cl-simple .cl-vacant-rooms>summary{min-height:44px;box-sizing:border-box;padding:10px 0;cursor:pointer;font-size:14px;color:#465970}
+.cl-simple .cl-vacant-rooms .cl-room-grid{margin-bottom:8px}
+.cl-simple .cl-room .cl-vital-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:0;margin:6px 0;gap:4px 12px}
+.cl-simple .cl-room .cl-vital-grid>div{display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 6px;padding:2px 0}
+.cl-simple .cl-room .cl-vital-grid>div>span{font-size:13px}
+.cl-simple .cl-room .cl-vital-grid>div>small{flex-basis:100%;font-size:13px}
+.cl-simple .cl-room .cl-vital-grid>.cl-vital-time{grid-column:1/-1;font-size:13px;color:#526174}
+.cl-simple .cc-room-summary .cc-pending-total{padding:2px 0;margin:0;font-size:14px}
+.cl-simple .cl-room .cl-care-team-compact .cl-care-staff{display:none}
+.cl-simple .cl-room .cl-care-team-compact .cl-care-cc{margin:3px 0}
+.cl-simple .cl-room-monitor:empty{display:none}
+.cl-simple .cl-work-more .cl-board-count{white-space:normal;margin:4px 0}
