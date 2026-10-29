@@ -175,3 +175,18 @@
 @media(max-width:820px){.ar-simple .ad-period,.ar-simple .ad-axis-note{font-size:13px}.ar-simple .ar-record-bar>div:first-child>small:not(.ar-demographics){display:inline;margin-left:5px}.ar-simple .ad-settings small{display:inline!important;margin-left:4px!important}}
 @media(max-width:820px){.ar-simple .ad-entry:has([data-ad-panel=measurement]:not([hidden])){padding-bottom:12px}.ar-simple [data-ad-panel=measurement]:not([hidden]) .ae-save-dock{position:sticky;left:auto;right:auto;bottom:var(--ae-keyboard,0px);z-index:5;margin-top:8px}.ar-simple [data-ae-inline]{overflow:visible}}
 .ar-simple .ad-missing-settings{margin:0}.ar-simple .ad-settings{margin:4px 0;padding:2px 0}
+.ar-single-page .ad-patient-setup,.ar-single-page .ad-medications{padding:12px;border:1px solid #d8e0e8;border-radius:10px;margin:10px 0;background:#fff}
+.ar-single-page .ad-patient-setup{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.ar-single-page .ad-patient-setup h4{margin:0;font-size:15px}.ar-single-page .ad-basic-actions{display:flex;gap:6px;margin-left:auto}
+.ar-single-page .ad-patient-setup dl{display:flex;flex-wrap:wrap;gap:4px 16px;flex-basis:100%;margin:0}.ar-single-page .ad-patient-setup dl>div{display:flex;gap:6px;font-size:14px}.ar-single-page .ad-patient-setup dt{color:#526174}.ar-single-page .ad-patient-setup dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.ar-single-page .ad-medications{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ar-single-page .ad-drug-actions{display:flex;flex-wrap:wrap;gap:6px}.ar-single-page .ad-medications .ae-prepared{flex:1 1 200px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ar-single-page .ad-medications .ae-prepared>h4{display:none}.ar-single-page .ad-medications .ae-drug-picks{flex:1 1 100%;display:flex;flex-wrap:wrap}
+.ar-single-page .ad-medications .ar-medication:empty{display:none}.ar-single-page .ad-recent-drugs{flex-basis:100%;font-size:14px}.ar-single-page .ad-recent-drugs p{margin:4px 0}.ar-single-page .ad-recent-drugs time{color:#526174;margin-right:6px}
+.ar-single-page .ad-medications .ae-quick-entry{flex-basis:100%;margin:4px 0}
+.ar-single-page .ad-extra-procedure{border:1px solid #d8e0e8;border-radius:8px;padding:0 12px;margin:12px 0}.ar-single-page .ad-extra-procedure>summary{font-size:14px;min-height:44px;padding:10px 0;box-sizing:border-box;cursor:pointer}
+.ar-single-page .ad-entry [data-ad-panel=measurement]{display:block}.ar-single-page .ad-entry .ae-inline>h4{display:block;font-size:15px;margin:0 0 8px}
+@media(max-width:820px){.ar-single-page .ad-patient-setup{gap:6px}.ar-single-page .ad-basic-actions{margin-left:0;flex-wrap:wrap}.ar-single-page .ad-patient-setup dl>div{max-width:100%}}
+.ar-single-page .ad-medications .ae-prepared{border:0!important;padding:0!important;background:transparent}
+.ar-single-page .ad-entry{padding:12px}
+@media(max-width:820px){.ar-single-page [data-ad-panel=measurement]:not([hidden]) .ae-save-dock{position:static;margin-top:8px}.ar-single-page .ad-entry:has([data-ad-panel=measurement]:not([hidden])){padding:12px}}

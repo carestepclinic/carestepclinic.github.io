@@ -55,6 +55,19 @@
   // Point editing and keyboard handling are attached by AnesthesiaRecord to each graph.
   // Configuration and history follow the working area; input widgets are never duplicated.
   if(setup)sheet.append(setup);
+  if(a.onePage){
+   sheet.classList.add('ar-single-page');dashboard.querySelector('.ad-entry-tabs')?.remove();
+   const basic=document.createElement('section');basic.className='ad-patient-setup';basic.innerHTML='<h4>환자·수술정보</h4><div class="ad-basic-actions"></div>';
+   if(setup){for(const cell of setup.querySelectorAll('dl>div'))if(['미입력','미확인'].includes(cell.querySelector('dd')?.textContent))cell.remove();const meta=setup.querySelector('dl');if(meta?.children.length)basic.append(meta);for(const action of setup.querySelectorAll('[data-ar=sheet],[data-ar=team]'))basic.querySelector('.ad-basic-actions').append(action);setup.querySelector('summary').textContent='장비·약물 준비 설정';setup.dataset.arArchive='';}
+   header.after(basic);
+   const medication=panel('medication');medication.hidden=false;medication.classList.add('ad-medications');basic.after(medication);
+   const drugActions=medication.querySelector('.ar-drug-actions');if(drugActions){const buttons=document.createElement('div');buttons.className='ad-drug-actions';buttons.append(...drugActions.querySelectorAll('button'));medication.prepend(buttons);drugActions.remove();}
+   for(const d of medication.querySelectorAll('details'))d.dataset.arArchive='';
+   if(prepared)prepared.querySelector('h4').textContent='투약';
+   const recent=document.createElement('div');recent.className='ad-recent-drugs';recent.innerHTML=rows.filter(r=>r.marker==='medication').slice(-3).reverse().map(r=>'<p><time>'+clock(r.observedAt)+'</time> <b>'+esc(a.administration(r))+'</b>'+(r.note?' · '+esc(r.note):'')+'</p>').join('');if(recent.children.length)medication.append(recent);
+   panel('measurement').hidden=false;
+   const extra=document.createElement('details');extra.className='ad-extra-procedure';extra.innerHTML='<summary>추가 처치·설정 기록</summary>';procedure.hidden=false;extra.append(procedure);dashboard.after(extra);
+  }
   const status=sheet.querySelector(':scope>p[role=status]');if(status){if(/^기록 \d+건$/.test(status.textContent.trim()))status.remove();else header?.firstElementChild?.append(status);}header?.setAttribute('aria-label','현재 마취 환자');
  }
  const api={series,overviewGraph,trendPanels,arrange};if(typeof module==='object'&&module.exports)module.exports=api;else g.AnesthesiaDashboard=api;

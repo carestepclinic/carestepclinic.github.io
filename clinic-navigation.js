@@ -1,7 +1,7 @@
 /* One navigation tree over the existing views. Routes contain no clinical data. */
 (function(g){
  'use strict';
- const practice={ops:['병원 운영','업무 체크리스트'],intake:['환자·문진','사전문진'],calc:['진료','임상 계산기'],ward:['진료','입원·처치 보드'],surgery:['진료','마취·수술'],protocols:['진료','진료 프로토콜']};
+ const practice={ops:['병원 운영','업무 체크리스트'],intake:['환자·문진','사전문진'],calc:['진료','임상 계산기'],ward:['진료','입원·처치 보드'],surgery:['진료','마취기록지'],protocols:['진료','진료 프로토콜']};
  const views={dashboard:['','오늘 업무'],patients:['환자·문진','환자·보호자'],library:['보호자 안내·후속관리','보호자 안내자료'],builder:['보호자 안내·후속관리','안내자료 작성'],followup:['보호자 안내·후속관리','상담·후속관리'],training:['','직원 교육'],pilot:['병원 운영','운영 통계'],settings:['설정·계정','병원·연동 설정'],onboarding:['설정·계정','처음 사용 설정'],voice:['설정·계정','문의·요청']};
  const account={my:'내 계정',team:'직원·권한',billing:'요금제·결제',security:'보안·데이터',legal:'약관·탈퇴'};
  const nav=document.querySelector('.clinic-navigation');let signature='';

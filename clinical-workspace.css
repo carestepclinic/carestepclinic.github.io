@@ -309,3 +309,16 @@ body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-sectio
 .cl-simple .cl-room .cl-care-team-compact .cl-care-cc{margin:3px 0}
 .cl-simple .cl-room-monitor:empty{display:none}
 .cl-simple .cl-work-more .cl-board-count{white-space:normal;margin:4px 0}
+/* A single anesthesia record workspace, with forms in the page. */
+.cl-workspace.cl-anesthesia-page .cl-layout{display:block}
+.cl-anesthesia-page .cl-layout>aside{position:static;margin:0 0 12px}
+.cl-anesthesia-page .cl-case-browser{width:100%;box-sizing:border-box}
+.cl-anesthesia-page .cl-case-browser [data-cl-list]{display:flex;flex-wrap:wrap;gap:6px;max-height:220px;overflow:auto}
+.cl-anesthesia-page .cl-case-browser [data-cl-case]{flex:1 1 220px;max-width:100%}
+.cl-anesthesia-page .cl-surgery-management{margin-top:12px;border:1px solid #d8e0e8;border-radius:8px;padding:0 12px}
+.cl-anesthesia-page .cl-surgery-management>summary{min-height:44px;padding:10px 0;box-sizing:border-box;cursor:pointer;font-size:14px}
+.cl-anesthesia-page .cl-inline-editor[open]{display:block;position:static;inset:auto;width:100%;max-width:none;max-height:none;margin:12px 0;padding:16px;box-sizing:border-box;overflow:visible;border:1px solid #9ab6ec;border-radius:10px;background:#f8fbff;box-shadow:none}
+.cl-inline-editor>header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cl-inline-editor>header h2{font-size:17px;margin:0}.cl-inline-editor form>footer{position:static;display:flex;gap:8px;margin-top:12px}
+.cl-inline-editor [data-cl-discard]:not([hidden]){background:#fff4dc;padding:10px;border-radius:8px}
+@media(max-width:760px){.cl-anesthesia-page .cl-inline-editor[open]{padding:12px}.cl-anesthesia-page .cl-inline-editor .cl-form-grid{grid-template-columns:1fr 1fr}.cl-anesthesia-page .cl-inline-editor label{min-width:0}.cl-anesthesia-page .cl-inline-editor input{max-width:100%}}
