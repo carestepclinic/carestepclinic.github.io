@@ -45,6 +45,13 @@
   const offset=Math.round(((sx-54)/650*minutes)/5)*5,value=lo+(268-sy)/254*(hi-lo);
   return {observedAt:new Date(start+offset*60000).toISOString(),value:Math.round(value*10)/10};
  }
+ function graphEventMarkup(rows,start,minutes,left,right,top,bottom){
+  const names={anesthesiaStart:'마취 시작',surgeryStart:'수술 시작',surgeryEnd:'수술 종료',anesthesiaEnd:'마취 종료',extubation:'발관'},colors={anesthesiaStart:'#3858a5',surgeryStart:'#9a5600',surgeryEnd:'#9a5600',anesthesiaEnd:'#3858a5',extubation:'#526273'};
+  const events=rows.filter(r=>!r.voided&&names[r.marker]&&Number.isFinite(Date.parse(r.observedAt))&&Date.parse(r.observedAt)>=start&&Date.parse(r.observedAt)<=start+minutes*60000).slice().sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
+  const lanes=[];return events.map(r=>{const x=left+(Date.parse(r.observedAt)-start)/(minutes*60000)*(right-left),label=names[r.marker]+' '+clock(r.observedAt),w=126,tx=Math.min(Math.max(x+3,left),right-w),lane=lanes.findIndex(end=>end+5<tx),i=lane<0?lanes.length:lane;lanes[i]=tx+w;const y=top+4+i*19,color=colors[r.marker];
+   return '<g data-ar-event="'+esc(r.marker)+'" style="pointer-events:none"><line class="ar-phase-line" x1="'+x+'" x2="'+x+'" y1="'+top+'" y2="'+bottom+'" style="stroke:'+color+';stroke-dasharray:4 3;stroke-width:1.3"/><rect x="'+tx+'" y="'+y+'" width="'+w+'" height="17" rx="3" style="fill:white;fill-opacity:.94;stroke:none"/><text class="ar-phase-label" x="'+(tx+3)+'" y="'+(y+12)+'" style="fill:'+color+';font-size:12px;font-weight:600">'+esc(label)+'</text><title>'+esc(label)+'</title></g>';
+  }).join('');
+ }
  function graph(key,rows,start,minutes,events=[]){
   const [label,unit,min,max]=metrics[key],end=start+minutes*60000;
   const points=rows.filter(r=>!r.voided&&r.type==='measurement'&&r.values?.[key]!=null&&Date.parse(r.observedAt)>=start&&Date.parse(r.observedAt)<=end);
@@ -54,7 +61,7 @@
   const gridStep=Math.max(5,Math.ceil(minutes/96/5)*5),labelStep=gridStep*Math.max(1,Math.ceil(minutes/8/gridStep));for(let i=0;i<=minutes;i+=gridStep){const xx=54+i/minutes*650;svg+=`<line x1="${xx}" x2="${xx}" y1="14" y2="268" class="ar-minor"/>`;if(i%labelStep===0)svg+=`<text x="${xx}" y="292" text-anchor="${i===0?'start':i===minutes?'end':'middle'}">${clock(start+i*60000)}</text>`;}
   // Only connect adjacent observations within two 5-minute columns; missing intervals remain visible.
   for(let i=1;i<points.length;i++)if(Date.parse(points[i].observedAt)-Date.parse(points[i-1].observedAt)<=600000)svg+=`<path class="ar-trace" d="M${x(points[i-1].observedAt)} ${y(points[i-1].values[key])} L${x(points[i].observedAt)} ${y(points[i].values[key])}"/>`;
-  for(const r of events.filter(r=>!r.voided&&r.type==='marker'&&Date.parse(r.observedAt)>=start&&Date.parse(r.observedAt)<=end))svg+=`<line class="ar-event-line" x1="${x(r.observedAt)}" x2="${x(r.observedAt)}" y1="14" y2="268"><title>${esc(markers[r.marker])} · ${clock(r.observedAt)}</title></line>`;
+  svg+=graphEventMarkup(events,start,minutes,54,704,14,268);
   for(const r of points)svg+=`<circle tabindex="0" role="button" aria-label="${esc(label+' '+r.values[key]+' '+unit+' · '+when(r.observedAt))}" data-ar-point="${esc(r.recordId)}" cx="${x(r.observedAt)}" cy="${y(r.values[key])}" r="5"><title>${when(r.observedAt)} · ${r.values[key]} ${unit}</title></circle>`;
   return `<section class="ar-chart"><h4>${label} <small>${unit}</small></h4><svg viewBox="0 0 720 300" data-ar-chart="${key}" data-start="${start}" data-minutes="${minutes}" data-lo="${lo}" data-hi="${hi}" role="img" aria-label="${label} 시간별 기록">${svg}</svg></section>`;
  }
@@ -111,10 +118,10 @@
   function nextEvent(){const ordered=['anesthesiaStart','intubation','surgeryStart','surgeryEnd','anesthesiaEnd','extubation'],done=rows().filter(r=>ordered.includes(r.marker));let index=done.reduce((n,r)=>Math.max(n,ordered.indexOf(r.marker)),-1);if(item.body.phase==='recovery')index=Math.max(index,4);if(item.body.phase==='closed')return '';const key=ordered[index+1];return key?btn('next-event',markers[key]+' 기록','data-key="'+key+'"'):'';}
   function recordBar(){const started=rows().find(r=>r.marker==='anesthesiaStart'),ended=rows().filter(r=>r.marker==='anesthesiaEnd').at(-1),elapsed=started?Math.max(0,Math.floor((Date.parse(ended?.observedAt||new Date().toISOString())-Date.parse(started.observedAt))/60000)):null;return '<div class="ar-record-bar"><div><b>'+esc(item.patient.name)+'</b> · '+(item.body.species==='cat'?'고양이':'개')+' · '+(item.body.weight?esc(item.body.weight)+' kg':'체중 미입력')+'<small class="ar-demographics">'+esc(patientSummary(item,rows()))+'</small><small>'+(elapsed==null?'마취 시작 시각 미기록':'마취 '+(ended?'기록 구간 ':'경과 ')+(ended?elapsed+'분':'<span data-ar-elapsed="'+esc(started.observedAt)+'">'+elapsed+'분</span>'))+' · '+esc(item.body.anesthesiaSheet?.operation||item.body.title)+'</small></div><div class="ar-quick-actions">'+(ready&&writable()?nextEvent()+ '<details class="ar-other-events"><summary>기타 기록</summary>'+btn('infusion','새 수액·CRI 추가')+btn('marker','사건 직접 선택·과거 기록')+'</details>':'')+'</div></div>';}
   function timingSummary(){
-   return '<section class="ar-timing" aria-label="마취·수술 시각"><h4>마취·수술 시각</h4><div>'+['anesthesiaStart','surgeryStart','surgeryEnd','anesthesiaEnd','extubation'].map(key=>{
+   return '<section class="ar-timing" aria-label="마취·수술 시각"><header><h4>마취·수술 시각</h4>'+(ready&&writable()?'<div class="ar-stage-action">'+nextEvent()+'</div>':'')+'</header><div>'+['anesthesiaStart','surgeryStart','surgeryEnd','anesthesiaEnd','extubation'].map(key=>{
     const entries=rows().filter(r=>r.type==='marker'&&r.marker===key);
-    return '<section data-timing="'+key+'"><b>'+markers[key]+'</b>'+(entries.length?entries.map(r=>'<p><time>'+when(r.observedAt)+'</time>'+ (a.medical?btn('edit-time','시각 수정','data-id="'+esc(r.recordId)+'" aria-label="'+markers[key]+' 시각 수정 · '+when(r.observedAt)+'" '+(loading||error?'disabled':'')):'')+'</p>').join(''):'<p>미기록</p>'+(writable()?btn('next-event',markers[key]+' 기록','data-key="'+key+'"') :''))+'</section>';
-   }).join('')+'</div><small>늦게 누른 시각은 실제 시각으로 정정할 수 있습니다. 원본과 정정 사유는 이력에 남습니다.</small></section>';
+    return '<section data-timing="'+key+'"><b>'+markers[key]+'</b>'+(entries.length?entries.map(r=>'<p>'+(a.medical?btn('edit-time',clock(r.observedAt),'data-id="'+esc(r.recordId)+'" aria-label="'+markers[key]+' 시각 수정 · '+when(r.observedAt)+'" title="'+when(r.observedAt)+' · 시각 수정" '+(loading||error?'disabled':'')):'<time title="'+when(r.observedAt)+'">'+clock(r.observedAt)+'</time>')+'</p>').join(''):(writable()?btn('next-event','입력','data-key="'+key+'" aria-label="'+markers[key]+' 시각 입력"'):'<p>—</p>'))+'</section>';
+   }).join('')+'</div></section>';
   }
   function medicationSection(){
    const meds=rows().filter(r=>r.marker==='medication');
@@ -231,5 +238,5 @@
   if(a.caseHistory&&view.planRevision!==item.revision)void fetchPlan();
   if(view.cache?.revision===item.revision){events=view.cache.events;all=view.cache.all;ready=true;render();}else void fetchAll();
  }
- const api={ageAt,sexLabel,patientDemographics,patientSummary,courseRange,printRanges,printDocument,metrics,markers,records,pointFromClick,graph,latestSettings,latestInfusions,metricRecency,mergeEvents,settingsText,mount};if(typeof module==='object'&&module.exports)module.exports=api;else g.AnesthesiaRecord=api;
+ const api={ageAt,sexLabel,patientDemographics,patientSummary,courseRange,printRanges,printDocument,metrics,markers,records,pointFromClick,graphEventMarkup,graph,latestSettings,latestInfusions,metricRecency,mergeEvents,settingsText,mount};if(typeof module==='object'&&module.exports)module.exports=api;else g.AnesthesiaRecord=api;
 })(typeof window==='undefined'?globalThis:window);
