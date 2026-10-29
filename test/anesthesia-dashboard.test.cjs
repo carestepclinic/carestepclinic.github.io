@@ -40,3 +40,10 @@ test('induction and procedure actions each open the correct form',async t=>{
 test('closed read-only dashboard exposes no record actions and retains print',async t=>{
  const {p,errors}=await fixture(t,{closed:true,medical:false,width:390});assert.equal(await p.locator('[data-ar=next-event]').count(),0);assert.equal(await p.locator('[data-ar=edit-time]').count(),0);await p.locator('[data-ar=entry-tab][data-key=medication]').click();assert.equal(await p.locator('[data-ar=induction]').count(),0);await p.locator('.ar-print-menu summary').click();await p.locator('[data-ar=print-all]').click();assert.match(await p.evaluate(()=>window.printed),/마취 기록지/);assert.deepEqual(errors,[]);
 });
+
+
+for(const width of [390,1440])test('clinical focus: one entry location and optional graph preserve measurement input '+width,async t=>{
+ const {p,errors}=await fixture(t,{width}),chart=p.locator('.ad-monitor'),entry=p.locator('.ad-entry');assert.equal(await p.locator('[data-ar=entry-focus]').count(),0);assert.equal(await p.locator('[data-ae-inline]').count(),1);assert.ok(await p.locator('.ad-values').isVisible());
+ assert.equal(await chart.evaluate(e=>e.open),width>820);await p.locator('[data-ae-inline] [name=heartRate]').fill('117');await chart.locator('summary').first().click();await p.locator('[data-ar=entry-tab][data-key=medication]').click();await p.locator('[data-ar=entry-tab][data-key=measurement]').click();assert.equal(await p.locator('[data-ae-inline] [name=heartRate]').inputValue(),'117');assert.equal(await chart.evaluate(e=>e.open),width<=820);assert.equal(await p.evaluate(()=>window.saved.length),0);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ if(width<=820){const e=await entry.boundingBox(),g=await chart.boundingBox();assert.ok(e.y<g.y);}await p.screenshot({path:path.resolve(__dirname,'../../clinical-focus-anesthesia-'+width+'.png'),fullPage:true});assert.deepEqual(errors,[]);
+});

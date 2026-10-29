@@ -563,3 +563,28 @@ for(const width of [390,1440])test('anesthesia dashboard in complete clinic shel
  const {p,api,errors}=await fixture(t,width,true);await newQuick(p,{kind:'surgery',weight:'5'});await practiceTab(p,'surgery');await p.locator('[data-cl-action=surgery-view][data-id=record]').click();await p.locator('.ar-dashboard').waitFor();assert.ok(await p.locator('[data-ar=entry-tab][data-key=measurement]').isVisible());assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  await p.screenshot({path:path.resolve(root,'../anesthesia-dashboard-clinic-'+width+'.png'),fullPage:true});assert.deepEqual(errors,[]);
 });
+
+
+test('clinical focus: complete schedule groups include tomorrow, held and PRN without truncation',()=>{
+ const now=Date.parse('2026-10-29T01:00:00Z'),make=(id,plannedAt,status='planned',medication)=>({id,plannedAt,status,medication});
+ const tasks=[...Array.from({length:5},(_,i)=>make('next'+i,'2026-10-30T01:00:00Z')),make('later','2026-10-30T05:00:00Z'),make('overdue','2026-10-28T01:00:00Z'),make('held','2026-10-30T09:00:00Z','held'),make('prn','2026-10-28T01:00:00Z','planned',{prn:true}),make('done','2026-10-28T01:00:00Z','done')];
+ const result=C.wardBoardTasks(tasks,now);assert.equal(result.next.length,5);assert.equal(result.attention.length,2);assert.equal(result.later.length,1);assert.equal(result.prn.length,1);assert.equal(result.pending.length,9);assert.equal(new Set([...result.next,...result.attention,...result.later,...result.prn].map(t=>t.id)).size,9);assert.equal(tasks.length,10);
+});
+for(const width of [390,1440])test('clinical focus: five concurrent treatments visible and group selection never records automatically '+width,async t=>{
+ const {p,api,caseIds,errors}=await summaryFixture(t,width),id=caseIds[0],base=await p.evaluate(()=>Date.now()),at=new Date(base+3600000).toISOString();
+ for(let i=0;i<6;i++){const c=(await api('/cases/'+id)).item;await api('/cases/'+id+'/events','POST',{revision:c.revision,requestKey:'clinical-focus-order-000'+i,kind:'order.add',data:{title:'합성 처치 '+(i+1),category:'injection',plannedAt:i===5?new Date(base+7200000).toISOString():at,confirm:true}});}
+ await p.locator('[data-cl-action=refresh]').click();await wardSettled(p);const card=p.locator('[data-room-card]').first();assert.match(await card.innerText(),/미완료 처치 6건/);assert.equal(await card.locator('.cc-room-task:visible').count(),5);assert.equal(await card.locator('.cc-room-schedule>h5').count(),1);assert.equal(await card.locator('details.cc-room-schedule').getAttribute('open'),null);assert.ok(await card.locator('.cl-room-monitor').isVisible());assert.match(await card.locator('.cl-room-monitor').innerText(),/활력\s+저하/);const before=(await api('/cases/'+id)).item.revision;
+ await card.locator('[data-cc-select-group]').click();assert.equal(await card.locator('[data-cc-pick]:checked').count(),5);assert.equal((await api('/cases/'+id)).item.revision,before);assert.match(await card.locator('[data-cc-batch]').innerText(),/5.*건 선택/s);await card.locator('[data-cc-bulk]').click();
+ await card.locator('details.cc-room-schedule>summary').click();assert.equal(await card.locator('.cc-room-task:visible').count(),6);await p.screenshot({path:path.resolve(root,'../clinical-focus-board-'+width+'.png'),fullPage:true});
+ await card.locator('.cl-room').click();await wardSettled(p);assert.ok(await p.locator('[data-cl-action=ward-medication]').isVisible());assert.ok(await p.locator('[data-cl-action=eff-round]').isVisible());assert.equal(await p.locator('[data-cl-action=ward-medication]').count(),1);
+ assert.equal(await p.locator('.cl-patient-sticky>.cl-ward-tabs').count(),1);assert.equal(await p.locator('.cl-patient-sticky>.cl-patient-manage').count(),1);assert.equal(await p.locator('.cl-task-grid>.cl-task').count(),6);assert.ok(await p.locator('.cl-workspace').evaluate(e=>e.scrollWidth<=e.clientWidth+1));if(width===1440){const boxes=await p.locator('.cl-task-grid>.cl-task').evaluateAll(es=>es.map(e=>({x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y})));assert.equal(boxes[0].y,boxes[1].y);assert.notEqual(boxes[0].x,boxes[1].x);}
+ await p.screenshot({path:path.resolve(root,'../clinical-focus-patient-'+width+'.png'),fullPage:true});assert.deepEqual(errors,[]);
+});
+
+for(const width of [390,1440])test('clinical focus: complete clinic anesthesia keeps direct entry and patient identity '+width,async t=>{
+ const {p,api,errors}=await fixture(t,width,true),c=await api('/cases','POST',{requestKey:'clinical-focus-surgery-001',kind:'surgery',species:'dog',weight:5,quickPatient:{name:'합성 마취 환자'}});
+ await practiceTab(p,'surgery');await p.locator('[data-cl-action=refresh]').click();await wardSettled(p);await (await show(p,'[data-cl-case="'+c.id+'"]')).click();await p.locator('[data-cl-action=surgery-view][data-id=record]').click();await p.locator('.ar-dashboard').waitFor();
+ assert.ok(await p.locator('[data-ar=entry-tab][data-key=measurement]').isVisible());await p.locator('[data-ae-inline] [name=heartRate]').fill('110');assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.match(await p.locator('.ar-record-bar').innerText(),/합성 마취 환자/);
+ if(width===390)assert.equal(await p.locator('.ad-monitor').getAttribute('open'),null);
+ await p.screenshot({path:path.resolve(root,'../clinical-focus-shell-anesthesia-'+width+'.png'),fullPage:true});assert.deepEqual(errors,[]);
+});
