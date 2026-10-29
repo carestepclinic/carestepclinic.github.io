@@ -28,7 +28,7 @@ for(const width of [320,390,820,1440])test(`dashboard keeps controls reachable a
  await p.screenshot({path:path.resolve(__dirname,'../../anesthesia-dashboard-'+width+'.png'),fullPage:width<1000});
 });
 test('legend toggles a series without losing measurement draft; displayed point opens exact record',async t=>{
- const {p,errors}=await fixture(t);await p.locator('[data-ae-inline] [name=heartRate]').fill('124');await p.locator('[data-ad-series=spo2]').uncheck();assert.equal(await p.locator('.ad-trend-panels [data-ar-chart=spo2]').isVisible(),false);assert.equal(await p.locator('[data-ae-inline] [name=heartRate]').inputValue(),'124');
+ const {p,errors}=await fixture(t);await p.locator('[data-ae-inline] [name=heartRate]').fill('124');await p.locator('.ad-view-settings').evaluate(e=>e.open=true);await p.locator('[data-ad-series=spo2]').uncheck();assert.equal(await p.locator('.ad-trend-panels [data-ar-chart=spo2]').isVisible(),false);assert.equal(await p.locator('[data-ae-inline] [name=heartRate]').inputValue(),'124');
  await p.locator('.ad-trend-panels [data-ar-chart=heartRate] [data-ar-point=measure3]').press('Enter');const d=p.locator('.test-dialog');assert.equal(await d.locator('[name=observedAt]').inputValue(),'2026-10-20T12:40');assert.equal(await d.locator('[name=heartRate]').inputValue(),'104');assert.deepEqual(errors,[]);
 });
 test('missing start/end controls open editable time entry, never write on click',async t=>{
@@ -62,7 +62,7 @@ test('simple workflow: independent units share time axis and default extra field
  const {p,errors}=await fixture(t);const plots=await p.locator('.ad-trend-panels svg').evaluateAll(els=>els.map(e=>({...e.dataset})));
  assert.equal(plots.length,6);assert.equal(new Set(plots.map(x=>x.start)).size,1);assert.equal(new Set(plots.map(x=>x.minutes)).size,1);assert.ok(new Set(plots.map(x=>x.lo+':'+x.hi)).size>1);
  assert.equal(await p.locator('[data-ae-inline]> .cl-form-grid input[type=number]').count(),6);assert.equal(await p.locator('[name=systolic]').isVisible(),false);assert.equal(await p.locator('[name=meanPressure]').isVisible(),true);assert.equal(await p.locator('.ad-settings').isVisible(),true);assert.equal(await p.locator('.ad-settings').evaluate(e=>!!e.closest('details')),false);
- await p.locator('[data-ae-inline] details').filter({hasText:'추가 측정 항목'}).locator('summary').click();await p.locator('[name=systolic]').fill('101');await p.locator('[data-ad-series=spo2]').uncheck();assert.equal(await p.locator('[name=systolic]').inputValue(),'101');assert.equal(await p.locator('[name=systolic]').isVisible(),true);assert.equal(await p.locator('.ar-history-archive details details').count(),0);assert.deepEqual(errors,[]);
+ await p.locator('[data-ae-inline] details').filter({hasText:'추가 측정 항목'}).locator('summary').click();await p.locator('[name=systolic]').fill('101');await p.locator('.ad-view-settings').evaluate(e=>e.open=true);await p.locator('[data-ad-series=spo2]').uncheck();assert.equal(await p.locator('[name=systolic]').inputValue(),'101');assert.equal(await p.locator('[name=systolic]').isVisible(),true);assert.equal(await p.locator('.ar-history-archive details details').count(),0);assert.deepEqual(errors,[]);
 });
 
 test('simple workflow: hospital template, visible settings and prepared drug last administration',async t=>{
