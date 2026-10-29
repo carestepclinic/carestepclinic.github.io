@@ -279,3 +279,17 @@ body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-sectio
 .cl-med-input-modes{display:flex;gap:6px;margin:0 0 12px}.cl-med-input-modes button{flex:1;min-height:44px}.cl-med-input-modes [aria-pressed=true]{background:#2352dc;color:white}.cl-med-input-modes~[hidden],[data-med-direct][hidden]{display:none!important}.cl-med-strength{grid-column:1/-1;border:1px solid #ccd8e6;padding:10px;border-radius:8px}.cl-med-strength>summary{font-size:14px;font-weight:650;cursor:pointer;min-height:24px}.cl-med-strength>div{margin-top:10px}.cl-medication-dialog [data-ward-strength-auto]{font-size:13px;line-height:1.5}.cl-medication-dialog [data-med-formula]{font-weight:700;font-size:16px}
 @media(max-width:760px){body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-section=surgery])) .topbar{gap:6px;margin-bottom:8px}body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-section=surgery])) .main{padding-top:12px}.cl-simple .cl-board-count{flex-basis:100%;margin:2px 4px}.cl-simple .cl-ward-overview>.cl-tabs{flex-wrap:wrap}.cl-simple .cl-sync-status{flex-basis:100%;order:3}.cl-simple .cl-room-group{margin-top:8px}.cl-simple .cl-room{padding:10px}.cl-simple .cl-room .cl-vital-grid>div{grid-template-columns:auto auto}.cl-simple .cl-room .cl-vital-grid>div>small{grid-column:1/-1}.cl-simple .cl-calendar-slot footer{align-items:flex-start}}
 .cl-simple .cl-ward-overview>.cl-tabs{display:flex;flex-wrap:wrap}.cl-simple .cl-ward-overview>.cl-tabs>button{flex:1 1 120px}.cl-simple .cl-board-count{white-space:normal;min-width:0}
+
+/* Shared clinical form typography; checkboxes retain their native compact size. */
+:is(.cl-workspace,.cl-dialog,.ar-sheet){font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif;font-size:14px;line-height:1.5}
+:is(.cl-workspace,.cl-dialog,.ar-sheet) :is(button,input,select,textarea){font-family:inherit;letter-spacing:normal;box-sizing:border-box}
+:is(.cl-workspace,.cl-dialog,.ar-sheet) :is(input:not([type=checkbox]):not([type=radio]),select,textarea){font-size:16px;font-weight:400;line-height:1.5;color:#24364c;background:#fff;border:1px solid #a8b8ca;border-radius:8px;padding:9px 11px;min-height:44px;max-width:100%;min-width:0}
+:is(.cl-workspace,.cl-dialog,.ar-sheet) textarea{min-height:96px;resize:vertical}
+:is(.cl-workspace,.cl-dialog,.ar-sheet) :is(input,textarea)::placeholder{font-weight:400;color:#66768a;opacity:1}
+:is(.cl-workspace,.cl-dialog,.ar-sheet) :is(input,select,textarea):focus-visible{outline:2px solid #2854e8;outline-offset:2px}
+:is(.cl-workspace,.cl-dialog,.ar-sheet) input[readonly]{background:#f3f6fa;color:#35475c}
+:is(.cl-workspace,.cl-dialog,.ar-sheet) :is(input,select,textarea)[aria-invalid=true]{border-color:#b42318;outline-color:#b42318}
+:is(.cl-workspace,.cl-dialog,.ar-sheet) button{font-size:14px;font-weight:600;line-height:1.4;border-radius:8px;min-height:44px}
+:is(.cl-workspace,.cl-dialog,.ar-sheet) label{font-size:14px;font-weight:600;line-height:1.5}
+:is(.cl-workspace,.cl-dialog,.ar-sheet) :is(small,.cl-help){font-size:13px;line-height:1.5}
+:is(.cl-workspace,.cl-dialog,.ar-sheet) input[type=number]{font-variant-numeric:tabular-nums}
