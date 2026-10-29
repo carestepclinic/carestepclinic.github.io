@@ -3950,9 +3950,9 @@ async function saasBootstrap(){
   const endpoint=CARESTEP_DEFAULT_WORKER_URL;try{localStorage.setItem(SAAS_ENDPOINT_STORAGE_KEY,endpoint);}catch{}if($('saasEndpoint'))$('saasEndpoint').value=endpoint;if(!saasToken){showLogin();return;}showSessionRestore();
   let d=null,lastError=null;for(let attempt=0;attempt<2&&!d;attempt++){try{d=await saasBootstrapMeOnce(attempt===0?15000:20000);}catch(e){lastError=e;if(!saasBootstrapRetryable(e)||attempt===1)break;showSessionRestore('로그인 세션은 유지되어 있습니다. 서버 연결을 한 번 더 확인하고 있습니다…');await new Promise(r=>setTimeout(r,450));}}
   if(!d){const e=lastError||new Error('세션을 확인하지 못했습니다.');if(e?.status===401||e?.status===403){saasToken='';saasMe=null;persistSaasSessionToken('');showLogin();saasSetAuthStatus('로그인 세션이 만료되었습니다. 다시 로그인해주세요.','error');return;}showSessionRestore('로그인 정보는 그대로 유지되어 있습니다. 네트워크 또는 서버 연결이 일시적으로 지연되고 있습니다. 다시 연결을 눌러주세요.',true);return;}
-  saasMe=d.me;saasSessionMeta=d.session||null;saasMode='auth';persistSaasSessionToken(saasToken);showApp();const resumeView=saasStoredLastView();if(resumeView!=='dashboard'&&saasCanView(resumeView))carestepSafeCall('resume_view',()=>go(resumeView,{historyMode:'replace'}));
+  saasMe=d.me;saasSessionMeta=d.session||null;saasMode='auth';persistSaasSessionToken(saasToken);const resumeView=saasStoredLastView(),resumeRoute=window.ClinicNavigation?.resume(resumeView)||{};showApp();if(resumeView!=='dashboard'&&saasCanView(resumeView))carestepSafeCall('resume_view',()=>go(resumeView,{historyMode:'replace',...resumeRoute}));
   const tasks=[['account_refresh',()=>saasRefreshAccount(false)],['clinic_local_state',()=>hydrateAuthenticatedClinicLocalState()],['render_restore',()=>renderAll()],['permissions_restore',()=>applySaasPermissions()],['deployment_status',()=>loadCareDeploymentStatus(false)],['billing_redirect',()=>handleBillingRedirect()],['central_content',()=>saasLoadCentralContent(true)],['category_overrides',()=>loadCategoryOverrides(true)],['calendar_config',()=>loadCalendarIntegrationConfig(true)],['messaging_settings',()=>loadMessagingSettings(false)],['solapi_return',()=>handleSolapiOauthReturn()],['voice_hydrate',()=>voiceHydrateForm()],['onboarding',()=>loadOnboardingStatus(false,true)]];
-  for(const [label,fn] of tasks){try{await fn();}catch(e){carestepSafeCall('restore_'+label,()=>{throw e;});}}if(resumeView!=='dashboard'&&saasCanView(resumeView))carestepSafeCall('resume_view_final',()=>go(resumeView,{historyMode:'none'}));
+  for(const [label,fn] of tasks){try{await fn();}catch(e){carestepSafeCall('restore_'+label,()=>{throw e;});}}if(resumeView!=='dashboard'&&carestepActiveView()===resumeView&&saasCanView(resumeView))carestepSafeCall('resume_view_final',()=>go(resumeView,{historyMode:'none'}));
 }
 function saasCancelRestoreAndLogin(){saasToken='';saasMe=null;persistSaasSessionToken('');try{sessionStorage.removeItem(SAAS_LAST_VIEW_SESSION_KEY);}catch{}showLogin();saasSetAuthStatus('로그인 화면으로 전환했습니다.','');}
 async function saasLogout(){
@@ -5441,8 +5441,9 @@ function carestepInitHistory(view='dashboard'){
   carestepHistoryInitialized=true;
 }
 function carestepRecordHistory(view,mode='push'){
-  if(carestepHistoryApplying||mode==='none'||$('appView')?.classList.contains('hidden'))return;
-  const safe=carestepHistorySafeView(view);
+  if($('appView')?.classList.contains('hidden'))return;
+  const safe=carestepHistorySafeView(view);window.ClinicNavigation?.remember(safe);
+  if(carestepHistoryApplying||mode==='none')return;
   if(!carestepHistoryInitialized){carestepInitHistory(safe);return;}
   const state=history.state&&typeof history.state==='object'?history.state:{};
   const route=window.ClinicNavigation?.route(safe)||{};if(state?.[CARESTEP_HISTORY_STATE_KEY]&&state.carestepView===safe&&!state.carestepGuard&&JSON.stringify(state.carestepRoute||{})===JSON.stringify(route))return;
@@ -10438,11 +10439,11 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinical-compact.js?v=20261029-ward-calendar"></script>
 <script src="clinical-efficiency.js?v=20261029-simple1"></script>
 <script src="practice-injection.js?v=20261029-injection"></script>
-<script src="clinical-workspace.js?v=20261029-simple1"></script>
+<script src="clinical-workspace.js?v=20261029-resume-strength1"></script>
 <script src="practice-prescription-summary.js?v=20261027knowledge1"></script>
 <script src="practice-prescription-library.js?v=20261027knowledge1"></script>
 <script src="practice-prescription-safety.js?v=20261026korean1"></script>
-<script src="clinic-navigation.js?v=20261028-nav1"></script>
+<script src="clinic-navigation.js?v=20261029-resume-strength1"></script>
 <script src="practice-tools.js?v=20261029-injection"></script>
 <script src="practice-clinic.js?v=20261028-nav1"></script>
 </body>
