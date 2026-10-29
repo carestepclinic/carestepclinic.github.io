@@ -294,6 +294,23 @@ body:has(#practice.active-view) #r61-patient-context{display:none}
 .pt-rx-drug-card[data-changing=true]>.pt-rx-drug-summary .pt-rx-summary-total{opacity:.45}
 .pt-rx-inline-strength [data-ingredient-status]{color:#91430b;font-size:14px}
 .pt-rx-inline-strength [data-ingredient-status]:empty{display:none}
+/* Summary cards use the available panel width without shrinking input controls. */
+.pt-calculator-focused .pt-rx-summary-list{grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));align-items:start;gap:10px}
+.pt-calculator-focused .pt-rx-summary-list>article,.pt-calculator-focused .pt-rx-summary-list>details{min-width:0}
+.pt-calculator-focused .pt-rx-drug-summary>summary{grid-template-columns:minmax(0,1fr) minmax(100px,1fr);gap:6px 12px;padding:10px 12px;align-items:center;font-size:14px;line-height:1.45}
+.pt-calculator-focused .pt-rx-drug-summary>summary>span:first-child{grid-column:1/-1;align-self:start}
+.pt-calculator-focused .pt-rx-drug-summary>summary b{font-size:15px;line-height:1.45}
+.pt-calculator-focused .pt-rx-summary-meta,.pt-calculator-focused .pt-rx-summary-total small{font-size:13px;line-height:1.5}
+.pt-calculator-focused .pt-rx-summary-total{justify-self:end;text-align:right;display:grid;grid-template-columns:auto auto;align-items:baseline;gap:0 6px}
+.pt-calculator-focused .pt-rx-summary-total>small:last-child{grid-column:1/-1}
+.pt-calculator-focused .pt-rx-summary-total strong{font-size:22px;line-height:1.3}
+.pt-calculator-focused .pt-rx-inline-strength{padding:0 12px 6px}
+.pt-calculator-focused .pt-rx-inline-strength>p{font-size:12px;margin:5px 0}
+.pt-calculator-focused .pt-rx-inline-strength>details>summary{min-height:36px;padding:6px 0;font-size:13px;box-sizing:border-box}
+.pt-calculator-focused .pt-rx-inline-strength:not(:has(>details[open])){display:flex;gap:8px;align-items:center;justify-content:space-between}
+.pt-calculator-focused .pt-rx-inline-strength:not(:has(>details[open]))>details{flex-shrink:0}
+.pt-calculator-focused .pt-rx-phase-details{padding:0 12px 12px}
+.pt-calculator-focused .pt-rx-phase-details .pt-rx-result{padding:10px;font-size:14px}
 .pt-rx-visible-issue{margin:0 16px 12px}
 @media(max-width:600px){.pt-rx-inline-strength{padding:0 12px 12px}.pt-rx-inline-strength .pt-bar>*{width:100%}}
 @media print{.pt-rx-inline-strength{display:none}}

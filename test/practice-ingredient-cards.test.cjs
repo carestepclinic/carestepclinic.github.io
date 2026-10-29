@@ -15,7 +15,19 @@ async function paste(p,value){await p.locator('[data-rx-text]').fill(value);}
 
 
 const card=(p,name)=>p.locator('.pt-rx-drug-card').filter({has:p.locator('.pt-rx-drug-summary>summary b',{hasText:name})});
-async function rx(p,source){await p.locator('[data-kind=batch]').click();await p.locator('[data-rx-text]').fill(source);await output(p).getByRole('heading',{name:/계산 완료/}).waitFor();}
+for(const width of [390,800,1440])test('nine calculated drugs use responsive grid with inline edits '+width,async t=>{
+ const p=await page(t,width),names=['pimobendan','diltiazem','ramipril','sildenafil','famotidine','omeprazole','telmisartan','UDCA','fluconazole'];
+ await p.evaluate(names=>{stored=names.map((name,i)=>({id:'grid'+i,revision:1,body:{title:'합성 '+name,kind:'tablet',value:10,unit:'mg',formulary:{version:1,calculatorReady:true,aliases:[name],species:['dog','cat'],route:'oral',warnings:[]}}}));},names);
+ if(width<=800)await p.locator('[data-calc-jump]').selectOption('batch');else await p.locator('[data-kind=batch]').click();
+ await p.locator('[data-rx-text]').fill(names.map(n=>n+' 1 mg/kg po bid for 28 days').join('\n'));await output(p).getByRole('heading',{name:/계산 완료 9\/9/}).waitFor();
+ const grid=output(p).locator('.pt-rx-summary-list'),cards=grid.locator('.pt-rx-drug-card');assert.equal(await cards.count(),9);
+ const positions=await cards.evaluateAll(es=>es.map(e=>({x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y,width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height})));
+ const columns=new Set(positions.map(p=>Math.round(p.x))).size;assert.ok(width>=1440?columns>=3:width===800?columns>=2:columns===1,'responsive columns');
+ if(width>=1440)assert.ok((await grid.boundingBox()).height<800,'nine cards fit a compact results area');
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await grid.screenshot({path:resolve(root,'../prescription-grid-'+width+'.png')});
+ await cards.first().locator('.pt-rx-drug-summary>summary').click();assert.ok(await cards.first().locator('[data-rx-edit]').isVisible());await manual(cards.first(),20);assert.ok(await cards.first().locator('[data-ingredient-apply]').isEnabled());await cards.first().locator('[data-ingredient-cancel]').click();await output(p).getByRole('heading',{name:/계산 완료 9\/9/}).waitFor();assert.equal(await p.evaluate(()=>calls.filter(c=>c.method!=='GET').length),0);
+});
+async function rx(p,source){if(await p.locator('[data-calc-jump]').isVisible())await p.locator('[data-calc-jump]').selectOption('batch');else await p.locator('[data-kind=batch]').click();await p.locator('[data-rx-text]').fill(source);await output(p).getByRole('heading',{name:/계산 완료/}).waitFor();}
 async function openPicker(c){const d=c.locator('.pt-rx-inline-strength>details');if(!await d.evaluate(e=>e.open))await d.locator('summary').click();}
 async function choose(c,label){await openPicker(c);await c.locator('[data-ingredient-choice]').selectOption({label});await c.locator('[data-ingredient-confirm]').check();}
 async function manual(c,value,kind='tablet'){await openPicker(c);await c.locator('[data-ingredient-choice]').selectOption('manual');await c.locator('[data-ingredient-kind]').selectOption(kind);await c.locator('[data-ingredient-value]').fill(String(value));await c.locator('[data-ingredient-confirm]').check();}
