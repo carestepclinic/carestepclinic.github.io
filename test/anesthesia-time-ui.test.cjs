@@ -21,7 +21,7 @@ async function fixture(t,width=1440,status='active',medical=true){
  await p.locator('.ar-timing').waitFor();return {p,errors};
 }
 for(const width of [320,390,1024,1440])for(const status of ['active','closed'])test(`timing correction visible outside selected range, ${status}, ${width}`,async t=>{
- const {p,errors}=await fixture(t,width,status);assert.match(await p.locator('.ar-timing').innerText(),/2026-10-20 12:49/);assert.equal(await p.locator('.ar-event-history [data-ar=edit]').count(),0);
+ const {p,errors}=await fixture(t,width,status);assert.match(await p.locator('[data-ar=edit-time][data-id=start]').getAttribute('aria-label'),/2026-10-20 12:49/);assert.match(await p.locator('.ar-timing').innerText(),/12:49/);assert.equal(await p.locator('.ar-event-history [data-ar=edit]').count(),0);
  assert.ok(await p.locator('.ar-timing').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
  await p.locator('[data-ar=edit-time][data-id=start]').click();const d=p.locator('.test-dialog'),time=d.locator('[name=observedAt]');assert.ok(await time.isVisible());assert.equal(await d.locator('[name=recordedPersonId]').inputValue(),'staff');assert.match(await d.locator('summary').first().innerText(),/합성 수행자/);assert.equal(await d.locator('[name=marker]').isVisible(),false);assert.equal(await d.locator('[name=voided]').isVisible(),false);
  await time.fill('2026-10-20T12:35');await d.locator('[name=reason]').fill('Synthetic late click correction');await d.locator('[name=confirm]').check();await d.getByRole('button',{name:'저장',exact:true}).click();await d.waitFor({state:'detached'});
