@@ -1,0 +1,45 @@
+/* Ward/anesthesia share a compact, readable control scale. */
+.cl-workspace:is([data-section=ward],[data-section=surgery]),.cl-dialog{--care-control:40px;--care-radius:8px;font-size:14px;line-height:1.5}
+.cl-workspace:is([data-section=ward],[data-section=surgery]) :is(button,select),.cl-dialog button{font-family:inherit;font-size:14px;min-height:var(--care-control);border-radius:var(--care-radius);line-height:1.4}
+.cl-workspace:is([data-section=ward],[data-section=surgery]) button:focus-visible,.cl-dialog button:focus-visible{outline:3px solid #2b59e8;outline-offset:2px}
+.cl-simple .cl-room .cl-care-team-compact .cl-care-staff{display:flex;flex-wrap:wrap;gap:2px 12px;color:#526174;font-size:13px}
+.cl-simple .cl-room .cl-care-team-compact .cl-care-staff>span{display:inline-flex;gap:4px}
+.cl-simple .cl-room .cl-care-staff b{font-size:13px}
+.cl-simple[data-compact] .cl-room .cl-patient-demographics{display:block;font-size:13px;line-height:1.5}
+.cl-simple .cl-room.occupied>strong{font-size:20px;line-height:1.4}
+.cl-simple .cl-room :is(.cl-room-monitor,small),.cl-simple .cl-next-treatment{font-size:13px;line-height:1.5}
+.cl-simple>.cl-toolbar h3{font-size:20px}
+@media(max-width:820px){.cl-workspace:is([data-section=ward],[data-section=surgery]),.cl-dialog{--care-control:44px}.cl-simple .cl-room-group>header p{font-size:13px}}
+
+/* Shared visual scale for both clinical workspaces; loaded after the components. */
+:is(.cl-workspace[data-section=ward],.cl-workspace[data-section=surgery],.ar-single-page,.cl-dialog){--care-body:14px;--care-small:13px;--care-control:40px;--care-radius:8px;--care-gap:8px;font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif;font-size:var(--care-body);line-height:1.5}
+.cl-workspace:is([data-section=ward],[data-section=surgery]) :is(button,select),.ar-single-page :is(button,select),.cl-dialog :is(button,select){font-size:var(--care-body);min-height:var(--care-control);border-radius:var(--care-radius);font-family:inherit;font-weight:600}
+.cl-workspace:is([data-section=ward],[data-section=surgery]) input,.ar-single-page input,.cl-dialog input{font-size:16px;font-variant-numeric:tabular-nums}
+.cl-workspace:is([data-section=ward],[data-section=surgery]) small,.ar-single-page :is(small,.ad-period,.ad-axis-note),.ar-single-page .ae-inline .ae-metric>small{font-size:var(--care-small);line-height:1.5}
+.cl-workspace .cl-room.occupied>strong,.ar-single-page .ar-record-bar>div>b{font-size:20px}
+.cl-info-needed{color:#526174;font-size:13px;padding:2px 0}.cl-local-save{font-size:13px;background:#e7f4ee;color:#166347;margin:0;padding:6px 12px}
+.ar-single-page .ar-quick-actions>[data-ar=sheet]{background:white;color:#153553;border-color:#b7c9ec}
+.ar-single-page .ad-patient-setup{display:block;border:0;border-bottom:1px solid #d8e0e8;border-radius:0;padding:0 4px;margin:4px 0 8px;background:transparent}
+.ar-single-page .ad-patient-setup>summary{cursor:pointer;min-height:40px;padding:9px 0;box-sizing:border-box;font-size:14px;color:#526174}
+.ar-single-page .ad-patient-setup:not([open])>:not(summary){display:none}
+.ar-single-page .ad-patient-setup[open] .ad-basic-actions{float:right;margin:0 0 6px 8px}.ar-single-page .ad-patient-setup dl{padding-bottom:8px}
+.ar-single-page .ad-medication-history{width:100%;margin:0;border:0;padding:0}
+.ar-single-page .ad-medication-history>summary{cursor:pointer;min-height:40px;box-sizing:border-box;padding:9px 0;color:#526174;font-size:14px}
+.ar-single-page .ad-medications:has(.ad-medication-history){margin:8px 0;padding:0 12px;background:transparent}
+.ar-single-page .ad-add-medication{order:3;margin-left:auto}
+.ar-single-page .ad-settings{margin:0 0 4px;padding:0}.ar-single-page .ad-settings:has(.ad-missing-settings):not(:has(>div>p))>b{display:none}
+.ar-single-page .ar-timing>.ad-time-line{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible;width:100%;gap:4px}
+.ar-single-page .ad-time-line section{display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-width:0;padding:4px 6px;background:#f7f9fc;border-radius:6px}
+.ar-single-page .ad-time-line section:after{display:none}.ar-single-page .ad-time-line section>b{font-size:13px;white-space:normal}.ar-single-page .ad-time-line section>p{margin:0}
+.ar-single-page .ad-time-line section>b:only-child{font-weight:500}.ar-single-page .ad-time-line section [data-ar=edit-time]{font-size:14px;font-weight:600}
+.ar-single-page .ar-record-bar .ar-demographics{word-break:keep-all;line-height:1.5}
+.ar-single-page .ar-timing,.ar-single-page .ad-monitor,.ar-single-page .ad-entry{border-radius:8px}
+.ar-single-page .ad-view-settings{padding:0 8px;margin:4px 0}.ar-single-page .ad-monitor>summary{font-size:15px}
+.ar-single-page .ad-entry .ae-inline>h4{font-size:16px}.ar-single-page .ae-save-dock [type=submit],.cl-workspace[data-section=ward] .cl-round-action button{background:#2454e8;border-color:#2454e8;color:white;font-weight:700}
+.ar-single-page .ae-save-dock{padding:8px 0}.ar-single-page .ae-save-dock [data-ae-state]:empty{display:none}
+@media(max-width:820px){:is(.cl-workspace[data-section=ward],.cl-workspace[data-section=surgery],.ar-single-page,.cl-dialog){--care-body:15px;--care-control:44px}.ar-single-page .ar-timing>.ad-time-line{grid-template-columns:repeat(2,minmax(0,1fr))}.ar-single-page .ad-time-line section:last-child{grid-column:1/-1}.ar-single-page .ad-patient-setup>summary,.ar-single-page .ad-medication-history>summary{min-height:44px}.ar-single-page .ad-basic-actions{float:none!important}.ar-single-page .ad-time-line section{padding:4px 8px}.ar-single-page .ad-add-medication{margin-left:0}}
+
+.ar-single-page .ar-timing button{font-size:var(--care-body);min-height:var(--care-control)}
+.ar-single-page .ar-timing>.ad-add-medication{display:flex;grid-template-columns:none}
+.ar-single-page .ar-record-bar .ar-quick-actions>[data-ar=sheet]{background:white!important;color:#153553!important}
+.ar-single-page .ar-timing>.ad-time-line{align-items:stretch}

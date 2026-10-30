@@ -794,7 +794,7 @@ for(const width of [390,1440])test('focus UI: compact cards hide empty data and 
  assert.equal(await p.locator('.cl-vacant-rooms').evaluate(e=>e.open),false);assert.equal(await p.locator('.cc-vacant').isVisible(),false);
  assert.equal(await card.locator('.cl-vital-time').count(),1);assert.equal(await card.locator('.cl-vital-grid>div>small').count(),0);
  assert.doesNotMatch(await card.innerText(),/오늘 남음 0건|예정된 다음 처치 없음|관찰 기록 없음|미측정:|주호소·담당자 미지정/);
- assert.doesNotMatch(await card.innerText(),/<time|data-cc-age/);assert.match(await card.innerText(),/예정 없음/);assert.match(await card.innerText(),/주의사항 미확인/);assert.match(await card.innerText(),/설사/);
+ assert.doesNotMatch(await card.innerText(),/<time|data-cc-age/);assert.match(await card.innerText(),/예정 없음/);assert.match(await card.innerText(),/정보 확인 필요/);assert.match(await card.innerText(),/설사/);
  await p.locator('.cl-vacant-rooms>summary').click();assert.ok(await p.locator('.cc-vacant').isVisible());
  await (await show(p,'[data-cl-action=refresh]')).click();await wardSettled(p);assert.ok(await p.locator('.cc-vacant').isVisible());await p.locator('.cl-vacant-rooms>summary').click();
  await p.addStyleTag({content:'@font-face{font-family:Pretendard;src:url(data:font/woff2;base64,'+fs.readFileSync(path.join(root,'pretendard-variable-1.3.9.woff2')).toString('base64')+') format("woff2");font-weight:100 900}'});await p.evaluate(()=>document.fonts.ready);await p.evaluate(()=>scrollTo(0,0));
@@ -835,4 +835,14 @@ for(const width of [390,1440])test('care flow: next ward work groups only pendin
  const {p,api,id,event,errors}=await scheduleFixture(t,width);await p.locator('[data-cl-action=ward-board-mode][data-id=rooms]').click();const card=p.locator('.cc-occupied').first();assert.match(await card.locator('.cl-next-treatment').innerText(),/주사처치 2종/);assert.doesNotMatch(await card.locator('.cl-next-treatment').innerText(),/Synthetic injection/);
  await card.locator('.cl-room').click();await wardManage(p);await p.locator('[data-cl-action=care-team]').click();const d=p.locator('.cl-dialog');await d.locator('[name=chiefComplaint]').fill('합성 관찰');await d.locator('[name=veterinarianId]').selectOption('owner');await d.locator('[name=technicianId]').selectOption('staff');await wardSave(p);await p.locator('[data-cl-action=rooms-back]').click();
  assert.ok(await card.locator('.cl-care-staff').isVisible());assert.ok(await card.locator('.cl-patient-demographics').isVisible());assert.equal(await p.locator('.cl-work-more>summary').innerText(),'관리');assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await p.screenshot({path:path.resolve(root,'../care-flow-ward-'+width+'.png'),fullPage:true});assert.deepEqual(errors,[]);
+});
+
+test('care work: treatment episodes group injections by time without merging other work or counting cancelled and PRN orders',()=>{
+ const now=Date.parse('2026-10-30T12:00:00+09:00'),at='2026-10-30T19:00:00+09:00',task=(id,patch={})=>({id,category:'injection',status:'planned',plannedAt:at,...patch});
+ const items=[task('a'),task('b'),task('c',{status:'done'}),task('d',{status:'cancelled'}),task('e',{medication:{prn:true}}),task('f',{category:'procedure'}),task('g',{category:'procedure'}),task('h',{plannedAt:'2026-10-31T09:00:00+09:00'}),task('i',{plannedAt:'2026-10-30T09:00:00+09:00'}),task('j',{status:'held'}),task('k',{plannedAt:null})];
+ assert.deepEqual(C.wardWorkEpisodes(items,now),{today:4,future:1,late:1,held:1,unscheduled:1});assert.deepEqual(C.wardWorkEpisodes([],now),{today:0,future:0,late:0,held:0,unscheduled:0});
+});
+test('care work: ward cards summarize missing information and show saved performer beside the changed patient',async t=>{
+ const {p,api,caseIds,errors}=await summaryFixture(t,390),card=p.locator('.cc-occupied').first();assert.ok(await card.locator('.cl-info-needed').isVisible());assert.match(await card.locator('.cl-info-needed').getAttribute('aria-label'),/주의사항 미확인/);assert.match(await card.innerText(),/설사/);assert.ok(await card.locator('.cl-monitor-abnormal').count()>0);
+ await card.locator('[data-cl-action=ward-round-open]').click();const d=p.locator('.cl-dialog');await d.locator('[name=v_temperature]').fill('38.3');await wardSave(p);assert.match(await card.locator('.cl-local-save').innerText(),/저장 완료/);assert.match(await card.locator('.cl-local-save').innerText(),/시험 원장/);assert.equal(await p.locator('.cl-save-status').isVisible(),false);assert.equal((await api('/cases/'+caseIds[0])).item.body.wardVitals.temperature.value,38.3);assert.equal((await api('/cases/'+caseIds[1])).item.body.wardVitals?.temperature,undefined);assert.deepEqual(errors,[]);
 });

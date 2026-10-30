@@ -322,16 +322,3 @@ body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-sectio
 .cl-inline-editor>header h2{font-size:17px;margin:0}.cl-inline-editor form>footer{position:static;display:flex;gap:8px;margin-top:12px}
 .cl-inline-editor [data-cl-discard]:not([hidden]){background:#fff4dc;padding:10px;border-radius:8px}
 @media(max-width:760px){.cl-anesthesia-page .cl-inline-editor[open]{padding:12px}.cl-anesthesia-page .cl-inline-editor .cl-form-grid{grid-template-columns:1fr 1fr}.cl-anesthesia-page .cl-inline-editor label{min-width:0}.cl-anesthesia-page .cl-inline-editor input{max-width:100%}}
-
-/* Ward/anesthesia share a compact, readable control scale. */
-.cl-workspace:is([data-section=ward],[data-section=surgery]),.cl-dialog{--care-control:40px;--care-radius:8px;font-size:14px;line-height:1.5}
-.cl-workspace:is([data-section=ward],[data-section=surgery]) :is(button,select),.cl-dialog button{font-family:inherit;font-size:14px;min-height:var(--care-control);border-radius:var(--care-radius);line-height:1.4}
-.cl-workspace:is([data-section=ward],[data-section=surgery]) button:focus-visible,.cl-dialog button:focus-visible{outline:3px solid #2b59e8;outline-offset:2px}
-.cl-simple .cl-room .cl-care-team-compact .cl-care-staff{display:flex;flex-wrap:wrap;gap:2px 12px;color:#526174;font-size:13px}
-.cl-simple .cl-room .cl-care-team-compact .cl-care-staff>span{display:inline-flex;gap:4px}
-.cl-simple .cl-room .cl-care-staff b{font-size:13px}
-.cl-simple[data-compact] .cl-room .cl-patient-demographics{display:block;font-size:13px;line-height:1.5}
-.cl-simple .cl-room.occupied>strong{font-size:20px;line-height:1.4}
-.cl-simple .cl-room :is(.cl-room-monitor,small),.cl-simple .cl-next-treatment{font-size:13px;line-height:1.5}
-.cl-simple>.cl-toolbar h3{font-size:20px}
-@media(max-width:820px){.cl-workspace:is([data-section=ward],[data-section=surgery]),.cl-dialog{--care-control:44px}.cl-simple .cl-room-group>header p{font-size:13px}}
