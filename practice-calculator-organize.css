@@ -1,0 +1,67 @@
+/* Task-oriented calculator shell. Scope all rules to the new workspace. */
+#practiceRoot .pt-organized{font-size:14px;line-height:1.5}
+#practiceRoot .pt-organized [hidden]{display:none!important}
+#practiceRoot .pt-organized .pt-calc-view-tools{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+#practiceRoot .pt-organized .pt-calc-view-tools>strong{margin-right:auto;font-size:18px}
+#practiceRoot .pt-organized .pt-calc-view-tools .pt-drug-settings{position:relative;margin:0;padding:8px 10px;max-width:100%;font-size:14px}
+#practiceRoot .pt-organized .pt-calc-view-tools .pt-drug-settings[open]{flex-basis:100%;order:5}
+#practiceRoot .pt-organized .pt-calc-view-tools .pt-view-options{margin:0}
+#practiceRoot .pt-organized .pt-calc-aux small{display:none}
+#practiceRoot .pt-organized .pt-calc-common{position:sticky;top:0;z-index:5;background:#f7faff;box-shadow:0 2px 5px #1639580d;padding:10px 12px;margin:0 0 12px}
+#practiceRoot .pt-organized .pt-calc-common:has(details[open]){position:static}
+#practiceRoot .pt-organized .pt-calc-layout{grid-template-columns:160px minmax(0,1fr);gap:14px}
+#practiceRoot .pt-organized.pt-nav-collapsed .pt-calc-layout{grid-template-columns:minmax(0,1fr)}
+#practiceRoot .pt-organized .pt-reset-calculation{margin:0}
+#practiceRoot .pt-organized .pt-calc-group{display:grid;gap:5px;margin:0 0 12px}
+#practiceRoot .pt-organized .pt-calc-group h4{font-size:13px;color:#53657c;margin:2px 8px}
+#practiceRoot .pt-organized .pt-calc-group button{width:100%;text-align:left;padding:9px 10px;min-height:40px;font-size:14px}
+#practiceRoot .pt-organized .pt-calc-group small{display:none}
+#practiceRoot .pt-organized .pt-prescription-modes{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+#practiceRoot .pt-organized .pt-prescription-modes button{min-height:40px;flex:0 1 auto}
+#practiceRoot .pt-organized label{font-weight:600}
+#practiceRoot .pt-organized input:not([type=checkbox]),#practiceRoot .pt-organized select,#practiceRoot .pt-organized textarea{font:inherit;font-size:15px;min-height:42px}
+#practiceRoot .pt-organized button{font:inherit;min-height:40px}
+#practiceRoot .pt-organized h3{font-size:18px;margin:0 0 10px}
+#practiceRoot .pt-organized h4{font-size:15px}
+#practiceRoot .pt-organized .pt-help,#practiceRoot .pt-organized small{font-size:13px;line-height:1.5}
+#practiceRoot .pt-organized .pt-entry-help{font-size:13px;margin:8px 0}
+#practiceRoot .pt-organized summary{cursor:pointer}
+#practiceRoot .pt-organized .pt-grid{gap:10px}
+#practiceRoot .pt-organized .pt-card{padding:14px}
+#practiceRoot .pt-organized .pt-common-regimen{border:1px solid #d2dff0;border-radius:8px;padding:8px 10px;margin:10px 0}
+#practiceRoot .pt-organized .pt-common-regimen .pt-rx-common{margin:8px 0 0;padding:0;border:0}
+#practiceRoot .pt-organized .pt-common-regimen h4{display:none}
+#practiceRoot .pt-organized [data-calc=batch]{display:grid;gap:14px;align-items:start}
+#practiceRoot .pt-organized .pt-prescription-entry,#practiceRoot .pt-organized .pt-prescription-result{min-width:0}
+#practiceRoot .pt-organized [data-rx-text]{min-height:130px;resize:vertical}
+#practiceRoot .pt-organized .pt-prescription-inputs{display:flex;gap:6px;margin:0 0 10px;flex-wrap:wrap}
+#practiceRoot .pt-organized .pt-image-tabs,#practiceRoot .pt-organized .pt-image-launch{display:none}
+#practiceRoot .pt-organized .pt-flow-rx-load:not([open]){display:none}
+#practiceRoot .pt-organized .pt-flow-rx-load>summary{display:none}
+#practiceRoot .pt-organized .pt-prescription-inputs button[aria-expanded=true]{border-color:#2452de;background:#eef3ff}
+#practiceRoot .pt-organized .pt-rx-date{display:block;margin:10px 0}
+#practiceRoot .pt-organized .pt-rx-date label{display:flex;align-items:center;gap:10px}
+#practiceRoot .pt-organized .pt-rx-date input{width:160px}
+#practiceRoot .pt-organized .pt-prescription-result:not(:has(output:not(:empty))){display:none}
+#practiceRoot .pt-organized .pt-rx-summary-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:10px}
+#practiceRoot .pt-organized .pt-rx-drug-card{margin:0;min-width:0}
+#practiceRoot .pt-organized .pt-rx-summary-total strong{font-size:22px;font-variant-numeric:tabular-nums}
+#practiceRoot .pt-organized .pt-rx-drug-summary>summary{padding:12px}
+#practiceRoot .pt-organized .pt-flow-form>.pt-flow-result{top:110px}
+@media(min-width:1400px){
+ #practiceRoot .pt-organized [data-calc=batch].pt-has-results{grid-template-columns:minmax(300px,.8fr) minmax(0,1.7fr)}
+}
+@media(max-width:800px){
+ #practiceRoot .pt-organized .pt-calc-layout{display:block}
+ #practiceRoot .pt-organized .pt-calc-nav{display:none}
+ #practiceRoot .pt-organized .pt-calc-common{position:static}
+ #practiceRoot .pt-organized .pt-calc-view-tools{gap:6px}
+ #practiceRoot .pt-organized .pt-calc-view-tools>strong{flex-basis:100%}
+ #practiceRoot .pt-organized .pt-card{padding:10px}
+ #practiceRoot .pt-organized button{min-height:44px}
+ #practiceRoot .pt-organized input:not([type=checkbox]),#practiceRoot .pt-organized select,#practiceRoot .pt-organized textarea{font-size:16px;min-height:44px}
+ #practiceRoot .pt-organized .pt-flow-form{display:block}
+ #practiceRoot .pt-organized .pt-flow-result{position:static;margin-top:12px}
+ #practiceRoot .pt-organized .pt-rx-summary-list{grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr))}
+}
+@media print{#practiceRoot .pt-organized .pt-calc-common{position:static}#practiceRoot .pt-organized .pt-calc-view-tools,#practiceRoot .pt-organized .pt-prescription-modes{display:none}}

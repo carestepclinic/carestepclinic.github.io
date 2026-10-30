@@ -71,7 +71,7 @@
   sidebar?.prepend(menuButton);
   menuButton.onclick=()=>{const open=sidebar.classList.toggle('pt-mobile-menu-open');menuButton.setAttribute('aria-expanded',String(open));menuButton.textContent=open?'CLINIC 메뉴 닫기':'CLINIC 메뉴 열기';};
 
-  const toolbar=document.createElement('section');toolbar.className='pt-calc-view-tools';toolbar.innerHTML='<strong>임상 계산기</strong><div><button type="button" data-calc-nav-toggle aria-expanded="true">계산기 메뉴 접기</button><button type="button" data-calc-expand aria-pressed="false">계산기 넓게 보기</button></div>';b.prepend(toolbar);
+  const toolbar=document.createElement('section');toolbar.className='pt-calc-view-tools';toolbar.innerHTML='<strong>처방·처치 계산</strong><div><button type="button" data-calc-nav-toggle aria-expanded="true">계산기 메뉴 접기</button><button type="button" data-calc-expand aria-pressed="false">계산기 넓게 보기</button></div>';b.prepend(toolbar);
   const collapse=toolbar.querySelector('[data-calc-nav-toggle]'),expand=toolbar.querySelector('[data-calc-expand]');
   collapse.onclick=()=>{const hidden=b.classList.toggle('pt-nav-collapsed');collapse.setAttribute('aria-expanded',String(!hidden));collapse.textContent=hidden?'계산기 메뉴 펼치기':'계산기 메뉴 접기';};
   function expanded(value){b.classList.toggle('pt-calculator-expanded',value);expand.setAttribute('aria-pressed',String(value));expand.textContent=value?'기본 화면으로':'계산기 넓게 보기';}

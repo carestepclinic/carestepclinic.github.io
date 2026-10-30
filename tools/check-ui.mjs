@@ -8,7 +8,7 @@ export const uiFiles = new Set([
  'clinic-navigation.js','clinic-navigation.css',
  'practice-injection.js','practice-injection-workflow.js','clinical-compact.js','clinical-efficiency.js','anesthesia-efficiency.js','anesthesia-dashboard.js','anesthesia-record.js','anesthesia-record.css',
  'practice-prescription-summary.js','practice-prescription-library.js','practice-prescription-safety.js','clinical-knowledge.js','clinical-knowledge.css','clinical-workspace.js','clinical-workspace.css','clinical-care-ui.css','clinical-protocol-starters.js',
- 'practice-calculator-flow.js','practice-calculator-settings.js',
+ 'practice-calculator-flow.js','practice-calculator-settings.js','practice-calculator-organize.js','practice-calculator-organize.css',
  'practice-anesthesia.js','practice-fluid-plan.js',
  'practice-calcium-guided.js','practice-preparation.js','practice-medication-flow.js','practice-rx-workflow.js','practice-medication-assist.js',
  'practice-prescription-image.js','clinic-tab-position.js',
