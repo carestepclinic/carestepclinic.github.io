@@ -42,14 +42,14 @@
 #practiceRoot .pt-organized .pt-rx-date{display:block;margin:10px 0}
 #practiceRoot .pt-organized .pt-rx-date label{display:flex;align-items:center;gap:10px}
 #practiceRoot .pt-organized .pt-rx-date input{width:160px}
-#practiceRoot .pt-organized .pt-prescription-result:not(:has(output:not(:empty))){display:none}
+#practiceRoot .pt-organized .pt-prescription-result{display:block;min-height:220px}
 #practiceRoot .pt-organized .pt-rx-summary-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:10px}
 #practiceRoot .pt-organized .pt-rx-drug-card{margin:0;min-width:0}
 #practiceRoot .pt-organized .pt-rx-summary-total strong{font-size:22px;font-variant-numeric:tabular-nums}
 #practiceRoot .pt-organized .pt-rx-drug-summary>summary{padding:12px}
 #practiceRoot .pt-organized .pt-flow-form>.pt-flow-result{top:110px}
 @media(min-width:1400px){
- #practiceRoot .pt-organized [data-calc=batch].pt-has-results{grid-template-columns:minmax(300px,.8fr) minmax(0,1.7fr)}
+ #practiceRoot .pt-organized [data-calc=batch]{grid-template-columns:minmax(300px,.8fr) minmax(0,1.7fr)}
 }
 @media(max-width:800px){
  #practiceRoot .pt-organized .pt-calc-layout{display:block}
@@ -65,3 +65,47 @@
  #practiceRoot .pt-organized .pt-rx-summary-list{grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr))}
 }
 @media print{#practiceRoot .pt-organized .pt-calc-common{position:static}#practiceRoot .pt-organized .pt-calc-view-tools,#practiceRoot .pt-organized .pt-prescription-modes{display:none}}
+
+/* Daily actions stay beside the patient inputs; infrequent setup is folded. */
+#practiceRoot .pt-organized .pt-calc-common{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;padding:10px}
+#practiceRoot .pt-organized .pt-calc-common>[data-common-inputs]{flex:0 1 330px;margin:0}
+#practiceRoot .pt-organized .pt-calc-common>.pt-patient-options{flex:1 1 240px;margin:0;padding:8px 0}
+#practiceRoot .pt-organized .pt-calc-common>.pt-patient-options[open]{order:3;flex-basis:100%}
+#practiceRoot .pt-organized .pt-calc-view-tools{margin:0;flex:0 0 auto;margin-left:auto}
+#practiceRoot .pt-organized .pt-workspace-more{position:relative}
+#practiceRoot .pt-organized .pt-workspace-more>summary,#practiceRoot .pt-organized .pt-result-more>summary{padding:8px 12px;border:1px solid #c1d2e8;border-radius:8px;min-height:40px;box-sizing:border-box}
+#practiceRoot .pt-organized .pt-workspace-options{display:grid;gap:10px;background:white;border:1px solid #c1d2e8;border-radius:10px;padding:12px;position:absolute;right:0;top:46px;width:min(500px,85vw);box-shadow:0 8px 24px #12324b22;z-index:20}
+#practiceRoot .pt-organized .pt-single-drug-action{margin-left:auto}
+#practiceRoot .pt-organized .pt-schedule-summary{padding:10px;border:1px solid #cedcf0;border-radius:8px;margin:10px 0;font-size:14px}
+#practiceRoot .pt-organized .pt-schedule-summary>summary{font-weight:600}
+#practiceRoot .pt-organized .pt-result-placeholder{padding:20px 12px;background:#f5f8fc;border:1px dashed #c1d2e8;border-radius:10px;min-height:180px;color:#53657c}
+#practiceRoot .pt-organized .pt-previous-results{opacity:.4;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;white-space:pre-line}
+#practiceRoot .pt-organized .pt-previous-results>div{background:white;padding:12px;border-radius:8px}
+#practiceRoot .pt-organized .pt-result-use{border-top:1px solid #cedcf0;padding-top:12px;margin-top:12px}
+#practiceRoot .pt-organized .pt-result-use h4{margin:0 0 8px}
+#practiceRoot .pt-organized .pt-result-use [data-result-actions]{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#practiceRoot .pt-organized .pt-result-use [data-result-actions]>label{flex-basis:100%;margin:0}
+#practiceRoot .pt-organized .pt-result-use .pt-flow-rx-save{margin-top:10px}
+#practiceRoot .pt-organized .pt-flow-rx-save>strong,#practiceRoot .pt-organized .pt-flow-rx-save>p.pt-help{display:none}
+#practiceRoot .pt-organized .pt-result-more[open]{flex-basis:100%}
+#practiceRoot .pt-organized .pt-card-edit{padding:0 10px 10px}
+#practiceRoot .pt-organized .pt-card-edit>summary{padding:8px 0}
+#practiceRoot .pt-organized .pt-rx-inline-strength{border-top:1px solid #e0e8f3}
+#practiceRoot .pt-organized .pt-rx-visible-issue{margin:8px 10px}
+#practiceRoot .pt-organized .pt-auto-dock{display:none!important}
+#practiceRoot .pt-organized .pt-rx-drug-summary>summary{gap:8px}
+#practiceRoot .pt-organized .pt-rx-drug-summary>summary{grid-template-columns:minmax(0,1fr) auto}
+#practiceRoot .pt-organized .pt-rx-summary-total small,#practiceRoot .pt-organized .pt-rx-summary-total strong{white-space:nowrap}
+@media(max-width:800px){
+ #practiceRoot .pt-organized .pt-calc-common>[data-common-inputs]{flex:1 1 100%}
+ #practiceRoot .pt-organized .pt-calc-common>.pt-patient-options{flex:1 1 160px}
+ #practiceRoot .pt-organized .pt-single-drug-action{margin-left:0}
+ #practiceRoot .pt-organized .pt-prescription-result{margin-top:12px}
+ #practiceRoot .pt-organized .pt-workspace-more>summary{min-height:44px}
+}
+
+#practiceRoot .pt-organized .pt-rx-entry-actions:not(:has([data-rx-parse]:not([hidden]))){display:none}
+#practiceRoot .pt-organized .pt-rx-editor:not([open]){display:none}
+#practiceRoot .pt-organized .pt-result-more{margin-top:8px}
+#practiceRoot .pt-organized .pt-result-more>button{margin:8px 8px 0 0}
+@media(max-width:800px){#practiceRoot .pt-organized .pt-result-placeholder{min-height:0;padding:12px}#practiceRoot .pt-organized .pt-prescription-result{min-height:0}}

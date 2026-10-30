@@ -22,7 +22,7 @@ for(const width of [390,768,1024,1680])test('grouped navigation, shared prescrip
  await p.locator('[data-injection-mode=injection]').click();assert.equal(await p.locator('[data-injection-calculator]').isVisible(),true);
  await p.locator('[data-injection-mode=oral]').click();assert.equal(await p.locator('[data-rx-text]').isVisible(),true);
  assert.equal(await p.locator('.pt-calc-view-tools .pt-reset-calculation').isVisible(),true);
- assert.equal(await p.locator('.pt-calc-view-tools .pt-drug-management > summary').innerText(),'병원 설정');
+ assert.equal(await p.locator('.pt-calc-view-tools .pt-drug-management').isVisible(),false);await p.locator('.pt-workspace-more>summary').click();assert.equal(await p.locator('.pt-calc-view-tools .pt-drug-management > summary').innerText(),'병원 설정');await p.locator('.pt-workspace-more>summary').click();
  assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));
  await p.screenshot({path:path.join(root,'../calculator-organized-'+width+'.png'),fullPage:true});
 });
@@ -38,7 +38,7 @@ test('automatic oral calculations, pending expansion, saved/photo entry and resp
  const p=await openPage(t);await context(p);const f=p.locator('[data-calc=batch]');
  await f.locator('[data-rx-text]').fill('carprofen 2 mg/kg po bid for 7 days\nunknownmedicine 1 mg/kg po bid for 7 days');
  await f.locator('.pt-rx-summary-total').first().waitFor();assert.match(await f.locator('.pt-rx-summary-total').first().innerText(),/5.6/);
- assert.equal(await f.locator('.pt-rx-drug-summary[data-pending=true]').evaluate(e=>e.open),true);
+ assert.equal(await f.locator('.pt-rx-drug-card:has([data-pending=true])').locator('.pt-card-edit').evaluate(e=>e.open),true);
  assert.equal(await f.locator('.pt-rx-drug-summary[data-pending=false]').evaluate(e=>e.open),false);
  const a=await f.locator('.pt-prescription-entry').boundingBox(),b=await f.locator('.pt-prescription-result').boundingBox();assert.ok(b.x>=a.x+a.width);
  await f.locator('[data-prescription-saved]').click();assert.equal(await f.locator('.pt-flow-rx-load').evaluate(e=>e.open),true);
@@ -51,7 +51,7 @@ test('search groups, auxiliary conversion and form state survive category naviga
  await openKind(p,'batch');await p.locator('[data-prescription-manual]').click();assert.equal(await p.locator('[data-calc=dose] [name=dose]').inputValue(),'1.25');
  await p.locator('[data-calc-search]').fill('칼륨');assert.equal(await p.locator('.pt-calc-group:not([hidden])').count(),1);assert.equal(await p.locator('.pt-calc-menu [data-kind=potassium]').isVisible(),true);
  await p.locator('[data-calc-search]').fill('notthere');assert.equal(await p.locator('[data-calc-empty]').isVisible(),true);await p.locator('[data-calc-search]').fill('');
- await p.locator('.pt-calc-view-tools [data-kind=convert]').click();assert.equal(await p.locator('[data-kind-panel=convert]').isVisible(),true);
+ await p.locator('.pt-workspace-more>summary').click();await p.locator('.pt-calc-view-tools [data-kind=convert]').click();await p.locator('.pt-workspace-more>summary').click();assert.equal(await p.locator('[data-kind-panel=convert]').isVisible(),true);
 });
 test('CRI clinical checks are not automatically selected',async t=>{
  const p=await openPage(t);await context(p);await openKind(p,'cri');const f=p.locator('[data-calc=cri]');
@@ -63,7 +63,7 @@ for(const width of [390,1680])test('every calculation destination stays reachabl
  for(const kind of ['emergency','anesthesia','fluid','cri','potassium','transfusion','acid','nutrition','batch']){
   await openKind(p,kind);assert.equal(await p.locator('[data-kind-panel="'+kind+'"]').isVisible(),true,kind);assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1),kind);
  }
- await p.locator('.pt-calc-view-tools [data-kind=convert]').click();await p.waitForTimeout(100);assert.equal(await p.locator('[data-calc-jump]').inputValue(),'convert');
+ await p.locator('.pt-workspace-more>summary').click();await p.locator('.pt-calc-view-tools [data-kind=convert]').click();await p.locator('.pt-workspace-more>summary').click();await p.waitForTimeout(100);assert.equal(await p.locator('[data-calc-jump]').inputValue(),'convert');
  if(width===390)await p.locator('[data-calc-jump]').selectOption('batch');else await openKind(p,'batch');
  assert.equal(await p.locator('.pt-prescription-modes').isVisible(),true);
 });
@@ -78,4 +78,65 @@ test('reset cancels without data loss and confirmed new calculation resets only 
  p.once('dialog',d=>d.dismiss());await p.locator('.pt-reset-calculation').click();assert.match(await p.locator('[data-rx-text]').inputValue(),/carprofen/);
  p.once('dialog',d=>d.accept());await p.locator('.pt-reset-calculation').click();await p.waitForTimeout(300);assert.equal(await p.locator('[data-rx-text]').inputValue(),'');assert.equal(await p.locator('[data-common-weight]').inputValue(),'');
  await context(p);await p.locator('[data-rx-text]').fill('carprofen 2 mg/kg po bid for 7 days');await p.locator('.pt-rx-summary-total').first().waitFor();assert.match(await p.locator('.pt-rx-summary-total').first().innerText(),/5.6/);
+});
+
+test('result column stays in place and stale output cannot be used during a rewrite',async t=>{
+ const p=await openPage(t);await context(p);const f=p.locator('[data-calc=batch]'),result=f.locator('.pt-prescription-result');
+ const before=await result.boundingBox();await f.locator('[data-rx-text]').fill('carprofen 2 mg/kg po bid for 7 days');await f.locator('.pt-rx-summary-total').first().waitFor();await p.waitForTimeout(100);
+ const ready=await result.boundingBox();assert.equal(Math.round(ready.x),Math.round(before.x));assert.equal(Math.round(ready.width),Math.round(before.width));
+ await f.locator('[data-checked]').check();await f.locator('[data-rx-text]').fill('carprofen 3 mg/kg po bid for 7 days');await p.waitForTimeout(100);
+ assert.match(await f.locator('.pt-result-placeholder').innerText(),/이전 결과는 사용할 수 없습니다/);assert.equal(await f.locator('.pt-result-use').isVisible(),false);
+ assert.equal(await f.locator('.pt-previous-results button,.pt-previous-results input').count(),0);
+ await p.waitForFunction(()=>document.querySelector('.pt-rx-summary-total')?.textContent.includes('8.4'));
+ assert.equal(await f.locator('[data-checked]').isChecked(),false);assert.equal(await f.locator('[data-rx-parse]').isVisible(),false);await p.screenshot({path:path.join(root,'../calculator-simple-result-pc.png'),fullPage:true});await p.setViewportSize({width:390,height:900});await p.screenshot({path:path.join(root,'../calculator-simple-result-mobile.png'),fullPage:true});
+ await p.locator('[data-common-weight]').fill('6');await p.waitForTimeout(60);assert.equal(await f.locator('.pt-previous-results').count(),0);
+});
+
+test('schedule summary preserves mixed daily and EOD stages and opens missing conditions',async t=>{
+ const p=await openPage(t);await context(p);const f=p.locator('[data-calc=batch]');
+ await f.locator('[data-rx-text]').fill('carprofen 2 mg/kg po bid for 7 days -> 1 mg/kg po EOD for 14 days');await f.locator('.pt-rx-summary-total').first().waitFor();
+ assert.match(await f.locator('.pt-schedule-summary>summary').innerText(),/약물별 일정 2종/);assert.match(await f.locator('.pt-rx-drug-summary>summary').innerText(),/8–21일/);assert.match(await f.locator('.pt-rx-drug-summary>summary').innerText(),/격일/);
+ await f.locator('[data-rx-text]').fill('carprofen 2 mg/kg');await p.waitForFunction(()=>document.querySelector('[data-calc=batch]').dataset.calculationState==='review');
+ assert.equal(await f.locator('.pt-schedule-summary').evaluate(e=>e.open),true);assert.equal(await f.locator('[data-rx-common=days]').isVisible(),true);
+});
+
+test('one modification entry per card retains manual concentration and invalidates export',async t=>{
+ const p=await openPage(t);await context(p);const f=p.locator('[data-calc=batch]');await f.locator('[data-rx-text]').fill('carprofen 2 mg/kg po bid for 7 days');await f.locator('.pt-rx-summary-total').first().waitFor();await p.waitForTimeout(100);
+ const card=f.locator('.pt-rx-drug-card');assert.equal(await card.locator('.pt-card-edit').count(),1);assert.equal(await card.locator('[data-rx-edit]').isVisible(),false);await f.locator('[data-checked]').check();
+ await card.locator('.pt-card-edit>summary').click();await card.locator('[data-ingredient-choice]').selectOption('manual');await card.locator('[data-ingredient-value]').fill('50');
+ assert.equal(await f.locator('[data-copy]').isEnabled(),false);await card.locator('[data-ingredient-confirm]').check();await card.locator('[data-ingredient-apply]').click();
+ await p.waitForFunction(()=>document.querySelector('.pt-rx-summary-total')?.textContent.includes('2.8'));assert.equal(await f.locator('[data-checked]').isChecked(),false);
+});
+
+test('result use survives repeated calculation and saves only explicitly reviewed current output',async t=>{
+ const p=await openPage(t);await context(p);const f=p.locator('[data-calc=batch]');
+ await p.evaluate(()=>{window.savedRx=[];const original=saasRequest;saasRequest=async(path,options)=>{if(path.endsWith('/practice/rx/sets')&&options?.method==='POST'){window.savedRx.push(JSON.parse(options.body));return {ok:true};}return original(path,options);};});
+ await f.locator('[data-rx-text]').fill('carprofen 2 mg/kg po bid for 7 days');await f.locator('.pt-rx-summary-total').first().waitFor();await p.waitForTimeout(100);
+ await f.locator('.pt-result-more>summary').click();assert.equal(await f.locator('[data-print]').isEnabled(),false);await f.locator('[data-checked]').check();assert.equal(await f.locator('[data-print]').isEnabled(),true);await p.waitForFunction(()=>!document.querySelector('[data-ward-calculator-import]').disabled);
+ await f.locator('[data-rx-text]').fill('carprofen 3 mg/kg po bid for 7 days');await p.waitForFunction(()=>document.querySelector('.pt-rx-summary-total')?.textContent.includes('8.4'));await p.waitForTimeout(100);
+ assert.equal(await f.locator('[data-rx-save-set]').count(),1);assert.equal(await f.locator('[data-print]').count(),1);assert.equal(await f.locator('[data-print]').isEnabled(),false);
+ await f.locator('[data-rx-save-set]').click();assert.equal(await p.locator('dialog[open]').count(),0);assert.equal(await p.evaluate(()=>savedRx.length),0);
+ await f.locator('[data-checked]').check();await f.locator('[data-rx-save-set]').click();const dialog=p.locator('dialog[open]');await dialog.locator('[name=title]').fill('합성 시험 세트');await dialog.locator('[name=indication]').fill('시험');await dialog.locator('[name=source]').fill('시험 기준');assert.equal(await dialog.locator('[name=confirm]').count(),0);
+ await dialog.locator('form button').click();await p.waitForFunction(()=>window.savedRx.length===1);assert.equal(await p.evaluate(()=>savedRx[0].confirm),true);assert.equal(await p.evaluate(()=>savedRx[0].rows[0].dose),3);
+});
+
+test('reviewed save is rejected if inputs change while dialog is open',async t=>{
+ const p=await openPage(t);await context(p);const f=p.locator('[data-calc=batch]');await f.locator('[data-rx-text]').fill('carprofen 2 mg/kg po bid for 7 days');await f.locator('.pt-rx-summary-total').first().waitFor();await f.locator('[data-checked]').check();await f.locator('.pt-result-more>summary').click();await f.locator('[data-rx-save-set]').click();const dialog=p.locator('dialog[open]');
+ await dialog.locator('[name=title]').fill('합성 시험');await dialog.locator('[name=indication]').fill('시험');await dialog.locator('[name=source]').fill('시험');await p.evaluate(()=>{const w=document.querySelector('[data-common-weight]');w.value='7';w.dispatchEvent(new Event('input',{bubbles:true}));});await dialog.locator('form button').click();assert.match(await dialog.locator('[data-status]').innerText(),/확인|바뀌|검토|계산/);
+});
+
+test('results precede optional reference management while active safety findings stay visible',async t=>{
+ const p=await openPage(t,390);await context(p);const f=p.locator('[data-calc=batch]');
+ await f.locator('[data-rx-text]').fill('carprofen 2 mg/kg po bid for 7 days\nprednisolone 0.5 mg/kg po sid for 7 days');await f.locator('.pt-rx-summary-total').first().waitFor();await p.waitForTimeout(400);
+ assert.equal(await f.locator('.pt-reference-library').evaluate(e=>e.open),false);assert.equal(await f.locator('.pt-library-status').isVisible(),true);assert.match(await f.locator('.pt-library-status').innerText(),/확인.*완료되지/);
+ const warning=f.locator('[data-safety-findings] .pt-safety-warning').first();assert.equal(await warning.isVisible(),true);
+ const resultBox=await f.locator('output').boundingBox(),safetyBox=await f.locator('.pt-rx-safety').boundingBox();assert.ok(safetyBox.y>=resultBox.y+resultBox.height);
+ await f.locator('.pt-reference-library>summary').click();assert.equal(await f.locator('[data-private-prepare]').isVisible(),true);
+});
+
+test('nine completed prescriptions form a compact three-column grid on desktop',async t=>{
+ const p=await openPage(t);await context(p);await p.evaluate(()=>{const original=saasRequest;saasRequest=async(path,options)=>{if(path.includes('/presets'))return {items:'abcdefghi'.split('').map(letter=>({id:'cf_'+letter,revision:1,body:{kind:'tablet',title:'시험약 '+letter,value:25,unit:'mg',formulary:{version:1,calculatorReady:true,route:'oral',species:['dog'],aliases:['testdrug'+letter],calculationBasis:'testdrug'+letter,warnings:[]}}})),canManage:true};return original(path,options);};});
+ const f=p.locator('[data-calc=batch]');await f.locator('[data-rx-text]').fill('abcdefghi'.split('').map(c=>'testdrug'+c+' 2 mg/kg po bid for 7 days').join('\n'));await p.waitForFunction(()=>document.querySelector('[data-calc=batch]').dataset.calculationState==='complete');
+ const cards=f.locator('.pt-rx-drug-card');assert.equal(await cards.count(),9);const a=await cards.nth(0).boundingBox(),b=await cards.nth(1).boundingBox(),c=await cards.nth(2).boundingBox(),d=await cards.nth(3).boundingBox();assert.equal(a.y,b.y);assert.equal(b.y,c.y);assert.ok(d.y>a.y);assert.ok(a.height<210);assert.ok((await cards.nth(0).locator('.pt-rx-summary-total strong').boundingBox()).height<32);
+ await p.screenshot({path:path.join(root,'../calculator-simple-nine-pc.png'),fullPage:true});
 });
