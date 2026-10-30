@@ -43,3 +43,10 @@
 .ar-single-page .ar-timing>.ad-add-medication{display:flex;grid-template-columns:none}
 .ar-single-page .ar-record-bar .ar-quick-actions>[data-ar=sheet]{background:white!important;color:#153553!important}
 .ar-single-page .ar-timing>.ad-time-line{align-items:stretch}
+
+.iw-review-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px;border-bottom:1px solid #d8e0e8}.iw-review-row>span{margin-left:auto;font-variant-numeric:tabular-nums}[data-injection-calculator] .cl-injection-input{margin:0}[data-injection-preview]{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.6}
+
+.iw-review-row>small{flex-basis:100%;overflow-wrap:anywhere;color:#526174}
+
+/* Keep icon-only calendar navigation from inheriting the text-button scale. */
+@media(max-width:760px){.cl-workspace[data-section=ward] .cl-calendar-tools button:is([data-id="-1"],[data-id="1"]){font-size:0}}

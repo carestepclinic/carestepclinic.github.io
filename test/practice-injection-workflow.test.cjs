@@ -1,0 +1,8 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),W=require('../practice-injection-workflow.js');
+test('injection bridge: recalled calculations require same clinic, case, species and weight',()=>{
+ let clinic='a',id='case1',weight=5,species='dog';const a={identity:()=>clinic,patient:()=>({clinicalCaseId:id}),weight:()=>weight,species:()=>species};const items=[{medication:{drug:'synthetic',amount:.5},instruction:'original'}];W.remember(a,items);items[0].medication.amount=99;assert.equal(W.recall(a)[0].medication.amount,.5);
+ for(const run of [()=>clinic='b',()=>{clinic='a';id='case2';},()=>{id='case1';weight=6;},()=>{weight=5;species='cat';}]){run();assert.throws(()=>W.recall(a),/동일 환자/);}species='dog';assert.equal(W.recall(a).length,1);
+});
+test('injection bridge: partial response loss retries the same key and does not duplicate earlier records',async()=>{
+ const saved=new Map(),calls=[];let lose=true;const save=async(kind,data,revision,recorder,key)=>{calls.push({data,revision,recorder,key});if(!saved.has(key))saved.set(key,{revision:revision+1});if(data.id===2&&lose){lose=false;throw Error('response lost');}return saved.get(key);};const write=W.batchWriter(save,7),entries=[{id:1},{id:2},{id:3}];await assert.rejects(write(entries,'staff'),/1\/3개/);assert.equal(saved.size,2);await assert.rejects(write([{id:99}],'staff'),/변경/);await assert.rejects(write(entries,'other'),/변경/);assert.equal((await write(entries,'staff')).revision,10);assert.equal(saved.size,3);assert.equal(calls[1].key,calls[2].key);assert.deepEqual(calls.map(x=>x.revision),[7,8,8,9]);
+});
