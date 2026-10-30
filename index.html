@@ -1058,7 +1058,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="clinical-workspace.css?v=20261030-protocol-browser1">
 <link rel="stylesheet" href="anesthesia-record.css?v=20261030-anesthesia-collaboration">
 <link rel="stylesheet" href="clinical-care-ui.css?v=20261030-injection-work1">
-<link rel="stylesheet" href="practice-tools.css?v=20261029-gridprint">
+<link rel="stylesheet" href="practice-tools.css?v=20261030-todayward1">
 <link rel="stylesheet" href="clinic-navigation.css?v=20261028-nav1">
 </head>
 <body>
@@ -1188,7 +1188,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 
       <section id="practice" class="view"><div id="practiceRoot"></div></section>
       <section id="training" class="view"><div id="staffTrainingRoot"></div></section>
-<section id="dashboard" class="view active-view"><div id="practiceTodayRoot" hidden></div>
+<section id="dashboard" class="view active-view"><div class="pt-today-layout"><div id="practiceTodayRoot" hidden></div><div id="wardTodayRoot" hidden></div></div>
         <div class="hero-panel">
           <div>
             <p class="eyebrow">오늘의 CARESTEP</p>
@@ -5418,7 +5418,7 @@ function showApp(){
   renderAll();carestepSafeCall('permissions',()=>applySaasPermissions());carestepSafeCall('account_render',()=>renderSaasAccount());carestepSafeCall('history_init',()=>carestepInitHistory(carestepActiveView()));
   setTimeout(()=>{try{refreshDailyWorkflowIndicators(false);}catch(e){console.error('[CARESTEP RECOVERY] daily_indicators',e);}},0);
 }
-function showLogin(){document.getElementById('practiceTodayRoot')?.replaceChildren();window.CarestepPractice?.clear();globalThis.CarestepTraining?.clear();window.ClinicReliability?.clearPrivate();r19GoogleStatusScope=''; clearFollowupScopedDetails();carestepResetHistoryForLogin(); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
+function showLogin(){window.CarestepTodayWard?.clear();document.getElementById('practiceTodayRoot')?.replaceChildren();window.CarestepPractice?.clear();globalThis.CarestepTraining?.clear();window.ClinicReliability?.clearPrivate();r19GoogleStatusScope=''; clearFollowupScopedDetails();carestepResetHistoryForLogin(); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
 
 /* v9.0.2 HOTFIX 25 · IN-APP BROWSER BACK NAVIGATION
    CARESTEP behaves like a single-page app, so browser Back should move through CARESTEP views
@@ -10443,12 +10443,13 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinical-efficiency.js?v=20261029-simple1"></script>
 <script src="practice-injection.js?v=20261030-consistent1"></script>
 <script src="practice-injection-workflow.js?v=20261030-consistent1"></script>
-<script src="clinical-workspace.js?v=20261030-protocol-browser1"></script>
+<script src="clinical-workspace.js?v=20261030-todayward1"></script>
 <script src="practice-prescription-summary.js?v=20261027knowledge1"></script>
 <script src="practice-prescription-library.js?v=20261030-efficient1"></script>
 <script src="practice-prescription-safety.js?v=20261026korean1"></script>
 <script src="clinic-navigation.js?v=20261030-organize1"></script>
-<script src="practice-tools.js?v=20261030-efficient1"></script>
-<script src="practice-clinic.js?v=20261028-nav1"></script>
+<script src="practice-tools.js?v=20261030-todayward1"></script>
+<script src="clinic-today-ward.js?v=20261030-todayward1"></script>
+<script src="practice-clinic.js?v=20261030-todayward1"></script>
 </body>
 </html>
