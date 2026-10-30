@@ -138,3 +138,26 @@
  #practiceRoot .pt-organized [data-injection-review]{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 #practiceRoot .pt-organized .pt-workspace-options{max-height:70vh;overflow:auto}
+
+/* Shared calculator typography and actions: one visual hierarchy across routes. */
+#practiceRoot .pt-organized{font-family:"Carestep Pretendard","Noto Sans KR",system-ui,sans-serif;font-size:15px;line-height:1.6}
+#practiceRoot .pt-organized :is(button,input,select,textarea){font-family:inherit;font-size:16px;min-height:44px;border-radius:9px}
+#practiceRoot .pt-organized :is(.pt-help,small,.pt-entry-help,.cl-help,.cl-injection-confirm){font-size:14px;line-height:1.6;color:#52677e}
+#practiceRoot .pt-organized h3{font-size:20px;font-weight:700}
+#practiceRoot .pt-organized h4{font-size:16px;font-weight:650}
+#practiceRoot .pt-organized :is(.pt-rx-summary-total strong,.cl-injection-result,.pt-result-key){font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.5}
+#practiceRoot .pt-organized :is(.pt-rx-drug-card,[data-injection-row]){border:1px solid #cedcf0;border-radius:10px;background:#fff}
+#practiceRoot .pt-organized :is(.pt-card-edit,.pt-injection-edit)>summary{font-size:14px;font-weight:600;min-height:44px;padding:10px}
+#practiceRoot .pt-organized .pt-injection-strength{margin:4px 0}
+#practiceRoot .pt-organized .pt-injection-use{display:flex;flex-wrap:wrap;gap:8px;border-top:1px solid #cedcf0;padding-top:12px;margin-top:12px}
+#practiceRoot .pt-organized .pt-injection-use button{margin:0}
+#practiceRoot .pt-organized .pt-result-use{display:flex;flex-wrap:wrap;align-items:start;gap:8px}
+#practiceRoot .pt-organized .pt-result-use [data-result-actions]{flex-basis:100%;margin:0;padding:0;border:0;background:transparent}
+#practiceRoot .pt-organized .pt-result-more{margin:0}
+#practiceRoot .pt-organized .pt-result-more>summary{min-height:44px;font-size:16px}
+#practiceRoot .pt-organized .pt-prescription-entry>h3,#practiceRoot .pt-organized .cl-injection-input>h3{display:none}
+#practiceRoot .pt-organized .cl-alert{color:#9b2424;background:#fff2ef;border-radius:9px;padding:10px}
+@media(max-width:800px){#practiceRoot .pt-organized :is(.pt-rx-drug-card,[data-injection-row]){padding:10px}}
+
+#practiceRoot .pt-organized .cl-injection-input{border:0;background:transparent;padding:0;margin:0}
+#practiceRoot .pt-organized .cl-injection-result{margin:6px 0;padding:4px 0;background:transparent;border:0}
