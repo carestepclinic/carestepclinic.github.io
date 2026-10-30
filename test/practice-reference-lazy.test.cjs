@@ -18,3 +18,10 @@ test('late original response cannot repopulate a cleared prescription',async t=>
  const view=w.PracticePrescriptionLibrary.mount(w.document.querySelector('#root'),{guard:()=>true,request:async p=>p==='/practice/references'?{libraries:[{id:'lib',status:'ready',count:1}]}:p.includes('/entries/')?new Promise(r=>release=()=>r({entry})):{id:'lib',index:[entry],title:'Synthetic'}});
  view.update([{drug:'Synthetic'}]);await wait(250);w.document.querySelector('[data-private-originals]').open=true;await wait(20);assert.equal(typeof release,'function');view.update([]);release();await wait(20);assert.equal(w.document.querySelectorAll('[data-private-content]').length,0);view.dispose();
 });
+test('reference patient and reset keep manual dose in single mode',t=>{
+ const inputs=names=>names.map(n=>'<input name="'+n+'">').join('');
+ const dom=new JSDOM('<main><section data-kind-panel="med"><form data-calc="dose">'+inputs(['dose','concentration','times','days','totalDoses','doseBasis','doseUnit','strengthUnit'])+'<select name="courseMode"><option value="single">Single</option><option value="days">Days</option></select></form></section><form data-calc="fluid">'+inputs(['rate','volume','hours'])+'</form></main>',{runScripts:'outside-only'});t.after(()=>dom.window.close());const w=dom.window;
+ w.PracticeReference={checked:'test',drugs:[],fluids:[],species:()=>''};w.eval(fs.readFileSync(require.resolve('../practice-reference-ui.js'),'utf8'));
+ const view=w.PracticeReferenceUI.mount(w.document.querySelector('main'),{layout(){},clear(){}}),mode=w.document.querySelector('[name=courseMode]');let changes=0;mode.addEventListener('change',()=>changes++);
+ mode.value='days';view.patient(null);assert.equal(mode.value,'single');mode.value='days';view.resetPreset();assert.equal(mode.value,'single');assert.equal(changes,2);
+});
