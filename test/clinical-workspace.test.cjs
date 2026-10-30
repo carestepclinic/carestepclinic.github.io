@@ -884,3 +884,18 @@ test('anesthesia pending: weight changes block stale dose and mobile layout rema
  await api('/cases/'+c.id+'/events','POST',{revision:1,requestKey:'pending-weight-plan-001',kind:'anesthesia.medication-plan',data:{confirm:true,species:'dog',weight:5,items:[{phase:'induction',medication,instruction:'Synthetic'}]}});await api('/cases/'+c.id+'/events','POST',{revision:2,requestKey:'pending-weight-edit-001',kind:'case.details',data:{weight:6}});
  await practiceTab(p,'surgery');await (await show(p,'[data-cl-action=refresh]')).click();await wardSettled(p);await (await show(p,'[data-cl-case="'+c.id+'"]')).click();await p.locator('[data-ar=plan-give]').waitFor();assert.equal(await p.locator('[data-ar=plan-give]').isDisabled(),true);assert.match(await p.locator('.ar-pending-medications').innerText(),/체중·종 변경/);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await p.screenshot({path:path.resolve(root,'../anesthesia-pending-mobile.png'),fullPage:true});assert.equal((await api('/cases/'+c.id+'/anesthesia')).events.length,0);assert.deepEqual(errors,[]);
 });
+
+for(const legacy of [false,true])for(const width of [390,1440])test('blood pressure: all three visible in order and saved independently '+width+' legacy '+legacy,async t=>{
+ const {p,api,errors}=await fixture(t,width,true);
+ if(legacy)await api('/workflows','POST',{requestKey:'pressure-template-001',confirm:true,body:{kind:'anesthesia-template',title:'Synthetic legacy monitor',measurementOrder:['heartRate','meanPressure','spo2'],device:'Synthetic',reviewMinutes:5}});
+ const c=await api('/cases','POST',{requestKey:'pressure-case-001',kind:'surgery',species:'dog',weight:5,quickPatient:{name:'Synthetic pressure'}});
+ await practiceTab(p,'surgery');await (await show(p,'[data-cl-action=refresh]')).click();await wardSettled(p);await (await show(p,'[data-cl-case="'+c.id+'"]')).click();await p.locator('[data-ae-inline]').waitFor();
+ if(legacy)await p.waitForFunction(()=>!document.querySelector('[data-ae-inline] [name=temperature]')?.checkVisibility());
+ const form=p.locator('[data-ae-inline]'),names=['systolic','diastolic','meanPressure'];
+ for(const name of names){assert.ok(await form.locator('[name='+name+']').isVisible());assert.equal(await form.locator('[name='+name+']').evaluate(e=>!!e.closest('details')),false);}
+ const order=await form.locator('input[type=number]').evaluateAll(es=>es.filter(e=>e.checkVisibility()).map(e=>e.name));const start=order.indexOf('systolic');assert.deepEqual(order.slice(start,start+3),names);
+ for(const [name,value] of [['systolic','120'],['diastolic','60'],['meanPressure','80']])await form.locator('[name='+name+']').fill(value);
+ await form.locator('[type=submit]').click();await p.waitForFunction(()=>document.querySelector('[data-ae-inline] [name=systolic]')?.value==='');
+ const events=(await api('/cases/'+c.id+'/anesthesia')).events;assert.deepEqual(JSON.parse(JSON.stringify(events.at(-1).body.values)),{systolic:120,diastolic:60,meanPressure:80});
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);
+});
