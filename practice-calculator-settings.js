@@ -56,7 +56,7 @@
   b.querySelector('[data-ref-species]').addEventListener('change',criContextChanged);
   b.querySelector('[data-ref-species]').addEventListener('change',()=>{epoch++;for(const s of states){s.check.checked=false;}});
   b.querySelector('[data-common-weight]').addEventListener('input',()=>epoch++);
-  function loaded(r){if(!o.guard())return;rows=partition(r).setupItems;ready=true;failed=false;canManage=!!r.canManage;message.textContent='제품·장비 기본값 연결됨';retry.hidden=true;for(const s of states)refresh(s);}
+  function loaded(r){if(!o.guard())return;rows=partition(r).setupItems;ready=true;failed=false;canManage=!!r.canManage;message.textContent='';retry.hidden=true;for(const s of states)refresh(s);}
   function failure(){if(!o.guard())return;failed=true;ready=false;canManage=false;message.textContent='병원 설정 불러오기 실패 · 현재 입력은 유지됩니다.';retry.hidden=false;for(const s of states){s.save.disabled=true;s.reload.disabled=true;status(s,'불러오기 실패 · 저장 권한과 저장값을 아직 확인하지 못했습니다.');}}
   return {loaded,failed:failure};
  }

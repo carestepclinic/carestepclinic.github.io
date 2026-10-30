@@ -28,9 +28,9 @@
   function altered(s){return s.active&&JSON.stringify(snapshot(s))!==JSON.stringify(s.applied);}
   function render(s,collapseComplete=false){
    const missing=[...s.advanced.querySelectorAll('input[required],select')].some(x=>!x.disabled&&!x.closest('label[hidden]')&&!x.value.trim());
-   if(missing)s.advanced.open=true;else if(collapseComplete)s.advanced.open=false;
+   if(s.kind==='dose'||missing)s.advanced.open=true;else if(collapseComplete)s.advanced.open=false;
    s.summary.hidden=!s.active;
-   if(s.kind==='dose'&&g.PracticeMedicationFlow){const unit=s.f.elements.doseUnit.closest('label'),times=s.f.elements.times.closest('label');if(s.active){s.advanced.querySelector('.pt-grid').append(unit,times);times.hidden=v(s.f,'courseMode')==='total';}else{s.f.elements.dose.closest('label').after(unit);s.f.querySelector('[data-days]').prepend(times);times.hidden=false;}}
+   if(s.kind==='dose'&&g.PracticeMedicationFlow){const unit=s.f.elements.doseUnit.closest('label'),times=s.f.elements.times.closest('label');if(s.active){s.advanced.querySelector('.pt-grid').append(unit);s.f.querySelector('[data-days]').prepend(times);times.hidden=['total','single'].includes(v(s.f,'courseMode'));}else{s.f.elements.dose.closest('label').after(unit);s.f.querySelector('[data-days]').prepend(times);times.hidden=v(s.f,'courseMode')==='single';}}
 
    s.summary.querySelector('[data-setting-values]').replaceChildren(...settings(s.f).map(text=>{const span=document.createElement('span');span.textContent=text;return span;}));
    for(const key of specs[s.kind].shared){const field=s.f.elements[key],label=field?.closest('label');if(!label||!field.value)continue;let tag=label.querySelector('[data-value-origin]');if(!tag){tag=document.createElement('small');tag.dataset.valueOrigin='';tag.className='pt-value-origin';label.append(tag);}const same=s.active&&String(s.applied?.[key])===field.value;tag.textContent=same?(s.active.draft?'문헌 참고 용법':'병원 처방 용법'):s.active?'이번 계산에서 수정':s.f.criReferenceContext&&['stock','stockUnit','doseUnit'].includes(key)?'제품·문헌 참고':'이번 계산값';tag.hidden=tag.textContent==='이번 계산값';}

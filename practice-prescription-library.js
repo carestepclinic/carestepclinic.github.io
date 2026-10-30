@@ -61,19 +61,25 @@
   async function read(card,meta,token){
    const target=card.querySelector('[data-private-content]');target.textContent='금기·주의·상호작용 원문을 불러오는 중…';card.dataset.entryKey=meta.key;
    try{const entry=await client.entry(meta);if(!entry||!active()||token!==generation||!card.isConnected||card.dataset.entryKey!==meta.key)return;
-    target.replaceChildren();const source=document.createElement('p');source.className='pt-help';source.textContent=meta.libraryTitle+' · '+entry.title+' · '+(groups[entry.group]||entry.group)+' · 책 '+meta.printedPage+'쪽 / PDF '+meta.page+'–'+meta.endPage+'쪽 · 등록 확인 '+meta.checkedAt;target.append(source);
+    card.dataset.sourceLoaded=meta.key;target.replaceChildren();const source=document.createElement('p');source.className='pt-help';source.textContent=meta.libraryTitle+' · '+entry.title+' · '+(groups[entry.group]||entry.group)+' · 책 '+meta.printedPage+'쪽 / PDF '+meta.page+'–'+meta.endPage+'쪽 · 등록 확인 '+meta.checkedAt;target.append(source);
     if(meta.errata||entry.errata){const warning=document.createElement('p');warning.className='pt-error';warning.textContent='공식 정오표 수정 대상입니다. 적용 전 수정 내용을 함께 확인하세요.';target.append(warning);const link=document.createElement('a');link.href='https://plumbs.com/handbook-errata-10th-edition/';link.target='_blank';link.rel='noopener noreferrer';link.textContent='공식 정오표 확인';target.append(link);}
     const note=document.createElement('p');note.className='pt-help';note.textContent='병원 내부 등록 원문 · 문서의 동물종·경로·조건을 함께 확인하세요. 원문 연결만으로 이 처방의 안전성이 판정되지는 않습니다.';target.append(note);
     for(const section of sections(entry)){const detail=document.createElement('details');detail.dataset.privateSection=section.heading;detail.open=false;const summary=document.createElement('summary');summary.textContent=section.label+(section.text?'':' · 등록 원문 구역 없음');detail.append(summary);const text=document.createElement('div');text.className='pt-private-text';text.textContent=section.text||'해당 제목의 원문 구역이 등록돼 있지 않습니다. 금기·주의사항이 없다는 뜻은 아닙니다.';detail.append(text);target.append(detail);}
    }catch(e){if(!active()||token!==generation||card.dataset.entryKey!==meta.key)return;target.textContent='원문 조회 실패 · '+(e.message||'다시 시도해주세요.');const retry=document.createElement('button');retry.type='button';retry.textContent='이 약물 다시 불러오기';retry.onclick=()=>void read(card,meta,token);target.append(retry);}
   }
+  const originals=box.querySelector('[data-private-originals]');
+  async function loadOriginals(){if(!originals.open||!active()||!catalog)return;const token=generation,work=[];
+   for(const row of rows){const card=cards.get(rowKey(row)),meta=catalog.items.find(x=>x.key===choice.get(rowKey(row)));if(card&&meta&&card.dataset.sourceLoaded!==meta.key)work.push(()=>read(card,meta,token));}
+   let next=0;await Promise.all(Array.from({length:Math.min(3,work.length)},async()=>{while(next<work.length&&active()&&token===generation)await work[next++]();}));
+  }
+  originals.addEventListener('toggle',()=>{if(originals.open)void loadOriginals();});
   async function render(){
    if(!active()||!rows.length)return;const token=generation;status.textContent='병원 등록 약물 목차를 확인하는 중…';
    try{const data=await client.index();if(!data||!active()||token!==generation)return;catalog=data;
     if(!data.items.length){status.textContent=data.importing?'약물 자료 등록 중입니다. 등록 완료 후 다시 불러와주세요.':'등록된 병원 내부 약물 자료가 없습니다. 계산기 상단의 Plumb’s 약물 찾기에서 등록 상태를 확인하세요.';return;}
     status.textContent='병원 자료 '+data.libraries.length+'개 · 전체 '+data.items.length+'개 항목 연결 가능'+(data.importing?' · 등록 중인 자료 제외':'')+' · '+data.libraries.map(x=>x.title).join(' / ');
     const work=[];for(const row of rows){const key=rowKey(row),found=candidates(data.items,row),selected=data.items.find(x=>x.key===choice.get(key)),meta=selected||automatic(found,row),card=document.createElement('article');card.className='pt-private-drug';const heading=document.createElement('h5');heading.textContent=row.drug||'약물명 확인 필요';card.append(heading);const content=document.createElement('div');content.dataset.privateContent='';card.append(content);list.append(card);cards.set(key,card);
-     if(meta){if(!selected)choice.set(key,meta.key);work.push(()=>choice.get(key)===meta.key?read(card,meta,token):null);}else content.textContent=found.length?'여러 후보 또는 국소 제형이 검색됐습니다. 적용할 원문 항목을 확인해 연결해주세요.':'이 이름으로 자동 연결된 항목이 없습니다. 전체 목차에서 원문 항목을 찾아 연결할 수 있습니다.';
+     if(meta){if(!selected)choice.set(key,meta.key);card.dataset.entryKey=meta.key;content.textContent='근거 원문을 펼치면 불러옵니다.';if(!summaryView||box.querySelector('[data-private-originals]').open)work.push(()=>choice.get(key)===meta.key?read(card,meta,token):null);}else content.textContent=found.length?'여러 후보 또는 국소 제형이 검색됐습니다. 적용할 원문 항목을 확인해 연결해주세요.':'이 이름으로 자동 연결된 항목이 없습니다. 전체 목차에서 원문 항목을 찾아 연결할 수 있습니다.';
      picker(card,row,found);
     }
     // Bound requests; fetch only the prescribed drugs, never the entire handbook.
