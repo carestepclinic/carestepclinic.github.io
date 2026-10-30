@@ -16,7 +16,7 @@
   fluid.before(fluidBox);
   const el=(key)=>drugBox.querySelector('[data-ref-'+key+']');
   const fe=(key)=>fluidBox.querySelector('[data-'+key+']');
-  const clearMed=()=>{applied=null;for(const key of ['dose','concentration','times','days','totalDoses'])med.elements[key].value='';med.elements.doseBasis.value='kg';med.elements.doseUnit.value='mg';med.elements.strengthUnit.value='mg';med.elements.courseMode.value='days';options.layout();options.clear();el('status').textContent='';};
+  const clearMed=()=>{applied=null;for(const key of ['dose','concentration','times','days','totalDoses'])med.elements[key].value='';med.elements.doseBasis.value='kg';med.elements.doseUnit.value='mg';med.elements.strengthUnit.value='mg';med.elements.courseMode.value='single';med.elements.courseMode.dispatchEvent(new Event('change',{bubbles:true}));options.layout();options.clear();el('status').textContent='';};
   const clearFluid=()=>{fluidApplied=null;for(const key of ['rate','volume','hours'])fluid.elements[key].value='';options.clear();fe('fluid-status').textContent='';};
   const drug=()=>ref.drugs.find(x=>x.id===el('drug').value);
   function list(){el('drug').innerHTML='<option value="">약물을 선택해주세요</option>'+ref.drugs.filter(x=>(!el('category').value||x.category===el('category').value)&&(!el('search').value||[x.name,x.generic,x.product].join(' ').toLowerCase().includes(el('search').value.toLowerCase()))).map(x=>'<option value="'+x.id+'">'+esc(x.name)+' · '+esc(x.product)+'</option>').join('');el('detail').replaceChildren();}
