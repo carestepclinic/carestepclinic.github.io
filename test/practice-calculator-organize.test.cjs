@@ -13,7 +13,7 @@ async function context(p){await p.locator('[data-ref-species]').selectOption('do
 async function navigatePractice(p,label){const keys={'처방·처치 계산':'calc','사전문진':'intake','업무 체크리스트':'ops'},nav=p.locator('.clinic-navigation');if(await nav.count()){if(!await nav.isVisible())await p.locator('[data-practice-menu]').click();const button=nav.locator('[data-tab="'+keys[label]+'"]'),group=button.locator('xpath=ancestor::details[1]');if(!await group.evaluate(d=>d.open))await group.locator('summary').first().click();await button.click();}else await p.getByRole('button',{name:label,exact:true}).click();}
 
 for(const width of [390,768,1024,1680])test('grouped navigation, shared prescription entry and no horizontal overflow '+width,async t=>{
- const p=await openPage(t,width);await context(p);await p.locator('.pt-prescription-modes').waitFor();
+ const p=await openPage(t,width);await context(p);await p.locator('.pt-prescription-modes').waitFor();assert.equal(await p.locator('.pt-rx-review').isVisible(),false);assert.equal(await p.locator('.pt-rx-view-tabs').isVisible(),false);assert.equal(await p.locator('#globalCaseBadge').isVisible(),false);
  assert.equal(await p.locator('[data-kind-panel=batch]').isVisible(),true);
  assert.equal(await p.locator('.pt-calc-menu [data-kind=med]').count(),0);
  assert.equal(await p.locator('.pt-calc-menu [data-kind=convert]').count(),0);
@@ -21,7 +21,7 @@ for(const width of [390,768,1024,1680])test('grouped navigation, shared prescrip
  await p.locator('[data-prescription-manual]').click();assert.equal(await p.locator('[data-calc=dose]').isVisible(),true);
  await p.locator('[data-injection-mode=injection]').click();assert.equal(await p.locator('[data-injection-calculator]').isVisible(),true);
  await p.locator('[data-injection-mode=oral]').click();assert.equal(await p.locator('[data-rx-text]').isVisible(),true);
- assert.equal(await p.locator('.pt-calc-view-tools .pt-reset-calculation').isVisible(),true);
+ assert.equal(await p.locator('.pt-calc-view-tools .pt-reset-calculation').isVisible(),false);
  assert.equal(await p.locator('.pt-calc-view-tools .pt-drug-management').isVisible(),false);await p.locator('.pt-workspace-more>summary').click();assert.equal(await p.locator('.pt-calc-view-tools .pt-drug-management > summary').innerText(),'병원 설정');await p.locator('.pt-workspace-more>summary').click();
  assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));
  await p.screenshot({path:path.join(root,'../calculator-organized-'+width+'.png'),fullPage:true});
@@ -75,7 +75,7 @@ test('fresh category opens at input and revisiting restores scroll without losin
 });
 test('reset cancels without data loss and confirmed new calculation resets only local input',async t=>{
  const p=await openPage(t);await context(p);await p.locator('[data-rx-text]').fill('carprofen 2 mg/kg po bid for 7 days');await p.locator('.pt-rx-summary-total').first().waitFor();
- p.once('dialog',d=>d.dismiss());await p.locator('.pt-reset-calculation').click();assert.match(await p.locator('[data-rx-text]').inputValue(),/carprofen/);
+ await p.locator('.pt-workspace-more>summary').click();p.once('dialog',d=>d.dismiss());await p.locator('.pt-reset-calculation').click();assert.match(await p.locator('[data-rx-text]').inputValue(),/carprofen/);
  p.once('dialog',d=>d.accept());await p.locator('.pt-reset-calculation').click();await p.waitForTimeout(300);assert.equal(await p.locator('[data-rx-text]').inputValue(),'');assert.equal(await p.locator('[data-common-weight]').inputValue(),'');
  await context(p);await p.locator('[data-rx-text]').fill('carprofen 2 mg/kg po bid for 7 days');await p.locator('.pt-rx-summary-total').first().waitFor();assert.match(await p.locator('.pt-rx-summary-total').first().innerText(),/5.6/);
 });
@@ -168,7 +168,7 @@ for(const width of [390,1680])test('efficiency: injection paste autocalculates, 
  assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));
 });
 test('efficiency: shared missing inputs and reset scope are stated once; blank output stays compact',async t=>{
- const p=await openPage(t);assert.equal(await p.locator('.pt-reset-calculation').innerText(),'전체 초기화');assert.ok((await p.locator('.pt-result-placeholder').boundingBox()).height<80);
+ const p=await openPage(t);assert.equal(await p.locator('.pt-reset-calculation').textContent(),'전체 초기화');assert.ok((await p.locator('.pt-result-placeholder').boundingBox()).height<80);
  await openKind(p,'cri');assert.equal(await p.locator('.pt-flow-context').isVisible(),true);assert.equal(await p.locator('[data-cri-status]').isVisible(),false);assert.equal(await p.locator('.pt-prescription-modes').isVisible(),false);
  await context(p);assert.equal(await p.locator('.pt-flow-context').isVisible(),false);assert.equal(await p.getByText('제품·장비 기본값 연결됨',{exact:true}).count(),0);
 });

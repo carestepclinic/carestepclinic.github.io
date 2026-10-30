@@ -25,7 +25,7 @@
   const more=document.createElement('details');more.className='pt-workspace-more';more.innerHTML='<summary>더보기</summary><div class="pt-workspace-options"></div>';toolbar.append(more);
   const options=more.querySelector('div');options.append(view,convert);if(settings)options.append(settings);
   q('.pt-calc-common').append(toolbar);
-  queueMicrotask(()=>{const reset=q('.pt-reset-calculation');if(reset){reset.textContent='전체 초기화';toolbar.prepend(reset);}});
+  queueMicrotask(()=>{const reset=q('.pt-reset-calculation');if(reset){reset.textContent='전체 초기화';reset.title='동물종·체중·모든 계산 입력 초기화';options.append(reset);}});
 
   // Prescription text/photo, injections and manual entry share the same destination.
   const modes=q('[aria-label="처방 계산 방식"]');
@@ -203,6 +203,7 @@
    if(product){const v=med.elements,unit={tablet:'정',capsule:'캡슐',liquid:'mL'}[v.form.value];set(product.querySelector(':scope > summary'),v.concentration.value?({tablet:'정제',capsule:'캡슐',liquid:'액상'}[v.form.value]+' · '+v.concentration.value+' '+v.strengthUnit.value+'/'+unit+' · 변경'):'제품 함량 입력');}
    const course=med?.querySelector('.pt-course-settings');if(course){const mode=med.elements.courseMode.value;set(course.querySelector('summary'),mode==='single'?'전체 필요량 계산':mode==='total'?'전체 필요량 · 총 '+(med.elements.totalDoses.value||'—')+'회':'전체 필요량 · 하루 '+(med.elements.times.value||'—')+'회 × '+(med.elements.days.value||'—')+'일');if(mode!=='single'&&!course.open&&med.elements.days.required)course.dataset.active='true';else delete course.dataset.active;}
    const rxStatus=rx?.querySelector('[data-rx-status]');if(rxStatus)hide(rxStatus,rx.dataset.calculationState==='idle'&&!rx.querySelector('[data-rx-text]').value.trim()||rx.dataset.calculationState==='complete'&&rxStatus.textContent.startsWith('단계별 함량 연결:'));
+   const hasRows=!!o.rows?.().length;for(const el of rx?.querySelectorAll('.pt-rx-review,.pt-rx-view-tabs')||[])if(!hasRows)hide(el,true);
    const output=rx?.querySelector('output');if(output)rx.classList.toggle('pt-has-results',!!output.textContent.trim());stableResult();scheduleSummary();compactCards();resultUse();
    const ward=rx?.querySelector('[data-ward-calculator-import]');if(ward){const hidden=rx.dataset.calculationState!=='complete';if(ward.hidden!==hidden)ward.hidden=hidden;}
    for(const f of all('.pt-flow-form')){const submit=f.querySelector('.pt-flow-result > button.pt-primary'),out=f.querySelector('output');if(submit&&autoKinds.has(f.dataset.calc)){const error=out?.classList.contains('pt-error')&&!!out.textContent.trim();hide(submit,!error);set(submit,'다시 계산');let state=f.querySelector('[data-auto-state]');if(!state){state=document.createElement('p');state.dataset.autoState='';state.className='pt-help';state.setAttribute('role','status');submit.before(state);}set(state,error?'입력값을 확인해주세요.':out?.textContent.trim()?'':'필수 입력 후 자동 계산됩니다.');hide(state,!state.textContent||!!f.querySelector('.pt-remaining button'));}}

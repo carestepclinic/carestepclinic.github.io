@@ -137,7 +137,7 @@
 @media print{.ae-save-dock{display:none!important}}
 
 /* Shared clinical form typography; checkboxes retain their native compact size. */
-:is(.cl-workspace,.cl-dialog,.ar-sheet){font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif;font-size:14px;line-height:1.5}
+:is(.cl-workspace,.cl-dialog,.ar-sheet){font-family:"Carestep Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif;font-size:14px;line-height:1.5}
 :is(.cl-workspace,.cl-dialog,.ar-sheet) :is(button,input,select,textarea){font-family:inherit;letter-spacing:normal;box-sizing:border-box}
 :is(.cl-workspace,.cl-dialog,.ar-sheet) :is(input:not([type=checkbox]):not([type=radio]),select,textarea){font-size:16px;font-weight:400;line-height:1.5;color:#24364c;background:#fff;border:1px solid #a8b8ca;border-radius:8px;padding:9px 11px;min-height:44px;max-width:100%;min-width:0}
 :is(.cl-workspace,.cl-dialog,.ar-sheet) textarea{min-height:96px;resize:vertical}
