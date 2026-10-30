@@ -278,7 +278,7 @@
     if(push)writeRoute();return true;
   }
   function viewLoader(view){
-    return ({training:()=>window.CarestepTraining?.open(),dashboard:loadOverview,approval:loadApproval,clinics:loadClinics,onboarding:loadOnboardingPortfolio,customerSuccess:loadCustomerSuccess,billing:loadBilling,usageBilling:loadUsageBilling,
+    return ({protocols:()=>window.CarestepHqProtocols?.open(),training:()=>window.CarestepTraining?.open(),dashboard:loadOverview,approval:loadApproval,clinics:loadClinics,onboarding:loadOnboardingPortfolio,customerSuccess:loadCustomerSuccess,billing:loadBilling,usageBilling:loadUsageBilling,
       integrations:()=>Promise.all([loadCalendarIntegration(),loadMessagingIntegration()]),senders:()=>Promise.all([loadSenderOnboarding(),loadMessagingIntegration()]),
       journeys:loadPatientJourneysHQ,surveys:loadGuardianSurveyHQ,crm:loadFollowupCrmHQ,content:loadContent,voice:loadVoice,production:loadProductionLaunch,audit:loadAudit})[view];
   }
@@ -287,7 +287,7 @@
     if(!allowLeave())return;
     const loader=viewLoader(view);if(!loader)return;
     try{
-      if(['dashboard','billing','usageBilling','clinics','onboarding','customerSuccess','surveys','crm','voice','content'].includes(view)){await loader();return;}
+      if(['protocols','dashboard','billing','usageBilling','clinics','onboarding','customerSuccess','surveys','crm','voice','content'].includes(view)){await loader();return;}
       await region(view,loader,()=>{},()=>reloadView(view));
     }finally{restoreClinicReturn(view);}
   }
@@ -297,6 +297,9 @@
     viewPositions.set(currentView,window.scrollY||0);
     if(view!=='clinics'&&!pendingClinicReturn)clinicReturnContext=null;
     currentView=view;
+    document.querySelectorAll('[data-material-view]').forEach(button=>{
+      if(button.dataset.materialView===view)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
+    });
     document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x===target));
     document.querySelectorAll('#nav [data-view]').forEach(x=>{
       x.classList.toggle('active',x.dataset.view===view);
@@ -545,6 +548,7 @@
   savePlan=card=>reviewedSave('plan:'+card.dataset.plan,()=>originalSavePlan(card));
   saveSubscription=()=>reviewedSave('subscription',()=>originalSaveSubscription());
   showView=view=>navigate(view);
+  document.querySelectorAll('[data-material-view]').forEach(button=>button.onclick=()=>showView(button.dataset.materialView));
   loadBilling=async function(){
     if(hasDirty()&&!activeSave&&!allowLeave())return;
     const retry=()=>loadBilling();

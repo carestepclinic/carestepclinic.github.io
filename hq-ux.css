@@ -428,3 +428,7 @@ button,input,select,textarea{font-family:inherit}
 .approval-center-card span,.approval-center-card small,.mini span,.hq-nav-count,.hq-priority-legend,.plan-card .feature{font-size:var(--hq-help-text)}
 .hq-nav-group-toggle{font-size:var(--hq-help-text)!important}
 .status,.cs-status,.pay-badge,.launch-status{font-size:var(--hq-table-text)}
+
+/* Shared material navigation, independent of list renderers. */
+.hq-material-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:6px;background:#edf2fa;border-radius:12px;margin:0 0 20px}.hq-material-tabs .btn{min-height:44px;white-space:normal;line-height:1.4}.hq-material-tabs [aria-current=page]{background:#2456ed;color:white;border-color:#2456ed;font-weight:700}.hq-protocol-search{flex:1;min-width:160px}.hq-protocol-search input{width:100%}.hq-protocol-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px}.hq-protocol-card{margin:0;min-width:0;overflow-wrap:anywhere}.hq-protocol-card h2{font-size:16px;line-height:1.5;margin:0}.hq-protocol-card .btn{margin-top:8px}.hq-material-tabs .btn:focus-visible{outline:3px solid #7c9dff;outline-offset:2px}
+@media(max-width:600px){.hq-material-tabs{gap:4px;padding:4px;margin-bottom:14px}.hq-material-tabs .btn{padding:8px 5px;font-size:13px}#protocols .toolbar{flex-wrap:wrap}#protocols .toolbar label{display:grid;gap:5px}}
