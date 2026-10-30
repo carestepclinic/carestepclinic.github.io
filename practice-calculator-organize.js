@@ -37,7 +37,7 @@
    const manual=document.createElement('button');manual.type='button';manual.dataset.prescriptionManual='';manual.textContent='단일 약물 계산';manual.className='pt-single-drug-action';manual.onclick=()=>o.selectKind('med');modes.append(manual);
   }
   const med=q('[data-calc=dose]'),rx=q('[data-calc=batch]');
-  set(med?.querySelector('h3'),'단일 약물 계산');set(rx?.querySelector('h3'),'처방 계산');
+  set(med?.querySelector('h3'),'단일 약물 계산');set(rx?.querySelector('h3'),'경구 처방');
   const duplicateEntry=med?.querySelector('.pt-rx-entry');if(duplicateEntry)duplicateEntry.hidden=true;
   set(q('.pt-medication-products > summary'),'함량·제형 변경');
   if(rx){
@@ -144,32 +144,32 @@
   function compactCards(){
    for(const card of all('.pt-rx-drug-card:not([data-compact-card])')){
     card.dataset.compactCard='';const inline=card.querySelector('.pt-rx-inline-strength'),editor=inline?.querySelector('details');if(!editor)continue;
-    editor.classList.add('pt-card-edit');set(editor.querySelector('summary'),'함량 변경');
+    editor.classList.add('pt-card-edit');set(editor.querySelector('summary'),'수정');
     const origin=inline.querySelector(':scope > p');if(origin)editor.append(origin);
-    const editButtons=[...card.querySelectorAll('[data-rx-edit]')];for(const button of editButtons){button.textContent=editButtons.length>1?'단계 '+(editButtons.indexOf(button)+1)+' 용량·일정 변경':'용량·일정 변경';editor.before(button);button.classList.add('pt-inline-edit');}
+    const editButtons=[...card.querySelectorAll('[data-rx-edit]')];for(const button of editButtons){button.textContent=editButtons.length>1?'단계 '+(editButtons.indexOf(button)+1)+' 용량·일정 변경':'용량·일정 변경';editor.querySelector('summary').after(button);button.classList.add('pt-inline-edit');}
     const details=card.querySelector('.pt-rx-drug-summary');if(details?.dataset.pending==='true'){details.open=false;editor.open=true;}
    }
   }
   function resultUse(){
    for(const f of all('form[data-calc]')){
     const actions=f.querySelector('[data-result-actions]');if(!actions)continue;
-    let use=f.querySelector('.pt-result-use');if(!use){use=document.createElement('section');use.className='pt-result-use';use.innerHTML='<h4>결과 사용</h4>';actions.before(use);use.append(actions);}
+    let use=f.querySelector('.pt-result-use');if(!use){use=document.createElement('section');use.className='pt-result-use';use.setAttribute('aria-label','계산 결과 작업');actions.before(use);use.append(actions);}
     hide(use,actions.hidden);
-    const print=actions.querySelector('[data-print]');let extra=use.querySelector('.pt-result-more');if(!extra){extra=document.createElement('details');extra.className='pt-result-more';extra.innerHTML='<summary>인쇄·저장</summary>';use.append(extra);}if(print){extra.querySelector('[data-print]')?.remove();extra.prepend(print);extra.prepend(extra.querySelector('summary'));}
+    const print=actions.querySelector('[data-print]');let extra=use.querySelector('.pt-result-more');if(!extra){extra=document.createElement('details');extra.className='pt-result-more';extra.innerHTML='<summary>저장</summary>';use.append(extra);}if(print){extra.querySelector('[data-print]')?.remove();actions.append(print);}
     if(f===rx){const save=f.querySelector('.pt-flow-rx-save'),ward=f.querySelector('[data-ward-calculator-import]');
      if(extra&&save&&save.parentElement!==extra)extra.append(save);
-     if(ward){const destination=o.destination?.()==='ward'?use:extra;if(ward.parentElement!==destination)destination.append(ward);}
-     if(ward){set(ward,o.destination?.()==='surgery'?'입원 지시로 연결':'입원 지시로');ward.classList.toggle('pt-primary',o.destination?.()==='ward');ward.disabled=!actions.querySelector('[data-checked]')?.checked;}
+     if(ward){const destination=use;if(ward.parentElement!==destination)destination.append(ward);}
+     if(ward){set(ward,'입원 처치에 연결');ward.classList.toggle('pt-primary',o.destination?.()==='ward');ward.disabled=!actions.querySelector('[data-checked]')?.checked;}
     }
    }
-   const injection=q('[data-injection-send]');if(injection&&!injection.closest('.pt-injection-use')){const use=document.createElement('section');use.className='pt-injection-use';use.innerHTML='<h4>결과 사용</h4>';injection.before(use);use.append(injection);set(injection,'마취 투약 대기로 연결');injection.classList.add('pt-primary');}
-   if(injection)hide(injection.closest('.pt-injection-use'),injection.hidden);
+   const injection=q('[data-injection-send]');if(injection&&!injection.closest('.pt-injection-use')){const use=document.createElement('section');use.className='pt-injection-use';use.setAttribute('aria-label','계산 결과 작업');injection.before(use);use.append(q('[data-injection-copy]'),injection);set(injection,'마취기록에 연결');injection.title='투약 대기로 등록';injection.classList.add('pt-primary');}
+   if(injection)hide(injection.closest('.pt-injection-use'),injection.hidden&&q('[data-injection-copy]').hidden);
   }
   // Fold generic instructions, never errors, active warnings or clinical review controls.
   for(const f of all('.pt-flow-form')){
    const entry=f.querySelector('.pt-flow-entry');if(!entry)continue;
    const help=[...entry.children].filter(x=>x.matches('p.pt-help')&&!x.hasAttribute('role'));
-   if(help.length){const d=document.createElement('details');d.className='pt-entry-help';d.innerHTML='<summary>입력 안내·참고 근거</summary>';entry.append(d);d.append(...help);}
+   if(help.length){const d=document.createElement('details');d.className='pt-entry-help';d.innerHTML='<summary>입력 도움말</summary>';entry.append(d);d.append(...help);const sources=[...d.querySelectorAll('a[href]')];if(sources.length){const references=document.createElement('details');references.className='pt-entry-help';references.innerHTML='<summary>참고문헌</summary>';d.after(references);references.append(...sources);}}
    const confirm=entry.querySelector('input[name=confirmed]');if(confirm)f.querySelector('.pt-flow-result')?.prepend(confirm.closest('label'));
   }
 
@@ -206,7 +206,7 @@
    const output=rx?.querySelector('output');if(output)rx.classList.toggle('pt-has-results',!!output.textContent.trim());stableResult();scheduleSummary();compactCards();resultUse();
    const ward=rx?.querySelector('[data-ward-calculator-import]');if(ward){const hidden=rx.dataset.calculationState!=='complete';if(ward.hidden!==hidden)ward.hidden=hidden;}
    for(const f of all('.pt-flow-form')){const submit=f.querySelector('.pt-flow-result > button.pt-primary'),out=f.querySelector('output');if(submit&&autoKinds.has(f.dataset.calc)){const error=out?.classList.contains('pt-error')&&!!out.textContent.trim();hide(submit,!error);set(submit,'다시 계산');let state=f.querySelector('[data-auto-state]');if(!state){state=document.createElement('p');state.dataset.autoState='';state.className='pt-help';state.setAttribute('role','status');submit.before(state);}set(state,error?'입력값을 확인해주세요.':out?.textContent.trim()?'':'필수 입력 후 자동 계산됩니다.');hide(state,!state.textContent||!!f.querySelector('.pt-remaining button'));}}
-   const retry=rx?.querySelector('[data-rx-parse]');if(retry){hide(retry,rx.dataset.calculationState!=='review');set(retry,'계산 다시 시도');} const dock=q('[data-dock-calculate]');if(dock)dock.classList.add('pt-auto-dock');
+   const retry=rx?.querySelector('[data-rx-parse]');if(retry){hide(retry,rx.dataset.calculationState!=='review');set(retry,'다시 계산');} const dock=q('[data-dock-calculate]');if(dock)dock.classList.add('pt-auto-dock');
   }
   const schedule=()=>{if(!frame&&!disposed)frame=requestAnimationFrame(refresh);};
   const observer=new MutationObserver(schedule);observer.observe(b,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','data-calculation-state']});
