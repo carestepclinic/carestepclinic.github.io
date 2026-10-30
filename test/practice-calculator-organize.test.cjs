@@ -28,7 +28,7 @@ for(const width of [390,768,1024,1680])test('grouped navigation, shared prescrip
 });
 test('manual entry auto-calculates and clears stale results without granting export confirmation',async t=>{
  const p=await openPage(t);await context(p);await p.locator('[data-prescription-manual]').click();const f=p.locator('[data-calc=dose]');
- await f.locator('.pt-medication-products>summary').click();await f.locator('[name=form]').selectOption('tablet');await f.locator('[name=concentration]').fill('25');await f.locator('[name=dose]').fill('2');await f.locator('[name=times]').fill('2');await f.locator('[name=days]').fill('7');
+ if(!await f.locator('.pt-medication-products').evaluate(e=>e.open))await f.locator('.pt-medication-products>summary').click();await f.locator('.pt-course-settings>summary').click();await f.locator('[name=form]').selectOption('tablet');await f.locator('[name=concentration]').fill('25');await f.locator('[name=dose]').fill('2');await f.locator('[name=times]').fill('2');await f.locator('[name=days]').fill('7');
  await p.waitForFunction(()=>document.querySelector('[data-calc=dose] output').textContent.includes('5.6 정'));
  assert.equal(await f.locator('[data-copy]').isEnabled(),false);await f.locator('[data-checked]').check();assert.equal(await f.locator('[data-copy]').isEnabled(),true);
  await f.locator('[name=dose]').fill('3');await p.waitForFunction(()=>document.querySelector('[data-calc=dose] output').textContent.includes('8.4 정'));assert.equal(await f.locator('[data-copy]').isEnabled(),false);
@@ -102,7 +102,7 @@ test('schedule summary preserves mixed daily and EOD stages and opens missing co
 
 test('one modification entry per card retains manual concentration and invalidates export',async t=>{
  const p=await openPage(t);await context(p);const f=p.locator('[data-calc=batch]');await f.locator('[data-rx-text]').fill('carprofen 2 mg/kg po bid for 7 days');await f.locator('.pt-rx-summary-total').first().waitFor();await p.waitForTimeout(100);
- const card=f.locator('.pt-rx-drug-card');assert.equal(await card.locator('.pt-card-edit').count(),1);assert.equal(await card.locator('[data-rx-edit]').isVisible(),false);await f.locator('[data-checked]').check();
+ const card=f.locator('.pt-rx-drug-card');assert.equal(await card.locator('.pt-card-edit').count(),1);assert.equal(await card.locator('[data-rx-edit]').isVisible(),true);await f.locator('[data-checked]').check();
  await card.locator('.pt-card-edit>summary').click();await card.locator('[data-ingredient-choice]').selectOption('manual');await card.locator('[data-ingredient-value]').fill('50');
  assert.equal(await f.locator('[data-copy]').isEnabled(),false);await card.locator('[data-ingredient-confirm]').check();await card.locator('[data-ingredient-apply]').click();
  await p.waitForFunction(()=>document.querySelector('.pt-rx-summary-total')?.textContent.includes('2.8'));assert.equal(await f.locator('[data-checked]').isChecked(),false);
@@ -128,15 +128,53 @@ test('reviewed save is rejected if inputs change while dialog is open',async t=>
 test('results precede optional reference management while active safety findings stay visible',async t=>{
  const p=await openPage(t,390);await context(p);const f=p.locator('[data-calc=batch]');
  await f.locator('[data-rx-text]').fill('carprofen 2 mg/kg po bid for 7 days\nprednisolone 0.5 mg/kg po sid for 7 days');await f.locator('.pt-rx-summary-total').first().waitFor();await p.waitForTimeout(400);
- assert.equal(await f.locator('.pt-reference-library').evaluate(e=>e.open),false);assert.equal(await f.locator('.pt-library-status').isVisible(),true);assert.match(await f.locator('.pt-library-status').innerText(),/확인.*완료되지/);
+ assert.equal(await f.locator('[data-private-originals]').evaluate(e=>e.open),false);assert.equal(await f.locator('[data-private-summary]').isVisible(),true);
  const warning=f.locator('[data-safety-findings] .pt-safety-warning').first();assert.equal(await warning.isVisible(),true);
  const resultBox=await f.locator('output').boundingBox(),safetyBox=await f.locator('.pt-rx-safety').boundingBox();assert.ok(safetyBox.y>=resultBox.y+resultBox.height);
- await f.locator('.pt-reference-library>summary').click();assert.equal(await f.locator('[data-private-prepare]').isVisible(),true);
+ assert.equal(await f.locator('[data-private-prepare]').count(),0);await p.locator('.pt-workspace-more>summary').click();await p.locator('.pt-drug-management>summary').click();assert.equal(await p.locator('[data-library-knowledge]').isVisible(),true);assert.equal(await p.locator('[data-private-prepare]').count(),0);
 });
 
 test('nine completed prescriptions form a compact three-column grid on desktop',async t=>{
  const p=await openPage(t);await context(p);await p.evaluate(()=>{const original=saasRequest;saasRequest=async(path,options)=>{if(path.includes('/presets'))return {items:'abcdefghi'.split('').map(letter=>({id:'cf_'+letter,revision:1,body:{kind:'tablet',title:'시험약 '+letter,value:25,unit:'mg',formulary:{version:1,calculatorReady:true,route:'oral',species:['dog'],aliases:['testdrug'+letter],calculationBasis:'testdrug'+letter,warnings:[]}}})),canManage:true};return original(path,options);};});
  const f=p.locator('[data-calc=batch]');await f.locator('[data-rx-text]').fill('abcdefghi'.split('').map(c=>'testdrug'+c+' 2 mg/kg po bid for 7 days').join('\n'));await p.waitForFunction(()=>document.querySelector('[data-calc=batch]').dataset.calculationState==='complete');
- const cards=f.locator('.pt-rx-drug-card');assert.equal(await cards.count(),9);const a=await cards.nth(0).boundingBox(),b=await cards.nth(1).boundingBox(),c=await cards.nth(2).boundingBox(),d=await cards.nth(3).boundingBox();assert.equal(a.y,b.y);assert.equal(b.y,c.y);assert.ok(d.y>a.y);assert.ok(a.height<210);assert.ok((await cards.nth(0).locator('.pt-rx-summary-total strong').boundingBox()).height<32);
+ const cards=f.locator('.pt-rx-drug-card');assert.equal(await cards.count(),9);const a=await cards.nth(0).boundingBox(),b=await cards.nth(1).boundingBox(),c=await cards.nth(2).boundingBox(),d=await cards.nth(3).boundingBox();assert.equal(a.y,b.y);assert.equal(b.y,c.y);assert.ok(d.y>a.y);assert.ok(a.height<270);assert.ok((await cards.nth(0).locator('.pt-rx-summary-total strong').boundingBox()).height<32);
  await p.screenshot({path:path.join(root,'../calculator-simple-nine-pc.png'),fullPage:true});
+});
+
+for(const width of [390,1680])test('efficiency: single dose needs no schedule; course and concentration edits recalculate safely '+width,async t=>{
+ const p=await openPage(t,width);await context(p);await p.locator('[data-prescription-manual]').click();const f=p.locator('[data-calc=dose]');
+ assert.equal(await f.locator('[name=courseMode]').inputValue(),'single');assert.equal(await f.locator('[name=times]').isVisible(),false);assert.equal(await f.locator('[name=days]').isVisible(),false);
+ assert.equal(await f.locator('.pt-medication-products [name=concentration]').isVisible(),true);
+ await f.locator('[name=form]').selectOption('tablet');await f.locator('[name=concentration]').fill('25');await f.locator('[name=dose]').fill('2');
+ await p.waitForFunction(()=>document.querySelector('[data-calc=dose] output').textContent.includes('0.4 정/회'));
+ assert.doesNotMatch(await f.locator('output').innerText(),/전체 필요량/);await f.locator('[data-checked]').check();
+ await f.locator('.pt-course-settings>summary').click();await f.locator('[name=times]').fill('2');await f.locator('[name=days]').fill('7');
+ await p.waitForFunction(()=>document.querySelector('[data-calc=dose] output').textContent.includes('5.6 정'));assert.equal(await f.locator('[data-copy]').isEnabled(),false);
+ await f.locator('[name=courseMode]').selectOption('single');await p.waitForFunction(()=>document.querySelector('[data-calc=dose] output').textContent.includes('0.4 정/회'));assert.doesNotMatch(await f.locator('output').innerText(),/전체 필요량/);
+ assert.equal(await f.locator('.pt-product-fields>summary').isVisible(),false);assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));
+ await p.screenshot({path:path.join(root,'../calculator-efficient-single-'+width+'.png'),fullPage:true});
+});
+for(const width of [390,1680])test('efficiency: injection paste autocalculates, retains reviewed source and invalidates use after changes '+width,async t=>{
+ const p=await openPage(t,width);await context(p);await p.locator('[data-injection-mode=injection]').click();const f=p.locator('.pt-injection-workspace');
+ await f.locator('[data-injection-text]').fill('SyntheticA 1 mg/kg IV\nSyntheticB 1 mL IM');
+ await f.locator('[data-injection-row]').nth(1).waitFor();assert.equal(await f.locator('[data-injection-read]').isVisible(),false);
+ const row=f.locator('[data-injection-row]').first();await row.locator('[data-rx-product]').selectOption('manual');await row.locator('[data-rx-strength]').fill('10');assert.match(await row.locator('output').innerText(),/0.5 mL/);
+ assert.equal(await f.locator('[data-injection-apply]').isEnabled(),false);for(const c of await f.locator('[data-rx-confirm]').all())await c.check();await f.locator('[data-injection-apply]').click();
+ assert.equal(await f.locator('[data-injection-copy]').isVisible(),true);assert.match(await f.locator('[data-injection-text]').inputValue(),/SyntheticA/);assert.equal(await f.locator('[data-injection-preview]').isVisible(),false);
+ await p.locator('[data-injection-mode=oral]').click();await p.locator('[data-injection-mode=injection]').click();assert.equal(await row.locator('[data-rx-strength]').inputValue(),'10');assert.equal(await f.locator('[data-injection-copy]').isVisible(),true);await row.locator('[data-rx-strength]').fill('20');assert.equal(await f.locator('[data-injection-copy]').isVisible(),false);assert.equal(await row.locator('[data-rx-confirm]').isChecked(),false);assert.match(await row.locator('output').innerText(),/0.25 mL/);
+ await p.locator('[data-common-weight]').fill('6');await p.waitForFunction(()=>document.querySelectorAll('[data-injection-row]').length===2);assert.equal(await f.locator('[data-injection-copy]').isVisible(),false);
+ await p.evaluate(()=>document.querySelector('.pt-organized').dispatchEvent(new CustomEvent('practice-patient-changed')));assert.equal(await f.locator('[data-injection-text]').inputValue(),'');
+ await f.locator('[data-injection-clear]').click();assert.equal(await f.locator('[data-injection-row]').count(),0);assert.equal(await f.locator('[data-injection-text]').inputValue(),'');assert.equal(await f.locator('[data-injection-copy]').isVisible(),false);
+ assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));
+});
+test('efficiency: shared missing inputs and reset scope are stated once; blank output stays compact',async t=>{
+ const p=await openPage(t);assert.equal(await p.locator('.pt-reset-calculation').innerText(),'전체 초기화');assert.ok((await p.locator('.pt-result-placeholder').boundingBox()).height<80);
+ await openKind(p,'cri');assert.equal(await p.locator('.pt-flow-context').isVisible(),true);assert.equal(await p.locator('[data-cri-status]').isVisible(),false);assert.equal(await p.locator('.pt-prescription-modes').isVisible(),false);
+ await context(p);assert.equal(await p.locator('.pt-flow-context').isVisible(),false);assert.equal(await p.getByText('제품·장비 기본값 연결됨',{exact:true}).count(),0);
+});
+test('efficiency: preparation candidates use one dose after switching away from a longer course',async t=>{
+ const p=await openPage(t);await context(p);await p.locator('[data-prescription-manual]').click();const f=p.locator('[data-calc=dose]');await f.locator('[name=form]').selectOption('tablet');await f.locator('[name=concentration]').fill('25');await f.locator('[name=dose]').fill('2');
+ await f.locator('.pt-course-settings>summary').click();await f.locator('[name=times]').fill('2');await f.locator('[name=days]').fill('7');await p.waitForFunction(()=>document.querySelector('[data-calc=dose] output').textContent.includes('5.6 정'));
+ await f.locator('[name=courseMode]').selectOption('single');await p.waitForFunction(()=>document.querySelector('[data-calc=dose] output').textContent.includes('0.4 정/회'));
+ await f.locator('.pt-dispense summary').click();await f.locator('[data-dispense-step]').fill('0.5');await f.locator('[data-dispense-source]').fill('Synthetic fixture');await f.locator('[data-dispense-run]').click();assert.match(await f.locator('[data-dispense-result]').innerText(),/총 0.5 정/);assert.doesNotMatch(await f.locator('[data-dispense-result]').innerText(),/총 7 정/);
 });

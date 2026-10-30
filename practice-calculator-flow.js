@@ -10,8 +10,8 @@
   const hide=(el,value)=>{if(el&&el.hidden!==value)el.hidden=value;};
   const reveal=el=>{for(let p=el?.parentElement;p&&p!==b;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;el?.focus();el?.scrollIntoView({block:'center',behavior:'smooth'});};
   const species=q('[data-ref-species]'),weight=q('[data-common-weight]');
-  const notice=document.createElement('div');notice.className='pt-flow-context';notice.hidden=true;notice.setAttribute('role','status');notice.innerHTML='<span></span><button type="button">입력하러 가기</button>';
-  q('.pt-calc-common')?.after(notice);
+  const notice=document.createElement('div');notice.className='pt-flow-context';notice.hidden=true;notice.setAttribute('role','status');notice.innerHTML='<span></span><button type="button">확인</button>';
+  q('.pt-calc-common')?.append(notice);
   let missing=null;notice.querySelector('button').onclick=()=>reveal(missing);
 
   // Keep one visible medication query; the optional regimen chooser uses the same query.
@@ -90,7 +90,7 @@
    const record=q('[data-record-weight-confirm]');
    missing=!species?.value?species:!(Number(weight?.value)>0)?weight:record&&!record.closest('label').hidden&&!record.checked?record:null;
    const needsContext=!['convert','acid'].includes(active);
-   hide(notice,!needsContext||!missing);text(notice.querySelector('span'),missing===species?'동물 종류를 선택해주세요.':missing===weight?'현재 체중을 입력해주세요.':'기록 체중과 측정일을 확인해주세요.');
+   hide(notice,!needsContext||!missing);text(notice.querySelector('span'),missing===species?'동물종 선택 필요':missing===weight?'체중 입력 필요':'기록 체중과 측정일을 확인해주세요.');
    // Emergency values remain hidden until the common context is complete; no repeated errors.
    b.classList.toggle('pt-flow-missing-context',!!missing);
    if(emSelect){const selected=emNav.querySelector('[aria-pressed=true]');if(selected&&emSelect.value!==selected.dataset.emFilter)emSelect.value=selected.dataset.emFilter;const count=all('[data-em-row]').filter(x=>!x.hidden).length;for(const opt of emSelect.options){const btn=emNav.querySelector('[data-em-filter="'+opt.value+'"]');text(opt,btn.textContent+(opt.selected?' · '+count+'개':''));}}
@@ -100,8 +100,9 @@
     const remaining=f.querySelector('.pt-remaining');
     if(remaining){const status=remaining.querySelector('span');if(status?.textContent==='필수 입력 완료 · 계산으로 결과 확인')text(status,'입력 완료');hide(remaining,!!f.querySelector('output')?.textContent.trim()&&!remaining.querySelector('button'));}
    }
+   for(const x of all('[data-protocol-status]'))if(x.textContent.startsWith('저장된 서식이 없습니다.'))hide(x,true);
    // A missing shared field is explained once in the common context bar.
-   for(const x of all('[data-protocol-status],[data-quick-product-status],.pt-quick-product > .pt-help'))hide(x,!!missing&&/상단에서 동물 종류|종을 선택/.test(x.textContent));
+   for(const x of all('[data-protocol-status],[data-quick-product-status],.pt-quick-product > .pt-help,[data-cri-status]'))hide(x,x.textContent.startsWith('저장된 서식이 없습니다.')||!!missing&&/상단에서 동물 종류|종을 선택|상단에서 개 또는 고양이/.test(x.textContent));
   }
   const schedule=()=>{if(!frame&&!disposed)frame=requestAnimationFrame(refresh);};
   const observer=new MutationObserver(schedule);observer.observe(b,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','aria-pressed']});

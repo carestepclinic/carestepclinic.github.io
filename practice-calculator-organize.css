@@ -109,3 +109,32 @@
 #practiceRoot .pt-organized .pt-result-more{margin-top:8px}
 #practiceRoot .pt-organized .pt-result-more>button{margin:8px 8px 0 0}
 @media(max-width:800px){#practiceRoot .pt-organized .pt-result-placeholder{min-height:0;padding:12px}#practiceRoot .pt-organized .pt-prescription-result{min-height:0}}
+
+/* Daily calculation: compact empty states, one product editor and explicit course. */
+#practiceRoot .pt-organized .pt-prescription-result{min-height:0}
+#practiceRoot .pt-organized .pt-result-placeholder{min-height:0;padding:8px 10px;border:0;background:transparent}
+#practiceRoot .pt-organized .pt-result-placeholder p{margin:0}
+#practiceRoot .pt-organized .pt-calc-common>.pt-flow-context{flex-basis:100%;margin:0;padding:4px 0;border:0;background:transparent;font-size:13px}
+#practiceRoot .pt-organized .pt-flow-context button{min-height:32px;padding:3px 12px}
+#practiceRoot .pt-organized .pt-product-fields{border:0;padding:0;margin:8px 0}
+#practiceRoot .pt-organized .pt-product-fields>summary{display:none}
+#practiceRoot .pt-organized .pt-course-settings{border:1px solid #cddbed;border-radius:8px;padding:10px;margin:10px 0}
+#practiceRoot .pt-organized .pt-course-settings[data-active=true]>summary{color:#1747b5}
+#practiceRoot .pt-organized .pt-course-settings>label{margin-top:10px}
+#practiceRoot .pt-organized .pt-managed-control:not(.pt-manage-open){display:none}
+#practiceRoot .pt-organized .pt-inline-edit{margin:4px 10px;min-height:36px}
+#practiceRoot .pt-organized .pt-injection-workspace>p:empty,#practiceRoot .pt-organized .cl-injection-input>p:empty{display:none}
+#practiceRoot .pt-organized .cl-injection-input textarea{width:100%;min-height:130px;box-sizing:border-box;resize:vertical}
+#practiceRoot .pt-organized [data-injection-review]{display:grid;gap:10px;margin:12px 0}
+#practiceRoot .pt-organized [data-injection-row]{border:1px solid #cedcf0;border-radius:10px;padding:12px;min-width:0}
+#practiceRoot .pt-organized [data-injection-row] label{display:block;margin-top:8px}
+#practiceRoot .pt-organized [data-injection-row] select,#practiceRoot .pt-organized [data-injection-row] input:not([type=checkbox]){width:100%;box-sizing:border-box}
+#practiceRoot .pt-organized .cl-injection-result{display:block;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;padding:10px 0;color:#153c64}
+#practiceRoot .pt-organized .cl-injection-confirm{font-size:13px;font-weight:400}
+#practiceRoot .pt-organized [data-injection-copy]{margin:8px 8px 0 0}
+#practiceRoot .pt-organized .pt-private-safety .pt-heading{flex-wrap:wrap}
+#practiceRoot .pt-organized .pt-private-safety{margin-top:12px}
+@media(min-width:1400px){
+ #practiceRoot .pt-organized [data-injection-review]{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+#practiceRoot .pt-organized .pt-workspace-options{max-height:70vh;overflow:auto}
