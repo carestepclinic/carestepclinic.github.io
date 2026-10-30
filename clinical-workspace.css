@@ -322,3 +322,27 @@ body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-sectio
 .cl-inline-editor>header h2{font-size:17px;margin:0}.cl-inline-editor form>footer{position:static;display:flex;gap:8px;margin-top:12px}
 .cl-inline-editor [data-cl-discard]:not([hidden]){background:#fff4dc;padding:10px;border-radius:8px}
 @media(max-width:760px){.cl-anesthesia-page .cl-inline-editor[open]{padding:12px}.cl-anesthesia-page .cl-inline-editor .cl-form-grid{grid-template-columns:1fr 1fr}.cl-anesthesia-page .cl-inline-editor label{min-width:0}.cl-anesthesia-page .cl-inline-editor input{max-width:100%}}
+/* Protocol browsing stays independent from patient/ward work. */
+.cl-workspace[data-section="protocols"] .cl-protocol-filters{display:grid;grid-template-columns:minmax(200px,1fr) minmax(150px,220px) minmax(120px,170px);gap:12px;align-items:end;margin:12px 0}
+.cl-workspace[data-section="protocols"] .cl-protocol-filters label{display:grid;gap:6px;font-weight:600;font-size:14px}
+.cl-workspace[data-section="protocols"] .cl-protocol-filters input,.cl-workspace[data-section="protocols"] .cl-protocol-filters select{width:100%;min-width:0;min-height:44px;font:inherit;font-weight:400;box-sizing:border-box}
+.cl-protocol-sources{display:flex;gap:8px;margin:16px 0}
+.cl-protocol-sources button[aria-pressed="true"]{background:#164666;color:#fff;border-color:#164666}
+.cl-protocol-sources span{margin-left:6px;font-size:13px}
+.cl-protocol-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.cl-workspace .cl-protocol-card{display:block;min-width:0;margin:0;padding:16px;text-align:left;border:1px solid #cfdae5;border-radius:12px;background:#fff;color:#173a53;box-shadow:none;font:inherit;line-height:1.55;overflow-wrap:anywhere}
+.cl-workspace button.cl-protocol-card:hover{background:#f0f6fa;border-color:#7395af}
+.cl-protocol-card strong{display:block;margin:5px 0;font-size:16px;line-height:1.5}
+.cl-protocol-meta{display:block;font-size:12px;color:#536c7d;font-weight:500}
+.cl-protocol-description{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:#536c7d;font-size:13px;font-weight:400}
+.cl-protocol-card summary{cursor:pointer}
+.cl-protocol-card[open]{grid-column:1/-1}
+.cl-protocol-card[open] .cl-protocol-description{display:block}
+.cl-protocol-card [data-protocol-body]:not(:empty){border-top:1px solid #e1e8ef;margin-top:14px;padding-top:12px}
+.cl-protocol-pages{display:flex;align-items:center;justify-content:center;gap:20px;margin:18px 0}
+.cl-protocol-result{font-size:13px;color:#536c7d;margin:10px 0}
+.cl-protocol-notice{font-size:14px;padding:10px 12px;background:#edf4f9;border-radius:8px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.cl-protocol-notice[role="alert"]{background:#fff3e7;color:#804914}
+.cl-protocol-create,.cl-protocol-patient{margin-top:18px}
+.cl-workspace[data-section="protocols"] :focus-visible{outline:3px solid #1b739f;outline-offset:3px}
+@media(max-width:650px){.cl-workspace[data-section="protocols"] .cl-protocol-filters{grid-template-columns:1fr 1fr}.cl-protocol-filters label:first-child{grid-column:1/-1}.cl-protocol-grid{grid-template-columns:1fr}.cl-workspace .cl-protocol-card{padding:13px}.cl-protocol-card strong{font-size:15px}}
