@@ -14,7 +14,7 @@
    for(const r of points)svg+='<circle tabindex="0" role="button" data-ar-point="'+esc(r.recordId)+'" cx="'+x(r.observedAt)+'" cy="'+y(r.values[k])+'" r="4.5" aria-label="'+s.label+' '+r.values[k]+' '+s.unit+' · '+local(r.observedAt)+'"><title>'+s.label+' '+r.values[k]+' '+s.unit+' · '+local(r.observedAt)+'</title></circle>';
    svg+='</g>';
   }
-  return '<svg viewBox="0 0 '+width+' 310" role="img" data-ar-overview aria-label="마취 모니터링 통합 추이 · 항목별 단위는 범례에 표시">'+svg+'</svg>'+(keys.length?'':'<p class="ad-empty">표시할 항목을 선택하세요.</p>')+(!observations.length?'<p class="ad-empty">아직 측정 기록이 없습니다. 측정 탭에서 기록하세요.</p>':'');
+  return '<svg viewBox="0 0 '+width+' 310" role="img" data-ar-overview aria-label="마취 모니터링 통합 추이 · 항목별 단위는 범례에 표시">'+svg+'</svg>'+(keys.length?'':'<p class="ad-empty">표시할 항목을 선택하세요.</p>')+(!observations.length?'<p class="ad-empty">아직 측정 기록이 없습니다.</p>':'');
  }
  function trendPanels(rows,start,minutes,keys=[...Object.keys(series),'temperature']){
   const metrics=(g.AnesthesiaRecord||(typeof module==='object'?require('./anesthesia-record.js'):{})).metrics,end=start+minutes*60000;
@@ -25,6 +25,14 @@
    for(const r of points)marks+='<circle tabindex="0" role="button" data-ar-point="'+esc(r.recordId)+'" aria-label="'+esc(label+' '+r.values[k]+' '+unit+' · '+local(r.observedAt))+'" cx="'+x(r.observedAt)+'" cy="'+y(r.values[k])+'" r="4"><title>'+esc(local(r.observedAt)+' · '+r.values[k]+' '+unit)+'</title></circle>';
    return '<section class="ar-chart"><h4>'+label+' <small>'+unit+'</small></h4><svg viewBox="0 0 360 160" data-ar-chart="'+k+'" data-start="'+start+'" data-minutes="'+minutes+'" data-lo="'+lo+'" data-hi="'+hi+'" role="img" aria-label="'+label+' 시간별 기록">'+marks+'</svg></section>';
   }).join('')+'</div>';
+ }
+ // Presentation only: existing timestamps/phase determine emphasis, never create clinical events.
+ function recordPhase(item,rows){
+  if(item.status==='closed')return 'closed';
+  const recorded=rows.filter(r=>!r.voided);
+  if(item.body?.phase==='recovery'||recorded.some(r=>['anesthesiaEnd','extubation'].includes(r.marker)))return 'recovery';
+  if(recorded.some(r=>r.type==='measurement'||['anesthesiaStart','intubation','surgeryStart','surgeryEnd'].includes(r.marker)))return 'live';
+  return 'prep';
  }
  function arrange(root,a){
   const sheet=root.querySelector('.ar-sheet'),timing=root.querySelector('.ar-timing');if(!sheet||!timing)return;
@@ -37,7 +45,7 @@
   timing.after(dashboard);const times=timing.querySelector(':scope>div');if(times){times.classList.add('ad-time-line');const more=document.createElement('details');more.className='ad-time-edit';more.innerHTML='<summary>시각 추가</summary>';for(const cell of times.children){const b=cell.querySelector('[data-ar=next-event]');if(b){b.textContent=cell.querySelector('b').textContent+' 입력';more.append(b);cell.classList.add('ad-time-pending');cell.title='시각 미기록';}}const next=timing.querySelector('.ar-stage-action [data-key]')?.dataset.key;for(const cell of times.children){if(cell.dataset.timing===next){cell.classList.add('ad-time-current');cell.setAttribute('aria-current','step');}const index=[...times.children].indexOf(cell);if(cell.classList.contains('ad-time-pending')&&[...times.children].slice(index+1).some(el=>el.querySelector('[data-ar=edit-time],time'))){cell.classList.add('ad-time-missing');cell.title='후속 시각 기록 있음 · 누락 시각 확인';}}if(more.children.length>1)timing.append(more);}const chart=dashboard.querySelector('.ad-monitor');chart.addEventListener('toggle',()=>{if(chart.isConnected)view.chartExpanded=chart.open;});const panel=k=>dashboard.querySelector('[data-ad-panel="'+k+'"]'),monitor=dashboard.querySelector('.ad-monitor-body');
   const valueKeys=[...Object.keys(series),'temperature'];if(!a.writable)dashboard.querySelector('.ad-values').innerHTML=valueKeys.map(k=>{const d=k==='temperature'?{label:'체온',unit:'°C',color:'#334155'}:series[k],record=rows.filter(r=>r.type==='measurement'&&r.values?.[k]!=null).at(-1),review=Number(a.item.body.anesthesiaSheet?.reviewMinutes||view.reviewMinutes),stale=record&&review>0&&(Date.now()-Date.parse(record.observedAt))/60000>=review;return '<div class="'+(stale?'ad-stale':'')+'"><span style="color:'+d.color+'">'+d.label+'</span><strong>'+(record?record.values[k]:'—')+' <small>'+d.unit+'</small></strong><small>'+(record?clock(record.observedAt)+(stale?' · 재확인':''):'미측정')+'</small></div>';}).join('');
   if(a.writable)dashboard.querySelector('.ad-values').remove();
-  const viewSettings=document.createElement('details');viewSettings.className='ad-view-settings';viewSettings.innerHTML='<summary>보기 설정</summary>';viewSettings.open=!!view.chartSettingsOpen;viewSettings.addEventListener('toggle',()=>{if(viewSettings.isConnected)view.chartSettingsOpen=viewSettings.open;});monitor.append(viewSettings);const nav=query('.ar-display');if(nav){nav.querySelector('[data-key=summary]').textContent='통합 그래프';nav.querySelector('[data-key=graphs]').textContent='항목별 그래프';monitor.prepend(nav);}
+  const viewSettings=document.createElement('details');viewSettings.className='ad-view-settings';viewSettings.innerHTML='<summary>보기 설정</summary>';viewSettings.open=!!view.chartSettingsOpen;viewSettings.addEventListener('toggle',()=>{if(viewSettings.isConnected)view.chartSettingsOpen=viewSettings.open;});monitor.append(viewSettings);const nav=query('.ar-display');if(nav){nav.querySelector('[data-key=summary]').textContent='통합 그래프';nav.querySelector('[data-key=graphs]').textContent='항목별 그래프';viewSettings.append(nav);}
   const overview=document.createElement('section');overview.className='ad-overview';overview.hidden=a.display!=='summary';overview.innerHTML='<div class="ad-legend">'+Object.entries(series).map(([k,d])=>'<label style="--series-color:'+d.color+'"><input type="checkbox" data-ad-series="'+k+'" '+(keys.includes(k)?'checked':'')+'><span>'+d.label+' <small>'+d.unit+'</small></span></label>').join('')+'</div><p class="ad-period">'+local(a.start)+' ~ '+(local(a.start).slice(0,10)===local(a.start+a.minutes*60000).slice(0,10)?clock(a.start+a.minutes*60000):local(a.start+a.minutes*60000))+'</p>'+(a.display==='summary'?'<p class="ad-axis-note">공통 숫자축 · 단위는 범례 참조</p>'+overviewGraph(rows,a.start,a.minutes,Object.keys(series),root.clientWidth<=820):'');monitor.append(overview);
   const range=query('.ar-range');if(range){range.open=true;viewSettings.append(range);}
   const graphs=query('.ar-detail-graphs');if(graphs)monitor.append(graphs);
@@ -57,9 +65,13 @@
   if(setup)sheet.append(setup);
   if(a.onePage){
    sheet.classList.add('ar-single-page');dashboard.querySelector('.ad-entry-tabs')?.remove();
+   const phase=recordPhase(a.item,rows);sheet.dataset.recordPhase=phase;
+   const phaseBadge=document.createElement('span');phaseBadge.className='ad-phase-badge';phaseBadge.textContent={prep:'마취 준비',live:'마취·수술 기록 중',recovery:'회복 기록',closed:'기록 종료'}[phase];header.firstElementChild?.append(phaseBadge);
    const basic=document.createElement('section');basic.className='ad-patient-setup';basic.innerHTML='<h4>환자·수술정보</h4><div class="ad-basic-actions"></div>';
    if(setup){for(const cell of setup.querySelectorAll('dl>div'))if(['미입력','미확인'].includes(cell.querySelector('dd')?.textContent))cell.remove();const meta=setup.querySelector('dl');if(meta?.children.length)basic.append(meta);for(const action of setup.querySelectorAll('[data-ar=sheet],[data-ar=team]'))basic.querySelector('.ad-basic-actions').append(action);setup.querySelector('summary').textContent='장비·약물 준비 설정';setup.dataset.arArchive='';}
+   const meta=basic.querySelector('dl');if(meta){const details=document.createElement('details');details.className='ad-patient-details';details.innerHTML='<summary>기본정보 보기</summary>';details.open=view.patientDetailsOpen??phase==='prep';details.append(meta);basic.append(details);details.querySelector('summary').addEventListener('click',()=>{view.patientDetailsOpen=!details.open;});}
    header.after(basic);
+   if(phase==='recovery'&&a.writable&&a.medical&&a.phaseAction){const recovery=document.createElement('section');recovery.className='ad-recovery-actions';recovery.innerHTML='<b>회복·인계</b><button type="button" data-ad-recovery="recovery">회복 상태 기록</button><button type="button" data-ad-recovery="close">기록 종료</button>';timing.after(recovery);recovery.querySelectorAll('[data-ad-recovery]').forEach(b=>b.onclick=()=>a.phaseAction(b.dataset.adRecovery));}
    const medication=panel('medication');medication.hidden=false;medication.classList.add('ad-medications');basic.after(medication);
    const drugActions=medication.querySelector('.ar-drug-actions');if(drugActions){const buttons=document.createElement('div');buttons.className='ad-drug-actions';buttons.append(...drugActions.querySelectorAll('button'));medication.prepend(buttons);drugActions.remove();}
    for(const d of medication.querySelectorAll('details'))d.dataset.arArchive='';
@@ -70,5 +82,5 @@
   }
   const status=sheet.querySelector(':scope>p[role=status]');if(status){if(/^기록 \d+건$/.test(status.textContent.trim()))status.remove();else header?.firstElementChild?.append(status);}header?.setAttribute('aria-label','현재 마취 환자');
  }
- const api={series,overviewGraph,trendPanels,arrange};if(typeof module==='object'&&module.exports)module.exports=api;else g.AnesthesiaDashboard=api;
+ const api={series,overviewGraph,trendPanels,recordPhase,arrange};if(typeof module==='object'&&module.exports)module.exports=api;else g.AnesthesiaDashboard=api;
 })(typeof window==='undefined'?globalThis:window);

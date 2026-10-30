@@ -190,3 +190,23 @@
 .ar-single-page .ad-medications .ae-prepared{border:0!important;padding:0!important;background:transparent}
 .ar-single-page .ad-entry{padding:12px}
 @media(max-width:820px){.ar-single-page [data-ad-panel=measurement]:not([hidden]) .ae-save-dock{position:static;margin-top:8px}.ar-single-page .ad-entry:has([data-ad-panel=measurement]:not([hidden])){padding:12px}}
+
+/* One-page records keep editing reachable while changing emphasis by recorded phase. */
+.ar-single-page .ad-phase-badge{display:inline-block;margin:3px 8px;padding:3px 8px;border-radius:6px;background:#edf2ff;color:#2345a0;font-size:13px;font-weight:600}
+.ar-single-page[data-record-phase=recovery] .ad-phase-badge{background:#e4f4ed;color:#166347}
+.ar-single-page[data-record-phase=closed] .ad-phase-badge{background:#eef1f5;color:#526174}
+.ar-single-page .ar-record-bar .ar-demographics{display:inline;font-size:13px}
+.ar-single-page .ad-patient-details{flex-basis:100%;border:0;padding:0;margin:0}
+.ar-single-page .ad-patient-details>summary{cursor:pointer;min-height:40px;padding:9px 0;box-sizing:border-box;color:#526174;font-size:14px}
+.ar-single-page .ad-recovery-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border:1px solid #bdd9ca;background:#f4faf7;border-radius:8px;margin:8px 0}
+.ar-single-page .ad-recovery-actions>b{margin-right:auto;font-size:15px}
+.ar-simple .ad-entry{max-height:none;overflow:visible}
+.ar-simple .ad-view-settings>summary{min-height:40px;padding:8px 0;box-sizing:border-box;font-size:14px}
+.ar-simple :is(.ad-period,.ad-axis-note,.ae-metric>small,.ae-save-identity span,.ad-settings> b,.ad-settings small,.ad-time-line section>b,.ad-time-line section>small,.ae-drug-picks small){font-size:13px;line-height:1.5}
+.ar-simple .ad-entry .ae-metric>small,.ar-simple .ae-inline .ae-metric>small{font-size:13px}
+.ar-simple :is(button,select){font-family:inherit;font-size:14px;min-height:40px;border-radius:8px}
+.ar-simple button:focus-visible{outline:3px solid #2b59e8;outline-offset:2px}
+.ar-simple form[aria-busy=true]{cursor:progress}
+@media(max-width:820px){.ar-simple :is(button,select),.ar-simple .ad-view-settings>summary,.ar-single-page .ad-patient-details>summary{min-height:44px}.ar-single-page .ad-phase-badge{margin-left:0}.ar-single-page .ad-recovery-actions button{flex:1 1 130px}}
+
+.ar-simple .ar-dashboard>.ad-monitor{width:100%;max-width:100%;box-sizing:border-box}.ar-simple .ad-view-settings{box-sizing:border-box;max-width:100%}
