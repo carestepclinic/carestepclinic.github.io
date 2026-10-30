@@ -3,15 +3,15 @@
   'use strict';
   const MIN_YEAR=1900;
   const MAX_YEAR=2099;
-  const DATE_SELECTOR='input[type="date"]';
+  const DATE_SELECTOR='input[type="date"], input[type="datetime-local"]';
   const notifiedAt=new WeakMap();
 
   function today(){return new Date().toISOString().slice(0,10);}
   function isDateInput(el){return !!el&&el.matches?.(DATE_SELECTOR);}
-  function parseDate(raw=''){
-    const match=String(raw).trim().match(/^\+?(\d{4,})-(\d{2})-(\d{2})$/);
+  function parseDate(raw='',withTime=false){
+    const match=String(raw).trim().match(withTime?/^(\d{4,})-(\d{2})-(\d{2})(T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?)$/:/^\+?(\d{4,})-(\d{2})-(\d{2})$/);
     if(!match)return null;
-    return {yearText:match[1],year:Number(match[1]),month:Number(match[2]),day:Number(match[3])};
+    return {yearText:match[1],year:Number(match[1]),month:Number(match[2]),day:Number(match[3]),time:match[4]||''};
   }
   function isRealDate(year,month,day){
     if(year<MIN_YEAR||year>MAX_YEAR||month<1||month>12||day<1||day>31)return false;
@@ -21,8 +21,9 @@
   function formatDate(year,month,day){return `${String(year).padStart(4,'0')}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;}
   function configure(el){
     if(!isDateInput(el))return;
-    if(!el.min)el.min=`${MIN_YEAR}-01-01`;
-    if(!el.max)el.max=el.id==='crmPatientBirthDate'?today():`${MAX_YEAR}-12-31`;
+    const withTime=el.type==='datetime-local';
+    if(!el.min)el.min=`${MIN_YEAR}-01-01`+(withTime?'T00:00':'');
+    if(!el.max)el.max=el.id==='crmPatientBirthDate'?today():`${MAX_YEAR}-12-31`+(withTime?'T23:59:59.999':'');
     el.dataset.fourDigitYear='true';
   }
   function notify(el,message){
@@ -35,13 +36,13 @@
     if(!isDateInput(el))return {valid:true,changed:false,value:el?.value||''};
     configure(el);
     const raw=String(el.value||'');
-    if(!raw){el.setCustomValidity?.('');return {valid:true,changed:false,value:''};}
-    const parsed=parseDate(raw);
+    if(!raw){el.setCustomValidity?.('');return {valid:!el.validity?.badInput,changed:false,value:''};}
+    const parsed=parseDate(raw,el.type==='datetime-local');
     if(!parsed){el.setCustomValidity?.('연도 4자리와 월·일을 정확히 입력해주세요.');return {valid:false,changed:false,value:raw};}
-    let {yearText,year,month,day}=parsed,changed=false;
+    let {yearText,year,month,day,time}=parsed,changed=false;
     if(yearText.length>4){
       year=Number(yearText.slice(0,4));
-      if(isRealDate(year,month,day)){el.value=formatDate(year,month,day);changed=true;if(announce)notify(el,`연도를 ${year}년으로 자동 교정했습니다.`);}
+      if(isRealDate(year,month,day)){el.value=formatDate(year,month,day)+time;changed=true;if(announce)notify(el,`연도를 ${year}년으로 자동 교정했습니다.`);}
     }
     const valid=yearText.length===4||changed?isRealDate(year,month,day):false;
     el.setCustomValidity?.(valid?'':`연도는 ${MIN_YEAR}~${MAX_YEAR} 사이의 4자리로 입력해주세요.`);
@@ -54,7 +55,7 @@
   }
   function validateForm(form){
     const dates=[...(form?.querySelectorAll?.(DATE_SELECTOR)||[])];
-    for(const el of dates){const result=normalize(el,{announce:true});if(!result.valid){el.focus();el.reportValidity?.();return false;}}
+    for(const el of dates){const result=normalize(el,{announce:true});if(!result.valid||!el.checkValidity()){el.focus();el.reportValidity?.();return false;}}
     return true;
   }
 
