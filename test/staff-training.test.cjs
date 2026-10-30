@@ -10,6 +10,12 @@ let browser,server,origin,fixture,supplementProvider,practiceProvider,practiceCo
 const fixtures=new Map();
 const browserTest=existsSync(workerFixture)?test:test.skip;
 async function stopPublication(f,id,actor=f.owner){return f.api('/versions/'+id+'/withdraw','POST',{revision:(await f.doc(id,actor)).document.revision},actor);}
+browserTest('clinic education hides edit audit while preserving server logs and clinical content',async t=>{
+ const f=fixture(t),d=await localSop(f,'합성 감사로그 표시 확인');await f.publish(d.versionId);
+ const p=await pageFor(t,f,'owner',390);await p.getByRole('button',{name:'병원 SOP',exact:true}).click();await p.getByRole('button',{name:'자료·검토 열기',exact:true}).click();
+ await p.locator('.st-reading').waitFor();assert.equal(await p.getByText('작성·검토 이력',{exact:true}).count(),0);assert.equal(await p.getByText('검토 항목 처리 이력',{exact:false}).count(),0);
+ assert.ok((await f.doc(d.versionId)).document.audit.length>0);assert.ok(await p.locator('.st-reading').isVisible());
+});
 for(const width of [390,1280])browserTest('withdrawn SOP can be republished explicitly from the card without changing version or history '+width,async t=>{
  const f=fixture(t),d=await localSop(f,'01. 진료 시작·마감 점검');await f.publish(d.versionId);const aid=await f.enroll(d.versionId);await f.attempt(aid,[]);await f.enroll(d.versionId,f.owner);await stopPublication(f,d.versionId);
  const history=f.sqlite.prepare('SELECT * FROM staff_training_attempts').all(),body=(await f.doc(d.versionId)).document.body,p=await pageFor(t,f,'owner',width);await p.getByRole('button',{name:'병원 SOP',exact:true}).click();

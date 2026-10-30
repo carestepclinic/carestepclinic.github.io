@@ -1613,7 +1613,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
               </div>
 
               <div class="diff-box"><div class="diff-head"><b>버전 변경점</b><span id="studioDiffMeta">저장 전 변경을 자동 비교합니다.</span></div><div id="studioDiffList" class="diff-list"><div class="studio-empty" style="border:0">편집할 자료를 선택하세요.</div></div></div>
-              <div class="audit-box"><div class="audit-head"><b>검수·변경 이력</b><span>로컬 편집 기록 · Published 중앙본은 D1 동기화</span></div><div id="studioAuditList" class="audit-list"><div class="studio-empty" style="border:0">아직 이력이 없습니다.</div></div></div>
+
 
               <div id="studioPublishModeNote" class="saas-cloud-note" style="margin-top:10px">병원 계정의 Publish는 중앙 반영이 완료된 경우에만 성공 처리합니다. 중앙 반영에 실패하면 기존 Draft/Review 상태를 유지합니다.</div>
               <div class="studio-actions"><button id="studioSaveEdit" class="btn btn-secondary" type="button">수정 저장</button><button id="studioMoveReview" class="btn btn-ghost" type="button">Review로 이동</button><button id="studioPublish" class="btn btn-primary" type="button">Quality Gate 통과 · Publish</button></div>
@@ -2034,7 +2034,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
             <div class="calendar-provider-actions" style="margin-top:10px"><button id="cancelCurrentCaseCalendar" class="btn btn-ghost" type="button">현재 환자 캘린더 일정 전체 취소</button></div>
             <div id="calendarSyncResult" class="calendar-sync-result">HQ에서 OAuth Client ID를 설정하면 병원 계정을 연결할 수 있습니다.</div>
             <div id="followupServerState" class="calendar-sync-result">환자별 통합 후속관리 상태를 준비하고 있습니다.</div>
-            <div id="followupSafetyPanel" class="multi-staff-safety"><div class="safety-head"><b>동시 편집 · 담당자</b><span id="followupEditLock" class="safety-lock">환자 연결 대기</span></div><div class="safety-controls"><select id="followupAssignee" class="input" aria-label="실무 담당자"><option value="">실무 담당자 미지정</option></select><select id="followupVet" class="input" aria-label="담당 수의사"><option value="">담당 수의사 미지정</option></select><button id="saveFollowupAssignment" class="btn btn-secondary" type="button">담당 저장</button></div><details class="safety-audit"><summary>최근 변경 이력</summary><div id="followupSafetyAudit"><div class="safety-audit-row">변경 이력이 없습니다.</div></div></details></div>
+            <div id="followupSafetyPanel" class="multi-staff-safety"><div class="safety-head"><b>동시 편집 · 담당자</b><span id="followupEditLock" class="safety-lock">환자 연결 대기</span></div><div class="safety-controls"><select id="followupAssignee" class="input" aria-label="실무 담당자"><option value="">실무 담당자 미지정</option></select><select id="followupVet" class="input" aria-label="담당 수의사"><option value="">담당 수의사 미지정</option></select><button id="saveFollowupAssignment" class="btn btn-secondary" type="button">담당 저장</button></div></div>
             <div class="calendar-provider-actions" style="margin-top:10px"><button id="cancelUnifiedFollowupCase" class="btn btn-danger" type="button">현재 환자 후속관리 전체 취소</button></div>
             <div class="calendar-direct-note">Google 연결 상태와 선택한 캘린더는 병원 계정 기준으로 저장·조회합니다. Outlook 연결은 이 브라우저 세션에서 사용합니다. Google 연결을 해제하려면 위의 연결 해제 버튼을 사용하세요.</div>
           </div>
