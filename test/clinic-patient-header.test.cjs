@@ -38,4 +38,12 @@ test('all Clinic routes retain screen titles without category labels',async t=>{
  for(const [tab,title] of Object.entries({ops:'업무 체크리스트',intake:'사전문진',calc:'처방·처치 계산',ward:'입원·처치 보드',surgery:'마취기록지',protocols:'진료 프로토콜'})){await p.evaluate(v=>{practiceTab=v;ClinicNavigation.sync('practice');},tab);assert.equal(await p.locator('#viewTitle').textContent(),title);assert.equal(await p.locator('#clinicNavigationPath').count(),0);}
  for(const [tab,title] of Object.entries({my:'내 계정',team:'직원·권한',billing:'요금제·결제',security:'보안·데이터',legal:'약관·탈퇴'})){await p.evaluate(v=>{document.querySelectorAll('[data-account-tab]').forEach(e=>e.classList.toggle('active',e.dataset.accountTab===v));ClinicNavigation.sync('account');},tab);assert.equal(await p.locator('#viewTitle').textContent(),title);assert.equal(await p.locator('#clinicNavigationPath').count(),0);}
  assert.equal(await p.locator('.topbar .eyebrow').evaluate(e=>getComputedStyle(e).display),'none');
+ await p.evaluate(()=>{window.trainingSection='sop';window.CarestepTraining={section:()=>trainingSection};ClinicNavigation.sync('training');ClinicNavigation.remember('training');});
+ assert.equal(await p.locator('#viewTitle').textContent(),'업무지침(SOP)');assert.equal(await p.locator('.clinic-navigation [aria-current=page]').count(),1);assert.equal(await p.locator('.clinic-navigation [aria-current=page]').getAttribute('data-training-section'),'sop');
+ assert.equal(await p.evaluate(()=>ClinicNavigation.resume('training').trainingSection),'sop');
+ assert.equal(await p.locator('[data-nav-group=operations] [data-training-section=sop]').count(),1);assert.equal(await p.locator('[data-nav-group=help] [data-view=onboarding]').count(),1);assert.equal(await p.locator('[data-nav-group=help] [data-view=voice]').count(),1);
+ await p.evaluate(()=>{trainingSection='education';ClinicNavigation.sync('training');});assert.equal(await p.locator('#viewTitle').textContent(),'직원 교육');assert.equal(await p.locator('.clinic-navigation [aria-current=page]').count(),1);
+ await p.evaluate(()=>{window.guideOpened=false;document.getElementById('openScreenGuide').onclick=()=>guideOpened=true;document.querySelector('[data-nav-guide]').click();});assert.equal(await p.evaluate(()=>guideOpened),true);
+ await p.evaluate(()=>{saasCanView=v=>v!=='training';ClinicNavigation.permissions();});assert.equal(await p.locator('[data-training-section=sop]').evaluate(e=>e.hidden),true);assert.equal(await p.locator('[data-training-section=education]').evaluate(e=>e.hidden),true);
+
 });

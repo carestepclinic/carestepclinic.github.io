@@ -123,7 +123,7 @@ before(async()=>{
    res.setHeader('Content-Type','text/html; charset=utf-8');
    res.end(`<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="stylesheet" href="/staff-training.css"><style>body{margin:0;background:#f3f6fb;font-family:Arial,sans-serif}main{max-width:1250px;margin:auto;padding:24px}@media(max-width:600px){main{padding:16px}}</style><main id="root"></main><script src="/staff-training.js"></script><link rel="stylesheet" href="/training-automation.css"><script src="/training-automation.js"></script><script>
 const params=new URLSearchParams(location.search);window.writes=[];window.failLoad=false;window.slow=false;window.syntheticIdentity='session-a';
-window.app=StaffTraining.mount(document.getElementById('root'),{common:params.get('role')==='hq',identity:()=>syntheticIdentity,request:async(p,o={})=>{
+window.app=StaffTraining.mount(document.getElementById('root'),{separateSop:params.get('separate')==='1',common:params.get('role')==='hq',identity:()=>syntheticIdentity,request:async(p,o={})=>{
  if(failLoad&&p==='/')throw Error('시험 연결 오류');
  if(slow&&p==='/')await new Promise(r=>setTimeout(r,500));
  if(o.method&&o.method!=='GET')writes.push(p);
@@ -175,12 +175,12 @@ browserTest('published practice and disease courses can be filtered and practice
  const p=await pageFor(t,f);await p.getByLabel('교육 종류',{exact:true}).selectOption('practice');assert.equal(await p.locator('.st-card').count(),1);assert.match(await p.locator('.st-card').innerText(),/입원 환자 인수인계/);await p.getByRole('button',{name:'직원 배정',exact:true}).click();await p.getByLabel('시험 직원',{exact:true}).check();await p.getByRole('button',{name:'선택 직원에게 배정',exact:true}).click();await p.getByRole('dialog').waitFor({state:'hidden'});assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM staff_training_assignments').get().n,1);
  await p.getByLabel('교육 종류',{exact:true}).selectOption('disease');assert.equal(await p.locator('.st-card').count(),1);assert.match(await p.locator('.st-card').innerText(),/질환 시험 교육/);assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM staff_training_generation_jobs').get().n,1);
 });
-async function pageFor(t,f,role='owner',width=1280){
+async function pageFor(t,f,role='owner',width=1280,separate=false){
  const id=Math.random().toString(36).slice(2);fixtures.set(id,f);t.after(()=>fixtures.delete(id));
  const context=await browser.newContext({viewport:{width,height:1000}});
  await context.route('**/*',route=>route.request().url().startsWith(origin)?route.continue():route.abort());
  const page=await context.newPage(),errors=[];page.setDefaultTimeout(7000);page.on('pageerror',e=>errors.push(e.message));t.after(async()=>{assert.deepEqual(errors,[]);await context.close();});
- await page.goto(origin+'/fixture?test='+id+'&role='+role);
+ await page.goto(origin+'/fixture?test='+id+'&role='+role+'&separate='+(separate?'1':'0'));
  await page.locator('.st-tabs').waitFor();
  return page;
 }
@@ -406,3 +406,11 @@ browserTest('workflow reading actions and table of contents are above long text 
 });
 
 for(const width of [390,1280])browserTest('approval preflight guides explicit gap decisions and retains approval gate '+width,async t=>{const f=fixture(t),d=await f.create(f.hq,{body:{...f.body(),gaps:['원내 연락 담당자 확인']}}),p=await pageFor(t,f,'hq',width);await p.getByRole('button',{name:'자료·검토 열기',exact:true}).click();await p.getByRole('button',{name:'검토 항목 정리',exact:true}).click();await p.getByLabel('검토 의료진 이름').fill('시험 검토자');await p.getByLabel('처리 방식',{exact:true}).selectOption('guidance');await p.getByLabel('처리 사유·본문 위치·적용 안내',{exact:true}).fill('연락 담당자와 보고 경로는 해당 병원의 현행 지침을 확인합니다.');await p.locator('[name="confirmReviewed"]').check();assert.ok(await p.locator('dialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1));await p.getByRole('button',{name:'처리 내용 저장',exact:true}).click();await p.getByText('적용 전 확인사항',{exact:true}).waitFor();assert.equal((await f.doc(d.versionId,f.hq)).document.status,'draft');assert.equal((await f.doc(d.versionId,f.hq)).document.body.gaps.length,0);assert.equal((await f.doc(d.versionId,f.hq)).document.body.gapReviews.length,1);assert.equal(await p.getByRole('button',{name:'승인하고 공개',exact:true}).count(),0);});
+
+for(const width of [390,1280])browserTest('separate SOP entry preserves documents and education return '+width,async t=>{
+ const f=fixture(t),d=await localSop(f,'합성 분류 시험');await f.publish(d.versionId);const p=await pageFor(t,f,'owner',width,true);
+ assert.equal(await p.locator('.st-tabs [data-tab=sop]').count(),0);await p.evaluate(async()=>{app.prepareSection('sop');await app.open();});
+ assert.equal(await p.evaluate(()=>app.section()),'sop');await p.getByRole('button',{name:'자료·검토 열기',exact:true}).click();await p.locator('.st-reading').waitFor();await p.locator('dialog [data-st=close]').click();
+ assert.equal(await p.locator('.st-tabs [data-tab=mine]').count(),0);await p.evaluate(async()=>{app.prepareSection('education');await app.open();});
+ assert.equal(await p.locator('.st-tabs [data-tab=sop]').count(),0);assert.equal(await p.locator('.st-tabs [data-tab=mine]').count(),1);assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));
+});

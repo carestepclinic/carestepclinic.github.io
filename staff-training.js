@@ -35,6 +35,7 @@
   if(!root)throw Error('Training root missing');
   root.classList.add('staff-training');
   let listPending=null,loadedAt=0;
+  let area='education';
   let data=null,tab=adapter.common?'manage':'library',query='',category='',courseType='',sequence=0,identity='',busy=false,dialog=null,dirty=false,activeDoc=null,activeAssignment=null,activeSupplement=null,requestKey='',message='',sort='number',view='',tabState={},returnFocus=null,manageView='assign',mineFilter='all',mineQuery='',reportQuery='',reportMember='',reportState='all',reportDue='all',reportPage=0;
   const ready=()=>!adapter.isReady||adapter.isReady();
   const actor=()=>data?.actor||{capabilities:{}};
@@ -50,11 +51,11 @@
    root.innerHTML=`<header class="st-heading"><div><span class="st-eyebrow">${adapter.common?'CARESTEP HQ':'CARESTEP CLINIC'}</span><h1>${adapter.common?'직원 교육자료':'직원 교육'}</h1><p>${adapter.common?'승인한 공통 교육자료를 각 병원 교육센터에 제공합니다.':'환자 선택 없이 교육자료를 찾고, 배정된 교육을 이어서 학습하세요.'}</p></div>${btn('새로고침','refresh')}</header><p data-status class="st-status" role="status" aria-live="polite"></p><div data-content></div>`;
   }
   function render(){
-   const expanded=[...root.querySelectorAll('.st-card-manage[open]')].map(e=>e.dataset.course);shell();notice(message);const host=root.querySelector('[data-content]');
+   adapter.navigation?.();const expanded=[...root.querySelectorAll('.st-card-manage[open]')].map(e=>e.dataset.course);shell();notice(message);const host=root.querySelector('[data-content]');
    if(!data){host.innerHTML='<div class="st-empty">직원 교육자료를 불러오고 있습니다.</div>';return;}
    const can=actor().capabilities;
    if((tab==='manage'&&!can.edit&&!can.review&&!can.manage)||(tab==='trash'&&!can.edit&&!can.review))tab='library';
-   const tabs=adapter.common?[['manage','공통 교육 관리'],['library','공개 자료']]:[['mine','내 교육'],['library','교육자료실'],['sop','병원 SOP'],...(can.edit||can.review||can.manage?[['manage','교육 배정·이수']]:[])];
+   const tabs=adapter.common?[['manage','공통 교육 관리'],['library','공개 자료']]:(adapter.separateSop&&area==='sop'?[['sop','업무지침(SOP)']]:[['mine','내 교육'],['library','교육자료실'],...(!adapter.separateSop?[['sop','병원 SOP']]:[]),...(can.edit||can.review||can.manage?[['manage','교육 배정·이수']]:[])]);
    if(can.edit||can.review)tabs.push(['trash','삭제한 자료']);
    const mine=data.assignments.filter(a=>a.user_id===actor().userId),pending=mine.filter(a=>!a.completed_at&&a.status==='published').length;
    host.innerHTML=`<nav class="st-tabs" aria-label="교육센터 메뉴">${tabs.map(([id,label])=>`<button type="button" data-st="tab" data-tab="${id}" aria-current="${tab===id?'page':'false'}">${label}${id==='mine'&&pending?` <span>${pending}</span>`:''}</button>`).join('')}</nav>
@@ -404,7 +405,7 @@
    ++sequence;loadedAt=0;listPending=null;tabState={};mineFilter='all';mineQuery='';reportQuery='';reportMember='';reportState='all';reportDue='all';reportPage=0;manageView='assign';sort='number';view='';data=null;identity='';dirty=false;activeDoc=null;activeAssignment=null;activeSupplement=null;query='';category='';courseType='';message='';
    if(dialog){dialog.close();dialog.remove();dialog=null;}shell();
   }
-  return {open:(options={})=>load({reuse:true,...options}),openVersion:id=>openDocument(id),close:closeDialog,leave(){if(!closeDialog())return false;remember();++sequence;return true;},clear,selectSop(){remember();tab='sop';query='';category='';courseType='';sort='number';view='list';}};
+  return {open:(options={})=>load({reuse:true,...options}),openVersion:id=>openDocument(id),close:closeDialog,leave(){if(!closeDialog())return false;remember();++sequence;return true;},clear,section:()=>area,prepareSection(value){if(!['education','sop'].includes(value))return false;if(!closeDialog())return false;remember();area=value;tab=value==='sop'?'sop':'library';query='';category='';courseType='';sort='number';view=value==='sop'?'list':'cards';return true;},selectSop(){if(!closeDialog())return false;remember();area='sop';tab='sop';query='';category='';courseType='';sort='number';view='list';return true;}};
  }
  global.StaffTraining={mount,filterCourses,sortCourses,groupCourses};
 })(globalThis);

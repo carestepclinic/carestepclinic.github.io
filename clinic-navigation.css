@@ -9,3 +9,5 @@
 .clinic-navigation-ready .pt-clinic-menu-toggle{display:none!important}
 
 @media(max-width:760px){body.clinic-navigation-ready #appView:has(#practice.active-view .pt-calculator-focused) .sidebar>.sidebar-brand{display:flex!important}body.clinic-navigation-ready #appView .sidebar.pt-menu-expanded>.nav-list{display:flex!important}body.clinic-navigation-ready #appView .sidebar:not(.pt-menu-expanded)>.nav-list{display:none!important}}
+
+.clinic-navigation .onboarding-pending:not(.active){color:#2055cb;font-weight:700}.clinic-navigation [data-nav-guide]{width:100%}
