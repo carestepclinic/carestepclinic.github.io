@@ -442,3 +442,12 @@ body:has(#builder.view.active-view) #caseContextBar,body:has(#builder.view.activ
  body:has(#appView) .pt-dialog .pt-card{padding:12px;margin:10px 0}
  #appView .pt .pt-empty{padding:16px}
 }
+
+@media screen{
+ .session-restore-shell{padding:16px;box-sizing:border-box}
+ .session-restore-shell .session-restore-card{width:min(420px,100%);min-width:0;padding:24px;box-sizing:border-box}
+ .session-restore-shell .session-restore-card p{font-size:14px;line-height:1.6}
+ .session-restore-preview{display:grid;gap:8px;margin-top:18px}
+ .session-restore-preview span{display:block;height:30px;border-radius:8px;background:#edf2f8}
+ .session-restore-preview span:first-child{width:60%;height:12px}
+}

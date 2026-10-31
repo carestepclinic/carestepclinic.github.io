@@ -65,3 +65,24 @@ test('clinical work keeps counts during refresh and labels stale results on fail
  assert.match(await p.locator('#clinicToday-tab-clinical').innerText(),/개별 업무 0건.*최신 조회 실패/);
  await p.locator('#clinicToday-tab-clinical').click();assert.match(await p.locator('#clinicClinicalFreshness').innerText(),/최신 조회 실패.*마지막 확인/);
 });
+
+for(const width of [390,1680])test('restore shares pending authentication, hides private view and defers full render '+width,async t=>{
+ const p=await openPage(t,width);
+ await p.evaluate(()=>{
+  window.savedRestoreMe=saasMe;saasToken='synthetic-session';saasMe=null;saasMode='demo';
+  window.restoreAuthCalls=0;window.fullRenderCalls=0;renderAll=()=>{fullRenderCalls++;};
+  saasStoredLastView=()=> 'dashboard';saasStartSessionServices=async()=>{};
+  saasBootstrapMeOnce=async()=>{restoreAuthCalls++;await new Promise(r=>window.releaseAuth=r);return {me:savedRestoreMe,session:{id:'verified'}};};
+  window.restoreOne=saasBootstrap();window.restoreTwo=saasBootstrap();
+ });
+ assert.equal(await p.evaluate(()=>restoreOne===restoreTwo),true);assert.equal(await p.evaluate(()=>restoreAuthCalls),1);
+ assert.equal(await p.locator('#appView').isVisible(),false);assert.equal(await p.locator('.session-restore-preview').isVisible(),true);
+ assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));
+ await p.evaluate(async()=>{releaseAuth();await Promise.all([restoreOne,restoreTwo]);});
+ assert.equal(await p.locator('#appView').isVisible(),true);assert.equal(await p.evaluate(()=>fullRenderCalls),0);
+ const timing=await p.evaluate(()=>CarestepRestoreTiming);assert.equal(timing.state,'visible');assert.ok(timing.authMs>=0);assert.ok(timing.viewMs>=0);assert.ok(timing.totalMs>=timing.authMs);
+});
+test('cancelled restoration cannot reopen authenticated screen after response arrives',async t=>{
+ const p=await openPage(t,390);await p.evaluate(()=>{const me=saasMe;saasToken='old-session';saasBootstrapMeOnce=async()=>{await new Promise(r=>window.releaseAuth=r);return {me,session:{id:'old'}};};window.restorePending=saasBootstrap();saasCancelRestoreAndLogin();});
+ await p.evaluate(async()=>{releaseAuth();await restorePending;});assert.equal(await p.locator('#appView').isVisible(),false);assert.equal(await p.locator('#loginView').isVisible(),true);
+});
