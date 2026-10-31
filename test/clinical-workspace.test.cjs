@@ -1068,8 +1068,8 @@ for(const width of [320,390,1440])test('clinical clarity: unified filters preser
 });
 test('clinical clarity: absent optional demographics stay compact',()=>{assert.equal(C.wardPatientSummary({body:{},patient:{}}),'');});
 
-test('clinical clarity: equal weights collapse and differing measurements remain explicit',async t=>{
- const {p,api,caseIds,errors}=await summaryFixture(t);await p.locator('.cl-room').first().click();await wardSettled(p);assert.match(await p.locator('.cl-patient-summary').innerText(),/최근 측정 8.6 kg · 계산 체중 5 kg/);
+test('clinical clarity: saved measurement becomes calculation weight',async t=>{
+ const {p,api,caseIds,errors}=await summaryFixture(t);await p.locator('.cl-room').first().click();await wardSettled(p);assert.match(await p.locator('.cl-patient-summary').innerText(),/체중 8.6 kg/);
  const id=caseIds[0],d=await api('/cases/'+id);await api('/cases/'+id+'/events','POST',{requestKey:'clarity-same-weight',revision:d.item.revision,kind:'observation',data:{category:'vitals',observedAt:new Date().toISOString(),values:{weightKG:5}}});await (await show(p,'[data-cl-action=refresh]')).click();await wardSettled(p);assert.match(await p.locator('.cl-patient-summary').innerText(),/체중 5 kg/);assert.doesNotMatch(await p.locator('.cl-patient-summary').innerText(),/최근 측정|계산 체중/);assert.deepEqual(errors,[]);
 });
 test('clinical clarity: safety findings and unsupported ingredients stay visible above collapsed references',async t=>{
@@ -1078,4 +1078,10 @@ test('clinical clarity: safety findings and unsupported ingredients stay visible
  const rows=['meloxicam','pds','syntheticunknown'].map(drug=>({drug,dose:1,doseUnit:'mg',doseBasis:'kg',route:'PO',times:1,days:7,startDay:1,intervalDays:1,firstDoseDay:1,strength:10,strengthUnit:'mg',form:'tablet',presetId:'x'}));
  window.claritySafety=PracticePrescriptionSafety.mount(host,{batch:{safetySnapshot:()=>({rows,species:'dog',weight:5,state:'complete'})}});
  });const box=p.locator('#clarity-safety');await box.locator('[data-safety-status]').filter({hasText:'처방 항목 3개'}).waitFor();assert.ok(await box.locator('[data-safety-findings] .pt-safety-warning').count()>0);assert.match(await box.locator('[data-safety-coverage]').innerText(),/syntheticunknown/);assert.equal(await box.locator('.pt-drug-references').getAttribute('open'),null);await box.locator('.pt-drug-references summary').click();assert.equal(await box.locator('[data-reference-ingredient]').count(),3);assert.deepEqual(errors,[]);
+});
+
+for(const width of [390,1440])test('ward measurement auto applies technician weight and removes unused devices panel '+width,async t=>{
+ const {p,api,caseIds,errors}=await summaryFixture(t,width);await p.locator('.cl-room').first().click();await wardSettled(p);await p.locator('[data-cl-action=ward-tab][data-id=measure]').click();assert.equal(await p.locator('[data-cl-action=ward-weight]').count(),0);assert.equal(await p.locator('[data-cl-action=ward-check-new]').count(),0);assert.doesNotMatch(await p.locator('.cl-measure-layout').innerText(),/검사·카테터·튜브/);
+ await p.locator('.cl-measure-layout [data-cl-action=eff-round]').click();const d=p.locator('.cl-dialog');await d.locator('[name=v_weightKG]').fill('6.3');await wardSave(p);assert.equal((await api('/cases/'+caseIds[0])).item.body.weight,6.3);assert.match(await p.locator('.cl-patient-summary').innerText(),/체중 6.3 kg/);
+ await p.locator('[data-cl-action=ward-tab][data-id=tasks]').click();await p.locator('[data-cl-action=ward-medication]').click();assert.match(await p.locator('.cl-dialog').innerText(),/6.3/);assert.deepEqual(errors,[]);
 });
