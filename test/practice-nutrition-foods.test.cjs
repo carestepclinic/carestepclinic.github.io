@@ -1,10 +1,10 @@
 const {test,before,after}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),http=require('node:http'),{chromium}=require('playwright');
 const root=path.resolve(__dirname,'..');let browser,server,origin;
 const catalog=require('../practice-food-catalog.json'),foods=require('../practice-nutrition-foods.js');
-test('catalog contains four official lineups, explicit missing values and normalized calorie units',()=>{
- assert.equal(catalog.items.length,294);assert.equal(new Set(catalog.items.map(p=>p.id)).size,294);
+test('catalog contains five official lineups, explicit missing values and normalized calorie units',()=>{
+ assert.equal(catalog.items.length,325);assert.equal(new Set(catalog.items.map(p=>p.id)).size,325);
  assert.equal(catalog.items.filter(p=>p.brand==='royalcanin').length,83);assert.equal(catalog.items.filter(p=>p.brand==='hills').length,58);
- assert.equal(catalog.items.filter(p=>p.brand==='naturalbalance').length,43);assert.equal(catalog.items.filter(p=>p.brand==='purina'&&p.purpose!=='reference').length,99);assert.equal(catalog.items.filter(p=>p.purpose==='reference').length,11);assert.ok(catalog.items.every(foods.valid));assert.equal(catalog.items.filter(p=>p.energy).length,140);
+ assert.equal(catalog.items.filter(p=>p.brand==='naturalbalance').length,43);assert.equal(catalog.items.filter(p=>p.brand==='purina'&&p.purpose!=='reference').length,99);assert.equal(catalog.items.filter(p=>p.purpose==='reference').length,11);assert.ok(catalog.items.every(foods.valid));assert.equal(catalog.items.filter(p=>p.energy).length,168);
  assert.ok(catalog.items.filter(p=>p.status!=='verified').every(p=>p.energy===null));
  assert.equal(catalog.items.find(p=>p.id==='rc-3911').energy.value,4120);
  assert.equal(catalog.items.find(p=>p.id==='rc-4022').energy,null); // discrepant dry/wet values on source page
@@ -64,4 +64,10 @@ for(const width of [390,1440])test('new brands, treats and unknown product famil
  await f.locator('[data-food-form]').selectOption('reference');await select.selectOption('purina-family-ha');assert.match(await f.locator('[data-food-note]').innerText(),/대상 동물/);assert.equal(await f.locator('[name=density]').inputValue(),'');
  await p.locator('[data-ref-species]').selectOption('cat');await f.locator('[data-food-brand]').selectOption('purina');await select.selectOption('purina-2116');assert.equal(await f.locator('[name=density]').inputValue(),'93.5');assert.equal(await f.locator('[name=unit]').inputValue(),'kcal/can');
  await f.locator('[data-food-detail]').scrollIntoViewIfNeeded();assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));await p.screenshot({path:path.join(root,'../nutrition-expanded-'+width+'.png')});
+});
+test('Prunus official coverage, species and calorie conversion',()=>{
+ const rows=catalog.items.filter(x=>x.brand==='prunus');assert.equal(rows.length,31);assert.equal(rows.filter(x=>x.energy).length,28);assert.equal(rows.filter(x=>x.species.includes('cat')).length,4);assert.equal(rows.filter(x=>x.form==='semimoist').length,5);assert.ok(rows.every(foods.valid));assert.equal(foods.search(catalog.items,{brand:'prunus',species:'dog',form:'semimoist'}).length,5);assert.equal(foods.search(catalog.items,{query:'프루너스'}).length,31);assert.equal(rows.find(x=>x.id==='prunus-recoverypatetype').energy.value,1288);assert.equal(rows.find(x=>x.id==='prunus-pureproteinlambpatetype').energy.value,837);assert.equal(rows.find(x=>x.id==='prunus-butlercatfood').energy,null);assert.equal(foods.search(rows,{species:'cat',query:'리커버리'}).length,0);assert.equal(foods.valid({...rows[0],sourceUrls:['https://healmedix.com.evil.invalid/product']}),false);
+});
+for(const width of [390,1440])test('Prunus product selection applies verified energy and clears missing energy '+width,async t=>{
+ const p=await openPage(t,width);await context(p);await openKind(p,'nutrition');const f=p.locator('[data-calc=nutrition]');await f.locator('[data-food-brand]').selectOption('prunus');const select=f.locator('[data-food-product]');await select.selectOption('prunus-recoverypatetype');assert.equal(await f.locator('[name=density]').inputValue(),'1288');assert.equal(await f.locator('[name=unit]').inputValue(),'kcal/kg');await f.locator('[data-food-form]').selectOption('semimoist');await select.selectOption('prunus-softlowfat');assert.equal(await f.locator('[name=density]').inputValue(),'2900');await f.locator('[data-food-form]').selectOption('');await select.selectOption('prunus-happydietcare');assert.equal(await f.locator('[name=density]').inputValue(),'');assert.match(await f.locator('[data-food-energy]').innerText(),/미확인/);
 });

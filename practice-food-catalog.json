@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "updatedAt": "2026-10-31",
-  "scope": "한국 공식 사이트 공개 제품 기준. 로얄캐닌·힐스 처방식, 내츄럴발란스·퓨리나 일반 라인업 및 퓨리나 병원 전용 제품군. 할인·묶음·체험팩 중복 제외. 국내 실시간 재고나 비공개 세부 제품 전체를 보장하지 않습니다.",
+  "scope": "한국 공식 사이트 공개 제품 기준. 로얄캐닌·힐스 처방식, 내츄럴발란스·퓨리나 일반 라인업 및 퓨리나 병원 전용 제품군. 할인·묶음·체험팩 중복 제외. 국내 실시간 재고나 비공개 세부 제품 전체를 보장하지 않습니다. 프루너스(닥터 힐메딕스) 공식 반려견·반려묘 처방사료, 처방습식캔, 프리미엄 사료 목록 31품목 포함. 포장 중량만 다른 제품은 통합.",
   "sources": [
     "https://www.royalcanin.com/kr/ko-kr/sitemap/sitemap-products.xml",
     "https://www.hillspet.co.kr/sitemap.xml",
@@ -16,6 +16,18 @@
       "url": "https://www.purinapetcare.co.kr/",
       "checkedAt": "2026-10-31",
       "coverage": "공식몰 개·고양이 일반 판매제품 99개, 병원 전용 제품군 11개. 상세 이미지 또는 공식 답변에서 확정한 열량만 입력."
+    },
+    {
+      "brand": "prunus",
+      "url": "https://healmedix.com/",
+      "checkedAt": "2026-10-31",
+      "coverage": "공식 dogfood 18종, catfood 3종, patecan 3종, premiumfood 7종의 상세페이지 확인. 28종 ME 확인, 3종 열량 미확인. 간식·보조제와 단종 여부가 확인되지 않은 과거 제품은 이번 추가 범위에서 제외.",
+      "categoryUrls": [
+        "https://healmedix.com/dogfood",
+        "https://healmedix.com/catfood",
+        "https://healmedix.com/patecan",
+        "https://healmedix.com/premiumfood"
+      ]
     }
   ],
   "items": [
@@ -6902,6 +6914,859 @@
       "note": "공식 병원 전용 제품 안내의 제품군 이름만 확인했습니다. 대상 동물·세부 제품·제형·포장 열량을 확인한 뒤 직접 입력하세요.",
       "sourceUrls": [
         "https://www.purinapetcare.co.kr/ppvd/pro_plan.php"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-ul500da",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 울트라 로우펫 500Da",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "UL500Da 울트라 로우팻",
+        "UL500Da"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3319,
+        "unit": "kcal/kg",
+        "evidence": "3319 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/UL500Da"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-u500",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 울트라 500+",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "U/500 하이포알러제닉",
+        "U500"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3687,
+        "unit": "kcal/kg",
+        "evidence": "3687 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/U500"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-softlowfat",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 소프트 로우펫",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "S/L 소프트 로우팻",
+        "softlowfat"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "semimoist",
+      "purpose": "food",
+      "energy": {
+        "value": 2900,
+        "unit": "kcal/kg",
+        "evidence": "2900 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "반습식 제품. ",
+      "sourceUrls": [
+        "https://healmedix.com/softlowfat"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-softmobility",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 소프트 모빌리티",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "S/M",
+        "softmobility"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "semimoist",
+      "purpose": "food",
+      "energy": {
+        "value": 3000,
+        "unit": "kcal/kg",
+        "evidence": "3000 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "반습식 제품. ",
+      "sourceUrls": [
+        "https://healmedix.com/softmobility"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-sa",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 소프트 알러제닉",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "S/A",
+        "SA"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "semimoist",
+      "purpose": "food",
+      "energy": {
+        "value": 3015,
+        "unit": "kcal/kg",
+        "evidence": "3015 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "반습식 제품. ",
+      "sourceUrls": [
+        "https://healmedix.com/SA"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-hypodiabetic",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 하이포 다이아베틱",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "H/DI",
+        "hypodiabetic"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3350,
+        "unit": "kcal/kg",
+        "evidence": "3350 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/hypodiabetic"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-dut",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 유리너리 트랙트 플러스 캄",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "D/UT",
+        "dut"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3880,
+        "unit": "kcal/kg",
+        "evidence": "3880 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/dut"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-uk",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 울트라 하이포알러제닉 케이천 플러스",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "U/K 케이천+",
+        "UK"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 4040,
+        "unit": "kcal/kg",
+        "evidence": "4040 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/UK"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-ha",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 하이포알러제닉 퓨어프로틴 플러스",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "H/A 퓨어 프로틴",
+        "HA"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 4068,
+        "unit": "kcal/kg",
+        "evidence": "4068 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/HA"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-wc",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 하이포알러제닉 웨이트컨트롤 플러스",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "W/C 웨이트 컨트롤",
+        "WC"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3600,
+        "unit": "kcal/kg",
+        "evidence": "3600 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/WC"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-urinary",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 하이포알러제닉 유리너리",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "H/U",
+        "Urinary"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3973,
+        "unit": "kcal/kg",
+        "evidence": "3973 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/Urinary"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-obesity",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 오비서티",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "D/O",
+        "obesity"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3200,
+        "unit": "kcal/kg",
+        "evidence": "3200 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/obesity"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-renal",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 레날",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "D/R",
+        "renal"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3947,
+        "unit": "kcal/kg",
+        "evidence": "3947 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/renal"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-hepatic",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 헤파틱",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "D/H",
+        "hepatic"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3980,
+        "unit": "kcal/kg",
+        "evidence": "3980 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/hepatic"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-cardiac",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 카디악",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "D/C",
+        "cardiac"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3757,
+        "unit": "kcal/kg",
+        "evidence": "3757 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/cardiac"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-mobilty",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 모빌리티",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "D/M mobility",
+        "mobilty"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3500,
+        "unit": "kcal/kg",
+        "evidence": "3500 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/mobilty"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-intestinal",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 인테스티날",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "D/I 인테스티널",
+        "intestinal"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 4020,
+        "unit": "kcal/kg",
+        "evidence": "4020 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/intestinal"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-lowfat",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 인테스티날 로우펫",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "D/L 인테스티널 로우팻",
+        "lowfat"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3350,
+        "unit": "kcal/kg",
+        "evidence": "3350 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/lowfat"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-dutfeline",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 유리너리 트랙트 플러스 캄 필라인",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "D/UT feline",
+        "dutfeline"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3870,
+        "unit": "kcal/kg",
+        "evidence": "3870 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/dutfeline"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-wcfeline",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 하이포알러제닉 웨이트컨트롤 필라인",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "W/C feline",
+        "wcfeline"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3160,
+        "unit": "kcal/kg",
+        "evidence": "3160 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/wcfeline"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-difeline",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 인테스티날 필라인",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "D/I feline 인테스티널",
+        "difeline"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 4191,
+        "unit": "kcal/kg",
+        "evidence": "4191 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/difeline"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-pureproteinlambpatetype",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 퓨어프로틴램 습식캔 160g",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "pure protein lamb",
+        "pureproteinlambpatetype"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": {
+        "value": 837,
+        "unit": "kcal/kg",
+        "evidence": "83.7 kcal/100g",
+        "basis": "제조사 공식 ME 표기 · 100g당 값을 kg당 값으로 환산"
+      },
+      "status": "verified",
+      "note": "공식 적용 대상은 개입니다.",
+      "sourceUrls": [
+        "https://healmedix.com/pureproteinlambpatetype"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-recoverypatetype",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 리커버리 습식캔 160g",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "recovery",
+        "recoverypatetype"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": {
+        "value": 1288,
+        "unit": "kcal/kg",
+        "evidence": "128.8 kcal/100g",
+        "basis": "제조사 공식 ME 표기 · 100g당 값을 kg당 값으로 환산"
+      },
+      "status": "verified",
+      "note": "공식 적용 대상은 개입니다.",
+      "sourceUrls": [
+        "https://healmedix.com/recoverypatetype"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-lowfatpatetype",
+      "brand": "prunus",
+      "name": "닥터 힐메딕스 인테스티날 로우펫 습식캔 160g",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "인테스티널 로우팻 low fat",
+        "lowfatpatetype"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": {
+        "value": 952,
+        "unit": "kcal/kg",
+        "evidence": "95.2 kcal/100g",
+        "basis": "제조사 공식 ME 표기 · 100g당 값을 kg당 값으로 환산"
+      },
+      "status": "verified",
+      "note": "공식 적용 대상은 개입니다.",
+      "sourceUrls": [
+        "https://healmedix.com/lowfatpatetype"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-anoredixduck",
+      "brand": "prunus",
+      "name": "아노레딕스 오리",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "anoredix duck",
+        "anoredixduck"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "semimoist",
+      "purpose": "food",
+      "energy": {
+        "value": 2587,
+        "unit": "kcal/kg",
+        "evidence": "2587 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "반습식 제품. ",
+      "sourceUrls": [
+        "https://healmedix.com/anoredixduck"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-anoredixchickenturkey",
+      "brand": "prunus",
+      "name": "아노레딕스 닭&칠면조",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "anoredix chicken turkey",
+        "anoredixchickenturkey"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "semimoist",
+      "purpose": "food",
+      "energy": {
+        "value": 2428,
+        "unit": "kcal/kg",
+        "evidence": "2428 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "반습식 제품. ",
+      "sourceUrls": [
+        "https://healmedix.com/anoredixchickenturkey"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-drhealskincare",
+      "brand": "prunus",
+      "name": "프리미엄 닥터 힐 스킨 케어",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "스킨케어",
+        "drhealskincare"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 4050,
+        "unit": "kcal/kg",
+        "evidence": "4050 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/drhealskincare"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-premiumlamer",
+      "brand": "prunus",
+      "name": "프리미엄 라메르",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "lamer",
+        "premiumlamer"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3890,
+        "unit": "kcal/kg",
+        "evidence": "3890 kcal/kg",
+        "basis": "제조사 공식 ME 표기"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://healmedix.com/premiumlamer"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-happydietcare",
+      "brand": "prunus",
+      "name": "닥터 해피 다이어트 케어",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "해피다이어트케어",
+        "happydietcare"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 열량을 확인하지 못했습니다. 실제 포장 표시값을 확인해 입력하세요.",
+      "sourceUrls": [
+        "https://healmedix.com/happydietcare"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-healthandbeautycare",
+      "brand": "prunus",
+      "name": "프리미엄 헬스 앤 뷰티 케어",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "헬스앤뷰티케어",
+        "healthandbeautycare"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 열량을 확인하지 못했습니다. 실제 포장 표시값을 확인해 입력하세요.",
+      "sourceUrls": [
+        "https://healmedix.com/healthandbeautycare"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "prunus-butlercatfood",
+      "brand": "prunus",
+      "name": "버틀러 캣 푸드",
+      "aliases": [
+        "프루너스",
+        "prunus",
+        "버틀러캣푸드 butler",
+        "butlercatfood"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 열량을 확인하지 못했습니다. 실제 포장 표시값을 확인해 입력하세요.",
+      "sourceUrls": [
+        "https://healmedix.com/butlercatfood"
       ],
       "checkedAt": "2026-10-31"
     }
