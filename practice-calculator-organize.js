@@ -25,7 +25,7 @@
   const more=document.createElement('details');more.className='pt-workspace-more';more.innerHTML='<summary>병원 설정</summary><div class="pt-workspace-options"></div>';toolbar.append(more);
   const options=more.querySelector('div');if(settings){settings.open=true;options.append(settings);}if(view)options.append(view);
   q('.pt-calc-common').append(toolbar);
-  queueMicrotask(()=>{const reset=q('.pt-reset-calculation');if(reset){reset.textContent='전체 초기화';reset.title='동물종·체중·모든 계산 입력 초기화';toolbar.insertBefore(reset,more);}const register=q('[data-strength-open]');if(register){register.textContent='약물·함량 등록';register.title='성분별 함량 선택 또는 새 약물 직접 등록';register.setAttribute('aria-haspopup','dialog');toolbar.insertBefore(register,reset||more);}});
+  queueMicrotask(()=>{const reset=q('.pt-reset-calculation');if(reset){reset.textContent='계산 입력 모두 지우기';reset.title='동물종·체중·계산 입력을 지웁니다. 저장한 병원 약품·기본값은 유지됩니다.';toolbar.insertBefore(reset,more);}const register=q('[data-strength-open]');if(register){register.textContent='약물·함량 등록';register.title='성분별 함량 선택 또는 새 약물 직접 등록';register.setAttribute('aria-haspopup','dialog');toolbar.insertBefore(register,reset||more);}});
 
   // Prescription text/photo, injections and manual entry share the same destination.
   const modes=q('[aria-label="처방 계산 방식"]');
