@@ -169,3 +169,19 @@
 #practiceRoot .cl-workspace .cl-calendar-tools button:is([data-id="-1"],[data-id="1"]){padding:6px;font-size:0}
 #practiceRoot .cl-workspace .cl-calendar-tools button[data-id=today]{padding:6px;font-size:14px}
 }
+
+/* Keep handoff available beside patient context without a separate workflow tab. */
+#practiceRoot .cl-patient-header{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,340px);align-items:start;gap:16px}
+#practiceRoot .cl-patient-info{min-width:0}
+#practiceRoot .cl-patient-info>.cl-care-team{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px}
+#practiceRoot .cl-handoff-side{min-width:0}
+#practiceRoot .cl-handoff-side>.cl-card{margin:0;padding:12px;background:#f7f9fd;border:1px solid #d8e2ef;border-radius:8px;overflow-wrap:anywhere}
+#practiceRoot .cl-handoff-side .cl-toolbar{margin:0 0 8px;gap:8px;align-items:center}
+#practiceRoot .cl-handoff-side h4{margin:0;font-size:16px}
+#practiceRoot .cl-handoff-side p{margin:6px 0;font-size:14px;overflow-wrap:anywhere}
+#practiceRoot .cl-handoff-side .cl-handoff-note{white-space:pre-wrap;max-height:96px;overflow:auto;overscroll-behavior:contain}
+#practiceRoot .cl-workspace .cl-ward-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;overflow:visible;width:100%;box-sizing:border-box;margin-top:12px}
+#practiceRoot .cl-workspace .cl-ward-tabs button{min-width:0;width:100%;white-space:normal;padding:10px 6px;margin:0;min-height:44px}
+@media(max-width:900px){#practiceRoot .cl-patient-header{grid-template-columns:minmax(0,1fr);gap:10px}#practiceRoot .cl-workspace .cl-ward-tabs{gap:4px}#practiceRoot .cl-workspace .cl-ward-tabs button{font-size:14px}}
+
+#practiceRoot .cl-handoff-tasks[open]{max-height:200px;overflow:auto;overscroll-behavior:contain}
