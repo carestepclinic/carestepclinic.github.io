@@ -68,20 +68,28 @@
    const phase=recordPhase(a.item,rows);sheet.dataset.recordPhase=phase;
    const phaseBadge=document.createElement('span');phaseBadge.className='ad-phase-badge';phaseBadge.textContent={prep:'마취 준비',live:'마취·수술 기록 중',recovery:'회복 기록',closed:'기록 종료'}[phase];header.firstElementChild?.append(phaseBadge);
    const basic=document.createElement('details');basic.className='ad-patient-setup';basic.innerHTML='<summary>수술·담당자 정보</summary><div class="ad-basic-actions"></div>';basic.open=view.patientDetailsOpen??phase==='prep';basic.querySelector('summary').addEventListener('click',()=>{view.patientDetailsOpen=!basic.open;});
-   if(setup){for(const cell of setup.querySelectorAll('dl>div'))if(['미입력','미확인'].includes(cell.querySelector('dd')?.textContent))cell.remove();const meta=setup.querySelector('dl');if(meta?.children.length)basic.append(meta);for(const action of setup.querySelectorAll('[data-ar=sheet],[data-ar=team]'))basic.querySelector('.ad-basic-actions').append(action);setup.querySelector('summary').textContent='장비·약물 준비 설정';setup.dataset.arArchive='';}
+   if(setup){for(const cell of setup.querySelectorAll('dl>div'))if(['미입력','미확인','미지정'].includes(cell.querySelector('dd')?.textContent))cell.remove();const meta=setup.querySelector('dl');if(meta?.children.length)basic.append(meta);for(const action of setup.querySelectorAll('[data-ar=sheet],[data-ar=team]'))basic.querySelector('.ad-basic-actions').append(action);setup.querySelector('summary').textContent='장비·약물 준비 설정';setup.dataset.arArchive='';}
    const editInfo=basic.querySelector('[data-ar=sheet]');if(editInfo){editInfo.textContent='정보 수정';header.querySelector('.ar-quick-actions')?.prepend(editInfo);}basic.classList.add('ad-inline-details');
    header.after(basic);
    if(phase==='recovery'&&a.writable&&a.medical&&a.phaseAction){const recovery=document.createElement('section');recovery.className='ad-recovery-actions';recovery.innerHTML='<b>회복·인계</b><button type="button" data-ad-recovery="recovery">회복 상태 기록</button><button type="button" data-ad-recovery="close">기록 종료</button>';timing.after(recovery);recovery.querySelectorAll('[data-ad-recovery]').forEach(b=>b.onclick=()=>a.phaseAction(b.dataset.adRecovery));}
    const medication=panel('medication');medication.hidden=false;medication.classList.add('ad-medications');basic.after(medication);
    const drugActions=medication.querySelector('.ar-drug-actions');if(drugActions){const buttons=document.createElement('div');buttons.className='ad-drug-actions';buttons.append(...drugActions.querySelectorAll('button'));medication.prepend(buttons);drugActions.remove();}
-   for(const d of medication.querySelectorAll('details'))d.dataset.arArchive='';
-   if(prepared)prepared.querySelector('h4').textContent='투약';
-   const recent=document.createElement('div');recent.className='ad-recent-drugs';recent.innerHTML=rows.filter(r=>r.marker==='medication').slice(-3).reverse().map(r=>'<p><time>'+clock(r.observedAt)+'</time> <b>'+esc(a.administration(r))+'</b>'+(r.note?' · '+esc(r.note):'')+'</p>').join('');if(recent.children.length)medication.append(recent);
-   if(phase!=='prep'){
-    const past=document.createElement('details');past.className='ad-medication-history';past.innerHTML='<summary>전처치·유도 기록 보기</summary>';past.open=!!view.medicationDetailsOpen||view.quickEntry?.kind==='drug';past.querySelector('summary').addEventListener('click',()=>{view.medicationDetailsOpen=!past.open;});
-    past.append(...medication.childNodes);medication.append(past);if(a.writable){const bar=document.createElement('div');bar.className='ad-add-medication';const add=past.querySelector('[data-ar=medication]');if(add){add.textContent='추가 투약';bar.append(add);}else bar.innerHTML=a.btn('medication','추가 투약');timing.append(bar);}
-    dashboard.after(medication);
+   for(const d of medication.querySelectorAll('.ar-medication>details:not(.ar-medication-history)'))d.dataset.arArchive='';
+
+   // Pending plans remain beside the timing controls; reusable settings never become administration records.
+   const done=medication.querySelector('.ar-medication-history');
+   if(done){done.classList.add('ad-medication-history');done.open=!!view.medicationDetailsOpen;done.querySelector('summary').addEventListener('click',()=>{view.medicationDetailsOpen=!done.open;});dashboard.after(done);}
+   if(prepared){
+    const totals=prepared.querySelector('details'),picks=prepared.querySelector('.ae-drug-picks'),add=prepared.querySelector('[data-ar=medication]');
+    if(add){add.textContent='투약 직접 기록';(medication.querySelector('.ad-drug-actions')||medication).append(add);}
+    if(totals){if(done){totals.classList.add('ad-dose-totals');done.append(totals);}else totals.remove();}
+    const heading=prepared.querySelector('h4');heading?.remove();
+    if(picks?.children.length){const saved=document.createElement('details');saved.className='ad-prepared-settings';saved.innerHTML='<summary>저장한 약물로 추가 투약</summary>';picks.before(saved);saved.append(picks);saved.open=view.quickEntry?.kind==='drug';}
+    else picks?.remove();
+    if(!prepared.querySelector('button,p'))prepared.remove();
    }
+   // The same completed records are shown once, with correction controls and cumulative amounts.
+   medication.setAttribute('aria-label','약물 준비');
    panel('measurement').hidden=false;
    const extra=document.createElement('details');extra.className='ad-extra-procedure';extra.innerHTML='<summary>추가 처치·설정 기록</summary>';procedure.hidden=false;extra.append(procedure);dashboard.after(extra);
   }

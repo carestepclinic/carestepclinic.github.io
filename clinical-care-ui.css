@@ -82,3 +82,38 @@
 @media(max-width:760px){.cl-workspace[data-section=ward] .cl-calendar-tools button:is([data-id="-1"],[data-id="1"]){font-size:0}}
 #practiceRoot .ar-single-page{--care-body:16px;--care-small:14px;font-family:"Carestep Pretendard","Noto Sans KR",system-ui,sans-serif}
 @media(max-width:760px){#practiceRoot .cl-workspace[data-section=ward] .cl-calendar-tools button:is([data-id="-1"],[data-id="1"]){font-size:0}}
+
+/* Care workspace consistency: shared reading surface and action hierarchy. */
+@media screen {
+ .ck-protocol-reader{width:min(960px,calc(100vw - 24px));max-height:calc(100dvh - 24px)}
+ .ck-protocol-reader>header{position:sticky;top:0;z-index:2;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:16px}
+ .ck-protocol-reader h2{font-size:20px;line-height:1.4;margin:0}
+ .ck-protocol-reader .ck-protocol-meta{display:flex;flex-wrap:wrap;gap:8px;color:#405976;font-size:14px}
+ .ck-protocol-reader .ck-protocol-meta span{padding:4px 8px;background:#f1f5fa;border-radius:6px}
+ .ck-protocol-reader .ck-step{padding:16px;border-bottom:1px solid #dbe4f0}
+ .ck-protocol-reader .ck-step h3{font-size:17px;margin:0 0 8px}
+ .ck-protocol-reader .ck-step p,.ck-protocol-summary{white-space:pre-wrap;line-height:1.65}
+ .ck-protocol-reader .ck-citations{display:block;color:#526780}
+ .ck-protocol-reader .ck-citations a{display:inline-block;padding:4px 8px}
+ .ck-protocol-sources{margin:16px 0}
+ .ck-protocol-sources section{scroll-margin-top:84px}
+ .ck-reader-actions{display:flex;flex-wrap:wrap;gap:8px;border-top:1px solid #dbe4f0;padding-top:16px;margin-top:16px}
+ .cl-room-details .cl-care-team{display:block}
+ .ad-medications .ad-drug-actions{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px}
+ .ar-single-page .ad-medication-history{box-sizing:border-box;min-width:0;max-width:100%;overflow-wrap:anywhere;padding:12px 16px;margin-top:12px;border:1px solid #dbe4f0;border-radius:8px;background:#fff}
+ .ar-single-page .ad-medication-history>summary{font-weight:650;min-height:44px;align-content:center}
+ .ar-single-page .ad-prepared-settings{margin:8px 0}
+ .ar-single-page .ad-dose-totals{border-top:1px solid #dbe4f0;margin-top:12px;padding-top:8px}
+ .ar-single-page :is(button,input,select){font-size:16px;min-height:44px}
+ .ar-single-page .ar-pending-medications :is(small,header span){font-size:14px}
+ .ar-single-page .ad-medications .ae-prepared{padding:0;border:0;box-shadow:none}
+ :is(.cl-workspace,.cl-dialog,.ck-protocol-reader,.ar-sheet) :is(button,summary,input,select):focus-visible{outline:3px solid #6a92ff;outline-offset:2px}
+ .ck-protocol-reader button,.cl-workspace button,.ar-sheet button{white-space:normal;overflow-wrap:anywhere}
+}
+@media screen and (max-width:640px){
+ .ck-protocol-reader{width:calc(100vw - 12px);max-height:calc(100dvh - 12px);margin:auto;padding:12px}
+ .ck-protocol-reader>header{gap:8px}
+ .ck-protocol-reader h2{font-size:18px}
+ .ck-reader-actions>button{flex:1 1 160px}
+ .ar-single-page .ad-medications .ad-drug-actions>button{flex:1 1 130px}
+}
