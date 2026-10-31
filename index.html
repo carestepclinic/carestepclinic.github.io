@@ -3901,10 +3901,25 @@ function saasSaveEndpoint(){
   if($('saasEndpoint'))$('saasEndpoint').value=base;
   return base;
 }
+async function saasStartSessionServices(prefix,restore=false){
+  const identity=clinicReadScope(),initialView=carestepActiveView(),valid=()=>saasMode==='auth'&&identity===clinicReadScope();
+  const run=async(label,fn)=>{if(!valid())return;try{return await fn();}catch(e){if(valid())carestepSafeCall(prefix+'_'+label,()=>{throw e;});}};
+  // Only cloud configuration precedes local hydration. Unrelated account and integration reads never gate the working view.
+  const critical=(async()=>{await run('permissions_initial',()=>applySaasPermissions());await run('cloud_state',()=>saasCheckCloud());for(const [label,fn] of [['clinic_local_state',()=>hydrateAuthenticatedClinicLocalState()],['render',()=>renderAll()],['permissions',()=>applySaasPermissions()],['voice_hydrate',()=>voiceHydrateForm()]])await run(label,fn);})();
+  const jobs=[
+    async()=>{await run('account_refresh',()=>saasRefreshAccount(false,{skipSession:true,skipCloud:true}));if(restore)await run('billing_redirect',()=>handleBillingRedirect());await critical;await run('onboarding',()=>loadOnboardingStatus(false,carestepActiveView()===initialView));},
+    async()=>{await critical;await run('central_content',()=>saasLoadCentralContent(true));await run('category_overrides',()=>loadCategoryOverrides(true));},
+    async()=>{await critical;await run('calendar_config',()=>loadCalendarIntegrationConfig(true));await run('messaging_settings',()=>loadMessagingSettings(false));await run('solapi_return',()=>handleSolapiOauthReturn());},
+    ()=>run('deployment_status',()=>loadCareDeploymentStatus(false))
+  ];
+  let next=0;const worker=async()=>{while(valid()&&next<jobs.length){const job=jobs[next++];await job();}};
+  void Promise.allSettled([worker(),worker()]);
+  await critical;
+}
+
 async function saasFinishAuth(data){
   if(!data?.token||!data?.me)throw new Error('로그인 응답이 올바르지 않습니다.');saasToken=data.token;saasMe=data.me;saasMode='auth';saasSessionMeta=data.session||{id:data.sessionId||'',expiresAt:data.expiresAt||'',createdAt:'',lastSeenAt:''};persistSaasSessionToken(saasToken);saasSaveEndpoint();showApp();go(roleUiProfile().defaultView,{historyMode:'replace'});
-  const tasks=[['permissions',()=>applySaasPermissions()],['account_refresh',()=>saasRefreshAccount(false)],['clinic_local_state',()=>hydrateAuthenticatedClinicLocalState()],['render_after_login',()=>renderAll()],['permissions_after_login',()=>applySaasPermissions()],['deployment_status',()=>loadCareDeploymentStatus(false)],['central_content',()=>saasLoadCentralContent(true)],['category_overrides',()=>loadCategoryOverrides(true)],['calendar_config',()=>loadCalendarIntegrationConfig(true)],['messaging_settings',()=>loadMessagingSettings(false)],['solapi_return',()=>handleSolapiOauthReturn()],['voice_hydrate',()=>voiceHydrateForm()],['onboarding',()=>loadOnboardingStatus(false,true)]];
-  for(const [label,fn] of tasks){try{await fn();}catch(e){carestepSafeCall('login_'+label,()=>{throw e;});}}setTimeout(()=>{try{refreshClinicActionCenter(true);}catch{}},0);
+  await saasStartSessionServices('login');setTimeout(()=>{try{refreshClinicActionCenter(true);}catch{}},0);
 }
 async function saasLogin(){
   try{
@@ -3952,8 +3967,7 @@ async function saasBootstrap(){
   let d=null,lastError=null;for(let attempt=0;attempt<2&&!d;attempt++){try{d=await saasBootstrapMeOnce(attempt===0?15000:20000);}catch(e){lastError=e;if(!saasBootstrapRetryable(e)||attempt===1)break;showSessionRestore('로그인 세션은 유지되어 있습니다. 서버 연결을 한 번 더 확인하고 있습니다…');await new Promise(r=>setTimeout(r,450));}}
   if(!d){const e=lastError||new Error('세션을 확인하지 못했습니다.');if(e?.status===401||e?.status===403){saasToken='';saasMe=null;persistSaasSessionToken('');showLogin();saasSetAuthStatus('로그인 세션이 만료되었습니다. 다시 로그인해주세요.','error');return;}showSessionRestore('로그인 정보는 그대로 유지되어 있습니다. 네트워크 또는 서버 연결이 일시적으로 지연되고 있습니다. 다시 연결을 눌러주세요.',true);return;}
   saasMe=d.me;saasSessionMeta=d.session||null;saasMode='auth';persistSaasSessionToken(saasToken);const resumeView=saasStoredLastView(),resumeRoute=window.ClinicNavigation?.resume(resumeView)||{};showApp();if(resumeView!=='dashboard'&&saasCanView(resumeView))carestepSafeCall('resume_view',()=>go(resumeView,{historyMode:'replace',...resumeRoute}));
-  const tasks=[['account_refresh',()=>saasRefreshAccount(false)],['clinic_local_state',()=>hydrateAuthenticatedClinicLocalState()],['render_restore',()=>renderAll()],['permissions_restore',()=>applySaasPermissions()],['deployment_status',()=>loadCareDeploymentStatus(false)],['billing_redirect',()=>handleBillingRedirect()],['central_content',()=>saasLoadCentralContent(true)],['category_overrides',()=>loadCategoryOverrides(true)],['calendar_config',()=>loadCalendarIntegrationConfig(true)],['messaging_settings',()=>loadMessagingSettings(false)],['solapi_return',()=>handleSolapiOauthReturn()],['voice_hydrate',()=>voiceHydrateForm()],['onboarding',()=>loadOnboardingStatus(false,true)]];
-  for(const [label,fn] of tasks){try{await fn();}catch(e){carestepSafeCall('restore_'+label,()=>{throw e;});}}if(resumeView!=='dashboard'&&carestepActiveView()===resumeView&&saasCanView(resumeView))carestepSafeCall('resume_view_final',()=>go(resumeView,{historyMode:'none'}));
+  await saasStartSessionServices('restore',true);
 }
 function saasCancelRestoreAndLogin(){saasToken='';saasMe=null;persistSaasSessionToken('');try{sessionStorage.removeItem(SAAS_LAST_VIEW_SESSION_KEY);}catch{}showLogin();saasSetAuthStatus('로그인 화면으로 전환했습니다.','');}
 async function saasLogout(){
@@ -4021,7 +4035,7 @@ function saasStatePayload(){
 }
 async function saasCheckCloud(){
   if(saasMode!=='auth'||!saasToken)return null;if(!saasHasFeature('cloudSync')){saasCloudMeta={state:null,version:0,updatedAt:'',conflict:false,error:saasFeatureMessage('cloudSync')};renderSaasAccount();return null;}
-  const d=await saasRequest('/saas/clinic/state',{method:'GET'});saasCloudMeta={...d,conflict:false,error:''};renderSaasAccount();return d;
+  const identity=clinicReadScope(),d=await saasRequest('/saas/clinic/state',{method:'GET'});if(identity!==clinicReadScope()||saasMode!=='auth')return null;saasCloudMeta={...d,conflict:false,error:''};renderSaasAccount();return d;
 }
 async function saasUploadCloud(silent=false){
   if(saasMode!=='auth')return;if(!saasHasFeature('cloudSync')){if(!silent)toast(saasFeatureMessage('cloudSync'));return;}const uploadToken=saasToken,uploadClinic=saasMe?.clinic?.id;const uploadCurrent=()=>uploadToken===saasToken&&uploadClinic===saasMe?.clinic?.id;const btn=silent?null:$('saasUploadState'),old=btn?.textContent;if(btn){btn.disabled=true;btn.classList.add('ux-busy');btn.textContent='저장 중…';}
@@ -4321,11 +4335,12 @@ function renderSaasAccount(){queueMicrotask(()=>r19RefreshGoogleStatus());
   $('saasInviteControls')?.classList.toggle('saas-hidden',!(auth&&saasPermission('team.manage',['owner','admin'].includes(role))&&saasHasFeature('teamManagement')));renderSubscriptionAccess();applyAccountRoleVisibility();
   renderSaasSessions();renderSaasDiagnostics();renderProductionGovernance();bindUxEmptyActions(document);
 }
-async function saasRefreshAccount(showToast=true){
+async function saasRefreshAccount(showToast=true,{skipSession=false,skipCloud=false}={}){
   if(saasMode!=='auth'){renderSaasAccount();return;}
+  const identity=clinicReadScope(),valid=()=>saasMode==='auth'&&identity===clinicReadScope();
   try{
-    const d=await saasRequest('/saas/me',{method:'GET'});saasMe=d.me;saasSessionMeta=d.session||saasSessionMeta;applySaasPermissions();
-    await Promise.all([saasCheckCloud(),saasLoadMembers(),saasLoadUsage(),saasLoadSessions(),saasLoadDiagnostics(),loadBillingOverview(false),loadProductionGovernance(false)]);renderSaasAccount();if(showToast)toast('계정 정보를 새로고침했습니다.');
+    if(!skipSession){const d=await saasRequest('/saas/me',{method:'GET'});if(!valid())return;saasMe=d.me;saasSessionMeta=d.session||saasSessionMeta;applySaasPermissions();}
+    await Promise.all([skipCloud?Promise.resolve():saasCheckCloud(),saasLoadMembers(),saasLoadUsage(),saasLoadSessions(),saasLoadDiagnostics(),loadBillingOverview(false),loadProductionGovernance(false)]);if(!valid())return;renderSaasAccount();if(showToast)toast('계정 정보를 새로고침했습니다.');
   }catch(e){if(showToast)toast(e.message||'계정 새로고침 실패');}
 }
 function saasRecordUsageEvent(eventType,templateId='',extra={}){
@@ -10447,7 +10462,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinical-efficiency.js?v=20261031-care-workflow"></script>
 <script src="practice-injection.js?v=20261031-consistency2"></script>
 <script src="practice-injection-workflow.js?v=20261030-consistent1"></script>
-<script src="clinical-workspace.js?v=20261031-care-workflow"></script>
+<script src="clinical-workspace.js?v=20261031-loading-flow"></script>
 <script src="practice-prescription-summary.js?v=20261027knowledge1"></script>
 <script src="practice-prescription-library.js?v=20261030-efficient1"></script>
 <script src="practice-prescription-safety.js?v=20261026korean1"></script>
