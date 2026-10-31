@@ -1050,7 +1050,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="carestep-workflow.css?v=flow-20261017">
   <link rel="stylesheet" href="home-access-clinic.css?v=readable-20261017">
 <link rel="stylesheet" href="carestep-ui.css?v=deployment-check-20261019a">
-<link rel="stylesheet" href="clinic-organization.css?v=20261031-today-single-column">
+<link rel="stylesheet" href="clinic-organization.css?v=20261031-density-followup">
 <style>
 .billing-contract-comparison{margin:16px 0;border:1px solid var(--line);border-radius:12px;padding:14px;background:#f8faff;line-height:1.65;font-size:14px}.billing-contract-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.billing-contract-columns span,.billing-contract-columns strong,.billing-contract-columns small{display:block}.billing-contract-columns strong{font-size:19px;margin:5px 0;color:#143d83}.billing-contract-comparison p{font-size:13px}.billing-contract-comparison summary{cursor:pointer;padding:8px 0;font-weight:700}.billing-catalog-row{padding:10px 0;border-top:1px solid var(--line)}.billing-catalog-row b,.billing-catalog-row span,.billing-catalog-row small{display:block}#billingReadStatus[data-state="error"]{color:#9a372d;background:#fff3f0;padding:12px;border-radius:10px}@media(max-width:600px){.billing-contract-columns{grid-template-columns:minmax(0,1fr)}.billing-contract-columns>div+div{border-top:1px solid var(--line);padding-top:12px}}
 </style>
@@ -1205,7 +1205,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
         </section>
 
         <section id="workFirstDashboard" class="work-first-dashboard" aria-label="오늘 처리할 업무">
-          <div class="work-first-head"><div><p class="eyebrow"></p><h3>오늘 업무</h3><p>오늘 확인할 업무와 처리 상태를 확인하세요.</p></div><button id="refreshWorkFirst" class="btn btn-secondary" type="button">업무 새로고침</button></div>
+          <div class="work-first-head"><button id="refreshWorkFirst" class="btn btn-secondary" type="button">업무 새로고침</button></div>
           <div class="work-first-kpis" role="list">
             <button type="button" class="work-first-kpi active" data-work-filter="all"><span>오늘 전체 업무</span><b id="workCountAll">0</b><small>우선순위순</small></button>
             <button type="button" class="work-first-kpi" data-work-filter="preventive"><span>오늘 접종·사상충</span><b id="workCountPreventive">0</b><small>오늘 예방 예정</small></button>
@@ -10411,7 +10411,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-read-flow.js?v=flow-20261017"></script>
 <script src="home-access-clinic.js?v=clarity-20261020f"></script>
 <script src="clinic-care.js?v=clarity-20261020g"></script>
-<script src="clinic-organization.js?v=20261031-today-single-column"></script>
+<script src="clinic-organization.js?v=20261031-density-followup"></script>
 <script src="staff-training.js?v=20261031-read-reuse"></script>
 <script src="staff-training-clinic.js?v=20261020a"></script>
 <script src="practice-intake.js?v=20261023a"></script>
@@ -10468,6 +10468,6 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-navigation.js?v=20261031-clinical-simple1"></script>
 <script src="practice-tools.js?v=20261031-injection-combo1"></script>
 <script src="clinic-today-ward.js?v=20261030-todayward1"></script>
-<script src="practice-clinic.js?v=20261030-todayward1"></script>
+<script src="practice-clinic.js?v=20261031-density-followup"></script>
 </body>
 </html>

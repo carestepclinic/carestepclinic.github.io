@@ -409,3 +409,36 @@ body:has(#builder.view.active-view) #caseContextBar,body:has(#builder.view.activ
  #patients .clinic-patient-row{padding:10px;gap:8px}
  #appView .clinic-section-tabs button{min-height:44px}
 }
+
+/* Compact overview and administrative surfaces; preserve document reading space. */
+@media screen{
+ #dashboard :is(#practiceTodayRoot,#wardTodayRoot){max-width:none}
+ #dashboard .clinic-today-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+ #dashboard .clinic-today-toolbar .clinic-section-tabs{flex:1;margin:0;min-width:0}
+ #dashboard .pt-today-layout{grid-template-columns:minmax(0,1fr);gap:10px}
+ #dashboard .pt-today-layout .pt-card{padding:12px;margin-bottom:0}
+ #dashboard .pt-today-summary{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+ #dashboard .pt-today-summary :is(h3,p){margin:0}
+ #dashboard .pt-today-summary>button{margin-left:auto}
+ #dashboard #workFirstDashboard{margin:12px 0;padding:12px}
+ #dashboard .work-first-head{justify-content:flex-end}
+ #dashboard #clinicHomePrimary{margin-top:0}
+ #dashboard .clinic-section-tabs{margin-top:4px}
+ .clinic-dashboard-management{margin-top:12px;padding:10px 12px;border:1px solid #dce5f2;border-radius:12px;background:#fff}
+ .clinic-dashboard-management>summary{cursor:pointer;font-weight:650;min-height:44px;display:list-item;align-content:center}
+ .clinic-dashboard-management-body{display:flex;flex-wrap:wrap;gap:8px;padding-top:8px}
+ .clinic-dashboard-management-body>.subscription-banner{flex-basis:100%;margin:0}
+ #clinicSyncStatus[data-state="idle"]{display:none}
+ #training .st-empty{padding:16px}
+ #training .st-loading{min-height:0;padding:16px}
+ #patients .timeline-welcome{min-height:0;padding:12px}
+ #patients .health-timeline{margin-top:10px;padding-top:10px}
+ body:has(#appView) .st-dialog:has(form)>header{padding:14px 16px;gap:10px}
+ body:has(#appView) .st-dialog:has(form)>.st-dialog-body{padding:16px}
+ body:has(#appView) .st-dialog form{gap:12px}
+ body:has(#appView) .st-dialog form fieldset{padding:12px}
+ body:has(#appView) .pt-dialog{padding:16px}
+ body:has(#appView) .pt-dialog>.pt-heading{top:-16px;padding:8px 0;margin-bottom:12px}
+ body:has(#appView) .pt-dialog .pt-card{padding:12px;margin:10px 0}
+ #appView .pt .pt-empty{padding:16px}
+}

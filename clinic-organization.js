@@ -79,6 +79,7 @@
   for(const id of ['workFirstBacklog','workFirstCleanupStatus']){const n=$(id);if(n)clinical.append(n);}
   const attention=document.createElement('section');attention.append(box);
   createTabs(queue,[['attention','상담·승인·발송 확인',attention],['clinical','진료·예방·후속관리',clinical]],{prefix:'clinicToday',selected:'attention'});
+  const toolbar=document.createElement('div');toolbar.className='clinic-today-toolbar';const nav=queue.querySelector('[role="tablist"]');nav.before(toolbar);toolbar.append(nav);const refresh=$('refreshWorkFirst');if(refresh)toolbar.append(refresh);host.querySelector('.work-first-head')?.remove();
   grid.append(queue);updateTodayCounts();
   const explorer=document.createElement('details');explorer.id='clinicTaskExplorer';explorer.className='clinic-task-explorer';explorer.innerHTML='<summary>상담·일정 상세 보기</summary>';
   const body=document.createElement('div');body.setAttribute('aria-label','상담과 일정 목록');explorer.append(body);
@@ -92,6 +93,19 @@
   function open(kind){if(typeof go==='function')go('dashboard');explorer.open=true;controls.select(kind);explorer.scrollIntoView({block:'start',behavior:'smooth'});body.querySelector('[aria-selected="true"]')?.focus({preventScroll:true});}
   global.carestepOpenClinicList=open;
 
+ }
+ function mountDashboardManagement(){
+  const dashboard=$('dashboard');if(!dashboard||$('clinicDashboardManagement'))return;
+  const menu=document.createElement('details');menu.id='clinicDashboardManagement';menu.className='clinic-dashboard-management';
+  menu.innerHTML='<summary>관리 메뉴</summary><div class="clinic-dashboard-management-body"></div>';dashboard.append(menu);
+  const body=menu.lastElementChild;
+  function arrange(){
+   for(const id of ['clinicHomeDirectoryOpen1','clinicHomeAccessDashboard']){const el=$(id);if(el&&el.parentElement!==body)body.append(el);}
+   const banner=$('subscriptionBanner');if(banner){const warning=banner.classList.contains('blocked')||banner.classList.contains('warn');if(warning){if(banner.parentElement!==dashboard)dashboard.insertBefore(banner,menu);}else if(banner.parentElement!==body)body.prepend(banner);}
+   if(dashboard.lastElementChild!==menu)dashboard.append(menu);
+  }
+  new MutationObserver(arrange).observe(dashboard,{childList:true});
+  const banner=$('subscriptionBanner');if(banner)new MutationObserver(arrange).observe(banner,{attributes:true,attributeFilter:['class']});arrange();
  }
  function syncNav(){
   const group=$('clinicMaterialNav');if(group){const children=[...group.querySelectorAll('.nav-item')];group.hidden=!children.some(n=>!n.classList.contains('saas-hidden')&&!n.classList.contains('role-ui-hidden'));if(children.some(n=>n.classList.contains('active')))group.open=true;}
@@ -136,7 +150,7 @@
  }
 
  function mount(){
-  mountDashboard();syncNav();mountHospitalManagement();
+  mountDashboard();mountDashboardManagement();syncNav();mountHospitalManagement();
   const bar=$('r61-controls'),settings=$('settings');if(bar&&settings){settings.insertBefore(bar,$('emrSyncCenter'));bar.setAttribute('aria-label','발송·공개·연동 관리');}
   document.querySelector('.nav-list')&&new MutationObserver(syncNav).observe(document.querySelector('.nav-list'),{subtree:true,attributes:true,attributeFilter:['class']});
   const original=global.crmTimelineOpen;timelineOpen=original;

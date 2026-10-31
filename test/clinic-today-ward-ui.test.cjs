@@ -23,7 +23,9 @@ for(const width of [390,1680])test('today inpatient layout and direct patient na
  await p.evaluate(()=>renderWorkFirstDashboard());
  const grid=await p.locator('#clinicHomePrimary').boundingBox(),queue=await p.locator('#clinicTodayQueue').boundingBox();assert.ok(Math.abs(grid.width-queue.width)<2,'today queue uses available width');
  const overview=p.locator('#wardTodayRoot');await overview.getByRole('button',{name:/입원 시험환자/}).waitFor();assert.match(await overview.innerText(),/입원 중 1마리 · 개 0 · 고양이 1/);
- const ward=await overview.boundingBox(),ops=await p.locator('#practiceTodayRoot').boundingBox();if(width>1000){assert.ok(ward.x>ops.x);assert.equal(ward.y,ops.y);}else assert.ok(ward.y>=ops.y+ops.height);
+ const ward=await overview.boundingBox(),ops=await p.locator('#practiceTodayRoot').boundingBox();assert.ok(ward.y>=ops.y+ops.height);assert.ok(ops.height<120);
+ const menu=p.locator("#clinicDashboardManagement");assert.equal(await menu.getAttribute("open"),null);await menu.locator("summary").click();assert.ok(await p.locator("#clinicHomeDirectoryOpen1").isVisible());
+ await p.evaluate(()=>document.getElementById("subscriptionBanner").classList.add("blocked"));await p.waitForFunction(()=>document.getElementById("subscriptionBanner").parentElement.id==="dashboard");
  assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));await p.screenshot({path:path.join(root,'../today-ward-'+width+'.png'),fullPage:true});
  await overview.getByRole('button',{name:/입원 시험환자/}).click();await p.locator('.cl-workspace[data-section=ward]').waitFor();await p.waitForFunction(()=>document.querySelector('.cl-ward-detail')?.textContent.includes('입원 시험환자'));
  assert.match(await p.locator('.cl-ward-detail').innerText(),/입원 시험환자/);
