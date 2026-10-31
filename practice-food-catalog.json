@@ -1,10 +1,22 @@
 {
   "schemaVersion": 1,
   "updatedAt": "2026-10-31",
-  "scope": "로얄캐닌 한국 공식 vet-products 사이트맵 및 힐스 한국 공식 Prescription Diet 사이트맵. 공식 등재 목록이며 판매 재고를 보증하지 않습니다.",
+  "scope": "한국 공식 사이트 공개 제품 기준. 로얄캐닌·힐스 처방식, 내츄럴발란스·퓨리나 일반 라인업 및 퓨리나 병원 전용 제품군. 할인·묶음·체험팩 중복 제외. 국내 실시간 재고나 비공개 세부 제품 전체를 보장하지 않습니다.",
   "sources": [
     "https://www.royalcanin.com/kr/ko-kr/sitemap/sitemap-products.xml",
-    "https://www.hillspet.co.kr/sitemap.xml"
+    "https://www.hillspet.co.kr/sitemap.xml",
+    {
+      "brand": "naturalbalance",
+      "url": "https://naturalbalance.co.kr/",
+      "checkedAt": "2026-10-31",
+      "coverage": "공식 내비게이션 43개 제품 상세페이지·열량 이미지 확인"
+    },
+    {
+      "brand": "purina",
+      "url": "https://www.purinapetcare.co.kr/",
+      "checkedAt": "2026-10-31",
+      "coverage": "공식몰 개·고양이 일반 판매제품 99개, 병원 전용 제품군 11개. 상세 이미지 또는 공식 답변에서 확정한 열량만 입력."
+    }
   ],
   "items": [
     {
@@ -3365,6 +3377,3531 @@
       "note": "",
       "sourceUrls": [
         "https://www.royalcanin.com/kr/dogs/products/vet-products/hypoallergenic-puppy-3318"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-774",
+      "brand": "naturalbalance",
+      "name": "오리지날 울트라 닭 & 보리 레시피 (작은알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3590,
+        "unit": "kcal/kg",
+        "evidence": "3,590 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=774&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20260507/EB82B4ECB694EB9FB4_EC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCEB8BAD26EBB3B4EBA6AC28EC8898ECA09529_09.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-185",
+      "brand": "naturalbalance",
+      "name": "오리지날 울트라 팻독 닭 & 연어 레시피 (큰알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3070,
+        "unit": "kcal/kg",
+        "evidence": "3,070 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=185&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20241112/EC9AB8ED8AB8EB9DBC20ED8CBBEB8F8520EB8BAD26EC97B0EC96B420EBA088EC8B9CED94BC20EAB095EC9584ECA780_EC82ACEBA38C28ED81B0EC958C29_EC8381EC84B8ED8E98EC9DB4ECA780_06.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-883",
+      "brand": "naturalbalance",
+      "name": "헬스 프로텍션 닭 & 현미 & 호박 레시피 (작은알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3502,
+        "unit": "kcal/kg",
+        "evidence": "3,502 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=883&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250507/EB82B4ECB694EB9FB4_EC8381EC84B8ED8E98EC9DB4ECA780_ED97ACEC8AA4ED9484EBA19CED858DEC8598_EB8BAD2CED9884EBAFB826ED98B8EBB09528EC8AA4EBAAB029_12.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-885",
+      "brand": "naturalbalance",
+      "name": "헬스 프로텍션 닭 & 현미 & 호박 레시피 (큰알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3502,
+        "unit": "kcal/kg",
+        "evidence": "3,502 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=885&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250507/EB82B4ECB694EB9FB4_EC8381EC84B8ED8E98EC9DB4ECA780_ED97ACEC8AA4ED9484EBA19CED858DEC8598_EB8BAD2CED9884EBAFB826ED98B8EBB09528EB9DBCECA78029_12.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-886",
+      "brand": "naturalbalance",
+      "name": "헬스 프로텍션 연어 & 현미 & 호박 레시피 (큰알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3500,
+        "unit": "kcal/kg",
+        "evidence": "3,500 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=886&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250507/EB82B4ECB694EB9FB4_EC8381EC84B8ED8E98EC9DB4ECA780_ED97ACEC8AA4ED9484EBA19CED858DEC8598_EC97B0EC96B42CED9884EBAFB826ED98B8EBB09528EB9DBCECA78029_12.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-884",
+      "brand": "naturalbalance",
+      "name": "헬스 프로텍션 닭 & 현미 & 호박 퍼피 레시피 (작은알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3614,
+        "unit": "kcal/kg",
+        "evidence": "3,614 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=884&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250507/EB82B4ECB694EB9FB4_EC8381EC84B8ED8E98EC9DB4ECA780_ED97ACEC8AA4ED9484EBA19CED858DEC8598_EB8BAD2CED9884EBAFB826ED98B8EBB09528ED8DBCED94BC29_12.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-1005",
+      "brand": "naturalbalance",
+      "name": "스페셜라이즈 뉴트리션 센서티브 스킨&스터먹 포뮬라 (큰알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3605,
+        "unit": "kcal/kg",
+        "evidence": "3,605 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=1005&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20260113/EB82B4ECB694EB9FB4_EC8AA4ED8E98EC859CEB89B4ED8AB8EBA6ACEC8598_EC84BCEC849CED8BB0EBB88C26EC8AA4ED82A826EC8AA4ED84B0EBA8B9_13.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-1006",
+      "brand": "naturalbalance",
+      "name": "스페셜라이즈 뉴트리션 조인트&머슬 헬스 포뮬라 (큰알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3590,
+        "unit": "kcal/kg",
+        "evidence": "3,590 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=1006&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20260113/EB82B4ECB694EB9FB4_EC8AA4ED8E98EC859CEB89B4ED8AB8EBA6ACEC8598_ECA1B0EC9DB8ED8AB826EBA8B8EC8AACED97ACEC8AA4_13.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-1004",
+      "brand": "naturalbalance",
+      "name": "스페셜라이즈 뉴트리션 다이제티브&조인트 헬스 포뮬라 (작은알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3595,
+        "unit": "kcal/kg",
+        "evidence": "3,595 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=1004&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20260113/EB82B4ECB694EB9FB4_EC8AA4ED8E98EC859CEB89B4ED8AB8EBA6ACEC8598_EB8BA4EC9DB4ECA09CED8BB0EBB88C26ECA1B0EC9DB8ED8AB8_13.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-861",
+      "brand": "naturalbalance",
+      "name": "L.I 그레인프리 연어 & 고구마 레시피 (작은알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 표기 3,360 kcal/kg와 365 kcal/100g가 일치하지 않아 자동 입력하지 않습니다.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=861&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20260728/EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC97B0EC96B426EAB3A0EAB5ACEBA788_EC8AA4EBAAB0_07.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-101",
+      "brand": "naturalbalance",
+      "name": "L.I 그레인프리 연어 & 고구마 레시피 (큰알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3360,
+        "unit": "kcal/kg",
+        "evidence": "3,360 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=101&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20260728/02EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC97B0EC96B426EAB3A0EAB5ACEBA78828EB9DBCECA78029_07.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-841",
+      "brand": "naturalbalance",
+      "name": "L.I 리저브 그레인프리 오리&감자 레시피 (작은알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3571,
+        "unit": "kcal/kg",
+        "evidence": "3,571 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=841&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250106/05d6c5ce5335059e78b85b885845e5de.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-99",
+      "brand": "naturalbalance",
+      "name": "L.I 그레인프리 닭 & 고구마 레시피 (작은알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "conflict",
+      "note": "기존 3,576 kcal/kg·NEW LOOK 3,510 kcal/kg가 함께 안내됩니다. 사용 포장을 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=99&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20251118/copy-1763441200-EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_LIEB8BAD26EAB3A0EAB5ACEBA78828EC8AA4EBAAB029_07.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-100",
+      "brand": "naturalbalance",
+      "name": "L.I 연어 & 현미 퍼피 레시피 (작은알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3740,
+        "unit": "kcal/kg",
+        "evidence": "3,740 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "NEW LOOK 표기 기준입니다. 기존 포장은 표시 열량을 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=100&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20261028/02EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_LIEC97B0EC96B4ED9884EBAFB8_ED8DBCED94BC_06.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-97",
+      "brand": "naturalbalance",
+      "name": "L.I 연어 & 현미 레시피 (큰알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "conflict",
+      "note": "기존 3,300 kcal/kg·NEW LOOK 3,538 kcal/kg가 함께 안내됩니다. 사용 포장을 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=97&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20251022/copy-1761117813-02EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_LIEC97B0EC96B426ED9884EBAFB828EB9DBCECA78029_07.jpg",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20251015/copy-1760514642-02EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_LIEC97B0EC96B426ED9884EBAFB828EB9DBCECA78029_06.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-98",
+      "brand": "naturalbalance",
+      "name": "L.I 닭 & 현미 레시피 (큰알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3445,
+        "unit": "kcal/kg",
+        "evidence": "3,445 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=98&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20251119/copy-1763536240-EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_LIEB8BAD26ED9884EBAFB828EB9DBCECA78029_09.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-479",
+      "brand": "naturalbalance",
+      "name": "L.I 야채 브로스 코팅 레시피 (작은알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3330,
+        "unit": "kcal/kg",
+        "evidence": "3,330 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=479&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20241112/EAB095EC9584ECA780_LIEC95BCECB18420EBB88CEBA19CEC8AA4ECBD94ED8C8520EBA088EC8B9CED94BC28EC8AA4EBAAB029_EC8381EC84B8ED8E98EC9DB4ECA780_05.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-186",
+      "brand": "naturalbalance",
+      "name": "L.I 야채 레시피 (큰알)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3480,
+        "unit": "kcal/kg",
+        "evidence": "3,480 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=186&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20260311/copy-1773217679-03EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_LIEC95BCECB184_EC82ACEBA38CEC84B1EBB684.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-260",
+      "brand": "naturalbalance",
+      "name": "크런치 비스켓 리얼 닭 간식",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": {
+        "value": 3100,
+        "unit": "kcal/kg",
+        "evidence": "3,100 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=260&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20230921/EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_ED81ACEB9FB0ECB998EBB984EC8AA4ECBC9328ECB998ED82A829_06.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-261",
+      "brand": "naturalbalance",
+      "name": "크런치 비스켓 리얼 연어 간식",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": {
+        "value": 3380,
+        "unit": "kcal/kg",
+        "evidence": "3,380 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=261&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20240821/EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_ED81ACEB9FB0ECB998EBB984EC8AA4ECBC9328EC97B0EC96B429_06.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-845",
+      "brand": "naturalbalance",
+      "name": "크런치 비스켓 리얼 땅콩버터간식",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": {
+        "value": 3540,
+        "unit": "kcal/kg",
+        "evidence": "3,540 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=845&cate_no=63",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20240816/copy-1723776919-EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_ED81ACEB9FB0ECB998EBB984EC8AA4ECBC9328EB9585ECBDA9EBB284ED84B029_05.jpg",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20240816/copy-1723776842-EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_ED81ACEB9FB0ECB998EBB984EC8AA4ECBC9328EB9585ECBDA9EBB284ED84B029_05.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-103",
+      "brand": "naturalbalance",
+      "name": "오리지날 울트라 닭 & 연어 레시피",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3920,
+        "unit": "kcal/kg",
+        "evidence": "3,920 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=103&cate_no=75",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20260715/EB82B4ECB694EB9FB4_EC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCEB8BAD26EC97B0EC96B428ECBAA329_EBA6ACEB89B4EC96BC_08.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-187",
+      "brand": "naturalbalance",
+      "name": "오리지날 울트라 그레인프리 인도어 닭 & 연어 레시피",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3800,
+        "unit": "kcal/kg",
+        "evidence": "3,800 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=187&cate_no=75",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20260715/EB82B4ECB694EB9FB4_EC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCEC9DB8EB8F84EC96B4EB8BAD26EC97B0EC96B428ECBAA329_EBA6ACEB89B4EC96BC_10.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-191",
+      "brand": "naturalbalance",
+      "name": "오리지날 울트라 팻캣 닭 & 연어 레시피",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3200,
+        "unit": "kcal/kg",
+        "evidence": "3,200 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=191&cate_no=75",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20260720/EB82B4ECB694EB9FB4_EC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCED8CBBECBAA328ECBAA329_EBA6ACEB89B4EC96BC_10.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-188",
+      "brand": "naturalbalance",
+      "name": "L.I 그레인프리 닭 & 완두 레시피",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3590,
+        "unit": "kcal/kg",
+        "evidence": "3,590 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=188&cate_no=75",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250328/copy-1743128413-KakaoTalk_20250328_110808214.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-190",
+      "brand": "naturalbalance",
+      "name": "L.I 그레인프리 연어 & 완두 레시피",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3500,
+        "unit": "kcal/kg",
+        "evidence": "3,500 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=190&cate_no=75",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20241112/LI20EC97B0EC96B426EC9984EB919020EBA088EC8B9CED94BC20EAB3A0EC9691EC9DB4EC82ACEBA38C_EC8381EC84B8ED8E98EC9DB4ECA780_08.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-907",
+      "brand": "naturalbalance",
+      "name": "울트라 프로틴 리얼 치킨 키튼 캣 레시피",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3530,
+        "unit": "kcal/kg",
+        "evidence": "3,530 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=907&cate_no=75",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250806/copy-1754467937-EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCED9484EBA19CED8BB428EBA6ACEC96BCECB998ED82A8ED82A4ED8ABC29_12.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-909",
+      "brand": "naturalbalance",
+      "name": "울트라 프로틴 리얼 치킨 캣 레시피",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3530,
+        "unit": "kcal/kg",
+        "evidence": "3,530 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=909&cate_no=75",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250708/EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCED9484EBA19CED8BB428EBA6ACEC96BCECB998ED82A829_12.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-908",
+      "brand": "naturalbalance",
+      "name": "울트라 프로틴 리얼 살몬 & 치킨 캣 레시피",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3590,
+        "unit": "kcal/kg",
+        "evidence": "3,590 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=908&cate_no=75",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250708/EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCED9484EBA19CED8BB428EBA6ACEC96BCEC82B4EBAAAC26ECB998ED82A829_12.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-910",
+      "brand": "naturalbalance",
+      "name": "울트라 프로틴+ 이뮨 & 다이제스티브 캣 레시피",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3570,
+        "unit": "kcal/kg",
+        "evidence": "3,570 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=910&cate_no=75",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250708/EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCED9484EBA19CED8BB42B28EC9DB4EBAEA826EB8BA4EC9DB4ECA09CEC8AA4ED8BB0EBB88C29_13.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-911",
+      "brand": "naturalbalance",
+      "name": "울트라 프로틴+ 스킨 & 코트 & 다이제스티브 캣 레시피",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3570,
+        "unit": "kcal/kg",
+        "evidence": "3,570 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=911&cate_no=75",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250708/EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCED9484EBA19CED8BB42B28EC8AA4ED82A826ECBD94ED8AB826EB8BA4EC9DB4ECA09CEC8AA4ED8BB0EBB88C29_13.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-263",
+      "brand": "naturalbalance",
+      "name": "오리지날 울트라 닭&닭간 레시피 (파테)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": {
+        "value": 1218,
+        "unit": "kcal/kg",
+        "evidence": "1,218 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=263&cate_no=76",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20260810/EB82B4ECB694EB9FB4_EC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCECBAA3ECBA94_EB8BAD26EB8BADEAB084_EBA6ACEB89B4EC96BC_05.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-284",
+      "brand": "naturalbalance",
+      "name": "오리지날 울트라 오션피쉬 레시피 (파테)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 페이지에 1,029 kcal/kg와 126 kcal/100g가 함께 안내됩니다. 캔 규격과 포장을 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=284&cate_no=76",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20260810/EB82B4ECB694EB9FB4_EC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCECBAA3ECBA94_EC98A4EC8598ED94BCEC89AC_EBA6ACEB89B4EC96BC_05.jpg",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20230710/EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCEC98A4EC8598ED94BCEC89AC28ECBAA3ECBA9429_06.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-281",
+      "brand": "naturalbalance",
+      "name": "오리지날 울트라 인도어 닭 레시피 (파테)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": {
+        "value": 1107,
+        "unit": "kcal/kg",
+        "evidence": "1,107 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=281&cate_no=76",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20260810/EB82B4ECB694EB9FB4_EC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCECBAA3ECBA94_EC9DB8EB8F84EC96B4EB8BAD_EBA6ACEB89B4EC96BC_05.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-282",
+      "brand": "naturalbalance",
+      "name": "오리지날 울트라 참치&새우 레시피 (파테)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": {
+        "value": 1070,
+        "unit": "kcal/kg",
+        "evidence": "107 kcal/100g",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기 · kcal/kg로 단위 환산"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=282&cate_no=76",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20230707/copy-1688716448-EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCECB0B8ECB99826EC8388EC9AB028ECBAA3ECBA9429_06.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-292",
+      "brand": "naturalbalance",
+      "name": "울트라 프로틴 리얼 치킨 캣 레시피 (파테)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": {
+        "value": 94,
+        "unit": "kcal/can",
+        "packageGrams": 79,
+        "evidence": "94 kcal/캔 · 79g",
+        "basis": "공식 제품 상세 이미지의 해당 맛·규격 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=292&cate_no=76",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250709/copy-1752017262-EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCED9484EBA19CED8BB428ED8C8CED858C29_11.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-912",
+      "brand": "naturalbalance",
+      "name": "울트라 프로틴 리얼 덕 캣 레시피 (파테)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": {
+        "value": 94,
+        "unit": "kcal/can",
+        "packageGrams": 79,
+        "evidence": "94 kcal/캔 · 79g",
+        "basis": "공식 제품 상세 이미지의 해당 맛·규격 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=912&cate_no=76",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250709/copy-1752017262-EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCED9484EBA19CED8BB428ED8C8CED858C29_11.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-293",
+      "brand": "naturalbalance",
+      "name": "울트라 프로틴 리얼 살몬 캣 레시피 (파테)",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": {
+        "value": 94,
+        "unit": "kcal/can",
+        "packageGrams": 79,
+        "evidence": "94 kcal/캔 · 79g",
+        "basis": "공식 제품 상세 이미지의 해당 맛·규격 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=293&cate_no=76",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250709/copy-1752017674-EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCED9484EBA19CED8BB428ED8C8CED858C29_11.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-290",
+      "brand": "naturalbalance",
+      "name": "울트라 프로틴 리얼 치킨 그레이비 캣 레시피",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": {
+        "value": 65,
+        "unit": "kcal/can",
+        "packageGrams": 76,
+        "evidence": "65 kcal/캔 · 76g",
+        "basis": "공식 제품 상세 이미지의 해당 맛·규격 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=290&cate_no=76",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250709/EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCED9484EBA19CED8BB428ECBBB529_11.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-291",
+      "brand": "naturalbalance",
+      "name": "울트라 프로틴 리얼 덕 그레이비 캣 레시피",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": {
+        "value": 68,
+        "unit": "kcal/can",
+        "packageGrams": 76,
+        "evidence": "68 kcal/캔 · 76g",
+        "basis": "공식 제품 상세 이미지의 해당 맛·규격 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=291&cate_no=76",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250709/copy-1752018344-EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCED9484EBA19CED8BB428ECBBB529_11.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-287",
+      "brand": "naturalbalance",
+      "name": "울트라 프로틴 리얼 살몬 그레이비 캣 레시피",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": {
+        "value": 66,
+        "unit": "kcal/can",
+        "packageGrams": 76,
+        "evidence": "66 kcal/캔 · 76g",
+        "basis": "공식 제품 상세 이미지의 해당 맛·규격 표기"
+      },
+      "status": "verified",
+      "note": "사용 중인 포장의 열량을 우선 확인하세요.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=287&cate_no=76",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20250709/copy-1752018673-EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCED9484EBA19CED8BB428ECBBB529_11.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-955",
+      "brand": "naturalbalance",
+      "name": "울트라 프로틴+ 스킨&코트&다이제스티브 레시피 퓨레 캣",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "treat",
+      "energy": {
+        "value": 1099,
+        "unit": "kcal/kg",
+        "evidence": "1,099 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=955&cate_no=76",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20251029/EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCED9484EBA19CED8BB42BED8C8CEC9AB0ECB99828EC8AA4ED82A826ECBD94ED8AB826EB8BA4EC9DB4ECA09CEC8AA4ED8BB0EBB88C29_13.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "nb-956",
+      "brand": "naturalbalance",
+      "name": "울트라 프로틴+ 이뮨&다이제스티브 레시피 퓨레 캣",
+      "aliases": [
+        "내추럴발란스",
+        "내츄럴발란스",
+        "Natural Balance"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "treat",
+      "energy": {
+        "value": 1110,
+        "unit": "kcal/kg",
+        "evidence": "1,110 kcal/kg",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://naturalbalance.co.kr/product/detail.html?product_no=956&cate_no=76",
+        "https://naturalbalance.co.kr/web/upload/NNEditor/20251029/copy-1761699372-EB82B4ECB694EB9FB4_newEC8381EC84B8ED8E98EC9DB4ECA780_EC9AB8ED8AB8EB9DBCED9484EBA19CED8BB42BED8C8CEC9AB0ECB99828EBA9B4EC97AD26EC868CED999429_13.jpg"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-14",
+      "brand": "purina",
+      "name": "덴탈라이프 미니 193g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=14"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-15",
+      "brand": "purina",
+      "name": "덴탈라이프 스몰미디움 198g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=15"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-326",
+      "brand": "purina",
+      "name": "베긴 스트립 베이컨 소고기맛 170g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=326"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-327",
+      "brand": "purina",
+      "name": "베긴 스트립 베이컨 오리지날 170g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=327"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-3968",
+      "brand": "purina",
+      "name": "프로플랜 라지 어덜트 15kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3.5,
+        "unit": "kcal/g",
+        "evidence": "3.5 kcal/g",
+        "basis": "공식몰 제품 문의의 퓨리나 펫케어 답변"
+      },
+      "status": "verified",
+      "note": "공식 제품값과 현재 포장을 대조하세요. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=3968"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-3971",
+      "brand": "purina",
+      "name": "프로플랜 라지 퍼피 15kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=3971"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-6772",
+      "brand": "purina",
+      "name": "프로플랜 라지 퍼피 3kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=6772"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-5510",
+      "brand": "purina",
+      "name": "프로플랜 미디움앤라지 센서티브스킨앤스터먹 12kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=5510"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-6773",
+      "brand": "purina",
+      "name": "프로플랜 미디움앤라지 센서티브스킨앤스터먹 3kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=6773"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-4908",
+      "brand": "purina",
+      "name": "프로플랜 슈레드블렌드 닭고기와쌀 15.9kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=4908"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1776",
+      "brand": "purina",
+      "name": "프로플랜 스몰앤토이 센서티브스킨앤스터먹 2.5kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1776"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1777",
+      "brand": "purina",
+      "name": "프로플랜 스몰앤토이 센서티브스킨앤스터먹 7kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3.8,
+        "unit": "kcal/g",
+        "evidence": "3.8 kcal/g",
+        "basis": "공식 제품 상세 이미지의 대사에너지 표기"
+      },
+      "status": "verified",
+      "note": "공식 제품값과 현재 포장을 대조하세요. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1777"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1774",
+      "brand": "purina",
+      "name": "프로플랜 스몰앤토이 어덜트 2.5kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1774"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1775",
+      "brand": "purina",
+      "name": "프로플랜 스몰앤토이 어덜트 7kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3.8,
+        "unit": "kcal/g",
+        "evidence": "3.8 kcal/g",
+        "basis": "공식몰 제품 문의의 퓨리나 펫케어 답변"
+      },
+      "status": "verified",
+      "note": "공식 제품값과 현재 포장을 대조하세요. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1775"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1773",
+      "brand": "purina",
+      "name": "프로플랜 스몰앤토이 퍼피 7kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1773"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-12018",
+      "brand": "purina",
+      "name": "프로플랜 토이 퍼피 베이비독 2.27kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=12018"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-2974",
+      "brand": "purina",
+      "name": "프로플랜 퍼포먼스 30/20 치킨 17kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=2974"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-4017",
+      "brand": "purina",
+      "name": "프로플랜 퍼포먼스 30/20 치킨 22.7kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=4017"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-6997",
+      "brand": "purina",
+      "name": "프로플랜 퍼포먼스 스타터 12KG",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=6997"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-13",
+      "brand": "purina",
+      "name": "덴탈라이프 캣 연어 51g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=13"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-12",
+      "brand": "purina",
+      "name": "덴탈라이프 캣 치킨 51g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=12"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-3658",
+      "brand": "purina",
+      "name": "캣차우 인도어 2.86kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 문의 답변의 열량은 포장과 추가 대조가 필요해 자동 입력하지 않습니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=3658"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-3656",
+      "brand": "purina",
+      "name": "캣차우 컴플리트 1.42kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=3656"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-5593",
+      "brand": "purina",
+      "name": "캣차우 컴플리트 11.3kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=5593"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-3657",
+      "brand": "purina",
+      "name": "캣차우 컴플리트 2.86kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=3657"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-9873",
+      "brand": "purina",
+      "name": "캣차우 컴플리트 6.8kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=9873"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1041",
+      "brand": "purina",
+      "name": "파티믹스 내추럴 참치 60g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1041"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1039",
+      "brand": "purina",
+      "name": "파티믹스 내추럴 치킨 60g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1039"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-75",
+      "brand": "purina",
+      "name": "파티믹스 믹스그릴 60g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=75"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-72",
+      "brand": "purina",
+      "name": "파티믹스 비치사이드 60g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=72"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-8221",
+      "brand": "purina",
+      "name": "파티믹스 비치사이드 850g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=8221"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-76",
+      "brand": "purina",
+      "name": "파티믹스 오리지날 60g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=76"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-8220",
+      "brand": "purina",
+      "name": "파티믹스 오리지날 850g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=8220"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1037",
+      "brand": "purina",
+      "name": "파티믹스 와일드카우보이 60g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1037"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-73",
+      "brand": "purina",
+      "name": "파티믹스 치즈크레이지 60g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=73"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-302",
+      "brand": "purina",
+      "name": "파티믹스 치킨 그레이비 60g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=302"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-74",
+      "brand": "purina",
+      "name": "파티믹스 캘리포니아 60g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=74"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-77",
+      "brand": "purina",
+      "name": "파티믹스 피크닉 60g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=77"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-2116",
+      "brand": "purina",
+      "name": "팬시피스트 노령묘 치킨 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": {
+        "value": 93.5,
+        "unit": "kcal/can",
+        "packageGrams": 85,
+        "evidence": "93.5 kcal/can · 85g",
+        "basis": "공식몰 제품 문의의 퓨리나 펫케어 답변"
+      },
+      "status": "verified",
+      "note": "공식 제품값과 현재 포장을 대조하세요. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=2116"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-11429",
+      "brand": "purina",
+      "name": "팬시피스트 닭고기 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=11429"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-49",
+      "brand": "purina",
+      "name": "팬시피스트 로얄 참치 & 게살맛 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=49"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-44",
+      "brand": "purina",
+      "name": "팬시피스트 로얄 참치 그레이비 소스 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "treat",
+      "energy": {
+        "value": 50,
+        "unit": "kcal/can",
+        "packageGrams": 85,
+        "evidence": "50 kcal/can · 85g",
+        "basis": "공식몰 제품 문의의 퓨리나 펫케어 답변"
+      },
+      "status": "verified",
+      "note": "공식 제품값과 현재 포장을 대조하세요. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=44"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-48",
+      "brand": "purina",
+      "name": "팬시피스트 로얄 참치 젤리 소스 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=48"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1994",
+      "brand": "purina",
+      "name": "팬시피스트 메들리 투스카니 참치 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1994"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1862",
+      "brand": "purina",
+      "name": "팬시피스트 메들리 프리마베라 연어 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1862"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1713",
+      "brand": "purina",
+      "name": "팬시피스트 메들리 프리마베라 치킨 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1713"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1746",
+      "brand": "purina",
+      "name": "팬시피스트 메들리 플로렌틴 참치 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": {
+        "value": 70,
+        "unit": "kcal/can",
+        "packageGrams": 85,
+        "evidence": "70 kcal/can · 85g",
+        "basis": "공식몰 제품 문의의 퓨리나 펫케어 답변"
+      },
+      "status": "verified",
+      "note": "공식 제품값과 현재 포장을 대조하세요. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1746"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1861",
+      "brand": "purina",
+      "name": "팬시피스트 메들리 플로렌틴 치킨 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1861"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-61",
+      "brand": "purina",
+      "name": "팬시피스트 브로스 순살 닭고기&고구마와 당근 40g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식몰 단종 예정 표기 · 보유 제품 포장을 확인하세요. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=61"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-11427",
+      "brand": "purina",
+      "name": "팬시피스트 비프&치킨 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=11427"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-3500",
+      "brand": "purina",
+      "name": "팬시피스트 쁘띠 딜라이트 대구 50g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식몰 단종 예정 표기 · 보유 제품 포장을 확인하세요. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=3500"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-2734",
+      "brand": "purina",
+      "name": "팬시피스트 쁘띠 딜라이트 연어 50g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=2734"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-2733",
+      "brand": "purina",
+      "name": "팬시피스트 쁘띠 딜라이트 참치 50g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=2733"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-2732",
+      "brand": "purina",
+      "name": "팬시피스트 쁘띠 딜라이트 치킨 50g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=2732"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-11425",
+      "brand": "purina",
+      "name": "팬시피스트 연어 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=11425"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-11424",
+      "brand": "purina",
+      "name": "팬시피스트 참치와 흰살생선 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=11424"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-2107",
+      "brand": "purina",
+      "name": "팬시피스트 청키 치킨 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=2107"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-11426",
+      "brand": "purina",
+      "name": "팬시피스트 치킨 하트 앤 리버 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=11426"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-2108",
+      "brand": "purina",
+      "name": "팬시피스트 키튼 흰살생선 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=2108"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-2114",
+      "brand": "purina",
+      "name": "팬시피스트 키튼치킨 85g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=2114"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-57",
+      "brand": "purina",
+      "name": "팬시피스트 퓨레키스 닭가슴살&참치 플레이크 40g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식몰 단종 예정 표기 · 보유 제품 포장을 확인하세요. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=57"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-59",
+      "brand": "purina",
+      "name": "팬시피스트 퓨레키스 참치&참치 플레이크 40g",
+      "aliases": [
+        "Purina",
+        "Fancy Feast"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식몰 단종 예정 표기 · 보유 제품 포장을 확인하세요. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=59"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1016",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 7세이상 노령묘 1.4kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3.5,
+        "unit": "kcal/g",
+        "evidence": "3.5 kcal/g",
+        "basis": "공식몰 제품 문의의 퓨리나 펫케어 답변"
+      },
+      "status": "verified",
+      "note": "공식 제품값과 현재 포장을 대조하세요. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1016"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-7194",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 건강 닭고기 퓨레 14g*4포",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=7194"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-7195",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 건강 참치 퓨레 14g*4포",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=7195"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1022",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 비뇨기계 관리 1.4kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3500,
+        "unit": "kcal/kg",
+        "evidence": "3500 kcal/kg",
+        "basis": "공식몰 제품 문의의 퓨리나 펫케어 답변"
+      },
+      "status": "verified",
+      "note": "공식 제품값과 현재 포장을 대조하세요. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1022"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-7111",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 성묘용 닭고기 1.5kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=7111"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-9945",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 성묘용 비뇨기계 관리 6kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=9945"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1017",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 성묘용 순살 연어 1.5kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1017"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-4907",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 성묘용 순살 연어 6kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=4907"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1018",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 성묘용 실내고양이 1.4kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1018"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-7112",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 성묘용 실내고양이 6kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=7112"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-7110",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 성묘용 장과 피부 건강 1.4kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=7110"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1019",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 성묘용 체중관리 1.4kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1019"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1020",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 성묘용 헤어볼관리 1.4kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3500,
+        "unit": "kcal/kg",
+        "evidence": "3500 kcal/kg",
+        "basis": "공식몰 제품 문의의 퓨리나 펫케어 답변"
+      },
+      "status": "verified",
+      "note": "공식 제품값과 현재 포장을 대조하세요. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1020"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-7196",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 소화 건강 참치 젤리 14g*4포",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "treat",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=7196"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-2425",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 습식 바다생선맛 70g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=2425"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-2426",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 습식 비뇨기계 관리 70g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=2426"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-2428",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 습식 인도어 70g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=2428"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-2424",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 습식 키튼 70g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=2424"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-2427",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 습식 헤어볼 70g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=2427"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-1021",
+      "brand": "purina",
+      "name": "퓨리나 원 캣 키튼 치킨 1.4kg",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=1021"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-753",
+      "brand": "purina",
+      "name": "프로플랜 캣 7세이상 노령묘 1.5kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3800,
+        "unit": "kcal/kg",
+        "evidence": "3800 kcal/kg",
+        "basis": "공식몰 제품 문의의 퓨리나 펫케어 답변"
+      },
+      "status": "verified",
+      "note": "공식 제품값과 현재 포장을 대조하세요. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=753"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-752",
+      "brand": "purina",
+      "name": "프로플랜 캣 성묘용 비뇨기계 관리 1.5kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3.7,
+        "unit": "kcal/g",
+        "evidence": "3.7 kcal/g",
+        "basis": "공식몰 제품 문의의 퓨리나 펫케어 답변"
+      },
+      "status": "verified",
+      "note": "공식 제품값과 현재 포장을 대조하세요. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=752"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-750",
+      "brand": "purina",
+      "name": "프로플랜 캣 성묘용 실내 고양이 1.5kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=750"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-748",
+      "brand": "purina",
+      "name": "프로플랜 캣 성묘용 연어 1.5kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 3700,
+        "unit": "kcal/kg",
+        "evidence": "3700 kcal/kg",
+        "basis": "공식몰 제품 문의의 퓨리나 펫케어 답변"
+      },
+      "status": "verified",
+      "note": "공식 제품값과 현재 포장을 대조하세요. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=748"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-849",
+      "brand": "purina",
+      "name": "프로플랜 캣 성묘용 연어 7kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=849"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-4593",
+      "brand": "purina",
+      "name": "프로플랜 캣 습식 노령묘용 85g",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=4593"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-4594",
+      "brand": "purina",
+      "name": "프로플랜 캣 습식 비뇨기계 건강 85g",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=4594"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-4595",
+      "brand": "purina",
+      "name": "프로플랜 캣 습식 살몬 키튼 그레이비 85g",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=4595"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-4874",
+      "brand": "purina",
+      "name": "프로플랜 캣 습식 치킨 어덜트 성묘용 85g",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=4874"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-747",
+      "brand": "purina",
+      "name": "프로플랜 캣 키튼 1.5kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 4000,
+        "unit": "kcal/kg",
+        "evidence": "4000 kcal/kg",
+        "basis": "공식몰 제품 문의의 퓨리나 펫케어 답변"
+      },
+      "status": "verified",
+      "note": "공식 제품값과 현재 포장을 대조하세요. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=747"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-754",
+      "brand": "purina",
+      "name": "프로플랜 캣 키튼 스타터 1.5kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": {
+        "value": 4100,
+        "unit": "kcal/kg",
+        "evidence": "4100 kcal/kg",
+        "basis": "공식몰 제품 문의의 퓨리나 펫케어 답변"
+      },
+      "status": "verified",
+      "note": "공식 제품값과 현재 포장을 대조하세요. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=754"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-850",
+      "brand": "purina",
+      "name": "프로플랜 캣 키튼 스타터 8kg",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=850"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-6553",
+      "brand": "purina",
+      "name": "프로플랜 하이드라케어 75g (12포)",
+      "aliases": [
+        "Purina",
+        "Pro Plan"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "supplement",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. 간식·보충 급여 제품입니다.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=6553"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-8481",
+      "brand": "purina",
+      "name": "프리스키 그레이비 바다생선 70g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=8481"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-8482",
+      "brand": "purina",
+      "name": "프리스키 그레이비 참치 70g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=8482"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-8484",
+      "brand": "purina",
+      "name": "프리스키 그레이비 치킨 70g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지에서 이 제품의 열량을 확정하지 못했습니다. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=8484"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-8483",
+      "brand": "purina",
+      "name": "프리스키 그레이비 키튼 치킨 70g",
+      "aliases": [
+        "Purina"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "purpose": "food",
+      "energy": {
+        "value": 0.73,
+        "unit": "kcal/g",
+        "evidence": "0.73 kcal/g",
+        "basis": "공식몰 제품 문의의 퓨리나 펫케어 답변"
+      },
+      "status": "verified",
+      "note": "공식 제품값과 현재 포장을 대조하세요. ",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/shop/product_view.php?pd_idx=8483"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-family-ha",
+      "brand": "purina",
+      "name": "프로플랜 HA · 식이 알러지 관리 (제품군)",
+      "aliases": [
+        "Purina",
+        "Pro Plan",
+        "PPVD"
+      ],
+      "species": [],
+      "form": "unknown",
+      "purpose": "reference",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 병원 전용 제품 안내의 제품군 이름만 확인했습니다. 대상 동물·세부 제품·제형·포장 열량을 확인한 뒤 직접 입력하세요.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/ppvd/pro_plan.php"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-family-drm",
+      "brand": "purina",
+      "name": "프로플랜 DRM · 문제성 피부 관리 (제품군)",
+      "aliases": [
+        "Purina",
+        "Pro Plan",
+        "PPVD"
+      ],
+      "species": [],
+      "form": "unknown",
+      "purpose": "reference",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 병원 전용 제품 안내의 제품군 이름만 확인했습니다. 대상 동물·세부 제품·제형·포장 열량을 확인한 뒤 직접 입력하세요.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/ppvd/pro_plan.php"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-family-ur",
+      "brand": "purina",
+      "name": "프로플랜 UR · 비뇨기계 결석 관리 (제품군)",
+      "aliases": [
+        "Purina",
+        "Pro Plan",
+        "PPVD"
+      ],
+      "species": [],
+      "form": "unknown",
+      "purpose": "reference",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 병원 전용 제품 안내의 제품군 이름만 확인했습니다. 대상 동물·세부 제품·제형·포장 열량을 확인한 뒤 직접 입력하세요.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/ppvd/pro_plan.php"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-family-nf",
+      "brand": "purina",
+      "name": "프로플랜 NF · 신장 기능 관리 (제품군)",
+      "aliases": [
+        "Purina",
+        "Pro Plan",
+        "PPVD"
+      ],
+      "species": [],
+      "form": "unknown",
+      "purpose": "reference",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 병원 전용 제품 안내의 제품군 이름만 확인했습니다. 대상 동물·세부 제품·제형·포장 열량을 확인한 뒤 직접 입력하세요.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/ppvd/pro_plan.php"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-family-en",
+      "brand": "purina",
+      "name": "프로플랜 EN · 소화기계 문제 관리 (제품군)",
+      "aliases": [
+        "Purina",
+        "Pro Plan",
+        "PPVD"
+      ],
+      "species": [],
+      "form": "unknown",
+      "purpose": "reference",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 병원 전용 제품 안내의 제품군 이름만 확인했습니다. 대상 동물·세부 제품·제형·포장 열량을 확인한 뒤 직접 입력하세요.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/ppvd/pro_plan.php"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-family-jm",
+      "brand": "purina",
+      "name": "프로플랜 JM · 관절 질환 관리 (제품군)",
+      "aliases": [
+        "Purina",
+        "Pro Plan",
+        "PPVD"
+      ],
+      "species": [],
+      "form": "unknown",
+      "purpose": "reference",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 병원 전용 제품 안내의 제품군 이름만 확인했습니다. 대상 동물·세부 제품·제형·포장 열량을 확인한 뒤 직접 입력하세요.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/ppvd/pro_plan.php"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-family-dm",
+      "brand": "purina",
+      "name": "프로플랜 DM · 혈당 관리 (제품군)",
+      "aliases": [
+        "Purina",
+        "Pro Plan",
+        "PPVD"
+      ],
+      "species": [],
+      "form": "unknown",
+      "purpose": "reference",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 병원 전용 제품 안내의 제품군 이름만 확인했습니다. 대상 동물·세부 제품·제형·포장 열량을 확인한 뒤 직접 입력하세요.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/ppvd/pro_plan.php"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-family-om",
+      "brand": "purina",
+      "name": "프로플랜 OM · 체중조절 과체중 관리 (제품군)",
+      "aliases": [
+        "Purina",
+        "Pro Plan",
+        "PPVD"
+      ],
+      "species": [],
+      "form": "unknown",
+      "purpose": "reference",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 병원 전용 제품 안내의 제품군 이름만 확인했습니다. 대상 동물·세부 제품·제형·포장 열량을 확인한 뒤 직접 입력하세요.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/ppvd/pro_plan.php"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-family-nc",
+      "brand": "purina",
+      "name": "프로플랜 NC · 신경 질환 관리 (제품군)",
+      "aliases": [
+        "Purina",
+        "Pro Plan",
+        "PPVD"
+      ],
+      "species": [],
+      "form": "unknown",
+      "purpose": "reference",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 병원 전용 제품 안내의 제품군 이름만 확인했습니다. 대상 동물·세부 제품·제형·포장 열량을 확인한 뒤 직접 입력하세요.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/ppvd/pro_plan.php"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-family-fortiflora",
+      "brand": "purina",
+      "name": "프로플랜 FortiFlora · 유산균 보조제 (제품군)",
+      "aliases": [
+        "Purina",
+        "Pro Plan",
+        "포티플로라"
+      ],
+      "species": [],
+      "form": "unknown",
+      "purpose": "reference",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 병원 전용 제품 안내의 제품군 이름만 확인했습니다. 대상 동물·세부 제품·제형·포장 열량을 확인한 뒤 직접 입력하세요.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/ppvd/pro_plan.php"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "purina-family-liveclear",
+      "brand": "purina",
+      "name": "프로플랜 Liveclear · 고양이 알러지 완화 사료 (제품군)",
+      "aliases": [
+        "Purina",
+        "Pro Plan",
+        "리브클리어"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "unknown",
+      "purpose": "reference",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 병원 전용 제품 안내의 제품군 이름만 확인했습니다. 대상 동물·세부 제품·제형·포장 열량을 확인한 뒤 직접 입력하세요.",
+      "sourceUrls": [
+        "https://www.purinapetcare.co.kr/ppvd/pro_plan.php"
       ],
       "checkedAt": "2026-10-31"
     }

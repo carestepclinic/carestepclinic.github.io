@@ -1,10 +1,10 @@
 const {test,before,after}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),http=require('node:http'),{chromium}=require('playwright');
 const root=path.resolve(__dirname,'..');let browser,server,origin;
 const catalog=require('../practice-food-catalog.json'),foods=require('../practice-nutrition-foods.js');
-test('catalog contains both official lineups, explicit missing values and normalized calorie units',()=>{
- assert.equal(catalog.items.length,141);assert.equal(new Set(catalog.items.map(p=>p.id)).size,141);
+test('catalog contains four official lineups, explicit missing values and normalized calorie units',()=>{
+ assert.equal(catalog.items.length,294);assert.equal(new Set(catalog.items.map(p=>p.id)).size,294);
  assert.equal(catalog.items.filter(p=>p.brand==='royalcanin').length,83);assert.equal(catalog.items.filter(p=>p.brand==='hills').length,58);
- assert.ok(catalog.items.every(foods.valid));assert.equal(catalog.items.filter(p=>p.energy).length,86);
+ assert.equal(catalog.items.filter(p=>p.brand==='naturalbalance').length,43);assert.equal(catalog.items.filter(p=>p.brand==='purina'&&p.purpose!=='reference').length,99);assert.equal(catalog.items.filter(p=>p.purpose==='reference').length,11);assert.ok(catalog.items.every(foods.valid));assert.equal(catalog.items.filter(p=>p.energy).length,140);
  assert.ok(catalog.items.filter(p=>p.status!=='verified').every(p=>p.energy===null));
  assert.equal(catalog.items.find(p=>p.id==='rc-3911').energy.value,4120);
  assert.equal(catalog.items.find(p=>p.id==='rc-4022').energy,null); // discrepant dry/wet values on source page
@@ -12,6 +12,15 @@ test('catalog contains both official lineups, explicit missing values and normal
  assert.ok(foods.search(catalog.items,{species:'cat',query:'리커버리'}).length);
  assert.ok(foods.search(catalog.items,{species:'cat',brand:'hills',query:'i/d'}).every(p=>p.species.includes('cat')));
  assert.equal(foods.search(catalog.items,{species:'cat',query:'u/d'}).length,0);
+ assert.equal(catalog.items.find(p=>p.id==='nb-774').energy.value,3590);
+ for(const id of ['nb-861','nb-99','nb-97','nb-284','purina-3658'])assert.equal(catalog.items.find(p=>p.id===id).energy,null);
+ assert.equal(foods.search(catalog.items,{brand:'naturalbalance',query:'내추럴발란스'}).length,43);
+ assert.ok(foods.search(catalog.items,{species:'dog',form:'reference',query:'PPVD'}).some(x=>x.id==='purina-family-ha'));
+ assert.equal(foods.search(catalog.items,{species:'dog',query:'Liveclear'}).length,0);
+ assert.ok(foods.search(catalog.items,{form:'dry'}).every(x=>!x.purpose||x.purpose==='food'));
+ assert.ok(!foods.canApply(catalog.items.find(x=>x.id==='nb-260')));
+ assert.ok(!foods.valid({...catalog.items[0],sourceUrls:[]}));assert.ok(!foods.valid({...catalog.items[0],sourceUrls:['https://naturalbalance.co.kr.evil.test/']}));
+ assert.ok(!foods.valid({...catalog.items.find(x=>x.purpose==='reference'),energy:{value:1,unit:'kcal/g'},status:'verified'}));
 });
 before(async()=>{browser=await chromium.launch({headless:true,executablePath:process.env.HQ_TEST_BROWSER});server=http.createServer((req,res)=>{try{const f=path.join(root,new URL(req.url,'http://local').pathname);res.setHeader('Content-Type',f.endsWith('.js')?'text/javascript':f.endsWith('.css')?'text/css':f.endsWith('.html')?'text/html':'application/octet-stream');res.end(fs.readFileSync(f));}catch{res.statusCode=404;res.end();}}).listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));origin='http://127.0.0.1:'+server.address().port;});
 after(async()=>{await browser.close();await new Promise(r=>server.close(r));});
@@ -43,4 +52,16 @@ for(const width of [390,1440])test('food selection, calories, manual override an
 test('catalog is lazy, failed loads retry without blocking manual entry, and requests are reused',async t=>{
  const p=await openPage(t);await context(p);let calls=0;await p.route('**/practice-food-catalog.json*',r=>{calls++;return calls===1?r.fulfill({status:503,body:'unavailable'}):r.continue();});assert.equal(calls,0);await openKind(p,'nutrition');const f=p.locator('[data-calc=nutrition]');await f.locator('[data-food-retry]').waitFor();await f.locator('[data-food-retry]').click();await p.waitForFunction(()=>document.querySelector('[data-food-product]').options.length>1);assert.equal(calls,2);
  await openKind(p,'fluid');await openKind(p,'nutrition');assert.equal(calls,2);
+});
+
+for(const width of [390,1440])test('new brands, treats and unknown product families '+width,async t=>{
+ const p=await openPage(t,width);await context(p);await openKind(p,'nutrition');const f=p.locator('[data-calc=nutrition]'),select=f.locator('[data-food-product]');await p.waitForFunction(()=>document.querySelector('[data-food-product]')?.options.length>1);
+ await f.locator('[data-food-brand]').selectOption('naturalbalance');await select.selectOption('nb-774');assert.equal(await f.locator('[name=density]').inputValue(),'3590');assert.equal(await f.locator('[name=unit]').inputValue(),'kcal/kg');
+ await select.selectOption('nb-861');assert.equal(await f.locator('[name=density]').inputValue(),'');assert.match(await f.locator('[data-food-energy]').innerText(),/확인 필요/);
+ await f.locator('[data-food-form]').selectOption('treat');await select.selectOption('nb-260');assert.equal(await f.locator('[name=density]').inputValue(),'');assert.match(await f.locator('[data-food-energy]').innerText(),/3,100.*참고용/);assert.match(await f.locator('[data-food-note]').innerText(),/자동 적용하지/);
+ await f.locator('[data-food-brand]').selectOption('purina');await f.locator('[data-food-form]').selectOption('');await select.selectOption('purina-1775');assert.equal(await f.locator('[name=density]').inputValue(),'3.8');assert.equal(await f.locator('[name=unit]').inputValue(),'kcal/g');
+ await select.selectOption('purina-3971');assert.equal(await f.locator('[name=density]').inputValue(),'');assert.equal(await f.locator('[name=unit]').inputValue(),'');
+ await f.locator('[data-food-form]').selectOption('reference');await select.selectOption('purina-family-ha');assert.match(await f.locator('[data-food-note]').innerText(),/대상 동물/);assert.equal(await f.locator('[name=density]').inputValue(),'');
+ await p.locator('[data-ref-species]').selectOption('cat');await f.locator('[data-food-brand]').selectOption('purina');await select.selectOption('purina-2116');assert.equal(await f.locator('[name=density]').inputValue(),'93.5');assert.equal(await f.locator('[name=unit]').inputValue(),'kcal/can');
+ await f.locator('[data-food-detail]').scrollIntoViewIfNeeded();assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));await p.screenshot({path:path.join(root,'../nutrition-expanded-'+width+'.png')});
 });
