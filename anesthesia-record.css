@@ -218,3 +218,19 @@
 @media(max-width:480px){.ar-pending-grid{grid-template-columns:1fr}}
 
 .ar-value-conflict{color:#b42318}.ar-table td small{display:block;font-size:11px}.ae-save-dock [data-ae-rebase]{grid-column:1/-1;grid-row:auto;position:relative}.ar-sync-status{font-size:12px;color:#526174;margin:4px 0}
+
+/* Anesthesia settings: one location for inhalant, ventilation, oxygen and fluids. */
+.ar-simple .ad-settings{display:block;padding:10px 12px}
+.ar-simple .ad-settings>div{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-items:start}
+.ar-simple .ad-settings>div>p,.ar-simple .ad-settings .ar-fluid-settings p{margin:0}
+.ar-simple .ad-settings .ar-fluid-settings{display:grid;gap:6px;min-width:0}
+.ar-simple .ad-settings button{width:100%;min-height:42px;text-align:left;white-space:normal;overflow-wrap:anywhere}
+.ar-reminder{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;border:1px solid #c5d5eb;border-radius:10px;background:#f3f7fd;margin:8px 0;font-size:14px}
+.ar-reminder[hidden]{display:none}
+.ar-reminder [data-reminder-text]{font-weight:650;flex:1 1 250px}
+.ar-reminder small{flex-basis:100%;color:#52677d;font-size:12px}
+.ar-reminder-due{background:#fff7e6;border-color:#dba340}
+.ar-reminder button{min-height:36px}
+[data-agent-custom][hidden]{display:none!important}
+@media(max-width:700px){.ar-simple .ad-settings>div{grid-template-columns:repeat(2,minmax(0,1fr))}.ar-reminder{font-size:13px}}
+@media print{.ar-reminder{display:none!important}}
