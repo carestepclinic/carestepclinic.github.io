@@ -204,3 +204,11 @@
  #practiceRoot .pt-organized .pt-flow-form{display:block}
  #practiceRoot .pt-organized .pt-flow-form>.pt-flow-result{margin-top:12px}
 }
+
+/* Compact shared labels; calculation and clinical review controls stay unchanged. */
+.pt-organized .pt-an-provenance{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0;font-size:13px;line-height:1.5}
+.pt-organized .pt-an-provenance p{margin:0!important}
+.pt-organized [data-k-reference-status]:empty{display:none}
+.pt-organized [data-nutrition-save]{justify-self:start;margin:4px 0}
+.pt-organized .pt-nutrition-save-scope{display:block;margin:0 0 8px}
+.pt-organized .pt-task-switch+.pt-fluid-plan{padding-top:14px}

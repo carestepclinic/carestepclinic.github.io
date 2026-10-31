@@ -173,7 +173,7 @@
       const minimum=c.el.querySelector('[data-em-pump-min]').value,other=c.el.querySelector('[data-em-other-rate]').value;
       const low=minimum!==''&&r.rate<num(minimum,'펌프 최소 정확 주입속도');
       let total='';if(other!==''){if(!/^(?:\d+\.?\d*|\.\d+)$/.test(other)||!Number.isFinite(+other)||+other>1e6)throw Error('다른 정맥라인 속도를 확인해주세요.');total='<span>다른 라인 포함 '+fmt(r.rate+Number(other))+' mL/hr · '+fmt((r.rate+Number(other))/Number(weight.value))+' mL/kg/hr</span>';}
-      c.out.innerHTML='<strong>'+(confirmed&&!low?'펌프 ':'예상 펌프 ')+fmt(r.rate)+' mL/hr'+(!confirmed||low?' · 확인 전':'')+'</strong><span class="pt-em-setup">'+recipe+' · '+(diluent.value?esc(diluent.selectedOptions[0].textContent):'희석액 선택 필요')+'</span>'+
+      c.out.innerHTML='<strong>'+(confirmed&&!low?'주입속도 ':'예상 주입속도 ')+fmt(r.rate)+' mL/hr'+(!confirmed||low?' · 확인 전':'')+'</strong><span class="pt-em-setup">'+recipe+' · '+(diluent.value?esc(diluent.selectedOptions[0].textContent):'희석액 선택 필요')+'</span>'+
        '<span>이 약물 수액 '+fmt(r.rate/Number(weight.value))+' mL/kg/hr · '+fmt(r.hourly)+' mg/hr</span>'+total+
        (low?'<b class="pt-dose-review">장비의 최소 정확 주입속도 미만입니다. 농도·펌프를 재검토하세요.</b>':'')+
        (!confirmed?'<small>희석액·조제량·주입 경로 확인 후 적용</small>':'')+
@@ -181,7 +181,7 @@
        (r.hours>24?'<small>24시간을 넘는 계획: 제품별 안정성에 따라 백 교체·폐기를 정하고, 전량 소진을 위해 속도를 높이지 마세요.</small>':'')+'</details>';
 
      }
-     else c.out.innerHTML='<span>1회 약물량 '+fmt(r.amount)+' '+d.unit+'</span><strong>'+(d.dilution?'희석 전 원액 ':'준비할 원액 ')+fmt(r.volume)+' mL</strong><small>'+fmt(Number(c.dose.value))+' '+d.unit+'/kg × '+weight.value+' kg ÷ '+fmt(Number(c.stock.value))+' '+d.unit+'/mL</small>'+(r.volume<0.1?'<small class="pt-em-measure">0.1 mL 미만 · 주사기 눈금에 맞는 희석·측정 계획 확인</small>':'');
+     else c.out.innerHTML='<span>1회 약물량 '+fmt(r.amount)+' '+d.unit+'</span><strong>'+(d.dilution?'희석 전 원액량 ':'1회 투여량 ')+fmt(r.volume)+' mL</strong><small>'+fmt(Number(c.dose.value))+' '+d.unit+'/kg × '+weight.value+' kg ÷ '+fmt(Number(c.stock.value))+' '+d.unit+'/mL</small>'+(r.volume<0.1?'<small class="pt-em-measure">0.1 mL 미만 · 주사기 눈금에 맞는 희석·측정 계획 확인</small>':'');
     const doseReview=document.createElement('small');doseReview.dataset.emDoseReview='';doseReview.className=r.doseOutside?'pt-dose-review':'pt-help';doseReview.hidden=!r.doseOutside&&!c.doseTouched;doseReview.textContent=r.doseOutside?'수의사 수정값 · 문헌 범위 밖 · 단위·처방 근거 확인':c.doseTouched?'수의사 수정값 · 입력 용량 환산':'문헌 기준값 환산';c.out.append(doseReview);
     }catch(e){c.out.className='pt-em-result pt-em-pending';c.out.textContent=e.message;}updateQuick(c);
    }

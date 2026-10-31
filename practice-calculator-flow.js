@@ -80,7 +80,7 @@
     else if(child.matches('[data-an-dose-reset],.pt-bar,details'))manage.append(child);
     else{child.classList.add('pt-flow-an-note');header.append(child);}
    }
-   inputs.append(manage);card.append(header,inputs,result);
+   const provenance=document.createElement('div');provenance.className='pt-an-provenance';for(const el of [...inputs.querySelectorAll('[data-an-origin],[data-an-dose-state]')])provenance.append(el);inputs.append(provenance,manage);card.append(header,inputs,result);
   }}
   let frame=0,disposed=false;
   function refresh(){

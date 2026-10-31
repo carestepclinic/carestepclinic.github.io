@@ -92,10 +92,11 @@
   if(settings)for(const control of all('[data-protocol-manage]')){
    control.classList.add('pt-managed-control');
    const form=control.closest('form'),link=document.createElement('button');link.type='button';
-   link.textContent=(form.querySelector('h3')?.textContent||'계산')+' 서식 관리';settings.append(link);
+   link.textContent=({dose:'단일 약물',fluid:'수액',cri:'정맥 주입',potassium:'칼륨',nutrition:'영양',ag:'음이온차',bicarbonate:'중탄산 보정'}[form.dataset.calc]||'')+' 계산 설정';settings.append(link);
    link.onclick=()=>{const panel=form.closest('[data-kind-panel]');if(panel)o.selectKind(panel.dataset.kindPanel);more.open=false;control.classList.add('pt-manage-open');control.open=true;control.scrollIntoView({block:'nearest'});};
    control.addEventListener('toggle',()=>{if(!control.open)control.classList.remove('pt-manage-open');});
    managed.push([control,link]);
+   if(form.dataset.calc==='nutrition'){const quick=document.createElement('button');quick.type='button';quick.dataset.nutritionSave='';quick.textContent='영양 계산 설정 저장';quick.onclick=()=>{link.click();control.querySelector('[data-protocol-save]')?.click();};const label=form.querySelector('[data-nutrition-product]')?.closest('label');if(label){label.after(quick);managed.push([control,quick]);const note=document.createElement('small');note.className='pt-help pt-nutrition-save-scope';note.textContent='저장 범위: RER 배수·제품 열량·단위·급여 횟수';quick.after(note);}}
   }
   // Schedule is one editable summary. Retain the exact parsed per-drug regimen.
   const regimen=document.createElement('details');regimen.className='pt-schedule-summary';regimen.innerHTML='<summary>일정 확인·변경</summary>';
@@ -155,12 +156,13 @@
     const actions=f.querySelector('[data-result-actions]');if(!actions)continue;
     let use=f.querySelector('.pt-result-use');if(!use){use=document.createElement('section');use.className='pt-result-use';use.setAttribute('aria-label','계산 결과 작업');actions.before(use);use.append(actions);}
     hide(use,actions.hidden);
-    const print=actions.querySelector('[data-print]');let extra=use.querySelector('.pt-result-more');if(!extra){extra=document.createElement('details');extra.className='pt-result-more';extra.innerHTML='<summary>저장</summary>';use.append(extra);}if(print){extra.querySelector('[data-print]')?.remove();actions.append(print);}
+    const print=actions.querySelector('[data-print]');let extra=use.querySelector('.pt-result-more');if(!extra){extra=document.createElement('details');extra.className='pt-result-more';extra.innerHTML='<summary>처방 저장</summary>';use.append(extra);}if(print){extra.querySelector('[data-print]')?.remove();actions.append(print);}
     if(f===rx){const save=f.querySelector('.pt-flow-rx-save'),ward=f.querySelector('[data-ward-calculator-import]');
      if(extra&&save&&save.parentElement!==extra)extra.append(save);
      if(ward){const destination=use;if(ward.parentElement!==destination)destination.append(ward);}
      if(ward){set(ward,'입원 처치에 연결');ward.classList.toggle('pt-primary',o.destination?.()==='ward');ward.disabled=!actions.querySelector('[data-checked]')?.checked;}
     }
+    hide(extra,![...extra.children].some(x=>x.tagName!=='SUMMARY'&&!x.hidden&&x.querySelector('button')));
    }
    const injection=q('[data-injection-send]');if(injection&&!injection.closest('.pt-injection-use')){const use=document.createElement('section');use.className='pt-injection-use';use.setAttribute('aria-label','계산 결과 작업');injection.before(use);use.append(q('[data-injection-copy]'),injection);set(injection,'마취기록에 연결');injection.title='투약 대기로 등록';injection.classList.add('pt-primary');}
    if(injection)hide(injection.closest('.pt-injection-use'),injection.hidden&&q('[data-injection-copy]').hidden);
@@ -185,13 +187,13 @@
    selectFluid=value=>{for(const node of nodes)hide(node,value==='plan'?node!==fluidPlan:node===fluidPlan);for(const button of nav.children)button.setAttribute('aria-pressed',String(button.dataset.fluidTask===value));};
    nav.querySelectorAll('button').forEach(button=>button.onclick=()=>selectFluid(button.dataset.fluidTask));
    q('[data-fp-apply]')?.addEventListener('click',()=>selectFluid('convert'));
-   set(q('[data-fp-run]'),'계획 계산');set(fluidPlan.querySelector('h3'),'필요 수액량 계획');set(fluidForm.querySelector('h3'),'속도·총량 환산');
+   set(fluidPlan.querySelector('h3'),'필요 수액량 계획');set(fluidForm.querySelector('h3'),'속도·총량 환산');
    const entry=document.createElement('div'),result=document.createElement('section'),title=fluidPlan.querySelector('h3');
    entry.className='pt-flow-entry';result.className='pt-flow-result';result.innerHTML='<h4>계산 결과</h4>';
    const output=fluidPlan.querySelector('output'),run=q('[data-fp-run]'),apply=q('[data-fp-apply]');
    for(const child of [...fluidPlan.children])if(child!==title)entry.append(child);
-   result.append(entry.querySelector('[data-fp-confirm]').closest('label'),run,output,apply);fluidPlan.append(entry,result);fluidPlan.classList.add('pt-flow-form');
-   selectFluid('plan');
+   result.append(entry.querySelector('[data-fp-confirm]').closest('label'),entry.querySelector('[data-fp-auto]'),run,output,apply);fluidPlan.append(entry,result);fluidPlan.classList.add('pt-flow-form');
+   hide(title,true);fluidPlan.setAttribute('aria-label','필요 수액량 계획');hide(fluidForm.querySelector('h3'),true);fluidForm.setAttribute('aria-label','속도·총량 환산');selectFluid('plan');
   }
   // Consolidate optional tools, while keeping product input and course visible.
   if(med){
@@ -234,8 +236,10 @@
     labelText(v.concentration,(liquid?'제품 농도':'제품 함량')+' · '+v.strengthUnit.value+'/'+per);labelText(v.strengthUnit,liquid?'농도 단위':'함량 단위');labelText(v.dose,'처방 용량 · 1회 기준');labelText(v.doseUnit,'처방 용량 단위');
     const missing=med.querySelector('.pt-remaining');for(const button of missing?.querySelectorAll('button')||[])if(/^(제품 함량|제품 농도)$/.test(button.textContent))set(button,liquid?'제품 농도':'제품 함량');else if(button.textContent==='1회 용량')set(button,'처방 용량');
    }
+   for(const form of all('form[data-calc]'))for(const button of form.querySelectorAll('.pt-remaining [data-field-name]')){if(['confirmed','protocolConfirmed'].includes(button.dataset.fieldName))continue;const field=form.elements[button.dataset.fieldName],label=field?.closest('label')?.firstChild;if(label?.nodeType===3)set(button,label.textContent.trim());}
    const nutrition=q('[data-calc=nutrition]');for(const label of nutrition?.querySelectorAll('label')||[]){const node=label.firstChild;if(node?.nodeType===3&&node.textContent.includes('저장한 급여 제품·횟수만 불러오기'))node.textContent='급여 제품 설정 불러오기';}
    hide(q('[data-injection-text-mode]'),true);
+   const blood=q('[data-kind-panel=transfusion]');hide(blood?.querySelector('h3'),true);const acid=q('[data-kind-panel=acid]');for(const title of acid?.querySelectorAll('form h3')||[])hide(title,true);for(const opt of all('[data-calc=nutrition] option'))if(opt.textContent==='배수 직접 입력 / 병원 계산 서식')set(opt,'배수 직접 입력 / 병원 계산 설정');
    const em=q('[data-kind-panel=emergency]');set(em?.querySelector('h3'),'응급약물');set(em?.querySelector('caption'),'계산 결과');
    const picker=q('[data-cri-picker]');set(picker?.querySelector('summary'),'약물 선택');hide(picker?.parentElement.querySelector(':scope > h4'),true);labelText(q('[data-cri-search]'),'약물 찾기');
    collectGuidance();

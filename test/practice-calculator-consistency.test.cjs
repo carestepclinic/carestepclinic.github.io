@@ -24,7 +24,7 @@ for(const width of [390,768,1440])test('fluid tasks retain inputs, calculate and
  const p=await openPage(t,width);await context(p);await openKind(p,'fluid');const plan=p.locator('.pt-fluid-plan'),f=p.locator('[data-calc=fluid]');
  assert.equal(await plan.isVisible(),true);assert.equal(await f.isVisible(),false);
  for(const [key,value] of Object.entries({dehydration:'5',hours:'12',loss:'2',other:'3'}))await plan.locator('[data-fp='+key+']').fill(value);
- await plan.locator('[data-fp-confirm]').check();await plan.locator('[data-fp-run]').click();assert.match(await plan.locator('output').innerText(),/32.333/);
+ await plan.locator('[data-fp-confirm]').check();assert.equal(await plan.locator('[data-fp-run]').isVisible(),false);assert.match(await plan.locator('output').innerText(),/32.333/);
  await plan.locator('[data-fp-apply]').click();assert.equal(await f.isVisible(),true);assert.equal(await plan.isVisible(),false);
  assert.ok(Math.abs(Number(await f.locator('[name=rate]').inputValue())-32.3333333333)<1e-8);
  assert.match(await f.locator('output').innerText(),/32.333/);
