@@ -71,7 +71,7 @@
   // Anesthesia is mounted lazily. Move each control once, retaining its event bindings.
   function anesthesia(){for(const card of all('.pt-an-card:not([data-flow-card])')){
    card.dataset.flowCard='';const header=document.createElement('div'),inputs=document.createElement('div'),result=document.createElement('div');header.className='pt-flow-an-header';inputs.className='pt-flow-an-inputs';result.className='pt-flow-an-result';
-   const manage=details('농도 저장·불러오기·근거','pt-flow-an-manage');
+   const manage=details('농도 저장·참고문헌','pt-flow-an-manage');
    const children=[...card.children],out=card.querySelector('output');
    for(const child of children){
     if(child.matches('small,h4,[data-an-range]'))header.append(child);
