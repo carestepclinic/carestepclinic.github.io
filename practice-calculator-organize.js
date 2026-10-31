@@ -8,7 +8,7 @@
   b.classList.add('pt-organized');
   const set=(el,value)=>{if(el&&el.textContent!==value)el.textContent=value;};
   const hide=(el,value)=>{if(el&&el.hidden!==value)el.hidden=value;};
-  const groups=[['약물 투여',[['batch','처방 계산'],['emergency','응급약물'],['anesthesia','마취약물']]],['수액·주입',[['fluid','수액 계산'],['cri','정맥 주입·CRI'],['transfusion','수혈 계산']]],['보충·보정',[['potassium','전해질 보충'],['acid','산·염기 계산']]],['영양',[['nutrition','영양·급여 계산']]]];
+  const groups=[['약물 투여',[['batch','처방 계산'],['emergency','응급약물'],['anesthesia','마취약물']]],['수액·주입',[['fluid','수액 계산'],['cri','정맥 주입·CRI'],['transfusion','수혈 계산']]],['보충·보정',[['potassium','전해질 보충'],['acid','산·염기 계산']]],['영양·환산',[['nutrition','영양·급여 계산'],['convert','단위·희석']]]];
   for(const [title,items] of groups){
    const group=document.createElement('section');group.className='pt-calc-group';
    const heading=document.createElement('h4');heading.textContent=title;group.append(heading);
@@ -18,12 +18,12 @@
   // Keep legacy routes addressable, but provide a single prescription menu entry.
   const direct=q('[data-kind=med]');direct.dataset.calcAux='true';direct.hidden=true;toolbar.append(direct);
   q('[data-kind=batch]').onclick=()=>o.selectKind('batch');
-  const convert=q('[data-kind=convert]');convert.dataset.calcAux='true';convert.classList.add('pt-calc-aux');set(convert.querySelector('b'),'단위·희석');toolbar.append(convert);
+  const convert=q('[data-kind=convert]');delete convert.dataset.calcAux;
   const settings=q('.pt-drug-management');if(settings){set(settings.querySelector(':scope > summary'),'병원 설정');toolbar.append(settings);}
   toolbar.querySelector(':scope > strong')?.remove();
   const view=q('.pt-view-options');set(view?.querySelector('summary'),'화면 설정');
-  const more=document.createElement('details');more.className='pt-workspace-more';more.innerHTML='<summary>더보기</summary><div class="pt-workspace-options"></div>';toolbar.append(more);
-  const options=more.querySelector('div');options.append(view,convert);if(settings)options.append(settings);
+  const more=document.createElement('details');more.className='pt-workspace-more';more.innerHTML='<summary>병원 설정</summary><div class="pt-workspace-options"></div>';toolbar.append(more);
+  const options=more.querySelector('div');if(settings){settings.open=true;options.append(settings);}if(view)options.append(view);
   q('.pt-calc-common').append(toolbar);
   queueMicrotask(()=>{const reset=q('.pt-reset-calculation');if(reset){reset.textContent='전체 초기화';reset.title='동물종·체중·모든 계산 입력 초기화';toolbar.insertBefore(reset,more);}const register=q('[data-strength-open]');if(register){register.textContent='약물·함량 등록';register.title='성분별 함량 선택 또는 새 약물 직접 등록';register.setAttribute('aria-haspopup','dialog');toolbar.insertBefore(register,reset||more);}});
 
@@ -93,7 +93,7 @@
    control.classList.add('pt-managed-control');
    const form=control.closest('form'),link=document.createElement('button');link.type='button';
    link.textContent=({dose:'단일 약물',fluid:'수액',cri:'정맥 주입',potassium:'칼륨',nutrition:'영양',ag:'음이온차',bicarbonate:'중탄산 보정'}[form.dataset.calc]||'')+' 계산 설정';settings.append(link);
-   link.onclick=()=>{const panel=form.closest('[data-kind-panel]');if(panel)o.selectKind(panel.dataset.kindPanel);more.open=false;control.classList.add('pt-manage-open');control.open=true;control.scrollIntoView({block:'nearest'});};
+   link.onclick=()=>{const panel=form.closest('[data-kind-panel]');if(panel)o.selectKind(panel.dataset.kindPanel);if(form.dataset.calc==='fluid')selectFluid?.('convert');more.open=false;control.classList.add('pt-manage-open');control.open=true;control.scrollIntoView({block:'nearest'});};
    control.addEventListener('toggle',()=>{if(!control.open)control.classList.remove('pt-manage-open');});
    managed.push([control,link]);
    if(form.dataset.calc==='nutrition'){const quick=document.createElement('button');quick.type='button';quick.dataset.nutritionSave='';quick.textContent='병원 영양 설정 저장';quick.onclick=()=>{link.click();control.querySelector('[data-protocol-save]')?.click();};const label=form.querySelector('[data-nutrition-product]')?.closest('label');if(label){label.after(quick);managed.push([control,quick]);const note=document.createElement('small');note.className='pt-help pt-nutrition-save-scope';note.textContent='저장 범위: RER 배수·제품 열량·단위·급여 횟수';quick.after(note);}}

@@ -16,16 +16,16 @@ for(const width of [390,768,1024,1680])test('grouped navigation, shared prescrip
  const p=await openPage(t,width);await context(p);await p.locator('.pt-prescription-modes').waitFor();assert.equal(await p.locator('.pt-rx-review').isVisible(),false);assert.equal(await p.locator('.pt-rx-view-tabs').isVisible(),false);assert.equal(await p.locator('#globalCaseBadge').isVisible(),false);
  assert.equal(await p.locator('[data-kind-panel=batch]').isVisible(),true);
  assert.equal(await p.locator('.pt-calc-menu [data-kind=med]').count(),0);
- assert.equal(await p.locator('.pt-calc-menu [data-kind=convert]').count(),0);
- assert.deepEqual(await p.locator('.pt-calc-group h4').allTextContents(),['약물 투여','수액·주입','보충·보정','영양']);
+ assert.equal(await p.locator('.pt-calc-menu [data-kind=convert]').count(),1);
+ assert.deepEqual(await p.locator('.pt-calc-group h4').allTextContents(),['약물 투여','수액·주입','보충·보정','영양·환산']);
  await p.locator('[data-prescription-manual]').click();assert.equal(await p.locator('[data-calc=dose]').isVisible(),true);
  await p.locator('[data-injection-mode=injection]').click();assert.equal(await p.locator('[data-injection-calculator]').isVisible(),true);
  await p.locator('[data-injection-mode=oral]').click();assert.equal(await p.locator('[data-rx-text]').isVisible(),true);
  const register=p.getByRole('button',{name:'약물·함량 등록',exact:true});assert.equal(await register.count(),1);assert.equal(await register.isVisible(),true);assert.equal(await register.locator('xpath=ancestor::details').count(),0);await register.click();const dialog=p.getByRole('dialog');await dialog.getByRole('heading',{name:'성분별 기본 함량',exact:true}).waitFor();assert.equal(await dialog.getByRole('button',{name:'목록에 없는 함량 직접 추가',exact:true}).isVisible(),true);assert.ok(await dialog.evaluate(e=>e.scrollWidth<=e.clientWidth+1));await dialog.getByRole('button',{name:'닫기',exact:true}).click();assert.equal(await p.locator('[data-common-weight]').inputValue(),'5');
  assert.equal(await p.locator('.pt-calc-view-tools > .pt-reset-calculation').isVisible(),true);assert.equal(await p.locator('.pt-reset-calculation').innerText(),'전체 초기화');assert.equal(await p.locator('.pt-workspace-more .pt-reset-calculation').count(),0);
- assert.equal(await p.locator('.pt-calc-view-tools .pt-drug-management').isVisible(),false);await p.locator('.pt-workspace-more>summary').click();assert.equal(await p.locator('.pt-calc-view-tools .pt-drug-management > summary').innerText(),'병원 설정');await p.locator('.pt-workspace-more>summary').click();
+ assert.equal(await p.locator('.pt-workspace-more>summary').innerText(),'병원 설정');assert.equal(await p.locator('.pt-calc-view-tools .pt-drug-management').isVisible(),false);await p.locator('.pt-workspace-more>summary').click();assert.equal(await p.locator('.pt-workspace-options .pt-drug-management').isVisible(),true);assert.equal(await p.locator('.pt-drug-management > summary').isVisible(),false);assert.ok(await p.locator('.pt-workspace-options').evaluate(e=>e.scrollWidth<=e.clientWidth+1));await p.locator('.pt-workspace-more>summary').click();var header=await p.locator('.pt-calc-common').boundingBox();assert.ok(header.height<=(width>1150?100:width>800?140:240),'compact header '+header.height);
  assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));
- await p.screenshot({path:path.join(root,'../calculator-reset-visible-'+width+'.png'),fullPage:true});
+ await p.screenshot({path:path.join(root,'../calculator-header-'+width+'.png'),fullPage:false});
 });
 test('manual entry auto-calculates and clears stale results without granting export confirmation',async t=>{
  const p=await openPage(t);await context(p);await p.locator('[data-prescription-manual]').click();const f=p.locator('[data-calc=dose]');
@@ -52,7 +52,7 @@ test('search groups, auxiliary conversion and form state survive category naviga
  await openKind(p,'batch');await p.locator('[data-prescription-manual]').click();assert.equal(await p.locator('[data-calc=dose] [name=dose]').inputValue(),'1.25');
  await p.locator('[data-calc-search]').fill('칼륨');assert.equal(await p.locator('.pt-calc-group:not([hidden])').count(),1);assert.equal(await p.locator('.pt-calc-menu [data-kind=potassium]').isVisible(),true);
  await p.locator('[data-calc-search]').fill('notthere');assert.equal(await p.locator('[data-calc-empty]').isVisible(),true);await p.locator('[data-calc-search]').fill('');
- await p.locator('.pt-workspace-more>summary').click();await p.locator('.pt-calc-view-tools [data-kind=convert]').click();await p.locator('.pt-workspace-more>summary').click();assert.equal(await p.locator('[data-kind-panel=convert]').isVisible(),true);
+ await openKind(p,'convert');assert.equal(await p.locator('[data-kind-panel=convert]').isVisible(),true);
 });
 test('CRI clinical checks are not automatically selected',async t=>{
  const p=await openPage(t);await context(p);await openKind(p,'cri');const f=p.locator('[data-calc=cri]');
@@ -64,7 +64,7 @@ for(const width of [390,1680])test('every calculation destination stays reachabl
  for(const kind of ['emergency','anesthesia','fluid','cri','potassium','transfusion','acid','nutrition','batch']){
   await openKind(p,kind);assert.equal(await p.locator('[data-kind-panel="'+kind+'"]').isVisible(),true,kind);assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1),kind);
  }
- await p.locator('.pt-workspace-more>summary').click();await p.locator('.pt-calc-view-tools [data-kind=convert]').click();await p.locator('.pt-workspace-more>summary').click();await p.waitForTimeout(100);assert.equal(await p.locator('[data-calc-jump]').inputValue(),'convert');
+ await openKind(p,'convert');await p.waitForTimeout(100);assert.equal(await p.locator('[data-calc-jump]').inputValue(),'convert');
  if(width===390)await p.locator('[data-calc-jump]').selectOption('batch');else await openKind(p,'batch');
  assert.equal(await p.locator('.pt-prescription-modes').isVisible(),true);
 });
@@ -132,7 +132,7 @@ test('results precede optional reference management while active safety findings
  assert.equal(await f.locator('[data-private-originals]').evaluate(e=>e.open),false);assert.equal(await f.locator('[data-private-summary]').isVisible(),true);
  const warning=f.locator('[data-safety-findings] .pt-safety-warning').first();assert.equal(await warning.isVisible(),true);
  const resultBox=await f.locator('output').boundingBox(),safetyBox=await f.locator('.pt-rx-safety').boundingBox();assert.ok(safetyBox.y>=resultBox.y+resultBox.height);
- assert.equal(await f.locator('[data-private-prepare]').count(),0);await p.locator('.pt-workspace-more>summary').click();await p.locator('.pt-drug-management>summary').click();assert.equal(await p.locator('[data-library-knowledge]').isVisible(),true);assert.equal(await p.locator('[data-private-prepare]').count(),0);
+ assert.equal(await f.locator('[data-private-prepare]').count(),0);await p.locator('.pt-workspace-more>summary').click();assert.equal(await p.locator('[data-library-knowledge]').isVisible(),true);assert.equal(await p.locator('[data-private-prepare]').count(),0);
 });
 
 test('nine completed prescriptions form a compact three-column grid on desktop',async t=>{
@@ -178,4 +178,14 @@ test('efficiency: preparation candidates use one dose after switching away from 
  await f.locator('.pt-course-settings>summary').click();await f.locator('[name=times]').fill('2');await f.locator('[name=days]').fill('7');await p.waitForFunction(()=>document.querySelector('[data-calc=dose] output').textContent.includes('5.6 정'));
  await f.locator('[name=courseMode]').selectOption('single');await p.waitForFunction(()=>document.querySelector('[data-calc=dose] output').textContent.includes('0.4 정/회'));
  await f.locator('.pt-extra-settings>summary').click();await f.locator('.pt-dispense summary').click();await f.locator('[data-dispense-step]').fill('0.5');await f.locator('[data-dispense-source]').fill('Synthetic fixture');await f.locator('[data-dispense-run]').click();assert.match(await f.locator('[data-dispense-result]').innerText(),/총 0.5 정/);assert.doesNotMatch(await f.locator('[data-dispense-result]').innerText(),/총 7 정/);
+});
+
+for(const width of [390,1680])test('compact context: missing input focus, patient disclosure and one-click settings '+width,async t=>{
+ const p=await openPage(t,width);await openKind(p,'emergency');const common=p.locator('.pt-calc-common');
+ assert.ok((await common.boundingBox()).height<=(width>800?115:250));
+ await p.locator('.pt-flow-context button').click();assert.equal(await p.locator('[data-ref-species]').evaluate(e=>e===document.activeElement),true);
+ await p.locator('[data-ref-species]').selectOption('dog');await p.waitForTimeout(100);await p.locator('.pt-flow-context button').click();assert.equal(await p.locator('[data-common-weight]').evaluate(e=>e===document.activeElement),true);
+ await p.locator('[data-common-weight]').fill('5');await p.locator('.pt-patient-options>summary').click();assert.equal(await p.locator('[data-patient-search]').isVisible(),true);assert.ok(await common.evaluate(e=>e.scrollWidth<=e.clientWidth+1));await p.locator('.pt-patient-options>summary').click();
+ await p.locator('.pt-workspace-more>summary').click();const menu=p.locator('.pt-workspace-options');await menu.getByRole('button',{name:'수액 계산 설정',exact:true}).click();assert.equal(await p.locator('.pt-workspace-more').evaluate(e=>e.open),false);assert.equal(await p.locator('[data-kind-panel=fluid]').isVisible(),true);assert.equal(await p.locator('[data-calc=fluid] [data-protocol-manage]').isVisible(),true);
+ await openKind(p,'convert');assert.equal(await p.locator('[data-calc=convert]').isVisible(),true);assert.equal(await p.locator('[data-common-weight]').inputValue(),'5');
 });

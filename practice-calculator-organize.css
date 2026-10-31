@@ -8,7 +8,7 @@
 #practiceRoot .pt-organized .pt-calc-view-tools .pt-view-options{margin:0}
 #practiceRoot .pt-organized .pt-calc-aux small{display:none}
 #practiceRoot .pt-organized .pt-calc-common{position:sticky;top:0;z-index:5;background:#f7faff;box-shadow:0 2px 5px #1639580d;padding:10px 12px;margin:0 0 12px}
-#practiceRoot .pt-organized .pt-calc-common:has(details[open]){position:static}
+#practiceRoot .pt-organized .pt-calc-common:has(>.pt-patient-options[open],>.pt-calc-view-tools>.pt-workspace-more[open]){position:static}
 #practiceRoot .pt-organized .pt-calc-layout{grid-template-columns:160px minmax(0,1fr);gap:14px}
 #practiceRoot .pt-organized.pt-nav-collapsed .pt-calc-layout{grid-template-columns:minmax(0,1fr)}
 #practiceRoot .pt-organized .pt-reset-calculation{margin:0}
@@ -212,3 +212,33 @@
 .pt-organized [data-nutrition-save]{justify-self:start;margin:4px 0}
 .pt-organized .pt-nutrition-save-scope{display:block;margin:0 0 8px}
 .pt-organized .pt-task-switch+.pt-fluid-plan{padding-top:14px}
+
+/* Shared context uses two short rows, with setup available from one disclosure. */
+#practiceRoot .pt-organized .pt-calc-common{display:grid;grid-template-columns:300px minmax(180px,1fr) auto;grid-template-areas:"inputs patient actions" "inputs status actions";gap:0 12px;align-items:center;padding:8px 10px}
+#practiceRoot .pt-organized .pt-calc-common>[data-common-inputs]{grid-area:inputs;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-width:none;min-width:0}
+#practiceRoot .pt-organized .pt-calc-common>[data-common-inputs]>label{margin:0;min-width:0}
+#practiceRoot .pt-organized .pt-calc-common>.pt-patient-options{grid-area:patient;min-width:0;margin:0;padding:0}
+#practiceRoot .pt-organized .pt-calc-common>.pt-patient-options>summary{padding:4px 0}
+#practiceRoot .pt-organized .pt-calc-common>.pt-patient-options[open]{grid-area:auto;grid-column:1/-1;grid-row:3;order:0;padding-top:8px}
+#practiceRoot .pt-organized .pt-calc-common>.pt-flow-context{grid-area:status;display:flex;justify-content:flex-start;gap:8px;padding:0;font-size:13px;min-width:0}
+#practiceRoot .pt-organized .pt-flow-context button{min-height:28px;padding:2px 8px}
+#practiceRoot .pt-organized .pt-calc-common>.pt-calc-view-tools{grid-area:actions;min-height:0;margin:0;gap:6px;align-self:center}
+#practiceRoot .pt-organized .pt-workspace-options{max-height:70vh;overflow:auto}
+#practiceRoot .pt-organized .pt-workspace-options>.pt-drug-management{border:0;padding:0;margin:0}
+#practiceRoot .pt-organized .pt-workspace-options>.pt-drug-management>summary{display:none}
+#practiceRoot .pt-organized .pt-workspace-options .pt-drug-management>button{margin:4px}
+@media(min-width:801px) and (max-width:1150px){
+ #practiceRoot .pt-organized .pt-calc-common{grid-template-columns:300px minmax(0,1fr);grid-template-areas:"inputs actions" "patient status";gap:4px 12px}
+ #practiceRoot .pt-organized .pt-calc-common>.pt-calc-view-tools{justify-content:flex-end}
+}
+@media(max-width:800px){
+ #practiceRoot .pt-organized .pt-calc-common{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"inputs inputs" "patient status" "actions actions";gap:4px 8px}
+ #practiceRoot .pt-organized .pt-calc-common>.pt-calc-view-tools{justify-content:flex-start;flex-wrap:wrap}
+ #practiceRoot .pt-organized .pt-calc-common>.pt-patient-options[open]{grid-column:1/-1;grid-row:4}
+ #practiceRoot .pt-organized .pt-patient-options>summary{font-size:13px}
+ #practiceRoot .pt-organized .pt-calc-common>.pt-flow-context{font-size:12px;gap:4px;justify-content:flex-end;flex-wrap:wrap}
+ #practiceRoot .pt-organized .pt-flow-context button{min-height:44px;padding:8px}
+ #practiceRoot .pt-organized .pt-workspace-more{position:static}
+ #practiceRoot .pt-organized .pt-calc-view-tools{position:relative}
+ #practiceRoot .pt-organized .pt-workspace-options{left:0;right:auto;top:100%;width:100%;box-sizing:border-box}
+}
