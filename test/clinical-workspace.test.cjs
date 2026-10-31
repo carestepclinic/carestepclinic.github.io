@@ -1046,7 +1046,7 @@ for(const width of [390,1440])test('ward food picker readable filters, paging, k
  await input.fill('직접 입력 사료');await input.press('Escape');assert.equal(await input.inputValue(),'직접 입력 사료');assert.equal(await food.locator('[data-wf-picker]').isVisible(),false);assert.ok(await food.evaluate(e=>e.scrollWidth<=e.clientWidth+1));assert.deepEqual(errors,[]);
 });
 for(const width of [320,390,1440])test('ward handoff sidebar keeps three equal tabs and recording accessible '+width,async t=>{
- const {p,api,caseIds,errors}=await summaryFixture(t,width);await p.locator('.cl-room').first().click();await wardSettled(p);const side=p.locator('.cl-handoff-side'),tabs=p.locator('.cl-ward-tabs button');assert.equal(await tabs.count(),3);assert.match(await side.innerText(),/등록된 인계 없음/);
+ const {p,api,caseIds,errors}=await summaryFixture(t,width);await p.locator('.cl-room').first().click();await wardSettled(p);const side=p.locator('.cl-handoff-side'),tabs=p.locator('.cl-ward-tabs button');assert.equal(await tabs.count(),3);assert.equal(await side.locator(".cl-handoff-empty [data-cl-action=handoff]").count(),1);
  const bounds=await tabs.evaluateAll(es=>es.map(e=>e.getBoundingClientRect().width));assert.ok(Math.max(...bounds)-Math.min(...bounds)<1);assert.ok(await p.locator('.cl-patient-header').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
  await side.locator('[data-cl-action=handoff]').click();const d=p.locator('.cl-dialog');await d.locator('[name=recipientId]').selectOption('owner');await d.locator('[name=currentState]').fill('합성 인계 상태');await wardSave(p);assert.match(await side.innerText(),/합성 인계 상태/);assert.match((await api('/cases/'+caseIds[0])).item.body.lastHandoff.note,/합성 인계 상태/);
  for(const tab of ['measure','fluids','tasks']){await p.locator('[data-cl-action=ward-tab][data-id='+tab+']').click();assert.ok(await side.isVisible());}
@@ -1084,4 +1084,12 @@ for(const width of [390,1440])test('ward measurement auto applies technician wei
  const {p,api,caseIds,errors}=await summaryFixture(t,width);await p.locator('.cl-room').first().click();await wardSettled(p);await p.locator('[data-cl-action=ward-tab][data-id=measure]').click();assert.equal(await p.locator('[data-cl-action=ward-weight]').count(),0);assert.equal(await p.locator('[data-cl-action=ward-check-new]').count(),0);assert.doesNotMatch(await p.locator('.cl-measure-layout').innerText(),/검사·카테터·튜브/);
  await p.locator('.cl-measure-layout [data-cl-action=eff-round]').click();const d=p.locator('.cl-dialog');await d.locator('[name=v_weightKG]').fill('6.3');await wardSave(p);assert.equal((await api('/cases/'+caseIds[0])).item.body.weight,6.3);assert.match(await p.locator('.cl-patient-summary').innerText(),/체중 6.3 kg/);
  await p.locator('[data-cl-action=ward-tab][data-id=tasks]').click();await p.locator('[data-cl-action=ward-medication]').click();assert.match(await p.locator('.cl-dialog').innerText(),/6.3/);assert.deepEqual(errors,[]);
+});
+
+for(const width of [390,1440])test('compact layout: shared measurement time, missing values and independent timestamps '+width,async t=>{
+ const {p,api,caseIds,errors}=await summaryFixture(t,width);await p.locator('.cl-room').first().click();await wardSettled(p);await p.locator('[data-cl-action=ward-tab][data-id=measure]').click();const grid=p.locator('.cl-measure-layout .cl-vital-grid');
+ assert.equal(await grid.locator('.cl-vital-time').count(),1);assert.match(await grid.innerText(),/미측정/);assert.ok(await p.locator('.cl-ward-patient').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
+ assert.ok(await p.locator('.cl-handoff-empty').evaluate(e=>e.getBoundingClientRect().height<=48));
+ await p.screenshot({path:'/tmp/compact-measure-'+width+'.png',fullPage:true});
+ const id=caseIds[0],d=await api('/cases/'+id);await api('/cases/'+id+'/events','POST',{requestKey:'compact-time-test',revision:d.item.revision,kind:'observation',data:{category:'vitals',observedAt:new Date().toISOString(),values:{heartRate:120}}});await (await show(p,'[data-cl-action=refresh]')).click();await wardSettled(p);assert.equal(await grid.locator('.cl-vital-time').count(),0);assert.ok(await grid.locator('div>small').count()>=3);assert.deepEqual(errors,[]);
 });

@@ -204,3 +204,100 @@
 }
 @media(max-width:760px){#practiceRoot .cl-ward-workbar .cl-actions>button{white-space:normal;overflow-wrap:anywhere;min-height:44px}}
 @media(max-width:760px){#practiceRoot .cl-workspace .cl-ward-workbar>.cl-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;gap:8px}#practiceRoot .cl-workspace .cl-ward-workbar>.cl-actions>button{width:100%;margin:0;min-width:0}}
+
+/* Clinical density: remove nested spacing, retain readable type and touch targets. */
+#practiceRoot .cl-workspace{--clinical-gap:8px}
+#practiceRoot .cl-workspace>.cl-toolbar{margin:4px 0 8px;padding:0;gap:8px}
+#practiceRoot .cl-workspace>.cl-toolbar>div:empty{display:none}
+#practiceRoot .cl-workspace>.cl-toolbar h3{margin:0}
+#practiceRoot .cl-workspace .cl-card{padding:12px;margin:8px 0;min-width:0}
+#practiceRoot .cl-workspace .cl-card>.cl-toolbar{margin:0 0 8px;gap:8px}
+#practiceRoot .cl-workspace .cl-card h4{margin:0}
+#practiceRoot .cl-workspace .cl-ward-detail>.cl-toolbar{margin:0 0 8px;padding:0 0 8px;gap:8px}
+#practiceRoot .cl-workspace .cl-ward-detail>.cl-toolbar>div{gap:8px}
+#practiceRoot .cl-workspace .cl-mobile-patient{margin:0;min-width:0}
+#practiceRoot .cl-workspace .cl-mobile-patient label{margin:0}
+#practiceRoot .cl-workspace .cl-patient-sticky{padding:10px 12px}
+#practiceRoot .cl-workspace .cl-patient-header{gap:8px 12px}
+#practiceRoot .cl-workspace .cl-patient-summary{gap:2px 12px}
+#practiceRoot .cl-workspace .cl-patient-info>.cl-care-team{margin:3px 0;gap:4px 12px}
+#practiceRoot .cl-workspace .cl-patient-manage{margin:2px 0 0;padding:0}
+#practiceRoot .cl-workspace .cl-patient-manage>summary{padding:4px 0;min-height:32px;box-sizing:border-box}
+#practiceRoot .cl-handoff-empty{display:flex;justify-content:flex-end;align-items:center;min-height:44px}
+#practiceRoot .cl-handoff-empty button{margin:0}
+#practiceRoot .cl-workspace .cl-handoff-side>.cl-card{padding:8px 10px;margin:0}
+#practiceRoot .cl-workspace .cl-handoff-note{margin:4px 0}
+#practiceRoot .cl-workspace .cl-ward-tabs{margin:6px 0 0;padding:4px;gap:6px}
+#practiceRoot .cl-workspace .cl-ward-tabs button{padding:8px 6px}
+#practiceRoot .cl-workspace .cl-ward-workbar{margin:8px 0 4px;gap:8px}
+#practiceRoot .cl-workspace .cl-ward-workbar p{margin:2px 0}
+#practiceRoot .cl-workspace .cl-calendar-tools{margin:6px 0}
+#practiceRoot .cl-workspace .cl-calendar-legend{margin:4px 0;gap:4px 6px}
+#practiceRoot .cl-workspace .cl-treatment-calendar{margin:6px 0}
+#practiceRoot .cl-workspace .cl-measure-layout{gap:8px;margin-top:8px;align-items:start}
+#practiceRoot .cl-workspace .cl-measure-layout>.cl-card{margin:0}
+#practiceRoot .cl-workspace .cl-vital-grid,#practiceRoot .cl-workspace .cl-monitor-grid{margin:6px 0;gap:6px}
+#practiceRoot .cl-workspace .cl-vital-grid>div,#practiceRoot .cl-workspace .cl-monitor-grid>div{padding:8px;min-width:0}
+#practiceRoot .cl-workspace .cl-vital-time{grid-column:1/-1;margin:0}
+#practiceRoot .cl-workspace details.cl-card:not([open]){padding:0 12px}
+#practiceRoot .cl-workspace details.cl-card>summary{padding:8px 0;min-height:40px;box-sizing:border-box}
+#practiceRoot .cl-workspace .wf-care{gap:8px;margin-top:8px}
+#practiceRoot .cl-workspace :is(.wf-fluid-grid,.wf-feeding-grid){gap:8px}
+#practiceRoot .cl-workspace .wf-care .cl-card{margin:0}
+#practiceRoot .cl-workspace .wf-feeding form{gap:8px}
+#practiceRoot .cl-workspace .wf-today{margin-top:8px}
+#practiceRoot .cl-workspace :is(.cl-message,.cl-save-status):empty{display:none}
+/* Browse controls share one row; titles and clinical contents keep their font sizes. */
+#practiceRoot .cl-workspace .cl-protocol-filters{margin:6px 0 8px;gap:8px}
+#practiceRoot .cl-protocol-browsebar{display:flex;justify-content:space-between;flex-wrap:wrap;align-items:center;gap:4px 12px;margin:4px 0}
+#practiceRoot .cl-protocol-browsebar :is(.cl-protocol-sources,.cl-protocol-shortcuts){display:flex;flex-wrap:wrap;gap:6px;margin:0}
+#practiceRoot .cl-protocol-browsebar button{margin:0}
+#practiceRoot .cl-workspace .cl-protocol-result{margin:6px 0}
+#practiceRoot .cl-workspace .cl-protocol-grid{gap:8px}
+#practiceRoot .cl-workspace .cl-protocol-card{padding:10px 12px}
+#practiceRoot .cl-workspace .cl-protocol-card strong{margin:3px 0}
+#practiceRoot .cl-workspace .cl-protocol-pages{margin:10px 0}
+/* Anesthesia: bring monitoring closer to patient context without shrinking the graph. */
+#practiceRoot .ar-single-page :is(.ar-record-bar,.ar-timing){padding:8px 10px;margin:6px 0;gap:6px}
+#practiceRoot .ar-single-page .ad-patient-setup{margin:2px 0 6px}
+#practiceRoot .ar-single-page .ad-patient-setup dl{gap:4px 12px;margin:4px 0}
+#practiceRoot .ar-single-page .ad-settings{margin:4px 0;padding:4px 0}
+#practiceRoot .ar-single-page .ar-reminder{margin:4px 0;padding:6px 10px}
+#practiceRoot .ar-single-page .ar-duration-summary{padding:4px 8px;gap:4px 16px}
+#practiceRoot .ar-single-page .ar-dashboard{gap:8px}
+#practiceRoot .ar-single-page :is(.ad-entry,.ad-monitor){padding:10px}
+#practiceRoot .ar-single-page .ad-view-settings{margin:6px 0;padding:4px 8px}
+#practiceRoot .ar-single-page :is(.ad-extra-procedure,.ar-history-archive,.ar-pending-medications){margin:8px 0}
+/* Calculator spacing is shared across input, result and safety sections. */
+#practiceRoot .pt-organized :is(.pt-card,.pt-rx-safety){padding:12px;margin-top:8px;margin-bottom:8px}
+#practiceRoot .pt-organized :is(.pt-flow-form,.pt-grid,.pt-rx-common){gap:8px}
+#practiceRoot .pt-organized :is(h3,h4){margin-top:0;margin-bottom:8px}
+#practiceRoot .pt-organized :is(.pt-rx-output,.pt-result-use,.pt-flow-result){margin-top:8px;margin-bottom:8px}
+#practiceRoot .pt-organized .pt-result-use{padding:8px 0}
+#practiceRoot .pt-organized .pt-flow-result>.pt-card{padding:0;border:0;margin:0;box-shadow:none}
+#practiceRoot .pt-organized :is([data-rx-status],[data-safety-coverage]):empty{display:none}
+@media(min-width:901px){
+#practiceRoot .cl-workspace .cl-ward-detail>.cl-toolbar{display:flex;flex-wrap:nowrap;align-items:center}
+#practiceRoot .cl-workspace .cl-ward-detail>.cl-toolbar>div:first-child{flex:1;min-width:0}
+#practiceRoot .cl-workspace .cl-mobile-patient{flex:1;max-width:560px}
+}
+@media(max-width:820px){
+#practiceRoot .cl-workspace :is(button,select),#practiceRoot .ar-single-page :is(button,select),#practiceRoot .pt-organized button{min-height:44px}
+#practiceRoot .cl-workspace :is(.cl-patient-manage>summary,details.cl-card>summary){min-height:44px}
+#practiceRoot .cl-workspace .cl-patient-header{gap:4px}
+#practiceRoot .cl-workspace .cl-handoff-empty{justify-content:flex-start}
+#practiceRoot .cl-workspace .cl-card{padding:10px}
+#practiceRoot .cl-workspace .cl-ward-detail>.cl-toolbar{align-items:center}
+#practiceRoot .cl-workspace .cl-ward-detail>.cl-toolbar>div{width:auto;flex:1;min-width:0}
+#practiceRoot .cl-workspace .cl-mobile-patient{flex:1 1 160px}
+#practiceRoot .cl-workspace .cl-protocol-card{padding:10px}
+}
+#practiceRoot .cl-workspace .cl-ward-tabs button[aria-pressed=true],#practiceRoot .cl-workspace .cl-ward-tabs button[aria-pressed=true]:hover{background:#2854e8!important;color:#fff!important;border-color:#2854e8}
+@media(max-width:1199px){#practiceRoot .cl-workspace .cl-measure-layout{display:grid;grid-template-columns:minmax(0,1fr)}}
+@media(max-width:820px){
+#practiceRoot .cl-workspace .cl-ward-detail>.cl-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 8px}
+#practiceRoot .cl-workspace .cl-ward-detail>.cl-toolbar>div:first-child{display:contents}
+#practiceRoot .cl-workspace .cl-ward-detail>.cl-toolbar [data-cl-action=rooms-back]{grid-column:1;grid-row:1;justify-self:start}
+#practiceRoot .cl-workspace .cl-ward-detail>.cl-toolbar [data-cl-action=discharge]{grid-column:2;grid-row:1;margin:0}
+#practiceRoot .cl-workspace .cl-ward-detail>.cl-toolbar .cl-mobile-patient{grid-column:1/-1;grid-row:2;width:100%;max-width:none}
+}
