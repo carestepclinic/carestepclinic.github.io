@@ -10,7 +10,7 @@ const markup=source.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi,'');
 const compare=source.slice(source.indexOf('function renderBillingContractComparison()'),source.indexOf('\nfunction renderBillingOverview()'));
 let server,browser,origin;
 before(async()=>{
- server=http.createServer((req,res)=>{const path=new URL(req.url,'http://localhost').pathname.slice(1)||'index.html';if(!['index.html','carestep-ui.css','clinic-organization.css','patient-crm.css','carestep-workflow.css','pretendard-variable-1.3.9.woff2'].includes(path)){res.writeHead(404);res.end();return;}res.setHeader('Content-Type',({'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.woff2':'font/woff2'})[extname(path)]);res.end(path==='index.html'?markup:readFileSync(resolve(root,path)));});
+ server=http.createServer((req,res)=>{const path=new URL(req.url,'http://localhost').pathname.slice(1)||'index.html';if(!['index.html','carestep-ui.css','clinic-organization.css','patient-crm.css','clinic-navigation.css','carestep-workflow.css','pretendard-variable-1.3.9.woff2'].includes(path)){res.writeHead(404);res.end();return;}res.setHeader('Content-Type',({'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.woff2':'font/woff2'})[extname(path)]);res.end(path==='index.html'?markup:readFileSync(resolve(root,path)));});
  await new Promise(r=>server.listen(0,'127.0.0.1',r));origin='http://127.0.0.1:'+server.address().port;
  browser=await chromium.launch({headless:true,...(process.env.HQ_TEST_BROWSER?{executablePath:process.env.HQ_TEST_BROWSER}:{})});
 });
@@ -55,7 +55,7 @@ for(const width of [390,1440])test(`Hospital management tabs remain readable and
  const context=await browser.newContext({viewport:{width,height:1000}});t.after(()=>context.close());
  await context.route('**/*',route=>route.request().url().startsWith(origin)?route.continue():route.abort());
  const page=await context.newPage();page.setDefaultTimeout(5000);await page.goto(origin);
- await page.evaluate(()=>{$('appView');function $(id){return document.getElementById(id);}window.$=$;$('appView').classList.remove('hidden');$('loginView').classList.add('hidden');window.ACCOUNT_TABS=new Set(['my','team','billing','security','legal']);window.ACCOUNT_TAB_STORAGE_KEY='test';window.saasMode='demo';});
+ await page.evaluate(()=>{$('appView');function $(id){return document.getElementById(id);}window.$=$;$('appView').classList.remove('hidden');$('loginView').classList.add('hidden');window.ACCOUNT_TABS=new Set(['my','team','billing','security','legal']);window.ACCOUNT_TAB_STORAGE_KEY='test';window.saasMode='demo';window.carestepActiveView=()=>document.querySelector('.view.active-view')?.id;window.carestepRecordHistory=()=>{};});
  await page.evaluate('(()=>{const global=window;const $=window.$;'+management+'\nmountHospitalManagement();mountHospitalManagement();})()');
  await page.evaluate('(()=>{'+tabFunction+'\nwindow.setAccountTab=setAccountTab;})()');
  await page.evaluate('(()=>{const tabs=document.getElementById("accountTabs");'+accountKeyHandler+'})()');
@@ -83,5 +83,26 @@ for(const width of [390,1440])test(`Hospital management tabs remain readable and
  for(const tab of ['my','team','billing','security','legal']){
   await page.evaluate(tab=>setAccountTab(tab),tab);assert.equal(await page.locator(`[data-account-pane="${tab}"]`).isVisible(),true);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'account '+tab+' overflow');
+ }
+});
+
+for(const width of [390,1440])test(`Clinic compact work surfaces preserve inputs and avoid overflow ${width}`,async t=>{
+ const context=await browser.newContext({viewport:{width,height:1000}});t.after(()=>context.close());
+ await context.route('**/*',r=>r.request().url().startsWith(origin)?r.continue():r.abort());
+ const page=await context.newPage();await page.goto(origin);
+ await page.evaluate(()=>{document.getElementById('appView').classList.remove('hidden');document.getElementById('loginView').classList.add('hidden');});
+ for(const view of ['patients','library','builder','followup']){
+  await page.evaluate(view=>{document.querySelectorAll('.view').forEach(e=>e.classList.toggle('active-view',e.id===view));},view);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),view+' page overflow');
+  if(view==='patients'){
+   assert.equal(await page.locator('.patient-crm-detail').evaluate(e=>getComputedStyle(e).minHeight),'0px');
+   assert.ok(await page.locator('.patient-crm-empty').evaluate(e=>e.getBoundingClientRect().height)<160);
+   await page.locator('#patientCrmSearch').fill('시험 환자');assert.equal(await page.locator('#patientCrmSearch').inputValue(),'시험 환자');
+  }
+  if(view==='builder'){
+   await page.locator('#templateSearch').fill('시험 자료');assert.equal(await page.locator('#templateSearch').inputValue(),'시험 자료');
+   assert.ok(await page.locator('#templateSearch').evaluate(e=>e.getBoundingClientRect().height)>=44);
+  }
+  if(process.env.HQ_SCREENSHOTS)await page.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`clinic-density-${view}-${width}.png`)});
  }
 });

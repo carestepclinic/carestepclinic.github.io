@@ -338,3 +338,74 @@ body:has(#builder.view.active-view) #caseContextBar,body:has(#builder.view.activ
 @media screen{.clinic-sync-status{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px;margin:10px 0;border:1px solid #ccd9ed;background:#f6f9ff;border-radius:12px;font-size:13px;line-height:1.6}.clinic-sync-status[data-state=error],.clinic-sync-status[data-state=conflict]{background:#fff5eb;border-color:#dba55f}.clinic-recovery-dialog{width:min(960px,94vw);max-height:85vh;overflow:auto;border:1px solid #cad7e9;border-radius:16px;padding:22px;color:#24364b;font:14px/1.65 'Carestep Pretendard',sans-serif}.clinic-recovery-dialog::backdrop{background:#17263b88}.clinic-recovery-dialog .btn{margin:7px 7px 7px 0;font:inherit;min-height:44px}.clinic-recovery-dialog article{padding:12px;border-bottom:1px solid #dce3ef}.clinic-recovery-table{width:100%;table-layout:fixed;border-collapse:collapse}.clinic-recovery-table td,.clinic-recovery-table th{padding:10px;border:1px solid #dce3ef;overflow-wrap:anywhere;white-space:pre-wrap;text-align:left}.clinic-recovery-dialog input[type=checkbox]{width:18px;height:18px;margin-right:8px}}
 
 @media screen{.clinic-recovery-dialog{box-sizing:border-box;overflow-wrap:anywhere}.clinic-recovery-dialog select{max-width:100%;font:inherit}}
+
+/* Clinic screen density: compact navigation and work lists, preserve reading/print styles. */
+@media screen {
+ #appView .topbar{gap:12px;margin-bottom:12px}
+ #appView :is(#dashboard,#patients,#library,#builder,#followup,#training,#settings,#account)>.section-head{gap:10px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
+ #clinicHomePrimary{gap:12px;margin-top:8px}
+ #clinicHomePrimary .care-task{padding:10px 12px;margin:6px 0;gap:8px}
+ #clinicHomePrimary .recent-patients{padding:12px}
+ #appView .clinic-home-list-links{gap:8px;margin-top:10px}
+ #appView .clinic-task-explorer{padding:12px;margin:12px 0}
+ #appView .clinic-task-explorer :is(.consult-inbox,.schedule-board){padding:10px 0}
+ #appView .clinic-section-tabs{margin:10px 0;padding-bottom:6px;gap:6px}
+ #patients :is(.patient-crm-list-panel,.patient-crm-detail){min-height:0}
+ #patients .patient-crm-detail{margin-top:12px}
+ #patients :is(.patient-crm-list-panel,.patient-crm-detail){padding:12px}
+ #patients .patient-crm-empty{min-height:0;padding:20px 12px}
+ #patients .patient-crm-head{gap:10px;margin-bottom:10px}
+ #patients .patient-crm-kpis{gap:8px;margin:8px 0}
+ #patients .patient-crm-kpi{padding:8px 12px;gap:8px}
+ #patients :is(.clinic-patient-columns,.clinic-patient-row){padding:10px 12px;gap:10px}
+ #patients .clinic-patient-row{min-height:60px}
+ #patients .clinic-patient-cell{gap:3px}
+ #patients .patient-workspace{padding:12px}
+ #patients .clinic-workspace-actions{padding:6px 0;gap:8px}
+ #patients .clinic-workspace-home :is(.patient-detail-head,.patient-detail-section){margin-top:12px}
+ #patients .patient-workspace-fast-record{margin:8px 0}
+ #library .clinic-library-recent{padding:12px;margin:10px 0}
+ #library .clinic-library-recent h4{margin-bottom:8px}
+ #library .clinic-library-filter-status{gap:8px;margin:8px 0;flex-wrap:wrap}
+ #library .clinic-library-filters{padding:10px;margin-bottom:10px}
+ #builder .builder-layout{gap:12px}
+ #builder .builder-controls{padding:14px}
+ #builder :is(.builder-case-context,.case-panel,.crm-builder-picker){padding:12px;margin-block:10px;gap:10px}
+ #builder .wizard-pane-title{margin-bottom:12px;gap:10px}
+ #builder .wizard-steps{gap:6px;margin-block:10px}
+ #builder .case-panel-head{margin-bottom:10px}
+ #followup .followup-hero{padding:12px;margin-bottom:10px}
+ #followup .followup-grid{gap:12px}
+ #followup .followup-card{padding:12px}
+ #followup .followup-message{min-height:0}
+ #appView .pt [data-body]:has(>[data-ops-list]) :is(.pt-toolbar,.pt-status-filters,.pt-filter-grid){gap:8px;margin-block:10px}
+ #appView .pt [data-ops-list] .pt-work-card{padding:12px;margin-block:8px}
+ #appView .pt [data-body]:has(>[data-ops-list]) .pt-template-readiness{padding:12px;margin-block:10px}
+ #training .st-toolbar{gap:10px;margin:10px 0}
+ #training .st-grid{gap:12px}
+ #training .st-card{padding:14px;gap:8px}
+ #training .st-card .st-actions{padding-top:10px}
+ #training .st-list-title{margin:16px 0 8px}
+ #training .st-report{margin:12px 0 16px}
+ #training .st-list-view>.st-card{padding:12px 14px;gap:12px}
+ #subscriptionBillingPanel .billing-head{gap:12px;margin-bottom:12px}
+ #subscriptionBillingPanel .billing-grid{gap:12px}
+ #subscriptionBillingPanel .billing-box{padding:14px}
+ #subscriptionBillingPanel .billing-status-grid{gap:8px;margin:10px 0}
+ #subscriptionBillingPanel .billing-mini{padding:10px}
+ #subscriptionBillingPanel .billing-contract-comparison{margin:12px 0;padding:12px}
+ #subscriptionBillingPanel .billing-contract-columns{gap:12px}
+ #subscriptionBillingPanel .billing-catalog-row{padding:10px 0}
+ #settings.clinic-management-view .settings-category-card{padding:12px}
+ #settings #r61-controls{margin:10px 0}
+ #appView .clinic-management-details{margin-block:10px;padding-block:10px}
+ #followup .followup-guide-top{gap:10px;margin-bottom:10px}
+ #appView .pt [data-body]:has(>.pt-intake-filters) :is(.pt-toolbar,.pt-status-filters,.pt-filter-grid){gap:8px;margin-block:10px}
+ #appView .pt [data-body]:has(>.pt-intake-filters) .pt-card{padding:12px;margin-block:8px}
+ #appView .pt [data-body]:has(>.pt-intake-filters) .pt-footnote{margin-top:12px}
+}
+@media screen and (max-width:700px){
+ #library .section-head .search{margin-top:8px}
+ #patients .clinic-patient-row{padding:10px;gap:8px}
+ #appView .clinic-section-tabs button{min-height:44px}
+}
