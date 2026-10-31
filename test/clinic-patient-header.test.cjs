@@ -12,7 +12,12 @@ for(const width of [390,900,1710])test('patient header groups controls without l
  await p.evaluate(()=>scrollTo(0,0));await p.screenshot({path:'/tmp/clinic-header-'+width+'.png'});
  await p.evaluate(()=>{document.getElementById('patients').classList.remove('active-view');document.getElementById('dashboard').classList.add('active-view');});await p.waitForFunction(()=>!document.querySelector('.topbar').classList.contains('clinic-patient-header'));
  assert.equal(await p.locator('.main > #screenHelpBar').count(),1);assert.equal(await p.locator('.clinic-install-heading > #clinicInstall').count(),1);assert.equal(await p.locator('.topbar-actions > .care-notification-wrap').count(),1);
- await p.evaluate(()=>{document.getElementById('dashboard').classList.remove('active-view');document.getElementById('patients').classList.add('active-view');});await p.locator('.clinic-patient-header-tools #clinicInstall').waitFor();assert.equal(await p.locator('#clinicInstall').count(),1);assert.deepEqual(errors,[]);
+ await p.evaluate(()=>{document.getElementById('dashboard').classList.remove('active-view');document.getElementById('patients').classList.add('active-view');});await p.locator('.clinic-patient-header-tools #clinicInstall').waitFor();assert.equal(await p.locator('#clinicInstall').count(),1);
+ await p.evaluate(()=>{document.getElementById('patients').classList.remove('active-view');document.getElementById('practice').classList.add('active-view');const nav=document.createElement('nav');nav.innerHTML='<button data-tab="intake" aria-pressed="true">사전문진</button>';document.getElementById('practiceRoot').append(nav);});
+ await p.waitForFunction(()=>document.querySelector('.topbar').classList.contains('clinic-patient-header'));assert.equal(await p.locator('.clinic-patient-header-tools #clinicInstall').count(),1);assert.equal(await p.locator('.clinic-patient-header-tools .care-notification-wrap').count(),1);
+ assert.ok(await p.locator('#hospitalBadge').evaluate(e=>e.getBoundingClientRect().top>document.getElementById('viewTitle').getBoundingClientRect().top));
+ await p.evaluate(()=>document.querySelector('#practiceRoot [data-tab="intake"]').setAttribute('aria-pressed','false'));await p.waitForFunction(()=>!document.querySelector('.topbar').classList.contains('clinic-patient-header'));assert.equal(await p.locator('.clinic-install-heading > #clinicInstall').count(),1);
+ assert.deepEqual(errors,[]);
 });
 
 for(const width of [390,1710])test('compact search and patient context '+width,async t=>{

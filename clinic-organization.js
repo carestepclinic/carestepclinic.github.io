@@ -183,7 +183,7 @@
   const placements=new Map();let queued=false;
   function move(node){if(!node)return;if(!placements.has(node)){const marker=document.createComment('patient header position');node.before(marker);placements.set(node,marker);}if(node.parentElement!==tools)tools.append(node);}
   function sync(){
-   queued=false;const active=patient.classList.contains('active-view');header.classList.toggle('clinic-patient-header',active);tools.hidden=!active;
+   queued=false;const intake=$('practice')?.classList.contains('active-view')&&!!document.querySelector('.clinic-navigation [data-tab="intake"][aria-current="page"],#practiceRoot [data-tab="intake"][aria-pressed="true"]');const active=patient.classList.contains('active-view')||intake;header.classList.toggle('clinic-patient-header',active);tools.hidden=!active;
    if(active){move(document.querySelector('.care-global-search'));move(document.querySelector('.care-notification-wrap'));move($('clinicInstall'));move($('screenHelpBar'));}
    else for(const [node,marker] of placements)if(marker.parentNode&&node.parentNode!==marker.parentNode)marker.after(node);
    for(const id of ['patientCrmNewPatient','patientCrmNewGuardian','patientCrmRefresh']){const node=$(id);if(node&&node.parentNode!==groups.register)groups.register.append(node);}
@@ -192,6 +192,7 @@
   }
   const schedule=()=>{if(!queued){queued=true;queueMicrotask(sync);}};
   new MutationObserver(schedule).observe(patient,{attributes:true,attributeFilter:['class']});
+  for(const target of [$('practice'),document.querySelector('.clinic-navigation')].filter(Boolean))new MutationObserver(schedule).observe(target,{childList:true,subtree:true,attributes:true,attributeFilter:['class','aria-current','aria-pressed']});
   new MutationObserver(schedule).observe(header,{childList:true,subtree:true});
   new MutationObserver(schedule).observe(actions,{childList:true,subtree:true});
   sync();
