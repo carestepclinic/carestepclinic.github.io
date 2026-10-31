@@ -25,7 +25,7 @@
   const more=document.createElement('details');more.className='pt-workspace-more';more.innerHTML='<summary>더보기</summary><div class="pt-workspace-options"></div>';toolbar.append(more);
   const options=more.querySelector('div');options.append(view,convert);if(settings)options.append(settings);
   q('.pt-calc-common').append(toolbar);
-  queueMicrotask(()=>{const reset=q('.pt-reset-calculation');if(reset){reset.textContent='전체 초기화';reset.title='동물종·체중·모든 계산 입력 초기화';options.append(reset);}});
+  queueMicrotask(()=>{const reset=q('.pt-reset-calculation');if(reset){reset.textContent='전체 초기화';reset.title='동물종·체중·모든 계산 입력 초기화';toolbar.insertBefore(reset,more);}});
 
   // Prescription text/photo, injections and manual entry share the same destination.
   const modes=q('[aria-label="처방 계산 방식"]');

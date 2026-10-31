@@ -21,10 +21,10 @@ for(const width of [390,768,1024,1680])test('grouped navigation, shared prescrip
  await p.locator('[data-prescription-manual]').click();assert.equal(await p.locator('[data-calc=dose]').isVisible(),true);
  await p.locator('[data-injection-mode=injection]').click();assert.equal(await p.locator('[data-injection-calculator]').isVisible(),true);
  await p.locator('[data-injection-mode=oral]').click();assert.equal(await p.locator('[data-rx-text]').isVisible(),true);
- assert.equal(await p.locator('.pt-calc-view-tools .pt-reset-calculation').isVisible(),false);
+ assert.equal(await p.locator('.pt-calc-view-tools > .pt-reset-calculation').isVisible(),true);assert.equal(await p.locator('.pt-reset-calculation').innerText(),'전체 초기화');assert.equal(await p.locator('.pt-workspace-more .pt-reset-calculation').count(),0);
  assert.equal(await p.locator('.pt-calc-view-tools .pt-drug-management').isVisible(),false);await p.locator('.pt-workspace-more>summary').click();assert.equal(await p.locator('.pt-calc-view-tools .pt-drug-management > summary').innerText(),'병원 설정');await p.locator('.pt-workspace-more>summary').click();
  assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));
- await p.screenshot({path:path.join(root,'../calculator-organized-'+width+'.png'),fullPage:true});
+ await p.screenshot({path:path.join(root,'../calculator-reset-visible-'+width+'.png'),fullPage:true});
 });
 test('manual entry auto-calculates and clears stale results without granting export confirmation',async t=>{
  const p=await openPage(t);await context(p);await p.locator('[data-prescription-manual]').click();const f=p.locator('[data-calc=dose]');
@@ -75,7 +75,7 @@ test('fresh category opens at input and revisiting restores scroll without losin
 });
 test('reset cancels without data loss and confirmed new calculation resets only local input',async t=>{
  const p=await openPage(t);await context(p);await p.locator('[data-rx-text]').fill('carprofen 2 mg/kg po bid for 7 days');await p.locator('.pt-rx-summary-total').first().waitFor();
- await p.locator('.pt-workspace-more>summary').click();p.once('dialog',d=>d.dismiss());await p.locator('.pt-reset-calculation').click();assert.match(await p.locator('[data-rx-text]').inputValue(),/carprofen/);
+ p.once('dialog',d=>d.dismiss());await p.locator('.pt-reset-calculation').click();assert.match(await p.locator('[data-rx-text]').inputValue(),/carprofen/);
  p.once('dialog',d=>d.accept());await p.locator('.pt-reset-calculation').click();await p.waitForTimeout(300);assert.equal(await p.locator('[data-rx-text]').inputValue(),'');assert.equal(await p.locator('[data-common-weight]').inputValue(),'');
  await context(p);await p.locator('[data-rx-text]').fill('carprofen 2 mg/kg po bid for 7 days');await p.locator('.pt-rx-summary-total').first().waitFor();assert.match(await p.locator('.pt-rx-summary-total').first().innerText(),/5.6/);
 });
