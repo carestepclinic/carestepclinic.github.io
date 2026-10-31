@@ -527,3 +527,20 @@ body:has(#builder.view.active-view) #caseContextBar,body:has(#builder.view.activ
 .clinic-followup-task em{flex-shrink:0;font-style:normal;font-size:12px;background:#eff4fc;padding:4px 8px;border-radius:20px;color:#466282}
 .clinic-followup-empty{margin:0 0 4px 8px}
 @media(max-width:780px){.patient-workspace-grid>.clinic-followup-plans{grid-row:auto}.clinic-followup-plans .patient-workspace-section-head{flex-wrap:wrap;gap:6px}}
+
+/* Keep browsing clear; patient identity remains visible while composing. */
+body:not(:has(#builder.view.active-view)) #r61-patient-context{display:none!important}
+body:has(#builder.view.active-view) #r61-patient-context{position:static;margin-bottom:10px;padding:10px 14px;box-shadow:none;gap:8px}
+body:has(#builder.view.active-view) #r61-patient-context[data-ready="true"]>span,
+body:has(#builder.view.active-view) #r61-patient-context .r61-context-create,
+body:has(#builder.view.active-view) #r61-patient-context .r61-context-history{display:none!important}
+body:has(#builder.view.active-view) #r61-patient-context .r61-context-change{margin-left:auto;flex:0 0 auto}
+#globalCaseBadge[hidden],#globalNewCase[hidden]{display:none!important}
+.topbar .care-global-search:has(#careGlobalSearchToggle){display:flex;align-items:center;gap:8px;flex:0 0 auto;width:auto;min-width:0;max-width:100%;margin:0}
+.topbar .care-global-search:has(#careGlobalSearchToggle)::before{display:none}
+#careGlobalSearchToggle{display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;min-height:44px;padding:10px}
+.topbar .care-global-search.is-open{flex:1 1 280px;width:340px;max-width:560px}
+.topbar .care-global-search #careGlobalSearch{min-width:0;padding-left:12px}
+.topbar .care-global-search #careGlobalSearch[hidden]{display:none}
+.topbar .care-global-search-results{top:calc(100% + 8px);min-width:280px}
+@media(max-width:600px){.topbar .care-global-search.is-open{flex-basis:100%;width:100%}.topbar .care-global-search-results{position:absolute;left:0;right:0;min-width:0;max-height:60vh}}

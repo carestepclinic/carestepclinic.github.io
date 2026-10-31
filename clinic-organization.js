@@ -197,8 +197,21 @@
   sync();
  }
 
+ function mountCompactSearch(){
+  const box=document.querySelector('.care-global-search'),input=$('careGlobalSearch');
+  if(!box||!input||$('careGlobalSearchToggle'))return;
+  const toggle=document.createElement('button');toggle.id='careGlobalSearchToggle';toggle.type='button';toggle.className='btn btn-secondary';toggle.title='통합 검색';toggle.setAttribute('aria-label','통합 검색');toggle.setAttribute('aria-controls','careGlobalSearch');toggle.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>';box.prepend(toggle);
+  const setOpen=(open,focus=false)=>{box.classList.toggle('is-open',open);toggle.setAttribute('aria-expanded',String(open));input.hidden=!open;if(!open)$('careGlobalSearchResults')?.classList.add('hidden');if(focus)(open?input:toggle).focus();};
+  toggle.onclick=()=>setOpen(!box.classList.contains('is-open'),true);
+  box.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();setOpen(false,true);}});
+  document.addEventListener('click',event=>{if(!box.contains(event.target))setOpen(false);});
+  box.addEventListener('click',event=>{if(event.target.closest('[data-care-search-type]'))setOpen(false);});
+  box.addEventListener('focusout',()=>queueMicrotask(()=>{if(!box.contains(document.activeElement))setOpen(false);}));
+  setOpen(false);
+ }
+
  function mount(){
-  mountPatientHeader();mountDashboard();mountDashboardManagement();syncNav();mountHospitalManagement();
+  mountPatientHeader();mountCompactSearch();mountDashboard();mountDashboardManagement();syncNav();mountHospitalManagement();
   const bar=$('r61-controls'),settings=$('settings');if(bar&&settings){settings.insertBefore(bar,$('emrSyncCenter'));bar.setAttribute('aria-label','발송·공개·연동 관리');}
   document.querySelector('.nav-list')&&new MutationObserver(syncNav).observe(document.querySelector('.nav-list'),{subtree:true,attributes:true,attributeFilter:['class']});
   const original=global.crmTimelineOpen;timelineOpen=original;
@@ -208,7 +221,7 @@
    const loaded=workspace?.recordsLoaded;if(showWorkspaceTab('records',patient.id)&&loaded)return original(patient,guardian);
   };
  }
- global.ClinicOrganization={mountPatientHeader,clinicalRows,noticeLabel,updateTodayCounts,ageLabel,recentTemplates,taskPreview,createTabs,mountHospitalManagement,organizeWorkspace,showWorkspaceTab,mountDashboard,syncNav};
+ global.ClinicOrganization={mountCompactSearch,mountPatientHeader,clinicalRows,noticeLabel,updateTodayCounts,ageLabel,recentTemplates,taskPreview,createTabs,mountHospitalManagement,organizeWorkspace,showWorkspaceTab,mountDashboard,syncNav};
  if(typeof module!=='undefined')module.exports=global.ClinicOrganization;
  if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();}
 })(typeof window==='undefined'?globalThis:window);
