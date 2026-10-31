@@ -3868,7 +3868,7 @@ window.addEventListener('r61-auth-ready',()=>{clinicReadCoordinator?.invalidate(
 function clinicReadScope(){return JSON.stringify([saasToken,saasMe?.clinic?.id,saasMe?.user?.id]);}
 function clinicReadAllowed(path){return ['/saas/patient-journeys','/saas/messaging/settings','/saas/followup/messages?limit=50'].includes(path);}
 function clinicReadNotice(at,reused){const host=$('followup');if(!host)return;let notice=$('clinicReadNotice');if(!notice){notice=document.createElement('div');notice.id='clinicReadNotice';notice.className='care-read-notice';notice.setAttribute('role','status');const text=document.createElement('span'),button=document.createElement('button');text.dataset.readNotice='1';button.type='button';button.className='btn btn-secondary';button.textContent='지금 다시 확인';button.onclick=()=>{clinicReadCoordinator?.invalidate();loadPatientJourneys(false);loadMessagingSettings(false);loadMessagingJobs(false);loadServerFollowupState(true);};notice.append(text,button);host.prepend(notice);}notice.querySelector('[data-read-notice]').textContent=(reused?'최근 조회 내용':'서버 확인')+' · '+new Date(at).toLocaleTimeString('ko-KR');}
-async function saasRequest(path,opt={}){saasCheckPermissionRequest(path,opt);const {reuseNavigation=false,...requestOptions}=opt;const read=(opt.method||'GET').toUpperCase()==='GET';if(!window.CarestepClinicReadFactory)return saasRawRequest(path,requestOptions);if(!clinicReadCoordinator)clinicReadCoordinator=window.CarestepClinicReadFactory({scope:clinicReadScope});if(!read){clinicReadCoordinator.invalidate();try{return await saasRawRequest(path,requestOptions);}finally{clinicReadCoordinator.invalidate();}}if(!clinicReadAllowed(path))return saasRawRequest(path,requestOptions);const result=await clinicReadCoordinator.read(saasEndpoint()+path,()=>saasRawRequest(path,requestOptions),{reuse:reuseNavigation});if(document.querySelector('.view.active-view')?.id==='followup')clinicReadNotice(result.checkedAt,result.reused);return result.value;}
+async function saasRequest(path,opt={}){saasCheckPermissionRequest(path,opt);const {reuseNavigation=false,...requestOptions}=opt;const read=(opt.method||'GET').toUpperCase()==='GET';if(!window.CarestepClinicReadFactory){if(!read){clinicalLoadRevision++;clinicLoadInvalidatePending();}return saasRawRequest(path,requestOptions);}if(!clinicReadCoordinator)clinicReadCoordinator=window.CarestepClinicReadFactory({scope:clinicReadScope});if(!read){clinicalLoadRevision++;clinicLoadInvalidatePending();clinicReadCoordinator.invalidate();try{return await saasRawRequest(path,requestOptions);}finally{clinicReadCoordinator.invalidate();}}if(!clinicReadAllowed(path))return saasRawRequest(path,requestOptions);const result=await clinicReadCoordinator.read(saasEndpoint()+path,()=>saasRawRequest(path,requestOptions),{reuse:reuseNavigation});if(document.querySelector('.view.active-view')?.id==='followup')clinicReadNotice(result.checkedAt,result.reused);return result.value;}
 
 const multiStaffLocks=new Map();
 let multiStaffHeartbeatTimer=null,followupSafetyState=null;
@@ -4800,8 +4800,9 @@ function renderWorkFirstDashboard(){
   [['workCountAll',buckets.all.length],['workCountPreventive',buckets.preventive.length],['workCountCare',buckets.care.length],['workCountConsult',buckets.consult.length],['workCountDelivery',buckets.delivery.length],['workCountUnassigned',buckets.unassigned.length],['workCountOverdue',buckets.overdue.length]].forEach(([id,n])=>{if($(id))$(id).textContent=String(n)});document.querySelectorAll('[data-work-filter]').forEach(b=>{b.classList.toggle('active',b.dataset.workFilter===workFirstFilter);b.hidden=!['all','preventive','care'].includes(b.dataset.workFilter)&&!(buckets[b.dataset.workFilter]||[]).length&&b.dataset.workFilter!==workFirstFilter;});if($('workFirstListTitle'))$('workFirstListTitle').textContent=labels[workFirstFilter]||labels.all;
   let rows=[...(buckets[workFirstFilter]||buckets.all)];rows.sort((a,b)=>Number(!!b.action?.breached)-Number(!!a.action?.breached)||({urgent:0,high:1,normal:2}[a.action?.priority]??3)-({urgent:0,high:1,normal:2}[b.action?.priority]??3)||String(a.dueDate||'').localeCompare(String(b.dueDate||'')));
   if($('workFirstListMeta'))$('workFirstListMeta').textContent=`${rows.length}건 · 긴급·지연·오늘 일정 순`;
-  window.carestepClinicalSummary=()=>({state:clinicClinicalReadState,total:buckets.all.length+buckets.backlog.length});window.ClinicOrganization?.updateTodayCounts();
+  window.carestepClinicalSummary=()=>({state:clinicClinicalReadState,refreshing:followupScheduleLoading&&!!clinicalLoadCheckedAt,stale:!!clinicalLoadError&&!!clinicalLoadCheckedAt,total:buckets.all.length+buckets.backlog.length});window.ClinicOrganization?.updateTodayCounts();
   renderWorkFirstRows(list,rows,12);workFirstFocusNext();
+  let freshness=$('clinicClinicalFreshness');if(!freshness){freshness=document.createElement('p');freshness.id='clinicClinicalFreshness';freshness.setAttribute('role','status');list.before(freshness);}freshness.textContent=clinicalLoadCheckedAt?[(clinicalLoadError|| (followupScheduleLoading?'갱신 중':'')), '마지막 확인 '+new Date(clinicalLoadCheckedAt).toLocaleTimeString('ko-KR')].filter(Boolean).join(' · '):'';freshness.hidden=!freshness.textContent;
   list.setAttribute('aria-busy',String(clinicClinicalReadState==='loading'));
   if(clinicClinicalReadState!=='ready'&&!rows.length){list.replaceChildren();const note=document.createElement('p');note.setAttribute('role','status');note.textContent=clinicClinicalReadState==='failed'?'진료·예방 업무 조회 실패 · 업무가 없는 것으로 판단하지 마세요.':clinicClinicalReadState==='unavailable'?'로그인과 후속관리 이용 권한을 확인해주세요.':'진료·예방 업무 확인 중…';list.append(note);if(clinicClinicalReadState==='failed'){const retry=document.createElement('button');retry.type='button';retry.className='btn btn-secondary';retry.textContent='진료·예방 업무 다시 조회';retry.onclick=()=>loadFollowupScheduleBoard(false);list.append(retry);}}
 
@@ -4822,8 +4823,30 @@ function renderFollowupScheduleBoard(){
   list.querySelectorAll('[data-schedule-patient]').forEach(b=>b.addEventListener('click',()=>window.crmOpenPatientRecord?.(b.dataset.scheduleGuardian,b.dataset.schedulePatient)));
   list.querySelectorAll('[data-schedule-reopen]').forEach(b=>b.addEventListener('click',()=>reopenCareOperation(b.dataset.scheduleReopen)));
 }
-async function loadFollowupScheduleBoard(showToast=false){
-  if(saasMode!=='auth'||!saasMe||!followupAllowed(false)){clinicClinicalReadState='unavailable';followupScheduleRows=[];careOperationsActions=[];careAutomationRuns=[];careOperationsTeam=[];careOperationsSummary={};careRecentPatients=[];renderFollowupScheduleBoard();renderConsultInbox();return false;}const {from,to}=scheduleBoardQueryRange();clinicClinicalReadState='loading';followupScheduleLoading=true;renderFollowupScheduleBoard();try{const d=await saasRequest(`/saas/care-operations?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);if(!Array.isArray(d.items)||!Array.isArray(d.actions))throw Error('업무 조회 형식을 확인하지 못했습니다.');clinicClinicalReadState='ready';followupScheduleRows=d.items;careOperationsActions=Array.isArray(d.actions)?d.actions:[];careAutomationRuns=Array.isArray(d.automation)?d.automation:[];careOperationsTeam=Array.isArray(d.team?.members)?d.team.members:[];careOperationsSummary=d.summary||{};careRecentPatients=Array.isArray(d.recentPatients)?d.recentPatients:[];if(d.notificationPreferences)careNotificationPreferences=d.notificationPreferences;notifyNewCareConsultations();loadConsultInbox(false);if(showToast)toast('오늘 업무를 새로 불러왔습니다.');return true;}catch(e){clinicClinicalReadState='failed';followupScheduleRows=[];careOperationsActions=[];careAutomationRuns=[];careOperationsTeam=[];careOperationsSummary={};careRecentPatients=[];if(showToast)toast(e.message||'오늘 업무를 불러오지 못했습니다.');console.warn('Care Operations load failed',e);return false;}finally{followupScheduleLoading=false;renderFollowupScheduleBoard();}
+let clinicalLoadScope='',clinicalLoadPending=null,clinicalLoadCheckedAt=0,clinicalLoadError='',clinicalLoadRevision=0;
+function clinicLoadInvalidatePending(){clinicalLoadPending=null;clinicalLoadCheckedAt=0;followupScheduleLoading=false;}
+function resetClinicalLoad(){clinicalLoadScope='';clinicalLoadPending=null;clinicalLoadCheckedAt=0;clinicalLoadError='';clinicalLoadRevision++;followupScheduleRows=[];careOperationsActions=[];careAutomationRuns=[];careOperationsTeam=[];careOperationsSummary={};careRecentPatients=[];followupScheduleLoading=false;}
+async function loadFollowupScheduleBoard(showToast=false,{reuse=false}={}){
+ const permitted=()=>saasMode==='auth'&&!!saasMe&&followupAllowed(false);
+ if(!permitted()){resetClinicalLoad();clinicClinicalReadState='unavailable';renderFollowupScheduleBoard();renderConsultInbox();return false;}
+ const {from,to}=scheduleBoardQueryRange(),identity=()=>JSON.stringify([clinicReadScope(),saasSessionMeta?.id,saasMe?.role,saasMe?.permissions,from,to]),key=identity();
+ if(clinicalLoadScope!==key){resetClinicalLoad();clinicalLoadScope=key;}
+ const revision=clinicalLoadRevision;
+ if(clinicalLoadPending?.key===key&&clinicalLoadPending.revision===revision)return clinicalLoadPending.promise;
+ if(reuse&&!showToast&&!clinicalLoadError&&clinicalLoadCheckedAt&&Date.now()-clinicalLoadCheckedAt<15000){renderFollowupScheduleBoard();return true;}
+ const job={key,revision,promise:null};clinicalLoadPending=job;
+ const current=()=>permitted()&&identity()===key&&clinicalLoadPending===job&&clinicalLoadRevision===revision;
+ job.promise=(async()=>{
+  clinicClinicalReadState=clinicalLoadCheckedAt?'ready':'loading';followupScheduleLoading=true;clinicalLoadError='';renderFollowupScheduleBoard();
+  const controller=new AbortController();let rejectDeadline;const deadline=new Promise((_,reject)=>rejectDeadline=reject),timer=setTimeout(()=>{controller.abort();rejectDeadline(Error('업무 조회 시간이 초과되었습니다.'));},20000);
+  try{
+   const d=await Promise.race([saasRequest(`/saas/care-operations?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,{signal:controller.signal}),deadline]);if(!current())return false;
+   if(!Array.isArray(d.items)||!Array.isArray(d.actions))throw Error('업무 조회 형식을 확인하지 못했습니다.');
+   clinicClinicalReadState='ready';clinicalLoadCheckedAt=Date.now();followupScheduleRows=d.items;careOperationsActions=d.actions;careAutomationRuns=d.automation||[];careOperationsTeam=d.team?.members||[];careOperationsSummary=d.summary||{};careRecentPatients=d.recentPatients||[];if(d.notificationPreferences)careNotificationPreferences=d.notificationPreferences;
+   notifyNewCareConsultations();void loadConsultInbox(false);if(showToast)toast('오늘 업무를 새로 불러왔습니다.');return true;
+  }catch(e){if(!current())return false;clinicalLoadError='최신 조회 실패';clinicClinicalReadState=clinicalLoadCheckedAt?'ready':'failed';if(showToast)toast(e.message||'오늘 업무를 불러오지 못했습니다.');return false;
+  }finally{clearTimeout(timer);if(current()){clinicalLoadPending=null;followupScheduleLoading=false;renderFollowupScheduleBoard();}}
+ })();return job.promise;
 }
 
 let clinicActionRefreshAt=0,clinicProductionStatus={carestep:'checking',solapi:'checking',google:'checking',sender:'checking',errors:[]};
@@ -4870,10 +4893,10 @@ async function checkClinicProductionStatus(){
 }
 async function refreshClinicActionCenter(force=false){
   if(!force&&Date.now()-clinicActionRefreshAt<30000){renderClinicActionCenter();renderFollowupScheduleBoard();return;}clinicActionRefreshAt=Date.now();
-  const jobs=[];if(saasMode==='auth'&&saasMe){if(followupAllowed(false))jobs.push(loadFollowupScheduleBoard(false));if(messagingAllowed(false))jobs.push(loadMessagingJobs(false));if(guardianSurveyAllowed(false))jobs.push(loadGuardianSurveys(false));if(followupCrmAllowed(false))jobs.push(loadFollowupCrm(false));if(googleCalendarReady())jobs.push(loadGoogleFollowupWorkboard(false));}
+  const jobs=[];if(saasMode==='auth'&&saasMe){if(followupAllowed(false))jobs.push(loadFollowupScheduleBoard(false,{reuse:!force}));if(messagingAllowed(false))jobs.push(loadMessagingJobs(false));if(guardianSurveyAllowed(false))jobs.push(loadGuardianSurveys(false));if(followupCrmAllowed(false))jobs.push(loadFollowupCrm(false));if(googleCalendarReady())jobs.push(loadGoogleFollowupWorkboard(false));}
   jobs.push(loadDeliveryRecovery(true));await Promise.allSettled(jobs);await checkClinicProductionStatus();renderClinicActionCenter();
 }
-function startCareOperationsAutoRefresh(){if(careOperationsAutoRefreshTimer)return;careOperationsAutoRefreshTimer=setInterval(()=>{if(document.visibilityState!=='visible'||!$('dashboard')?.classList.contains('active-view')||saasMode!=='auth'||!saasMe||followupScheduleLoading)return;loadFollowupScheduleBoard(false);},8000);}
+function startCareOperationsAutoRefresh(){if(careOperationsAutoRefreshTimer)return;careOperationsAutoRefreshTimer=setInterval(()=>{if(document.visibilityState!=='visible'||!$('dashboard')?.classList.contains('active-view')||saasMode!=='auth'||!saasMe||followupScheduleLoading)return;loadFollowupScheduleBoard(false);},30000);}
 async function retryProductionChecks(){const b=$('retryProductionChecks');if(b){b.disabled=true;b.textContent='확인 중…';}try{await refreshClinicActionCenter(true);toast('할 일과 시스템 상태를 다시 확인했습니다.');}finally{if(b){b.disabled=false;b.textContent='상태 다시 확인';}}}
 
 function packageSelectionSummary(){
@@ -5431,7 +5454,7 @@ function showApp(){
   renderAll();carestepSafeCall('permissions',()=>applySaasPermissions());carestepSafeCall('account_render',()=>renderSaasAccount());carestepSafeCall('history_init',()=>carestepInitHistory(carestepActiveView()));
   setTimeout(()=>{try{refreshDailyWorkflowIndicators(false);}catch(e){console.error('[CARESTEP RECOVERY] daily_indicators',e);}},0);
 }
-function showLogin(){window.CarestepTodayWard?.clear();document.getElementById('practiceTodayRoot')?.replaceChildren();window.CarestepPractice?.clear();globalThis.CarestepTraining?.clear();window.ClinicReliability?.clearPrivate();r19GoogleStatusScope=''; clearFollowupScopedDetails();carestepResetHistoryForLogin(); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
+function showLogin(){resetClinicalLoad();window.CarestepTodayWard?.clear();document.getElementById('practiceTodayRoot')?.replaceChildren();window.CarestepPractice?.clear();globalThis.CarestepTraining?.clear();window.ClinicReliability?.clearPrivate();r19GoogleStatusScope=''; clearFollowupScopedDetails();carestepResetHistoryForLogin(); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
 
 /* v9.0.2 HOTFIX 25 · IN-APP BROWSER BACK NAVIGATION
    CARESTEP behaves like a single-page app, so browser Back should move through CARESTEP views
@@ -10410,8 +10433,8 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="r83-clinic.js"></script>
 <script src="clinic-read-flow.js?v=flow-20261017"></script>
 <script src="home-access-clinic.js?v=clarity-20261020f"></script>
-<script src="clinic-care.js?v=clarity-20261020g"></script>
-<script src="clinic-organization.js?v=20261031-density-followup"></script>
+<script src="clinic-care.js?v=20261031-work-loading"></script>
+<script src="clinic-organization.js?v=20261031-work-loading"></script>
 <script src="staff-training.js?v=20261031-read-reuse"></script>
 <script src="staff-training-clinic.js?v=20261020a"></script>
 <script src="practice-intake.js?v=20261023a"></script>

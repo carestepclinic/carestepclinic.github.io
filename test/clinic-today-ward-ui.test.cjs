@@ -49,3 +49,19 @@ for(const width of [390,1680])test('restored dashboard loads both summaries with
  assert.ok(await p.locator('#practiceTodayRoot').isVisible());assert.ok(await p.locator('#wardTodayRoot').isVisible());
  const calls=await p.evaluate(()=>restoreSummaryCalls);assert.ok(calls.includes('/saas/operations/'));assert.ok(calls.includes('/saas/practice/clinical/cases'));
 });
+
+test('clinical work keeps counts during refresh and labels stale results on failure',async t=>{
+ const p=await openPage(t,390);
+ await p.evaluate(async()=>{
+  resetClinicalLoad();followupAllowed=()=>true;notifyNewCareConsultations=()=>{};loadConsultInbox=async()=>{};
+  const old=saasRequest;window.clinicalReads=0;window.delayClinical=false;window.failClinical=false;
+  saasRequest=async(path,opts)=>{if(!path.startsWith('/saas/care-operations?'))return old(path,opts);clinicalReads++;if(delayClinical)await new Promise(r=>window.releaseClinical=r);if(failClinical)throw Error('offline');return {items:[],actions:[]};};
+  go('dashboard');await loadFollowupScheduleBoard();
+ });
+ await p.waitForFunction(()=>document.getElementById('clinicToday-tab-clinical').textContent.includes('개별 업무 0건'));
+ await p.evaluate(()=>{delayClinical=true;window.refreshPending=loadFollowupScheduleBoard(true);});
+ assert.match(await p.locator('#clinicToday-tab-clinical').innerText(),/개별 업무 0건.*갱신 중/);
+ await p.evaluate(async()=>{failClinical=true;releaseClinical();await refreshPending;});
+ assert.match(await p.locator('#clinicToday-tab-clinical').innerText(),/개별 업무 0건.*최신 조회 실패/);
+ await p.locator('#clinicToday-tab-clinical').click();assert.match(await p.locator('#clinicClinicalFreshness').innerText(),/최신 조회 실패.*마지막 확인/);
+});
