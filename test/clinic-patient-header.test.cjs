@@ -29,3 +29,13 @@ for(const width of [390,1710])test('compact search and patient context '+width,a
  await p.locator('#careGlobalSearchToggle').click();assert.equal(await p.locator('#careGlobalSearch').inputValue(),'검사');await p.locator('#viewTitle').click();assert.equal(await p.locator('#careGlobalSearch').isVisible(),false);
  await p.evaluate(()=>{document.getElementById('patients').classList.remove('active-view');document.getElementById('builder').classList.add('active-view');});assert.equal(await p.locator('#r61-patient-context').isVisible(),true);assert.equal(await p.locator('#r61-patient-context>span').isVisible(),false);assert.equal(await p.locator('.r61-context-change').isVisible(),true);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
 });
+test('all Clinic routes retain screen titles without category labels',async t=>{
+ const p=await browser.newPage();t.after(()=>p.close());await p.route('**/*',r=>r.request().url().startsWith(origin)?r.continue():r.abort());await p.goto(origin);
+ await p.evaluate(()=>{window.saasMode='auth';window.saasMe={role:'owner',clinic:{id:'test'},user:{id:'test'}};window.saasPermission=()=>true;window.saasCanView=()=>true;window.practiceTab='ops';window.CarestepPractice={route:()=>practiceTab};});
+ await p.addScriptTag({content:readFileSync(resolve(root,'clinic-navigation.js'),'utf8')});
+ const titles={dashboard:'오늘 업무',patients:'환자·보호자',library:'보호자 안내자료',builder:'안내자료 작성',followup:'상담·후속관리',training:'직원 교육',pilot:'운영 통계',settings:'병원·연동 설정',onboarding:'처음 사용 설정',voice:'문의·요청'};
+ for(const [view,title] of Object.entries(titles)){await p.evaluate(v=>ClinicNavigation.sync(v),view);assert.equal(await p.locator('#viewTitle').textContent(),title);assert.equal(await p.locator('#clinicNavigationPath').count(),0);}
+ for(const [tab,title] of Object.entries({ops:'업무 체크리스트',intake:'사전문진',calc:'처방·처치 계산',ward:'입원·처치 보드',surgery:'마취기록지',protocols:'진료 프로토콜'})){await p.evaluate(v=>{practiceTab=v;ClinicNavigation.sync('practice');},tab);assert.equal(await p.locator('#viewTitle').textContent(),title);assert.equal(await p.locator('#clinicNavigationPath').count(),0);}
+ for(const [tab,title] of Object.entries({my:'내 계정',team:'직원·권한',billing:'요금제·결제',security:'보안·데이터',legal:'약관·탈퇴'})){await p.evaluate(v=>{document.querySelectorAll('[data-account-tab]').forEach(e=>e.classList.toggle('active',e.dataset.accountTab===v));ClinicNavigation.sync('account');},tab);assert.equal(await p.locator('#viewTitle').textContent(),title);assert.equal(await p.locator('#clinicNavigationPath').count(),0);}
+ assert.equal(await p.locator('.topbar .eyebrow').evaluate(e=>getComputedStyle(e).display),'none');
+});
