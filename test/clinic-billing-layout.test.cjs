@@ -40,10 +40,11 @@ for(const width of [390,900,1440])test(`Clinic billing uses shared typography, b
   const bounds=await page.locator('#subscriptionBillingPanel '+selector).evaluateAll(nodes=>nodes.map(el=>({w:el.clientWidth,scroll:el.scrollWidth})));
   assert.ok(bounds.every(x=>x.scroll<=x.w+1),selector+' must not overflow');
  }
- assert.match(await page.locator('#billingContractComparison').innerText(),/169,000원[\s\S]*185,900원/);
+ assert.match(await page.locator('#billingContractComparison').innerText(),/169,000원/);
+ assert.equal(await page.locator('.billing-catalog-row').isVisible(),false);
  assert.equal(await page.locator('#billingPlanSelect').isEnabled(),true);
  await page.locator('#billingCycleSelect').selectOption('annual');assert.equal(await page.locator('#billingCycleSelect').inputValue(),'annual');
- await page.locator('#billingContractComparison summary').click();assert.equal(await page.locator('.billing-catalog-row').isVisible(),true);
+ await page.locator('#billingContractComparison summary').click();assert.equal(await page.locator('.billing-catalog-row').isVisible(),true);assert.match(await page.locator('.billing-catalog-row').innerText(),/185,900원/);
  if(process.env.HQ_SCREENSHOTS)await page.locator('[data-account-pane="billing"]').screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`clinic-billing-${width}.png`)});
 });
 
@@ -80,6 +81,16 @@ for(const width of [390,1440])test(`Hospital management tabs remain readable and
  assert.equal(await page.locator('[data-voice-type="condition"]').getAttribute('aria-pressed'),'true');
  await page.evaluate(()=>{document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active-view',el.id==='account'));setAccountTab('my');document.querySelector('[data-account-tab="team"]').style.display='none';});
  await page.locator('[data-account-tab="my"]').focus();await page.keyboard.press('ArrowRight');assert.equal(await page.locator('[data-account-tab="billing"]').getAttribute('aria-selected'),'true');
+ await page.evaluate(()=>setAccountTab('my','saasCurrentPassword'));
+ await page.locator('#saasCurrentPassword').waitFor({state:'visible'});
+ assert.equal(await page.locator('#accountPassword').getAttribute('open'),'');
+ await page.locator('#saasCurrentPassword').fill('synthetic-only');
+ assert.equal(await page.locator('#saasCurrentPassword').inputValue(),'synthetic-only');
+ await page.evaluate(()=>setAccountTab('team','saasInviteRole'));
+ await page.locator('#saasInviteRole').waitFor({state:'visible'});
+ assert.equal(await page.locator('#accountPermissions').getAttribute('open'),null);
+ assert.equal(await page.locator('#accountImportantActions').getAttribute('open'),null);
+ assert.equal(await page.locator('#account .account-ux-summary').count(),0);
  for(const tab of ['my','team','billing','security','legal']){
   await page.evaluate(tab=>setAccountTab(tab),tab);assert.equal(await page.locator(`[data-account-pane="${tab}"]`).isVisible(),true);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'account '+tab+' overflow');

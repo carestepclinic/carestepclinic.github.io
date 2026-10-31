@@ -1050,7 +1050,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="carestep-workflow.css?v=flow-20261017">
   <link rel="stylesheet" href="home-access-clinic.css?v=readable-20261017">
 <link rel="stylesheet" href="carestep-ui.css?v=deployment-check-20261019a">
-<link rel="stylesheet" href="clinic-organization.css?v=20261031-restore-ui">
+<link rel="stylesheet" href="clinic-organization.css?v=20261031-account">
 <style>
 .billing-contract-comparison{margin:16px 0;border:1px solid var(--line);border-radius:12px;padding:14px;background:#f8faff;line-height:1.65;font-size:14px}.billing-contract-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.billing-contract-columns span,.billing-contract-columns strong,.billing-contract-columns small{display:block}.billing-contract-columns strong{font-size:19px;margin:5px 0;color:#143d83}.billing-contract-comparison p{font-size:13px}.billing-contract-comparison summary{cursor:pointer;padding:8px 0;font-weight:700}.billing-catalog-row{padding:10px 0;border-top:1px solid var(--line)}.billing-catalog-row b,.billing-catalog-row span,.billing-catalog-row small{display:block}#billingReadStatus[data-state="error"]{color:#9a372d;background:#fff3f0;padding:12px;border-radius:10px}@media(max-width:600px){.billing-contract-columns{grid-template-columns:minmax(0,1fr)}.billing-contract-columns>div+div{border-top:1px solid var(--line);padding-top:12px}}
 </style>
@@ -1681,7 +1681,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
                 <input id="saasNewPasswordConfirm" class="input" type="password" autocomplete="new-password" placeholder="새 비밀번호 확인" />
                 <button id="saasChangePassword" class="btn btn-primary" type="button">비밀번호 변경</button>
               </div>
-              <div id="saasPasswordStatus" class="saas-cloud-note">비밀번호는 안전한 해시로 저장되며 평문 비밀번호는 저장하지 않습니다.</div>
+              <div id="saasPasswordStatus" class="saas-cloud-note">변경하면 현재 브라우저를 제외한 다른 로그인 세션이 종료됩니다.</div>
             </div>
           </div>
         </div>
@@ -1728,7 +1728,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
         </div>
 
         <div class="account-tab-pane" data-account-pane="billing">
-          <div class="account-pane-head"><div><h3>요금제 · 결제</h3><p>현재 계약과 HQ 공통 요금제, 결제내역을 확인합니다.</p></div><button id="billingRefresh" class="btn btn-secondary" type="button">구독·요금제 새로고침</button></div><p id="billingReadStatus" class="billing-note" role="status" aria-live="polite"></p>
+          <div class="account-pane-head"><div><h3>요금제 · 결제</h3><p>현재 계약과 HQ 공통 요금제, 결제내역을 확인합니다.</p></div><button id="billingRefresh" class="btn btn-secondary" type="button">새로고침</button></div><p id="billingReadStatus" class="billing-note" role="status" aria-live="polite"></p>
           <div class="panel billing-subscription-panel account-ux-card" id="subscriptionBillingPanel">
             <div class="billing-head">
               <div><h3 style="font-size:15px;margin:2px 0 0">결제 · 구독 관리</h3><p class="muted" style="margin-top:5px">BASIC은 보호자 관리, PRO는 회복관리·예방 안내 자동화를 제공합니다. ENTERPRISE와 EMR 연동은 별도 계약합니다. 기존 계약 가격과 제공량은 유지되며, 플랜 변경 시 적용 금액을 확인해주세요.</p></div>
@@ -1777,7 +1777,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
           <div class="saas-account-grid">
             <div class="panel account-ux-card">
               <div class="section-head" style="margin:0">
-                <div><h3 style="font-size:15px">현재 병원 설정 동기화</h3><p class="muted" style="margin:4px 0 0">병원 프로필·QR·퇴원 프리셋·출력 프리셋을 현재 설정으로 동기화합니다. 환자 진료기록·게시 PDF·복약 일정의 전체 백업이 아닙니다.</p></div>
+                <div><h3 style="font-size:15px">현재 병원 설정 동기화</h3><p class="muted" style="margin:4px 0 0">병원 프로필·QR·퇴원 및 출력 프리셋을 기기 간 동기화합니다.</p></div>
                 <span id="saasCloudBadge" class="ai-conn-badge off">연결 필요</span>
               </div>
               <div class="saas-kpi-grid">
@@ -1801,9 +1801,9 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
             </div>
           </div>
           <div id="configBackupPanel" class="panel account-ux-card" style="margin-top:14px">
-            <div class="section-head" style="margin:0"><div><h3 style="font-size:15px">병원 설정 이전 버전 복원</h3><p class="muted" style="margin:4px 0 0">병원 프로필·프리셋, 콘텐츠·발송 설정과 사용자 후속관리 계획의 이전 버전을 최근 10개까지 보관합니다. 환자 진료기록·게시 PDF·복약 일정은 이 설정 복원에 포함되지 않습니다.</p></div><button id="createConfigBackupBtn" class="btn btn-secondary" type="button">설정 버전 보관</button></div>
+            <div class="section-head" style="margin:0"><div><h3 style="font-size:15px">병원 설정 이전 버전 복원</h3><p class="muted" style="margin:4px 0 0">병원 프로필·프리셋, 콘텐츠·발송 설정과 사용자 후속관리 계획을 최근 10개 버전까지 보관합니다.</p></div><button id="createConfigBackupBtn" class="btn btn-secondary" type="button">설정 버전 보관</button></div>
             <div id="configBackupList" class="governance-list"><div class="voice-empty">Owner/Admin 로그인 후 백업을 확인합니다.</div></div>
-            <div class="account-role-note">설정 버전 보관에는 결제키·환자명·보호자 연락처·복약정보를 넣지 않습니다.</div>
+            <div class="account-role-note">설정 동기화·버전 보관은 전체 데이터 백업이 아닙니다. 환자 진료기록·게시 PDF·복약 일정·결제키·보호자 연락처는 포함하지 않습니다.</div>
           </div>
           <div id="operatorUnlockPanel" class="panel operator-unlock-panel hidden" style="margin-top:14px">
             <div class="section-head" style="margin:0"><div><h3 style="font-size:15px">CARESTEP 운영자 모드</h3></div><span id="operatorStatusBadge" class="ai-conn-badge off">잠김</span></div>
@@ -1823,12 +1823,12 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
                 <p id="legalStatusText">최신 동의 상태를 불러오는 중입니다.</p>
                 <div class="governance-actions"><button class="btn btn-ghost" type="button" data-legal-doc="terms">이용약관 보기</button><button class="btn btn-ghost" type="button" data-legal-doc="privacy">개인정보 처리방침 보기</button></div>
                 <div id="legalAcceptanceControls" class="legal-account-controls"><label><input id="accountTermsAgree" type="checkbox"> 이용약관 동의</label><label><input id="accountPrivacyAgree" type="checkbox"> 개인정보 처리방침 동의</label><button id="acceptLegalBtn" class="btn btn-primary" type="button">최신 약관 동의</button></div>
-                <small class="governance-note">상용 출시 전 사업자 정보·환불정책·처리위탁/국외이전·보유기간은 실제 계약 구조를 기준으로 최종 검토하세요.</small>
+
               </div>
               <div class="governance-box legal-safety-note">
                 <h4>데이터 관리 원칙</h4>
-                <p>병원 설정 이전 버전 복원과 삭제 절차는 보안 · 데이터 탭에서 확인할 수 있습니다. 결제·회계·감사상 법적 보존이 필요한 최소 기록은 서비스 데이터 삭제 후에도 별도 보존될 수 있습니다.</p>
-                <button class="btn btn-secondary" type="button" data-account-open-tab="security" onclick="setAccountTab('security')">백업 · 복구 관리</button>
+                <p>병원 설정 복원은 보안 · 데이터에서, 삭제·탈퇴는 아래 중요 작업에서 진행합니다. 결제·회계·감사상 법적 보존이 필요한 최소 기록은 서비스 데이터 삭제 후에도 별도 보존될 수 있습니다.</p>
+                <button class="btn btn-secondary" type="button" data-account-open-tab="security" onclick="setAccountTab('security')">병원 설정 복원</button>
               </div>
               <div id="clinicDeletionBox" class="governance-box danger-zone">
                 <h4>병원 데이터 삭제 요청</h4><p>Owner만 요청할 수 있습니다. 요청 후 7일 유예기간이 있으며, HQ는 구독 종료·미정산 금액 확인 후 실행합니다.</p>
@@ -4171,7 +4171,7 @@ function renderBillingContractComparison(){
  const code=sub.planCode,period=sub.billingCycle==='annual'?'연':'월',catalog=d.plans?.[code],key=sub.billingCycle==='annual'?'annualPriceKrw':'monthlyPriceKrw',raw=catalog?.[key],gross=raw===undefined||raw===null?null:Math.round(Number(raw)*(catalog?.vatExclusive?1.1:1)),policy=d.accountVerified?saasMe?.entitlements?.plan:null;
  const limit=(v,unit)=>v===undefined||v===null?'확인 필요':Number(v)===0?'제한 없음':Number(v).toLocaleString('ko-KR')+unit;
  const reason=sub.foundingActive?'초기 가입 가격보장 적용 중':Number(sub.priceOverrideKrw)>0?'병원별 계약금액 적용':sub.commercialVersion==='legacy'?'기존 계약 조건 유지':'저장된 계약 조건 적용';
- box.innerHTML=`<div class="billing-contract-columns"><div><span>현재 적용 계약 · ${escapeHtml(code)}</span><strong>${period} ${Number.isFinite(sub.effectivePriceKrw)?billingMoney(sub.effectivePriceKrw):'확인 필요'}</strong><small>부가세 포함 · ${reason}</small><small>직원 ${limit(policy?.limits?.members,'명')} · 월 HOME 게시 ${limit(policy?.limits?.packagesMonthly,'건')}</small></div><div><span>HQ 공통 요금제 · 신규 계약 기준</span><strong>${catalog?.quoteRequired?'별도 견적':gross===null?'확인 필요':`${period} ${billingMoney(gross)}`}</strong><small>부가세 포함${catalog?.isActive===false?' · 신규 선택 중지':''}</small><small>직원 ${limit(catalog?.members,'명')} · 월 HOME 게시 ${limit(catalog?.packagesMonthly,'건')}</small></div></div><p>HQ와 같은 설정을 조회합니다. 공통 기능 변경은 반영되며, 현재 계약가격·제공량은 유지됩니다. 아래에서 다른 플랜으로 변경할 때 적용 금액을 확인해주세요.</p><details><summary>최신 공통 요금제 전체 보기</summary>${Object.entries(d.plans||{}).map(([name,p])=>`<div class="billing-catalog-row"><b>${escapeHtml(name)}</b><span>${p.quoteRequired?'별도 견적':`월 ${billingMoney(Math.round(Number(p.monthlyPriceKrw)*(p.vatExclusive?1.1:1)))}`} · 부가세 포함${p.isActive?'':' · 신규 선택 중지'}</span><small>직원 ${limit(p.members,'명')} · 월 HOME 게시 ${limit(p.packagesMonthly,'건')}</small></div>`).join('')}</details>`;
+ box.innerHTML=`<div class="billing-contract-columns"><div><span>현재 적용 계약 · ${escapeHtml(code)}</span><strong>${period} ${Number.isFinite(sub.effectivePriceKrw)?billingMoney(sub.effectivePriceKrw):'확인 필요'}</strong><small>부가세 포함 · ${reason}</small><small>직원 ${limit(policy?.limits?.members,'명')} · 월 HOME 게시 ${limit(policy?.limits?.packagesMonthly,'건')}</small></div></div><details><summary>공통 요금제 비교</summary><p>현재 계약가격·제공량은 유지됩니다. 요금제 변경 시 적용 금액을 확인해주세요.</p>${Object.entries(d.plans||{}).map(([name,p])=>`<div class="billing-catalog-row"><b>${escapeHtml(name)}</b><span>${p.quoteRequired?'별도 견적':`월 ${billingMoney(Math.round(Number(p.monthlyPriceKrw)*(p.vatExclusive?1.1:1)))}`} · 부가세 포함${p.isActive?'':' · 신규 선택 중지'}</span><small>직원 ${limit(p.members,'명')} · 월 HOME 게시 ${limit(p.packagesMonthly,'건')}</small></div>`).join('')}</details>`;
 }
 
 function renderBillingOverview(){
@@ -4312,9 +4312,9 @@ function setAccountTab(tab='my',focusId=''){
   document.querySelectorAll('[data-account-tab]').forEach(b=>{const on=b.dataset.accountTab===next;b.classList.toggle('active',on);b.setAttribute('aria-selected',on?'true':'false');b.tabIndex=on?0:-1;});
   document.querySelectorAll('[data-account-pane]').forEach(p=>{const on=p.dataset.accountPane===next;p.classList.toggle('active',on);p.hidden=!on;});
   try{localStorage.setItem(ACCOUNT_TAB_STORAGE_KEY,next);}catch{}
-  if(next==='billing'&&saasMode==='auth'&&!billingOverviewLoading)loadBillingOverview(false);
+  if(saasMode==='auth'&&carestepActiveView()==='account')saasLoadAccountTab(next);
   if(carestepActiveView()==='account'){window.ClinicNavigation?.sync('account');carestepRecordHistory('account');}
-  if(focusId)setTimeout(()=>{const el=$(focusId);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});try{el.focus({preventScroll:true});}catch{el.focus();}}},90);
+  if(focusId)setTimeout(()=>{const el=$(focusId);if(el){for(let parent=el.parentElement;parent;parent=parent.parentElement)if(parent.tagName==='DETAILS')parent.open=true;el.scrollIntoView({behavior:'smooth',block:'center'});try{el.focus({preventScroll:true});}catch{el.focus();}}},90);
 }
 function initAccountUx(){
   const tabs=$('accountTabs');
@@ -4334,7 +4334,7 @@ function renderSaasAccount(){queueMicrotask(()=>r19RefreshGoogleStatus());
   renderBillingOverview();
   const auth=saasMode==='auth'&&saasMe,role=auth?saasMe.role:'owner';
   if($('saasClinicTitle'))$('saasClinicTitle').textContent=auth?saasMe.clinic.name:'로컬 데모';
-  if($('saasAccountSubtitle'))$('saasAccountSubtitle').textContent=auth?`${saasMe.user.displayName} · ${saasMe.user.email}`:'서버 계정과 연결되지 않은 로컬 모드입니다.';
+  if($('saasAccountSubtitle'))$('saasAccountSubtitle').textContent=auth?'계정과 병원 설정 관리':'서버 계정과 연결되지 않은 로컬 모드입니다.';
   if($('saasAccountRole'))$('saasAccountRole').textContent=auth?saasRoleLabel(role):'LOCAL DEMO';
   if($('saasUserName'))$('saasUserName').textContent=auth?saasMe.user.displayName:'로컬 데모';
   if($('saasUserEmail'))$('saasUserEmail').textContent=auth?saasMe.user.email:'계정 미연결';
@@ -4350,12 +4350,32 @@ function renderSaasAccount(){queueMicrotask(()=>r19RefreshGoogleStatus());
   $('saasInviteControls')?.classList.toggle('saas-hidden',!(auth&&saasPermission('team.manage',['owner','admin'].includes(role))&&saasHasFeature('teamManagement')));renderSubscriptionAccess();applyAccountRoleVisibility();
   renderSaasSessions();renderSaasDiagnostics();renderProductionGovernance();bindUxEmptyActions(document);
 }
+let accountReadIdentity='';
+function saasLoadAccountTab(tab='my',force=false){
+ if(saasMode!=='auth'||!saasMe||!window.CarestepAccountReads)return Promise.resolve();
+ const scope=clinicReadScope()+JSON.stringify([saasMe.role,saasMe.permissions]),valid=()=>saasMode==='auth'&&scope===clinicReadScope()+JSON.stringify([saasMe?.role,saasMe?.permissions]);
+ if(accountReadIdentity!==scope){
+  accountReadIdentity=scope;saasSessions=[];saasDiagnostics=[];saasUsageSummary=null;billingOverviewState=null;configBackupsState=[];legalStatusState=null;clinicDeletionState=null;
+  renderSaasAccount();
+  for(const id of ['saasMemberList','saasSessionList','saasDiagnostics','configBackupList']){const el=$(id);if(el)el.textContent='탭을 열면 최신 정보를 확인합니다.';}
+ }
+ const get=(id,label,path,apply)=>({id,label,run:async()=>{const data=await saasRequest(path,{method:'GET'});if(valid())apply(data);}});
+ const manager=saasPermission('settings.manage',['owner','admin'].includes(saasMe.role));
+ const jobs=tab==='team'?[get('members','직원 목록','/saas/members',d=>renderSaasMembers(d.members||[]))]:
+ tab==='billing'?[{id:'billing',label:'결제 정보',run:async()=>{await loadBillingOverview(false);if(billingOverviewState?.stale||!billingOverviewState)throw Error('결제 정보 확인 실패');}},get('usage','사용량','/saas/usage/summary',d=>{saasUsageSummary=d;renderSaasAccount();})]:
+ tab==='security'?[
+  get('sessions','로그인 세션','/saas/sessions',d=>{saasSessions=d.sessions||[];renderSaasSessions();if($('saasSecurityBadge'))$('saasSecurityBadge').textContent=saasSessions.length+' 세션';}),
+  {id:'cloud',label:'설정 동기화',run:()=>saasCheckCloud()},
+  ...(manager?[get('backups','설정 버전','/saas/backups',d=>{configBackupsState=d.backups||[];renderProductionGovernance();}),get('diagnostics','시스템 진단','/saas/diagnostics',d=>{saasDiagnostics=d.errors||[];renderSaasDiagnostics();})]:[])]:
+ tab==='legal'?[get('legal','약관 동의','/saas/legal/status',d=>{legalStatusState=d;renderProductionGovernance();}),...(saasMe.role==='owner'?[get('deletion','삭제 요청','/saas/clinic/deletion-request',d=>{clinicDeletionState=d;renderProductionGovernance();})]:[])]:[];
+ return window.CarestepAccountReads.load(tab,{scope,valid,jobs,force});
+}
 async function saasRefreshAccount(showToast=true,{skipSession=false,skipCloud=false}={}){
   if(saasMode!=='auth'){renderSaasAccount();return;}
   const identity=clinicReadScope(),valid=()=>saasMode==='auth'&&identity===clinicReadScope();
   try{
     if(!skipSession){const d=await saasRequest('/saas/me',{method:'GET'});if(!valid())return;saasMe=d.me;saasSessionMeta=d.session||saasSessionMeta;applySaasPermissions();}
-    await Promise.all([skipCloud?Promise.resolve():saasCheckCloud(),saasLoadMembers(),saasLoadUsage(),saasLoadSessions(),saasLoadDiagnostics(),loadBillingOverview(false),loadProductionGovernance(false)]);if(!valid())return;renderSaasAccount();if(showToast)toast('계정 정보를 새로고침했습니다.');
+    if(carestepActiveView()==='account')await saasLoadAccountTab(document.querySelector('[data-account-pane].active')?.dataset.accountPane||'my',!skipSession);else if(!skipCloud)await saasCheckCloud();if(!valid())return;renderSaasAccount();if(showToast)toast('계정 정보를 새로고침했습니다.');
   }catch(e){if(showToast)toast(e.message||'계정 새로고침 실패');}
 }
 function saasRecordUsageEvent(eventType,templateId='',extra={}){
@@ -5563,7 +5583,7 @@ function go(view,options={}){
   if(view==='contentStudio'){studioHydrateCentralKey();renderStudioCloudStatus();}
   if(view==='pilot'&&saasMode==='auth'&&saasMe)setTimeout(()=>loadMonthlyOperationsReport(false),0);
   if(view==='onboarding'&&saasMode==='auth'&&saasMe)setTimeout(()=>loadOnboardingStatus(false,false),0);
-  if(view==='account'){let tab=options.accountTab||'my';if(!options.accountTab)try{tab=localStorage.getItem(ACCOUNT_TAB_STORAGE_KEY)||'my';}catch{}setAccountTab(tab);saasRefreshAccount(false);}
+  if(view==='account'){let tab=options.accountTab||'my';if(!options.accountTab)try{tab=localStorage.getItem(ACCOUNT_TAB_STORAGE_KEY)||'my';}catch{}setAccountTab(tab);renderSaasAccount();}
   if(view==='dashboard')setTimeout(()=>refreshDailyWorkflowIndicators(false),0);
   renderGlobalCaseBadge();window.ClinicNavigation?.sync(view);
   carestepRecordHistory(view,options.historyMode||'push');
@@ -10414,7 +10434,7 @@ $('billingRegisterCard')?.addEventListener('click',startBillingCardRegistration)
 $('billingRetryPayment')?.addEventListener('click',retryBillingPayment);
 $('billingCancelSubscription')?.addEventListener('click',()=>setBillingCancel(true));
 $('billingUndoCancel')?.addEventListener('click',()=>setBillingCancel(false));
-$('billingRefresh')?.addEventListener('click',()=>loadBillingOverview(true));
+$('billingRefresh')?.addEventListener('click',()=>saasLoadAccountTab('billing',true));
 
 carestepSafeCall('boot_ai_settings',()=>studioLoadAiSettings());
 carestepSafeCall('boot_default_date',()=>setDefaultDischargeDate(true));
@@ -10450,7 +10470,8 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-read-flow.js?v=flow-20261017"></script>
 <script src="home-access-clinic.js?v=clarity-20261020f"></script>
 <script src="clinic-care.js?v=20261031-work-loading"></script>
-<script src="clinic-organization.js?v=20261031-work-loading"></script>
+<script src="clinic-account-reads.js?v=20261031-account"></script>
+<script src="clinic-organization.js?v=20261031-account"></script>
 <script src="staff-training.js?v=20261031-read-reuse"></script>
 <script src="staff-training-clinic.js?v=20261020a"></script>
 <script src="practice-intake.js?v=20261023a"></script>

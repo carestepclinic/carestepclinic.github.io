@@ -451,3 +451,32 @@ body:has(#builder.view.active-view) #caseContextBar,body:has(#builder.view.activ
  .session-restore-preview span{display:block;height:30px;border-radius:8px;background:#edf2f8}
  .session-restore-preview span:first-child{width:60%;height:12px}
 }
+
+/* Account panes share compact headings, typography and progressive disclosure. */
+#account.clinic-management-view .account-pane-head{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+#account.clinic-management-view .account-pane-head>div:first-child{margin-right:auto}
+#account.clinic-management-view .account-pane-head h3{margin:0}
+#account.clinic-management-view .account-ux-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+#account.clinic-management-view .account-quick-btn{padding:8px 12px;min-height:40px}
+#account.clinic-management-view .account-quick-btn span{display:none}
+#account.clinic-management-view .account-quick-btn b{font:inherit;font-weight:650}
+#account .account-disclosure{min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff}
+#account .account-disclosure>summary{cursor:pointer;font-size:14px;font-weight:700;line-height:1.5;min-height:24px}
+#account .account-disclosure[open]>summary{margin-bottom:10px}
+#account .account-disclosure>:last-child{margin-bottom:0}
+#account .account-team-primary>#accountInvite{margin-top:12px}
+#account #accountImportantActions{grid-column:1/-1}
+#account #accountImportantActions[open]{display:block}
+#account #accountImportantActions .governance-box{margin-top:10px}
+#account #accountUsage{margin-top:10px}
+#account .account-read-status{display:flex;flex-wrap:wrap;gap:4px 12px;color:#435973;font-size:13px;line-height:1.5;margin:0 0 8px}
+#account .account-read-status:empty{display:none}
+#account .account-read-status>span{display:inline-flex;align-items:center;gap:6px}
+#account .account-read-status .btn{padding:4px 8px;min-height:36px}
+#account .billing-head:has(>span:only-child){justify-content:flex-end;margin-bottom:6px}
+#account .account-disclosure .input{max-width:100%;box-sizing:border-box}
+@media(max-width:600px){#account.clinic-management-view .account-pane-head>.btn{margin-top:0}#account .account-disclosure{padding:10px}#account .account-quick-btn{flex:1;text-align:center}#account .account-pane-head>.status-badge{margin-top:0}}
+.clinic-navigation-ready #account.clinic-management-view .account-ux-actions{display:none}
+#account.clinic-management-view .account-ux-hero{padding:12px 14px;margin-bottom:12px;align-items:center}
+#account.clinic-management-view .account-ux-hero h2{font-size:18px;margin:0}
+#account.clinic-management-view #saasAccountSubtitle{display:none}

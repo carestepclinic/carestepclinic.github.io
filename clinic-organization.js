@@ -131,6 +131,31 @@
    const input=$(id);if(!input||input.closest('label'))continue;
    const label=document.createElement('label');label.className='clinic-management-field';label.htmlFor=id;label.append(document.createTextNode(title));input.before(label);label.append(input);
   }
+  const account=$('account');
+  if(account&&!account.dataset.compactAccount){
+   account.dataset.compactAccount='1';
+   account.querySelector('.account-ux-summary')?.remove();
+   function disclosure(nodes,id,title){
+    nodes=nodes.filter(Boolean);if(!nodes.length)return;
+    const details=document.createElement('details'),summary=document.createElement('summary');details.id=id;details.className='account-disclosure';summary.textContent=title;nodes[0].before(details);details.append(summary,...nodes);return details;
+   }
+   account.querySelectorAll('.account-pane-head p').forEach(e=>e.remove());
+   account.querySelector('.account-role-note')?.remove();
+   const user=$('saasUserName')?.closest('.account-ux-card');user?.querySelector('.section-head')?.remove();
+   const password=$('saasCurrentPassword')?.closest('.account-ux-card');
+   if(password){password.querySelector('.section-head')?.remove();disclosure([...password.children],'accountPassword','비밀번호 변경');}
+   const team=account.querySelector('.account-team-primary');
+   if(team){team.querySelector('.section-head')?.remove();const invite=$('saasInviteControls');if(invite){const note=document.createElement('p');note.className='muted';note.textContent='초대코드는 7일 동안 한 번만 사용할 수 있습니다.';invite.prepend(note);team.append(invite);disclosure([invite],'accountInvite','직원 초대');}}
+   const guide=account.querySelector('.permission-guide');if(guide){guide.querySelector('header')?.remove();disclosure([...guide.children],'accountPermissions','업무 권한 안내');}
+   const billing=account.querySelector('.billing-head');if(billing){billing.querySelector('div')?.remove();}
+   const invoice=$('billingInvoiceList')?.closest('.billing-box');if(invoice){invoice.querySelector('.section-head')?.remove();disclosure([...invoice.children],'accountInvoices','청구내역 · 영수증');}
+   const plan=account.querySelector('.billing-plan-row');if(plan){const nodes=[];for(let node=plan;node;node=node.nextElementSibling)nodes.push(node);disclosure(nodes,'accountPlanChange','요금제 변경 · 해지');}
+   const security=account.querySelector('[data-account-pane="security"]'),billingPane=account.querySelector('[data-account-pane="billing"]');
+   const kpis=security?.querySelector('.saas-kpi-grid');if(kpis){const d=disclosure([kpis,$('saasSubscriptionDetail'),$('saasBillingMeter')],'accountUsage','제공 범위 · 사용량');billingPane?.append(d);}
+   const diag=account.querySelector('.saas-diag');if(diag){diag.querySelector('b')?.remove();disclosure([...diag.children],'accountDiagnostics','시스템 진단');}
+   const legal=account.querySelector('.production-governance-grid');if(legal){const danger=[...legal.querySelectorAll('.danger-zone')];const withdraw=$('withdrawAccountBtn')?.closest('.governance-box');if(withdraw&&!danger.includes(withdraw))danger.push(withdraw);const d=disclosure(danger,'accountImportantActions','중요 작업 · 삭제 및 탈퇴');if(d)legal.append(d);}
+   for(const tab of ['team','security','legal']){const head=account.querySelector(`[data-account-pane="${tab}"] .account-pane-head`);if(head){const refresh=document.createElement('button');refresh.type='button';refresh.className='btn btn-ghost';refresh.textContent='새로고침';refresh.addEventListener('click',()=>globalThis.saasLoadAccountTab?.(tab,true));head.append(refresh);}}
+  }
   function saveScope(id,inputs,copy,successEvent){
    const button=$(id);if(!button||$(id+'Scope'))return;
    const note=document.createElement('p');note.id=id+'Scope';note.className='clinic-save-scope';note.setAttribute('role','status');note.textContent=copy;button.parentElement.before(note);

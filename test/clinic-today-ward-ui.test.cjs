@@ -86,3 +86,24 @@ test('cancelled restoration cannot reopen authenticated screen after response ar
  const p=await openPage(t,390);await p.evaluate(()=>{const me=saasMe;saasToken='old-session';saasBootstrapMeOnce=async()=>{await new Promise(r=>window.releaseAuth=r);return {me,session:{id:'old'}};};window.restorePending=saasBootstrap();saasCancelRestoreAndLogin();});
  await p.evaluate(async()=>{releaseAuth();await restorePending;});assert.equal(await p.locator('#appView').isVisible(),false);assert.equal(await p.locator('#loginView').isVisible(),true);
 });
+
+for(const width of [390,1440])test('account panes load independently, retry failures and open quick actions '+width,async t=>{
+ const p=await openPage(t,width);
+ await p.evaluate(()=>{
+  window.accountCalls=[];window.failAccountSessions=true;saasToken='synthetic-account-token';saasMe.user={id:'owner',displayName:'시험 사용자',email:'example@example.test'};saasMe.clinic.name='시험 병원';
+  const old=saasRequest;saasRequest=async(path,opts)=>{accountCalls.push(path);if(path==='/saas/sessions'&&failAccountSessions)throw Error('synthetic offline');if(path==='/saas/members')return {members:[{membershipId:'test',displayName:'시험 직원',email:'staff@example.test',role:'staff',status:'active',permissions:{mode:'default'}}]};if(path==='/saas/diagnostics')return {errors:[]};return old(path,opts);};
+  go('account',{accountTab:'my'});
+ });
+ assert.equal(await p.locator('#accountPassword').getAttribute('open'),null);
+ await p.locator('#accountPassword>summary').click();await p.locator('#saasCurrentPassword').waitFor({state:'visible'});
+ await p.evaluate(()=>go('account',{accountTab:'team'}));await p.locator('#saasMemberList').getByText('시험 직원',{exact:true}).waitFor();
+ assert.equal(await p.evaluate(()=>accountCalls.filter(x=>x==='/saas/members').length),1);
+ await p.evaluate(()=>go('account',{accountTab:'security'}));await p.locator('[data-read="sessions"]').getByRole('button',{name:'다시 시도'}).waitFor();
+ assert.match(await p.locator('[data-read="diagnostics"]').innerText(),/확인/);
+ const count=await p.evaluate(()=>accountCalls.filter(x=>x==='/saas/diagnostics').length);
+ await p.evaluate(()=>failAccountSessions=false);await p.locator('[data-read="sessions"]').getByRole('button').click();await p.waitForFunction(()=>!document.querySelector('[data-read="sessions"] button'));
+ assert.equal(await p.evaluate(()=>accountCalls.filter(x=>x==='/saas/diagnostics').length),count);
+ await p.evaluate(()=>go('account',{accountTab:'team'}));assert.equal(await p.evaluate(()=>accountCalls.filter(x=>x==='/saas/members').length),1);
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ await p.screenshot({path:'/tmp/account-settings-'+width+'.png',fullPage:true});
+});
