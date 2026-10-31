@@ -30,7 +30,7 @@ function node(tag,text){const n=document.createElement(tag);if(text!==undefined)
 function button(parent,label,fn){const b=node('button',label);b.type='button';b.className='btn btn-secondary';b.onclick=fn;parent.append(b);return b;}
 function modal(title){const d=node('dialog');d.className='clinic-recovery-dialog';const head=node('h3',title),body=node('div'),close=button(d,'닫기',()=>d.close());d.prepend(head,body);document.body.append(d);d.addEventListener('close',()=>d.remove());d.showModal();return {d,body,close};}
 function value(v){return v===undefined?'미설정':typeof v==='object'?JSON.stringify(v):String(v);}
-const labels={patient:'환자',guardian:'보호자',home:'HOME 연결',id:'식별번호',status:'상태',patients:'연결 환자 수',timelineEvents:'건강기록 수',activeHomeLinks:'활성 HOME 연결 수',scheduledFollowups:'예정 후속관리 수',hospital:'병원',workflow:'운영 설정',name:'이름',director:'원장',phone:'전화',address:'주소',website:'홈페이지',dischargePresets:'개별지시 기본값',packagePresets:'출력 기본값',qr:'QR',followup:'후속관리',recent:'최근 사용',pilot:'시범 설정',followupMessagePresets:'병원 메시지 프리셋',species:'종',breed:'품종',birthDate:'생년월일',sex:'성별',neutered:'중성화',latestWeightKg:'최근 체중',timings:'자료 작성시간 통계',usage:'사용 기록',feedback:'직원 피드백'};
+const labels={patient:'환자',guardian:'보호자',home:'HOME 연결',id:'식별번호',status:'상태',patients:'연결 환자 수',timelineEvents:'건강기록 수',activeHomeLinks:'활성 HOME 연결 수',scheduledFollowups:'예정 후속관리 수',hospital:'병원',workflow:'운영 설정',name:'이름',director:'원장',phone:'전화',address:'주소',website:'홈페이지',dischargePresets:'개별지시 기본값',packagePresets:'출력 기본값',qr:'QR',followup:'후속관리',recent:'최근 사용',pilot:'시범 설정',followupMessagePresets:'병원 메시지 서식',species:'종',breed:'품종',birthDate:'생년월일',sex:'성별',neutered:'중성화',latestWeightKg:'최근 체중',timings:'자료 작성시간 통계',usage:'사용 기록',feedback:'직원 피드백'};
 function comparison(parent,a,b,left='현재 PC',right='서버',showEqual=false){const rows=comparisonRows(a,b,showEqual);const changed=rows.filter(x=>!x.equal).length;parent.append(node('p',showEqual?`전체 비교 항목 ${rows.length}개 · 다른 값 ${changed}개`:rows.length?`서로 다른 항목 ${rows.length}개`:'비교한 항목의 값이 같습니다.'));const table=node('table');table.className='clinic-recovery-table';const tr=node('tr');for(const t of ['항목',left,right])tr.append(node('th',t));table.append(tr);for(const r of rows){const row=node('tr');row.dataset.equal=String(r.equal);for(const t of [r.path.split('.').map(k=>labels[k]||k).join(' · '),value(r.before),value(r.after)])row.append(node('td',t));table.append(row);}parent.append(table);}
 let cloudPending=false,cloudState='idle',cloudMessage='',uploadRunning=false,uploadQueued=false;
 function paintCloud(){let root=$('clinicSyncStatus');if(!root){root=node('div');root.id='clinicSyncStatus';root.className='clinic-sync-status';root.setAttribute('role','status');root.setAttribute('aria-live','polite');$('screenHelpBar')?.after(root);}if(!root)return;root.hidden=!scope();const renderKey=scope()+cloudState+cloudMessage;if(root.dataset.renderKey===renderKey)return;root.dataset.renderKey=renderKey;root.replaceChildren(node('span',cloudMessage||'병원 설정의 서버 저장 상태를 확인할 수 있습니다.'));root.dataset.state=cloudState;if(cloudState==='localonly')button(root,'서버 반영 확인',()=>saasUploadCloud(false));if(cloudState==='error'||cloudState==='conflict')button(root,cloudState==='conflict'?'차이 확인·복구':'동기화 다시 시도',()=>cloudState==='conflict'?reviewCloud():saasUploadCloud(false));}
@@ -79,16 +79,16 @@ async function restoreFileRecovery(){
  }catch(e){toast(e.message||'복구하지 못했습니다.');}
 }
 api.importBackup=async function(file){
- const auth=backupContext();if(!auth){toast('로그인 또는 로컬 데모에서 백업을 복원해주세요.');return;}
+ const auth=backupContext();if(!auth){toast('로그인 또는 체험 화면에서 백업을 복원해주세요.');return;}
  if(scope()&&typeof saasPermission==='function'&&!saasPermission('settings.manage')){toast('병원 설정 관리 권한이 필요합니다.');return;}
  try{
   if(file.size>8*1024*1024)throw Error('백업 파일이 너무 큽니다. 8MB 이하 파일을 선택해주세요.');
   const data=validateBackup(JSON.parse(await file.text()));if(auth!==backupContext())return;
   const incoming={hospital:{...defaultHospital,...data.hospital},workflow:normalizedWorkflowState(data.workflow)};
-  const {d,body}=modal('JSON 백업 복원 미리보기');
+  const {d,body}=modal('설정 복원 내용 확인');
   body.append(node('p','파일: '+(file.name||'백업 JSON')),node('p','병원: '+(data.hospital.name||'미입력')+' · 백업 시각: '+(data.exportedAt||'기록 없음')));
-  body.append(node('p','병원 설정과 PC 사용 통계를 파일의 내용으로 바꿉니다. 환자 진료기록·게시 자료는 이 복원 대상이 아닙니다. 복원 직전 상태는 이 탭에 2시간 보관합니다.'));
-  const changes=differences({hospital,workflow:workflowSettings},incoming);body.append(node('p','변경 항목 '+changes.length+'개 · 사용 기록 '+(workflowSettings.usage||[]).length+' → '+(incoming.workflow.usage||[]).length+'건 · 메시지 프리셋 '+(workflowSettings.followupMessagePresets||[]).length+' → '+(incoming.workflow.followupMessagePresets||[]).length+'개'));
+  body.append(node('p','병원 설정과 PC 사용 통계를 파일의 내용으로 바꿉니다. 환자 진료기록·공개 자료는 이 복원 대상이 아닙니다. 복원 직전 상태는 이 탭에 2시간 보관합니다.'));
+  const changes=differences({hospital,workflow:workflowSettings},incoming);body.append(node('p','변경 항목 '+changes.length+'개 · 사용 기록 '+(workflowSettings.usage||[]).length+' → '+(incoming.workflow.usage||[]).length+'건 · 메시지 서식 '+(workflowSettings.followupMessagePresets||[]).length+' → '+(incoming.workflow.followupMessagePresets||[]).length+'개'));
   const details=node('details');details.append(node('summary','전체 변경 내용 보기'));comparison(details,{hospital,workflow:workflowSettings},incoming,'현재 PC','백업 파일');body.append(details);
   const different=!!(data.clinicId&&scope()&&data.clinicId!==saasMe?.clinic?.id)||(String(data.hospital.name||'').trim()!==String(hospital.name||'').trim());
   const confirmBox=node('input');confirmBox.type='checkbox';const confirmLabel=node('label',different?' 병원이 다르거나 병원명이 다른 백업임을 확인했습니다.':' 변경 내용과 백업 시각을 확인했습니다.');confirmLabel.prepend(confirmBox);body.append(confirmLabel);
@@ -96,7 +96,7 @@ api.importBackup=async function(file){
   const status=node('p');status.setAttribute('role','status');body.append(status);let applied=false;
   const apply=button(body,'복구본 보관 후 이 PC에 복원',async()=>{
    if(applied||!confirmBox.checked||auth!==backupContext())return;
-   if(!confirm('검토한 JSON 백업으로 이 PC 설정을 복원할까요?'))return;
+   if(!confirm('확인한 백업 파일로 이 PC 설정을 복원할까요?'))return;
    apply.disabled=true;
    try{
     const before={hospital:structuredClone(hospital),workflow:structuredClone(workflowSettings)};

@@ -63,7 +63,7 @@
   root.querySelector('.patient-workspace-quick')?.remove();
   for(const n of [...detail.children])if(n.matches('.patient-detail-head,.guardian-summary')||n.querySelector('.guardian-patient-grid,[data-crm-delete-guardian]'))panels.home.append(n);
   const returnList=document.createElement('button');returnList.type='button';returnList.className='btn btn-secondary';returnList.textContent='환자 목록으로';returnList.onclick=()=>{$('patientCrmSearch')?.focus({preventScroll:true});$('patientCrmSearch')?.scrollIntoView({block:'center'});};root.querySelector('.patient-workspace-head-actions')?.prepend(returnList);
-  root.setAttribute('aria-label','선택 환자 작업공간');
+  root.setAttribute('aria-label','선택 환자 상세');
   const state={root,key,patientId:context.patientId,control:null,recordsLoaded:false};workspace=state;
   const control=createTabs(root,[['summary','요약',panels.summary],['records','건강기록',panels.records],['materials','자료·복약',panels.materials],['home','HOME·보호자',panels.home]],{prefix:'clinicWorkspace',selected:tabs.get(key),onChange:tab=>{tabs.delete(key);tabs.set(key,tab);if(tabs.size>20)tabs.delete(tabs.keys().next().value);if(tab==='records'&&!state.recordsLoaded&&context.patient&&context.guardian){state.recordsLoaded=true;const timeline=panels.records.querySelector('#crmPatientTimelineMount');if(timeline){const loading=document.createElement('p');loading.className='care-loading';loading.setAttribute('role','status');loading.textContent='선택한 환자의 건강기록을 불러오는 중입니다.';timeline.replaceChildren(loading);}(timelineOpen||global.crmTimelineOpen)?.(context.patient,context.guardian);}}});
   state.control=control;

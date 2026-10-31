@@ -61,18 +61,18 @@
   const cfg=await saasRequest('/saas/r61/config');if(!openingEqual(opening,openingSnapshot()))throw Error('PATIENT_OR_CLINIC_CHANGED');if(cfg.flags.followup_auto_completion!==true)throw Error('FOLLOWUP_AUTO_COMPLETION_OFF');
   const p=subject();if(!p.patientId)throw Error('PATIENT_REQUIRED');
   const cases=await saasRequest('/saas/followup/cases?patientId='+encodeURIComponent(p.patientId));if(!openingEqual(opening,openingSnapshot()))throw Error('PATIENT_OR_CLINIC_CHANGED');
-  const d=document.createElement('dialog'),title=document.createElement('h2');title.textContent='실제 후속관리 단계 확인';d.append(title);
+  const d=document.createElement('dialog'),title=document.createElement('h2');title.textContent='후속관리 완료 확인';d.append(title);
   const close=document.createElement('button');close.textContent='닫기';close.onclick=()=>d.close();d.append(close);d.addEventListener('close',()=>d.remove());document.body.append(d);d.showModal();
   for(const c of cases.items.filter(x=>x.patientId===p.patientId&&x.status==='active')){
    const box=document.createElement('section'),h=document.createElement('h3'),status=document.createElement('p');h.textContent='관리 시작 '+c.startDate+' · '+c.caseKey;box.append(h,status);d.append(box);
    const s=await saasRequest('/saas/followup/cases/'+encodeURIComponent(c.caseKey)+'/required-stages?patientId='+encodeURIComponent(p.patientId));if(!openingEqual(opening,openingSnapshot()))throw Error('PATIENT_OR_CLINIC_CHANGED');window.r83BindConfirmationContext(s,cfg.flags.followup_auto_completion,deps);
    for(const day of s.requiredStages){
-    const b=document.createElement('button');b.textContent='D+'+day+(s.confirmedStages.includes(day)?' 확인 완료':day===s.requiredStages.at(-1)?' 실제 마지막 단계 · 최종 확인':' 실제 단계 확인');b.disabled=s.confirmedStages.includes(day);box.append(b);
-    b.onclick=async()=>{if(!confirm('해당 환자의 D+'+day+' 필수 후속관리 수행을 실제로 확인했습니까? 설정 마법사 확인이 아닙니다.'))return;b.disabled=true;try{const x=await window.r83ConfirmStage(s,day);status.textContent=x.completed?'완료 이력을 보존하고 다음 환자 화면으로 이동했습니다.':'단계 확인을 저장했습니다.';if(x.completed)d.close();}catch{status.textContent='결과 미확정 또는 거부. 현재 환자를 유지합니다. 자동 재요청하지 않습니다.';}};
-    const read=document.createElement('button');read.textContent='D+'+day+' 앞선 요청 결과만 확인';box.append(read);read.onclick=async()=>{try{const x=await window.r83ReadConfirmation(s,day);status.textContent=x.completed?'완료 receipt 확인 후 다음 환자 화면으로 이동했습니다.':'완료 미확정. 현재 환자를 유지합니다.';if(x.completed)d.close();}catch{status.textContent='조회 실패. 현재 환자를 유지합니다.';}};
+    const b=document.createElement('button');b.textContent='D+'+day+(s.confirmedStages.includes(day)?' 확인 완료':day===s.requiredStages.at(-1)?' 마지막 일차 관리 완료 확인':' 해당 일차 관리 완료 확인');b.disabled=s.confirmedStages.includes(day);box.append(b);
+    b.onclick=async()=>{if(!confirm('해당 환자의 D+'+day+' 후속관리를 완료했습니까?'))return;b.disabled=true;try{const x=await window.r83ConfirmStage(s,day);status.textContent=x.completed?'후속관리 완료 기록을 저장했습니다.':'해당 일차의 완료 확인을 저장했습니다.';if(x.completed)d.close();}catch(e){status.textContent=e.message==='PATIENT_OR_CLINIC_CHANGED'?'선택한 환자 또는 로그인 정보가 바뀌었습니다. 창을 닫고 다시 열어주세요.':e.message==='FOLLOWUP_AUTO_COMPLETION_OFF'?'이 병원에서는 후속관리 완료 처리를 사용할 수 없습니다.':e.message==='CONFIRMATION_IN_PROGRESS'?'완료 확인을 저장 중입니다. 잠시 기다려주세요.':'저장 여부 확인이 필요합니다. 해당 일차의 저장 여부 확인 버튼을 눌러주세요.';}};
+    const read=document.createElement('button');read.textContent='D+'+day+' 저장 여부 확인';box.append(read);read.onclick=async()=>{try{const x=await window.r83ReadConfirmation(s,day);status.textContent=x.completed?'후속관리 완료 기록을 확인했습니다.':'완료 기록이 확인되지 않았습니다. 잠시 후 저장 여부를 다시 확인해주세요.';if(x.completed)d.close();}catch{status.textContent='저장 여부를 확인하지 못했습니다. 잠시 후 다시 확인해주세요.';}};
    }
   }
-  if(!cases.items.some(x=>x.patientId===p.patientId&&x.status==='active')){const n=document.createElement('p');n.textContent='진행 중 케이스가 없습니다. 완료 이력은 환자 작업공간에서 조회할 수 있습니다.';d.append(n);}
+  if(!cases.items.some(x=>x.patientId===p.patientId&&x.status==='active')){const n=document.createElement('p');n.textContent='진행 중인 후속관리가 없습니다. 완료 이력은 환자 상세에서 확인할 수 있습니다.';d.append(n);}
  }
  window.r83OpenRequiredStages=open;
 })();

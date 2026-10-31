@@ -161,7 +161,7 @@
     async function materials() {
         const selected = selection();
         if (!materialId(selected.patientId) || !materialId(selected.guardianId)) {
-            alert('환자 작업공간에서 연결된 환자·보호자를 먼저 선택해주세요.');
+            alert('환자 상세에서 연결된 환자·보호자를 먼저 선택해주세요.');
             return;
         }
         const {body} = dialog('보호자에게 보내기 · CARESTEP HOME')
@@ -599,7 +599,7 @@
         const saveInfo = el('p'); saveInfo.setAttribute('role', 'status'); footer.append(saveInfo);
         button(consent, '선택 보호자의 예방문자 동의 기록', async () => {
             const selected = selection();
-            if (!selected.patientId || !selected.guardianId) {saveInfo.textContent = '먼저 환자 작업공간에서 환자·보호자를 선택해주세요.'; return;}
+            if (!selected.patientId || !selected.guardianId) {saveInfo.textContent = '먼저 환자 상세에서 환자·보호자를 선택해주세요.'; return;}
             if (!confirm('선택한 보호자의 접종·사상충 예방 문자 수신 동의를 실제로 확인했습니까?')) return;
             if (settingsSession() !== session || selection().patientId !== selected.patientId || selection().guardianId !== selected.guardianId) throw Error('SESSION_CHANGED');
             const saved = await api('/consent', {patientId: selected.patientId, purpose: 'preventive', confirmed: true, explicitConsentRecorded: true}, {redirect: 'error'});
@@ -2121,7 +2121,7 @@
         if(!parent.children.length)parent.append(el('p','자료 전달 이력이 없습니다.'));
     }
     async function materialHistory(){
-        let base;try{base=materialScope('scope-check',1);}catch{alert('환자 작업공간에서 환자·보호자를 먼저 선택해주세요.');return;}const {d,body}=dialog('자료 전달 이력'),rows=el('section');
+        let base;try{base=materialScope('scope-check',1);}catch{alert('환자 상세에서 환자·보호자를 먼저 선택해주세요.');return;}const {d,body}=dialog('자료 전달 이력'),rows=el('section');
         const guard=()=>{materialSame(base,materialScope('scope-check',1));};
         body.append(el('p','최근 자료 전달 기록 100건 중 자료 전달 이력입니다. 자료별 공개 상태와 열기·다운로드 요청 기록입니다. 실제로 내용을 읽었거나 파일 저장을 마쳤다는 확인은 아닙니다.'));
         button(body,'자료 작성',async()=>{guard();d.close();await openWorkspaceComposer();});
