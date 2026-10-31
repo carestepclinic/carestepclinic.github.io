@@ -27,7 +27,7 @@ for(const width of [390,1440])test('four settings are visible and adjacent '+wid
  const box=p.locator('.ad-settings');for(const key of ['agent','ventilation','oxygen'])assert.ok(await box.locator('[data-key='+key+']').isVisible());
  assert.ok(await box.locator('[data-ar=infusion]').isVisible());assert.equal(await box.locator('.ad-missing-settings').count(),0);
  const rects=await box.locator('[data-key=agent],[data-key=ventilation],[data-key=oxygen],[data-ar=infusion]').evaluateAll(es=>es.map(e=>({x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y})));
- assert.equal(rects[0].y,rects[1].y);if(width>700)assert.equal(rects[0].y,rects[3].y);
+ if(width>900){assert.equal(rects[0].y,rects[1].y);assert.equal(rects[0].y,rects[3].y);}else assert.ok(rects[0].y<=rects[1].y);
  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);
  await p.screenshot({path:path.resolve(__dirname,'../../anesthesia-settings-'+width+'.png'),fullPage:false});
 });

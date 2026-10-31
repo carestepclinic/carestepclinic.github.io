@@ -234,3 +234,17 @@
 [data-agent-custom][hidden]{display:none!important}
 @media(max-width:700px){.ar-simple .ad-settings>div{grid-template-columns:repeat(2,minmax(0,1fr))}.ar-reminder{font-size:13px}}
 @media print{.ar-reminder{display:none!important}}
+
+/* Tube, inhalant, ventilation, oxygen and fluids share one settings row. */
+.ar-simple .ad-settings>div{grid-template-columns:repeat(5,minmax(0,1fr))}
+.ar-tube-setting{display:flex;flex-wrap:wrap;gap:4px;align-items:end;margin:0;min-width:0}
+.ar-tube-setting label{flex:1 1 100px;font-size:12px;font-weight:650;margin:0}
+.ar-tube-setting input{display:block;box-sizing:border-box;width:100%;min-width:0;min-height:36px;margin-top:3px;font-size:14px}
+.ar-simple .ad-settings .ar-tube-setting button{width:auto;min-height:36px;padding:4px 8px}
+.ar-tube-setting [role=status]{flex-basis:100%;font-size:12px}
+.ar-tube-setting [role=status]:empty{display:none}
+.ar-duration-summary{display:flex;gap:8px 24px;align-items:center;flex-wrap:wrap;padding:6px 10px;border-radius:7px;background:#edf3fb;flex:1 1 100%;order:1}
+.ar-duration-summary span{display:flex;gap:8px;align-items:center}
+.ar-duration-summary small{font-size:12px;color:#52657b}
+.ar-duration-summary strong{font-size:15px;font-variant-numeric:tabular-nums;color:#173859}
+@media(max-width:900px){.ar-simple .ad-settings>div{grid-template-columns:repeat(2,minmax(0,1fr))}.ar-tube-setting input{font-size:16px}}
