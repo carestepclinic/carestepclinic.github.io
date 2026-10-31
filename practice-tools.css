@@ -747,3 +747,29 @@ body:has(#practice.active-view) #globalNewCase,body:has(#practice.active-view) #
 
 /* Today: checklist and inpatient overview share the primary work area. */
 .pt-today-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.pt-today-layout>div{min-width:0;width:100%;margin:0}.pt-today-layout:has(>div[hidden]){grid-template-columns:1fr}.pt-today-layout .pt-card{margin-top:0}.pt-today-ward-head,.pt-today-ward-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.pt-today-ward-head h3{margin:0}.pt-today-ward-list{display:grid;gap:6px}.pt .pt-today-ward-patient{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;width:100%;padding:10px 12px}.pt-today-ward-patient>span:first-child{min-width:0}.pt-today-ward-patient small{display:block;font-weight:400}.pt-today-ward-open{font-size:14px;white-space:nowrap;color:#2456a5}.pt-today-ward-footer{margin-top:12px}.pt-today-ward-time{display:block;margin-top:8px;color:#52677e}@media(max-width:1000px){.pt-today-layout{grid-template-columns:1fr}}
+
+
+/* Intake list: compact shared controls, with management below the work list. */
+:is(#practiceRoot,.pt) .pt-intake-workspace>.pt-toolbar{margin:0 0 10px;padding:0 0 10px;min-height:0;align-items:center}
+:is(#practiceRoot,.pt) .pt-intake-workspace>.pt-toolbar>.pt-bar:empty{display:none}
+:is(#practiceRoot,.pt) .pt-intake-workspace>.pt-toolbar>.pt-bar:last-child{margin-left:auto}
+:is(#practiceRoot,.pt) .pt-intake-workspace .pt-status-filters{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+:is(#practiceRoot,.pt) .pt-intake-workspace .pt-status-filters button{flex:0 0 auto;flex-direction:row;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:8px 12px;font-family:inherit;font-weight:600;font-size:14px;line-height:1.4}
+:is(#practiceRoot,.pt) .pt-intake-workspace .pt-status-filters strong{font-size:14px;border-radius:20px;background:#edf2fa;color:#344c6b;padding:2px 7px}
+:is(#practiceRoot,.pt) .pt-intake-workspace .pt-status-filters button[aria-pressed=true] strong{background:#ffffff30;color:inherit}
+:is(#practiceRoot,.pt) .pt-intake-workspace .pt-intake-filters{gap:8px;margin:10px 0;align-items:end}
+:is(#practiceRoot,.pt) .pt-intake-workspace .pt-intake-filters>label{font-size:14px;font-weight:600}
+:is(#practiceRoot,.pt) .pt-intake-workspace input{font-family:inherit;font-weight:400;font-size:15px;min-height:42px}
+:is(#practiceRoot,.pt) .pt-intake-workspace input::placeholder{font-weight:400}
+:is(#practiceRoot,.pt) .pt-intake-workspace button{font-family:inherit;min-height:42px;font-size:14px;padding:8px 12px}
+:is(#practiceRoot,.pt) .pt-intake-workspace .pt-intake-advanced{min-width:100px;position:relative}
+:is(#practiceRoot,.pt) .pt-intake-workspace .pt-intake-advanced>summary{padding:10px 8px;font-size:14px}
+:is(#practiceRoot,.pt) .pt-intake-workspace .pt-intake-advanced[open] .pt-grid{position:absolute;right:0;top:100%;z-index:10;background:#fff;width:340px;box-shadow:0 6px 20px #19314d18}
+:is(#practiceRoot,.pt) .pt-intake-workspace .pt-search-scope{margin:8px 0;font-size:13px}
+:is(#practiceRoot,.pt) .pt-intake-workspace .pt-empty{padding:20px 14px;min-height:0}
+:is(#practiceRoot,.pt) .pt-intake-workspace .pt-empty p{margin:6px 0}
+:is(#practiceRoot,.pt) .pt-intake-workspace .pt-load-more:not(:has(button:not([hidden]))):has(p:empty){display:none}
+:is(#practiceRoot,.pt) .pt-intake-workspace .pt-footnote,:is(#practiceRoot,.pt) .pt-intake-workspace>.pt-intake-actions{margin:10px 0;font-size:13px}
+@media(max-width:640px){:is(#practiceRoot,.pt) .pt-intake-workspace .pt-intake-filters>label{flex-basis:100%}:is(#practiceRoot,.pt) .pt-intake-workspace .pt-intake-advanced[open] .pt-grid{left:0;right:auto;width:min(340px,calc(100vw - 64px))}:is(#practiceRoot,.pt) .pt-intake-workspace .pt-status-filters{flex-wrap:wrap;overflow:visible}:is(#practiceRoot,.pt) .pt-intake-workspace .pt-status-filters button{font-size:13px;padding:8px}}
+
+:is(#practiceRoot,.pt) .pt-intake-workspace .pt-intake-advanced .pt-grid>label{grid-column:auto;grid-row:auto}
