@@ -480,3 +480,35 @@ body:has(#builder.view.active-view) #caseContextBar,body:has(#builder.view.activ
 #account.clinic-management-view .account-ux-hero{padding:12px 14px;margin-bottom:12px;align-items:center}
 #account.clinic-management-view .account-ux-hero h2{font-size:18px;margin:0}
 #account.clinic-management-view #saasAccountSubtitle{display:none}
+
+/* Patient page: one utility row, one context row and grouped patient actions. */
+#appView .topbar.clinic-patient-header{display:grid;grid-template-columns:minmax(160px,1fr) auto;gap:12px 20px;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #dce5f2}
+#appView .clinic-patient-header>.clinic-install-heading{display:block;min-width:0;width:auto}
+#appView .clinic-patient-header .clinic-install-heading .eyebrow{margin:0 0 5px}
+.clinic-patient-header-tools{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0}
+.clinic-patient-header-tools[hidden]{display:none!important}
+.clinic-patient-header-tools .care-global-search{flex:1 1 280px;width:280px;max-width:340px;min-width:160px;order:0;margin:0}
+.clinic-patient-header-tools #clinicInstall,.clinic-patient-header-tools #openScreenGuide{min-height:40px;padding:8px 12px;border:1px solid #dce5f2;border-radius:10px;background:#fff;color:#24496f;font-family:inherit;font-size:13px;font-weight:600;line-height:1.35;white-space:nowrap}
+.clinic-patient-header-tools #screenHelpBar{margin:0;padding:0;flex:none}
+.clinic-patient-header-tools .care-notification-button{width:40px;height:40px;min-height:40px}
+#appView .clinic-patient-header .topbar-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;width:100%;gap:8px;overflow:visible;justify-content:flex-start}
+.clinic-patient-header #hospitalBadge{order:0}
+.clinic-patient-header #saasRoleBadge{order:1}
+.clinic-patient-header #globalCaseBadge{order:2;margin-left:auto;min-width:0;max-width:400px}
+.clinic-patient-header #globalNewCase{order:3;min-height:36px;padding:7px 12px}
+#patients .patient-crm-head{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:12px}
+#patients .patient-crm-head>div:first-child{flex:1 1 240px}
+#patients .patient-crm-head h3{margin:0 0 4px;font-size:20px}
+#patients .patient-crm-actions{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin:0}
+.clinic-patient-actions-register,.clinic-patient-actions-home{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.clinic-patient-actions-home{padding-left:16px;border-left:1px solid #dce5f2}
+.clinic-patient-actions-home[hidden]{display:none!important}
+#patients .patient-crm-actions .btn{min-height:40px;margin:0;padding:9px 13px;font-size:14px;line-height:1.35;white-space:nowrap}
+@media(max-width:1100px){#appView .topbar.clinic-patient-header{grid-template-columns:1fr}.clinic-patient-header-tools{justify-content:flex-start;flex-wrap:wrap}.clinic-patient-header-tools .care-global-search{max-width:none;flex-grow:1}#patients .patient-crm-actions{width:100%}}
+@media(max-width:600px){.clinic-patient-header-tools .care-global-search{flex-basis:100%;width:100%}#appView .clinic-patient-header #globalCaseBadge{margin-left:0;flex:1 1 180px}.clinic-patient-header #globalNewCase{flex:none}.clinic-patient-actions-register,.clinic-patient-actions-home{width:100%}.clinic-patient-actions-home{padding:10px 0 0;border-left:0;border-top:1px solid #dce5f2}#patients .patient-crm-actions .btn{flex:1 1 auto}.clinic-patient-header-tools .care-notification-panel{position:fixed;left:12px;right:12px;width:auto;max-width:none}}
+#appView .clinic-patient-header>.clinic-install-heading{grid-column:1;grid-row:1}
+#appView .clinic-patient-header>.clinic-patient-header-tools{grid-column:2;grid-row:1}
+#appView .clinic-patient-header>.topbar-actions{grid-row:2}
+#appView .clinic-patient-header #globalCaseBadge{flex:0 1 auto;width:auto}
+@media(max-width:1100px){#appView .clinic-patient-header>.clinic-patient-header-tools{grid-column:1;grid-row:2}#appView .clinic-patient-header>.topbar-actions{grid-row:3}}
+@media(max-width:600px){#appView .clinic-patient-header #globalCaseBadge{flex:1 1 180px}}

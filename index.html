@@ -1050,7 +1050,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="carestep-workflow.css?v=flow-20261017">
   <link rel="stylesheet" href="home-access-clinic.css?v=readable-20261017">
 <link rel="stylesheet" href="carestep-ui.css?v=deployment-check-20261019a">
-<link rel="stylesheet" href="clinic-organization.css?v=20261031-account">
+<link rel="stylesheet" href="clinic-organization.css?v=20261031-patient-header">
 <style>
 .billing-contract-comparison{margin:16px 0;border:1px solid var(--line);border-radius:12px;padding:14px;background:#f8faff;line-height:1.65;font-size:14px}.billing-contract-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.billing-contract-columns span,.billing-contract-columns strong,.billing-contract-columns small{display:block}.billing-contract-columns strong{font-size:19px;margin:5px 0;color:#143d83}.billing-contract-comparison p{font-size:13px}.billing-contract-comparison summary{cursor:pointer;padding:8px 0;font-weight:700}.billing-catalog-row{padding:10px 0;border-top:1px solid var(--line)}.billing-catalog-row b,.billing-catalog-row span,.billing-catalog-row small{display:block}#billingReadStatus[data-state="error"]{color:#9a372d;background:#fff3f0;padding:12px;border-radius:10px}@media(max-width:600px){.billing-contract-columns{grid-template-columns:minmax(0,1fr)}.billing-contract-columns>div+div{border-top:1px solid var(--line);padding-top:12px}}
 </style>
@@ -1309,7 +1309,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 
       <section id="patients" class="view">
         <div class="patient-crm-head">
-          <div><p class="eyebrow"></p><h3>환자 관리</h3><p>환자를 검색해 선택하면 건강기록·자료·복약·HOME 연결을 한곳에서 관리할 수 있습니다.</p></div>
+          <div><p class="eyebrow"></p><h3>환자 목록</h3><p>환자를 선택해 건강기록·자료·복약을 확인하세요.</p></div>
           <div class="patient-crm-actions"><button id="patientCrmRefresh" class="btn btn-secondary" type="button">새로고침</button><button id="patientCrmNewGuardian" class="btn btn-secondary" type="button">+ 보호자 등록</button><button id="patientCrmNewPatient" class="btn btn-primary" type="button">+ 환자 등록</button></div>
         </div>
         <div class="patient-crm-notice"><span>🔒</span><div><b>병원별 분리 · 암호화 저장</b><br>보호자명·연락처, 환자 식별정보와 건강 타임라인 제목·메모는 병원별로 분리해 암호화 저장합니다. 체중·접종·사상충·병원 진료·후속관리 계획은 환자별 날짜순으로 누적됩니다.</div></div>
@@ -10471,7 +10471,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="home-access-clinic.js?v=20261031-practical-terms"></script>
 <script src="clinic-care.js?v=20261031-practical-labels"></script>
 <script src="clinic-account-reads.js?v=20261031-account"></script>
-<script src="clinic-organization.js?v=20261031-practical-terms"></script>
+<script src="clinic-organization.js?v=20261031-patient-header"></script>
 <script src="staff-training.js?v=20261031-clinical-terms"></script>
 <script src="staff-training-clinic.js?v=20261020a"></script>
 <script src="practice-intake.js?v=20261023a"></script>

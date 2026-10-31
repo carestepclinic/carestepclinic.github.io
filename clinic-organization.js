@@ -174,8 +174,31 @@
   }
  }
 
+ function mountPatientHeader(){
+  const patient=$('patients'),header=document.querySelector('.topbar'),actions=patient?.querySelector('.patient-crm-actions');
+  if(!patient||!header||!actions||header.dataset.patientLayout)return;
+  header.dataset.patientLayout='1';
+  const tools=document.createElement('div');tools.className='clinic-patient-header-tools';tools.hidden=true;header.append(tools);
+  const groups={};for(const [key,label] of [['register','환자·보호자 등록'],['home','HOME 연결 관리']]){const group=document.createElement('div');group.className='clinic-patient-actions-'+key;group.setAttribute('role','group');group.setAttribute('aria-label',label);actions.append(group);groups[key]=group;}
+  const placements=new Map();let queued=false;
+  function move(node){if(!node)return;if(!placements.has(node)){const marker=document.createComment('patient header position');node.before(marker);placements.set(node,marker);}if(node.parentElement!==tools)tools.append(node);}
+  function sync(){
+   queued=false;const active=patient.classList.contains('active-view');header.classList.toggle('clinic-patient-header',active);tools.hidden=!active;
+   if(active){move(document.querySelector('.care-global-search'));move(document.querySelector('.care-notification-wrap'));move($('clinicInstall'));move($('screenHelpBar'));}
+   else for(const [node,marker] of placements)if(marker.parentNode&&node.parentNode!==marker.parentNode)marker.after(node);
+   for(const id of ['patientCrmNewPatient','patientCrmNewGuardian','patientCrmRefresh']){const node=$(id);if(node&&node.parentNode!==groups.register)groups.register.append(node);}
+   for(const id of ['clinicHomeAccessOpen','clinicHomeDirectoryOpen0']){const node=$(id);if(node&&node.parentNode!==groups.home)groups.home.append(node);}
+   groups.home.hidden=!groups.home.children.length;
+  }
+  const schedule=()=>{if(!queued){queued=true;queueMicrotask(sync);}};
+  new MutationObserver(schedule).observe(patient,{attributes:true,attributeFilter:['class']});
+  new MutationObserver(schedule).observe(header,{childList:true,subtree:true});
+  new MutationObserver(schedule).observe(actions,{childList:true,subtree:true});
+  sync();
+ }
+
  function mount(){
-  mountDashboard();mountDashboardManagement();syncNav();mountHospitalManagement();
+  mountPatientHeader();mountDashboard();mountDashboardManagement();syncNav();mountHospitalManagement();
   const bar=$('r61-controls'),settings=$('settings');if(bar&&settings){settings.insertBefore(bar,$('emrSyncCenter'));bar.setAttribute('aria-label','발송·공개·연동 관리');}
   document.querySelector('.nav-list')&&new MutationObserver(syncNav).observe(document.querySelector('.nav-list'),{subtree:true,attributes:true,attributeFilter:['class']});
   const original=global.crmTimelineOpen;timelineOpen=original;
@@ -185,7 +208,7 @@
    const loaded=workspace?.recordsLoaded;if(showWorkspaceTab('records',patient.id)&&loaded)return original(patient,guardian);
   };
  }
- global.ClinicOrganization={clinicalRows,noticeLabel,updateTodayCounts,ageLabel,recentTemplates,taskPreview,createTabs,mountHospitalManagement,organizeWorkspace,showWorkspaceTab,mountDashboard,syncNav};
+ global.ClinicOrganization={mountPatientHeader,clinicalRows,noticeLabel,updateTodayCounts,ageLabel,recentTemplates,taskPreview,createTabs,mountHospitalManagement,organizeWorkspace,showWorkspaceTab,mountDashboard,syncNav};
  if(typeof module!=='undefined')module.exports=global.ClinicOrganization;
  if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();}
 })(typeof window==='undefined'?globalThis:window);
