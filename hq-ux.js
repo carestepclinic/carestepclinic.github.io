@@ -275,21 +275,25 @@
     document.querySelectorAll('[data-billing-pane]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.billingPane===billingPane)));
     if(byId('hqBillingChannels'))byId('hqBillingChannels').hidden=billingPane!=='subscriptions';
     if(regions.get('hqBillingChannels'))regions.get('hqBillingChannels').box.hidden=billingPane!=='subscriptions';
-    if(push)writeRoute();return true;
+    if(push){writeRoute();if(currentView==='billing'&&byId('loginOverlay').classList.contains('hidden'))void reloadView('billing');}return true;
   }
-  function viewLoader(view){
-    return ({protocols:()=>window.CarestepHqProtocols?.open(),training:()=>window.CarestepTraining?.open(),dashboard:loadOverview,approval:loadApproval,clinics:loadClinics,onboarding:loadOnboardingPortfolio,customerSuccess:loadCustomerSuccess,billing:loadBilling,usageBilling:loadUsageBilling,
+  function viewLoader(view,force=true){
+    return ({protocols:()=>window.CarestepHqProtocols?.open({reuse:!force}),training:()=>window.CarestepTraining?.open({reuse:!force}),dashboard:loadOverview,approval:loadApproval,clinics:loadClinics,onboarding:loadOnboardingPortfolio,customerSuccess:loadCustomerSuccess,billing:loadBilling,usageBilling:loadUsageBilling,
       integrations:()=>Promise.all([loadCalendarIntegration(),loadMessagingIntegration()]),senders:()=>Promise.all([loadSenderOnboarding(),loadMessagingIntegration()]),
       journeys:loadPatientJourneysHQ,surveys:loadGuardianSurveyHQ,crm:loadFollowupCrmHQ,content:loadContent,voice:loadVoice,production:loadProductionLaunch,audit:loadAudit})[view];
   }
-  async function reloadView(view=currentView){
+  const pendingViews=new Map();
+  async function reloadView(view=currentView,{force=true}={}){
     if(!byId('loginOverlay').classList.contains('hidden'))return;
     if(!allowLeave())return;
-    const loader=viewLoader(view);if(!loader)return;
-    try{
+    const loader=viewLoader(view,force);if(!loader)return;
+    const key=JSON.stringify([endpoint(),hqSessionToken(),view,billingPane,selectedClinic,...filterIds.map(id=>byId(id)?.value)]);
+    if(!force&&pendingViews.has(key))return pendingViews.get(key);
+    const work=(async()=>{try{
       if(['protocols','dashboard','billing','usageBilling','clinics','onboarding','customerSuccess','surveys','crm','voice','content'].includes(view)){await loader();return;}
       await region(view,loader,()=>{},()=>reloadView(view));
-    }finally{restoreClinicReturn(view);}
+    }finally{if(currentView===view)restoreClinicReturn(view);}})();
+    pendingViews.set(key,work);try{return await work;}finally{if(pendingViews.get(key)===work)pendingViews.delete(key);}
   }
   function navigate(view,{push=true,check=true}={}){
     const target=byId(view);if(!target?.classList.contains('view')){toast('현재 제공되지 않는 화면입니다.');return false;}
@@ -312,7 +316,7 @@
     syncHqNavForView(view);if(view==='billing')setBillingPane(billingPane,{push:false,check:false});
     if(push)writeRoute();saveState();
     window.scrollTo({top:viewPositions.get(view)||0,behavior:'instant'});
-    reloadView(view);return true;
+    void reloadView(view,{force:false});return true;
   }
   function restoreRoute(){
     const saved=loadState(),parsed=route(location.hash||('#'+(saved.view||'dashboard')+(saved.view==='billing'?'/'+(saved.pane||'subscriptions'):'')));
@@ -551,12 +555,14 @@
   document.querySelectorAll('[data-material-view]').forEach(button=>button.onclick=()=>showView(button.dataset.materialView));
   loadBilling=async function(){
     if(hasDirty()&&!activeSave&&!allowLeave())return;
-    const retry=()=>loadBilling();
+    const pane=billingPane,retry=()=>loadBilling();
+    if(pane==='payments')return loadPaymentAutomation();
+    const planLoad=region('planGrid',()=>req('/hq/plans'),data=>{plans=data.plans||[];foundingPolicy=data.foundingPolicy||foundingPolicy;renderPlans();},retry);
+    if(pane==='plans')return planLoad;
     salesChannels=null;renderChannelCounts();
     await Promise.all([
-      region('planGrid',()=>req('/hq/plans'),data=>{plans=data.plans||[];foundingPolicy=data.foundingPolicy||foundingPolicy;renderPlans();},retry),
+      planLoad,
       region('subscriptionTable',()=>req('/hq/subscriptions'),data=>{subscriptions=data.subscriptions||[];foundingPolicy=data.foundingPolicy||foundingPolicy;renderSubscriptions();},retry),
-      loadPaymentAutomation(),
       region('hqBillingChannels',()=>req('/hq/overview'),data=>{salesChannels=data.salesChannels||{};renderChannelCounts();},retry)
     ]);
   };
@@ -1256,7 +1262,7 @@
   function syncAuthenticationPresentation(){
     const locked=!loginOverlay.classList.contains('hidden');document.body.classList.toggle('hq-auth-locked',locked);shell.inert=locked;
     byId('hqHeaderTools').inert=locked;byId('hqMenuToggle').disabled=locked;byId('hqToolsToggle').disabled=locked;
-    if(locked){hideHqQuickResults();document.body.classList.remove('hq-menu-open');byId('hqNavBackdrop').hidden=true;}
+    if(locked){pendingViews.clear();hideHqQuickResults();document.body.classList.remove('hq-menu-open');byId('hqNavBackdrop').hidden=true;}
   }
   new MutationObserver(syncAuthenticationPresentation).observe(loginOverlay,{attributes:true,attributeFilter:['class']});syncAuthenticationPresentation();
 

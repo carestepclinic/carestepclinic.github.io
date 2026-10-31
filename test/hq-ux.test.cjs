@@ -46,7 +46,7 @@ async function fixture(t,width=1280){
   });
   return page;
 }
-async function billing(page){await page.evaluate(()=>showView('billing'));await page.locator('.plan-card').first().waitFor({state:'attached'});await page.waitForFunction(()=>document.getElementById('hqPaymentProvider').textContent==='정상');}
+async function billing(page){await page.evaluate(()=>showView('billing'));await page.locator('.plan-card').first().waitFor({state:'attached'});await page.evaluate(()=>loadPaymentAutomation());await page.waitForFunction(()=>document.getElementById('hqPaymentProvider').textContent==='정상');}
 test('dashboard keeps its current title after loading and places work before collapsed statistics',async t=>{
  const p=await fixture(t,390);
  await p.evaluate(async()=>{
@@ -515,13 +515,13 @@ test('confirmed central-account hospital retains a separate budget editor and ex
 });
 
 test('payment outage is unknown, retains other regions, retry restores true zero and OFF',async t=>{
-  const p=await fixture(t);await p.evaluate(()=>{failPayment=true;showView('billing');});
+  const p=await fixture(t);await p.evaluate(()=>{failPayment=true;showView('billing');});await p.locator('.plan-card').first().waitFor({state:'attached'});await p.locator('#hqTabpayments').click();
   await p.waitForFunction(()=>document.getElementById('hqPaymentProvider').textContent==='확인 필요');
   assert.equal(await p.locator('.plan-card').count(),4);
   assert.match(await p.locator('#subscriptionTable').innerText(),/시험 병원 A/);
   assert.match(await p.locator('#hqOverageAutobillMeta').innerText(),/확인하지 못했습니다/);
   assert.equal(await p.locator('#hqRunBilling').isDisabled(),true);
-  await p.locator('#hqTabpayments').click();await p.evaluate(()=>failPayment=false);
+  await p.evaluate(()=>failPayment=false);
   await p.locator('#hqBillingpayments .hq-load-status button').click();
   await p.waitForFunction(()=>document.getElementById('hqPaymentProvider').textContent==='정상');
   assert.equal(await p.locator('#hqPaymentPaid').innerText(),'0');

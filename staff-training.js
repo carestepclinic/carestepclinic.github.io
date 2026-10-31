@@ -34,6 +34,7 @@
  function mount(root,adapter){
   if(!root)throw Error('Training root missing');
   root.classList.add('staff-training');
+  let listPending=null,loadedAt=0;
   let data=null,tab=adapter.common?'manage':'library',query='',category='',courseType='',sequence=0,identity='',busy=false,dialog=null,dirty=false,activeDoc=null,activeAssignment=null,activeSupplement=null,requestKey='',message='',sort='number',view='',tabState={},returnFocus=null,manageView='assign',mineFilter='all',mineQuery='',reportQuery='',reportMember='',reportState='all',reportDue='all',reportPage=0;
   const ready=()=>!adapter.isReady||adapter.isReady();
   const actor=()=>data?.actor||{capabilities:{}};
@@ -99,13 +100,15 @@
    const pages=Math.max(1,Math.ceil(rows.length/20));reportPage=Math.min(reportPage,pages-1);const shown=rows.slice(reportPage*20,reportPage*20+20);
    host.innerHTML='<p class="st-count" role="status">'+rows.length+'건 · '+(reportPage+1)+' / '+pages+'쪽</p>'+(rows.length?'<div class="st-table-wrap" tabindex="0" aria-label="직원별 교육 현황"><table><thead><tr><th>직원</th><th>교육자료</th><th>기한</th><th>학습 상태</th></tr></thead><tbody>'+shown.map(a=>'<tr><td data-label="직원">'+esc(a.display_name)+'</td><td data-label="교육자료">'+esc(a.title)+' <small>v'+a.version+'</small></td><td data-label="기한">'+shortDate(a.due_date)+'</td><td data-label="학습 상태">'+({done:'이수 완료',overdue:'기한 초과',learning:'학습 중',new:'학습 전',unavailable:'자료 이용 불가'})[learningState(a)]+(a.completed_at&&a.score!=null?' · '+a.score+'점':'')+'</td></tr>').join('')+'</tbody></table></div>':'<p class="st-empty">조건에 맞는 교육 기록이 없습니다.</p>')+'<div class="st-actions">'+btn('이전','report-page','data-step="-1" '+(reportPage===0?'disabled':''))+btn('다음','report-page','data-step="1" '+(reportPage===pages-1?'disabled':''))+'</div>';
   }
-  async function load(){
+  async function load({reuse=false}={}){
    const current=adapter.identity?.()||'';
-   if(current!==identity){mineFilter='all';mineQuery='';reportQuery='';reportMember='';reportState='all';reportDue='all';reportPage=0;manageView='assign';identity=current;tabState={};sort='number';view='';data=null;query='';category='';courseType='';if(dialog){dirty=false;closeDialog();}}
+   if(current!==identity){loadedAt=0;listPending=null;mineFilter='all';mineQuery='';reportQuery='';reportMember='';reportState='all';reportDue='all';reportPage=0;manageView='assign';identity=current;tabState={};sort='number';view='';data=null;query='';category='';courseType='';if(dialog){dirty=false;closeDialog();}}
    if(!ready()){data=null;shell();notice('병원 직원 계정으로 로그인하면 교육센터를 사용할 수 있습니다.');return;}
+   if(reuse&&data&&Date.now()-loadedAt<30000){if(!dialog&&root.querySelector('[data-tab][aria-current=page]')?.dataset.tab!==tab)render();return;}
+   if(reuse&&listPending?.seq===sequence)return listPending.promise;
    const seq=++sequence;if(!data){shell();root.querySelector('[data-content]').innerHTML='<div class="st-empty st-loading" aria-busy="true">교육자료와 내 교육을 불러오는 중입니다…</div>';}else notice('목록을 업데이트하는 중입니다. 기존 자료를 계속 볼 수 있습니다.');
-   try{const result=await adapter.request('/',{method:'GET'});if(seq!==sequence||current!==(adapter.identity?.()||''))return;const y=global.scrollY,focused=root.contains(document.activeElement)?document.activeElement:null,field=focused?.matches('input,select')?Object.keys(focused.dataset)[0]:'',caret=focused?.selectionStart;data=result;message='';render();if(field){const el=root.querySelector('[data-'+field.replace(/[A-Z]/g,c=>'-'+c.toLowerCase())+']');el?.focus({preventScroll:true});if(caret!=null)el?.setSelectionRange?.(caret,caret);global.scrollTo({top:y,behavior:'instant'});}}
-   catch(e){if(seq!==sequence)return;if(!data){shell();root.querySelector('[data-content]').innerHTML=btn('다시 불러오기','refresh');}notice((e.message||'교육자료를 불러오지 못했습니다.')+(data?' 기존 목록을 유지했습니다. 새로고침으로 다시 확인해주세요.':''),true);}
+   try{const request=adapter.request('/',{method:'GET'});listPending={seq,promise:request.catch(()=>{})};const result=await request;if(seq!==sequence||current!==(adapter.identity?.()||''))return;const y=global.scrollY,focused=root.contains(document.activeElement)?document.activeElement:null,field=focused?.matches('input,select')?Object.keys(focused.dataset)[0]:'',caret=focused?.selectionStart;data=result;loadedAt=Date.now();message='';render();if(field){const el=root.querySelector('[data-'+field.replace(/[A-Z]/g,c=>'-'+c.toLowerCase())+']');el?.focus({preventScroll:true});if(caret!=null)el?.setSelectionRange?.(caret,caret);global.scrollTo({top:y,behavior:'instant'});}}
+   catch(e){if(seq!==sequence)return;if(!data){shell();root.querySelector('[data-content]').innerHTML=btn('다시 불러오기','refresh');}loadedAt=0;notice((e.message||'교육자료를 불러오지 못했습니다.')+(data?' 기존 목록을 유지했습니다. 새로고침으로 다시 확인해주세요.':''),true);}finally{if(listPending?.seq===seq)listPending=null;}
   }
   function closeDialog(){
    if(busy){notice('처리 결과를 확인하고 있습니다.');return false;}
@@ -123,6 +126,7 @@
   }
   async function mutate(action){
    if(busy)return;
+   loadedAt=0;listPending=null;
    const current=identity,epoch=sequence;busy=true;root.setAttribute('aria-busy','true');
    const controls=[...root.querySelectorAll('button'),...(dialog?.querySelectorAll('button')||[])];controls.forEach(b=>{b.dataset.wasDisabled=b.disabled?'1':'0';b.disabled=true;});
    try{return await action(()=>epoch===sequence&&current===(adapter.identity?.()||''));}
@@ -397,10 +401,10 @@
   global.addEventListener('beforeunload',e=>{if(dirty||busy){e.preventDefault();e.returnValue='';}});
   function clear(){
    if(adapter.common)global.TrainingAutomation?.close();
-   ++sequence;tabState={};mineFilter='all';mineQuery='';reportQuery='';reportMember='';reportState='all';reportDue='all';reportPage=0;manageView='assign';sort='number';view='';data=null;identity='';dirty=false;activeDoc=null;activeAssignment=null;activeSupplement=null;query='';category='';courseType='';message='';
+   ++sequence;loadedAt=0;listPending=null;tabState={};mineFilter='all';mineQuery='';reportQuery='';reportMember='';reportState='all';reportDue='all';reportPage=0;manageView='assign';sort='number';view='';data=null;identity='';dirty=false;activeDoc=null;activeAssignment=null;activeSupplement=null;query='';category='';courseType='';message='';
    if(dialog){dialog.close();dialog.remove();dialog=null;}shell();
   }
-  return {open:load,openVersion:id=>openDocument(id),close:closeDialog,leave(){if(!closeDialog())return false;remember();++sequence;return true;},clear,selectSop(){remember();tab='sop';query='';category='';courseType='';sort='number';view='list';}};
+  return {open:(options={})=>load({reuse:true,...options}),openVersion:id=>openDocument(id),close:closeDialog,leave(){if(!closeDialog())return false;remember();++sequence;return true;},clear,selectSop(){remember();tab='sop';query='';category='';courseType='';sort='number';view='list';}};
  }
  global.StaffTraining={mount,filterCourses,sortCourses,groupCourses};
 })(globalThis);
