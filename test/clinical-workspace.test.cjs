@@ -964,7 +964,7 @@ test('schedule UI: completed-only groups expose copy without move or completion 
 for(const width of [390,1440])test('clinical simplicity: ward details stay optional and anesthesia lists only relevant records '+width,async t=>{
  const {p,api,errors}=await summaryFixture(t,width);
  const details=p.locator('.cl-room-details').first();assert.equal(await details.evaluate(e=>e.open),false);assert.ok(await p.locator('.cl-room').first().locator('.cl-monitor-abnormal').first().isVisible());
- assert.equal(await p.locator('.cl-room').first().locator('.cl-patient-demographics').count(),0);
+ assert.ok(await p.locator('.cl-room').first().locator('.cl-patient-demographics').isVisible());
  await details.locator('summary').click();assert.ok(await details.locator('.cl-vital-grid').isVisible());
  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  await p.screenshot({path:path.resolve(root,'../clinical-simple-ward-'+width+'.png'),fullPage:true});
@@ -985,4 +985,18 @@ for(const width of [390,1440])test('copy without acknowledgment: new schedule an
  const r=await api('/cases/'+id);assert.equal(r.item.body.tasks.length,before.body.tasks.length+1);assert.deepEqual(r.item.body.tasks.slice(0,before.body.tasks.length),before.body.tasks);const added=r.item.body.tasks.at(-1);assert.equal(added.status,'planned');assert.equal(added.copiedFromTaskId,sourceId);assert.equal(r.events.filter(e=>e.kind==='order.schedule').length,1);assert.equal(r.item.body.orderChanges.at(-1).mode,'copy');assert.ok(!r.item.body.orderChanges.at(-1).ackAt);
  await p.locator('[data-cl-action=ward-board-mode][data-id=rooms]').click();assert.doesNotMatch(await p.locator('.cl-ward-overview').innerText(),/변경 지시 미확인/);await p.locator('.cl-room').first().click();await wardSettled(p);assert.equal(await p.locator('.ce-notices').count(),0);assert.equal(await p.locator('[data-cl-action=eff-ack]').count(),0);await (await show(p,'[data-cl-action=refresh]')).click();await wardSettled(p);assert.equal(await p.locator('.ce-notices').count(),0);
  const latest=await api('/cases/'+id);await api('/cases/'+id+'/events','POST',{revision:latest.item.revision,requestKey:'copy-without-ack-done',kind:'task.record',data:{taskId:added.id,status:'done',actualAt:new Date().toISOString()}});const completed=await api('/cases/'+id);assert.equal(completed.item.body.tasks.find(t=>t.id===added.id).status,'done');assert.equal(completed.events.filter(e=>e.kind==='order.ack').length,0);assert.deepEqual(errors,[]);
+});
+
+for(const width of [320,390,1440])test('ward identity always visible: compact expanded and returning '+width,async t=>{
+ const {p,api,f,caseIds,errors}=await summaryFixture(t,width),id=caseIds[0];await p.clock.setSystemTime(new Date('2026-10-29T08:33:00Z'));
+ const demographics={birthDate:'2020-10-29',breed:'합성 긴 품종명 코리안 쇼트헤어 믹스',sex:'female',neutered:'yes'};
+ f.clinicalHandler=async(path,m,b)=>{const r=await f.extras(path,m,b);if(m==='GET'){if(path==='/clinical/rooms')for(const x of r.items||[])if(x.patientCase?.id===id)Object.assign(x.patientCase.patient,demographics);if(path.endsWith('/cases/'+id))Object.assign(r.item.patient,demographics);}return r;};
+ await (await show(p,'[data-cl-action=refresh]')).click();await wardSettled(p);
+ const card=p.locator('.cc-occupied').first(),identity=card.locator('.cl-room-identity'),demo=identity.locator('.cl-patient-demographics');
+ const check=async()=>{assert.ok(await demo.isVisible());assert.match(await demo.innerText(),/6세 · 합성 긴 품종명 코리안 쇼트헤어 믹스 · 중성화 암컷/);assert.equal(await card.locator('.cl-patient-demographics').count(),1);assert.ok(await identity.evaluate(e=>e.scrollWidth<=e.clientWidth+1));assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));};
+ await check();assert.equal(await card.locator('.cl-room-details').evaluate(e=>e.open),false);
+ assert.match(await p.locator('.cc-occupied').nth(1).locator('.cl-room-identity').innerText(),/나이 미입력 · 품종 미입력 · 성별 미입력/);assert.equal(await p.locator('.cc-vacant .cl-room-identity').count(),0);
+ await card.locator('.cl-room-details>summary').click();await check();await card.locator('.cl-room-details>summary').click();await check();
+ await card.locator('.cl-room').click();await wardSettled(p);await p.locator('[data-cl-action=rooms-back]').click();await check();
+ await p.screenshot({path:path.resolve(root,'../ward-demographics-'+width+'.png'),fullPage:true});assert.deepEqual(errors,[]);
 });

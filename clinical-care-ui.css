@@ -135,3 +135,8 @@
 .cl-workspace .cl-protocol-card strong{font-size:16px}
 .ar-single-page .ar-tube-setting label,.ar-single-page .ar-tube-setting [role=status],.ar-single-page .ar-duration-summary small,.ar-single-page .ar-reminder small{font-size:14px}
 @media(max-width:760px){.cl-task-hub .cl-task-quick-actions>button{flex:1 1 42%}.cl-task-hub .cl-task-delete{width:100%}.cl-simple .cl-board-count{font-size:16px}.cl-simple .cl-room-group>header p{font-size:14px}}
+
+/* Patient identity stays visible in both compact and expanded ward cards. */
+.cl-workspace .cl-room>.cl-room-identity{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;width:100%;min-width:0}
+.cl-workspace .cl-room .cl-room-identity>strong{font-size:20px;line-height:1.4}
+.cl-workspace .cl-room .cl-room-identity>.cl-patient-demographics{display:block;min-width:0;max-width:100%;font-size:14px;line-height:1.5;font-weight:400;color:#526174;white-space:normal;overflow-wrap:anywhere}
