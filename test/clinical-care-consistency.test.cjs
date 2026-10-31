@@ -38,6 +38,6 @@ test('protocol navigation: nonmedical reader cannot publish revise or apply',asy
 });
 for(const width of [390,1440])test('ward summary: complaint and abnormal observations appear once while unknown stays distinct '+width,async t=>{
  const p=await fixture(t,width);await p.evaluate(()=>app.open('ward'));await p.locator('[data-room-card=room1]').waitFor();const card=p.locator('[data-room-card=room1]');
- await card.locator('.cl-room-details').evaluate(e=>e.open=true);assert.equal((await card.innerText()).split('합성 주호소').length-1,1);assert.equal(await card.locator('.cl-monitor-abnormal').count(),1);assert.match(await card.innerText(),/미확인/);assert.ok(await card.locator('[data-monitor=appetite]').count());assert.equal(await card.locator('.cl-care-cc').count(),0);
+ await card.locator('.cl-room-details').evaluate(e=>e.open=true);assert.equal((await card.innerText()).split('합성 주호소').length-1,1);assert.equal(await card.locator('.cl-monitor-abnormal').count(),1);assert.match(await card.innerText(),/미관찰/);assert.ok(await card.locator('[data-monitor=appetite]').count());assert.equal(await card.locator('.cl-care-cc').count(),0);
  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await p.screenshot({path:path.resolve(root,'../care-ward-summary-'+width+'.png'),fullPage:true});assert.equal(await p.evaluate(()=>calls.some(c=>c.method!=='GET')),false);
 });

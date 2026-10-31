@@ -49,10 +49,10 @@
    tabs.querySelector('[data-prescription-text]').onclick=()=>{rx.querySelector('[data-mode=text]')?.click();rx.querySelector('[data-rx-text]').focus({preventScroll:true});};
    tabs.querySelector('[data-prescription-photo]').onclick=()=>{const mode=rx.querySelector('[data-mode=image]');if(mode)mode.click();else rx.querySelector('.pt-image-launch')?.click();};
    if(load){
-    const saved=document.createElement('button');saved.type='button';saved.dataset.prescriptionSaved='';saved.textContent='저장 처방';saved.setAttribute('aria-expanded','false');
+    const saved=document.createElement('button');saved.type='button';saved.dataset.prescriptionSaved='';saved.textContent='처방 서식';saved.setAttribute('aria-expanded','false');
     saved.onclick=()=>{load.open=!load.open;if(load.open)load.scrollIntoView({block:'nearest'});};tabs.append(saved);
     load.addEventListener('toggle',()=>saved.setAttribute('aria-expanded',String(load.open)));
-    set(load.querySelector('summary'),'저장 처방·단계별 작성');
+    set(load.querySelector('summary'),'처방 서식·단계별 작성');
    }
    const clear=rx.querySelector('[data-rx-clear]');clear.parentElement.classList.add('pt-rx-entry-actions');set(clear,'처방 지우기');clear.title='처방 입력만 지우기';tabs.append(clear);
    const common=rx.querySelector('.pt-rx-common-settings');if(common){common.classList.add('pt-common-regimen');set(common.querySelector('summary'),'공통 용법 · 누락된 조건만 적용');}
@@ -96,7 +96,7 @@
    link.onclick=()=>{const panel=form.closest('[data-kind-panel]');if(panel)o.selectKind(panel.dataset.kindPanel);more.open=false;control.classList.add('pt-manage-open');control.open=true;control.scrollIntoView({block:'nearest'});};
    control.addEventListener('toggle',()=>{if(!control.open)control.classList.remove('pt-manage-open');});
    managed.push([control,link]);
-   if(form.dataset.calc==='nutrition'){const quick=document.createElement('button');quick.type='button';quick.dataset.nutritionSave='';quick.textContent='영양 계산 설정 저장';quick.onclick=()=>{link.click();control.querySelector('[data-protocol-save]')?.click();};const label=form.querySelector('[data-nutrition-product]')?.closest('label');if(label){label.after(quick);managed.push([control,quick]);const note=document.createElement('small');note.className='pt-help pt-nutrition-save-scope';note.textContent='저장 범위: RER 배수·제품 열량·단위·급여 횟수';quick.after(note);}}
+   if(form.dataset.calc==='nutrition'){const quick=document.createElement('button');quick.type='button';quick.dataset.nutritionSave='';quick.textContent='병원 영양 설정 저장';quick.onclick=()=>{link.click();control.querySelector('[data-protocol-save]')?.click();};const label=form.querySelector('[data-nutrition-product]')?.closest('label');if(label){label.after(quick);managed.push([control,quick]);const note=document.createElement('small');note.className='pt-help pt-nutrition-save-scope';note.textContent='저장 범위: RER 배수·제품 열량·단위·급여 횟수';quick.after(note);}}
   }
   // Schedule is one editable summary. Retain the exact parsed per-drug regimen.
   const regimen=document.createElement('details');regimen.className='pt-schedule-summary';regimen.innerHTML='<summary>일정 확인·변경</summary>';
@@ -156,15 +156,15 @@
     const actions=f.querySelector('[data-result-actions]');if(!actions)continue;
     let use=f.querySelector('.pt-result-use');if(!use){use=document.createElement('section');use.className='pt-result-use';use.setAttribute('aria-label','계산 결과 작업');actions.before(use);use.append(actions);}
     hide(use,actions.hidden);
-    const print=actions.querySelector('[data-print]');let extra=use.querySelector('.pt-result-more');if(!extra){extra=document.createElement('details');extra.className='pt-result-more';extra.innerHTML='<summary>처방 저장</summary>';use.append(extra);}if(print){extra.querySelector('[data-print]')?.remove();actions.append(print);}
+    const print=actions.querySelector('[data-print]');let extra=use.querySelector('.pt-result-more');if(!extra){extra=document.createElement('details');extra.className='pt-result-more';extra.innerHTML='<summary>처방 서식 저장</summary>';use.append(extra);}if(print){extra.querySelector('[data-print]')?.remove();actions.append(print);}
     if(f===rx){const save=f.querySelector('.pt-flow-rx-save'),ward=f.querySelector('[data-ward-calculator-import]');
      if(extra&&save&&save.parentElement!==extra)extra.append(save);
      if(ward){const destination=use;if(ward.parentElement!==destination)destination.append(ward);}
-     if(ward){set(ward,'입원 처치에 연결');ward.classList.toggle('pt-primary',o.destination?.()==='ward');ward.disabled=!actions.querySelector('[data-checked]')?.checked;}
+     if(ward){set(ward,'입원 투약 지시 만들기');ward.classList.toggle('pt-primary',o.destination?.()==='ward');ward.disabled=!actions.querySelector('[data-checked]')?.checked;}
     }
     hide(extra,![...extra.children].some(x=>x.tagName!=='SUMMARY'&&!x.hidden&&x.querySelector('button')));
    }
-   const injection=q('[data-injection-send]');if(injection&&!injection.closest('.pt-injection-use')){const use=document.createElement('section');use.className='pt-injection-use';use.setAttribute('aria-label','계산 결과 작업');injection.before(use);use.append(q('[data-injection-copy]'),injection);set(injection,'마취기록에 연결');injection.title='투약 대기로 등록';injection.classList.add('pt-primary');}
+   const injection=q('[data-injection-send]');if(injection&&!injection.closest('.pt-injection-use')){const use=document.createElement('section');use.className='pt-injection-use';use.setAttribute('aria-label','계산 결과 작업');injection.before(use);use.append(q('[data-injection-copy]'),injection);set(injection,'마취 투약 대기로 등록');injection.title='투약 대기로 등록';injection.classList.add('pt-primary');}
    if(injection)hide(injection.closest('.pt-injection-use'),injection.hidden&&q('[data-injection-copy]').hidden);
   }
   // Fold generic instructions, never errors, active warnings or clinical review controls.

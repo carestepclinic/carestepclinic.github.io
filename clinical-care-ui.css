@@ -117,3 +117,21 @@
  .ck-reader-actions>button{flex:1 1 160px}
  .ar-single-page .ad-medications .ad-drug-actions>button{flex:1 1 130px}
 }
+
+/* Clinical workflow: visible census, shallow actions, one readable scale. */
+.cl-simple .cl-board-count{display:block;font-size:16px;color:#24364c;margin:8px 0 12px}
+.cl-simple .cl-room-group>header p{display:block;font-size:14px;color:#526174}
+.cl-task-hub .cl-task-hub-patient{margin:0 0 12px}
+.cl-task-hub-item{border-top:1px solid #d7e1ef;padding:12px 0}
+.cl-task-hub-item h3{font-size:18px;margin:0 0 4px}
+.cl-task-hub-item p{margin:4px 0 8px}
+.cl-task-quick-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.cl-task-delete{margin-left:auto}.cl-task-delete>summary{cursor:pointer;min-height:44px;padding:10px;box-sizing:border-box;color:#9d2f19}
+.cl-task-delete[open]{flex-basis:100%;margin:0}
+.cl-task-quick-actions button{min-height:44px}
+.cl-workspace .cl-calendar-slot>footer{display:flex;flex-wrap:wrap;gap:6px}
+:is(.cl-workspace,.ar-single-page,.ck-dialog,.cl-dialog){--care-body:16px;--care-small:14px;--care-control:44px}
+.cl-workspace .cl-protocol-meta,.cl-workspace .cl-protocol-description,.cl-workspace .cl-protocol-result,.cl-simple .cl-room .cl-patient-demographics,.cl-simple .cl-room .cl-care-staff b,.cl-simple .cl-room .cl-care-staff,.cl-simple .cl-room .cl-vital-grid>div>small,.ar-single-page .ar-demographics,.ar-single-page .ad-period,.ar-single-page .ad-axis-note,.ar-single-page .ad-legend small{font-size:14px;line-height:1.5}
+.cl-workspace .cl-protocol-card strong{font-size:16px}
+.ar-single-page .ar-tube-setting label,.ar-single-page .ar-tube-setting [role=status],.ar-single-page .ar-duration-summary small,.ar-single-page .ar-reminder small{font-size:14px}
+@media(max-width:760px){.cl-task-hub .cl-task-quick-actions>button{flex:1 1 42%}.cl-task-hub .cl-task-delete{width:100%}.cl-simple .cl-board-count{font-size:16px}.cl-simple .cl-room-group>header p{font-size:14px}}
