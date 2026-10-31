@@ -33,7 +33,7 @@
   const sel=f.elements.nutritionProfile,target=f.elements.targetWeight,factor=box.querySelector('[data-nutrition-factor]');let writing=false;
   function info(){const p=profile(sel.value,o.species.value);box.querySelector('[data-nutrition-summary]').textContent=p?(o.species.value==='cat'?'고양이':'개')+' · '+p.label+' · '+m.value+' × '+(p.target?'목표':'현재')+' 체중의 RER':'';box.querySelector('[data-nutrition-note]').textContent=p?.note||'급여 후 체중·BCS·MCS와 섭취량을 재평가해 목표 열량을 조정하세요.';const a=box.querySelector('[data-nutrition-source]'),s=p?.source||sources.pna;a.href=s.url;a.textContent=s.label;}
   function render(){const p=profile(sel.value,o.species.value);m.closest('label').hidden=!!p;box.querySelector('[data-nutrition-range]').hidden=!p;box.querySelector('[data-nutrition-target]').hidden=!p?.target;target.required=!!p?.target;info();}
-  function menu(){sel.replaceChildren(new Option('배수 직접 입력 / 병원 계산 서식','manual'));if(['dog','cat'].includes(o.species.value))for(const p of profiles)sel.add(new Option(p.label,p.id));sel.value='manual';target.value='';factor.replaceChildren();render();preview();}
+  function menu(){if(!f.querySelector('[data-extra-supply=nutrition]')?.checked)f.elements.other.value='0';sel.replaceChildren(new Option('배수 직접 입력 / 병원 계산 서식','manual'));if(['dog','cat'].includes(o.species.value))for(const p of profiles)sel.add(new Option(p.label,p.id));sel.value='manual';target.value='';factor.replaceChildren();render();preview();}
   function setFactor(){writing=true;m.value=factor.value;m.dispatchEvent(new Event('input',{bubbles:true}));writing=false;info();}
   sel.onchange=()=>{const p=profile(sel.value,o.species.value);target.value='';factor.replaceChildren();if(p){for(const n of p.values)factor.add(new Option(n+' × RER',String(n)));setFactor();}render();o.clear();};
   factor.onchange=setFactor;
@@ -43,8 +43,9 @@
   const energy=document.createElement('p');energy.className='pt-energy-preview';energy.dataset.energyPreview='';energy.setAttribute('role','status');box.append(energy);
   function preview(){try{const v={...Object.fromEntries(new FormData(f)),weight:o.weight.value},x=resolve(v,o.species.value),m=Number(v.multiplier);if(!Number.isFinite(m)||m<=0||m>10)throw Error();energy.textContent='하루 목표 열량 '+g.PracticeCalculators.display(g.PracticeCalculators.rer(x.weight)*m)+' kcal/day · '+(x.target?'목표':'현재')+' 체중 '+x.weight+' kg 기준 · 급여량은 아래 제품 설정 후 계산';}catch{energy.textContent='체중·영양 목적·배수를 정하면 제품 입력 전에도 하루 목표 열량을 확인할 수 있습니다.';}}
   for(const ev of ['input','change']){f.addEventListener(ev,preview);o.weight.addEventListener(ev,preview);o.species.addEventListener(ev,()=>queueMicrotask(preview));}f.addEventListener('reset',()=>queueMicrotask(preview));
+  const foods=g.PracticeNutritionFoods?.mount(f,o);
   menu();
-  return {values(v){return {...v,weight:resolve(v,o.species.value).weight};},describe(v){const x=resolve(v,o.species.value);return '현재 체중 '+x.current+' kg · '+(x.target?'목표 체중':'계산 기준 체중')+' '+x.weight+' kg\n영양 목적: '+(x.profile?.label||'수의사 직접 설정')+'\n'+(x.profile?.note||'초기 추정값 · 체중·BCS·MCS와 실제 섭취량에 따라 조정')+'\n근거 '+(x.profile?.source||sources.pna).url;}};
+  return {values(v){return {...v,weight:resolve(v,o.species.value).weight};},describe(v){const x=resolve(v,o.species.value);return '현재 체중 '+x.current+' kg · '+(x.target?'목표 체중':'계산 기준 체중')+' '+x.weight+' kg\n영양 목적: '+(x.profile?.label||'수의사 직접 설정')+'\n'+(x.profile?.note||'초기 추정값 · 체중·BCS·MCS와 실제 섭취량에 따라 조정')+'\n근거 '+(x.profile?.source||sources.pna).url+(foods?.describe()||'');}};
  }
  const api={profiles,profile,resolve,mount};g.PracticeNutrition=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window==='undefined'?globalThis:window);

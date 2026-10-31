@@ -1,0 +1,3372 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-10-31",
+  "scope": "로얄캐닌 한국 공식 vet-products 사이트맵 및 힐스 한국 공식 Prescription Diet 사이트맵. 공식 등재 목록이며 판매 재고를 보증하지 않습니다.",
+  "sources": [
+    "https://www.royalcanin.com/kr/ko-kr/sitemap/sitemap-products.xml",
+    "https://www.hillspet.co.kr/sitemap.xml"
+  ],
+  "items": [
+    {
+      "id": "hills-multi-organ-multi-organ-care-dry-cat",
+      "brand": "hills",
+      "name": "멀티오간 반려묘용 건사료(치킨)",
+      "aliases": [
+        "multi organ multi organ care dry"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3840,
+        "unit": "kcal/kg",
+        "evidence": "3840 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-multi-organ-multi-organ-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-multi-organ-chicken-minced-multi-organ-care-canned-cat",
+      "brand": "hills",
+      "name": "멀티오간 반려묘용 습식사료(치킨)",
+      "aliases": [
+        "multi organ chicken minced multi organ care canned"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 1098,
+        "unit": "kcal/kg",
+        "evidence": "1098 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-multi-organ-chicken-minced-multi-organ-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-metabolic-weight-management-dry-cat",
+      "brand": "hills",
+      "name": "메타볼릭 반려묘용 건사료(치킨)",
+      "aliases": [
+        "metabolic weight management dry"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3398,
+        "unit": "kcal/kg",
+        "evidence": "3398 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-metabolic-weight-management-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-metabolic-mini-chicken-weight-management-dry-dog",
+      "brand": "hills",
+      "name": "메타볼릭 스몰 바이트 반려견용 건사료(치킨)",
+      "aliases": [
+        "metabolic mini chicken weight management dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3121,
+        "unit": "kcal/kg",
+        "evidence": "3121 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-metabolic-mini-chicken-weight-management-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-ad-urgent-care-canned-dog",
+      "brand": "hills",
+      "name": "힐스 프리스크립션 다이어트 a/d 반려견, 반려묘용 습식사료",
+      "aliases": [
+        "ad urgent care canned"
+      ],
+      "species": [
+        "dog",
+        "cat"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지의 열량 또는 기준 단위를 확인할 수 없습니다.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-ad-urgent-care-canned",
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-ad-urgent-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-id-chicken-vegetable-stew-digestive-care-canned-dog",
+      "brand": "hills",
+      "name": "힐스 프리스크립션 다이어트 i/d 치킨&채소 스튜 반려견용 습식사료",
+      "aliases": [
+        "id chicken vegetable stew digestive care canned"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지의 열량 또는 기준 단위를 확인할 수 없습니다.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-id-chicken-vegetable-stew-digestive-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-id-chicken-vegetable-stew-digestive-care-canned-cat",
+      "brand": "hills",
+      "name": "힐스 프리스크립션 다이어트 i/d 치킨&채소 스튜 반려묘용 습식사료",
+      "aliases": [
+        "id chicken vegetable stew digestive care canned"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 73,
+        "unit": "kcal/can",
+        "packageGrams": 82,
+        "evidence": "73 kcal / Boîte (82 g)",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "이 열량은 82 g 캔 기준입니다. 다른 용량의 캔과 구분하세요.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-id-chicken-vegetable-stew-digestive-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-kd-chicken-vegetable-stew-kidney-care-canned-dog",
+      "brand": "hills",
+      "name": "힐스 프리스크립션 다이어트 k/d 반려견용 습식사료(치킨&야채 스튜)",
+      "aliases": [
+        "kd chicken vegetable stew kidney care canned"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지의 열량 또는 기준 단위를 확인할 수 없습니다.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-kd-chicken-vegetable-stew-kidney-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-kd-kidney-care-dry-cat",
+      "brand": "hills",
+      "name": "힐스 프리스크립션 다이어트 k/d 반려묘용 건사료(치킨)",
+      "aliases": [
+        "kd kidney care dry"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4083,
+        "unit": "kcal/kg",
+        "evidence": "4083 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-kd-kidney-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-kd-chicken-vegetable-stew-kidney-care-canned-cat",
+      "brand": "hills",
+      "name": "힐스 프리스크립션 다이어트 k/d 반려묘용 습식사료(치킨&야채 스튜)",
+      "aliases": [
+        "kd chicken vegetable stew kidney care canned"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지의 열량 또는 기준 단위를 확인할 수 없습니다.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-kd-chicken-vegetable-stew-kidney-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-kd-early-stage-support-chicken-kidney-care-dry-cat",
+      "brand": "hills",
+      "name": "힐스 프리스크립션 다이어트 k/d 얼리 서포트 반려묘용 건사료",
+      "aliases": [
+        "kd early stage support chicken kidney care dry"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4082,
+        "unit": "kcal/kg",
+        "evidence": "4082 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-kd-early-stage-support-chicken-kidney-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-kd-chicken-kidney-care-canned-cat",
+      "brand": "hills",
+      "name": "힐스 프리스크립션 다이어트 k/d 파테 위드 치킨 반려묘용 습식사료",
+      "aliases": [
+        "kd chicken kidney care canned"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지의 열량 또는 기준 단위를 확인할 수 없습니다.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-kd-chicken-kidney-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-cd-multicare-urinary-care-dry-dog",
+      "brand": "hills",
+      "name": "c/d 멀티케어 반려견용 건사료(치킨)",
+      "aliases": [
+        "cd multicare urinary care dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3820,
+        "unit": "kcal/kg",
+        "evidence": "3820 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-cd-multicare-urinary-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-cd-multicare-chicken-vegetable-stew-urinary-care-canned-dog",
+      "brand": "hills",
+      "name": "c/d 멀티케어 반려견용 습식사료(치킨&야채 스튜)",
+      "aliases": [
+        "cd multicare chicken vegetable stew urinary care canned"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 266,
+        "unit": "kcal/can",
+        "packageGrams": 354,
+        "evidence": "266 kcal / 12.5 oz (354 g) can",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "이 열량은 354 g 캔 기준입니다. 다른 용량의 캔과 구분하세요.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-cd-multicare-chicken-vegetable-stew-urinary-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-cd-multicare-chicken-urinary-care-dry-cat",
+      "brand": "hills",
+      "name": "c/d 멀티케어 반려묘용 건사료(치킨)",
+      "aliases": [
+        "cd multicare chicken urinary care dry"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3896,
+        "unit": "kcal/kg",
+        "evidence": "3896 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-cd-multicare-chicken-urinary-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-cd-multicare-stress-chicken-urinary-care-dry-cat",
+      "brand": "hills",
+      "name": "c/d 멀티케어 스트레스 반려묘용 건사료(치킨)",
+      "aliases": [
+        "cd multicare stress chicken urinary care dry"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3844,
+        "unit": "kcal/kg",
+        "evidence": "3844 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-cd-multicare-stress-chicken-urinary-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-cd-multicare-stress-vegetable-tuna-stew-urinary-care-canned-cat",
+      "brand": "hills",
+      "name": "c/d 멀티케어 스트레스 반려묘용 습식사료(채소&참치 스튜)",
+      "aliases": [
+        "cd multicare stress vegetable tuna stew urinary care canned"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지의 열량 또는 기준 단위를 확인할 수 없습니다.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-cd-multicare-stress-vegetable-tuna-stew-urinary-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-cd-multicare-stress-chicken-vegetable-stew-urinary-care-canned-cat",
+      "brand": "hills",
+      "name": "c/d 멀티케어 스트레스 반려묘용 습식사료(치킨&야채 스튜)",
+      "aliases": [
+        "cd multicare stress chicken vegetable stew urinary care canned"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지의 열량 또는 기준 단위를 확인할 수 없습니다.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-cd-multicare-stress-chicken-vegetable-stew-urinary-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-cd-multicare-metabolic-urinary-care-dry-cat",
+      "brand": "hills",
+      "name": "c/d 멀티케어+메타볼릭 반려묘용 건사료",
+      "aliases": [
+        "cd multicare metabolic urinary care dry"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3255,
+        "unit": "kcal/kg",
+        "evidence": "3255 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-cd-multicare-metabolic-urinary-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-gastrointestinal-biome-small-bites-digestive-care-dry-dog",
+      "brand": "hills",
+      "name": "GI 바이옴 스몰바이트 반려견용 건사료",
+      "aliases": [
+        "gastrointestinal biome small bites digestive care dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3327,
+        "unit": "kcal/kg",
+        "evidence": "3327 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-gastrointestinal-biome-small-bites-digestive-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-gastrointestinal-biome-stress-digestive-care-dry-cat",
+      "brand": "hills",
+      "name": "GI 바이옴 스트레스 반려묘용 건사료 (치킨)",
+      "aliases": [
+        "gastrointestinal biome stress digestive care dry"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3807,
+        "unit": "kcal/kg",
+        "evidence": "3807 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-gastrointestinal-biome-stress-digestive-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-gastrointestinal-biome-stress-stew-digestive-care-canned-cat",
+      "brand": "hills",
+      "name": "GI바이옴 치킨&채소 스튜 반려묘용 습식사료",
+      "aliases": [
+        "gastrointestinal biome stress stew digestive care canned"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 826,
+        "unit": "kcal/kg",
+        "evidence": "826 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-gastrointestinal-biome-stress-stew-digestive-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-hd-heart-care-dry-dog",
+      "brand": "hills",
+      "name": "h/d 반려견용 건사료(치킨)",
+      "aliases": [
+        "hd heart care dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4002,
+        "unit": "kcal/kg",
+        "evidence": "4002 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-hd-heart-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-id-low-fat-digestive-care-dry-dog",
+      "brand": "hills",
+      "name": "i/d 로우팻 반려견용 건사료",
+      "aliases": [
+        "id low fat digestive care dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3311,
+        "unit": "kcal/kg",
+        "evidence": "3311 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-id-low-fat-digestive-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-id-low-fat-rice-vegetable-chicken-stew-digestive-care-canned-dog",
+      "brand": "hills",
+      "name": "i/d 로우팻 반려견용 습식사료(쌀, 치킨&야채 스튜)",
+      "aliases": [
+        "id low fat rice vegetable chicken stew digestive care canned"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지의 열량 또는 기준 단위를 확인할 수 없습니다.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-id-low-fat-rice-vegetable-chicken-stew-digestive-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-id-digestive-care-dry-dog",
+      "brand": "hills",
+      "name": "i/d 반려견용 건사료 (치킨)",
+      "aliases": [
+        "id digestive care dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3589,
+        "unit": "kcal/kg",
+        "evidence": "3589 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-id-digestive-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-id-digestive-care-dry-cat",
+      "brand": "hills",
+      "name": "i/d 반려묘용 건사료 (치킨)",
+      "aliases": [
+        "id digestive care dry"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3934,
+        "unit": "kcal/kg",
+        "evidence": "3934 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-id-digestive-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-id-digestive-care-canned-cat",
+      "brand": "hills",
+      "name": "i/d 반려묘용 습식사료(치킨 파테)",
+      "aliases": [
+        "id digestive care canned"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 172,
+        "unit": "kcal/can",
+        "packageGrams": 156,
+        "evidence": "172 kcal / 5.5 oz (156 g) can",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "이 열량은 156 g 캔 기준입니다. 다른 용량의 캔과 구분하세요.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-id-digestive-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-id-small-bites-digestive-care-dry-dog",
+      "brand": "hills",
+      "name": "i/d 스몰바이트 반려견용 건사료(치킨 플레이버)",
+      "aliases": [
+        "id small bites digestive care dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3589,
+        "unit": "kcal/kg",
+        "evidence": "3589 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-id-small-bites-digestive-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-id-kitten-chicken-pate-digestive-care-canned-cat",
+      "brand": "hills",
+      "name": "i/d 키튼 반려묘용 습식사료(치킨 파테)",
+      "aliases": [
+        "id kitten chicken pate digestive care canned"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 173,
+        "unit": "kcal/can",
+        "packageGrams": 156,
+        "evidence": "173 kcal / 5.5 oz (156 g) can",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "이 열량은 156 g 캔 기준입니다. 다른 용량의 캔과 구분하세요.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-id-kitten-chicken-pate-digestive-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-id-puppy-turkey-digestive-care-canned-dog",
+      "brand": "hills",
+      "name": "i/d 퍼피 반려견용 습식사료(칠면조)",
+      "aliases": [
+        "id puppy turkey digestive care canned"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지의 열량 또는 기준 단위를 확인할 수 없습니다.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-id-puppy-turkey-digestive-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-jd-small-bites-joint-care-dry-dog",
+      "brand": "hills",
+      "name": "j/d 스몰바이트 반려견용 건사료",
+      "aliases": [
+        "jd small bites joint care dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3670,
+        "unit": "kcal/kg",
+        "evidence": "3670 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-jd-small-bites-joint-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-kd-kidney-care-dry-dog",
+      "brand": "hills",
+      "name": "k/d 반려견용 건사료",
+      "aliases": [
+        "kd kidney care dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3991,
+        "unit": "kcal/kg",
+        "evidence": "3991 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-kd-kidney-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-kd-ocean-fish-tuna-kidney-care-dry-cat",
+      "brand": "hills",
+      "name": "k/d 반려묘용 건식사료(오션피쉬)",
+      "aliases": [
+        "kd ocean fish tuna kidney care dry"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4084,
+        "unit": "kcal/kg",
+        "evidence": "4084 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-kd-ocean-fish-tuna-kidney-care-dry",
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-kd-ocean-fish-kidney-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-kd-vegetable-tuna-stew-kidney-care-canned-cat",
+      "brand": "hills",
+      "name": "k/d 반려묘용 습식사료(야채&튜나 스튜)",
+      "aliases": [
+        "kd vegetable tuna stew kidney care canned"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지의 열량 또는 기준 단위를 확인할 수 없습니다.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-kd-vegetable-tuna-stew-kidney-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-ld-liver-care-dry-dog",
+      "brand": "hills",
+      "name": "l/d 반려견용 건사료(치킨)",
+      "aliases": [
+        "ld liver care dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3995,
+        "unit": "kcal/kg",
+        "evidence": "3995 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-ld-liver-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-ld-liver-care-canned-dog",
+      "brand": "hills",
+      "name": "l/d 반려견용 습식사료",
+      "aliases": [
+        "ld liver care canned"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 565,
+        "unit": "kcal/can",
+        "packageGrams": 370,
+        "evidence": "565 kcal / 13 oz (370 g) can",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "이 열량은 370 g 캔 기준입니다. 다른 용량의 캔과 구분하세요.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-ld-liver-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-onc-on-care-chicken-restorative-care-dry-dog",
+      "brand": "hills",
+      "name": "ONC 케어 반려견용 건사료 (치킨)",
+      "aliases": [
+        "onc on care chicken restorative care dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4158,
+        "unit": "kcal/kg",
+        "evidence": "4158 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-onc-on-care-chicken-restorative-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-onc-on-care-chicken-stew-restorative-care-canned-dog",
+      "brand": "hills",
+      "name": "ONC 케어 반려견용 습식사료",
+      "aliases": [
+        "onc on care chicken stew restorative care canned"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지의 열량 또는 기준 단위를 확인할 수 없습니다.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-onc-on-care-chicken-stew-restorative-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-onc-on-care-chicken-restorative-care-dry-cat",
+      "brand": "hills",
+      "name": "ONC 케어 반려묘용 건사료(치킨)",
+      "aliases": [
+        "onc on care chicken restorative care dry"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4187,
+        "unit": "kcal/kg",
+        "evidence": "4187 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-onc-on-care-chicken-restorative-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-onc-on-care-chicken-stew-restorative-care-canned-cat",
+      "brand": "hills",
+      "name": "ONC 케어 반려묘용 습식사료",
+      "aliases": [
+        "onc on care chicken stew restorative care canned"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 936,
+        "unit": "kcal/kg",
+        "evidence": "936 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-onc-on-care-chicken-stew-restorative-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-rd-weight-management-dry-dog",
+      "brand": "hills",
+      "name": "r/d 치킨 플레이버 반려견용 건사료",
+      "aliases": [
+        "rd weight management dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3063,
+        "unit": "kcal/kg",
+        "evidence": "3063 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-rd-weight-management-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-td-dental-care-dry-cat",
+      "brand": "hills",
+      "name": "t/d 반려묘용 건사료(치킨 플레이버)",
+      "aliases": [
+        "td dental care dry"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3577,
+        "unit": "kcal/kg",
+        "evidence": "3577 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-td-dental-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-td-small-bites-dental-care-dry-dog",
+      "brand": "hills",
+      "name": "t/d 스몰바이트 반려견용 건사료",
+      "aliases": [
+        "td small bites dental care dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3468,
+        "unit": "kcal/kg",
+        "evidence": "3468 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-td-small-bites-dental-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-ud-urinary-care-dry-dog",
+      "brand": "hills",
+      "name": "u/d 반려견용 건사료",
+      "aliases": [
+        "ud urinary care dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3986,
+        "unit": "kcal/kg",
+        "evidence": "3986 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-ud-urinary-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-ud-urinary-care-canned-dog",
+      "brand": "hills",
+      "name": "u/d 반려견용 습식사료",
+      "aliases": [
+        "ud urinary care canned"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지의 열량 또는 기준 단위를 확인할 수 없습니다.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-ud-urinary-care-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-wd-chicken-glucose-management-canned-cat",
+      "brand": "hills",
+      "name": "w/d 멀티 베네핏 반려묘용 습식사료(치킨)",
+      "aliases": [
+        "wd chicken glucose management canned"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 128,
+        "unit": "kcal/can",
+        "packageGrams": 156,
+        "evidence": "128 kcal / 5.5 oz (156 g) can",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "이 열량은 156 g 캔 기준입니다. 다른 용량의 캔과 구분하세요.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-wd-chicken-glucose-management-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-wd-glucose-management-dry-dog",
+      "brand": "hills",
+      "name": "w/d 멀티베네핏 반려견용 건사료(치킨 플레이버)",
+      "aliases": [
+        "wd glucose management dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3087,
+        "unit": "kcal/kg",
+        "evidence": "3087 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-wd-glucose-management-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-wd-vegetable-chicken-stew-glucose-management-canned-dog",
+      "brand": "hills",
+      "name": "w/d 멀티베네핏 반려견용 습식사료 (치킨 & 야채 스튜)",
+      "aliases": [
+        "wd vegetable chicken stew glucose management canned"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 201,
+        "unit": "kcal/can",
+        "packageGrams": 354,
+        "evidence": "201 kcal / 12.5 oz (354 g) can",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "이 열량은 354 g 캔 기준입니다. 다른 용량의 캔과 구분하세요.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-wd-vegetable-chicken-stew-glucose-management-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-wd-glucose-management-dry-cat",
+      "brand": "hills",
+      "name": "w/d 멀티베네핏 반려묘용 건사료(치킨 플레이버)",
+      "aliases": [
+        "wd glucose management dry"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3228,
+        "unit": "kcal/kg",
+        "evidence": "3228 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-wd-glucose-management-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-yd-thyroid-care-dry-cat",
+      "brand": "hills",
+      "name": "y/d 반려묘용 건사료(치킨)",
+      "aliases": [
+        "yd thyroid care dry"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4005,
+        "unit": "kcal/kg",
+        "evidence": "4005 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-yd-thyroid-care-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-zd-low-fat-small-bites-hydrolysed-soy-food-sensitivities-dry-dog",
+      "brand": "hills",
+      "name": "z/d 로우팻(가수분해 대두 단백질) 반려견용 건사료",
+      "aliases": [
+        "zd low fat small bites hydrolysed soy food sensitivities dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3198,
+        "unit": "kcal/kg",
+        "evidence": "3198 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-zd-low-fat-small-bites-hydrolysed-soy-food-sensitivities-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-zd-low-fat-hydrolysed-soy-food-sensitivities-canned-dog",
+      "brand": "hills",
+      "name": "z/d 로우팻(가수분해 대두 단백질) 반려견용 습식사료",
+      "aliases": [
+        "zd low fat hydrolysed soy food sensitivities canned"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 342,
+        "unit": "kcal/can",
+        "packageGrams": 370,
+        "evidence": "342 kcal / 13 oz (370 g) can",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "이 열량은 370 g 캔 기준입니다. 다른 용량의 캔과 구분하세요.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-zd-low-fat-hydrolysed-soy-food-sensitivities-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-zd-food-sensitivities-dry-cat",
+      "brand": "hills",
+      "name": "z/d 반려묘용 건사료",
+      "aliases": [
+        "zd food sensitivities dry"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3847,
+        "unit": "kcal/kg",
+        "evidence": "3847 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-zd-food-sensitivities-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-zd-small-bites-food-sensitivities-dry-dog",
+      "brand": "hills",
+      "name": "z/d 스몰바이트 하이드롤라이즈드 치킨 반려견용 건사료",
+      "aliases": [
+        "zd small bites food sensitivities dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3504,
+        "unit": "kcal/kg",
+        "evidence": "3504 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-zd-small-bites-food-sensitivities-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-zd-food-sensitivities-dry-dog",
+      "brand": "hills",
+      "name": "z/d 하이드롤라이즈드 치킨 반려견용 건사료",
+      "aliases": [
+        "zd food sensitivities dry"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3505,
+        "unit": "kcal/kg",
+        "evidence": "3505 kcal/kg",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-zd-food-sensitivities-dry"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-zd-food-sensitivities-canned-dog",
+      "brand": "hills",
+      "name": "z/d 하이드롤라이즈드 치킨 반려견용 습식사료",
+      "aliases": [
+        "zd food sensitivities canned"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "missing",
+      "note": "공식 페이지의 열량 또는 기준 단위를 확인할 수 없습니다.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/dog-food/prescription-diet-zd-food-sensitivities-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "hills-zd-food-sensitivities-canned-cat",
+      "brand": "hills",
+      "name": "z/d 하이드롤라이즈드 치킨 반려묘용 습식사료",
+      "aliases": [
+        "zd food sensitivities canned"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 173,
+        "unit": "kcal/can",
+        "packageGrams": 156,
+        "evidence": "173 kcal / 5.5 oz (156 g) can",
+        "basis": "공식 영양정보"
+      },
+      "status": "verified",
+      "note": "이 열량은 156 g 캔 기준입니다. 다른 용량의 캔과 구분하세요.",
+      "sourceUrls": [
+        "https://www.hillspet.co.kr/cat-food/prescription-diet-zd-food-sensitivities-canned"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-8073",
+      "brand": "royalcanin",
+      "name": "글리코밸런스 스몰독",
+      "aliases": [
+        "GLYCOBALANCE SMALL DOGS"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3269,
+        "unit": "kcal/kg",
+        "evidence": "3269 kcal/kg",
+        "basis": "공식 제품 데이터"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/glycobalance-small-dogs-8073"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-3911",
+      "brand": "royalcanin",
+      "name": "독 가스트로인테스티널",
+      "aliases": [
+        "Gastrointestinal",
+        "Dog Gastrointestinal"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4120,
+        "unit": "kcal/kg",
+        "evidence": "412kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/gastrointestinal-3911"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-3932",
+      "brand": "royalcanin",
+      "name": "독 가스트로인테스티널 로우팻",
+      "aliases": [
+        "Gastrointestinal Low Fat",
+        "Gastrointestinal Low Fat"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/gastrointestinal-low-fat-3932"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3465 kcal/kg (설명)",
+        "3471 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-2734",
+      "brand": "royalcanin",
+      "name": "독 가스트로인테스티널 로우팻 + 하이포알러제닉",
+      "aliases": [
+        "GASTROINTESTINAL LOW FAT + HYPOALLERGENIC",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/gastrointestinal-low-fat-+-hypoallergenic-2734"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3508 kcal/kg (설명)",
+        "3566 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4029",
+      "brand": "royalcanin",
+      "name": "독 가스트로인테스티널 로우팻 로프 인 캔",
+      "aliases": [
+        "Gastrointestinal Low Fat",
+        "GASTROINTESTINAL LOW FAT CAN"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/gastrointestinal-low-fat-4029"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "940 kcal/kg (설명)",
+        "982 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-1463",
+      "brand": "royalcanin",
+      "name": "독 가스트로인테스티널 로우팻 스몰독",
+      "aliases": [
+        "Gastro Intestinal Low Fat Small Dog",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/gastro-intestinal-low-fat-small-dog-1463"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3465 kcal/kg (설명)",
+        "3464 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4038",
+      "brand": "royalcanin",
+      "name": "독 가스트로인테스티널 로프 인 캔",
+      "aliases": [
+        "Gastrointestinal",
+        "Dog Gastrointestinal"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/gastrointestinal-4038"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "1112 kcal/kg (설명)",
+        "1178 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4015-v1",
+      "brand": "royalcanin",
+      "name": "독 글리코밸런스 로프 인 캔",
+      "aliases": [
+        "GLYCOBALANCE"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 797,
+        "unit": "kcal/kg",
+        "evidence": "797 kcal/kg",
+        "basis": "공식 제품 데이터"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/glycobalance-4015/v1"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-3712",
+      "brand": "royalcanin",
+      "name": "독 뉴터드 어덜트 스몰독",
+      "aliases": [
+        "NEUTERED ADULT SMALL DOG",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3302,
+        "unit": "kcal/kg",
+        "evidence": "3302 kcal/kg",
+        "basis": "공식 제품 데이터"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/neutered-adult-small-dog-3712"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-4086",
+      "brand": "royalcanin",
+      "name": "독 다이아베틱",
+      "aliases": [
+        "DIABETIC",
+        "DIABETIC"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3437,
+        "unit": "kcal/kg",
+        "evidence": "344kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/diabetic-4086"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-4015",
+      "brand": "royalcanin",
+      "name": "독 다이아베틱 캔",
+      "aliases": [
+        "DIABETIC SPECIAL LOW CARBOHYDRATE",
+        "DIABETIC SPECIAL LOW CARBOHYDRATE LOAF IN CAN"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 819,
+        "unit": "kcal/kg",
+        "evidence": "82kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/diabetic-special-low-carbohydrate-4015"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-3723",
+      "brand": "royalcanin",
+      "name": "독 덴탈 스몰독",
+      "aliases": [
+        "DENTAL SMALL DOG",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3813,
+        "unit": "kcal/kg",
+        "evidence": "381.30kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/dental-small-dog-3723"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-3916",
+      "brand": "royalcanin",
+      "name": "독 레날",
+      "aliases": [
+        "RENAL",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/renal-3916"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3984 kcal/kg (설명)",
+        "4017 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4162",
+      "brand": "royalcanin",
+      "name": "독 레날 셀렉트",
+      "aliases": [
+        "RENAL SELECT",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/renal-select-4162"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3997 kcal/kg (설명)",
+        "3964 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-1249",
+      "brand": "royalcanin",
+      "name": "독 레날 스몰독",
+      "aliases": [
+        "RENAL SMALL DOG",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3984,
+        "unit": "kcal/kg",
+        "evidence": "398.40 kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/renal-small-dog-1249"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-4020",
+      "brand": "royalcanin",
+      "name": "독 레날 캔",
+      "aliases": [
+        "RENAL",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/renal-4020"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "1586 kcal/kg (설명)",
+        "1662 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-6501",
+      "brand": "royalcanin",
+      "name": "독 레날+하이포알러제닉",
+      "aliases": [
+        "MULTIFUNCTION RENAL + HYPOALLERGENIC",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4023,
+        "unit": "kcal/kg",
+        "evidence": "402.30kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/multifunction-renal-+-hypoallergenic-6501"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-1829",
+      "brand": "royalcanin",
+      "name": "독 모빌리티 서포트",
+      "aliases": [
+        "MOBILITY SUPPORT",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3641,
+        "unit": "kcal/kg",
+        "evidence": "364.1kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/mobility-support-1829"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-3948",
+      "brand": "royalcanin",
+      "name": "독 세타이어티 웨이트 매니지먼트",
+      "aliases": [
+        "Satiety Weight Management",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/satiety-weight-management-3948"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "2670 kcal/kg (설명)",
+        "2696 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4252",
+      "brand": "royalcanin",
+      "name": "독 세타이어티 웨이트 매니지먼트 스몰독",
+      "aliases": [
+        "SATIETY WEIGHT MANAGEMENT SMALL DOG",
+        "SATIETY WEIGHT MANAGEMENT Small Dog"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 2696,
+        "unit": "kcal/kg",
+        "evidence": "270kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/satiety-weight-management-small-dog-4252"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-4250",
+      "brand": "royalcanin",
+      "name": "독 세타이어티 웨이트 매니지먼트 캔",
+      "aliases": [
+        "SATIETY WEIGHT MANAGEMENT",
+        "SATIETY WEIGHT MANAGEMENT"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 617,
+        "unit": "kcal/kg",
+        "evidence": "62kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/satiety-weight-management-4250"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-3922",
+      "brand": "royalcanin",
+      "name": "독 센시티비티 컨트롤",
+      "aliases": [
+        "SENSITIVITY CONTROL"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3310,
+        "unit": "kcal/kg",
+        "evidence": "331kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/sensitivity-control-3922"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-4027",
+      "brand": "royalcanin",
+      "name": "독 센시티비티 컨트롤 캔",
+      "aliases": [
+        "SENSITIVITY CONTROL Duck with Rice"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/sensitivity-control-duck-with-rice-4027"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "1380 kcal/kg (설명)",
+        "1492 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4006",
+      "brand": "royalcanin",
+      "name": "독 스킨케어 스몰독",
+      "aliases": [
+        "SKIN CARE SMALL DOG",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3937,
+        "unit": "kcal/kg",
+        "evidence": "394kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/skin-care-small-dog-4006"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-4014",
+      "brand": "royalcanin",
+      "name": "독 아날러제닉",
+      "aliases": [
+        "ANALLERGENIC",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4003,
+        "unit": "kcal/kg",
+        "evidence": "400kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/anallergenic-4014"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-4912",
+      "brand": "royalcanin",
+      "name": "독 아이시유 가스트로 로우팻 리퀴드",
+      "aliases": [
+        "GI Low Fat Liquid Dog",
+        "-"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "liquid",
+      "energy": {
+        "value": 972,
+        "unit": "kcal/kg",
+        "evidence": "97.2kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "공식 열량은 중량 기준입니다. g으로 계산하며 mL로 환산하지 않습니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/gi-low-fat-liquid-dog-4912",
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/gastrointestinal-low-fat-liquid-dog-4912"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-4911",
+      "brand": "royalcanin",
+      "name": "독 아이시유 레날 리퀴드",
+      "aliases": [
+        "ROYAL CANIN VETERINARY DIET Canine RENAL SUPPORT LIQUID"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "liquid",
+      "energy": {
+        "value": 1254,
+        "unit": "kcal/kg",
+        "evidence": "125.4kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "공식 열량은 중량 기준입니다. g으로 계산하며 mL로 환산하지 않습니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/renal-liquid-dog-4911",
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/royal-canin-veterinary-diet-canine-renal-support-liquid-4911"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-3913",
+      "brand": "royalcanin",
+      "name": "독 유리너리 S/O",
+      "aliases": [
+        "Urinary S/O",
+        "dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3878,
+        "unit": "kcal/kg",
+        "evidence": "388kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/urinary-so-3913"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-3800",
+      "brand": "royalcanin",
+      "name": "독 유리너리 S/O 모더레이트 칼로리",
+      "aliases": [
+        "Urinary S/O Moderate Calorie",
+        "dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/urinary-so-moderate-calorie-3800"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3290 kcal/kg (설명)",
+        "3296 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-3801",
+      "brand": "royalcanin",
+      "name": "독 유리너리 S/O 스몰독",
+      "aliases": [
+        "Urinary S/O Small Dog",
+        "dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/urinary-so-small-dog-3801"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3850 kcal/kg (설명)",
+        "3837 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4021",
+      "brand": "royalcanin",
+      "name": "독 유리너리 S/O 캔",
+      "aliases": [
+        "URINARY S/O",
+        "-"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/urinary-so-4021"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "960 kcal/kg (설명)",
+        "1009 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4079",
+      "brand": "royalcanin",
+      "name": "독 유리너리 S/O 파우치",
+      "aliases": [
+        "URINARY S/O",
+        "-"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/urinary-so-4079"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "930 kcal/kg (설명)",
+        "1017 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-3942",
+      "brand": "royalcanin",
+      "name": "독 유리너리 U/C",
+      "aliases": [
+        "URINARY UC",
+        "Dog Nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3827,
+        "unit": "kcal/kg",
+        "evidence": "383kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/urinary-uc-3942"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-6500",
+      "brand": "royalcanin",
+      "name": "독 유리너리S/O+하이포알러제닉",
+      "aliases": [
+        "URINARY S/O + HYPOALLERGENIC"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/urinary-so-+-hypoallergenic-6500"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3710 kcal/kg (설명)",
+        "3800 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-3930",
+      "brand": "royalcanin",
+      "name": "독 카디악",
+      "aliases": [
+        "CARDIAC",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4143,
+        "unit": "kcal/kg",
+        "evidence": "414.30kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/cardiac-3930"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-4023",
+      "brand": "royalcanin",
+      "name": "독 카디악 캔",
+      "aliases": [
+        "CARDIAC",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/cardiac-4023"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "1246 kcal/kg (설명)",
+        "1312 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-3910",
+      "brand": "royalcanin",
+      "name": "독 하이포알러제닉",
+      "aliases": [
+        "HYPOALLERGENIC",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4079,
+        "unit": "kcal/kg",
+        "evidence": "408kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/hypoallergenic-3910"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-1083",
+      "brand": "royalcanin",
+      "name": "독 하이포알러제닉 + 세타이어티",
+      "aliases": [
+        "HYPOALLERGENIC + SATIETY",
+        "Dog MF"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/hypoallergenic-+-satiety-1083"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "2586 kcal/kg (설명)",
+        "2685 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-3964",
+      "brand": "royalcanin",
+      "name": "독 하이포알러제닉 모더레이트 칼로리",
+      "aliases": [
+        "HYPOALLERGENIC MODERATE CALORIE",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3732,
+        "unit": "kcal/kg",
+        "evidence": "373kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/hypoallergenic-moderate-calorie-3964"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-3952",
+      "brand": "royalcanin",
+      "name": "독 하이포알러제닉 스몰독",
+      "aliases": [
+        "HYPOALLERGENIC SMALL DOG",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3893,
+        "unit": "kcal/kg",
+        "evidence": "389kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/hypoallergenic-small-dog-3952"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-4084",
+      "brand": "royalcanin",
+      "name": "독 하이포알러제닉 캔",
+      "aliases": [
+        "HYPOALLERGENIC"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/hypoallergenic-4084"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "990 kcal/kg (설명)",
+        "1060 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-3927",
+      "brand": "royalcanin",
+      "name": "독 헤파틱",
+      "aliases": [
+        "Hepatic",
+        "HEPATIC DOG"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3909,
+        "unit": "kcal/kg",
+        "evidence": "390.9kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/hepatic-3927"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-4022",
+      "brand": "royalcanin",
+      "name": "독 헤파틱 로프 인 캔",
+      "aliases": [
+        "Hepatic",
+        "Dog Hepatic"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/hepatic-4022"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3909 kcal/kg (설명)",
+        "1466 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-8062",
+      "brand": "royalcanin",
+      "name": "레날 + 하이포알러제닉 스몰독",
+      "aliases": [
+        "RENAL + HYPOALLERGENIC SMALL DOGS",
+        "Dog MF"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/renal-+-hypoallergenic-small-dogs-8062"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "4030 kcal/kg (설명)",
+        "4126 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4055",
+      "brand": "royalcanin",
+      "name": "리커버리 캔",
+      "aliases": [
+        "Recovery",
+        "Cat and Dog Recovery"
+      ],
+      "species": [
+        "dog",
+        "cat"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/recovery-4055"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "1146 kcal/kg (설명)",
+        "1266 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-3317",
+      "brand": "royalcanin",
+      "name": "아날러제닉 스몰독",
+      "aliases": [
+        "ANALLERGENIC SMALL DOG",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/anallergenic-small-dog-3317"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3850 kcal/kg (설명)",
+        "4022 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4910",
+      "brand": "royalcanin",
+      "name": "아이시유 리커버리 리퀴드",
+      "aliases": [
+        "Recovery Liquid (Dog & Cat)"
+      ],
+      "species": [
+        "dog",
+        "cat"
+      ],
+      "form": "liquid",
+      "energy": {
+        "value": 880,
+        "unit": "kcal/kg",
+        "evidence": "88kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "공식 열량은 중량 기준입니다. g으로 계산하며 mL로 환산하지 않습니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/recovery-liquid-dog-%26-cat-4910"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-8064",
+      "brand": "royalcanin",
+      "name": "유리너리 S/O + 세타이어티 스몰독",
+      "aliases": [
+        "URINARY S/O + SATIETY SMALL DOGS"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/urinary-so-+-satiety-small-dogs-8064"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "2564 kcal/kg (설명)",
+        "2660 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-8063",
+      "brand": "royalcanin",
+      "name": "유리너리 S/O + 하이포알러제닉 스몰독",
+      "aliases": [
+        "URINARY S/O  + HYPOALLERGENIC SMALL DOGS"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/urinary-so--+-hypoallergenic-small-dogs-8063"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3719 kcal/kg (설명)",
+        "3807 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-3905",
+      "brand": "royalcanin",
+      "name": "캣 가스트로인테스티널",
+      "aliases": [
+        "Gastrointestinal",
+        "Cat Gastrointestinal"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/gastrointestinal-3905"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "4087 kcal/kg (설명)",
+        "4089 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4008",
+      "brand": "royalcanin",
+      "name": "캣 가스트로인테스티널 모더레이트 칼로리",
+      "aliases": [
+        "Gastrointestinal Moderate Calorie",
+        "Cat Nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3720,
+        "unit": "kcal/kg",
+        "evidence": "372kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/gastrointestinal-moderate-calorie-4008"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-4009",
+      "brand": "royalcanin",
+      "name": "캣 가스트로인테스티널 모더레이트 칼로리 씬 슬라이스 인 그레이비 파우치",
+      "aliases": [
+        "Gastrointestinal Moderate Calorie",
+        "Cat Nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/gastrointestinal-moderate-calorie-4009"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "729 kcal/kg (설명)",
+        "778 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4039",
+      "brand": "royalcanin",
+      "name": "캣 가스트로인테스티널 씬 슬라이스 인 그레이비 파우치",
+      "aliases": [
+        "Gastrointestinal",
+        "Cat Gastrointestinal"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/gastrointestinal-4039"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "955 kcal/kg (설명)",
+        "1032 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-2735",
+      "brand": "royalcanin",
+      "name": "캣 가스트로인테스티널 하이드롤라이즈 프로틴",
+      "aliases": [
+        "GASTROINTESTINAL HYDROLYSED PROTEIN",
+        "Cat nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/gastrointestinal-hydrolysed-protein-2735"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "4037 kcal/kg (설명)",
+        "4149 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4007",
+      "brand": "royalcanin",
+      "name": "캣 가스트로인테스티널 화이버 리스폰스",
+      "aliases": [
+        "Gastrointestinal Fibre Response",
+        "Cat Nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3908,
+        "unit": "kcal/kg",
+        "evidence": "390.8kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/gastrointestinal-fibre-response-4007"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-2733",
+      "brand": "royalcanin",
+      "name": "캣 가스트로인테스티널 화이버 리스폰스 그레이비 파우치",
+      "aliases": [
+        "GASTROINTESTINAL FIBRE RESPONSE",
+        "Cat nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/gastrointestinal-fibre-response-2733"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "710 kcal/kg (설명)",
+        "772 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-2721",
+      "brand": "royalcanin",
+      "name": "캣 뉴터드 세타이어티 밸런스",
+      "aliases": [
+        "NEUTERED SATIETY BALANCE",
+        "Cat nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3333,
+        "unit": "kcal/kg",
+        "evidence": "333.30kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/neutered-satiety-balance-2721"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-3906",
+      "brand": "royalcanin",
+      "name": "캣 다이아베틱",
+      "aliases": [
+        "DIABETIC",
+        "DIABETIC"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3852,
+        "unit": "kcal/kg",
+        "evidence": "3852 kcal/kg",
+        "basis": "공식 제품 데이터"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/diabetic-3906"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-6531",
+      "brand": "royalcanin",
+      "name": "캣 레날 + 하이포알러제닉",
+      "aliases": [
+        "MULTIFUNCTION RENAL + HYPOALLERGENIC",
+        "Cat nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4102,
+        "unit": "kcal/kg",
+        "evidence": "410.20kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/multifunction-renal-+-hypoallergenic-6531"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-4160",
+      "brand": "royalcanin",
+      "name": "캣 레날 셀렉트",
+      "aliases": [
+        "RENAL SELECT",
+        "Cat nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4105,
+        "unit": "kcal/kg",
+        "evidence": "410.50kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/renal-select-4160"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-3949",
+      "brand": "royalcanin",
+      "name": "캣 레날 스페셜",
+      "aliases": [
+        "RENAL SPECIAL",
+        "Cat nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/renal-special-3949"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3919 kcal/kg (설명)",
+        "4022 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4030",
+      "brand": "royalcanin",
+      "name": "캣 레날 위드 치킨",
+      "aliases": [
+        "RENAL WITH CHICKEN",
+        "Cat nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/renal-with-chicken-4030"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "1177 kcal/kg (설명)",
+        "1271 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4067",
+      "brand": "royalcanin",
+      "name": "캣 레날 위드 피시",
+      "aliases": [
+        "RENAL WITH FISH",
+        "Cat nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/renal-with-fish-4067"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "950 kcal/kg (설명)",
+        "1015 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-1246",
+      "brand": "royalcanin",
+      "name": "캣 레날 파우치",
+      "aliases": [
+        "RENAL",
+        "Cat nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/renal-1246"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "1053 kcal/kg (설명)",
+        "1084 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-3943",
+      "brand": "royalcanin",
+      "name": "캣 세타이어티 웨이트 매니지먼트",
+      "aliases": [
+        "SATIETY WEIGHT MANAGEMENT",
+        "SATIETY WEIGHT MANAGEMENT"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3040,
+        "unit": "kcal/kg",
+        "evidence": "304kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/satiety-weight-management-3943"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-1070",
+      "brand": "royalcanin",
+      "name": "캣 세타이어티 웨이트 매니지먼트 파우치",
+      "aliases": [
+        "SATIETY WEIGHT MANAGEMENT",
+        "SATIETY WEIGHT MANAGEMENT"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 660,
+        "unit": "kcal/kg",
+        "evidence": "66kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/satiety-weight-management-1070"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-1950",
+      "brand": "royalcanin",
+      "name": "캣 아날러제닉",
+      "aliases": [
+        "ANALLERGENIC",
+        "Cat nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/anallergenic-1950"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "4090 kcal/kg (설명)",
+        "3913 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-4951",
+      "brand": "royalcanin",
+      "name": "캣 아이시유 레날 리퀴드",
+      "aliases": [
+        "Renal Liquid Cat",
+        "-"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "liquid",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/renal-liquid-cat-4951"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "986 kcal/kg (설명)",
+        "1077 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-1242",
+      "brand": "royalcanin",
+      "name": "캣 얼리 레날",
+      "aliases": [
+        "EARLY RENAL",
+        "Cat nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3808,
+        "unit": "kcal/kg",
+        "evidence": "380.80kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/early-renal-1242"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-1243",
+      "brand": "royalcanin",
+      "name": "캣 얼리 레날 파우치",
+      "aliases": [
+        "EARLY RENAL",
+        "Cat nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/early-renal-1243"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "978 kcal/kg (설명)",
+        "1038 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-3901",
+      "brand": "royalcanin",
+      "name": "캣 유리너리 S/O",
+      "aliases": [
+        "URINARY S/O",
+        "cat nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3872,
+        "unit": "kcal/kg",
+        "evidence": "387kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/urinary-so-3901"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-6533",
+      "brand": "royalcanin",
+      "name": "캣 유리너리 S/O + 블래더 컴포트",
+      "aliases": [
+        "URINARY S/O + BLADDER COMFORT",
+        "Cat Urinary"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/urinary-so-+-bladder-comfort-6533"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3563 kcal/kg (설명)",
+        "3589 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-1263",
+      "brand": "royalcanin",
+      "name": "캣 유리너리 S/O + 블래더 컴포트 + 세타이어티",
+      "aliases": [
+        "URINARY S/O + BLADDER COMFORT + SATIETY"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/urinary-so-+-bladder-comfort-+-satiety-1263"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3126 kcal/kg (설명)",
+        "3039 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-1254",
+      "brand": "royalcanin",
+      "name": "캣 유리너리 S/O 머셀 인 그레이비 파우치",
+      "aliases": [
+        "URINARY S/O",
+        "-"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": {
+        "value": 906,
+        "unit": "kcal/kg",
+        "evidence": "91kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/urinary-so-1254"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-3954",
+      "brand": "royalcanin",
+      "name": "캣 유리너리 S/O 모더레이트 칼로리",
+      "aliases": [
+        "Urinary S/O Moderate Calorie",
+        "cat nutrition"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3517,
+        "unit": "kcal/kg",
+        "evidence": "352kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/urinary-so-moderate-calorie-3954"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-4080",
+      "brand": "royalcanin",
+      "name": "캣 유리너리 S/O 모더레이트 칼로리 파우치",
+      "aliases": [
+        "URINARY S/O MODERATE CALORIE",
+        "-"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "wet",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/urinary-so-moderate-calorie-4080"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "730 kcal/kg (설명)",
+        "796 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-1264",
+      "brand": "royalcanin",
+      "name": "캣 유리너리 S/O 에이징 + 블래더 컴포트",
+      "aliases": [
+        "URINARY S/O AGEING 7+ + BLADDER COMFORT"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/urinary-so-ageing-7+-+-bladder-comfort-1264"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3705 kcal/kg (설명)",
+        "3738 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-6530",
+      "brand": "royalcanin",
+      "name": "캣 유리너리S/O+하이포알러제닉",
+      "aliases": [
+        "URINARY S/O + HYPOALLERGENIC"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/urinary-so-+-hypoallergenic-6530"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "3770 kcal/kg (설명)",
+        "3930 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-2730",
+      "brand": "royalcanin",
+      "name": "캣 카디악",
+      "aliases": [
+        "CARDIAC"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 3751,
+        "unit": "kcal/kg",
+        "evidence": "375 Kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/cardiac-2730"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-3902",
+      "brand": "royalcanin",
+      "name": "캣 하이포알러제닉",
+      "aliases": [
+        "HYPOALLERGENIC",
+        "Cat Hypoallergenic"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4102,
+        "unit": "kcal/kg",
+        "evidence": "410kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/hypoallergenic-3902"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-4012",
+      "brand": "royalcanin",
+      "name": "캣 헤파틱",
+      "aliases": [
+        "Hepatic",
+        "HEPATIC"
+      ],
+      "species": [
+        "cat"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4126,
+        "unit": "kcal/kg",
+        "evidence": "412.6kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/cats/products/vet-products/hepatic-4012"
+      ],
+      "checkedAt": "2026-10-31"
+    },
+    {
+      "id": "rc-8069",
+      "brand": "royalcanin",
+      "name": "하이포알러제닉 + 세타이어티 스몰독",
+      "aliases": [
+        "HYPOALLERGENIC + SATIETY SMALL DOGS"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": null,
+      "status": "conflict",
+      "note": "공식 설명과 제품 데이터의 열량이 달라 포장 확인이 필요합니다.",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/hypoallergenic-+-satiety-small-dogs-8069"
+      ],
+      "checkedAt": "2026-10-31",
+      "conflictingEnergy": [
+        "2586 kcal/kg (설명)",
+        "2685 kcal/kg (제품 데이터)"
+      ]
+    },
+    {
+      "id": "rc-3318",
+      "brand": "royalcanin",
+      "name": "하이포알러제닉 퍼피",
+      "aliases": [
+        "HYPOALLERGENIC PUPPY",
+        "Dog nutrition"
+      ],
+      "species": [
+        "dog"
+      ],
+      "form": "dry",
+      "energy": {
+        "value": 4021,
+        "unit": "kcal/kg",
+        "evidence": "402kcal per 100g",
+        "basis": "공식 제품 설명·제품 데이터 대조"
+      },
+      "status": "verified",
+      "note": "",
+      "sourceUrls": [
+        "https://www.royalcanin.com/kr/dogs/products/vet-products/hypoallergenic-puppy-3318"
+      ],
+      "checkedAt": "2026-10-31"
+    }
+  ]
+}

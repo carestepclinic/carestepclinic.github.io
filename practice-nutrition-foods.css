@@ -1,0 +1,9 @@
+.pt-food-picker{min-width:0;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #d5e1f2}
+.pt-food-picker label{display:block;margin-bottom:8px}
+.pt-food-picker input,.pt-food-picker select{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+.pt-food-picker .pt-food-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pt-food-picker p{margin:6px 0;overflow-wrap:anywhere}
+.pt-food-picker [data-food-energy]{font-weight:600}
+.pt-food-picker details{margin-top:8px}
+.pt-food-picker a{overflow-wrap:anywhere}
+@media(max-width:420px){.pt-food-picker .pt-food-filters{gap:6px}.pt-food-picker select{font-size:14px}}
