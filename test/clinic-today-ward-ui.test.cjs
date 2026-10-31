@@ -30,3 +30,22 @@ for(const width of [390,1680])test('today inpatient layout and direct patient na
  await overview.getByRole('button',{name:/입원 시험환자/}).click();await p.locator('.cl-workspace[data-section=ward]').waitFor();await p.waitForFunction(()=>document.querySelector('.cl-ward-detail')?.textContent.includes('입원 시험환자'));
  assert.match(await p.locator('.cl-ward-detail').innerText(),/입원 시험환자/);
 });
+
+for(const width of [390,1680])test('restored dashboard loads both summaries without visiting another tab '+width,async t=>{
+ const p=await openPage(t,width);
+ await p.evaluate(async()=>{
+  const me=saasMe;saasToken='synthetic-restore-token';saasMode='demo';saasMe=null;
+  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('active-view',e.id==='dashboard'));
+  document.getElementById('practiceTodayRoot').hidden=true;window.CarestepTodayWard.clear();
+  window.restoreSummaryCalls=[];const old=saasRequest;
+  saasRequest=async(path,options)=>{restoreSummaryCalls.push(path);return path==='/saas/practice/clinical/cases'?{items:[]}:old(path,options);};
+  saasStoredLastView=()=> 'dashboard';saasBootstrapMeOnce=async()=>({me,session:{id:'restored-session'}});
+  saasStartSessionServices=async()=>{};
+  await saasBootstrap();
+ });
+ await p.locator('#practiceTodayRoot').getByText('미완료 0건 · 보류 0건',{exact:true}).waitFor();
+ await p.locator('#wardTodayRoot').getByText('현재 입원 중인 환자가 없습니다.',{exact:true}).waitFor();
+ assert.equal(await p.locator('.view.active-view').getAttribute('id'),'dashboard');
+ assert.ok(await p.locator('#practiceTodayRoot').isVisible());assert.ok(await p.locator('#wardTodayRoot').isVisible());
+ const calls=await p.evaluate(()=>restoreSummaryCalls);assert.ok(calls.includes('/saas/operations/'));assert.ok(calls.includes('/saas/practice/clinical/cases'));
+});
