@@ -1,6 +1,6 @@
 /* R65 manual request UI. No local process launch, activation or automatic resubmit. Status reads only while pending. */
 (()=>{'use strict';
- const labels={queued:'Agent 대기 중',claimed:'동기화 진행 중',running:'동기화 진행 중',success_no_changes:'최신 백업과 동일 · 변경 없음',completed:'완료',failed:'실패',stale:'시간 초과'};
+ const labels={queued:'병원 서버 PC 응답 대기',claimed:'동기화 진행 중',running:'동기화 진행 중',success_no_changes:'최신 백업과 동일 · 변경 없음',completed:'완료',failed:'실패',stale:'시간 초과'};
  const when=v=>{const d=new Date(v);return v&&Number.isFinite(d.getTime())?d.toLocaleString('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}):'기록 없음';};
  const el=(tag,text)=>{const x=document.createElement(tag);if(text)x.textContent=text;return x;};
  let scope='',generation=0,key='',ownRequest='',busy=false,timer=null;
@@ -12,7 +12,7 @@
   if(!key)key=crypto.randomUUID();
   let d;try{d=await api();}catch{return;}if(rev!==generation||identity()!==current||!d.enabled||!d.agentVerified)return;
   const panel=el('section');panel.id='r65-manual-controls';panel.setAttribute('aria-label','eFriends 동기화');panel.style.cssText='padding:12px;border:1px solid #cbd5e1;border-radius:12px;margin:12px';
-  const message=el('p',(d.nextRunNotice||'서버 PC의 최신 백업을 반영합니다.')+(d.requestCheckSeconds===60?' 서버 PC가 켜져 있으면 약 1분 이내 요청을 확인합니다.':' Agent의 다음 실행 시 요청을 확인합니다.')+' 백업 생성 이후의 진료 내용은 다음 백업에 포함돼야 반영됩니다.'),status=el('p'),request=el('button','eFriends 최신 백업 반영'),check=el('button','상태 새로고침');request.type=check.type='button';panel.append(message,request,check,status);
+  const message=el('p',(d.nextRunNotice||'서버 PC의 최신 백업을 반영합니다.')+(d.requestCheckSeconds===60?' 서버 PC가 켜져 있으면 약 1분 이내 요청을 확인합니다.':' 연동 프로그램이 다음에 실행될 때 요청을 확인합니다.')+' 백업 생성 이후의 진료 내용은 다음 백업에 포함돼야 반영됩니다.'),status=el('p'),request=el('button','eFriends 최신 백업 지금 불러오기 요청'),check=el('button','상태 새로고침');request.type=check.type='button';panel.append(message,request,check,status);
   if(ownRequest&&d.requests.some(r=>r.id===ownRequest&&(r.closed||['completed','success_no_changes'].includes(r.state)))){key=crypto.randomUUID();ownRequest='';}
   const pending=d.requests.find(r=>!r.closed&&['queued','claimed','running','failed','stale'].includes(r.state));
   request.disabled=busy||!!pending;

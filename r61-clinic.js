@@ -455,7 +455,7 @@
         CLINIC_NOT_ACTIVE: '병원 활성·승인 상태 확인 필요', PREVENTIVE_MESSAGING_NOT_READY: '문자 발송 준비 상태 확인 필요',
         PREVENTIVE_LMS_POLICY_REQUIRED: '외부 발송 허용과 LMS 채널을 함께 선택해주세요.',
         PREVENTIVE_CHANNEL_INVALID: '예방관리 발송 방식을 다시 선택해주세요.',
-        VACCINE_IDENTITY_REQUIRED: '접종 종류 확인 필요', PREVENTIVE_RECORD_REVIEW_REQUIRED: '예방 기록 날짜·일정 충돌 확인 필요'
+        VACCINE_IDENTITY_REQUIRED: '접종 종류 확인 필요', PREVENTIVE_RECORD_REVIEW_REQUIRED: '예방 기록·예정일 확인 필요'
     };
     const preventiveReason = code => preventiveReasons[code] || '발송 조건 확인 필요';
     function settingsSession() {
@@ -500,7 +500,7 @@
                 }
                 if (!d.targets.length) rows.append(el('p', '해당 날짜의 발송 예정 대상이 없습니다.'));
                 if (d.excludedCount) rows.append(el('p', '접종 종류·날짜 등을 확인해야 하는 기록 ' + d.excludedCount + '건은 대상 계산에서 제외했습니다.'));
-                rows.append(el('p', '실제 발송 직전에 일정·발송 허용·병원 설정을 다시 확인합니다. 발송 이력의 sent는 SOLAPI 접수를 뜻하며 보호자 수신 완료와 다릅니다.'));
+                rows.append(el('p', '실제 발송 직전에 일정·발송 허용·병원 설정을 다시 확인합니다. 발송업체 접수는 SOLAPI가 요청을 받은 상태이며, 보호자 수신 완료와 다릅니다.'));
             } catch (e) {
                 rows.replaceChildren(el('p', e?.message === 'SESSION_CHANGED' ? '로그인 또는 병원이 바뀌었습니다. 창을 다시 열어주세요.' : '대상을 조회하지 못했습니다. 병원 설정과 예방 일정 기록을 확인해주세요.'));
             }
@@ -576,7 +576,7 @@
             l.className='r61-settings-check';
             (key==='efriends_home_visible_default'?publication:delivery).append(l);
         }
-        publication.append(el('p', '자동 공개를 켜면 HOME에 연결된 활성 환자의 새 체중·접종·심장사상충·진료 기록이 이후 동기화부터 공개됩니다. HOME 연결 전에 동기화된 기록은 연결 후 자동으로 공개되지 않으며, 환자 기록에서 따로 공개해야 합니다. 기존 기록의 공개·비공개 설정과 명시적으로 비공개 처리한 기록은 유지됩니다. 병원 내부 메모는 자동 공개하지 않습니다.'));
+        publication.append(el('p', '자동 공개를 켜면 HOME에 연결된 관리 대상 환자의 새 체중·접종·심장사상충·진료 기록이 이후 동기화부터 공개됩니다. HOME 연결 전에 동기화된 기록은 연결 후 자동으로 공개되지 않으며, 환자 기록에서 따로 공개해야 합니다. 기존 기록의 공개·비공개 설정과 명시적으로 비공개 처리한 기록은 유지됩니다. 병원 내부 메모는 자동 공개하지 않습니다.'));
         delivery.append(el('p', '접종·사상충 자동발송을 켜면 저장된 예정일과 보호자별 발송 허용 상태를 기준으로 정기 발송합니다. 먼저 대상과 문구를 확인해주세요.'));
         const preventiveMode = el('select');
         preventiveMode.id = 'r61PreventiveChannel';
@@ -1462,7 +1462,7 @@
             buttons.save.disabled = empty || locked || s.sent || !s.previewed || !!s.assetId;
             buttons.send.disabled = empty || locked || s.sent || s.status !== 'READY_UNSENT';
             buttons.recover.disabled = empty || uiBusy || s.busy || !s.hasRecovery;
-            buttons.recover.textContent = s.pending ? '미확정 저장·공개 결과 조회' : '저장·공개 결과 조회';
+            buttons.recover.textContent = s.pending ? '저장·공개 여부 확인 필요' : '저장·공개 여부 확인';
             buttons.revoke.disabled = empty || locked || !s.assetId;
         }
         ;
@@ -1550,7 +1550,7 @@
                 info.textContent = (result.replayed ? '기존 HOME에 공개 확인' : 'HOME에 공개 완료') + ' · 공개 번호: ' + result.deliveryId;
         }
         );
-        action('recover', '저장·공개 결과 조회', async () => show(await control.recover()));
+        action('recover', '저장·공개 여부 확인', async () => show(await control.recover()));
         action('revoke', 'PDF 공개 취소', async () => {
             const result = await control.revoke(confirm('이 PDF의 공개를 철회할까요? 이 PDF를 연결한 공개 건의 접근이 차단됩니다. 기존 텍스트·후속관리 기록은 보존합니다.'));
             if (result)
@@ -2009,7 +2009,7 @@
         },previewPanel);
         const afterSend=el('div');afterSend.className='r61-after-send';afterSend.hidden=true;body.append(afterSend);let nextMaterial;if(builder){nextMaterial=button(afterSend,'남은 자료 확인',async()=>{guard();d.close();await sendBuilderMaterials();});nextMaterial.className='btn btn-primary r61-primary';nextMaterial.hidden=true;}button(afterSend,'HOME 복약 일정·알림 등록',async()=>{guard();d.close();await window.carestepOpenMedicationPlans?.();});button(afterSend,'자료 전달 이력',materialHistory);button(afterSend,'출력 화면으로 돌아가기',()=>{d.close();if(typeof go==='function')go('builder');if(typeof setWizardStep==='function')setWizardStep(5);});button(afterSend,'다른 환자 선택',()=>{d.close();choosePatient();});
         const more=el('details');more.className='r61-composer-help';more.append(el('summary','기존 자료·결과 조회·관리'));body.append(more);
-        action('recover','중단된 저장·공개 결과 조회',async()=>{if(builder){reviewed.checked=false;stage=2;if(!previewBlob||!builder.item.draft)throw Error('MATERIAL_ORIGINAL_SOURCE_CHANGED');}else revokePreview();const result=await flow.recover();if(builder&&result?.receipt?.sha256&&result.receipt.sha256!==Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await previewBlob.arrayBuffer())),x=>x.toString(16).padStart(2,'0')).join('')){revokePreview();throw Error('MATERIAL_ORIGINAL_SOURCE_CHANGED');}show();},more);
+        action('recover','중단된 작업의 저장·공개 여부 확인',async()=>{if(builder){reviewed.checked=false;stage=2;if(!previewBlob||!builder.item.draft)throw Error('MATERIAL_ORIGINAL_SOURCE_CHANGED');}else revokePreview();const result=await flow.recover();if(builder&&result?.receipt?.sha256&&result.receipt.sha256!==Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await previewBlob.arrayBuffer())),x=>x.toString(16).padStart(2,'0')).join('')){revokePreview();throw Error('MATERIAL_ORIGINAL_SOURCE_CHANGED');}show();},more);
         extraButtons.push(button(more,'PDF 저장·공개 관리',privatePDF));
         if(!builder)extraButtons.push(button(more,'텍스트 자료 공개·이력',materials));
         if(!builder&&admin())extraButtons.push(button(more,'공개용 자료 관리',approveMaterial));
@@ -2143,8 +2143,8 @@
             button(g,'캘린더 설정 위치 보기',()=>{const node=document.getElementById('googleCalendarStatus');if(node){node.scrollIntoView({block:'center'});body.closest('dialog')?.close();}else g.append(el('p','후속관리 설정의 캘린더 단계에서 연결·선택할 수 있습니다.'));});
             const sync=responses[1].status==='fulfilled'?responses[1].value:null,manual=responses[2].status==='fulfilled'?responses[2].value:null,e=workCard(rows);e.append(el('strong','eFriends 동기화'));
             if(sync?.ok===true){const h=sync.heartbeat,last=sync.lastSuccess,age=h?Date.now()-Date.parse(h.last_seen_at):Infinity,late=!Number.isFinite(age)||age>Math.max(35,(Number(h?.interval_minutes)||15)*2+5)*60000;e.append(el('p',!h?'서버 PC 연결 기록 없음':h.status==='failed'?'서버 PC 동기화 오류':late?'서버 PC 응답 지연 · 연결 확인 필요':h.status==='syncing'?'동기화 처리 중':'서버 PC 응답 확인'),el('p','마지막 응답 '+workTime(h?.last_seen_at)+' · 다음 예정 '+workTime(h?.next_expected_at)),el('p','최근 반영 완료 '+workTime(last?.finished_at)+(last?.status==='completed_with_errors'?' · 일부 오류 있음':'')),el('p',last?'최근 반영: 신규 '+Number(last.events_created||0)+'건 · 수정 '+Number(last.events_updated||0)+'건 · 오류 '+Number(last.errors||0)+'건':'반영 완료 기록 없음'));}else e.append(el('p','동기화 상태를 조회하지 못했습니다.'));
-            e.append(el('p',manual?.ok===true?(manual.enabled&&manual.agentVerified?'수동 최신 백업 반영 사용 가능 · 15분 자동 동기화 유지':'수동 반영 비활성 · 설치/승인 상태 확인 필요'):'수동 반영 상태 미확인'));
-            button(e,'수동 반영 위치 보기',async()=>{if(typeof go==='function')go('settings');await window.R65ManualSync?.refresh(true);const management=document.getElementById('r61-management');if(management)management.open=true;document.getElementById('r65-manual-controls')?.scrollIntoView({block:'center'});body.closest('dialog')?.close();});
+            e.append(el('p',manual?.ok===true?(manual.enabled&&manual.agentVerified?'EMR 최신 백업 불러오기 요청 가능 · 15분 자동 동기화 유지':'EMR 백업 불러오기 요청 불가 · 설치·승인 상태 확인 필요'):'EMR 백업 불러오기 가능 여부 확인 필요'));
+            button(e,'EMR 백업 불러오기 설정 열기',async()=>{if(typeof go==='function')go('settings');await window.R65ManualSync?.refresh(true);const management=document.getElementById('r61-management');if(management)management.open=true;document.getElementById('r65-manual-controls')?.scrollIntoView({block:'center'});body.closest('dialog')?.close();});
         };button(body,'연동 상태 새로고침',load);body.append(rows);await load();
     }
 

@@ -4,7 +4,7 @@
   if(!window.CarestepStabilization?.asset('timeline','bundle-r19')){const notice=document.createElement('div');notice.setAttribute('role','alert');notice.textContent='화면과 프로그램 버전이 다릅니다. 새로고침 후 다시 확인해주세요.';(document.body||document.documentElement).prepend(notice);return;}
   const $=id=>document.getElementById(id);
   const TYPE_META={
-    weight:{label:'체중',icon:'kg',title:'체중 측정'},vaccination:{label:'접종',icon:'V',title:'예방접종'},heartworm:{label:'사상충',icon:'H',title:'심장사상충 예방'},visit:{label:'진료',icon:'+',title:'병원 진료'},note:{label:'메모',icon:'N',title:'임상 메모'},journey:{label:'Journey',icon:'J',title:'Care Journey'},appetite:{label:'식욕',icon:'A',title:'식욕 기록'},water:{label:'음수',icon:'W',title:'음수 기록'},vomiting:{label:'구토',icon:'V',title:'구토 기록'},diarrhea:{label:'설사',icon:'D',title:'설사 기록'},medication:{label:'투약',icon:'M',title:'투약 기록'}
+    weight:{label:'체중',icon:'kg',title:'체중 측정'},vaccination:{label:'접종',icon:'V',title:'예방접종'},heartworm:{label:'사상충',icon:'H',title:'심장사상충 예방'},visit:{label:'진료',icon:'+',title:'병원 진료'},note:{label:'메모',icon:'N',title:'임상 메모'},journey:{label:'후속관리',icon:'J',title:'후속관리 계획'},appetite:{label:'식욕',icon:'A',title:'식욕 기록'},water:{label:'음수',icon:'W',title:'음수 기록'},vomiting:{label:'구토',icon:'V',title:'구토 기록'},diarrhea:{label:'설사',icon:'D',title:'설사 기록'},medication:{label:'투약',icon:'M',title:'투약 기록'}
   };
   const RECORD_CATEGORIES=[['clinical','병원기록'],['vaccination','접종'],['heartworm','사상충'],['weight','체중']];
   function recordCategory(e={}){return ['vaccination','heartworm','weight'].includes(e.type)?e.type:'clinical';}
