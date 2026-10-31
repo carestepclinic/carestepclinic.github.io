@@ -18,8 +18,8 @@ test('all 737 reviewed reference headings are searchable, without treating searc
  const item={name:'시험',english:'Example',aliases:['Example'],referenceNames:['Example Ophthalmic'],searchAliases:['search only']};
  assert.ok(S.searchNames(item).includes('search only'));assert.ok(!S.aliases(item).includes('search only'));assert.ok(!S.aliases(item).includes('Example Ophthalmic'));
 });
-test('426 added names have stable accepted manual IDs and no invented strength, dose, species or route',()=>{
- const added=catalog.ingredients.filter(x=>x.sourceType==='reference-name');assert.equal(added.length,426);
+test('425 unverified names retain empty strengths; manufacturer-verified citrate is separate',()=>{
+ const added=catalog.ingredients.filter(x=>x.sourceType==='reference-name');assert.equal(added.length,425);
  for(const item of added){assert.match(item.id,/^manual-[a-f0-9]{20}$/);assert.deepEqual(item.options,[]);assert.ok(item.name.length<=100&&item.english.length<=100);assert.ok(item.aliases.length<=12);for(const k of ['dose','regimen','species','route','value','unit'])assert.equal(item[k],undefined,item.english+' '+k);if(item.entryType!=='ingredient')assert.equal(item.setupMode,'product');}
  for(const name of ['Pimobendan','Maropitant','Oclacitinib','Trilostane','Carprofen','Robenacoxib','Firocoxib','Lokivetmab','Alfaxalone','Atipamezole','Enrofloxacin','Marbofloxacin','Cefovecin','Toceranib','Fenbendazole','Ivermectin','Acepromazine','Apomorphine','Lidocaine','Cefazolin'])assert.ok(added.some(x=>x.english===name),name);
  const loki=added.find(x=>x.english==='Lokivetmab');assert.ok(S.searchNames(loki).some(x=>x==='로키베트맙'));

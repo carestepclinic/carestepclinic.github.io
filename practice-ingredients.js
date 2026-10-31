@@ -18,11 +18,11 @@
   for(const [target,names] of [['ursodeoxycholicacid',['UDCA','ursodiol']],['prednisolone',['pds']],['cyclosporine',['ciclosporin','cyclosporin']]]){const f=families.get(target);if(f)for(const n of names){f.aliases.add(n);addAlias(n,f);}}
   await Promise.all([...families.values()].map(async f=>{f.preferredId='manual-'+await hash('carestep-prescription-default-v1|'+f.key);idIndex.set(f.preferredId,f);}));catalog=doc;return doc;
  }
- async function load(){if(catalog)return catalog;if(!promise)promise=(g.PracticeStrengths?.catalog?g.PracticeStrengths.catalog():fetch('practice-strength-catalog.json?v=20261024-2',{credentials:'omit',cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('성분 목록을 불러오지 못했습니다.');return r.json();})).then(configure).catch(e=>{promise=null;throw e;});return promise;}
+ async function load(){if(catalog)return catalog;if(!promise)promise=(g.PracticeStrengths?.catalog?g.PracticeStrengths.catalog():fetch('practice-strength-catalog.json?v=20261031-potassium1',{credentials:'omit',cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('성분 목록을 불러오지 못했습니다.');return r.json();})).then(configure).catch(e=>{promise=null;throw e;});return promise;}
  function resolve(name){const set=aliasIndex.get(key(name));return set?.size===1?[...set][0]:null;}
  function metadata(p){return p.body?.formulary||p.body?.strength;}
  function familyOf(p){const m=metadata(p);if(!m)return null;const byId=idIndex.get(m.ingredientId);if(byId)return byId;const refs=new Set([m.english,m.calculationBasis,...(m.aliases||[])].map(resolve).filter(Boolean));return refs.size===1?[...refs][0]:null;}
- function named(p,drug){return [p.body?.title,...(metadata(p)?.aliases||[])].some(x=>key(x)===key(drug));}
+ function named(p,drug){const m=metadata(p);if((m?.ingredientId==='manual-0793ad74243cf94ae589'||['citratepotassium','potassiumcitrate','구연산칼륨'].includes(key(m?.english)))&&['potassium','칼륨','citrate','구연산','elementalpotassium'].includes(key(drug)))return false;return [p.body?.title,...(metadata(p)?.aliases||[])].some(x=>key(x)===key(drug));}
  function matching(items,drug){const f=resolve(drug);return items.filter(p=>named(p,drug)||(f&&familyOf(p)===f));}
  function preferred(p,f){return !!f&&p.body?.strength?.ingredientId===f.preferredId;}
  function candidates(items,drug,species,route,doseUnit){
