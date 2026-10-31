@@ -59,7 +59,7 @@ for(const width of [390,1440])test('navigation has one injection entry and guida
  const p=await openPage(t,width);await context(p);await p.locator('[data-injection-mode=injection]').click();assert.equal(await p.locator('[data-injection-text-mode]').isVisible(),false);assert.equal(await p.locator('[data-injection-text]').isVisible(),true);assert.equal(await p.locator('[data-injection-clear]').isVisible(),true);
  for(const kind of ['cri','potassium','transfusion','acid','nutrition','emergency','anesthesia']){await openKind(p,kind);assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1),kind);}
  await openKind(p,'cri');assert.equal(await p.locator('[data-cri-picker]>summary').innerText(),'약물 선택');assert.equal(await p.locator('[data-cri-search]').locator('..').innerText(),'약물 찾기');
- await openKind(p,'nutrition');assert.match(await p.locator('[data-calc=nutrition]').innerText(),/계산 설정 불러오기/);assert.match(await p.locator('[data-calc=nutrition]').innerText(),/급여 제품 설정 불러오기/);
+ await openKind(p,'nutrition');assert.match(await p.locator('[data-calc=nutrition]').innerText(),/저장 설정 불러오기/);assert.equal(await p.locator('[data-nutrition-product]').isVisible(),false);await p.locator('[data-calc=nutrition] .pt-saved-settings>summary').click();assert.equal(await p.locator('[data-nutrition-scope]').isVisible(),true);
  await openKind(p,'batch');await p.locator('[data-injection-mode=injection]').click();await p.screenshot({path:path.join(root,'../calculator-consistency-injection-'+width+'.png'),fullPage:true});
 });
 

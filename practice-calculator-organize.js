@@ -281,7 +281,8 @@
   const schedule=()=>{if(!frame&&!disposed)frame=requestAnimationFrame(refresh);};
   const observer=new MutationObserver(schedule);observer.observe(b,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','data-calculation-state']});
   b.addEventListener('practice-kind-selected',schedule);b.addEventListener('change',schedule);refresh();
-  return {dispose(){disposed=true;b.removeEventListener('practice-product-applied',productApplied);clearTimeout(timer);cancelAnimationFrame(frame);observer.disconnect();b.removeEventListener('input',changed);b.removeEventListener('change',changed);b.removeEventListener('change',schedule);b.removeEventListener('practice-kind-selected',schedule);b.removeEventListener('practice-rx-invalidating',capturePrevious);b.removeEventListener('practice-rx-reset',forget);}};
+  const clarity=g.PracticeCalculatorClarity?.mount(b);
+  return {dispose(){clarity?.dispose();disposed=true;b.removeEventListener('practice-product-applied',productApplied);clearTimeout(timer);cancelAnimationFrame(frame);observer.disconnect();b.removeEventListener('input',changed);b.removeEventListener('change',changed);b.removeEventListener('change',schedule);b.removeEventListener('practice-kind-selected',schedule);b.removeEventListener('practice-rx-invalidating',capturePrevious);b.removeEventListener('practice-rx-reset',forget);}};
  }
  g.PracticeCalculatorOrganize={mount};
 })(window);

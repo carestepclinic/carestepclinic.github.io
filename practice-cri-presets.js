@@ -83,7 +83,7 @@
  function mount(b,o){
   const f=b.querySelector('[data-calc=cri]'),species=b.querySelector('[data-ref-species]');if(!f||!species)return null;
   const box=document.createElement('section');box.className='pt-cri-presets';
-  box.innerHTML='<h4>약물 선택</h4><details class="pt-entry-help"><summary>CRI 입력 안내</summary><p class="pt-help">종별 참고 범위·단위를 표시합니다. 처방 용량과 실제 제품 함량은 확인 후 선택하세요. 부하 투여량은 포함하지 않습니다.</p></details><details data-cri-picker open><summary>정맥 주입 약물 찾기</summary><label>약물 검색<input type="search" data-cri-search placeholder="예: 펜타닐, furosemide" autocomplete="off"></label><nav class="pt-bar" aria-label="CRI 약물 분류">'+[['all','전체'],['circulation','순환'],['pain','진통'],['seizure','발작'],['gi','위장관'],['diuretic','이뇨'],['anesthesia','마취'],['intermittent','간헐 주입']].map(([id,label])=>'<button type="button" data-cri-group="'+id+'" aria-pressed="'+(id==='all')+'">'+label+'</button>').join('')+'</nav><div class="pt-cri-choices"></div><p data-cri-empty hidden>일치하는 약물이 없습니다. 검색어 또는 분류를 변경해주세요.</p></details><p data-cri-status role="status"></p><div data-cri-reference hidden><div class="pt-cri-regimen"><h4>용법 확인</h4><strong data-cri-indication></strong><p data-cri-range></p><div data-cri-dose-field></div><div class="pt-bar" data-cri-dose-buttons aria-label="참고 용량 빠른 선택"></div><p data-cri-dose-status role="status"></p><p class="pt-help">참고 범위에서 이번 환자에게 적용할 용량을 선택하세요. 하한값도 모든 환자의 권장 시작량은 아닙니다.</p><details><summary>투여 조건·모니터링·근거</summary><p data-cri-note></p><a data-cri-source target="_blank" rel="noopener noreferrer">투여 근거 확인</a><p class="pt-help">확인 2026-10-25 · 환자 반응에 맞춰 조정 · 혼합약물 조제식 아님</p></details></div><label>주사제 함량<select data-cri-stock></select></label><p class="pt-help" data-cri-stock-note></p></div><button type="button" data-cri-manual>다른 약물 직접 입력</button>';
+  box.innerHTML='<h4>약물 선택</h4><details class="pt-entry-help"><summary>CRI 입력 안내</summary><p class="pt-help">종별 참고 범위·단위를 표시합니다. 처방 용량과 실제 제품 함량은 확인 후 선택하세요. 부하 투여량은 포함하지 않습니다.</p></details><details data-cri-picker open><summary>정맥 주입 약물 찾기</summary><label>약물 검색<input type="search" data-cri-search placeholder="예: 펜타닐, furosemide" autocomplete="off"></label><nav class="pt-bar" aria-label="CRI 약물 분류">'+[['all','전체'],['circulation','순환'],['pain','진통'],['seizure','발작'],['gi','위장관'],['diuretic','이뇨'],['anesthesia','마취'],['intermittent','간헐 주입']].map(([id,label])=>'<button type="button" data-cri-group="'+id+'" aria-pressed="'+(id==='all')+'">'+label+'</button>').join('')+'</nav><div class="pt-cri-choices"></div><p data-cri-empty hidden>일치하는 약물이 없습니다. 검색어 또는 분류를 변경해주세요.</p></details><p data-cri-status role="status"></p><div data-cri-reference hidden><div class="pt-cri-regimen"><h4>용법 확인</h4><strong data-cri-indication></strong><p data-cri-range></p><div data-cri-dose-field></div><div class="pt-bar" data-cri-dose-buttons aria-label="참고 용량 빠른 선택"></div><p data-cri-dose-status role="status"></p><p class="pt-help">참고 범위에서 이번 환자에게 적용할 용량을 선택하세요. 하한값도 모든 환자의 권장 시작량은 아닙니다.</p><details><summary>투여 조건·모니터링·근거</summary><p data-cri-note></p><a data-cri-source target="_blank" rel="noopener noreferrer">투여 근거 확인</a><p class="pt-help">확인 2026-10-25 · 환자 반응에 맞춰 조정 · 혼합약물 조제식 아님</p></details></div><label>주사제 농도<select data-cri-stock></select></label><p class="pt-help" data-cri-stock-note></p></div><button type="button" data-cri-manual>다른 약물 직접 입력</button>';
   f.querySelector('h3').after(box);
   let records=[],selected=null,profile=null,choices=[],filter='all',touched=false,applying=false,manualEntry=false;
   const fields=f.elements,status=box.querySelector('[data-cri-status]'),stockSelect=box.querySelector('[data-cri-stock]'),picker=box.querySelector('[data-cri-picker]'),query=box.querySelector('[data-cri-search]');
@@ -131,14 +131,14 @@
   function applyStock(){
    const x=choices.find(x=>x.id===stockSelect.value);fields.stockUnit.value=x?.unit||'mg';fields.stock.value=x?String(x.value):'';
    const note=box.querySelector('[data-cri-stock-note]');
-   note.replaceChildren(document.createTextNode(x?(x.clinic?'병원 저장값':'공통 함량 · 실제 앰플 확인')+' · 기준: '+x.basis:'함량 후보가 여러 개이면 실제 제품을 선택하세요. 직접 입력도 가능합니다.'));
-   if(x&&/^https:\/\//.test(x.url)){const a=document.createElement('a');a.href=x.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=' 함량 출처';note.append(a);}
+   note.replaceChildren(document.createTextNode(x?(x.clinic?'병원 저장값':'공통 농도 · 실제 앰플 확인')+' · 기준: '+x.basis:'농도 후보가 여러 개이면 실제 제품을 선택하세요. 직접 입력도 가능합니다.'));
+   if(x&&/^https:\/\//.test(x.url)){const a=document.createElement('a');a.href=x.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=' 농도 출처';note.append(a);}
    if(!x&&stockSelect.value==='manual'){const advanced=f.querySelector('[data-settings]');if(advanced)advanced.open=true;}
    clear();notify();
   }
   function load(){
    choices=options(selected,records,species.value);
-   stockSelect.innerHTML='<option value="">함량 선택</option>'+choices.map(x=>'<option value="'+esc(x.id)+'">'+(x.clinic?'병원 저장 · ':'공통 · ')+x.value+' '+x.unit+'/mL</option>').join('')+'<option value="manual">직접 입력</option>';
+   stockSelect.innerHTML='<option value="">농도 선택</option>'+choices.map(x=>'<option value="'+esc(x.id)+'">'+(x.clinic?'병원 저장 · ':'공통 · ')+x.value+' '+x.unit+'/mL</option>').join('')+'<option value="manual">직접 입력</option>';
    const local=choices.filter(x=>x.clinic),set=local.length?local:choices,unique=new Set(set.map(x=>x.value*(x.unit==='mcg'?0.001:1)));
    stockSelect.value=unique.size===1?set[0].id:'';applyStock();
   }
@@ -211,7 +211,7 @@
    if(['drug','stock','stockUnit'].includes(e.target.name)){
     touched=true;
     if(e.target.name==='drug'){for(const key of ['dose','stock','stockUnit','rate','stockML','diluent'])fields[key].value='';reset();clear();return;}
-    stockSelect.value='manual';box.querySelector('[data-cri-stock-note]').textContent='직접 수정한 함량·단위 · 실제 제품과 대조';
+    stockSelect.value='manual';box.querySelector('[data-cri-stock-note]').textContent='직접 수정한 농도·단위 · 실제 제품과 대조';
    }
    if(e.target.name==='volume')bag.value=['20','50','100','500'].includes(fields.volume.value)?fields.volume.value:'custom';
    if(profile)doseFeedback();refreshQuick();
