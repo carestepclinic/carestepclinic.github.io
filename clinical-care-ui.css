@@ -140,3 +140,13 @@
 .cl-workspace .cl-room>.cl-room-identity{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;width:100%;min-width:0}
 .cl-workspace .cl-room .cl-room-identity>strong{font-size:20px;line-height:1.4}
 .cl-workspace .cl-room .cl-room-identity>.cl-patient-demographics{display:block;min-width:0;max-width:100%;font-size:14px;line-height:1.5;font-weight:400;color:#526174;white-space:normal;overflow-wrap:anywhere}
+
+/* Keep ward measurements visible and the care team beside the complaint. */
+.cl-workspace .cl-room>.cl-room-care{display:block;width:100%;min-width:0}
+.cl-workspace .cl-room-care>.cl-care-team{display:flex;flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:4px 12px;font-size:14px}
+.cl-workspace .cl-room-care .cl-care-cc{flex:1 1 120px;gap:4px;margin:0}
+.cl-workspace .cl-room-care .cl-care-staff{display:flex;flex-wrap:wrap;gap:4px 12px}
+.cl-workspace .cl-room-care .cl-care-staff>span{display:inline-flex;flex-wrap:wrap;gap:4px}
+.cl-workspace .cl-room-care .cl-care-staff b,.cl-workspace .cl-room-care .cl-care-staff span{font-size:14px;line-height:1.5}
+.cl-workspace .cl-room .cl-info-needed{display:block;color:#526174;font-size:13px;line-height:1.5;white-space:normal;overflow-wrap:anywhere}
+.cl-workspace section.cl-room-details{display:block}

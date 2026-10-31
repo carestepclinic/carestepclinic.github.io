@@ -963,9 +963,9 @@ test('schedule UI: completed-only groups expose copy without move or completion 
 
 for(const width of [390,1440])test('clinical simplicity: ward details stay optional and anesthesia lists only relevant records '+width,async t=>{
  const {p,api,errors}=await summaryFixture(t,width);
- const details=p.locator('.cl-room-details').first();assert.equal(await details.evaluate(e=>e.open),false);assert.ok(await p.locator('.cl-room').first().locator('.cl-monitor-abnormal').first().isVisible());
+ const details=p.locator('.cl-room-details').first();assert.ok(await details.isVisible());assert.ok(await p.locator('.cl-room').first().locator('.cl-monitor-abnormal').first().isVisible());
  assert.ok(await p.locator('.cl-room').first().locator('.cl-patient-demographics').isVisible());
- await details.locator('summary').click();assert.ok(await details.locator('.cl-vital-grid').isVisible());
+ assert.equal(await details.locator('summary').count(),0);assert.ok(await details.locator('.cl-vital-grid').isVisible());
  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  await p.screenshot({path:path.resolve(root,'../clinical-simple-ward-'+width+'.png'),fullPage:true});
  const c=await api('/cases','POST',{requestKey:'simple-surgery-001',kind:'surgery',species:'dog',weight:5,quickPatient:{name:'합성 마취 전용'}});
@@ -994,9 +994,20 @@ for(const width of [320,390,1440])test('ward identity always visible: compact ex
  await (await show(p,'[data-cl-action=refresh]')).click();await wardSettled(p);
  const card=p.locator('.cc-occupied').first(),identity=card.locator('.cl-room-identity'),demo=identity.locator('.cl-patient-demographics');
  const check=async()=>{assert.ok(await demo.isVisible());assert.match(await demo.innerText(),/6세 · 합성 긴 품종명 코리안 쇼트헤어 믹스 · 중성화 암컷/);assert.equal(await card.locator('.cl-patient-demographics').count(),1);assert.ok(await identity.evaluate(e=>e.scrollWidth<=e.clientWidth+1));assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));};
- await check();assert.equal(await card.locator('.cl-room-details').evaluate(e=>e.open),false);
+ await check();assert.ok(await card.locator('.cl-room-details .cl-vital-grid').isVisible());
  assert.match(await p.locator('.cc-occupied').nth(1).locator('.cl-room-identity').innerText(),/나이 미입력 · 품종 미입력 · 성별 미입력/);assert.equal(await p.locator('.cc-vacant .cl-room-identity').count(),0);
- await card.locator('.cl-room-details>summary').click();await check();await card.locator('.cl-room-details>summary').click();await check();
+ assert.equal(await card.locator('.cl-room-details>summary').count(),0);await check();
  await card.locator('.cl-room').click();await wardSettled(p);await p.locator('[data-cl-action=rooms-back]').click();await check();
  await p.screenshot({path:path.resolve(root,'../ward-demographics-'+width+'.png'),fullPage:true});assert.deepEqual(errors,[]);
+});
+
+for(const width of [320,390,1440])test('ward measurements always open: care team and explicit missing fields '+width,async t=>{
+ const {p,api,f,caseIds,errors}=await summaryFixture(t,width),id=caseIds[0];
+ f.clinicalHandler=async(path,m,b)=>{const r=await f.extras(path,m,b);if(m==='GET'){const patch=x=>{if(x?.id===id)x.body.careTeam={chiefComplaint:'합성 피부질환',veterinarianName:'시험 수의사',technicianName:'시험 테크니션'};};if(path==='/clinical/rooms')for(const x of r.items||[])patch(x.patientCase);if(path.endsWith('/cases/'+id))patch(r.item);}return r;};
+ await (await show(p,'[data-cl-action=refresh]')).click();await wardSettled(p);const card=p.locator('.cc-occupied').first();
+ const check=async()=>{const vitals=card.locator('.cl-room-details .cl-vital-grid');assert.ok(await vitals.isVisible());for(const v of ['8.6','38.5','180'])assert.ok((await vitals.innerText()).includes(v));assert.equal(await card.locator('.cl-room-details summary').count(),0);const team=card.locator('.cl-room-care');assert.ok(await team.isVisible());assert.ok(await team.evaluate(e=>{const cc=e.querySelector('.cl-care-cc').getBoundingClientRect(),staff=e.querySelector('.cl-care-staff').getBoundingClientRect();return staff.top-cc.bottom<20;}));for(const v of ['주호소','합성 피부질환','담당 수의사','시험 수의사','담당 테크니션','시험 테크니션'])assert.ok((await team.innerText()).includes(v));assert.equal(await card.locator('.cl-care-staff').count(),1);assert.match(await card.locator('.cl-info-needed').innerText(),/주의사항 미확인/);assert.match(await card.locator('.cl-info-needed').innerText(),/호흡수.*미측정/);assert.doesNotMatch(await card.innerText(),/정보 확인 필요 [0-9]+개/);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));};
+ await check();assert.match(await p.locator('.cc-occupied').nth(1).locator('.cl-info-needed').innerText(),/생활 관찰 미기록/);
+ await card.locator('.cl-room').click();await wardSettled(p);await p.locator('[data-cl-action=rooms-back]').click();await check();
+ await (await show(p,'[data-cl-action=refresh]')).click();await wardSettled(p);await check();
+ await p.screenshot({path:path.resolve(root,'../ward-measurements-open-'+width+'.png'),fullPage:true});assert.deepEqual(errors,[]);
 });
