@@ -28,7 +28,7 @@ for(const width of [390,1280])browserTest('withdrawn SOP can be republished expl
  await p.getByRole('button',{name:'확인 후 다시 공개',exact:true}).click();await p.getByRole('button',{name:'공개 중단',exact:true}).waitFor();
  assert.equal((await f.doc(d.versionId)).document.current,true);assert.equal((await f.doc(d.versionId)).document.version,1);assert.deepEqual((await f.doc(d.versionId)).document.body,body);assert.deepEqual(f.sqlite.prepare('SELECT * FROM staff_training_attempts').all(),history);
  assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM staff_training_versions').get().n,1);assert.equal((await p.evaluate(()=>writes.filter(x=>x.endsWith('/republish')))).length,1);
- await p.getByRole('button',{name:'닫기',exact:true}).click();assert.match(await p.locator('.st-card').innerText(),/승인됨 · v1/);await p.reload();await p.getByRole('button',{name:'병원 SOP',exact:true}).click();assert.equal(await p.getByRole('button',{name:'다시 공개',exact:true,includeHidden:true}).count(),0);
+ await p.getByRole('button',{name:'닫기',exact:true}).click();assert.match(await p.locator('.st-card').innerText(),/승인됨 · 1판/);await p.reload();await p.getByRole('button',{name:'병원 SOP',exact:true}).click();assert.equal(await p.getByRole('button',{name:'다시 공개',exact:true,includeHidden:true}).count(),0);
 });
 browserTest('republish is hidden from learners and edit-only staff, and HQ requires reviewer name',async t=>{
  const f=fixture(t),d=await localSop(f);await f.publish(d.versionId);await stopPublication(f,d.versionId);f.editor={...f.staff,permissions:{mode:'custom',keys:['training.read','training.edit']}};
@@ -46,7 +46,7 @@ browserTest('SOP version delete keeps its published sibling visible and version 
  const p=await pageFor(t,f);await p.getByRole('button',{name:'병원 SOP',exact:true}).click();
  await versionAction(p,'버전 삭제',v2.versionId);assert.match(await p.getByRole('dialog').innerText(),/v2만 삭제/);assert.match(await p.getByRole('dialog').innerText(),/다른 버전 1개/);
  await p.locator('[name=confirm]').check();await p.getByRole('button',{name:'삭제 확정',exact:true}).click();await p.getByRole('dialog').waitFor({state:'hidden'});
- assert.equal(await p.locator('.st-card').count(),1);assert.match(await p.locator('.st-card').innerText(),/승인됨 · v1/);assert.equal((await f.doc(d.versionId)).document.current,true);
+ assert.equal(await p.locator('.st-card').count(),1);assert.match(await p.locator('.st-card').innerText(),/승인됨 · 1판/);assert.equal((await f.doc(d.versionId)).document.current,true);
  await p.getByRole('button',{name:'삭제한 자료',exact:true}).click();assert.match(await p.locator('.st-card').innerText(),/v2 버전/);await p.getByRole('button',{name:'복원',exact:true}).click();await p.locator('[name=confirm]').check();await p.getByRole('button',{name:'버전 복원',exact:true}).click();await p.getByRole('dialog').waitFor({state:'hidden'});
  assert.equal((await f.doc(v2.versionId)).document.status,'draft');assert.equal((await f.doc(d.versionId)).document.current,true);assert.ok((await p.evaluate(()=>writes)).every(x=>x.includes('/versions/')));
 });

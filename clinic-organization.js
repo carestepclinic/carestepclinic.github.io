@@ -158,14 +158,14 @@
   }
   function saveScope(id,inputs,copy,successEvent){
    const button=$(id);if(!button||$(id+'Scope'))return;
-   const note=document.createElement('p');note.id=id+'Scope';note.className='clinic-save-scope';note.setAttribute('role','status');note.textContent=copy;button.parentElement.before(note);
+   const note=document.createElement('p');note.id=id+'Scope';note.className='clinic-save-scope';note.setAttribute('role','status');note.textContent=copy;note.dataset.dirty='false';button.parentElement.before(note);
    const clean=()=>{note.dataset.dirty='false';note.textContent=copy;};
-   for(const input of inputs)input.addEventListener('input',()=>{note.dataset.dirty='true';note.textContent='저장하지 않은 변경사항이 있습니다. '+copy;});
+   for(const input of inputs)input.addEventListener('input',()=>{note.dataset.dirty='true';note.textContent=copy+' 변경사항을 저장해주세요.';});
    if(successEvent)window.addEventListener(successEvent,clean);
    else button.addEventListener('click',()=>{if($('hospitalName')?.value.trim())clean();});
   }
-  saveScope('saveHospital',['hospitalName','directorName','hospitalPhone','hospitalAddress','hospitalWebsite'].map($).filter(Boolean),'병원정보 저장은 병원 기본정보에 적용됩니다. 접종·사상충 일정 규칙은 별도로 저장하세요.');
-  saveScope('saveClinicalProtocol',[...document.querySelectorAll('[data-protocol-path]')],'일정 규칙 저장은 접종·사상충 간격에만 적용됩니다. 병원 기본정보는 별도로 저장하세요.','carestep:clinical-protocol-updated');
+  saveScope('saveHospital',['hospitalName','directorName','hospitalPhone','hospitalAddress','hospitalWebsite'].map($).filter(Boolean),'병원 기본정보','carestep:hospital-saved');
+  saveScope('saveClinicalProtocol',[...document.querySelectorAll('[data-protocol-path]')],'예방 일정 규칙','carestep:clinical-protocol-updated');
   const voiceTabs=$('voiceTabs');
   if(voiceTabs&&!voiceTabs.dataset.managementKeys){
    voiceTabs.dataset.managementKeys='1';voiceTabs.setAttribute('role','group');voiceTabs.setAttribute('aria-label','요청 종류');
@@ -183,7 +183,7 @@
   const placements=new Map();let queued=false;
   function move(node){if(!node)return;if(!placements.has(node)){const marker=document.createComment('patient header position');node.before(marker);placements.set(node,marker);}if(node.parentElement!==tools)tools.append(node);}
   function sync(){
-   queued=false;const intake=$('practice')?.classList.contains('active-view')&&!!document.querySelector('.clinic-navigation [data-tab="intake"][aria-current="page"],#practiceRoot [data-tab="intake"][aria-pressed="true"]');const active=patient.classList.contains('active-view')||intake;header.classList.toggle('clinic-patient-header',active);tools.hidden=!active;
+   queued=false;const active=true;header.classList.toggle('clinic-patient-header',active);tools.hidden=!active;
    if(active){move(document.querySelector('.care-global-search'));move(document.querySelector('.care-notification-wrap'));move($('clinicInstall'));move($('screenHelpBar'));}
    else for(const [node,marker] of placements)if(marker.parentNode&&node.parentNode!==marker.parentNode)marker.after(node);
    for(const id of ['patientCrmNewPatient','patientCrmNewGuardian','patientCrmRefresh']){const node=$(id);if(node&&node.parentNode!==groups.register)groups.register.append(node);}

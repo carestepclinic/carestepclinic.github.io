@@ -544,3 +544,19 @@ body:has(#builder.view.active-view) #r61-patient-context .r61-context-change{mar
 .topbar .care-global-search #careGlobalSearch[hidden]{display:none}
 .topbar .care-global-search-results{top:calc(100% + 8px);min-width:280px}
 @media(max-width:600px){.topbar .care-global-search.is-open{flex-basis:100%;width:100%}.topbar .care-global-search-results{position:absolute;left:0;right:0;min-width:0;max-height:60vh}}
+
+/* Shared page density: retain actions, safety notices and form labels. */
+#library>.section-head>div:first-child,#account .account-pane-head>div:first-child{display:none}
+#library>.section-head .search{margin-top:0}
+#account .account-pane-head{justify-content:flex-end}
+#dashboard .action-center-head>div>p,#dashboard .schedule-board-head>div>p{display:none}
+#dashboard .action-center-head h3{margin:0}
+.clinic-save-scope[data-dirty="false"]{display:none}
+#builder .builder-controls>.section-head{display:none}
+body:has(#builder.active-view) #r61-patient-context[data-ready="true"]~* .builder-case-context>div:has(#builderContextPatient){display:none}
+#builder .builder-case-context{position:static;box-shadow:none;margin-block:8px;padding:10px;gap:6px 10px}
+#builder .builder-case-context .builder-context-topic{grid-row:auto;grid-column:1}
+#builder .builder-case-context .btn{grid-row:1/3}
+#builder .crm-builder-picker{padding:8px 10px}
+#appView .topbar.clinic-patient-header{gap:8px 16px;margin-bottom:12px;padding-bottom:10px}
+#appView .topbar #viewTitle{margin:0}
