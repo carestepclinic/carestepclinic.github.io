@@ -19,6 +19,9 @@ for(const width of [390,1680])test('today inpatient layout and direct patient na
  const item={id:'ward-test',kind:'admission',status:'active',revision:1,patient_id:'',patient:{name:'입원 시험환자',species:'cat'},body:{species:'cat',weight:4,title:'입원',location:'고양이 1',tasks:[],orders:[],infusions:[],wardChecks:[]}};
  const old=saasRequest;saasRequest=async(path,options)=>path.endsWith('/clinical/cases')?{items:[item],hasMore:false}:path.endsWith('/clinical/cases/ward-test')?{item,events:[],canRecord:true}:path.endsWith('/clinical/rooms')?{items:[{id:'room-test',name:'고양이 1',patientCase:item}]}:old(path,options);go('dashboard');
  });
+ assert.equal(await p.locator('#dashboard .recent-patients, #workRecentPatients').count(),0);
+ await p.evaluate(()=>renderWorkFirstDashboard());
+ const grid=await p.locator('#clinicHomePrimary').boundingBox(),queue=await p.locator('#clinicTodayQueue').boundingBox();assert.ok(Math.abs(grid.width-queue.width)<2,'today queue uses available width');
  const overview=p.locator('#wardTodayRoot');await overview.getByRole('button',{name:/입원 시험환자/}).waitFor();assert.match(await overview.innerText(),/입원 중 1마리 · 개 0 · 고양이 1/);
  const ward=await overview.boundingBox(),ops=await p.locator('#practiceTodayRoot').boundingBox();if(width>1000){assert.ok(ward.x>ops.x);assert.equal(ward.y,ops.y);}else assert.ok(ward.y>=ops.y+ops.height);
  assert.ok(await p.locator('body').evaluate(e=>e.scrollWidth<=innerWidth+1));await p.screenshot({path:path.join(root,'../today-ward-'+width+'.png'),fullPage:true});

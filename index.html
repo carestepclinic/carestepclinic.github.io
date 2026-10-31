@@ -1050,7 +1050,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="carestep-workflow.css?v=flow-20261017">
   <link rel="stylesheet" href="home-access-clinic.css?v=readable-20261017">
 <link rel="stylesheet" href="carestep-ui.css?v=deployment-check-20261019a">
-<link rel="stylesheet" href="clinic-organization.css?v=20261031-clinic-density">
+<link rel="stylesheet" href="clinic-organization.css?v=20261031-today-single-column">
 <style>
 .billing-contract-comparison{margin:16px 0;border:1px solid var(--line);border-radius:12px;padding:14px;background:#f8faff;line-height:1.65;font-size:14px}.billing-contract-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.billing-contract-columns span,.billing-contract-columns strong,.billing-contract-columns small{display:block}.billing-contract-columns strong{font-size:19px;margin:5px 0;color:#143d83}.billing-contract-comparison p{font-size:13px}.billing-contract-comparison summary{cursor:pointer;padding:8px 0;font-weight:700}.billing-catalog-row{padding:10px 0;border-top:1px solid var(--line)}.billing-catalog-row b,.billing-catalog-row span,.billing-catalog-row small{display:block}#billingReadStatus[data-state="error"]{color:#9a372d;background:#fff3f0;padding:12px;border-radius:10px}@media(max-width:600px){.billing-contract-columns{grid-template-columns:minmax(0,1fr)}.billing-contract-columns>div+div{border-top:1px solid var(--line);padding-top:12px}}
 </style>
@@ -1205,7 +1205,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
         </section>
 
         <section id="workFirstDashboard" class="work-first-dashboard" aria-label="오늘 처리할 업무">
-          <div class="work-first-head"><div><p class="eyebrow"></p><h3>오늘 업무</h3><p>지금 확인할 업무부터 처리하고, 최근 환자의 작업을 이어가세요.</p></div><button id="refreshWorkFirst" class="btn btn-secondary" type="button">업무 새로고침</button></div>
+          <div class="work-first-head"><div><p class="eyebrow"></p><h3>오늘 업무</h3><p>오늘 확인할 업무와 처리 상태를 확인하세요.</p></div><button id="refreshWorkFirst" class="btn btn-secondary" type="button">업무 새로고침</button></div>
           <div class="work-first-kpis" role="list">
             <button type="button" class="work-first-kpi active" data-work-filter="all"><span>오늘 전체 업무</span><b id="workCountAll">0</b><small>우선순위순</small></button>
             <button type="button" class="work-first-kpi" data-work-filter="preventive"><span>오늘 접종·사상충</span><b id="workCountPreventive">0</b><small>오늘 예방 예정</small></button>
@@ -1217,7 +1217,6 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
           </div>
           <div class="work-first-content">
             <div><div class="work-first-section-head"><div><b id="workFirstListTitle">전체 업무</b><span id="workFirstListMeta">우선순위대로 표시합니다.</span></div><button id="workFirstOpenSchedule" class="btn btn-ghost" type="button">전체 일정 보기</button></div><div id="workFirstList" class="work-first-list"><div class="schedule-board-empty">오늘 업무를 불러오는 중입니다.</div></div></div>
-            <aside class="recent-patients"><div class="work-first-section-head"><div><b>최근 작업 중인 환자</b><span>최근 수정한 환자 작업공간</span></div></div><div id="workRecentPatients" class="work-recent-list"><div class="schedule-board-empty">최근 환자를 불러오는 중입니다.</div></div><button class="btn btn-secondary work-recent-all" type="button" data-go="patients">전체 환자 보기</button></aside>
           </div>
         <details id="workFirstBacklog" class="work-backlog" hidden><summary id="workFirstBacklogCount">지난 미처리 0건</summary><p>이전 날짜의 업무입니다. 지난 후속관리 문자 실패 건은 확인 후 정리할 수 있습니다. 실패 이력은 남으며 문자는 다시 보내지 않습니다.</p><button id="workFirstCleanupAll" class="btn btn-secondary" type="button" hidden>지난 발송 실패 일괄 정리</button><div id="workFirstBacklogList"></div><button id="workFirstBacklogMore" class="btn btn-secondary" type="button" hidden>12건 더 보기</button></details><div id="workFirstCleanupStatus" class="work-cleanup-status" role="status" hidden></div>
         </section>
@@ -4797,7 +4796,7 @@ function renderWorkFirstRows(list,rows,limit){
   list.querySelectorAll('.work-first-row').forEach(row=>{const item=rows.find(x=>String(x.id)===row.dataset.workId&&String(x.sourceType||'')===row.dataset.workType);if(!item)return;row.querySelector('[data-work-consult]')?.addEventListener('click',()=>{workFirstConsultQuickId=item.id;openCareConsultReply(item.id);});row.querySelector('[data-work-assign]')?.addEventListener('change',e=>workFirstAssign(item,e.target.value));row.querySelector('[data-work-resolve]')?.addEventListener('click',()=>workFirstResolve(item));row.querySelector('[data-work-retry]')?.addEventListener('click',()=>workFirstRetryMessage(item));row.querySelector('[data-work-cleanup]')?.addEventListener('click',()=>workFirstAcknowledgeMessages([item]));row.querySelectorAll('[data-work-record]').forEach(b=>b.addEventListener('click',()=>workFirstOpenQuickRecord(item,b.dataset.workRecord)));row.querySelector('[data-work-patient]')?.addEventListener('click',()=>window.R61PatientRoute.open({guardianId:item.guardianId,patientId:item.patientId,taskId:String(item.id||'')}));});
 }
 function renderWorkFirstDashboard(){
-  const list=$('workFirstList'),recent=$('workRecentPatients');if(!list||!recent)return;const rawBuckets=workFirstBuckets(),buckets=Object.fromEntries(Object.entries(rawBuckets).map(([key,rows])=>[key,window.ClinicOrganization?.clinicalRows(rows,window.carestepAttentionSummary?.().consult)||rows])),labels={all:'오늘 전체 업무',preventive:'오늘 접종·사상충',care:'오늘 진료·후속관리',consult:'보호자 상담 필요',delivery:'발송 실패·미열람',unassigned:'담당자 미지정',overdue:'지연 업무'};
+  const list=$('workFirstList');if(!list)return;const rawBuckets=workFirstBuckets(),buckets=Object.fromEntries(Object.entries(rawBuckets).map(([key,rows])=>[key,window.ClinicOrganization?.clinicalRows(rows,window.carestepAttentionSummary?.().consult)||rows])),labels={all:'오늘 전체 업무',preventive:'오늘 접종·사상충',care:'오늘 진료·후속관리',consult:'보호자 상담 필요',delivery:'발송 실패·미열람',unassigned:'담당자 미지정',overdue:'지연 업무'};
   [['workCountAll',buckets.all.length],['workCountPreventive',buckets.preventive.length],['workCountCare',buckets.care.length],['workCountConsult',buckets.consult.length],['workCountDelivery',buckets.delivery.length],['workCountUnassigned',buckets.unassigned.length],['workCountOverdue',buckets.overdue.length]].forEach(([id,n])=>{if($(id))$(id).textContent=String(n)});document.querySelectorAll('[data-work-filter]').forEach(b=>{b.classList.toggle('active',b.dataset.workFilter===workFirstFilter);b.hidden=!['all','preventive','care'].includes(b.dataset.workFilter)&&!(buckets[b.dataset.workFilter]||[]).length&&b.dataset.workFilter!==workFirstFilter;});if($('workFirstListTitle'))$('workFirstListTitle').textContent=labels[workFirstFilter]||labels.all;
   let rows=[...(buckets[workFirstFilter]||buckets.all)];rows.sort((a,b)=>Number(!!b.action?.breached)-Number(!!a.action?.breached)||({urgent:0,high:1,normal:2}[a.action?.priority]??3)-({urgent:0,high:1,normal:2}[b.action?.priority]??3)||String(a.dueDate||'').localeCompare(String(b.dueDate||'')));
   if($('workFirstListMeta'))$('workFirstListMeta').textContent=`${rows.length}건 · 긴급·지연·오늘 일정 순`;
@@ -4807,7 +4806,6 @@ function renderWorkFirstDashboard(){
   if(clinicClinicalReadState!=='ready'&&!rows.length){list.replaceChildren();const note=document.createElement('p');note.setAttribute('role','status');note.textContent=clinicClinicalReadState==='failed'?'진료·예방 업무 조회 실패 · 업무가 없는 것으로 판단하지 마세요.':clinicClinicalReadState==='unavailable'?'로그인과 후속관리 이용 권한을 확인해주세요.':'진료·예방 업무 확인 중…';list.append(note);if(clinicClinicalReadState==='failed'){const retry=document.createElement('button');retry.type='button';retry.className='btn btn-secondary';retry.textContent='진료·예방 업무 다시 조회';retry.onclick=()=>loadFollowupScheduleBoard(false);list.append(retry);}}
 
   const backlog=$('workFirstBacklog'),backlogList=$('workFirstBacklogList');if(backlog&&backlogList){backlog.hidden=!buckets.backlog.length;$('workFirstBacklogCount').textContent='지난 미처리 '+buckets.backlog.length+'건';renderWorkFirstRows(backlogList,[...buckets.backlog].sort((a,b)=>String(a.dueDate).localeCompare(String(b.dueDate))),workFirstBacklogLimit);$('workFirstBacklogMore').hidden=buckets.backlog.length<=workFirstBacklogLimit;const cleanup=$('workFirstCleanupAll'),count=workFirstCleanupCandidates(buckets.backlog).length;if(cleanup){cleanup.hidden=!count;cleanup.textContent='지난 발송 실패 '+count+'건 일괄 정리';cleanup.onclick=()=>workFirstAcknowledgeMessages(workFirstBuckets().backlog);}workFirstCleanupControls();}
-  recent.innerHTML=careRecentPatients.length?careRecentPatients.slice(0,6).map(x=>`<button class="work-recent-patient" type="button" data-recent-patient="${escapeHtml(x.patientId)}" data-recent-guardian="${escapeHtml(x.guardianId)}"><span><b>${escapeHtml(x.patientName||'환자')}</b><span>${escapeHtml(x.guardianName||'보호자')} · ${escapeHtml(x.species==='dog'?'강아지':x.species==='cat'?'고양이':'기타')}</span></span><em>${escapeHtml(x.updatedAt?new Date(x.updatedAt).toLocaleDateString('ko-KR'):'')}</em></button>`).join(''):'<div class="schedule-board-empty">최근 작업한 환자가 없습니다.</div>';recent.querySelectorAll('[data-recent-patient]').forEach(b=>b.onclick=()=>window.crmOpenPatientRecord?.(b.dataset.recentGuardian,b.dataset.recentPatient));
 }
 function renderFollowupScheduleBoard(){
   const board=$('followupScheduleBoard'),list=$('followupScheduleList');if(!board||!list)return;board.classList.toggle('schedule-board-loading',followupScheduleLoading);document.querySelectorAll('[data-schedule-view]').forEach(b=>b.classList.toggle('active',b.dataset.scheduleView===followupScheduleView));
@@ -10413,7 +10411,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-read-flow.js?v=flow-20261017"></script>
 <script src="home-access-clinic.js?v=clarity-20261020f"></script>
 <script src="clinic-care.js?v=clarity-20261020g"></script>
-<script src="clinic-organization.js?v=clarity-20261020b"></script>
+<script src="clinic-organization.js?v=20261031-today-single-column"></script>
 <script src="staff-training.js?v=20261031-read-reuse"></script>
 <script src="staff-training-clinic.js?v=20261020a"></script>
 <script src="practice-intake.js?v=20261023a"></script>

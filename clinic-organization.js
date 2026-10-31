@@ -71,7 +71,7 @@
  }
  function showWorkspaceTab(tab,patientId){if(!workspace?.root.isConnected||(patientId&&workspace.patientId!==patientId))return false;return workspace.control?.select(tab)||false;}
  function mountDashboard(){
-  const host=$('workFirstDashboard'),box=$('clinicCareInbox'),recent=document.querySelector('#dashboard .recent-patients');if(!host||!box||$('clinicHomePrimary'))return;
+  const host=$('workFirstDashboard'),box=$('clinicCareInbox');if(!host||!box||$('clinicHomePrimary'))return;
   const grid=document.createElement('div');grid.id='clinicHomePrimary';host.querySelector('.work-first-head').after(grid);const queue=document.createElement('section');queue.id='clinicTodayQueue';queue.setAttribute('aria-label','오늘 업무 목록');
   const clinical=document.createElement('section');clinical.id='clinicClinicalTasks';
   const existing=host.querySelector('.care-work-more');
@@ -79,7 +79,7 @@
   for(const id of ['workFirstBacklog','workFirstCleanupStatus']){const n=$(id);if(n)clinical.append(n);}
   const attention=document.createElement('section');attention.append(box);
   createTabs(queue,[['attention','상담·승인·발송 확인',attention],['clinical','진료·예방·후속관리',clinical]],{prefix:'clinicToday',selected:'attention'});
-  grid.append(queue);if(recent)grid.append(recent);updateTodayCounts();
+  grid.append(queue);updateTodayCounts();
   const explorer=document.createElement('details');explorer.id='clinicTaskExplorer';explorer.className='clinic-task-explorer';explorer.innerHTML='<summary>상담·일정 상세 보기</summary>';
   const body=document.createElement('div');body.setAttribute('aria-label','상담과 일정 목록');explorer.append(body);
   const consult=$('careConsultInbox'),schedule=$('followupScheduleBoard');if(!consult||!schedule)return;

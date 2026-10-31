@@ -2,7 +2,7 @@
 .clinic-nav-category{margin:4px 0;border:1px solid #34445d;border-radius:12px;padding:3px}
 .clinic-nav-category>summary{padding:10px 12px;cursor:pointer;font-size:14px;font-weight:800;color:#dae5f7}
 .clinic-nav-category .nav-item{margin:2px 0}.clinic-nav-category[hidden]{display:none!important}
-#clinicHomePrimary{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,300px);align-items:start;gap:20px;margin-top:12px}
+#clinicHomePrimary{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:20px;margin-top:12px}
 #clinicHomePrimary>*{min-width:0}#clinicHomePrimary .care-inbox{margin:0;padding:0;border:0}
 #clinicHomePrimary .care-task{padding:14px;margin:10px 0;border-radius:12px;gap:12px}
 #clinicHomePrimary .care-task h3{font-size:16px;line-height:1.5;word-break:keep-all;overflow-wrap:anywhere}
