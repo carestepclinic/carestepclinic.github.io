@@ -346,3 +346,9 @@ body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-sectio
 .cl-protocol-create,.cl-protocol-patient{margin-top:18px}
 .cl-workspace[data-section="protocols"] :focus-visible{outline:3px solid #1b739f;outline-offset:3px}
 @media(max-width:650px){.cl-workspace[data-section="protocols"] .cl-protocol-filters{grid-template-columns:1fr 1fr}.cl-protocol-filters label:first-child{grid-column:1/-1}.cl-protocol-grid{grid-template-columns:1fr}.cl-workspace .cl-protocol-card{padding:13px}.cl-protocol-card strong{font-size:15px}}
+
+/* Additional room categories fill the available row and wrap on narrow screens. */
+.cl-simple .cl-ward-overview .cl-room-groups{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px}
+.cl-simple .cl-ward-overview .cl-room-group .cl-room-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+.cl-dialog [data-room-counts]{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+.cl-dialog fieldset:has([data-room-category-add]) .cl-form-grid{grid-template-columns:1fr}
