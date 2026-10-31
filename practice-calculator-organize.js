@@ -108,7 +108,7 @@
   const safety=rx?.querySelector('.pt-rx-safety');
   if(safety){
    rx.querySelector('output').after(safety);
-   safety.querySelector(':scope > p.pt-help')?.remove();
+   safety.querySelector(':scope > p.pt-help:not([data-safety-coverage])')?.remove();
    const library=safety.querySelector('.pt-private-safety');
    if(library){
     const manage=library.querySelector('[data-private-prepare]');
@@ -160,11 +160,11 @@
     if(f===rx){const save=f.querySelector('.pt-flow-rx-save'),ward=f.querySelector('[data-ward-calculator-import]');
      if(extra&&save&&save.parentElement!==extra)extra.append(save);
      if(ward){const destination=use;if(ward.parentElement!==destination)destination.append(ward);}
-     if(ward){set(ward,'입원 투약 지시 만들기');ward.classList.toggle('pt-primary',o.destination?.()==='ward');ward.disabled=!actions.querySelector('[data-checked]')?.checked;}
+     if(ward){set(ward,'입원 투약 일정 만들기');ward.title='계산 결과로 예정 투약을 작성합니다. 실제 투약 완료 기록은 별도로 남깁니다.';ward.classList.toggle('pt-primary',o.destination?.()==='ward');ward.disabled=!actions.querySelector('[data-checked]')?.checked;}
     }
     hide(extra,![...extra.children].some(x=>x.tagName!=='SUMMARY'&&!x.hidden&&x.querySelector('button')));
    }
-   const injection=q('[data-injection-send]');if(injection&&!injection.closest('.pt-injection-use')){const use=document.createElement('section');use.className='pt-injection-use';use.setAttribute('aria-label','계산 결과 작업');injection.before(use);use.append(q('[data-injection-copy]'),injection);set(injection,'마취 투약 대기로 등록');injection.title='투약 대기로 등록';injection.classList.add('pt-primary');}
+   const injection=q('[data-injection-send]');if(injection&&!injection.closest('.pt-injection-use')){const use=document.createElement('section');use.className='pt-injection-use';use.setAttribute('aria-label','계산 결과 작업');injection.before(use);use.append(q('[data-injection-copy]'),injection);set(injection,'마취 투약 준비에 추가');injection.title='계산 결과를 준비 목록에 추가합니다. 실제 투약 완료 기록은 별도로 남깁니다.';injection.classList.add('pt-primary');}
    if(injection)hide(injection.closest('.pt-injection-use'),injection.hidden&&q('[data-injection-copy]').hidden);
   }
   // Fold generic instructions, never errors, active warnings or clinical review controls.

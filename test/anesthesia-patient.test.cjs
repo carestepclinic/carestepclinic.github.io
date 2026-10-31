@@ -19,7 +19,7 @@ test('patient import, case overrides, corrected start date and explicit clearing
 });
 test('print header and patient fields use the same surgery-date age and escape imported text',()=>{
  const data={...item,patient:{...item.patient,breed:'<img onerror=x>'}};const html=printDocument({item:data,rows,ranges:printRanges(rows)});
- assert.match(html,/6세 8개월/);assert.match(html,/중성화 수컷/);assert.match(html,/2020-02-29/);assert.match(html,/&lt;img onerror=x&gt;/);assert.doesNotMatch(html,/<img onerror/);
+ assert.match(html,/6세 8개월/);assert.match(html,/중성화 수컷/);assert.doesNotMatch(html,/<b>생년월일<\/b>/);assert.match(html,/&lt;img onerror=x&gt;/);assert.doesNotMatch(html,/<img onerror/);
 });
 
 const {chromium}=require('playwright');let browser;before(async()=>{browser=await chromium.launch({headless:true,executablePath:process.env.HQ_TEST_BROWSER});});after(async()=>browser?.close());

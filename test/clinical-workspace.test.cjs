@@ -1046,7 +1046,7 @@ for(const width of [390,1440])test('ward food picker readable filters, paging, k
  await input.fill('직접 입력 사료');await input.press('Escape');assert.equal(await input.inputValue(),'직접 입력 사료');assert.equal(await food.locator('[data-wf-picker]').isVisible(),false);assert.ok(await food.evaluate(e=>e.scrollWidth<=e.clientWidth+1));assert.deepEqual(errors,[]);
 });
 for(const width of [320,390,1440])test('ward handoff sidebar keeps three equal tabs and recording accessible '+width,async t=>{
- const {p,api,caseIds,errors}=await summaryFixture(t,width);await p.locator('.cl-room').first().click();await wardSettled(p);const side=p.locator('.cl-handoff-side'),tabs=p.locator('.cl-ward-tabs button');assert.equal(await tabs.count(),3);assert.match(await side.innerText(),/인계 기록이 없습니다/);
+ const {p,api,caseIds,errors}=await summaryFixture(t,width);await p.locator('.cl-room').first().click();await wardSettled(p);const side=p.locator('.cl-handoff-side'),tabs=p.locator('.cl-ward-tabs button');assert.equal(await tabs.count(),3);assert.match(await side.innerText(),/등록된 인계 없음/);
  const bounds=await tabs.evaluateAll(es=>es.map(e=>e.getBoundingClientRect().width));assert.ok(Math.max(...bounds)-Math.min(...bounds)<1);assert.ok(await p.locator('.cl-patient-header').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
  await side.locator('[data-cl-action=handoff]').click();const d=p.locator('.cl-dialog');await d.locator('[name=recipientId]').selectOption('owner');await d.locator('[name=currentState]').fill('합성 인계 상태');await wardSave(p);assert.match(await side.innerText(),/합성 인계 상태/);assert.match((await api('/cases/'+caseIds[0])).item.body.lastHandoff.note,/합성 인계 상태/);
  for(const tab of ['measure','fluids','tasks']){await p.locator('[data-cl-action=ward-tab][data-id='+tab+']').click();assert.ok(await side.isVisible());}
@@ -1054,4 +1054,28 @@ for(const width of [320,390,1440])test('ward handoff sidebar keeps three equal t
 });
 for(const width of [390,1440])test('ward Prunus catalog search and semimoist selection '+width,async t=>{
  const {p,errors}=await summaryFixture(t,width);await p.locator('.cl-room').first().click();await wardSettled(p);await p.locator('[data-cl-action=ward-tab][data-id=fluids]').click();const food=p.locator('[data-wf-form=food]');await food.locator('[name=productName]').focus();await food.locator('[data-wf-brand]').selectOption('prunus');await food.locator('[data-wf-format]').selectOption('semimoist');assert.equal(await food.locator('[data-wf-pick]').count(),5);await food.locator('[name=productName]').fill('프루너스 소프트 로우펫');assert.equal(await food.locator('[data-wf-pick]').count(),1);await food.locator('[data-wf-pick]').click();assert.equal(await food.locator('[name=unit]').inputValue(),'g');assert.match(await food.locator('[data-wf-catalog]').innerText(),/프루너스 · 반습식/);assert.deepEqual(errors,[]);
+});
+
+for(const width of [320,390,1440])test('clinical clarity: unified filters preserve date, direct order and empty state '+width,async t=>{
+ const {p,api,caseIds,errors}=await summaryFixture(t,width);await p.locator('.cl-room').first().click();await wardSettled(p);
+ const toolbar=p.locator('.cl-calendar-tools');assert.equal(await toolbar.locator('[name=wardFilter]').count(),1);assert.ok(await p.locator('[data-cl-action=ward-order]').isVisible());
+ assert.doesNotMatch(await p.locator('.cl-patient-summary').innerText(),/나이 미입력|품종 미입력|성별 미입력/);
+ await toolbar.locator('[name=calendarDate]').fill('2026-10-01');await toolbar.locator('[name=calendarRange]').selectOption('all');await toolbar.locator('[name=calendarRange]').selectOption('now');assert.equal(await toolbar.locator('[name=calendarDate]').inputValue(),'2026-10-01');
+ await toolbar.locator('[name=wardFilter]').selectOption('done');assert.match(await p.locator('.cl-treatment-calendar').innerText(),/등록된 처치가 없습니다/);
+ assert.ok(await toolbar.evaluate(e=>e.scrollWidth<=e.clientWidth+1));const heights=await toolbar.locator('input,select,button').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().height));assert.ok(heights.every(h=>h===44));
+ await p.locator('[data-cl-action=ward-order]').click();assert.ok(await p.locator('.cl-dialog').isVisible());await p.locator('.cl-dialog [data-cl-action=close]').click();
+ await p.screenshot({path:'/tmp/clinical-clarity-'+width+'.png',fullPage:true});assert.deepEqual(errors,[]);
+});
+test('clinical clarity: absent optional demographics stay compact',()=>{assert.equal(C.wardPatientSummary({body:{},patient:{}}),'');});
+
+test('clinical clarity: equal weights collapse and differing measurements remain explicit',async t=>{
+ const {p,api,caseIds,errors}=await summaryFixture(t);await p.locator('.cl-room').first().click();await wardSettled(p);assert.match(await p.locator('.cl-patient-summary').innerText(),/최근 측정 8.6 kg · 계산 체중 5 kg/);
+ const id=caseIds[0],d=await api('/cases/'+id);await api('/cases/'+id+'/events','POST',{requestKey:'clarity-same-weight',revision:d.item.revision,kind:'observation',data:{category:'vitals',observedAt:new Date().toISOString(),values:{weightKG:5}}});await (await show(p,'[data-cl-action=refresh]')).click();await wardSettled(p);assert.match(await p.locator('.cl-patient-summary').innerText(),/체중 5 kg/);assert.doesNotMatch(await p.locator('.cl-patient-summary').innerText(),/최근 측정|계산 체중/);assert.deepEqual(errors,[]);
+});
+test('clinical clarity: safety findings and unsupported ingredients stay visible above collapsed references',async t=>{
+ const {p,errors}=await fixture(t,390,true,false);await practiceTab(p,'calc');await p.evaluate(()=>{
+ const host=document.createElement('div');host.id='clarity-safety';host.innerHTML='<form data-calc="batch"><div class="pt-rx-output"></div></form>';document.body.append(host);
+ const rows=['meloxicam','pds','syntheticunknown'].map(drug=>({drug,dose:1,doseUnit:'mg',doseBasis:'kg',route:'PO',times:1,days:7,startDay:1,intervalDays:1,firstDoseDay:1,strength:10,strengthUnit:'mg',form:'tablet',presetId:'x'}));
+ window.claritySafety=PracticePrescriptionSafety.mount(host,{batch:{safetySnapshot:()=>({rows,species:'dog',weight:5,state:'complete'})}});
+ });const box=p.locator('#clarity-safety');await box.locator('[data-safety-status]').filter({hasText:'처방 항목 3개'}).waitFor();assert.ok(await box.locator('[data-safety-findings] .pt-safety-warning').count()>0);assert.match(await box.locator('[data-safety-coverage]').innerText(),/syntheticunknown/);assert.equal(await box.locator('.pt-drug-references').getAttribute('open'),null);await box.locator('.pt-drug-references summary').click();assert.equal(await box.locator('[data-reference-ingredient]').count(),3);assert.deepEqual(errors,[]);
 });

@@ -185,3 +185,22 @@
 @media(max-width:900px){#practiceRoot .cl-patient-header{grid-template-columns:minmax(0,1fr);gap:10px}#practiceRoot .cl-workspace .cl-ward-tabs{gap:4px}#practiceRoot .cl-workspace .cl-ward-tabs button{font-size:14px}}
 
 #practiceRoot .cl-handoff-tasks[open]{max-height:200px;overflow:auto;overscroll-behavior:contain}
+
+/* One place for date, range and task filters; preserve mobile touch targets. */
+#practiceRoot .cl-workspace .cl-calendar-tools:has([name=wardFilter]){grid-template-columns:auto 180px auto auto minmax(170px,1fr) minmax(190px,1fr) minmax(120px,1fr)}
+#practiceRoot .cl-patient-demographics:empty{display:none}
+#practiceRoot .cl-workspace .cl-save-status{background:transparent;padding:4px 0;font-size:13px}
+#practiceRoot .cl-workspace :is(.cl-protocol-filters,.cl-calendar-tools) label{font-size:14px;font-weight:600}
+#practiceRoot .cl-workspace :is(.cl-protocol-filters,.cl-calendar-tools) :is(input,select){font-family:inherit;font-size:16px;font-weight:400;min-height:44px;border-radius:8px}
+@media(min-width:761px) and (max-width:1200px){
+#practiceRoot .cl-workspace .cl-calendar-tools:has([name=wardFilter]){grid-template-columns:auto 180px auto auto minmax(170px,1fr)}
+#practiceRoot .cl-calendar-tools label:has([name=wardFilter]){grid-column:1/3}
+#practiceRoot .cl-calendar-tools label:has([name=wardStaff]){grid-column:3/6}
+}
+@media(max-width:760px){
+#practiceRoot .cl-workspace .cl-calendar-tools:has([name=wardFilter]){grid-template-columns:44px minmax(0,1fr) 44px}
+#practiceRoot .cl-calendar-tools label:has([name=wardFilter]){grid-column:1/-1;grid-row:3}
+#practiceRoot .cl-calendar-tools label:has([name=wardStaff]){grid-column:1/-1;grid-row:4}
+}
+@media(max-width:760px){#practiceRoot .cl-ward-workbar .cl-actions>button{white-space:normal;overflow-wrap:anywhere;min-height:44px}}
+@media(max-width:760px){#practiceRoot .cl-workspace .cl-ward-workbar>.cl-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;gap:8px}#practiceRoot .cl-workspace .cl-ward-workbar>.cl-actions>button{width:100%;margin:0;min-width:0}}
