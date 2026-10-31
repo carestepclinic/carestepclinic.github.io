@@ -107,3 +107,17 @@ for(const width of [390,1440])test('account panes load independently, retry fail
  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  await p.screenshot({path:'/tmp/account-settings-'+width+'.png',fullPage:true});
 });
+
+for(const width of [390,1440])test('clinical terminology follows dosage form without changing prescription '+width,async t=>{
+ const p=await openPage(t,width);await p.locator('[data-prescription-manual]').click();await context(p);
+ const med=p.locator('[data-calc=dose]');
+ await med.evaluate(el=>{for(let d=el.parentElement;d;d=d.parentElement)if(d.tagName==='DETAILS')d.open=true;for(const d of el.querySelectorAll('details'))d.open=true;});
+ await med.locator('[name=dose]').fill('2');
+ for(const [form,label] of [['tablet','1정당 함량'],['capsule','1캡슐당 함량'],['liquid','1mL당 농도']]){
+  await med.locator('[name=form]').selectOption(form);assert.match(await med.locator('[name=concentration]').locator('..').innerText(),new RegExp(label));assert.equal(await med.locator('[name=dose]').inputValue(),'2');
+ }
+ await med.locator('[name=concentration]').fill('10');
+ await med.locator('[name=courseMode]').selectOption('single');await p.waitForFunction(()=>document.querySelector('[data-calc=dose] output')?.textContent.includes('mL'));
+ assert.match(await med.locator('output').innerText(),/1\s*mL/);
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+});

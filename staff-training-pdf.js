@@ -73,7 +73,7 @@
   }
   function heading(text){space(82);y-=6;paragraph(text,{size:14,leading:22,color:blue,gap:10});}
   newPage();
-  const type=d.kind==='sop'?'우리 병원 SOP':d.body.format==='practice'?'병원 실무 교육':'질환·증상 교육';
+  const type=d.kind==='sop'?'병원 업무지침(SOP)':d.body.format==='practice'?'병원 실무 교육':'질환·증상 교육';
   paragraph(type+' · '+(d.common?'공통 자료':'우리 병원 자료'),{size:10,color:blue,leading:17,gap:8});
   paragraph(d.title,{size:21,leading:29,gap:12});
   paragraph('v'+d.version+' · '+(status[d.status]||'상태 확인 필요')+(d.reviewedAt?' · 승인 '+String(d.reviewedAt).slice(0,10):''),{size:9.5,color:muted,leading:16,gap:16});

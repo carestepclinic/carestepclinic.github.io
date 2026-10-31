@@ -233,7 +233,7 @@
    for(const field of all('input[name=stock]'))labelText(field,field.closest('[data-calc=calcium]')?'원소칼슘 농도 · mg/mL':field.closest('[data-calc=potassium]')?'KCl 원액 농도 · mEq/mL':field.closest('[data-calc=cri]')?'원액 농도':'원액 농도 · mg/mL');
    const stock=q('[data-cri-stock]');labelText(stock,'주사제 농도');
    if(med){const v=med.elements,liquid=v.form.value==='liquid',per=liquid?'mL':v.form.value==='capsule'?'캡슐':'정';
-    labelText(v.concentration,(liquid?'제품 농도':'제품 함량')+' · '+v.strengthUnit.value+'/'+per);labelText(v.strengthUnit,liquid?'농도 단위':'함량 단위');labelText(v.dose,'처방 용량 · 1회 기준');labelText(v.doseUnit,'처방 용량 단위');
+    labelText(v.concentration,({tablet:'1정당 함량',capsule:'1캡슐당 함량',liquid:'1mL당 농도'})[v.form.value]+' · '+v.strengthUnit.value+'/'+per);labelText(v.strengthUnit,liquid?'농도 단위':'함량 단위');labelText(v.dose,'처방 용량 · 1회 기준');labelText(v.doseUnit,'처방 용량 단위');
     const missing=med.querySelector('.pt-remaining');for(const button of missing?.querySelectorAll('button')||[])if(/^(제품 함량|제품 농도)$/.test(button.textContent))set(button,liquid?'제품 농도':'제품 함량');else if(button.textContent==='1회 용량')set(button,'처방 용량');
    }
    for(const form of all('form[data-calc]'))for(const button of form.querySelectorAll('.pt-remaining [data-field-name]')){if(['confirmed','protocolConfirmed'].includes(button.dataset.fieldName))continue;const field=form.elements[button.dataset.fieldName],label=field?.closest('label')?.firstChild;if(label?.nodeType===3)set(button,label.textContent.trim());}

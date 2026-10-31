@@ -12,7 +12,7 @@
  const docKeys=d=>d.body?.format==='practice'?practiceKeys:keys;
  const typeLabel=c=>c.kind==='sop'?'병원 SOP':(c.format||c.body?.format)==='practice'?'병원 실무 교육':'질환·증상 교육';
  const topicOptions=d=>d.body?.format==='practice'?Object.fromEntries(practiceKeys.map((k,i)=>[k,practiceLabels[i]])):supplementTopics;
- const sourceLabel=id=>id==='guardian'?'보호자 원본':/^ref\d+$/.test(id)?'참고 근거 '+id.slice(3):/_w\d+$/.test(id)?'외부 검색 근거':'추가 참고 근거';
+ const sourceLabel=id=>id==='guardian'?'참고한 보호자 안내자료':/^ref\d+$/.test(id)?'참고 근거 '+id.slice(3):/_w\d+$/.test(id)?'외부 검색 근거':'추가 참고 근거';
  const supplementTopics={pathology:'병태생리·등급',diagnosis:'검사·진단의 이해',surgery:'수술 원리·수술 전후 관리',nursing:'간호 관찰·통증 평가·보고',counseling:'보호자 상담·재진 안내',medication:'약물 관리·주의사항'};
  const supplementStatus=s=>({running:'생성 중',ready:'검토 가능',applied:'반영 완료',failed:'생성 미완료'})[s]||'확인 필요';
  const labels=d=>d.body?.format==='practice'?practiceLabels:d.kind==='sop'?['업무 목적·기준','절차·확인사항','응대·보고']:['임상 핵심','간호·보고 체크리스트','보호자 상담'];
@@ -135,7 +135,7 @@
   }
   const request=(p,body,method='POST')=>adapter.request(p,{method,body:JSON.stringify(body)});
   function sourceView(sources){
-   return `<details class="st-sources"><summary>원본·참고 근거 ${sources.length}개</summary>${sources.map(s=>`<article><b>${esc(s.title)}</b><p>${s.contentId?(s.kind==='builtin'?'기본 자료 · 원본 기준 '+esc(s.version):'중앙 게시 자료 · v'+esc(s.version)):s.kind==='web_search_summary'?'AI 검색 요약 · 원문 확인 필요 · 검색일 '+shortDate(s.retrievedAt):'검토용 참고자료'} · ${sourceLabel(s.id)}</p>${s.url&&/^https?:\/\//.test(s.url)?`<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">근거 원문 열기</a>`:''}<p>${esc(s.excerpt||s.content?.description||'')}</p>${s.content?.sections?`<ul>${s.content.sections.flatMap(x=>x.items.map(i=>`<li>${esc(i)}</li>`)).join('')}</ul>`:''}</article>`).join('')}</details>`;
+   return `<details class="st-sources"><summary>원본·참고 근거 ${sources.length}개</summary>${sources.map(s=>`<article><b>${esc(s.title)}</b><p>${s.contentId?(s.kind==='builtin'?'기본 자료 · 원본 기준 '+esc(s.version):'공통 보호자 안내자료 · v'+esc(s.version)):s.kind==='web_search_summary'?'AI 검색 요약 · 원문 확인 필요 · 검색일 '+shortDate(s.retrievedAt):'검토용 참고자료'} · ${sourceLabel(s.id)}</p>${s.url&&/^https?:\/\//.test(s.url)?`<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">근거 원문 열기</a>`:''}<p>${esc(s.excerpt||s.content?.description||'')}</p>${s.content?.sections?`<ul>${s.content.sections.flatMap(x=>x.items.map(i=>`<li>${esc(i)}</li>`)).join('')}</ul>`:''}</article>`).join('')}</details>`;
   }
   async function openDocument(id,assignmentId='',edit=false,reopen=false){
    const current=identity,seq=++sequence;notice('교육자료를 여는 중입니다.');
@@ -245,7 +245,7 @@
   async function createDialog(){
    if(!adapter.common){
     if(!actor().capabilities.edit||tab!=='sop')return;
-    showDialog('우리 병원 SOP 작성',`<p>병원에서 실제 사용하는 업무 기준과 절차를 직접 작성합니다. 승인 후 해당 병원 직원에게 공개됩니다.</p><form data-create><input type="hidden" name="kind" value="sop"><label>SOP 제목<input name="title" maxlength="240" placeholder="예: 개원·마감 점검"></label><label>분류<input name="category" maxlength="80" placeholder="예: 병원 운영"></label><div class="st-actions">${btn('수동 초안 만들기','manual','',true)}</div></form>`,true);return;
+    showDialog('병원 업무지침(SOP) 작성',`<p>병원에서 실제 사용하는 업무 기준과 절차를 직접 작성합니다. 승인 후 해당 병원 직원에게 공개됩니다.</p><form data-create><input type="hidden" name="kind" value="sop"><label>업무지침 제목<input name="title" maxlength="240" placeholder="예: 개원·마감 점검"></label><label>분류<input name="category" maxlength="80" placeholder="예: 병원 운영"></label><div class="st-actions">${btn('직접 작성','manual','',true)}</div></form>`,true);return;
    }
    const current=identity,seq=++sequence;
    notice('기본 자료와 중앙 게시 원본을 불러오는 중입니다.');
@@ -255,20 +255,20 @@
     const body=`<form data-create><label>제작 방식<select name="kind" aria-label="제작 방식"><option value="education">보호자 자료로 질환·증상 교육 만들기</option><option value="practice">주제로 실무 교육 새로 만들기</option></select></label>
      <label>교육 제목·주제<input name="title" maxlength="160" placeholder="원본 선택 시 제목 자동 사용 / 실무 교육은 주제 입력"></label><fieldset data-practice-wrap hidden><legend>실무 교육 대상</legend><div class="st-source-filters"><label>대상 직원<select name="audience" aria-label="대상 직원">${['신입 직원','진료·간호 직원','접수·상담 직원','관리자','전체 직원'].map(x=>`<option>${x}</option>`).join('')}</select></label><label>교육 수준<select name="level" aria-label="교육 수준">${['기초','실무','심화'].map(x=>`<option>${x}</option>`).join('')}</select></label></div><p class="st-muted">예: 접수·전화 응대, 입원 인수인계, 검체 관리, 소독·멸균, 퇴원 안내</p><p>학습 목표 · 핵심 지식 · 업무 순서 · 체크리스트 · 보고·인계 기준 · 상황별 예시 · 평가 5문항</p><label class="st-choice"><input name="webSearch" type="checkbox" checked>주제에 맞는 전문기관·공공기관의 근거 검색</label><p class="st-muted">검색을 끄면 아래에 참고 근거를 직접 추가하세요. 병원별 담당자·장비·내부 절차는 병원 지침 확인 항목으로 남깁니다.</p></fieldset>
      <label>분류<input name="category" maxlength="80" placeholder="예: 수술 · 신입 직원 · 접수"></label>
-     <fieldset data-source-wrap><legend>교육 원본 선택</legend><div class="st-source-filters"><label>원본 검색<input type="search" data-source-search placeholder="질환·수술명 또는 분류로 검색"></label><label>원본 출처<select data-source-type aria-label="원본 출처"><option value="all">전체 출처</option><option value="builtin">기본 자료</option><option value="central">중앙 게시 자료</option></select></label></div><p class="st-muted" data-source-count role="status" aria-live="polite"></p><label>교육 원본<select name="sourceContentId" aria-label="교육 원본" aria-describedby="stSourceHint"></select></label><p class="st-muted" id="stSourceHint">기본 자료와 중앙에 게시된 보호자 안내자료를 사용합니다. 선택한 원문은 교육 초안과 함께 보관됩니다.</p><button type="button" class="st-button" data-source-reset>검색·필터 초기화</button></fieldset>
+     <fieldset data-source-wrap><legend>교육 원본 선택</legend><div class="st-source-filters"><label>원본 검색<input type="search" data-source-search placeholder="질환·수술명 또는 분류로 검색"></label><label>원본 출처<select data-source-type aria-label="원본 출처"><option value="all">전체 출처</option><option value="builtin">기본 자료</option><option value="central">공통 보호자 안내자료</option></select></label></div><p class="st-muted" data-source-count role="status" aria-live="polite"></p><label>교육 원본<select name="sourceContentId" aria-label="교육 원본" aria-describedby="stSourceHint"></select></label><p class="st-muted" id="stSourceHint">기본 자료와 공통 보호자 안내자료를 사용합니다. 선택한 원문은 교육 초안과 함께 보관됩니다.</p><button type="button" class="st-button" data-source-reset>검색·필터 초기화</button></fieldset>
      <p class="st-muted" data-source-help>환자별 자료 대신 공통 원문을 사용합니다. 원문에 없는 전문 지식은 근거를 추가한 뒤 검토합니다.</p>
      <details class="st-sources"><summary>참고 근거 직접 추가 (선택)</summary><p>이용 가능한 자료의 필요한 부분만 입력하세요. 근거의 임상 타당성은 승인 시 의료진이 확인합니다.</p>${[1,2,3].map(n=>`<fieldset data-reference><legend>참고 근거 ${n}</legend><label>자료명<input data-ref-title maxlength="240"></label><label>원문 주소 또는 서지정보<input data-ref-url placeholder="https:// 주소 (선택)"><input data-ref-citation placeholder="교재 판·장·페이지 또는 가이드라인 발행연도"></label><label>활용할 원문 내용<textarea data-ref-excerpt rows="3" maxlength="5500"></textarea></label><label class="st-choice"><input type="checkbox" data-ref-rights> 이 내용을 교육 제작에 이용할 권한을 확인했습니다.</label></fieldset>`).join('')}</details>
-     <div data-practice-consent hidden class="st-warning"><label class="st-choice"><input type="checkbox" name="confirmSend">주제·참고자료를 기존 OpenAI 연결로 전송하고 AI 작성·검색 사용료가 발생함을 확인했습니다.</label><p class="st-muted">개인정보와 병원 비밀정보를 입력하지 마세요. 생성 결과는 승인 전 초안으로 저장됩니다.</p></div><div class="st-actions">${btn('수동 초안 만들기','manual')}${btn('AI 교육 초안 생성','generate','',true)}</div><p class="st-muted">AI 생성은 요청할 때만 실행됩니다. 동일 원본·근거의 기존 결과를 우선 사용하며, ${data.limits?.dailyGenerations===0?'CARESTEP 하루 생성 횟수 제한은 없습니다. 연결된 AI 서비스의 한도와 사용료는 별도로 적용됩니다.':'하루 '+(data.limits?.dailyGenerations||5)+'회까지 생성할 수 있습니다.'}</p></form>`;
+     <div data-practice-consent hidden class="st-warning"><label class="st-choice"><input type="checkbox" name="confirmSend">주제·참고자료를 기존 OpenAI 연결로 전송하고 AI 작성·검색 사용료가 발생함을 확인했습니다.</label><p class="st-muted">개인정보와 병원 비밀정보를 입력하지 마세요. 생성 결과는 승인 전 초안으로 저장됩니다.</p></div><div class="st-actions">${btn('직접 작성','manual')}${btn('AI 교육 초안 생성','generate','',true)}</div><p class="st-muted">AI 생성은 요청할 때만 실행됩니다. 동일 원본·근거의 기존 결과를 우선 사용하며, ${data.limits?.dailyGenerations===0?'CARESTEP 하루 생성 횟수 제한은 없습니다. 연결된 AI 서비스의 한도와 사용료는 별도로 적용됩니다.':'하루 '+(data.limits?.dailyGenerations||5)+'회까지 생성할 수 있습니다.'}</p></form>`;
     if(!showDialog(adapter.common?'공통 교육자료 만들기':'교육자료 만들기',body,true))return;notice('');
     const form=dialog.querySelector('[data-create]'),kind=form.elements.kind,select=form.elements.sourceContentId,search=form.querySelector('[data-source-search]'),type=form.querySelector('[data-source-type]');
     const sources=d.sources.map(s=>({...s,sourceType:s.sourceType==='builtin'?'builtin':'central'}));
     const sync=()=>{const practice=kind.value==='practice';for(const selector of ['[data-source-wrap]','[data-source-help]'])form.querySelector(selector).hidden=practice;for(const selector of ['[data-practice-wrap]','[data-practice-consent]'])form.querySelector(selector).hidden=!practice;for(const a of ['manual','generate'])form.querySelector('[data-st='+a+']').disabled=!practice&&!select.value;};
     const filter=()=>{
      const before=select.value,words=search.value.normalize('NFKC').toLocaleLowerCase('ko').trim().split(/\s+/).filter(Boolean),matches=sources.filter(s=>(type.value==='all'||s.sourceType===type.value)&&words.every(w=>(s.title+' '+s.category).normalize('NFKC').toLocaleLowerCase('ko').includes(w)));
-     select.innerHTML='<option value="">'+(matches.length?'원본을 선택하세요':'조건에 맞는 원본이 없습니다')+'</option>'+['builtin','central'].map(k=>{const rows=matches.filter(s=>s.sourceType===k);return rows.length?`<optgroup label="${k==='builtin'?'기본 자료':'중앙 게시 자료'} · ${rows.length}개">${rows.map(s=>`<option value="${esc(s.content_id)}">${esc(s.title)}${k==='central'?' · v'+esc(s.version):''}</option>`).join('')}</optgroup>`:'';}).join('');
+     select.innerHTML='<option value="">'+(matches.length?'원본을 선택하세요':'조건에 맞는 원본이 없습니다')+'</option>'+['builtin','central'].map(k=>{const rows=matches.filter(s=>s.sourceType===k);return rows.length?`<optgroup label="${k==='builtin'?'기본 자료':'공통 보호자 안내자료'} · ${rows.length}개">${rows.map(s=>`<option value="${esc(s.content_id)}">${esc(s.title)}${k==='central'?' · v'+esc(s.version):''}</option>`).join('')}</optgroup>`:'';}).join('');
      select.value=matches.some(s=>s.content_id===before)?before:'';
      const builtin=sources.filter(s=>s.sourceType==='builtin').length;
-     form.querySelector('[data-source-count]').textContent=`전체 ${sources.length}개 · 기본 자료 ${builtin}개 · 중앙 게시 자료 ${sources.length-builtin}개 · 현재 조건 ${matches.length}개${before&&!select.value?' · 검색 조건이 바뀌어 원본 선택이 해제됐습니다.':''}`;
+     form.querySelector('[data-source-count]').textContent=`전체 ${sources.length}개 · 기본 자료 ${builtin}개 · 공통 보호자 안내자료 ${sources.length-builtin}개 · 현재 조건 ${matches.length}개${before&&!select.value?' · 검색 조건이 바뀌어 원본 선택이 해제됐습니다.':''}`;
      form.querySelector('[data-source-reset]').hidden=!search.value&&type.value==='all';sync();
     };
     kind.addEventListener('change',sync);select.addEventListener('change',sync);search.addEventListener('input',filter);type.addEventListener('change',filter);form.querySelector('[data-source-reset]').addEventListener('click',()=>{search.value='';type.value='all';filter();search.focus();});filter();
@@ -360,7 +360,7 @@
     });return;
    }
    if(a==='generate'||a==='manual'){
-    const body=creationBody();if(body.kind==='education'&&body.format!=='practice'&&!body.sourceContentId){notice('보호자 원본을 선택해주세요.',true);return;}if(body.kind==='sop'&&!body.title){notice('SOP 제목을 입력해주세요.',true);return;}
+    const body=creationBody();if(body.kind==='education'&&body.format!=='practice'&&!body.sourceContentId){notice('참고한 보호자 안내자료을 선택해주세요.',true);return;}if(body.kind==='sop'&&!body.title){notice('업무지침 제목을 입력해주세요.',true);return;}
     if(body.format==='practice'&&body.config.topic.trim().length<2){notice('실무 교육 주제를 두 글자 이상 입력해주세요.',true);return;}
     if(a==='generate'&&body.format==='practice'&&!body.confirmSend){notice('AI에 전달할 주제·참고자료와 사용료 안내를 확인해주세요.',true);return;}
     notice(a==='generate'?'원문과 근거로 교육 초안을 생성하고 있습니다. 완료되면 검토 화면을 엽니다.':'초안을 저장하고 있습니다.');
