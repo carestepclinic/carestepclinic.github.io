@@ -39,3 +39,9 @@ for(const width of [390,1440])test('registered patient auto fills calendar and s
  assert.equal(await p.evaluate(()=>saved.length),0);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await p.screenshot({path:path.resolve(__dirname,'../../anesthesia-patient-'+width+'.png'),fullPage:true});
  await d.locator('button[type=submit]').click();const result=await p.evaluate(()=>saved[0]);assert.equal(result.kind,'anesthesia.sheet');assert.equal(result.data.age,'5세');assert.equal(result.data.birthDate,'2021-10-29');assert.equal(result.data.sex,'중성화 암컷');assert.equal(result.data.breed,'수정 합성 품종');assert.deepEqual(errors,[]);
 });
+
+test('guardian and chart identity appear in anesthesia summary and escaped print header',()=>{
+ const identified={...item,patient:{...item.patient,guardianName:'시험 <보호자>',chartNumber:'TEST-101'}};
+ assert.match(patientSummary(identified,rows),/시험 <보호자>.*TEST-101/);
+ const html=printDocument({item:identified,rows,ranges:printRanges(rows)});assert.match(html,/시험 &lt;보호자&gt;/);assert.match(html,/TEST-101/);assert.doesNotMatch(html,/시험 <보호자>/);
+});

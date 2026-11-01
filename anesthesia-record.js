@@ -23,7 +23,7 @@
   const birthDate=modern?sheet.birthDate||'':sheet.age?'':p.birthDate||'';
   return {breed:Object.hasOwn(sheet,'breed')?sheet.breed:p.breed||'',birthDate,age:birthDate?ageAt(birthDate,date):sheet.age||'',sex:sheet.sex||(modern?'미확인':sexLabel(p)),date};
  }
- function patientSummary(item,rows=[]){const d=patientDemographics(item,rows);return [d.breed,d.age||(d.birthDate?'생년월일 확인 필요':''),d.sex==='미확인'?'':d.sex].filter(Boolean).join(' · ');}
+ function patientSummary(item,rows=[]){const d=patientDemographics(item,rows);return [item.patient?.guardianName?'보호자 '+item.patient.guardianName:'',item.patient?.chartNumber||item.patient?.externalPatientId?'차트 '+(item.patient.chartNumber||item.patient.externalPatientId):'',d.breed,d.age||(d.birthDate?'생년월일 확인 필요':''),d.sex==='미확인'?'':d.sex].filter(Boolean).join(' · ');}
  function records(events){
   const result=new Map();for(const e of [...events].sort((a,b)=>a.revision-b.revision)){
    if(e.kind==='anesthesia.entry')result.set(e.body.recordId,{...e.body,revision:e.revision,eventId:e.id});
