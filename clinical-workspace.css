@@ -372,3 +372,8 @@ body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-sectio
 
 .cl-anesthesia-page .cl-anesthesia-filters label{margin-bottom:0}
 .cl-anesthesia-page[data-has-case="false"] .cl-toolbar .pt-primary{background:#2454ed;color:white;border-color:#2454ed}
+
+.cl-record-list-card{display:flex;flex-direction:column;min-width:0;border:1px solid #d5dfec;border-radius:12px;background:#fff;overflow:hidden}
+.cl-record-list-card > button[data-cl-case]{flex:1;border:0;border-radius:0;width:100%;margin:0;padding:12px}
+.cl-record-list-card footer{display:flex;justify-content:flex-end;padding:0 8px 8px}
+.cl-record-list-card footer button{min-height:44px;padding:8px 14px;font:inherit;color:#a32a32;background:#fff;border:1px solid #e3c9cc;border-radius:8px}
