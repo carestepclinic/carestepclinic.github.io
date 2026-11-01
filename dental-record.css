@@ -103,3 +103,6 @@
 .dn .dn-batch-done{padding:8px;background:#e7f4ee;border-radius:8px;margin:8px 0}.dn .dn-batch-done button{display:block;margin-top:6px}
 .dn .dn-image-input{display:grid;grid-template-columns:minmax(120px,1fr) minmax(160px,2fr) minmax(160px,2fr);gap:10px;align-items:end}.dn .dn-image-input input{min-width:0;width:100%}
 @media(max-width:820px){.dn{--care-control:44px}.dn .dn-image-input{grid-template-columns:1fr}.dn .dn-score button{padding:4px;min-width:30px}}
+
+/* Keep clinical action buttons consistent despite later global font shorthand rules. */
+#practiceRoot .dn button:not(.dn-tooth){font-family:"Carestep Pretendard","Noto Sans KR",system-ui,sans-serif;font-size:16px;font-weight:600;line-height:1.5;letter-spacing:normal;min-height:44px}
