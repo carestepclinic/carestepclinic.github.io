@@ -57,3 +57,12 @@
 .dn [data-import-preview] label{display:inline-flex;align-items:center;margin:6px 10px 6px 0}.dn [data-import-preview] input{width:17px;min-height:17px}.dn [data-related-list]{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .dn-image-input{display:grid;grid-template-columns:120px 150px minmax(100px,1fr) minmax(150px,1fr);gap:8px}.dn-image-input input,.dn-image-input select{width:100%;min-width:0}.dn-images{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,260px));gap:12px;margin:12px 0}.dn-images figure{margin:0;padding:8px;border:1px solid #cedbea;border-radius:8px}.dn-images img{max-width:100%;height:140px;object-fit:contain}.dn-images figcaption{overflow-wrap:anywhere;font-size:12px}.dn [data-guide-text]{width:100%;min-height:180px}
 @media(max-width:700px){.dn-clinical-status{margin:5px 0 0}.dn-patient span{flex-basis:100%}.dn-compare-charts{grid-template-columns:1fr}.dn-image-input{grid-template-columns:1fr 1fr}.dn-images{grid-template-columns:1fr 1fr}.dn .dn-tooth .dn-treatment{font-size:7px;padding:0}.dn-detail-grid{gap:6px}}
+
+/* Dental workflow: compact filters and explicit output options. */
+.dn .dn-list-filters{display:grid;grid-template-columns: minmax(160px,2fr) repeat(4,minmax(110px,1fr)) auto;align-items:end;gap:10px}
+.dn .dn-list-filters label{min-width:0;display:grid;gap:4px}.dn .dn-list-filters input{width:100%;min-width:0}
+.dn .dn-head>div{flex-wrap:wrap;align-items:center}.dn .dn-print-option{display:flex;align-items:center;gap:4px;font-size:13px}
+.dn [data-pocket-hint]{display:block;font-size:12px;color:#536b83;margin:4px 0}.dn input[readonly]{background:#f1f5fa}
+.dn .dn-images [data-image-loading]{display:block;padding:20px 8px}.dn .dn-images [hidden]{display:none}
+@media(max-width:900px){.dn .dn-list-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.dn .dn-list-filters label:first-child{grid-column:1/-1}}
+@media(max-width:480px){.dn .dn-head>div{gap:6px}.dn .dn-head button,.dn .dn-head select{min-height:40px}}
