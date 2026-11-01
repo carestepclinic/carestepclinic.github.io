@@ -130,3 +130,42 @@
 .dn-record-list-card > button[data-record]{flex:1;border:0;border-radius:0;width:100%;margin:0;padding:12px}
 .dn-record-list-card footer{display:flex;justify-content:flex-end;padding:0 8px 8px}
 .dn-record-list-card footer button{min-height:44px;padding:8px 14px;font:inherit;color:#a32a32;background:#fff;border:1px solid #e3c9cc;border-radius:8px}
+
+/* Dental workflow: compact setup, list and task controls. */
+.dn [hidden]{display:none!important}
+.dn .dn-work.dn-editor-idle{grid-template-columns:minmax(0,1fr)}
+.dn .dn-grade-details{margin:8px 0;border-top:1px solid #dce6f2;padding-top:8px}
+.dn .dn-grade-details>summary{font-weight:600;cursor:pointer}
+.dn .dn-grade-details .dn-grades{margin-top:8px}
+.dn .dn-list-filters{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.dn .dn-list-filters>label:first-child{flex:1;min-width:200px}
+.dn .dn-list-filters>label:nth-child(2){flex:0 1 150px}
+.dn .dn-list-advanced{flex:0 1 auto;border:0;padding:0}
+.dn .dn-list-advanced>summary{padding:10px;min-height:44px;box-sizing:border-box;cursor:pointer}
+.dn .dn-list-advanced[open]{flex-basis:100%;order:4}
+.dn .dn-list-advanced .dn-meta{margin:4px 0}
+.dn .dn-print-actions{display:flex;align-items:center;gap:4px}
+.dn .dn-print-actions details{position:relative;margin:0;padding:0;border:0}
+.dn .dn-print-actions summary{cursor:pointer;padding:10px 6px}
+.dn .dn-print-actions details>button{position:absolute;right:0;top:100%;white-space:nowrap;background:#fff;z-index:5}
+.dn .dn-finish{align-items:start;gap:10px;padding:12px}
+.dn .dn-finish>div{flex:1;min-width:0}
+.dn .dn-finish p{margin:6px 0}
+.dn [data-dn-status]{margin:4px 0 8px;font-size:13px;color:#48617a}
+.dn .dn-editor-heading{position:sticky;top:0;background:#fff;z-index:1}
+.dn [data-batch-apply]{position:sticky;bottom:0;width:100%;min-height:44px}
+@media(max-width:760px){
+ .dn .dn-head{gap:4px;padding:6px}
+ .dn .dn-head>.dn-pinned-patient{flex-basis:100%}
+ .dn .dn-head>.dn-head-actions{justify-content:space-between;gap:4px}
+ .dn .dn-head-actions button{padding:6px 10px}
+ .dn .dn-pinned-patient span{font-size:12px;line-height:1.4}
+ .dn .dn-section-nav{gap:2px;padding-top:3px}
+ .dn .dn-section-nav button{min-height:36px!important;padding:3px!important}
+ .dn .dn-list-filters>label:first-child{min-width:0;flex-basis:100%}
+ .dn .dn-meta{gap:8px}
+ .dn .dn-finish{display:block}
+ .dn .dn-finish>[data-complete]{width:100%;margin-top:8px}
+}
+
+@media(max-width:760px){.dn .dn-work aside.dn-batch-editor.dn-editor-open{max-height:45dvh}.dn .dn-work:has(.dn-batch-editor.dn-editor-open){padding-bottom:45dvh}}
