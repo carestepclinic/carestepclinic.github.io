@@ -122,3 +122,6 @@
 .dn [data-image-save]{display:block;margin:6px 0;color:#526580}.dn [data-image-save][data-state=saved]{color:#08735d}.dn [data-image-save][data-state=failed]{color:#b42318}
 .dn .dn-common-meta [data-clinical-badge]{font-size:12px;color:#526580}
 @media(max-width:760px){.dn .dn-section-nav button{padding:4px;font-size:14px!important}.dn .dn-chart-toolbar{gap:8px}.dn .dn-tooth-jump{width:100%}}
+
+/* Background fetch status is separate from record save status. */
+.dn [data-dn-sync]{font-size:13px;color:#546b84;margin:0 0 8px}.dn .dn-image-complete summary{cursor:pointer;font-size:14px;color:#17664b}
