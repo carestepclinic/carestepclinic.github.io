@@ -17,3 +17,14 @@ test('summary print omits empty sections and zero-index-only rows; detailed prin
  const summary=D.printHtml(item,d,'시험',{mode:'summary',images:false}),detail=D.printHtml(item,d,'시험',{mode:'detailed'});
  assert.doesNotMatch(summary,/<td>101<\/td>/);assert.match(detail,/<td>101<\/td>/);assert.doesNotMatch(summary,/<h2>방사선 소견<\/h2>/);assert.match(detail,/<h2>방사선 소견<\/h2>/);assert.match(summary,/검토한 안내/);assert.match(summary,/<td>108<\/td>/);
 });
+
+test('navigation uses ascending existing numbers in every quadrant without changing anatomical display',()=>{
+ for(const species of ['dog','cat']){const all=D.navigationOrder(species);assert.equal(new Set(all).size,D.teeth(species).length);for(const q of [1,2,3,4]){const ids=all.filter(x=>String(x).startsWith(String(q)));assert.deepEqual(ids,[...ids].sort((a,b)=>a-b));} }
+ assert.ok(!D.navigationOrder('cat').includes('105'));assert.notDeepEqual(D.navigationOrder('dog'),D.displayOrder('dog'));
+});
+test('guardian merge preserves manual edits while replacing unchanged source paragraphs',()=>{
+ const base='진단: 이전\n\n관리: 기본',next='진단: 변경\n\n관리: 새 관리';
+ assert.equal(D.mergeGuardian(base,base,next).text,next);
+ assert.equal(D.mergeGuardian(base,'진단: 이전\n\n관리: 직접 작성\n\n추가 문구',next).text,'진단: 변경\n\n관리: 직접 작성\n\n추가 문구');
+ assert.equal(D.mergeGuardian('','기존 수기 안내',next).text,'기존 수기 안내');
+});
