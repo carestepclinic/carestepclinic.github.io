@@ -106,3 +106,12 @@
 
 /* Keep clinical action buttons consistent despite later global font shorthand rules. */
 #practiceRoot .dn button:not(.dn-tooth){font-family:"Carestep Pretendard","Noto Sans KR",system-ui,sans-serif;font-size:16px;font-weight:600;line-height:1.5;letter-spacing:normal;min-height:44px}
+
+/* Dental recording: compact patient context, photo queue and in-place preview. */
+.dn .dn-head>.dn-pinned-patient{display:flex;flex:1;min-width:0;flex-direction:column;align-items:flex-start;gap:2px}
+.dn .dn-pinned-patient b{font-size:18px;line-height:1.4}.dn .dn-pinned-patient span{font-size:13px;font-weight:400;color:#48617b;overflow-wrap:anywhere}
+.dn .dn-head>.dn-head-actions{flex:none;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.dn .dn-image-actions{display:flex;gap:6px;flex-wrap:wrap}.dn .dn-image-progress{background:#f2f6fc;border-radius:8px;padding:10px;margin:10px 0}.dn .dn-image-progress ul{list-style:none;padding:0;margin:8px 0}.dn .dn-image-progress li{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:5px 0}.dn .dn-image-progress li span{overflow-wrap:anywhere;min-width:0}.dn .dn-image-progress button{flex:none}
+.dn .dn-photo-viewer{width:min(1100px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - 24px);padding:14px;border:1px solid #b8cae0;border-radius:12px;background:#fff;color:#173c5d}
+.dn .dn-photo-viewer::backdrop{background:#142437b3}.dn .dn-photo-viewer header{display:flex;align-items:center;justify-content:space-between;gap:10px}.dn .dn-photo-viewer header b{overflow-wrap:anywhere;min-width:0}.dn .dn-photo-viewer header button{flex:none}.dn .dn-photo-viewer nav{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0}.dn .dn-photo-viewer nav button{min-width:44px}.dn .dn-photo-viewer [data-view-stage]{height:min(65dvh,720px);overflow:auto;background:#edf1f6;border-radius:8px;overscroll-behavior:contain}.dn .dn-photo-viewer [data-view-wrap]{position:relative;margin:12px}.dn .dn-photo-viewer img{position:absolute;max-width:none;max-height:none;object-fit:contain;transform-origin:center}.dn .dn-photo-viewer small{display:block;margin-top:8px;color:#48617b}.dn .dn-photo-viewer [data-view-message]:empty{display:none}
+@media(max-width:760px){.dn .dn-head{flex-wrap:wrap;gap:6px}.dn .dn-head>.dn-pinned-patient{flex-basis:100%}.dn .dn-head>.dn-head-actions{width:100%;justify-content:flex-end}.dn .dn-pinned-patient b{font-size:16px}.dn .dn-photo-viewer{padding:10px}.dn .dn-photo-viewer [data-view-stage]{height:50dvh}.dn .dn-photo-viewer nav{gap:4px}}
