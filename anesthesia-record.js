@@ -117,23 +117,67 @@
   if(!start||item.status==='closed'||item.body?.deleted||['recovery','closed'].includes(item.body?.phase)||list.some(r=>['anesthesiaEnd','extubation'].includes(r.marker)&&Date.parse(r.observedAt)>=at))return null;
   const bucket=Math.max(0,Math.floor((now-at)/300000));return {key:start.recordId+':'+at,start:at,bucket,next:at+(bucket+1)*300000};
  }
- let reminderAudio=null,reminderSound=false;
+
+ let reminderAudio=null,reminderSound=false,reminderVibration=false;
  function createReminder({root,valid,state,view}){
   root.anesthesiaReminder?.stop();
-  let disposed=false;
-  function stop(){if(disposed)return;disposed=true;clearInterval(timer);}
-  function beep(){if(!reminderSound||!reminderAudio||reminderAudio.state!=='running')return;try{const oscillator=reminderAudio.createOscillator(),gain=reminderAudio.createGain();oscillator.connect(gain);gain.connect(reminderAudio.destination);oscillator.frequency.value=880;gain.gain.setValueAtTime(.08,reminderAudio.currentTime);gain.gain.exponentialRampToValueAtTime(.001,reminderAudio.currentTime+.5);oscillator.start();oscillator.stop(reminderAudio.currentTime+.5);}catch{}}
+  let disposed=false,signalling=false,note='',soundBusy=false;
+  const noteText='화면을 열어두세요. 잠금·백그라운드에서는 알림이 제한됩니다.';
+  function stop(){if(disposed)return;disposed=true;clearInterval(timer);document.removeEventListener('visibilitychange',onVisible);}
+  async function beep(){
+   if(!reminderSound)return false;
+   const Audio=g.AudioContext||g.webkitAudioContext;if(!Audio)throw Error('소리 미지원');
+   if(!reminderAudio||reminderAudio.state==='closed')reminderAudio=new Audio();
+   if(reminderAudio.state!=='running'){
+    let timeout;try{await Promise.race([reminderAudio.resume(),new Promise((_,reject)=>{timeout=setTimeout(()=>reject(Error('소리 재개 대기')),1500);})]);}finally{clearTimeout(timeout);}
+   }
+   if(disposed||!valid()||!reminderSound)return false;
+   if(reminderAudio.state!=='running')throw Error('소리 재개 필요');
+   for(const offset of [0,.4,.8]){
+    const oscillator=reminderAudio.createOscillator(),gain=reminderAudio.createGain(),at=reminderAudio.currentTime+offset;
+    oscillator.connect(gain);gain.connect(reminderAudio.destination);oscillator.frequency.value=880;
+    gain.gain.setValueAtTime(.18,at);gain.gain.exponentialRampToValueAtTime(.001,at+.28);
+    oscillator.onended=()=>{oscillator.disconnect?.();gain.disconnect?.();};oscillator.start(at);oscillator.stop(at+.3);
+   }return true;
+  }
+  function vibrate(){
+   if(!reminderVibration)return false;
+   try{return g.navigator?.vibrate?.([250,150,250,150,400])===true;}catch{return false;}
+  }
+  async function signal(test=false){
+   if(signalling||disposed)return;signalling=true;
+   const vibration=vibrate();let sounded=false,failed=false;
+   try{ sounded=await beep(); }catch{failed=true;}
+   finally{
+    signalling=false;
+    if(disposed)return;
+    note=failed?'소리 재생이 중단됐습니다. 소리 시험을 눌러 다시 켜주세요.':
+     test?(sounded?'시험음 재생 요청 · 들리지 않으면 기기 미디어 음량을 확인하세요.':reminderVibration?'진동 시험 요청 · 실제 진동을 확인하세요.':'소리 또는 진동을 먼저 켜주세요.'):'';
+    if(reminderVibration&&!vibration)note+=(note?' ':'')+'진동을 실행하지 못했습니다. 기기 설정을 확인하세요.';
+    paint();
+   }
+  }
+  function onVisible(){if(!document.hidden)paint();}
   function paint(){
    if(disposed)return;if(!valid()){stop();return;}const host=root.querySelector('[data-ar-reminder]');if(!host)return;
    const current=state();host.hidden=!current;if(!current){view.fiveMinuteReminder=null;return;}
    if(view.fiveMinuteReminder?.key!==current.key)view.fiveMinuteReminder={key:current.key,seen:0,ack:0};const memo=view.fiveMinuteReminder;
-   if(current.bucket>memo.seen&&!document.hidden&&root.getClientRects().length){memo.seen=current.bucket;beep();}
+   if(current.bucket>memo.seen&&!document.hidden&&root.getClientRects().length){memo.seen=current.bucket;void signal();}
    const due=current.bucket>0&&memo.ack<current.bucket,text=host.querySelector('[data-reminder-text]');
    host.classList.toggle('ar-reminder-due',due);const message=due?'마취 '+(current.bucket*5)+'분 경과 · 측정·기록을 확인하세요.':'5분 알림 · 다음 '+clock(current.next);if(text.textContent!==message)text.textContent=message;
-   text.setAttribute('role',due?'alert':'status');const ack=host.querySelector('[data-reminder-ack]');ack.hidden=!due;ack.onclick=()=>{memo.ack=current.bucket;paint();};
-   const sound=host.querySelector('[data-reminder-sound]');sound.textContent=reminderSound?'소리 끄기':'소리 켜기';sound.setAttribute('aria-pressed',String(reminderSound));sound.onclick=async()=>{if(reminderSound){reminderSound=false;paint();return;}try{const Audio=g.AudioContext||g.webkitAudioContext;if(!Audio)throw Error();reminderAudio=reminderAudio||new Audio();await reminderAudio.resume();if(disposed)return;reminderSound=reminderAudio.state==='running';if(!reminderSound)throw Error();beep();host.querySelector('[data-reminder-note]').textContent='소리 알림 켜짐 · 마취기록 화면을 열어두세요.';}catch{host.querySelector('[data-reminder-note]').textContent='소리를 켜지 못했습니다. 화면 알림은 계속 표시됩니다.';}paint();};
+   text.setAttribute('role',due?'alert':'status');const ack=host.querySelector('[data-reminder-ack]');ack.hidden=!due;ack.onclick=()=>{memo.ack=current.bucket;g.navigator?.vibrate?.(0);paint();};
+   const sound=host.querySelector('[data-reminder-sound]');sound.textContent=reminderSound?'소리 끄기':'소리 켜기';sound.disabled=soundBusy;sound.setAttribute('aria-pressed',String(reminderSound));
+   sound.onclick=async()=>{if(soundBusy)return;if(reminderSound){reminderSound=false;note='소리 알림 꺼짐';paint();return;}soundBusy=true;reminderSound=true;paint();await signal(true);soundBusy=false;paint();};
+   let vibration=host.querySelector('[data-reminder-vibration]');
+   if(!vibration){vibration=document.createElement('button');vibration.type='button';vibration.dataset.reminderVibration='';sound.after(vibration);}
+   const supported=typeof g.navigator?.vibrate==='function';vibration.disabled=!supported;vibration.textContent=supported?(reminderVibration?'진동 끄기':'진동 켜기'):'진동 미지원';vibration.setAttribute('aria-pressed',String(reminderVibration));
+   vibration.onclick=()=>{reminderVibration=!reminderVibration;if(reminderVibration){const ok=vibrate();note=ok?'진동 시험 요청 · 실제 진동을 확인하세요.':'진동을 실행하지 못했습니다. 기기 설정을 확인하세요.';}else{g.navigator?.vibrate?.(0);note='진동 알림 꺼짐';}paint();};
+   let test=host.querySelector('[data-reminder-test]');
+   if(!test){test=document.createElement('button');test.type='button';test.dataset.reminderTest='';test.textContent='소리·진동 시험';vibration.after(test);}
+   test.disabled=soundBusy;test.onclick=()=>signal(true);
+   const status=host.querySelector('[data-reminder-note]');status.textContent=(note?note+' ':'')+noteText;status.title='휴대폰의 무음·진동 모드는 자동 감지할 수 없습니다. 진동을 별도로 켜주세요. 기기·브라우저 설정에 따라 소리·진동이 제한될 수 있습니다.';
   }
-  const timer=setInterval(paint,1000);const controller={paint,stop};root.anesthesiaReminder=controller;paint();return controller;
+  const timer=setInterval(paint,1000);document.addEventListener('visibilitychange',onVisible);const controller={paint,stop};root.anesthesiaReminder=controller;paint();return controller;
  }
 
  function mount(root,a){
@@ -158,13 +202,29 @@
   function nextEvent(){const ordered=['anesthesiaStart','intubation','surgeryStart','surgeryEnd','anesthesiaEnd','extubation'],done=rows().filter(r=>ordered.includes(r.marker));let index=done.reduce((n,r)=>Math.max(n,ordered.indexOf(r.marker)),-1);if(item.body.phase==='recovery')index=Math.max(index,4);if(item.body.phase==='closed')return '';const key=ordered[index+1];return key?btn('next-event',markers[key]+' 기록','data-key="'+key+'"'):'';}
   function recordBar(){const started=rows().find(r=>r.marker==='anesthesiaStart'),ended=rows().filter(r=>r.marker==='anesthesiaEnd').at(-1),elapsed=started?Math.max(0,Math.floor((Date.parse(ended?.observedAt||new Date().toISOString())-Date.parse(started.observedAt))/60000)):null;return '<div class="ar-record-bar"><div><b>'+esc(item.patient.name)+'</b> · '+(item.body.species==='cat'?'고양이':'개')+' · '+(item.body.weight?esc(item.body.weight)+' kg':'체중 미입력')+'<small class="ar-demographics">'+esc(patientSummary(item,rows()))+'</small><small>'+(elapsed==null?'마취 시작 시각 미기록':'마취 '+(ended?'기록 구간 ':'경과 ')+(ended?elapsed+'분':'<span data-ar-elapsed="'+esc(started.observedAt)+'">'+elapsed+'분</span>'))+' · '+esc(item.body.anesthesiaSheet?.operation||item.body.title)+'</small></div><div class="ar-quick-actions">'+(ready&&writable()?nextEvent()+ '<details class="ar-other-events"><summary>기타 기록</summary>'+btn('infusion','새 수액·CRI 추가')+btn('marker','사건 직접 선택·과거 기록')+'</details>':'')+'</div></div>';}
 
-  function tubeSetting(){const current=item.body.anesthesiaSheet?.tube||'';if(!a.medical||!writable())return '<div class="ar-tube-setting"><small>튜브 크기</small><strong>'+esc(current||'미기록')+'</strong></div>';return '<form class="ar-tube-setting" data-ar-tube><label>튜브 크기 · mm<input name="tube" aria-label="튜브 크기 · mm" value="'+esc(view.tubeDraft?.value??current)+'" maxlength="100" placeholder="예: 4.5 / 4.5 cuffed"></label><button type="submit">저장</button><span role="status"></span></form>';}
-  function bindTube(){const f=root.querySelector('[data-ar-tube]');if(!f)return;const input=f.elements.tube,button=f.querySelector('button'),out=f.querySelector('[role=status]');button.disabled=!view.tubeDraft;input.oninput=()=>{view.tubeDraft={value:input.value,revision:view.tubeDraft?.revision??item.revision};button.disabled=false;};f.onsubmit=async e=>{e.preventDefault();if(!writable()||view.recordSaving||!view.tubeDraft)return;const draft=view.tubeDraft;if(draft.revision!==item.revision){out.textContent='다른 기록이 변경됐습니다. 최신 정보를 확인한 뒤 다시 저장해주세요.';return;}view.recordSaving=true;button.disabled=true;out.textContent='저장 중…';try{await a.save('anesthesia.sheet',{...item.body.anesthesiaSheet,tube:input.value.trim()},draft.revision);if(!valid())return;delete view.tubeDraft;out.textContent='저장됨';await a.reload();}catch(e){if(valid()){out.textContent=e.message||'저장하지 못했습니다. 다시 시도해주세요.';button.disabled=false;}}finally{view.recordSaving=false;}};}
+  function tubeSetting(){const current=item.body.anesthesiaSheet?.tube||'';if(!writable())return '<div class="ar-tube-setting"><small>튜브 크기</small><strong>'+esc(current||'미기록')+'</strong></div>';return '<form class="ar-tube-setting" data-ar-tube><label>튜브 크기 · mm<input name="tube" aria-label="튜브 크기 · mm" value="'+esc(view.tubeDraft?.value??current)+'" maxlength="100" placeholder="예: 4.5 / 4.5 cuffed"></label><button type="submit">저장</button><span role="status"></span></form>';}
+  function bindTube(){const f=root.querySelector('[data-ar-tube]');if(!f)return;const input=f.elements.tube,button=f.querySelector('button'),out=f.querySelector('[role=status]');button.disabled=!view.tubeDraft;input.oninput=()=>{view.tubeDraft={value:input.value,revision:view.tubeDraft?.revision??item.revision};button.disabled=false;};f.onsubmit=async e=>{e.preventDefault();if(!writable()||view.recordSaving||!view.tubeDraft)return;const draft=view.tubeDraft;if(draft.revision!==item.revision){out.textContent='다른 기록이 변경됐습니다. 최신 정보를 확인한 뒤 다시 저장해주세요.';return;}view.recordSaving=true;button.disabled=true;out.textContent='저장 중…';try{await a.save('anesthesia.sheet',{tube:input.value.trim()},draft.revision);if(!valid())return;delete view.tubeDraft;out.textContent='저장됨';await a.reload();}catch(e){if(valid()){out.textContent=e.message||'저장하지 못했습니다. 다시 시도해주세요.';button.disabled=false;}}finally{view.recordSaving=false;}};}
+
+  async function recordNow(marker){
+   if(!writable()||view.recordSaving||!['anesthesiaStart','intubation','surgeryStart','surgeryEnd','anesthesiaEnd','extubation'].includes(marker))return;
+   if(rows().some(r=>r.marker===marker)){view.directMessage=markers[marker]+' 시각이 이미 기록되어 있습니다. 시각을 눌러 수정하세요.';render();return;}
+   view.directRequests=view.directRequests||{};
+   const q=view.directRequests[marker]||(view.directRequests[marker]={data:{type:'marker',marker,observedAt:new Date().toISOString(),note:marker==='intubation'&&item.body.anesthesiaSheet?.tube?'튜브 '+item.body.anesthesiaSheet.tube:''},revision:item.revision,recorder:a.performer(),key:crypto.randomUUID()});
+   view.recordSaving=true;view.directMessage=markers[marker]+' 저장 중…';render();let written=false;
+   try{
+    await a.save('anesthesia.entry',q.data,q.revision,q.recorder,q.key);written=true;
+    // Keep a local acknowledgement until the server's record is reloaded.
+    all.push({...q.data,recordId:'saved-'+q.key,pendingSync:true,recorder:{id:q.recorder},revision:q.revision+1});
+    delete view.directRequests[marker];view.directMessage=markers[marker]+' · '+clock(q.data.observedAt)+' 기록 완료';
+    view.recordSaving=false;if(valid())render();if(valid())await a.reload();
+   }catch(e){view.directMessage=written?'기록은 저장됐습니다. 새로고침해 최신 내용을 확인해주세요.':markers[marker]+' 저장 실패 · '+(e.message||'연결 확인 후 같은 버튼으로 다시 시도해주세요.');if(e.status===409||e.statusCode===409)delete view.directRequests[marker];}
+   finally{view.recordSaving=false;if(valid())render();}
+  }
   function timingSummary(){
    return '<section class="ar-timing" aria-label="마취·수술 시각"><header><h4>마취·수술 시각</h4>'+(ready&&writable()?'<div class="ar-stage-action">'+nextEvent()+'</div>':'')+'</header><div>'+['anesthesiaStart','surgeryStart','surgeryEnd','anesthesiaEnd','extubation'].map(key=>{
     const entries=rows().filter(r=>r.type==='marker'&&r.marker===key);
-    return '<section data-timing="'+key+'"><b>'+markers[key]+'</b>'+(entries.length?entries.map(r=>'<p>'+(a.medical?btn('edit-time',clock(r.observedAt),'data-id="'+esc(r.recordId)+'" aria-label="'+markers[key]+' 시각 수정 · '+when(r.observedAt)+'" title="'+when(r.observedAt)+' · 시각 수정" '+(loading||error?'disabled':'')):'<time title="'+when(r.observedAt)+'">'+clock(r.observedAt)+'</time>')+'</p>').join(''):(writable()?btn('next-event','입력','data-key="'+key+'" aria-label="'+markers[key]+' 시각 입력"'):'<p>—</p>'))+'</section>';
-   }).join('')+'</div>'+durationSummary(rows())+'</section>';
+    return '<section data-timing="'+key+'"><b>'+markers[key]+'</b>'+(entries.length?entries.map(r=>'<p>'+(a.medical&&!r.pendingSync?btn('edit-time',clock(r.observedAt),'data-id="'+esc(r.recordId)+'" aria-label="'+markers[key]+' 시각 수정 · '+when(r.observedAt)+'" title="'+when(r.observedAt)+' · 시각 수정" '+(loading||error?'disabled':'')):'<time title="'+when(r.observedAt)+'">'+clock(r.observedAt)+'</time>')+'</p>').join(''):(writable()?btn('next-event','입력','data-key="'+key+'" aria-label="'+markers[key]+' 시각 입력"'):'<p>—</p>'))+'</section>';
+   }).join('')+'</div>'+durationSummary(rows())+'<p class="ar-direct-status" role="status">'+esc(view.directMessage||'버튼을 누른 현재 시각으로 기록됩니다.')+'</p></section>';
   }
   function pendingMedicationSection(){
    const plans=(item.body.anesthesiaMedicationPlans||[]).filter(p=>p.status==='pending');if(!plans.length)return '';
@@ -211,7 +271,7 @@
    efficiency?.bind(root);efficiency?.bindQuick(root);for(const [selector,open] of Object.entries(disclosed)){const d=root.querySelector(selector);if(d)d.open=open;}root.querySelectorAll('[data-ar-lazy]').forEach(el=>{const d=el.closest('details'),fill=()=>{if(!el.dataset.filled){el.innerHTML=table(windowRows());el.dataset.filled='1';el.querySelectorAll('[data-ar]').forEach(b=>b.onclick=()=>action(b));}};d.querySelector(':scope>summary')?.addEventListener('click',()=>{if(!d.open)fill();});d.addEventListener('toggle',()=>{if(d.open)fill();});if(d.open)fill();});
    root.querySelector('[data-ar-graph-input]')?.addEventListener('change',e=>{view.graphInput=e.target.checked;});
    root.querySelectorAll('[data-cl-elapsed]').forEach(e=>{e.textContent=Math.max(0,Math.floor((Date.now()-Date.parse(e.dataset.clElapsed))/60000))+'분 경과';});
-   root.querySelectorAll('[data-ar]').forEach(b=>b.onclick=()=>action(b));bindTube();reminder?.paint();
+   root.querySelectorAll('[data-ar]').forEach(b=>{b.onclick=()=>action(b);if(view.recordSaving&&['next-event','airway'].includes(b.dataset.ar))b.disabled=true;});bindTube();reminder?.paint();
    root.querySelector('[name=arStart]')?.addEventListener('change',e=>{const n=Date.parse(e.target.value+'+09:00');if(Number.isFinite(n)){start=n;followCourse=false;render();}});
    root.querySelector('[name=arMinutes]')?.addEventListener('change',e=>{minutes=Number(e.target.value);followCourse=false;render();});
    root.querySelectorAll('[data-ar-chart]').forEach(svg=>svg.onclick=e=>{
@@ -302,7 +362,7 @@
    const html=printDocument({rows:rows(),ranges,item,fieldValues:Object.fromEntries(Object.keys(fields).map(k=>[k,sheetValue(k)])),plan:plan?.body.summary||'',legacy:legacySettings(true),administration,complete});
    win.document.open();win.document.write(html);win.document.close();
   }
-  function action(b){if(['procedure','premedication','induction','prepared-use','adjust-setting','adjust-infusion','next-event','preparation','equipment','team','medication','infusion','airway','sheet','measurement','settings','marker'].includes(b.dataset.ar)&&!writable())return;switch(b.dataset.ar){case 'plan-give':return givePlannedMedication(b.dataset.id);case 'plan-cancel':return cancelPlannedMedication(b.dataset.id);case 'entry-tab':view.entryTab=b.dataset.key;render();return;case 'entry-focus':view.entryTab=b.dataset.key;render();{const target=root.querySelector('.ad-entry');target?.scrollIntoView({block:'nearest',behavior:'auto'});if(b.dataset.key==='measurement')target?.querySelector('input[type=number]')?.focus({preventScroll:true});}return;case 'procedure':return entry(null,{marker:'other'},'marker');case 'plan-retry':return fetchPlan();case 'premedication':if(a.injectionBatch&&g.PracticeInjectionWorkflow)return a.injectionBatch('premedication');return entry(null,{marker:'medication',note:'전처치'},'marker');case 'induction':if(a.injectionBatch&&g.PracticeInjectionWorkflow)return a.injectionBatch('induction');return entry(null,{marker:'medication',note:'마취 유도'},'marker');case 'prepared-use':return efficiency?.openQuick('drug',b.dataset.id);case 'adjust-setting':return efficiency?.openQuick('setting',b.dataset.key);case 'adjust-infusion':return efficiency?.openQuick('infusion',b.dataset.key);case 'next-event':return efficiency?efficiency.openQuick('marker',b.dataset.key,markers[b.dataset.key]):entry(null,{marker:b.dataset.key},'marker');case 'preparation':return efficiency?.preparation().catch(e=>{error=e.message;render();});case 'equipment':return efficiency?.configure().catch(e=>{error=e.message;render();});case 'team':return efficiency?.team(rows());case 'refresh':return a.reload();case 'display':display=b.dataset.key;break;case 'medication':return entry(null,{marker:'medication'},'marker');case 'infusion':{const last=latestInfusions(rows()).at(-1);return entry(null,{marker:'infusion',administration:last?{name:last.name,route:'IV'}:{}},'marker');}case 'airway':return entry(null,{marker:'intubation'},'marker');case 'course':followCourse=true;break;case 'previous':followCourse=false;start-=minutes*60000;break;case 'next':followCourse=false;start+=minutes*60000;break;case 'latest':followCourse=false;start=Math.floor(Date.parse(rows().at(-1)?.observedAt||new Date().toISOString())/3600000)*3600000;break;case 'filter':filter=b.dataset.key;break;case 'sheet':return sheet();case 'measurement':return root.querySelector('[data-ae-inline] input[type=number]')?.focus();case 'settings':{const last=rows().filter(r=>r.marker==='settings'&&r.settings?.agent).at(-1);return entry(null,{marker:'settings',settings:last?{agent:last.settings.agent}:{}},'marker');}case 'marker':return entry(null,{},'marker');case 'edit-time':{const old=all.find(r=>r.recordId===b.dataset.id);if(old&&!old.voided)return entry(old,{},old.type,true);return;}case 'delete-medication':return deleteMedication(all.find(r=>r.recordId===b.dataset.id));case 'edit':{const old=all.find(r=>r.recordId===b.dataset.id);if(old)return entry(old);return;}case 'print':return print();case 'print-all':return print(true);}render();}
+  function action(b){if(['procedure','premedication','induction','prepared-use','adjust-setting','adjust-infusion','next-event','preparation','equipment','team','medication','infusion','airway','sheet','measurement','settings','marker'].includes(b.dataset.ar)&&!writable())return;switch(b.dataset.ar){case 'plan-give':return givePlannedMedication(b.dataset.id);case 'plan-cancel':return cancelPlannedMedication(b.dataset.id);case 'entry-tab':view.entryTab=b.dataset.key;render();return;case 'entry-focus':view.entryTab=b.dataset.key;render();{const target=root.querySelector('.ad-entry');target?.scrollIntoView({block:'nearest',behavior:'auto'});if(b.dataset.key==='measurement')target?.querySelector('input[type=number]')?.focus({preventScroll:true});}return;case 'procedure':return entry(null,{marker:'other'},'marker');case 'plan-retry':return fetchPlan();case 'premedication':if(a.injectionBatch&&g.PracticeInjectionWorkflow)return a.injectionBatch('premedication');return entry(null,{marker:'medication',note:'전처치'},'marker');case 'induction':if(a.injectionBatch&&g.PracticeInjectionWorkflow)return a.injectionBatch('induction');return entry(null,{marker:'medication',note:'마취 유도'},'marker');case 'prepared-use':return efficiency?.openQuick('drug',b.dataset.id);case 'adjust-setting':return efficiency?.openQuick('setting',b.dataset.key);case 'adjust-infusion':return efficiency?.openQuick('infusion',b.dataset.key);case 'next-event':return recordNow(b.dataset.key);case 'preparation':return efficiency?.preparation().catch(e=>{error=e.message;render();});case 'equipment':return efficiency?.configure().catch(e=>{error=e.message;render();});case 'team':return efficiency?.team(rows());case 'refresh':return a.reload();case 'display':display=b.dataset.key;break;case 'medication':return entry(null,{marker:'medication'},'marker');case 'infusion':{const last=latestInfusions(rows()).at(-1);return entry(null,{marker:'infusion',administration:last?{name:last.name,route:'IV'}:{}},'marker');}case 'airway':return recordNow('intubation');case 'course':followCourse=true;break;case 'previous':followCourse=false;start-=minutes*60000;break;case 'next':followCourse=false;start+=minutes*60000;break;case 'latest':followCourse=false;start=Math.floor(Date.parse(rows().at(-1)?.observedAt||new Date().toISOString())/3600000)*3600000;break;case 'filter':filter=b.dataset.key;break;case 'sheet':return sheet();case 'measurement':return root.querySelector('[data-ae-inline] input[type=number]')?.focus();case 'settings':{const last=rows().filter(r=>r.marker==='settings'&&r.settings?.agent).at(-1);return entry(null,{marker:'settings',settings:last?{agent:last.settings.agent}:{}},'marker');}case 'marker':return entry(null,{},'marker');case 'edit-time':{const old=all.find(r=>r.recordId===b.dataset.id);if(old&&!old.voided&&!old.pendingSync)return entry(old,{},old.type,true);return;}case 'delete-medication':return deleteMedication(all.find(r=>r.recordId===b.dataset.id));case 'edit':{const old=all.find(r=>r.recordId===b.dataset.id);if(old&&!old.pendingSync)return entry(old);return;}case 'print':return print();case 'print-all':return print(true);}render();}
   root.addEventListener('anesthesia-clock',()=>{if(!valid()||loading)return;g.ClinicalCompact?.updateTimes(root);const sync=root.querySelector('.ar-sync-status');if(sync&&!error)sync.textContent=syncLabel();const el=root.querySelector('.ar-latest');if(el)el.outerHTML=latestSummary();const elapsed=root.querySelector('[data-ar-elapsed]');if(elapsed)elapsed.textContent=Math.max(0,Math.floor((Date.now()-Date.parse(elapsed.dataset.arElapsed))/60000))+'분';});
   if(a.caseHistory&&view.planRevision!==item.revision)void fetchPlan();
   if(view.cache?.revision===item.revision){events=view.cache.events;all=view.cache.all;ready=true;render();}else void fetchAll();
