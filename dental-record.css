@@ -66,3 +66,15 @@
 .dn .dn-images [data-image-loading]{display:block;padding:20px 8px}.dn .dn-images [hidden]{display:none}
 @media(max-width:900px){.dn .dn-list-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.dn .dn-list-filters label:first-child{grid-column:1/-1}}
 @media(max-width:480px){.dn .dn-head>div{gap:6px}.dn .dn-head button,.dn .dn-head select{min-height:40px}}
+
+/* Focused tooth entry and reusable hospital phrases. */
+.dn [hidden]{display:none!important}.dn-tooth-filters{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}.dn-tooth-filters button{font-size:13px;padding:7px 10px}.dn-tooth-filters [aria-pressed=true]{background:#2456e8;color:white}
+.dn-zoom{display:flex!important;align-items:center;gap:8px;margin:8px 0}.dn-zoom select{width:auto;min-width:150px}
+.dn .dn-teeth{display:grid;grid-template-columns:repeat(auto-fit,minmax(48px,1fr));grid-auto-flow:row;gap:5px}
+.dn .dn-tooth{min-width:44px;min-height:88px}.dn .dn-tooth small,.dn .dn-tooth .dn-treatment{font-size:11px;line-height:1.3;white-space:normal}.dn .dn-tooth-type{font-size:11px}
+.dn-zoomed .dn-chart{grid-template-columns:1fr}.dn-zoomed .dn-teeth{grid-template-columns:repeat(auto-fit,minmax(60px,1fr))}
+.dn-phrase-tools{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}.dn-phrase-tools select{max-width:100%;flex:1 1 150px}.dn-phrase-tools button{font-size:12px;padding:6px 9px}.dn-phrases{margin-top:5px}.dn-phrases summary{font-size:12px}.dn-note-field{min-width:0}
+.dn-editor-photos{border-top:1px solid #d5dfef;margin-top:12px;padding-top:10px}.dn-editor-photos label{margin-top:8px}.dn-editor-photos .dn-images{grid-template-columns:1fr}.dn-photo-add input{font-size:12px;max-width:100%}
+@media(max-width:700px){.dn .dn-tooth{min-width:44px;min-height:100px}.dn .dn-teeth{grid-template-columns:repeat(auto-fit,minmax(48px,1fr))}.dn-zoomed .dn-teeth{grid-template-columns:repeat(auto-fit,minmax(60px,1fr))}.dn .dn-tooth small,.dn .dn-tooth .dn-treatment{font-size:11px}.dn-phrase-tools button{min-height:44px}.dn-zoom{position:sticky;top:0;background:#fff;z-index:2;padding:5px 0}.dn [data-editor].dn-editor-open{z-index:30}}
+
+@media(max-width:700px){.dn .dn-head>div{display:flex;flex-wrap:wrap;gap:6px}.dn .dn-head button{flex:0 0 auto;min-width:56px;white-space:nowrap}.dn .dn-head select{max-width:150px}.dn .dn-head .dn-print-option{white-space:nowrap}.dn .dn-head button[data-dn=save]{margin-left:auto}}
