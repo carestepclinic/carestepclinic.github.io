@@ -1,0 +1,28 @@
+# Neurological record assistance
+
+Scope: client-only reference, reviewed 2026-11-01. No AI calls, external patient-data transmission, automatic diagnosis, prescription, record mutation, new database or server changes. No claim of clinical validation, sensitivity, specificity or diagnostic probability. It is a conservative subset of clinical patterns, not a comprehensive veterinary diagnostic engine.
+
+## Clinical interpretation
+
+The aid uses explicitly recorded structured findings. Free text, patient species/age, onset/course, laboratory values, drugs and imaging are not automatically interpreted. These remain clinician inputs for narrowing broad, unranked differential categories. No treatment recommendation is generated. Suggestions are not added to signed assessment or localization, or to the clinical printout automatically.
+
+Localization is withheld unless examination context is explicitly `awake` (no sedation). Sedation, other limitations and unknown context do not become normal. Urgent recorded findings may still prompt reassessment. Normal withdrawal does not establish conscious pain perception. Absence of a suggested pattern never excludes neurological disease.
+
+Supported patterns: forebrain/diffuse brain, brainstem/diffuse brain, cerebellar, central/peripheral/undifferentiated vestibular, C1–C5, C6–T2, T3–L3, L4–S3/peripheral, generalized peripheral/neuromuscular. Requirements are executable in `clinicalAid` in `neuro-record.js`. They intentionally require explicit corroborating findings; these implementation gates are not a validated diagnostic rule. Cerebellar suggestion partly depends on the clinician's existing ataxia classification. Spinal gates require recorded normal mentation and selected bilateral cranial findings, not assumed absence of cranial disease. L4–S3 warns about spinal shock and peripheral alternatives. Multiple matches remain visible without numeric ranking or forced laterality.
+
+UI shows the pattern, entered supporting observations, unranked differential categories, missing/unavailable core observations and source links. Deep-pain/mentation/ambulation prompts refer to recorded findings, do not infer prognosis, and do not replace examination.
+
+## Sources
+
+- [MSD Veterinary Manual: The Neurologic Examination of Animals](https://www.msdvetmanual.com/nervous-system/the-neurologic-examination/the-neurologic-examination-of-animals): domains, limitations, neuroanatomical localization; William B. Thomas, reviewed by Joyce Carnevale.
+- [MSD: Degenerative Diseases of the Spinal Column and Cord](https://www.msdvetmanual.com/nervous-system/diseases-of-the-spinal-column-and-cord/degenerative-diseases-of-the-spinal-column-and-cord-in-animals): compressive disease examples and limitations of physical localization.
+- [MSD: Otitis Media and Interna](https://www.msdvetmanual.com/ear-disorders/otitis-media-and-interna/otitis-media-and-interna-in-animals): peripheral vestibular signs and ear evaluation.
+- [MSD: Initial Triage and Resuscitation](https://www.msdvetmanual.com/emergency-medicine-and-critical-care/evaluation-and-initial-treatment-of-small-animal-emergency-patients/initial-triage-and-resuscitation-of-small-animal-emergency-patients): neurological emergency reassessment and broad DAMNITV etiologic framework.
+
+Original concise Korean paraphrases and independently implemented UI. No reproduction of source charts, images or full text.
+
+## UX and access
+
+Same pain button is idempotent; only explicit untested clears the finding. Read-only review filters never change stored findings. Recheck compares actual result changes separately from newly examined and untested/limited findings. Comparison detail reads are limited to six visible records at a time, at most three concurrent reads, only after user opens comparison; additional records require more. Loaded subset sorts by exam timestamp, without claiming a global date sort over unloaded records. Errors remain visible and can retry.
+
+Lists reuse loaded pages; stale lists refresh after 60 seconds on return or idle focus, preserving page depth. Search filters use existing server `from`, `to`, `vet`. Identity scope guards and revisions remain enforced. Tests cover software behavior and clinical rule boundaries, not clinical diagnostic performance.
