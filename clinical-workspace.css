@@ -352,3 +352,23 @@ body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-sectio
 .cl-simple .cl-ward-overview .cl-room-group .cl-room-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
 .cl-dialog [data-room-counts]{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
 .cl-dialog fieldset:has([data-room-category-add]) .cl-form-grid{grid-template-columns:1fr}
+
+/* Anesthesia entry list follows the dental record library layout. */
+.cl-anesthesia-page[data-has-case="false"]{width:100%;max-width:none;font-size:14px;line-height:1.5}
+.cl-anesthesia-page[data-has-case="false"]>.cl-toolbar{margin:0 0 22px;min-height:42px}
+.cl-anesthesia-page[data-has-case="false"]>.cl-toolbar>div:last-child{margin-left:auto;display:flex;gap:7px}
+.cl-anesthesia-page[data-has-case="false"]>.cl-toolbar .pt-primary{order:-1}
+.cl-anesthesia-page[data-has-case="false"] .cl-save-status:empty,.cl-anesthesia-page[data-has-case="false"] .cl-message:empty{display:none}
+.cl-anesthesia-page .cl-anesthesia-filters{display:grid;grid-template-columns:minmax(160px,2fr) repeat(4,minmax(110px,1fr)) auto;align-items:end;gap:10px;margin:10px 0}
+.cl-anesthesia-page .cl-anesthesia-filters label{display:grid;gap:4px;min-width:0;font-weight:600}
+.cl-anesthesia-page .cl-anesthesia-filters input,.cl-anesthesia-page .cl-anesthesia-filters select{width:100%;min-width:0;font:inherit;font-weight:400;border:1px solid #b8cae0;border-radius:8px;background:white;color:inherit;padding:9px;min-height:40px}
+.cl-anesthesia-page .cl-anesthesia-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:12px;margin-top:15px}
+.cl-anesthesia-page .cl-anesthesia-results .cl-case{display:grid;align-content:start;text-align:left;gap:5px;width:100%;min-width:0;margin:0;padding:9px;font:inherit;overflow-wrap:anywhere}
+.cl-anesthesia-page .cl-anesthesia-results .cl-case span{font-size:14px}
+.cl-anesthesia-page .cl-anesthesia-empty{grid-column:1/-1;margin:0}
+@media(max-width:900px){.cl-anesthesia-page .cl-anesthesia-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.cl-anesthesia-page .cl-anesthesia-filters label:first-child{grid-column:1/-1}}
+
+.cl-anesthesia-page .cl-anesthesia-filters input,.cl-anesthesia-page .cl-anesthesia-filters select,.cl-anesthesia-page .cl-anesthesia-filters>button{height:42px;min-height:42px;margin:0}
+
+.cl-anesthesia-page .cl-anesthesia-filters label{margin-bottom:0}
+.cl-anesthesia-page[data-has-case="false"] .cl-toolbar .pt-primary{background:#2454ed;color:white;border-color:#2454ed}
