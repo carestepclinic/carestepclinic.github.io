@@ -37,3 +37,12 @@ Refreshing comparison replaces the selected visit with the returned revision. A 
 Numeric cards show only the active input unit, with canonical comparison values separately labeled. Desktop unit selectors sit beside values; narrow screens keep full-width inputs and selectors. Test method choices are scoped to thyroid, cortisol, or DOCP/electrolytes; previously saved out-of-scope values remain selectable as legacy entries. Dose/sample timestamps describe timing separately from method. No server schema or clinical thresholds changed.
 
 Trend summaries show current input, comparison value, and difference. Current points have distinct styling and all points support tap/click and keyboard activation. Compact grids and spacing preserve readable control sizes and shared record typography.
+
+## Follow-up consistency
+
+- Concurrent laboratory changes are reconciled as a single value/unit/canonical-value bundle. Independent clinical entries continue to merge separately. Conflict choices use clinical labels and the last server save time in Korea.
+- Saved completion status updates in place without replacing a focused input.
+- Follow-up parent links are fixed by the explicit new-recheck action; selecting a comparison visit does not change that parent.
+- The list displays derived completed/partial follow-up status while keeping the original scheduled date. A completed, linked follow-up only covers its own conditions. Unlinked, diagnostic, future, deleted and reopened visits do not clear outstanding schedules. Historical dates and records are never rewritten.
+- Related follow-up history is scoped to the hospital/patient and bounded to 1,000 visits. If coverage is incomplete, unresolved schedules remain visible with a connection-check label.
+- Printed test method names match the screen; dosing and sampling timestamps have explicit labels.

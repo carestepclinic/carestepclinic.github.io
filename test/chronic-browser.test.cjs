@@ -1,5 +1,36 @@
 const {test,before,after}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const {chromium}=require('playwright');let browser,server,url;const root=path.resolve(__dirname,'..');
+
+test('saved completion badge and action update in place after an amendment',async()=>{
+ const p=await page();await begin(p);await p.locator('[data-act=complete]').click();await p.waitForFunction(()=>document.querySelector('[data-clinical-status]')?.textContent==='작성 완료');
+ await p.locator('[data-field="measurements.creatinine"]').fill('3');const before=await p.locator('[data-field="measurements.creatinine"]').elementHandle();await save(p);
+ assert.equal(await p.locator('[data-clinical-status]').innerText(),'완료 후 수정');assert.equal(await p.locator('[data-act=complete]').innerText(),'진료 기록 완료');assert.ok(await before.evaluate(e=>e.isConnected));await p.close();
+});
+for(const [width,choice] of [[390,'remote'],[1440,'local']])test('conflicting lab value and unit have one atomic readable choice '+width,async()=>{
+ const p=await page(width);await begin(p);await p.locator('[data-field="measurements.creatinine"]').fill('3');await save(p);
+ await p.evaluate(()=>{const r=state.records[0];r.revision++;r.updated_at='2026-11-02T10:30:00Z';r.body.chronicChart.measurements.creatinine=4;r.body.chronicChart.measurementInputs.creatinine={value:4,unit:'mg/dL'};});
+ await p.locator('[data-field="measurements.creatinine"]').fill('5');await p.locator('[data-unit=creatinine]').selectOption('µmol/L');await p.locator('[data-act=save]').click();await p.locator('[data-act=resolve]').click();
+ assert.equal(await p.locator('[data-choice]').count(),1);const box=await p.locator('[data-conflict]').innerText();assert.match(box,/크레아티닌.*Creatinine/s);assert.match(box,/442 µmol\/L/);assert.match(box,/4 mg\/dL/);assert.doesNotMatch(box,/measurementInputs|measurements/);
+ assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+ if(process.env.CHR_SHOTS){fs.mkdirSync(process.env.CHR_SHOTS,{recursive:true});await p.screenshot({path:path.join(process.env.CHR_SHOTS,'conflict-'+width+'.png'),fullPage:true});}
+ await p.locator('[data-choice]').selectOption(choice);await p.locator('[data-merge]').click();await p.waitForFunction(()=>document.querySelector('[data-act=save]').textContent==='저장됨');
+ const d=await p.evaluate(()=>state.records[0].body.chronicChart);assert.equal(d.measurements.creatinine,choice==='local'?5:4);assert.deepEqual(d.measurementInputs.creatinine,choice==='local'?{value:442,unit:'µmol/L'}:{value:4,unit:'mg/dL'});await p.close();
+});
+test('atomic merge handles deletion, old canonical-only values and independent edits',async()=>{
+ const p=await page();const result=await p.evaluate(()=>{const base={measurements:{creatinine:3},measurementInputs:{},plan:''},local={measurements:{},measurementInputs:{},plan:'수정 계획'},remote={measurements:{creatinine:4,glucose:100},measurementInputs:{creatinine:{value:353.6,unit:'µmol/L'}},plan:''};const c=ChronicRecord.mergeChart(base,local,remote);return ChronicRecord.mergeChart(base,local,remote,{[c.conflicts[0].id]:'local'});});
+ assert.deepEqual(result.chart.measurements,{glucose:100});assert.deepEqual(result.chart.measurementInputs,{});assert.equal(result.chart.plan,'수정 계획');assert.equal(result.conflicts.length,0);await p.close();
+});
+test('comparison selection does not silently change the follow-up parent',async()=>{
+ const p=await page();await begin(p);await p.locator('[data-act=recheck]').click();await save(p);await p.locator('[data-act=recheck]').click();await section(p,'compare');await p.locator('[data-compare-mode]').selectOption('visit');await p.locator('[data-compare]').selectOption('e1');await save(p);
+ assert.equal(await p.evaluate(()=>state.records[2].body.previousId),'e2');await p.close();
+});
+test('printing uses translated current and legacy test methods with labeled times',async()=>{
+ const p=await page();await begin(p);await p.locator('[data-condition=hypothyroid]').check();await p.locator('.chr-context').evaluate(e=>e.open=true);await p.locator('[data-field="testContexts.thyroid.method"]').selectOption('baseline');await p.locator('[data-field="testContexts.thyroid.lastDoseAt"]').fill('2026-11-02T08:00');await p.locator('[data-field="testContexts.thyroid.sampleAt"]').fill('2026-11-02T12:00');
+ await p.locator('.chr-context details').evaluate(e=>e.open=true);await p.locator('[data-field="testContext.method"]').fill('postDose');await save(p);const pop=p.waitForEvent('popup');await p.locator('[data-act=print]').click();const out=await pop;await out.locator('.summary').waitFor();await out.locator('input[type=checkbox]').first().check();const text=await out.locator('body').innerText();assert.match(text,/갑상선 검사 조건/);assert.match(text,/기저 검사/);assert.match(text,/마지막 투약 2026-11-02 08:00/);assert.match(text,/채혈 2026-11-02 12:00/);assert.match(text,/투약 후/);assert.doesNotMatch(text,/baseline|postDose|검사 검사/);await out.close();await p.close();
+});
+test('list distinguishes completed and partially outstanding follow-up dates',async()=>{
+ const p=await page();await p.evaluate(()=>{state.pages={first:{items:[{id:'synthetic-old',patient:{name:'합성 환자'},date:'2026-10-01',conditions:['ckd'],followupDate:'2026-10-15',followup:{state:'completed',completedAt:'2026-10-15',pendingConditions:[]}},{id:'synthetic-partial',patient:{name:'합성 복합질환'},conditions:['ckd','diabetes'],followupDate:'2026-10-15',followup:{state:'partial',pendingConditions:['diabetes']}}]}};});await p.locator('[data-act=refresh]').click();assert.match(await p.locator('[data-open=synthetic-old]').innerText(),/재검 완료 2026-10-15 · 당시 예정 2026-10-15/);assert.match(await p.locator('[data-open=synthetic-partial]').innerText(),/남은 질환 당뇨병/);await p.close();
+});
 const harness=`<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/practice-tools.css"><link rel="stylesheet" href="/neuro-record.css"><link rel="stylesheet" href="/ophthalmic-record.css"><link rel="stylesheet" href="/chronic-record.css"><style>@font-face{font-family:Pretendard;src:url(/pretendard-variable-1.3.9.woff2)}body{font-family:Pretendard,sans-serif;margin:14px;background:#f5f7fb}</style><main id="root"></main><script src="/ophthalmic-record.js"></script><script src="/chronic-record.js"></script><script>
 window.state={scope:'test:owner',canEdit:true,records:JSON.parse(sessionStorage.getItem('mock-records')||'[]'),requests:[],keys:{},imageData:{},fail:false};
 const patient={id:'p1',name:'합성 환자',species:'dog',breed:'합성 품종',sex:'male',neutered:'yes',birthDate:'2020-01-01',latestWeightKg:5,guardianName:'합성 보호자',chartNumber:'TEST-101'};
