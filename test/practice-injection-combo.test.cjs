@@ -54,3 +54,18 @@ test('activity units reload as IU and unsupported storage units are not claimed 
  assert.equal(saved.body.unit,'U');assert.equal(I.calculate(r,5,saved,'cat').amount,.1);
  await assert.rejects(f.store().save(r,product(2,'mEq'),'cat',()=>true),/지원하지/);
 });
+
+test('selected product aliases reuse the same saved concentration under another spelling',async()=>{
+ const f=fixture(),first=I.parse('alpha 2 mg/kg IV')[0];
+ const source={id:'catalog:a',body:{kind:'liquid',value:50,unit:'mg',strength:{english:'alpha',aliases:['alpha','시험알파'],route:'injection',species:['dog','cat']}}};
+ const saved=await f.store().save(first,source,'dog',()=>true);
+ const alternate=I.parse('시험알파 2 mg/kg IV')[0];
+ const other={id:'other',body:{...source.body,value:100}};
+ const options=I.candidates(alternate,[saved,other],'dog');
+ assert.equal(I.defaultChoice(alternate,options,'dog'),saved.id);
+ const next=f.store();next.remember(f.items);
+ await next.save(alternate,{body:{kind:'liquid',value:75,unit:'mg'}},'dog',()=>true);
+ assert.equal(f.items.length,1);assert.equal(f.items[0].id,saved.id);assert.equal(f.items[0].body.value,75);
+ assert.equal(I.defaultChoice(first,I.candidates(first,f.items,'dog'),'dog'),saved.id);
+ assert.equal(source.body.value,50);
+});
