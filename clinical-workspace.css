@@ -270,14 +270,14 @@
 @media(max-width:760px){.cl-simple>.cl-toolbar>div:last-child{width:100%;gap:4px}.cl-simple .cl-work-more[open]{flex-basis:100%}.cl-simple .cl-work-more>div{min-width:0}.cl-simple .cc-performer>summary{font-size:13px}.cl-simple .cl-room-group>header p{font-size:12px}.cl-simple .cl-calendar-tools{margin:6px 0}.cl-simple .cl-calendar-legend small{display:none}.cl-simple .cl-tabs button{min-height:44px}}
 .cl-simple .cl-room-groups{grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr))}.cl-simple[data-compact=true] .cl-room .cl-patient-demographics{display:none}.cl-simple .cl-room .cl-vital-grid>div{display:grid;grid-template-columns:auto 1fr;gap:2px 6px;padding:5px}.cl-simple .cl-room .cl-vital-grid>div>span{grid-column:1/-1;font-size:12px}.cl-simple .cl-room .cl-vital-grid>div>small{align-self:center;font-size:11px;line-height:1.4}.cl-simple .cl-attention{padding:8px 10px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}.cl-simple .cl-attention>div{margin:0}.cl-simple .cl-attention>b{font-size:13px}.cl-simple .cl-calendar-slot>.cl-calendar-event.cl-calendar-planned{background:#fff}
 /* Clinical work: compact context, readable values, and one primary action. */
-body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-section=surgery])) .topbar{margin-bottom:10px;gap:6px 14px}
-body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-section=surgery])) :is(#globalCaseBadge,#globalNewCase,#clinicInstall,#clinicNavigationPath,.topbar .eyebrow){display:none!important}
-body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-section=surgery])) .topbar>.clinic-install-heading{flex:1 1 auto;display:block}
-body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-section=surgery])) .topbar h2{font-size:23px}
+body:has(#practice.active-view :is(.cl-workspace:is([data-section=ward],[data-section=surgery]),.record-layout)) .topbar{margin-bottom:10px;gap:6px 14px}
+body:has(#practice.active-view :is(.cl-workspace:is([data-section=ward],[data-section=surgery]),.record-layout)) :is(#globalCaseBadge,#globalNewCase,#clinicInstall,#clinicNavigationPath,.topbar .eyebrow){display:none!important}
+body:has(#practice.active-view :is(.cl-workspace:is([data-section=ward],[data-section=surgery]),.record-layout)) .topbar>.clinic-install-heading{flex:1 1 auto;display:block}
+body:has(#practice.active-view :is(.cl-workspace:is([data-section=ward],[data-section=surgery]),.record-layout)) .topbar h2{font-size:23px}
 .cl-simple .cl-ward-overview>.cl-toolbar h3{display:none}.cl-simple .cl-ward-overview>.cl-tabs{align-items:center;gap:6px}.cl-simple .cl-board-count{font-size:13px;color:#526174;margin:0 8px;flex:1;white-space:nowrap}.cl-simple .cl-sync-status{font-size:12px;margin-right:auto}
 .cl-simple .cl-room-group{background:#fff;border:0;padding:4px 0}.cl-simple .cl-room-group>header p{display:none}.cl-simple .cc-room{background:#fff;border-color:#d8e0e8}.cl-simple .cl-room{background:#fff}.cl-simple .cl-room .cl-room-state{display:none}.cl-simple .cl-room .cl-vital-grid{gap:4px;margin:8px 0}.cl-simple .cl-room .cl-vital-grid>div{background:transparent;padding:3px}.cl-simple .cl-room .cl-vital-grid>div>strong{font-size:19px}.cl-simple .cl-room .cl-vital-grid>div>small{font-size:12px}.cl-simple .cl-missing-vitals{grid-column:1/-1;color:#576779;font-size:12px}.cl-simple .cl-room .cl-vital-grid>.cl-alert{background:#fff0f0}.cl-simple .cl-room .cl-vital-grid>.cl-stale{background:#fff7e9}.cl-simple .cc-pending-total{line-height:1.7}.cl-simple .cl-room .cl-care-team{font-size:13px}.cl-simple .cc-room-next{background:#f8fafc}.cl-simple .cl-calendar-more{margin-left:auto}.cl-simple .cl-calendar-more>summary{cursor:pointer;padding:9px;min-height:44px;box-sizing:border-box;color:#526174}.cl-simple .cl-calendar-more[open]{display:flex}.cl-simple .cl-calendar-slot footer>[data-cl-action=ward-calendar-record]{font-weight:700;color:#174bbd;border-color:#b4c8f5}
 .cl-med-input-modes{display:flex;gap:6px;margin:0 0 12px}.cl-med-input-modes button{flex:1;min-height:44px}.cl-med-input-modes [aria-pressed=true]{background:#2352dc;color:white}.cl-med-input-modes~[hidden],[data-med-direct][hidden]{display:none!important}.cl-med-strength{grid-column:1/-1;border:1px solid #ccd8e6;padding:10px;border-radius:8px}.cl-med-strength>summary{font-size:14px;font-weight:650;cursor:pointer;min-height:24px}.cl-med-strength>div{margin-top:10px}.cl-medication-dialog [data-ward-strength-auto]{font-size:13px;line-height:1.5}.cl-medication-dialog [data-med-formula]{font-weight:700;font-size:16px}
-@media(max-width:760px){body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-section=surgery])) .topbar{gap:6px;margin-bottom:8px}body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-section=surgery])) .main{padding-top:12px}.cl-simple .cl-board-count{flex-basis:100%;margin:2px 4px}.cl-simple .cl-ward-overview>.cl-tabs{flex-wrap:wrap}.cl-simple .cl-sync-status{flex-basis:100%;order:3}.cl-simple .cl-room-group{margin-top:8px}.cl-simple .cl-room{padding:10px}.cl-simple .cl-room .cl-vital-grid>div{grid-template-columns:auto auto}.cl-simple .cl-room .cl-vital-grid>div>small{grid-column:1/-1}.cl-simple .cl-calendar-slot footer{align-items:flex-start}}
+@media(max-width:760px){body:has(#practice.active-view :is(.cl-workspace:is([data-section=ward],[data-section=surgery]),.record-layout)) .topbar{gap:6px;margin-bottom:8px}body:has(#practice.active-view :is(.cl-workspace:is([data-section=ward],[data-section=surgery]),.record-layout)) .main{padding-top:12px}.cl-simple .cl-board-count{flex-basis:100%;margin:2px 4px}.cl-simple .cl-ward-overview>.cl-tabs{flex-wrap:wrap}.cl-simple .cl-sync-status{flex-basis:100%;order:3}.cl-simple .cl-room-group{margin-top:8px}.cl-simple .cl-room{padding:10px}.cl-simple .cl-room .cl-vital-grid>div{grid-template-columns:auto auto}.cl-simple .cl-room .cl-vital-grid>div>small{grid-column:1/-1}.cl-simple .cl-calendar-slot footer{align-items:flex-start}}
 .cl-simple .cl-ward-overview>.cl-tabs{display:flex;flex-wrap:wrap}.cl-simple .cl-ward-overview>.cl-tabs>button{flex:1 1 120px}.cl-simple .cl-board-count{white-space:normal;min-width:0}
 
 /* Shared clinical form typography; checkboxes retain their native compact size. */
@@ -377,3 +377,48 @@ body:has(#practice.active-view .cl-workspace:is([data-section=ward],[data-sectio
 .cl-record-list-card > button[data-cl-case]{flex:1;border:0;border-radius:0;width:100%;margin:0;padding:12px}
 .cl-record-list-card footer{display:flex;justify-content:flex-end;padding:0 8px 8px}
 .cl-record-list-card footer button{min-height:44px;padding:8px 14px;font:inherit;color:#a32a32;background:#fff;border:1px solid #e3c9cc;border-radius:8px}
+
+/* Shared clinical-record presentation. Clinical fields and saved data stay module-owned. */
+:is(.record-layout,.cl-anesthesia-page){font-family:inherit;font-size:14px;line-height:1.5;width:100%;max-width:none;min-width:0}
+.record-layout :is(button,input,select,textarea){font-family:inherit;line-height:1.5}
+.record-layout :is(button,input,select,textarea):focus-visible{outline:3px solid #98b3ff;outline-offset:2px}
+.record-layout :is(.dn-head-actions,.nr-actions) button{font-size:14px;font-weight:600;min-height:42px;padding:9px 14px;border-radius:8px}
+.record-layout button.pt-primary{background:#2454ed;color:#fff;border-color:#2454ed}
+.record-layout[data-record-mode=list] :is(.dn-head,.nr-head,.er-list-actions){position:static;display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:7px;min-height:42px;padding:0;margin:0 0 22px;border:0;background:transparent}
+.record-layout[data-record-mode=list] :is(.dn-head-actions,.nr-actions){width:auto;display:flex;justify-content:flex-end;gap:7px;margin-left:auto}
+.record-layout[data-record-mode=list] :is(.dn-head,.nr-head,.er-list-actions) button{flex:none;font-size:14px;font-weight:600;line-height:1.5;min-height:42px;padding:9px 14px;border:1px solid #b8cae0;border-radius:8px;white-space:nowrap}
+.record-layout[data-record-mode=list] :is(.dn-head,.nr-head,.er-list-actions) button.pt-primary{background:#2454ed;color:#fff;border-color:#2454ed}
+:is(.record-layout,.cl-anesthesia-page) :is(.record-filters,.cl-anesthesia-filters){display:grid;grid-template-columns:minmax(160px,2fr) repeat(4,minmax(110px,1fr)) auto;align-items:end;gap:10px;margin:10px 0 16px}
+:is(.record-layout,.cl-anesthesia-page) :is(.record-filters,.cl-anesthesia-filters)>label{display:grid;gap:4px;min-width:0;margin:0;font-size:14px;font-weight:600;line-height:1.5}
+:is(.record-layout,.cl-anesthesia-page) :is(.record-filters,.cl-anesthesia-filters) :is(input,select){box-sizing:border-box;width:100%;min-width:0;max-width:100%;height:42px;min-height:42px;margin:0;font:inherit;font-weight:400;line-height:1.5;padding:9px;border:1px solid #b8cae0;border-radius:8px;background:#fff;color:inherit}
+:is(.record-layout,.cl-anesthesia-page) :is(.record-filters,.cl-anesthesia-filters)>button{height:42px;min-height:42px;margin:0;padding:9px 14px;font:inherit;font-weight:600;line-height:1.5;border:1px solid #b8cae0;border-radius:8px;background:#fff;color:inherit;justify-self:end}
+.record-layout[data-record-mode=list] :is([data-dn-status],[data-nr-status],[data-er-status]):empty{display:none}
+.record-layout[data-record-mode=list] :is(.dn-list-conditions,.nr-search-applied){font-size:13px;margin:8px 0;gap:8px}
+.record-layout[data-record-mode=list] .dn-list-conditions:has(>button:only-child){display:none}
+.record-layout[data-record-mode=list] :is(.dn-list,.nr-list,.er-record-list){display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:12px;margin-top:15px}
+.record-layout[data-record-mode=list] :is(.dn-record-list-card,.nr-list-item,.er-record){min-width:0;border:1px solid #d5dfec;border-radius:12px;background:#fff;overflow:hidden}
+.record-layout[data-record-mode=list] :is(.dn-record-list-card>button,.nr-record,.er-record){display:flex;flex-direction:column;align-items:flex-start;align-content:start;gap:5px;min-width:0;width:100%;padding:12px;margin:0;text-align:left;font:inherit;overflow-wrap:anywhere}
+.record-layout[data-record-mode=list] :is(.dn-record-list-card>button,.nr-record){border:0;border-radius:0}
+.record-layout[data-record-mode=list] :is(.dn-record-list-card,.nr-record,.er-record) b{font-size:16px;font-weight:700}
+.record-layout[data-record-mode=list] :is(.dn-record-list-card,.nr-record,.er-record) :is(span,small){font-size:14px;font-weight:400;line-height:1.5}
+.record-layout[data-record-mode=list] :is(.er-record-list,.nr-list)>p{grid-column:1/-1}
+@media(max-width:900px){
+ :is(.record-layout,.cl-anesthesia-page) :is(.record-filters,.cl-anesthesia-filters){grid-template-columns:repeat(2,minmax(0,1fr))}
+ :is(.record-layout,.cl-anesthesia-page) :is(.record-filters,.cl-anesthesia-filters)>label:first-child{grid-column:1/-1}
+}
+@media(max-width:520px){
+ .record-layout[data-record-mode=list] :is(.dn-head,.nr-head,.er-list-actions){margin-bottom:16px}
+ :is(.record-layout,.cl-anesthesia-page) :is(.record-filters,.cl-anesthesia-filters) :is(input,select){font-size:16px}
+ .record-layout[data-record-mode=list] :is(.dn-list,.nr-list,.er-record-list){grid-template-columns:minmax(0,1fr)}
+}
+
+/* Match the anesthesia record font and neutralize legacy list padding. */
+#practiceRoot .record-layout{font-family:"Carestep Pretendard","Noto Sans KR",system-ui,sans-serif}
+.clinic-navigation-ready #practiceRoot .record-layout[data-record-mode=list] :is(.dn-head,.nr-head,.er-list-actions){padding:0;margin:4px 0 8px}
+
+#practiceRoot .record-layout[data-record-mode=list] :is(.dn-head,.nr-head,.er-list-actions) button{font-size:16px;min-height:44px;height:44px}
+
+#practiceRoot :is(.record-filters,.cl-anesthesia-filters)>button{font-size:16px;min-height:44px;height:44px}
+#practiceRoot .cl-anesthesia-page:has(.cl-anesthesia-filters)>.cl-toolbar{padding:0;min-height:44px}
+
+#practiceRoot .cl-anesthesia-page:has(.cl-anesthesia-filters)>.cl-toolbar>div:first-child{display:none}
