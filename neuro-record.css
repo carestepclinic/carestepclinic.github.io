@@ -52,3 +52,21 @@
 .nr-record [data-list-time]{display:inline}
 .nr [data-review-count]:not(:empty){background:#edf3fb;border-radius:6px;padding:8px 10px}
 @media(max-width:520px){.nr-actions [data-nr=undo-findings]{max-width:170px}.nr .nr-nav-arrow{min-width:32px;min-height:42px}.nr-read-result{min-height:42px}}
+
+/* Compact review-to-assessment workflow. */
+.nr .nr-save-status{background:transparent;border-color:transparent;font-size:12px;padding:3px 5px;min-height:30px;font-weight:400}
+.nr .nr-save-status:focus-visible{outline:2px solid #98b3ff}
+.nr-print-options>summary{list-style:none;border:1px solid #bdcde4;border-radius:9px;padding:8px 11px;min-height:40px;background:#fff}
+.nr-print-options>summary::-webkit-details-marker{display:none}
+.nr-print-options[open]>summary{margin-bottom:0}
+.nr-print-menu{position:absolute;right:0;top:calc(100% + 4px);z-index:8;background:#fff;border:1px solid #bdcde4;border-radius:10px;padding:10px;box-shadow:0 5px 20px #18395222;min-width:220px;display:grid;gap:8px}
+.nr .nr-print-menu select{position:static;box-shadow:none;max-width:none;min-width:0;width:100%}
+.nr .nr-aid>summary{font-size:14px}.nr-assessment>label{margin-top:12px}
+.nr-review-empty{grid-column:1/-1;padding:10px;background:#f3f7fc;border-radius:8px}
+.nr-search-applied{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0}
+.nr-search-applied>span{display:flex;gap:5px;flex-wrap:wrap;min-width:0}
+.nr-search-applied>span>span{background:#eaf0fa;padding:3px 7px;border-radius:5px;font-size:13px;overflow-wrap:anywhere}
+.nr-search-applied button{flex:none}
+.nr-comparison-counts{padding:8px;background:#edf3fb;border-radius:7px}
+.nr [data-comparison-results]>details{border-top:1px solid #dce5f1;margin-top:8px;padding-top:5px}
+@media(max-width:520px){.nr-print-options>summary{min-height:42px;padding:8px 9px}.nr-actions [data-nr=undo-findings]{max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nr-search-applied{align-items:start}.nr-print-menu{right:auto;left:0;min-width:200px;max-width:calc(100vw - 30px)}}

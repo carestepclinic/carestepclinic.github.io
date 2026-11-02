@@ -49,3 +49,12 @@ Patient age/sex is shown in the compact header. Examination context stays visibl
 - Copied summaries include the record's patient identification, species, breed, age, sex and weight; no inferred values are introduced.
 - Horizontal mobile section navigation has edge controls and reveals the active section without moving the page sideways.
 - List and comparison dates include stored examination time. If the list response omits time, only viewport-visible records are read, at most two concurrently. A scope-local 60-second metadata cache prevents repeated reads. Missing time is explicit and request failure is retryable by refresh. No server endpoint or data schema is changed.
+
+
+## Streamlined review and completion (2026-11-02)
+- Section navigation preserves the selected results filter. Empty sections explain the lack of matching recorded results and offer an explicit switch to input; navigation never changes findings.
+- Manual localization, assessment and plan precede an initially collapsed clinical-reference panel. Recorded urgent alerts remain visible outside it. Clinical rules are unchanged.
+- Print scope and print action share one menu. Autosave is a compact status control, with explicit retry still visible after failure; undo and completion remain directly accessible.
+- Copied summaries group explicitly normal findings by examination and side. Untested count is separate, and no untested side is inferred normal.
+- Applied list search conditions have a single reset that clears query, status, dates, examiner and pagination, without modifying records.
+- Prior comparison shows category counts and actual result changes immediately. Newly examined, untested/limited, clinical text and metadata groups expand on demand, preserving opened groups during edits.
