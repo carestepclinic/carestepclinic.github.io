@@ -58,3 +58,14 @@ Patient age/sex is shown in the compact header. Examination context stays visibl
 - Copied summaries group explicitly normal findings by examination and side. Untested count is separate, and no untested side is inferred normal.
 - Applied list search conditions have a single reset that clears query, status, dates, examiner and pagination, without modifying records.
 - Prior comparison shows category counts and actual result changes immediately. Newly examined, untested/limited, clinical text and metadata groups expand on demand, preserving opened groups during edits.
+
+
+## Reliability follow-up (2026-11-02)
+
+- Rechecks use the preceding saved exam weight, including an empty weight, rather than overwriting it with directory weight. The initial source and subsequent manual edits are labelled.
+- A failed complete/reopen action retains its intended status and request key; the action explicitly retries saving rather than reversing the pending intent.
+- Changing the comparison clears the previous result immediately. Failure shows a selected-record retry without displaying mismatched results.
+- Recently fetched visible-list detail is reused only after a matching server revision check. Expired or changed revisions fetch fresh detail; scope changes clear the cache. Failed checks do not open stale records.
+- Search date validation happens before committing any filter; errors are inline and prior applied filters remain intact.
+- Print loads the same bundled Korean font and waits before opening the print dialog. Font failure uses an explicitly reported system-font fallback.
+- No clinical rules, server endpoints, stored patient records or database schema are changed.
