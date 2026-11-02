@@ -40,3 +40,42 @@ test('earlier visit does not compare a future result as its previous examination
 test('lost completion response can be retried without toggling completion back',async()=>{const p=await page();await begin(p);await p.evaluate(()=>state.loseResponse=true);await p.locator('[data-act=complete]').click();await p.waitForFunction(()=>document.querySelector('[data-status]').textContent.includes('저장 실패'));assert.equal(await p.locator('[data-act=complete]').isDisabled(),true);await save(p);assert.equal(await p.evaluate(()=>state.records[0].body.chronicChart.clinicalStatus),'complete');await p.close();});
 
 test('cardiac markers show units, preserve decimals, compare previous visit and print',async()=>{const p=await page();await begin(p);await p.locator('[data-condition=cardiac]').check();assert.equal(await p.locator('[data-field="measurements.ntproBNP"]').isVisible(),true);assert.match(await p.locator('[data-field="measurements.ntproBNP"]').locator('..').innerText(),/pmol\/L/);assert.match(await p.locator('[data-field="measurements.ctni"]').locator('..').innerText(),/ng\/mL/);await p.locator('[data-field="measurements.ntproBNP"]').fill('2400');await p.locator('[data-field="measurements.ctni"]').fill('0.018');await save(p);await p.locator('[data-act=recheck]').click();assert.equal(await p.locator('[data-field="measurements.ntproBNP"]').inputValue(),'');assert.equal(await p.locator('[data-field="measurements.ctni"]').inputValue(),'');assert.match(await p.locator('[data-prev=ctni]').innerText(),/0.018 ng\/mL/);await p.locator('[data-field="measurements.ntproBNP"]').fill('3200');await p.locator('[data-field="measurements.ctni"]').fill('0.028');await section(p,'compare');assert.match(await p.locator('[data-comparison]').innerText(),/2400\s+3200\s+\+800/);assert.match(await p.locator('[data-comparison]').innerText(),/0.018\s+0.028\s+\+0.01/);await save(p);const popup=p.waitForEvent('popup');await p.locator('[data-act=print]').click();const out=await popup;await out.locator('h1').waitFor();const text=await out.locator('body').innerText();assert.match(text,/NT-proBNP.*pmol\/L.*3200.*2400/s);assert.match(text,/cTnI.*ng\/mL.*0.028.*0.018/s);await out.close();await p.close();});
+
+for(const [condition,key,value] of [['cushing','cortisolACTH','8.2'],['addison','sodium','140'],['hypothyroid','tt4','1.2'],['hyperthyroid','tt4','6.5']])
+test('endocrine '+condition+' selection, persistence, fresh recheck, comparison and print',async()=>{
+ const p=await page();await begin(p);assert.equal(await p.locator('[data-condition=other]').count(),0);
+ await p.locator('[data-condition='+condition+']').check();await p.locator('[data-condition=ckd]').uncheck();
+ await p.locator('[data-panel=exam] details').evaluate(e=>e.open=true);
+ await p.locator('[data-field="measurements.'+key+'"]').fill(value);
+ await p.locator('[data-field=endocrineContext]').fill('시험 채혈 12:00 / 투약 08:00');
+ await save(p);assert.equal(await p.evaluate(k=>state.records[0].body.chronicChart.measurements[k],key),+value);
+ await p.locator('[data-act=recheck]').click();await p.locator('[data-panel=exam] details').evaluate(e=>e.open=true);
+ assert.equal(await p.locator('[data-field="measurements.'+key+'"]').inputValue(),'');
+ assert.equal(await p.locator('[data-field=endocrineContext]').inputValue(),'');
+ assert.ok((await p.locator('[data-prev='+key+']').innerText()).includes(value));
+ await p.locator('[data-field="measurements.'+key+'"]').fill(String(+value+1));
+ await p.locator('[data-field=endocrineContext]').fill('이번 채혈 13:00');
+ await save(p);
+ const popup=p.waitForEvent('popup');await p.locator('[data-act=print]').click();const out=await popup;await out.locator('h1').waitFor();
+ assert.match(await out.locator('body').innerText(),/이번 채혈 13:00/);await out.close();await p.close();
+});
+test('legacy other chart can be opened, printed and reclassified without losing results',async()=>{
+ const p=await page();await begin(p);await p.locator('[data-field="measurements.creatinine"]').fill('2.4');await save(p);
+ await p.evaluate(()=>{state.records[0].body.chronicChart.conditions=['other'];});
+ await p.locator('[data-act=back]').click();await p.locator('[data-open]').click();
+ assert.equal(await p.locator('[data-legacy-condition]').count(),1);assert.equal(await p.locator('[data-condition=other]').count(),0);
+ const popup=p.waitForEvent('popup');await p.locator('[data-act=print]').click();const out=await popup;await out.locator('h1').waitFor();
+ assert.match(await out.locator('body').innerText(),/이전 분류 · 기타 만성질환/);await out.close();
+ await p.locator('[data-condition=addison]').check();await save(p);
+ assert.equal(await p.evaluate(()=>state.records[0].body.chronicChart.measurements.creatinine),2.4);
+ assert.deepEqual(await p.evaluate(()=>state.records[0].body.chronicChart.conditions),['addison']);await p.close();
+});
+for(const width of [390,1440])test('seven disease choices wrap without overflow at '+width,async()=>{
+ const p=await page(width);await quick(p);
+ for(const el of await p.locator('[data-condition]').all())await el.check();
+ const b=await p.locator('.chr-conditions').boundingBox();assert.ok(b.x>=0&&b.x+b.width<=width+1);
+ assert.equal(await p.locator('[data-condition]').count(),7);
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ if(process.env.CHR_SCREENSHOT_DIR)await p.screenshot({path:path.join(process.env.CHR_SCREENSHOT_DIR,'endocrine-'+width+'.png')});
+ await p.close();
+});
