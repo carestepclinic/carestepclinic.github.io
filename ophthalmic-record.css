@@ -36,3 +36,14 @@
 @media(min-width:1450px){.er .er-exam-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){.er .er-exam-grid{grid-template-columns:1fr}.er .er-history-fields{grid-template-columns:1fr}.er .er-exam-card input,.er .er-exam-card select{font-size:16px;min-height:44px}.er .er-finding select{font-size:14px;min-height:44px}.er .er-exam-card .er-english{font-size:12px}.er .er-check{min-height:44px}.er .er-eye-guide{font-size:13px}.er .er-compare-controls{display:grid;grid-template-columns:1fr 1fr}.er .er-rx input,.er .er-rx select,.er .er-photo input,.er .er-photo select{font-size:16px;min-height:44px}}
 @media print{.er .er-eye-guide{position:static}.er [data-er-undo],.er [data-upload-status]{display:none}}
+.er .er-conflict-row{padding:10px 0;border-top:1px solid #ddc9a9;display:grid;gap:6px}
+.er .er-conflict-values{display:grid;grid-template-columns:1fr 1fr;gap:10px;white-space:pre-wrap;overflow-wrap:anywhere}
+.er .er-conflict-row select{max-width:320px;width:100%}
+@media(max-width:760px){
+ .er .er-head .nr-actions button,.er .er-jumps button,.er .er-quick button,.er .er-eye button,.er .er-template-row button,.er .er-list-actions button{font-size:14px;min-height:44px;padding:8px 10px;font-family:inherit}
+ .er .er-head .nr-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .er .er-jumps{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .er .er-jumps button{padding:8px 3px;white-space:normal}
+ .er .er-head [data-er-demographics],.er .er-save-state{font-size:12px}
+ .er .er-conflict-values{grid-template-columns:1fr}
+}
