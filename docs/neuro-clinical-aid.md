@@ -40,3 +40,12 @@ Patient age/sex is shown in the compact header. Examination context stays visibl
 - Chart summary copy includes manually entered findings, limitations, localization and plan. Generated clinical-aid suggestions are excluded. Clipboard-denied fallback remains selectable.
 - Record completion is displayed separately from network save status. Failed completion remains pending.
 - Free-text input no longer rebuilds findings/clinical aid on every keystroke. Open comparison updates are debounced; exam/context changes remain immediate.
+
+
+## Review usability fixes (2026-11-02)
+- Read-only filter results now use explicit text values, including local pain findings. Empty filters explain the absence of recorded results; they do not imply a normal examination.
+- Validation expands all containing disclosures, focuses the invalid field and adds an inline error.
+- The record header contains undo with the affected examination name, preserving existing scope/concurrency guards.
+- Copied summaries include the record's patient identification, species, breed, age, sex and weight; no inferred values are introduced.
+- Horizontal mobile section navigation has edge controls and reveals the active section without moving the page sideways.
+- List and comparison dates include stored examination time. If the list response omits time, only viewport-visible records are read, at most two concurrently. A scope-local 60-second metadata cache prevents repeated reads. Missing time is explicit and request failure is retryable by refresh. No server endpoint or data schema is changed.
