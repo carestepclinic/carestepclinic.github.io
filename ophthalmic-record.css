@@ -5,3 +5,34 @@
 /* Focused examination sections share one patient header and one save state. */
 .er .er-jumps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:8px 0;margin:0 0 12px}.er-jumps button[aria-selected=true]{background:#2455d6;color:white;border-color:#2455d6}.er-english{font-weight:400;color:#60768d;font-size:11px}.er .er-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.er .er-section-heading h3{margin:0}.er .er-save-state{padding:2px 4px!important;background:transparent!important;font-size:12px;min-height:0}.er-quick{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 0}.er-quick small{color:#60768d}.er-finding{min-width:0;display:grid;gap:4px}.er .er-check{display:flex;flex-direction:row;align-items:center;gap:5px;font-size:12px}.er .er-check input{width:16px;min-height:16px;height:16px}.er .er-finding select{font-size:12px;min-height:32px;padding:5px}.er .er-lesion.er-selected{background:#f0f5ff;border-radius:6px;outline:2px solid #719aff;padding:10px}.er g.er-selected circle{stroke:#122f93;stroke-width:3}.er g[data-lesion-select]{cursor:pointer}.er-position{display:flex;gap:10px;max-width:280px}.er-position label{min-width:0}.er-lesion>button{margin-left:8px}.er-rx-templates{padding:10px;background:#f5f8fd;border:1px solid #d7e2ef;border-radius:8px}.er-template-row{display:flex;gap:8px;margin:8px 0}.er-template-row input,.er-template-row select{min-width:0;flex:1}.er-template-row button{flex-shrink:0}.er [data-previous-plan] p{white-space:pre-wrap}.er [data-previous-plan] details{padding:10px;border:1px solid #d7e2ef;border-radius:8px}.er .er-photo-open{padding:0;width:100%;border:0;background:transparent}.er-photo-dialog{width:min(1100px,94vw);max-height:92vh;overflow:auto;border:1px solid #bdcde1;border-radius:12px;padding:16px;color:#17334c}.er-photo-dialog::backdrop{background:#142d4b99}.er-photo-compare{display:grid;grid-template-columns:1fr 1fr;gap:16px}.er-photo-compare>div{min-width:0}.er-photo-compare figure{margin:10px 0}.er-photo-compare img{width:100%;max-height:65vh;object-fit:contain}.er-photo-compare select{width:100%}.er-photo-compare figcaption{font-size:13px;margin-top:8px}.er [data-er-demographics]{overflow-wrap:anywhere}.er .er-head{background:#fff;border:1px solid #dae4f0;border-radius:10px;padding:10px 12px}
 @media(max-width:600px){.er .er-head{position:sticky;top:0;z-index:10;gap:4px;padding:8px;display:block}.er .er-head>div:first-child{display:flex;flex-wrap:wrap;column-gap:8px;align-items:center}.er .er-head [data-er-demographics]{font-size:11px}.er .er-head .nr-actions{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.er .er-head .nr-actions button{padding:7px 9px;min-height:40px;font-size:12px}.er .er-jumps{gap:4px}.er .er-jumps button{padding:8px 3px;min-height:42px;font-size:12px}.er-quick button{font-size:12px;min-height:40px;padding:6px}.er-quick span,.er-quick small{width:100%}.er .er-template-row{flex-wrap:wrap}.er-template-row input,.er-template-row select{flex-basis:100%}.er-photo-compare{grid-template-columns:1fr}.er-photo-compare img{max-height:38vh}.er-photo-dialog{padding:10px}.er-english{font-size:10px}}
+
+/* Compact examination cards keep OD/OS together at every screen width. */
+.er .er-history{display:block;padding:10px 12px}
+.er .er-history-fields{display:grid;grid-template-columns:1fr 1fr 200px;gap:12px;margin-top:8px}
+.er [data-history-summary]{margin:4px 0 0;font-size:13px;color:#526b82;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.er .er-history[open] [data-history-summary]{display:none}
+.er .er-exam-group{position:relative;margin:8px 0}
+.er .er-eye-guide{position:sticky;top:var(--er-head-height,90px);z-index:4;display:flex;gap:18px;align-items:center;background:#f0f5fd;border:1px solid #d8e3ef;border-radius:6px;padding:7px 10px;font-size:13px}
+.er .er-eye-guide>b{margin-right:auto}
+.er .er-od{color:#2455d6}.er .er-os{color:#087561}
+.er .er-exam-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+.er .er-exam-card{min-width:0;padding:10px;border:1px solid #dae4f0;border-radius:8px;background:#fff}
+.er .er-exam-card>b{display:block;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.er .er-exam-card .er-english,.er .er-exam-card .er-unit{font-size:12px;font-weight:400}
+.er .er-eye-labels{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;margin:6px 0 3px}
+.er .er-exam-card .er-pair{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0;border:0;align-items:start}
+.er [data-eye-cell]{min-width:0;border-radius:6px}
+.er [data-eye-cell=od].er-eye-active{outline:2px solid #779cf1;outline-offset:2px}
+.er [data-eye-cell=os].er-eye-active{outline:2px solid #69baa8;outline-offset:2px}
+.er .er-exam-card input,.er .er-exam-card select{font-size:14px;min-height:40px;padding:8px;width:100%;box-sizing:border-box}
+.er .er-check input{width:18px;min-height:18px;height:18px}
+.er .er-check{min-height:30px}
+.er .er-compare-controls{display:flex;gap:12px;align-items:end;flex-wrap:wrap}
+.er [data-er-undo]:not([hidden]){display:flex;align-items:center;gap:12px;padding:8px 12px;background:#fff6df;border:1px solid #e1c47a;border-radius:8px;margin:6px 0}
+.er [data-upload-status]{font-size:13px;margin-top:6px}
+.er [data-upload-status]>div{padding:5px 0;overflow-wrap:anywhere}
+.er [data-upload-status] button{margin-left:8px}
+.er .er-rx-templates{margin-bottom:8px}
+@media(min-width:1450px){.er .er-exam-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.er .er-exam-grid{grid-template-columns:1fr}.er .er-history-fields{grid-template-columns:1fr}.er .er-exam-card input,.er .er-exam-card select{font-size:16px;min-height:44px}.er .er-finding select{font-size:14px;min-height:44px}.er .er-exam-card .er-english{font-size:12px}.er .er-check{min-height:44px}.er .er-eye-guide{font-size:13px}.er .er-compare-controls{display:grid;grid-template-columns:1fr 1fr}.er .er-rx input,.er .er-rx select,.er .er-photo input,.er .er-photo select{font-size:16px;min-height:44px}}
+@media print{.er .er-eye-guide{position:static}.er [data-er-undo],.er [data-upload-status]{display:none}}
