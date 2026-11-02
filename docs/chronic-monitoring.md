@@ -28,3 +28,12 @@ Primary display is a usability prioritization, not a mandatory minimum panel or 
 Alternative units retain numeric input and unit alongside validated canonical values. Comparison does not imply assay interchangeability or a universal reference interval. Thyroid, cortisol, and DOCP/electrolyte contexts are separate; elapsed dose/sample time is calculated, not prefilled. The older common context remains accessible. Text reused from earlier visits stores attribution separately and refuses overflow instead of silently truncating. Printed summaries include all entered numeric results, observation categories, and laboratory notes; long records continue onto further pages. Photos load only when selected for printing.
 
 Context uses authenticated clinic/patient filtering plus a cursor; quick patients remain linked by encounter IDs, never by name. No patient records are backfilled by deployment.
+
+## Follow-up reliability and layout
+Definitive payload rejection (400/413/415/422) releases the rejected request without automatically resubmitting it. Editing then saves the corrected chart with a new request key; uncertain network/server responses keep the original key for safe replay. Future birth dates are caught before submission and focus the field.
+
+Refreshing comparison replaces the selected visit with the returned revision. A selected visit absent from the refreshed page is cleared with an explanation rather than retaining stale values. Older-page loading remains available.
+
+Numeric cards show only the active input unit, with canonical comparison values separately labeled. Desktop unit selectors sit beside values; narrow screens keep full-width inputs and selectors. Test method choices are scoped to thyroid, cortisol, or DOCP/electrolytes; previously saved out-of-scope values remain selectable as legacy entries. Dose/sample timestamps describe timing separately from method. No server schema or clinical thresholds changed.
+
+Trend summaries show current input, comparison value, and difference. Current points have distinct styling and all points support tap/click and keyboard activation. Compact grids and spacing preserve readable control sizes and shared record typography.
