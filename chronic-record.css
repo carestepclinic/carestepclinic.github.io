@@ -16,3 +16,6 @@
 @media(max-width:700px){.chr .record-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.chr .chr-grid{gap:6px}.chr .chr-grid label{padding:5px}.chr .nr-actions button{min-height:40px}.chr .chr-two{grid-template-columns:1fr}}
 
 .chr .chr-grid label>small:not([data-prev]):not([data-prev-symptom]){display:inline;margin-left:4px}
+
+/* Monitoring workflow: compact condition picker, explicit input units. */
+.chr-diseases{margin:8px 0}.chr-diseases>summary{cursor:pointer;font-weight:600;padding:8px}.chr-context-group{padding:10px 0;border-bottom:1px solid #dce4f0}.chr-context-group h4,.chr-extra h4{margin:6px 0}.chr-extra{margin-top:12px;padding:12px;background:#f5f8fc;border:1px solid #d5e0ef;border-radius:10px}.chr-grid [data-unit]{margin-top:4px}.chr-purpose{display:flex;gap:12px;flex-wrap:wrap}.chr-purpose label{max-width:340px;flex:1}.chr-context p{margin:6px 0}.chr-record [data-visit-picker][hidden]{display:none!important}
