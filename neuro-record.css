@@ -20,3 +20,20 @@
 
 .nr-history{display:grid;grid-template-columns:minmax(0,2fr) minmax(220px,1fr);gap:6px 16px;align-items:start}.nr-history>label{max-width:none;margin:0}.nr-history>label:first-child{grid-row:1/3}.nr-history>details{grid-column:2}.nr-history>details[open]{grid-column:1/-1}.nr-assessment [data-summary]{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px}.nr-assessment [data-summary]>p{grid-column:1/-1}.nr-abnormal-summary,.nr-limited-summary{margin:0}.nr-assessment [data-summary] ul{grid-template-columns:1fr}
 @media(max-width:520px){.nr-history{grid-template-columns:1fr;gap:8px}.nr-history>label:first-child{grid-row:auto}.nr-history>details{grid-column:1}.nr-assessment [data-summary]{grid-template-columns:1fr}.nr-assessment [data-summary]>p{grid-column:1}}
+
+/* Record navigation, stable sides and reversible entry. */
+.nr .nr-exam-en{display:block;font-size:12px;font-weight:400;line-height:1.35;color:#526b82;margin:2px 0 5px;overflow-wrap:anywhere}
+.nr-jumps{flex-wrap:nowrap;overflow-x:auto;max-width:100%;padding-bottom:3px;scrollbar-width:thin}
+.nr .nr-jumps button{flex:0 0 auto;white-space:nowrap}
+.nr-jumps button[aria-current=true]{background:#2456df;color:#fff}
+.nr-filtered-out{opacity:.55}.nr-filtered-out select{background:#f4f6f9!important;border-color:#d5dfeb!important}
+.nr-status-badge{padding:4px 9px;border-radius:6px;background:#edf2fa;color:#31516e;font-weight:600}
+.nr-status-badge[data-state=complete]{background:#e3f3ec;color:#16624b}
+.nr-status-badge[data-state=amended]{background:#fff1d9;color:#805111}
+.nr .nr-toolbar>span{white-space:normal}
+.nr-recheck summary small{display:block;font-weight:400}.nr-recheck>div{padding:8px 0;border-top:1px solid #d8e2ee}
+.nr-recheck p{white-space:pre-wrap;max-height:140px;overflow:auto}
+.nr-just-changed{animation:nr-highlight 2s ease-out}
+@keyframes nr-highlight{from{box-shadow:0 0 0 2px #4384f0;background:#e7f0ff}to{box-shadow:none}}
+@media(prefers-reduced-motion:reduce){.nr-just-changed{animation:none;outline:1px solid #9bb9e0}}
+@media(max-width:520px){.nr-jumps button{min-height:42px}.nr-toolbar{flex-wrap:wrap}.nr-toolbar button{flex:0 1 auto}.nr-status-badge{width:100%}.nr-exam-en{font-size:12px}.nr-review-tools [data-nr=undo-findings]{font-size:13px}}

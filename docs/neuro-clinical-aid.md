@@ -30,3 +30,13 @@ Lists reuse loaded pages; stale lists refresh after 60 seconds on return or idle
 ## Examination workflow (2026-11-02)
 
 Patient age/sex is shown in the compact header. Examination context stays visible. Normal shortcuts affect one side; bulk results require explicitly selected examined sides. Unexamined values are never inferred. Filtered review supports targeted editing and return to the previous filter. Abnormal findings and evaluation limitations have separate summaries. Local aid explains missing context/results and links to missing observations, without changing clinician assessment or clinical rules. Prior details are reused for 60 seconds within the current record/scope; explicit refresh reloads them. Only an earlier same-patient exam is selected for initial comparison. Print uses grouped side-by-side matrices and allows further pages for long content.
+
+
+## Examination workflow update (2026-11-02)
+- Added Korean/English exam names using MSD Veterinary Manual, “The Neurologic Examination of Animals” terminology: https://www.msdvetmanual.com/nervous-system/the-neurologic-examination/the-neurologic-examination-of-animals (checked 2026-11-02). Field identifiers, clinical interpretation rules and saved exam values are unchanged.
+- Section navigation retains the full form. Result filters retain left/right and limb positions, dimming excluded cells.
+- The last ten local exam edits can be undone, including explicit-side bulk entry. Remote adoption, conflicts and record changes clear undo state.
+- Recheck optionally imports history and plan separately; findings and examination context are always new.
+- Chart summary copy includes manually entered findings, limitations, localization and plan. Generated clinical-aid suggestions are excluded. Clipboard-denied fallback remains selectable.
+- Record completion is displayed separately from network save status. Failed completion remains pending.
+- Free-text input no longer rebuilds findings/clinical aid on every keystroke. Open comparison updates are debounced; exam/context changes remain immediate.
