@@ -47,3 +47,12 @@
  .er .er-head [data-er-demographics],.er .er-save-state{font-size:12px}
  .er .er-conflict-values{grid-template-columns:1fr}
 }
+
+.er [data-rx-draft]{grid-column:1/-1;color:#795010;background:#fff7e7;padding:7px 10px;border-radius:6px;font-size:13px}
+.er [data-rx-draft][hidden]{display:none}
+.er .er-trend{min-width:0}.er .er-trend svg{width:100%;display:block}.er .er-trend [data-trend-value]{cursor:pointer}.er .er-trend [data-trend-value]:focus,.er .er-trend-active{outline:none;filter:drop-shadow(0 0 3px #234dd9)}
+.er .er-trend-select{display:grid;gap:4px;font-size:13px}.er .er-trend-select select{width:100%;min-width:0;min-height:40px}.er [data-trend-detail]{font-size:13px;min-height:20px;margin:5px 0;color:#174578}
+.er .er-photo-controls{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px;align-items:center}.er .er-photo-controls select,.er [data-previous-photo]{width:100%;min-width:0;min-height:44px}.er .er-photo-controls button{min-height:44px;font-size:14px;font-family:inherit}.er .er-photo-compare>div{min-width:0}.er .er-photo-compare figure{margin:12px 0}
+@media(max-width:760px){.er .er-trend-select select,.er .er-photo-controls select,.er [data-previous-photo]{font-size:16px;min-height:44px}.er .er-photo-controls button{padding:7px}}
+
+@media(max-width:760px){.er #er-compare .er-two{grid-template-columns:1fr}.er .er-trend svg text{font-size:20px}.er .er-trend svg{min-height:110px}}
