@@ -129,7 +129,8 @@
   const results=document.createElement('div');results.className='cs-settings-results';results.hidden=true;results.setAttribute('aria-live','polite');shell.before(search,results);
   const entries=sections.flatMap((section,i)=>[{label:section.querySelector('h4').textContent,index:i},...[...section.querySelectorAll('.cs-setting-link')].filter(b=>!b.hidden).map(b=>({label:b.textContent,index:i,target:b}))]);
   entries.push({label:'접종·사상충 일정 규칙',index:2},{label:'자동발송 · HOME 공개',index:4,target:auto.querySelector('.cs-actions button')},{label:'직원 삭제·승인 권한',index:1,target:grid.querySelector('[data-settings-action=team]')});
-  search.oninput=()=>{const q=search.value.trim().toLowerCase();results.replaceChildren();results.hidden=!q;if(!q)return;for(const e of entries.filter(e=>e.label.toLowerCase().includes(q)).slice(0,10)){results.append(button(e.label,()=>{activate(e.index);search.value='';results.hidden=true;e.target?.click();}));}if(!results.children.length)results.textContent='일치하는 설정이 없습니다.';};
+  const searchKey=value=>String(value).toLowerCase().replace(/[\s·・/]+/g,'');
+  search.oninput=()=>{const q=searchKey(search.value);results.replaceChildren();results.hidden=!q;if(!q)return;for(const e of entries.filter(e=>searchKey(e.label).includes(q)).slice(0,10)){results.append(button(e.label,()=>{activate(e.index);search.value='';results.hidden=true;e.target?.click();}));}if(!results.children.length)results.textContent='일치하는 설정이 없습니다.';};
   search.onkeydown=e=>{if(e.key==='Enter'&&!results.hidden){e.preventDefault();results.querySelector('button')?.click();}};
   document.getElementById('settingsHubTitle').textContent='설정 항목';
  }
