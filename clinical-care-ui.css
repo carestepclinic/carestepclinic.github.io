@@ -301,3 +301,7 @@
 #practiceRoot .cl-workspace .cl-ward-detail>.cl-toolbar [data-cl-action=discharge]{grid-column:2;grid-row:1;margin:0}
 #practiceRoot .cl-workspace .cl-ward-detail>.cl-toolbar .cl-mobile-patient{grid-column:1/-1;grid-row:2;width:100%;max-width:none}
 }
+
+/* Keep version actions outside the reader button on hospital cards. */
+#practiceRoot .cl-workspace .cl-protocol-entry:has(.cl-protocol-delete)>.cl-protocol-card{padding:10px 62px 54px 10px;min-height:116px}
+.cl-workspace .cl-protocol-delete{position:absolute;right:8px;bottom:8px;min-height:36px;padding:6px 12px}
