@@ -305,3 +305,46 @@
 /* Keep version actions outside the reader button on hospital cards. */
 #practiceRoot .cl-workspace .cl-protocol-entry:has(.cl-protocol-delete)>.cl-protocol-card{padding:10px 62px 54px 10px;min-height:116px}
 .cl-workspace .cl-protocol-delete{position:absolute;right:8px;bottom:8px;min-height:36px;padding:6px 12px}
+
+/* Protocol versions, reading and patient application share one compact flow. */
+.cl-workspace .cl-protocol-family{min-width:0;border:1px solid #cfdbed;border-radius:12px;padding:8px;background:#fff;align-self:start}
+.cl-workspace .cl-protocol-family>.cl-protocol-entry+.cl-protocol-entry{margin-top:8px}
+.cl-workspace .cl-protocol-family>details{margin-top:8px}
+.cl-workspace .cl-protocol-family>details>summary{padding:8px;cursor:pointer}
+.cl-workspace .cl-protocol-card small{display:block;margin-top:4px;color:#526783}
+.cl-workspace .cl-protocol-statusbar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.cl-workspace .cl-protocol-statusbar[hidden]{display:none}
+.cl-workspace .cl-protocol-statusbar button[aria-pressed=true]{background:#e9efff;border-color:#8da9ff;color:#1948c5}
+dialog.ck-protocol-reader[open]{display:flex;flex-direction:column;overflow:hidden;padding:0;max-height:92dvh}
+.ck-protocol-reader>.st-dialog-body{flex:1 1 auto;min-height:0;max-height:none;overflow:auto;padding:12px 16px}
+.ck-protocol-reader>.ck-fixed-actions{flex:0 0 auto;display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-top:1px solid #d4dfed;background:#fff;margin:0}
+.ck-protocol-reader>.ck-fixed-actions button,.ck-protocol-reader>.ck-fixed-actions summary{min-height:40px;padding:8px 12px;font:inherit;cursor:pointer}
+.ck-step-nav{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.ck-step-nav button{font:inherit;font-size:13px;padding:6px 10px;min-height:36px}
+.ck-protocol-reader .ck-step{scroll-margin-top:12px}
+.ck-manage-menu{margin-left:auto;position:relative}
+.ck-manage-menu[open]>button{position:absolute;right:0;bottom:100%;min-width:140px;background:#fff;color:#b42332;border:1px solid #e9c1c8;box-shadow:0 4px 16px #132b4920}
+.ck-protocol-reader>.ck-fixed-actions>.ck-manage-menu{margin:0 0 0 auto;padding:0;border:0}
+.ck-protocol-reader>.ck-fixed-actions>.ck-manage-menu>summary{margin:0;border:1px solid #d4dfed;border-radius:8px}
+.ck-protocol-reader .ck-checks{margin:12px 0;padding:10px;background:#fff9ed;border-radius:8px}
+.cl-protocol-editor [data-cl-step],.cl-protocol-editor [data-cl-source]{border:1px solid #c8d6ea;border-radius:10px;padding:12px;margin:12px 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.cl-protocol-editor [data-cl-step] label:has(textarea),.cl-step-tools{grid-column:1/-1}
+.cl-step-tools{display:flex;justify-content:flex-end;gap:6px}
+.cl-protocol-editor [data-cl-source] label:first-of-type{grid-column:1/-1}
+.cl-protocol-editor [data-cl-source]>button{justify-self:start}
+.cl-protocol-editor input,.cl-protocol-editor select,.cl-protocol-editor textarea{min-width:0;width:100%;box-sizing:border-box}
+.cl-protocol-editor fieldset label{min-width:0}
+.cl-protocol-editor footer,.cl-protocol-apply footer{flex-shrink:0;background:#fff;padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;margin:0;border-top:1px solid #d4dfed}
+dialog:is(.cl-protocol-editor,.cl-protocol-apply)[open]{display:flex;flex-direction:column;overflow:hidden;padding:0;max-height:92dvh}
+dialog:is(.cl-protocol-editor,.cl-protocol-apply)>header{flex-shrink:0;padding:12px 16px;background:#fff}
+dialog:is(.cl-protocol-editor,.cl-protocol-apply)>form{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:0;margin:0}
+dialog:is(.cl-protocol-editor,.cl-protocol-apply)>form>footer{position:static;bottom:auto;margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+.cl-protocol-scroll{flex:1;min-height:0;overflow:auto;padding:0 16px 12px}
+dialog:is(.cl-protocol-editor,.cl-protocol-apply)>[data-cl-discard]:not([hidden]){flex-shrink:0;padding:8px 16px}
+.cl-apply-selection{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:14px 0 8px}
+.cl-protocol-apply .cl-apply-step{display:flex;align-items:flex-start;gap:10px;padding:10px;border-bottom:1px solid #d5dfed;margin:0}
+.cl-protocol-apply .cl-apply-step>input{width:18px;min-width:18px;height:18px;margin-top:3px}
+.cl-apply-step>span{min-width:0;display:grid;gap:4px}
+.cl-apply-step small{color:#2755a0}
+.cl-apply-step>span>span{font-size:13px;white-space:pre-wrap}
+@media(max-width:600px){.cl-protocol-editor [data-cl-step],.cl-protocol-editor [data-cl-source]{grid-template-columns:minmax(0,1fr)}.cl-protocol-editor footer>button{flex:1}.ck-protocol-reader>.ck-fixed-actions{padding:8px;gap:6px}.ck-step-nav{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}.ck-step-nav button{flex-shrink:0}}
