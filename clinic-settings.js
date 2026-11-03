@@ -37,10 +37,10 @@
  function settings(){
   const old=document.querySelector('[data-settings-original]');if(!old||old.dataset.organized)return;old.dataset.organized='true';old.classList.add('cs-settings-grid');
   const cards=new Map([...old.querySelectorAll('[data-settings-action]')].map(b=>[b.dataset.settingsAction,b]));
-  const structure=[['병원 기본정보',['clinic']],['직원·권한',['team']],['진료 기본설정',['protocol','calc','ward','records','protocols']],['자료·교육',['library','training','sop']],['HOME·자동화·연동',['home','visibility','messaging','calendar','emr','partner']],['요금제·구독',['billing']]];
+  const structure=[['병원 기본정보',['clinic']],['직원·권한',['team']],['진료 기본설정',['protocol','calc','ward','records','protocols']],['자료·교육',['library','training','sop']],['HOME·자동화·연동',['home','visibility','messaging','calendar','emr','partner']],['요금제·구독',['billing']],['보안·데이터',['security']]];
   const added={calc:['약품·함량·조제 기준','practice','calc'],ward:['입원실·처치 서식','practice','ward'],records:['기록지·마취 설정','practice','surgery'],protocols:['진료 프로토콜','practice','protocols'],library:['보호자 안내자료','library'],training:['교육자료·배정','training'],sop:['우리 병원 SOP','training','sop'],visibility:['동기화 기록 HOME 공개','settings']};
   for(const [title,actions] of structure){const section=document.createElement('section');section.className='cs-settings-section';const h=document.createElement('h4');h.textContent=title;section.append(h);for(const id of actions){const existing=cards.get(id);if(existing){existing.className='cs-setting-link';existing.querySelector('em')?.remove();existing.querySelector('.settings-category-icon')?.remove();section.append(existing);}else{const [label,view,tab]=added[id],b=document.createElement('button');b.type='button';b.className='cs-setting-link';b.textContent=label;b.onclick=()=>{if(id==='visibility'){if(g.r61OpenHomeSettings)g.r61OpenHomeSettings();else toast('HOME 공개 설정을 불러오고 있습니다. 잠시 후 다시 눌러주세요.');return;}go(view,tab==='sop'?{trainingSection:'sop'}:{practiceTab:tab});};section.append(b);}}old.append(section);}
-  const security=cards.get('security');if(security){const details=document.createElement('details');details.className='cs-settings-advanced';details.innerHTML='<summary>보안·운영 점검</summary>';security.className='cs-setting-link';details.append(security);old.parentElement.append(details);}
+
  }
  const planUndo=new WeakMap();
  function recommended(e){
@@ -119,7 +119,7 @@
   shell.className='cs-settings-shell';nav.className='cs-settings-nav';nav.setAttribute('aria-label','설정 분류');select.className='cs-settings-select';select.setAttribute('aria-label','설정 분류');grid.before(shell);shell.append(nav,grid);
   sections.forEach((section,i)=>{const title=section.querySelector('h4').textContent;section.id='cs-section-'+i;const b=button(title,()=>activate(i));b.setAttribute('aria-controls',section.id);nav.append(b);select.add(new Option(title,String(i)));});nav.before(select);
   const storageKey=()=> 'carestep.settings.section:'+identity();
-  function activate(index,remember=true){index=Math.max(0,Math.min(sections.length-1,Number(index)||0));sections.forEach((s,i)=>s.hidden=i!==index);[...nav.children].forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));select.value=String(index);if(remember)try{sessionStorage.setItem(storageKey(),String(index));}catch{}if(index===2&&document.querySelector('#settings.active-view'))prepareProtocol();}
+  function activate(index,remember=true){if(remember&&S.unified&&[1,5,6].includes(Number(index))){S.openSection(Number(index));return;}index=Math.max(0,Math.min(sections.length-1,Number(index)||0));sections.forEach((s,i)=>s.hidden=i!==index);[...nav.children].forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));select.value=String(index);if(remember)try{sessionStorage.setItem(storageKey(),String(index));}catch{}if(index===2&&document.querySelector('#settings.active-view'))prepareProtocol();}
   activateSection=activate;restoreSection=()=>{let index=0;try{index=Number(sessionStorage.getItem(storageKey()))||0;}catch{}activate(index,false);};
   select.onchange=()=>activate(Number(select.value));activate(0,false);
   const added=[...grid.querySelectorAll('button:not([data-settings-action])')];
@@ -222,4 +222,63 @@
  g.addEventListener('carestep:automation-settings-saved',()=>{statusAt=0;if(document.querySelector('#settings.active-view'))void loadAutomation(true);});
  document.addEventListener('click',async e=>{const b=e.target.closest('[data-cs-contract-retry]');if(!b)return;b.disabled=true;b.textContent='조회 중…';try{if(typeof loadBillingOverview==='function')await loadBillingOverview(true);else if(typeof loadClinicDetail==='function'&&typeof selectedClinic!=='undefined'&&selectedClinic)await loadClinicDetail(selectedClinic);}catch{toast('계약 정보를 불러오지 못했습니다. 다시 시도해주세요.');}finally{if(b.isConnected){b.disabled=false;b.textContent='계약 정보 다시 조회';}}});
  enhanceHub();enhancePermissions();enhanceContract();groupPlans();
+})(window);
+
+/* One hospital-settings navigation, retaining existing account routes and handlers. */
+(function(g){
+ 'use strict';
+ function mount(){
+ const S=g.ClinicSettings,root=document.getElementById('settings'),account=document.getElementById('account');
+ if(!S||!root||!account)return;
+ const tabs={1:'team',5:'billing',6:'security'},indices={team:1,billing:5,security:6};
+ const titles=['병원 기본정보','직원·권한','진료 기본설정','자료·교육','HOME·자동화·연동','요금제·구독','보안·데이터'];
+ const key=()=> 'carestep.settings.section:'+JSON.stringify([saasMe?.clinic?.id,saasMe?.user?.id]);
+ const allowed=i=>tabs[i]?g.ClinicNavigation.accountAllowed(tabs[i]):saasCanView('settings');
+ const remember=i=>{try{sessionStorage.setItem(key(),String(i));}catch{}};
+ const saved=()=>{try{return Number(sessionStorage.getItem(key()))||0;}catch{return 0;}};
+ const resolve=i=>Number.isInteger(i)&&i>=0&&i<titles.length&&allowed(i)?i:titles.findIndex((_,n)=>allowed(n));
+ S.unified=true;S.canEnter=()=>titles.some((_,i)=>allowed(i));
+ const shell=document.createElement('div'),nav=document.createElement('nav'),select=document.createElement('select'),content=document.createElement('div');
+ shell.className='cs-settings-shell cs-account-shell';nav.className='cs-settings-nav';nav.setAttribute('aria-label','설정 분류');select.className='cs-settings-select';select.setAttribute('aria-label','설정 분류');content.className='cs-account-content';
+ titles.forEach((title,i)=>{const b=document.createElement('button');b.type='button';b.className='cs-button';b.textContent=title;b.onclick=()=>S.openSection(i);nav.append(b);select.add(new Option(title,String(i)));});
+ select.onchange=()=>S.openSection(Number(select.value));shell.append(select,nav,content);account.append(shell);
+ for(const pane of [...account.querySelectorAll('[data-account-pane]')])content.append(pane);
+ const withdrawal=document.getElementById('personalWithdrawalBox'),deletion=document.getElementById('clinicDeletionBox');
+ function fold(node,title,tab){if(!node)return;const details=document.createElement('details');details.className='cs-important-action';const summary=document.createElement('summary');summary.textContent=title;details.append(summary,node);account.querySelector('[data-account-pane="'+tab+'"]').append(details);}
+ fold(withdrawal,'개인 계정 탈퇴','my');fold(deletion,'병원 데이터 삭제 요청','security');
+ account.querySelector('.legal-safety-note')?.remove();
+ document.getElementById('accountImportantActions')?.remove();
+ const home=root.querySelector('#cs-section-4');
+ for(const id of ['r61-controls','emrSyncCenter']){const el=document.getElementById(id);if(el)home.append(el);}
+ const diagnostics=root.querySelector('.operations-settings-panel');if(diagnostics)account.querySelector('[data-account-pane=security]').append(diagnostics);
+ root.querySelector('[data-cs-auto-summary]')?.remove();
+ // A category is the entry point; do not show another identically named link card.
+ for(const tab of ['team','billing','security'])root.querySelector('[data-settings-action="'+tab+'"]')?.setAttribute('hidden','');
+ const mainNav=root.querySelector('.cs-settings-nav'),mainSelect=root.querySelector('.cs-settings-select');
+ mainNav.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;e.preventDefault();e.stopImmediatePropagation();S.openSection([...mainNav.children].indexOf(b));},true);
+ mainSelect.addEventListener('change',e=>{e.stopImmediatePropagation();S.openSection(Number(mainSelect.value));},true);
+ function permissions(){for(const [menu,dropdown] of [[mainNav,mainSelect],[nav,select]])titles.forEach((_,i)=>{menu.children[i].hidden=!allowed(i);dropdown.options[i].disabled=!allowed(i);dropdown.options[i].hidden=!allowed(i);});}
+ function syncAccount(tab){
+  const index=indices[tab],hospital=index!==undefined;shell.classList.toggle('cs-personal-shell',!hospital);account.classList.toggle('cs-unified-account',true);account.classList.toggle('cs-hospital-account',hospital);
+  nav.hidden=select.hidden=!hospital;
+  if(hospital){const heading=account.querySelector('[data-account-pane="'+tab+'"] .account-pane-head h3');if(heading)heading.textContent=titles[index];remember(index);select.value=String(index);[...nav.children].forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));}
+  permissions();
+ }
+ const setTab=g.setAccountTab;g.setAccountTab=function(tab='my',focus=''){const result=setTab(tab,focus);const active=account.querySelector('[data-account-tab].active')?.dataset.accountTab||'my';syncAccount(active);return result;};
+ const oldGo=g.go;g.go=function(view,options={}){
+  if(view==='settings'){
+   const i=resolve(options.settingsSection===undefined?saved():Number(options.settingsSection));if(i<0)return false;
+   remember(i);permissions();
+   if(tabs[i])return oldGo('account',{...options,accountTab:tabs[i]});
+  }
+  return oldGo(view,options);
+ };
+ S.openSection=i=>g.go('settings',{settingsSection:i});
+ const oldCategory=g.openSettingsCategory;g.openSettingsCategory=function(action){const map={clinic:0,team:1,protocol:2,billing:5,security:6,emr:4};if(Object.hasOwn(map,action)){const i=map[action];if(!allowed(i))return;S.openSection(i);if(action==='emr'){loadEmrSyncStatus(false);settingsScrollTo('#emrSyncCenter');}return;}return oldCategory(action);};
+ const oldLoad=g.saasLoadAccountTab;g.saasLoadAccountTab=function(tab='my',force=false){const result=oldLoad(tab,force);if(tab==='security'&&saasMode==='auth'&&saasMe?.role==='owner'){
+  const scope=clinicReadScope(),valid=()=>scope===clinicReadScope();void g.CarestepAccountReads?.load(tab,{scope:scope+JSON.stringify([saasMe.role,saasMe.permissions]),valid,force,jobs:[{id:'deletion',label:'삭제 요청',run:async()=>{const d=await saasRequest('/saas/clinic/deletion-request',{method:'GET'});if(valid()){clinicDeletionState=d;renderProductionGovernance();}}}]});
+ }return result;};
+ syncAccount(account.querySelector('[data-account-tab].active')?.dataset.accountTab||'my');
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })(window);

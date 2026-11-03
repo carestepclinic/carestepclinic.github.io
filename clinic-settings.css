@@ -37,3 +37,15 @@
 .cs-permission-effective>div{align-items:start}
 .cs-permission-effective span{line-height:1.7}
 @media(max-width:600px){.cs-automation-summary{flex-wrap:wrap}.cs-automation-summary span{flex:1 1 220px}}
+/* Shared settings navigation across hospital and personal account routes. */
+#account.cs-unified-account>:is(.account-ux-hero,.account-ux-summary,.account-ux-actions,#accountTabs){display:none!important}
+.cs-account-content{min-width:0;width:100%}.cs-account-content .account-tab-pane{margin:0!important;min-width:0}
+.cs-account-content .account-pane-head{margin-top:0}.cs-account-content .account-pane-head h3{font-size:18px}
+.cs-account-content .saas-account-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cs-account-content .billing-layout{grid-template-columns:minmax(0,1fr)}
+.cs-personal-shell{display:block}.cs-settings-nav[hidden],.cs-settings-select[hidden],.cs-settings-nav button[hidden]{display:none!important}
+.cs-important-action{margin-top:16px;border-top:1px solid #dce5f4;padding-top:12px}.cs-important-action>summary{cursor:pointer;font-weight:600;padding:8px 0}
+#cs-section-4>:is(#r61-controls,#emrSyncCenter){margin:12px 0;max-width:100%}
+#settings .cs-settings-section[hidden]{display:none!important}
+@media(max-width:700px){.cs-account-content .saas-account-grid{grid-template-columns:minmax(0,1fr)}}
+#account.cs-hospital-account .account-pane-head>div:first-child{display:block;margin-right:auto}
