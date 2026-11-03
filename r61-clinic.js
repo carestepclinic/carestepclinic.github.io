@@ -2179,6 +2179,7 @@
             }
         }
         ;
+        window.r61OpenHomeSettings = settings;
         window.r61OpenMaterials = openWorkspaceComposer;
         window.r61OpenPreventiveResults=preventiveResults;window.r61OpenPreventiveReview=preventiveReview;
         window.r61OpenPatientPreview=async()=>{if(window.crmPrepareMaterialPatient&&!await window.crmPrepareMaterialPatient())return;if(typeof go==='function')go('builder');if(typeof setWizardStep==='function')setWizardStep(5);};
