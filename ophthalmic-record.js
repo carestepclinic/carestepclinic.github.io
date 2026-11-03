@@ -201,7 +201,7 @@ function mount(root,a){
 
  const onScroll=()=>{clearTimeout(viewTimer);if(mode==='record')viewTimer=setTimeout(persistView,120);};g.addEventListener('scroll',onScroll,{passive:true});const pageHide=()=>{persistView();if(item?.id)persistRx();};g.addEventListener('pagehide',pageHide);
  const unload=e=>{pageHide();if(dirty||busy||pending||partialRx().length&&!rxLocalSaved){e.preventDefault();e.returnValue='';}};g.addEventListener('beforeunload',unload);
- return {open,leave,reset(){reset();remember('');},sync(){if(scope&&(!a.ready()||scope!==a.identity()))clear();},dispose(){pageHide();disposed=true;clearTimeout(timer);clearTimeout(viewTimer);g.removeEventListener('scroll',onScroll);g.removeEventListener('pagehide',pageHide);g.removeEventListener('beforeunload',unload);clear();}};
+ return {open,context:()=>item?.id?{caseId:item.id}:null,async openRecord(id){await open();await load(id);},leave,reset(){reset();remember('');},sync(){if(scope&&(!a.ready()||scope!==a.identity()))clear();},dispose(){pageHide();disposed=true;clearTimeout(timer);clearTimeout(viewTimer);g.removeEventListener('scroll',onScroll);g.removeEventListener('pagehide',pageHide);g.removeEventListener('beforeunload',unload);clear();}};
 }
 g.OphthalmicRecord={mount,blank,fields,value,eyeSVG,trend,age,sex,mergeChart};
 })(window);
