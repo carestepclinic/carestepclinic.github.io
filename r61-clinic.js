@@ -664,7 +664,7 @@
                     }})
                 });
                 if (settingsSession() !== session || saved?.ok !== true || !saved.flags || !saved.policy) throw Error('CONFIG_UNCONFIRMED');
-                Object.assign(cfg, saved);tracker?.saved();
+                Object.assign(cfg, saved);tracker?.saved();window.dispatchEvent(new CustomEvent('carestep:automation-settings-saved'));
                 saveInfo.textContent = saved.flags.preventive_auto_delivery ? '설정 저장 완료 · 자동발송 켜짐. 예정 대상 조회에서 확인해주세요.' : '설정 저장 완료 · 자동발송 꺼짐. 발송 없이 대상을 미리 확인할 수 있습니다.';
             } catch (e) {
                 tracker?.failed();
