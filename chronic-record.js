@@ -39,6 +39,14 @@ const fields=[
  ["ionizedCalcium","이온화 칼슘 · iCa","mmol/L",0,10,"ple",true],
  ["magnesium","총 마그네슘 · Mg","mg/dL",0,20,"ple",true]
 ];
+// Existing fields follow the clinic laboratory report order; no result or reference range is imported.
+const cbcOrder=['wbc','neutrophils','lymphocytes','hematocrit','reticulocytes','platelets'];
+const chemistryOrder=['alp','alt','bilirubin','bun','creatinine','totalCalcium','phosphorus','totalProtein','albumin','glucose','triglycerides','cholesterol','magnesium','sodium','potassium','chloride','fructosamine','sdma'];
+const cbcKeys=[...cbcOrder,'pcv'];
+const chemistryKeys=[...chemistryOrder,'bhb','ntproBNP','ctni','totalCO2','cobalamin','folate','ionizedCalcium'];
+const displayFieldOrder=['weight','bcs','sbp','sleepRR','heartRate',...cbcKeys,...chemistryKeys];
+const fieldRank=k=>{const i=displayFieldOrder.indexOf(k);return i<0?displayFieldOrder.length:i;};
+fields.sort((a,b)=>fieldRank(a[0])-fieldRank(b[0]));
 const noteFields=[['mcs','근육 상태 · MCS','all'],['cbc','CBC · 혈구 검사 소견','all'],['urinalysis','요검사 · 침사 소견','ckd,diabetes,cushing,addison,hyperthyroid,imha,ple'],['urineCulture','요배양 · 감염 의심 시','ckd,diabetes,cushing,imha'],['imaging','영상 검사 · 초음파/방사선','all'],['ecg','심전도 · ECG','cardiac,hyperthyroid'],['glucoseCurve','혈당 곡선 · CGM 요약','diabetes'],["bloodSmear","혈액 도말 · 구형적혈구/응집/혈소판 확인","imha"],["immuneEvidence","면역성 용혈 평가 · SAT/DAT, 채혈·수혈 시점","imha"],["secondaryCauses","감염·약물·종양 등 원인 평가","imha"],["transfusion","수혈 일시·제제·반응","imha"],["coagulation","혈전·출혈 위험 / 응고검사 · 검사명·단위 함께 기록","imha,ple"],["adverseEffects","치료 부작용·감염 모니터링","imha,ple"],["fecalTesting","분변·기생충 검사","ple"],["proteinLoss","단백 소실 감별 · UPC/간 기능/출혈 등","ple"],["giTests","소화기 추가 검사 · TLI/PLI, 검사법·단위·참고범위","ple"],["histopathology","장 조직검사 · 부위/방법/병리 결과","ple"],["stoolDiet","대변 상태·횟수 / 실제 식이·섭취량·반응","ple"],["diseaseActivity","질병 활성도·삶의 질 · 사용 지표명/점수 함께 기록","ple"]];
 const examGuide={
  ckd:'크레아티닌·SDMA·인·혈압·UPC 추적. 요비중/침사, 전해질, CBC·칼슘·TCO₂ 등은 병기와 임상 상태에 맞춰 선택합니다.',
@@ -169,16 +177,16 @@ function mount(root,a){
  }
  function noteCard(f){return '<label>'+f[1]+'<textarea rows="2" maxlength="2000" data-field="examNotes.'+f[0]+'">'+esc(draft.examNotes?.[f[0]]||'')+'</textarea></label>';}
  function groupedExams(){
- const groups=[['basic','기본 측정·증상',['weight','bcs','sbp','sleepRR','heartRate','mcs']],['blood','혈액·생화학 검사',[]],['urine','요검사',['upc','usg','urinalysis','urineCulture']],['hormone','호르몬 검사',['tt4','tsh','ft4','cortisolBaseline','cortisolACTH','cortisolLddst4','cortisolLddst8']],['other','영상·기타 평가',['imaging','ecg','laAo','lviddn','glucoseCurve','immuneEvidence','secondaryCauses','fecalTesting','proteinLoss','giTests','histopathology','stoolDiet','diseaseActivity','transfusion','adverseEffects']]];
+ const groups=[['basic','기본 측정·증상',['weight','bcs','sbp','sleepRR','heartRate','mcs']],['cbc','CBC · 혈구 검사',[...cbcKeys,'cbc','bloodSmear']],['blood','생화학 검사',chemistryKeys],['urine','요검사',['upc','usg','urinalysis','urineCulture']],['hormone','호르몬 검사',['tt4','tsh','ft4','cortisolBaseline','cortisolACTH','cortisolLddst4','cortisolLddst8']],['other','영상·기타 평가',['imaging','ecg','laAo','lviddn','glucoseCurve','immuneEvidence','secondaryCauses','fecalTesting','proteinLoss','giTests','histopathology','stoolDiet','diseaseActivity','transfusion','adverseEffects']]];
  const groupOf=k=>groups.find(g=>g[2].includes(k))?.[0]||'blood';
  const match=(label,html,note=false)=>'<div class="'+(note?'chr-note-cell':'')+'" data-exam-match="'+esc(label.toLowerCase())+'">'+html+'</div>';
  return '<label class="chr-exam-search">검사 찾기<input data-exam-search type="search" placeholder="검사명 · 영문 약어" value="'+esc(examQuery)+'"></label>'+groups.map(([key,title])=>{
- const nums=fields.filter(f=>relevantField(f)&&groupOf(f[0])===key).sort((a,b)=>Number(isAdvanced(a))-Number(isAdvanced(b))),notes=noteFields.filter(f=>chosen(draft,f[2])&&groupOf(f[0])===key),syms=key==='basic'?symptoms.filter(f=>chosen(draft,f[3])):[];
+ const nums=fields.filter(f=>relevantField(f)&&groupOf(f[0])===key).sort((a,b)=>['cbc','blood'].includes(key)?fieldRank(a[0])-fieldRank(b[0]):Number(isAdvanced(a))-Number(isAdvanced(b))),notes=noteFields.filter(f=>chosen(draft,f[2])&&groupOf(f[0])===key),syms=key==='basic'?symptoms.filter(f=>chosen(draft,f[3])):[];
  if(!nums.length&&!notes.length&&!syms.length)return '';
  return '<section class="chr-exam-section" data-exam-group="'+key+'"><h4>'+title+'</h4><div class="chr-grid chr-compact-grid">'+nums.map(f=>match(f[1],valueCard(f))).join('')+syms.map(f=>match(f[1],symptomCard(f))).join('')+notes.map(f=>match(f[1],noteCard(f),true)).join('')+'</div></section>';
  }).join('')+'<p data-exam-empty hidden>일치하는 검사가 없습니다.</p>';
  }
- function displaySettings(){return '<details class="chr-display-settings"><summary>검사 표시 순서</summary><small>선택한 수치 검사를 각 분류 앞쪽에 표시합니다. 모든 검사는 계속 표시하며, 이 브라우저에서 순서를 기억합니다.</small><div class="chr-pin-grid">'+fields.filter(relevantField).map(f=>'<label><input type="checkbox" data-pin="'+f[0]+'" '+(!isAdvanced(f)?'checked':'')+' '+(f[0]==='weight'?'disabled':'')+'>'+esc(f[1])+'</label>').join('')+'</div><button type="button" data-reset-display>기본 배치로 복원</button></details>';}
+ function displaySettings(){return '<details class="chr-display-settings"><summary>검사 표시 순서</summary><small>CBC·생화학은 병원 검사결과지 순서로 고정합니다. 그 외 선택한 수치 검사는 각 분류 앞쪽에 표시하며, 이 브라우저에서 기억합니다.</small><div class="chr-pin-grid">'+fields.filter(relevantField).map(f=>'<label><input type="checkbox" data-pin="'+f[0]+'" '+(!isAdvanced(f)?'checked':'')+' '+(f[0]==='weight'||cbcKeys.includes(f[0])||chemistryKeys.includes(f[0])?'disabled':'')+'>'+esc(f[1])+'</label>').join('')+'</div><button type="button" data-reset-display>기본 배치로 복원</button></details>';}
  function filterExams(){const panel=root.querySelector('[data-panel=exam]');if(!panel)return;const q=examQuery.trim().toLowerCase();for(const el of panel.querySelectorAll('[data-exam-match]'))el.hidden=!el.dataset.examMatch.includes(q);for(const group of panel.querySelectorAll('[data-exam-group]'))group.hidden=![...group.querySelectorAll('[data-exam-match]')].some(e=>!e.hidden);const empty=panel.querySelector('[data-exam-empty]');if(empty)empty.hidden=!![...panel.querySelectorAll('[data-exam-match]')].some(e=>!e.hidden);}
  function bindExamTools(panel){
  panel.querySelector('[data-exam-search]')?.addEventListener('input',e=>{examQuery=e.target.value;filterExams();});
