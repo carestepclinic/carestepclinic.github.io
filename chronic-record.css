@@ -29,3 +29,17 @@
 @media(max-width:700px){.chr .chr-value-input:has(select){display:grid;grid-template-columns:minmax(0,1fr);gap:0}.chr .chr-value-input:has(select) input,.chr .chr-value-input:has(select) select{width:100%;min-width:0}.chr .chr-value-input select{font-size:14px}}
 .chr .chr-purpose label{max-width:340px}.chr .chr-two>label:only-child{grid-column:1/-1}.chr .chr-conditions{padding:6px 0}.chr .chr-diseases{margin:6px 0}.chr .chr-diseases>summary{padding:6px}.chr .chr-grid:empty,.chr .chr-two:empty{display:none}
 @media(max-width:700px){.chr .chr-purpose label{max-width:none}.chr [data-trend-chart] svg text{font-size:16px}}
+
+/* Visit workflow: latest patient visit, compact entry and direct comparisons. */
+.chr .chr-patient-group{border:1px solid #d7e2ee;border-radius:10px;background:white;overflow:hidden;margin:8px 0}
+.chr .chr-latest{display:flex;align-items:center;gap:10px;padding:8px}.chr .chr-latest>.er-record{flex:1;min-width:0;margin:0;border:0}.chr .chr-latest>[data-list-recheck]{flex:none;min-height:42px}
+.chr [data-history-group]{padding:0 12px 10px}.chr [data-history-group] summary{padding:6px;cursor:pointer}.chr .chr-list-scope{display:block;margin:8px 0;color:#53697e}
+.chr .chr-value-wrap{min-width:0}.chr .chr-value{display:block}.chr .chr-trend-link{font:inherit;font-size:12px;min-height:32px;padding:4px 8px;margin-top:3px;border:1px solid #ccd9eb;background:#fff;border-radius:6px;color:#1748b3;cursor:pointer}
+.chr .chr-advanced-group h4{font-size:14px;margin:12px 0 4px}.chr .chr-advanced-group [data-exam-match]{min-width:0}.chr .chr-advanced-group .chr-two label{display:block}.chr .chr-advanced-group textarea{width:100%;box-sizing:border-box}
+.chr [hidden]{display:none!important}.chr .chr-exam-search{display:block;max-width:450px;margin:10px 0}.chr .chr-exam-search input{width:100%}
+.chr .chr-display-settings{margin-top:10px}.chr .chr-pin-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:10px 0}.chr .chr-pin-grid label{display:flex;align-items:center;gap:6px;font-size:13px;min-width:0}.chr .chr-pin-grid input{width:18px;height:18px;min-height:18px;flex:none}
+.chr .chr-recorded-extras:empty{display:none}.chr .chr-recorded-extras{padding:6px;background:#edf3ff;border-radius:6px}
+.chr [data-plan-sources]{max-height:none;overflow:visible}.chr .chr-reuse-latest{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.chr .chr-reuse-entry{padding:10px;border:1px solid #d7e2ee;border-radius:8px;min-width:0}.chr .chr-reuse-entry>small{display:block;color:#53697e;margin:5px 0}.chr .chr-reuse-entry p{white-space:pre-wrap;overflow-wrap:anywhere;max-height:160px;overflow:auto;margin:6px 0}.chr .chr-reuse-entry button{font:inherit;font-size:13px;min-height:38px;margin:3px 4px 3px 0}
+.chr .er-jumps{scroll-margin-top:12px}.chr .chr-exam-group h4{color:#354d69}.chr .chr-value-input input{font-weight:600}.chr [data-show-trend]:focus-visible{outline:2px solid #2453e8;outline-offset:2px}
+@media(min-width:1500px){.chr .chr-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:700px){.chr .chr-latest{align-items:stretch;flex-direction:column;gap:4px}.chr .chr-latest>[data-list-recheck]{align-self:flex-end}.chr .chr-pin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.chr .chr-reuse-latest{grid-template-columns:1fr}.chr .chr-trend-link{min-height:40px}.chr .chr-reuse-entry button{min-height:42px}.chr .chr-grid label{font-size:13px}.chr .er-jumps button{min-height:42px}}
