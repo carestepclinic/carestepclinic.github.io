@@ -25,3 +25,15 @@
 @container (max-width:600px){.cs-inline-form .protocol-row{grid-template-columns:65px minmax(0,1fr)}.cs-inline-form .protocol-row.head{display:none}.cs-inline-form .protocol-input{grid-column:1/-1}.cs-inline-form .protocol-input:before{content:attr(data-label);font-size:12px;width:100px;flex:0 0 100px}.cs-inline-form .protocol-input .input{width:100%}}
 
 @media(max-width:1100px){.cs-settings-shell{display:block}.cs-settings-nav{display:none}.cs-settings-select{display:block;width:100%;min-height:44px;margin-bottom:10px;padding:9px;border:1px solid #bdcfe9;border-radius:8px;font:inherit;background:#fff;color:#153b5b}.cs-status-rows{grid-template-columns:1fr}.cs-inline-form .clinical-protocol-head{flex-wrap:wrap}}
+/* Shared CLINIC / HQ settings workflow. */
+.cs-setting-link[hidden]{display:none!important}
+.cs-automation-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;margin:8px 0;border:1px solid #dce5f4;border-radius:10px;background:#f7faff;font-size:13px;line-height:1.5}
+.cs-automation-summary.needs-attention{background:#fff8e8;border-color:#ead6a8}
+.cs-automation-summary .cs-button{flex-shrink:0}
+.cs-protocol-schedule{margin-top:16px;border-top:1px solid #dce5f4;padding-top:12px}
+.cs-protocol-schedule>summary{font-weight:600;cursor:pointer;padding:8px 0}
+.cs-search-target{outline:3px solid #8caaff!important;outline-offset:3px}
+.cs-contract-unknown{border:1px solid #e5d7b4;background:#fffaf0;padding:10px;border-radius:8px;margin-top:10px}
+.cs-permission-effective>div{align-items:start}
+.cs-permission-effective span{line-height:1.7}
+@media(max-width:600px){.cs-automation-summary{flex-wrap:wrap}.cs-automation-summary span{flex:1 1 220px}}

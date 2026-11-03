@@ -42,7 +42,19 @@
   for(const [title,actions] of structure){const section=document.createElement('section');section.className='cs-settings-section';const h=document.createElement('h4');h.textContent=title;section.append(h);for(const id of actions){const existing=cards.get(id);if(existing){existing.className='cs-setting-link';existing.querySelector('em')?.remove();existing.querySelector('.settings-category-icon')?.remove();section.append(existing);}else{const [label,view,tab]=added[id],b=document.createElement('button');b.type='button';b.className='cs-setting-link';b.textContent=label;b.onclick=()=>{if(id==='visibility'){if(g.r61OpenHomeSettings)g.r61OpenHomeSettings();else toast('HOME 공개 설정을 불러오고 있습니다. 잠시 후 다시 눌러주세요.');return;}go(view,tab==='sop'?{trainingSection:'sop'}:{practiceTab:tab});};section.append(b);}}old.append(section);}
   const security=cards.get('security');if(security){const details=document.createElement('details');details.className='cs-settings-advanced';details.innerHTML='<summary>보안·운영 점검</summary>';security.className='cs-setting-link';details.append(security);old.parentElement.append(details);}
  }
- function recommended(e){const b=e.target.closest('[data-recommended-plan]');if(!b)return;const card=b.closest('[data-plan]');if(card.dataset.editing==='false'){card.querySelector('.hq-editor-toolbar button')?.click();}const v=C.recommended(b.dataset.recommendedPlan);for(const [key,on] of Object.entries(v)){const input=card.querySelector('[data-feature="'+key+'"]');if(input){input.checked=on;input.dispatchEvent(new Event('change',{bubbles:true}));}}let notice=card.querySelector('[data-cs-preview]');if(!notice){notice=document.createElement('p');notice.dataset.csPreview='';notice.className='cs-permission-preview';b.after(notice);}notice.textContent='권장 구성을 불러왔습니다. 아직 저장되지 않았습니다. 저장하면 신규·변경 계약에 적용되며 기존 진료 기능은 유지됩니다.';}
+ const planUndo=new WeakMap();
+ function recommended(e){
+  const b=e.target.closest('[data-recommended-plan]');if(!b)return;const card=b.closest('[data-plan]');
+  if(card.dataset.editing==='false')card.querySelector('.hq-editor-toolbar button')?.click();
+  if(card.dataset.editing==='false')return;
+  const fields=[...card.querySelectorAll('[data-feature]')];planUndo.set(card,fields.map(x=>[x,x.checked]));
+  const v=C.recommended(b.dataset.recommendedPlan);for(const input of fields)if(Object.hasOwn(v,input.dataset.feature)){input.checked=v[input.dataset.feature];input.dispatchEvent(new Event('change',{bubbles:true}));}
+  let notice=card.querySelector('[data-cs-preview]');if(!notice){notice=document.createElement('div');notice.dataset.csPreview='';notice.className='cs-permission-preview';b.after(notice);}
+  notice.textContent='권장 구성을 불러왔습니다. 아직 저장되지 않았습니다. ';const undo=document.createElement('button');undo.type='button';undo.className='cs-button';undo.textContent='불러오기 취소';
+  undo.onclick=()=>{if(card.dataset.editing==='false')return;for(const [input,value] of planUndo.get(card)||[]){input.checked=value;input.dispatchEvent(new Event('change',{bubbles:true}));}planUndo.delete(card);notice.remove();};notice.append(undo);
+  new MutationObserver((_,observer)=>{if(card.dataset.editing==='false'){planUndo.delete(card);notice.remove();observer.disconnect();}}).observe(card,{attributes:true,attributeFilter:['data-editing']});
+ }
+
  if(typeof bindMemberPermissions==='function'){const old=bindMemberPermissions;g.bindMemberPermissions=function(root){old(root);decoratePermissions(root);};}
  if(typeof renderBillingContractComparison==='function'){const old=renderBillingContractComparison;g.renderBillingContractComparison=function(){old();capabilitySummary();};}
  g.ClinicSettings={access,decoratePermissions,refresh:()=>{settings();guide();capabilitySummary();}};
@@ -78,8 +90,8 @@
   if(!force&&statusKey===key&&statusAt&&Date.now()-statusAt<30000)return;
   const same=statusKey===key,generation=++statusGeneration;statusKey=key;
   const current=()=>key===identity()&&generation===statusGeneration;
-  box.setAttribute('aria-busy','true');box.querySelector('[data-cs-status-time]').textContent='갱신 중…';box.querySelector('[data-cs-status-refresh]').disabled=true;
-  if(!same||!statusAt){box.querySelector('[data-cs-status-rows]').textContent='자동화 상태 확인 중…';box.querySelector('[data-cs-status-note]').textContent='';}
+  box.setAttribute('aria-busy','true');document.querySelector('[data-cs-auto-summary]')?.setAttribute('aria-busy','true');box.querySelector('[data-cs-status-time]').textContent='갱신 중…';box.querySelector('[data-cs-status-refresh]').disabled=true;
+  if(!same||!statusAt){box.querySelector('[data-cs-status-rows]').textContent='자동화 상태 확인 중…';box.querySelector('[data-cs-status-note]').textContent='';const summary=document.querySelector('[data-cs-auto-summary]');if(summary){summary.querySelector('span').textContent='자동화 상태 확인 중…';summary.classList.remove('needs-attention');}}
   statusRequest=(async()=>{try{
    if(typeof saasMode==='undefined'||saasMode!=='auth')throw Error('병원 로그인 후 확인할 수 있습니다.');
    const cfg=await saasRequest('/saas/r61/config');if(!current())return;
@@ -87,9 +99,10 @@
    const note=box.querySelector('[data-cs-status-note]'),reasons=[...new Set(cfg.preventive?.reasons||[])];note.replaceChildren();
    const text=document.createElement('span');text.textContent='접종·사상충은 같은 스위치를 사용합니다. '+(reasons.length?reasons.map(x=>reasonLabels[x]||'발송 조건 확인 필요').join(' · '):'실제 발송은 예정일·수신 허용·채널 상태에 따릅니다.');note.append(text);
    if(reasons.length)note.append(button('발송 조건 확인',()=>g.r61OpenHomeSettings?.()));
+   const summary=document.querySelector('[data-cs-auto-summary]');if(summary){summary.querySelector('span').textContent=automationRows(cfg).map(x=>x.join(' ')).join(' · ')+(reasons.length?' · '+reasons.map(x=>reasonLabels[x]||'발송 조건 확인 필요').join(' · '):'');summary.classList.toggle('needs-attention',!!reasons.length);}
    statusAt=Date.now();box.querySelector('[data-cs-status-time]').textContent='확인 '+new Date(statusAt).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
-  }catch(err){if(current()){box.querySelector('[data-cs-status-rows]').textContent='자동화 상태 조회 실패 · '+(err.message||'다시 확인해주세요.');box.querySelector('[data-cs-status-note]').textContent='상태 새로고침으로 다시 확인해주세요.';box.querySelector('[data-cs-status-time]').textContent='확인 필요';statusAt=0;}}
-  finally{if(current()){box.removeAttribute('aria-busy');box.querySelector('[data-cs-status-refresh]').disabled=false;statusRequest=null;}}})();return statusRequest;
+  }catch(err){if(current()){box.querySelector('[data-cs-status-rows]').textContent='자동화 상태 조회 실패 · '+(err.message||'다시 확인해주세요.');box.querySelector('[data-cs-status-note]').textContent='상태 새로고침으로 다시 확인해주세요.';box.querySelector('[data-cs-status-time]').textContent='확인 필요';statusAt=0;const summary=document.querySelector('[data-cs-auto-summary]');if(summary){summary.querySelector('span').textContent='자동화 상태 확인 필요 · 상태를 다시 조회해주세요.';summary.classList.add('needs-attention');}}}
+  finally{if(current()){box.removeAttribute('aria-busy');document.querySelector('[data-cs-auto-summary]')?.removeAttribute('aria-busy');box.querySelector('[data-cs-status-refresh]').disabled=false;statusRequest=null;}}})();return statusRequest;
  }
  let activateSection=()=>{},restoreSection=()=>{},profileKey='',protocolKey='',protocolPending=null,protocolDirty=false;
  function enterSettings(){
@@ -119,20 +132,30 @@
   const help=document.createElement('p');help.className='cs-help';help.textContent='자료 열람·작성·배정을 위한 업무 바로가기입니다.';sections[3].querySelector('h4').after(help);
   const billing=grid.querySelector('[data-settings-action="billing"] b');if(billing)billing.textContent='요금제·구독';
   const auto=document.createElement('section');auto.className='cs-automation';auto.dataset.csAutomation='';auto.innerHTML='<header><b>자동화 상태</b><span data-cs-status-time>확인 전</span></header><div class="cs-status-rows" data-cs-status-rows>설정 화면을 열면 현재 상태를 확인합니다.</div><p class="cs-help" data-cs-status-note></p><div class="cs-actions"></div>';
-  const refresh=button('상태 새로고침',()=>loadAutomation(true));refresh.dataset.csStatusRefresh='';auto.querySelector('.cs-actions').append(button('자동발송·HOME 공개 설정',()=>g.r61OpenHomeSettings?.()),refresh);shell.before(auto);
+  const refresh=button('상태 새로고침',()=>loadAutomation(true));refresh.dataset.csStatusRefresh='';auto.querySelector('.cs-actions').append(button('자동발송·HOME 공개 설정',()=>g.r61OpenHomeSettings?.()),refresh);sections[4].querySelector('h4').after(auto);const strip=document.createElement('div');strip.className='cs-automation-summary';strip.dataset.csAutoSummary='';strip.innerHTML='<span>자동화 상태 확인 중…</span>';strip.append(button('상태·설정 보기',()=>activate(4)));shell.before(strip);
   // Keep infrequently used long forms available without extending every category.
   for(const [selector,title] of [['#emrSyncCenter','EMR 동기화 상세'],['.operations-settings-panel','운영·연동 진단'],['.settings-panel','병원 기본정보·접종 일정 편집']]){const panel=document.querySelector('#settings '+selector);if(!panel)continue;const d=document.createElement('details');d.className='cs-settings-legacy';d.innerHTML='<summary>'+title+'</summary>';const children=[...panel.childNodes];panel.append(d);d.append(...children);}
   const profile=document.querySelector('#settings .settings-panel'),protocol=profile?.querySelector('.clinical-protocol');
   if(profile){const wrapper=profile.querySelector(':scope > details.cs-settings-legacy');if(wrapper){wrapper.querySelector(':scope > summary')?.remove();profile.replaceChildren(...wrapper.childNodes);}sections[0].append(profile);profile.classList.add('cs-inline-form');grid.querySelector('[data-settings-action=clinic]').hidden=true;}
-  if(protocol){sections[2].querySelector('h4').after(protocol);protocol.classList.add('cs-inline-form');grid.querySelector('[data-settings-action=protocol]').hidden=true;protocol.addEventListener('input',()=>protocolDirty=true);}
+  if(protocol){const d=document.createElement('details');d.className='cs-protocol-schedule';d.innerHTML='<summary>접종·사상충 기본 일정</summary><p class="cs-help">접종 간격·추가 접종·사상충 예방 일정을 편집합니다.</p>';sections[2].append(d);d.append(protocol);protocol.classList.add('cs-inline-form');grid.querySelector('[data-settings-action=protocol]').hidden=true;protocol.addEventListener('input',()=>protocolDirty=true);setupScheduleUndo(protocol);}
   const search=document.createElement('input');search.type='search';search.className='cs-settings-search';search.placeholder='설정 찾기 · 자동발송, 직원 권한, 약품 함량';search.setAttribute('aria-label','설정 찾기');
   const results=document.createElement('div');results.className='cs-settings-results';results.hidden=true;results.setAttribute('aria-live','polite');shell.before(search,results);
   const entries=sections.flatMap((section,i)=>[{label:section.querySelector('h4').textContent,index:i},...[...section.querySelectorAll('.cs-setting-link')].filter(b=>!b.hidden).map(b=>({label:b.textContent,index:i,target:b}))]);
-  entries.push({label:'접종·사상충 일정 규칙',index:2},{label:'자동발송 · HOME 공개',index:4,target:auto.querySelector('.cs-actions button')},{label:'직원 삭제·승인 권한',index:1,target:grid.querySelector('[data-settings-action=team]')});
+  entries.push({label:'접종·사상충 일정 규칙',index:2,focus:()=>{const d=document.querySelector('.cs-protocol-schedule');d.open=true;focusSetting(d.querySelector('[data-protocol-path]'));}},{label:'자동발송 · HOME 공개',index:4,target:auto.querySelector('.cs-actions button')},{label:'직원 삭제·승인 권한',index:1,target:grid.querySelector('[data-settings-action=team]')});
+  for(const [id,label,aliases] of [['hospitalName','병원명','병원이름'],['directorName','원장 이름','대표자'],['hospitalPhone','병원 전화번호','연락처 대표전화 전화'],['hospitalAddress','병원 주소','위치'],['hospitalWebsite','병원 홈페이지','웹사이트 URL'],['hospitalLogo','병원 로고','사진 이미지']])entries.push({label,index:0,aliases,focus:()=>focusSetting(document.getElementById(id))});
+  entries.push({label:'문자 발신번호',aliases:'전화 SOLAPI 발신 전화번호',index:4,focus:async()=>{const scope=identity();openSettingsCategory('messaging');await loadMessagingSettings(false,true);if(scope!==identity()||!document.querySelector('#followup.active-view'))return;focusSetting(['messagingSenderSelect','messagingSenderNumber'].map(id=>document.getElementById(id)).find(el=>el&&!el.disabled&&el.getClientRects().length));}});
+  for(const input of document.querySelectorAll('[data-protocol-path]')){const label=input.closest('tr')?.textContent.trim().replace(/\s+/g,' ');if(label)entries.push({label,index:2,focus:()=>{document.querySelector('.cs-protocol-schedule').open=true;focusSetting(input);}});}
   const searchKey=value=>String(value).toLowerCase().replace(/[\s·・/]+/g,'');
-  search.oninput=()=>{const q=searchKey(search.value);results.replaceChildren();results.hidden=!q;if(!q)return;for(const e of entries.filter(e=>searchKey(e.label).includes(q)).slice(0,10)){results.append(button(e.label,()=>{activate(e.index);search.value='';results.hidden=true;e.target?.click();}));}if(!results.children.length)results.textContent='일치하는 설정이 없습니다.';};
+  search.oninput=()=>{const q=searchKey(search.value);results.replaceChildren();results.hidden=!q;if(!q)return;for(const e of entries.filter(e=>searchKey(e.label+' '+(e.aliases||'')).includes(q)).slice(0,10)){results.append(button(e.label,()=>{activate(e.index);search.value='';results.hidden=true;if(e.focus)e.focus();else e.target?.click();}));}if(!results.children.length)results.textContent='일치하는 설정이 없습니다.';};
   search.onkeydown=e=>{if(e.key==='Enter'&&!results.hidden){e.preventDefault();results.querySelector('button')?.click();}};
   document.getElementById('settingsHubTitle').textContent='설정 항목';
+ }
+ function focusSetting(el){if(!el)return;reveal(el);el.focus({preventScroll:true});el.classList.add('cs-search-target');setTimeout(()=>el.classList.remove('cs-search-target'),2400);}
+ function setupScheduleUndo(protocol){
+  const reset=document.getElementById('resetClinicalProtocol');if(!reset)return;reset.textContent='기본 일정 불러오기';let before=null,scope='';
+  const undo=button('불러오기 취소',()=>{if(!before||scope!==identity())return;for(const [input,value] of before){input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));}before=null;undo.hidden=true;toast('불러오기 전 일정으로 돌아왔습니다.');});undo.hidden=true;reset.after(undo);
+  reset.addEventListener('click',()=>{before=[...protocol.querySelectorAll('[data-protocol-path]')].map(x=>[x,x.value]);scope=identity();undo.hidden=false;protocolDirty=true;queueMicrotask(()=>protocol.querySelector('[data-protocol-path]')?.dispatchEvent(new Event('input',{bubbles:true})));},true);
+  g.addEventListener('carestep:clinical-protocol-updated',()=>{before=null;undo.hidden=true;});
  }
  const templates={
   reception:{label:'접수 직원',keys:['patients.edit','materials.read','followup.read','messages.read','training.read','operations.read']},
@@ -141,8 +164,14 @@
   manager:{label:'관리자',keys:['patients.read','materials.read','training.manage','operations.manage','settings.manage','billing.manage','team.manage','stats.read','messages.read']}
  };
  function permissionStatus(keys,feature,entitlements){
-  if(!entitlements?.plan)return '계약 조회 필요';if(entitlements.accessBlocked)return '구독 상태 확인';if(entitlements.plan.features?.[feature]===false)return '계약 미포함';return keys?'사용 가능':'권한 추가 필요';
+  if(!keys)return '권한 없음';if(!entitlements?.plan)return '계약 조회 필요';if(entitlements.accessBlocked)return '구독 상태 확인';if(entitlements.plan.features?.[feature]===false)return '계약 미포함';return '가능';
  }
+ function effectiveAccess(keys,id,feature,ent){
+  const read=keys.includes('clinical.'+id+'.read'),restricted=ent?.accessBlocked||ent?.plan?.features?.[feature]===false;
+  const action=(key,label)=>label+' '+permissionStatus(keys.includes(key),feature,ent);
+  return '조회 '+(!read?'권한 없음':!ent?.plan?'계약 조회 필요':restricted?'기존 기록 가능':'가능')+' · '+action('clinical.'+id+'.edit','작성·수정')+' · '+action('clinical.'+id+'.delete','삭제')+(id==='protocols'?' · '+action('clinical.approve','승인'):'');
+ }
+
  function enhancePermissions(root=document){for(const card of root.querySelectorAll('[data-member-id]')){
   const grid=card.querySelector('.member-permission-grid'),mode=card.querySelector('[data-permission-mode]');if(!grid||!mode||grid.dataset.quick)continue;grid.dataset.quick='true';
   const inputs=[...grid.querySelectorAll('[data-permission-key]')],quick=document.createElement('section');quick.className='cs-permission-quick';
@@ -160,7 +189,7 @@
   const delta=document.createElement('p');delta.className='cs-help';delta.setAttribute('aria-live','polite');preset.append(delta);
   quick.querySelector('[data-cs-template-use]').onclick=()=>{const t=templates[quick.querySelector('select').value];if(!t||mode.disabled)return;undo=snapshot();apply(t.keys);const after=readKeys(),added=after.filter(k=>!undo.keys.includes(k)),removed=undo.keys.filter(k=>!after.includes(k)),label=k=>inputs.find(x=>x.dataset.permissionKey===k)?.closest('label')?.textContent.trim()||k;delta.textContent='추가 '+added.length+'개 · 제외 '+removed.length+'개'+(added.length?' / 추가: '+added.map(label).join(', '):'')+(removed.length?' / 제외: '+removed.map(label).join(', '):'');undoButton.hidden=false;};
   function update(){const changed=JSON.stringify(snapshot())!==JSON.stringify(baseline);undoButton.hidden=!undo;const keys=mode.value==='custom'?clinicExpandPermissions(readKeys()):clinicPermissionKeys({mode:mode.value},card.querySelector('[data-member-role]')?.value),ent=eplan();quick.querySelectorAll('select,button').forEach(x=>x.disabled=mode.disabled);quick.querySelectorAll('[data-cs-module]').forEach(s=>{const prefix='clinical.'+s.dataset.csModule+'.';s.value=keys.includes(prefix+'edit')?'edit':keys.includes(prefix+'read')?'read':'none';const saved=baseline.mode==='custom'?clinicExpandPermissions(baseline.keys):clinicPermissionKeys({mode:baseline.mode},baseline.role);s.closest('label').classList.toggle('cs-permission-changed',s.value!==(saved.includes(prefix+'edit')?'edit':saved.includes(prefix+'read')?'read':'none'));});
-   preview.innerHTML='<strong>'+(changed?'변경 중 · 직원 저장 후 적용':'현재 저장된 권한')+'</strong><div class="cs-permission-effective">'+C.modules.map(([id,label,key])=>{const prefix='clinical.'+id+'.',has=keys.includes(prefix+'read');return '<div><b>'+label+'</b><span>'+permissionStatus(has,key,ent)+' · 권한: '+(keys.includes(prefix+'edit')?'작성 가능':has?'조회만':'접근 불가')+(keys.includes(prefix+'delete')?' · 삭제 가능':'')+'</span></div>';}).join('')+'</div><p>진료 승인 '+(keys.includes('clinical.approve')?'가능':'불가')+' · 병원 약품·서식 설정 '+(keys.includes('clinical.settings')?'가능':'불가')+'</p><small>'+(changed?'변경사항을 적용하려면 직원 저장을 누르세요.':'')+' 계약 미포함 기능의 기존 기록 조회는 유지됩니다.</small>';
+   preview.innerHTML='<strong>'+(changed?'변경 중 · 직원 저장 후 적용':'현재 저장된 권한')+'</strong><div class="cs-permission-effective">'+C.modules.map(([id,label,key])=>{const prefix='clinical.'+id+'.',has=keys.includes(prefix+'read');return '<div><b>'+label+'</b><span>'+effectiveAccess(keys,id,key,ent)+'</span></div>';}).join('')+'</div><p>진료 승인 '+(keys.includes('clinical.approve')?'가능':'불가')+' · 병원 약품·서식 설정 '+(keys.includes('clinical.settings')?'가능':'불가')+'</p><small>'+(changed?'변경사항을 적용하려면 직원 저장을 누르세요.':'')+' 계약 미포함 기능의 기존 기록 조회는 유지됩니다.</small>';
   }
   card.addEventListener('change',()=>queueMicrotask(update));
   const effective=document.createElement('details');effective.className='cs-effective-details';effective.innerHTML='<summary>실제 이용 범위 확인</summary>';preview.before(effective);effective.append(preview);
@@ -168,9 +197,9 @@
  }}
  function comparison(current,catalog){
   const rows=C.features.map(x=>({label:x.label,a:featureState(current,x.key),b:featureState(catalog,x.key)}));
-  const cell=v=>v===null?'조회 필요':v?'포함':'미포함';const different=rows.filter(x=>x.a!==x.b||x.a===null),same=rows.filter(x=>x.a===x.b&&x.a!==null);
-  const table=list=>'<div class="cs-comparison"><table><thead><tr><th>진료·교육 기능</th><th>현재 병원 계약</th><th>신규 계약 기준</th></tr></thead><tbody>'+list.map(x=>'<tr'+(x.a!==x.b?' class="cs-different"':'')+'><th scope="row">'+esc(x.label)+'</th><td>'+cell(x.a)+'</td><td>'+cell(x.b)+'</td></tr>').join('')+'</tbody></table></div>';
-  return '<div class="cs-contract-differences"><b>신규 기준과 다른 기능 '+different.length+'개</b>'+(different.length?table(different):'<p class="cs-help">현재 계약과 신규 기준의 진료·교육 기능이 같습니다.</p>')+(same.length?'<details><summary>동일한 기능 '+same.length+'개 보기</summary>'+table(same)+'</details>':'')+'<p class="cs-help">계약 변경 전까지 현재 기능·가격·제공량을 유지합니다.</p></div>';
+  const cell=v=>v===null?'조회 필요':v?'포함':'미포함';const unknown=rows.filter(x=>x.a===null||x.b===null),different=rows.filter(x=>x.a!==null&&x.b!==null&&x.a!==x.b),same=rows.filter(x=>x.a===x.b&&x.a!==null);
+  const table=list=>'<div class="cs-comparison"><table><thead><tr><th>진료·교육 기능</th><th>현재 병원 계약</th><th>신규 계약 기준</th></tr></thead><tbody>'+list.map(x=>'<tr'+(x.a!==null&&x.b!==null&&x.a!==x.b?' class="cs-different"':'')+'><th scope="row">'+esc(x.label)+'</th><td>'+cell(x.a)+'</td><td>'+cell(x.b)+'</td></tr>').join('')+'</tbody></table></div>';
+  return '<div class="cs-contract-differences"><b>신규 기준과 다른 기능 '+different.length+'개</b>'+(different.length?table(different):unknown.length?'':'<p class="cs-help">현재 계약과 신규 기준의 진료·교육 기능이 같습니다.</p>')+(unknown.length?'<section class="cs-contract-unknown"><b>확인 필요 '+unknown.length+'개</b><p>계약 정보를 불러오지 못해 아직 비교할 수 없습니다.</p><button type="button" class="cs-button" data-cs-contract-retry>계약 정보 다시 조회</button>'+table(unknown)+'</section>':'')+(same.length?'<details><summary>동일한 기능 '+same.length+'개 보기</summary>'+table(same)+'</details>':'')+'<p class="cs-help">계약 변경 전까지 현재 기능·가격·제공량을 유지합니다.</p></div>';
  }
  function enhanceContract(){
   const box=document.querySelector('[data-cs-contract]');if(!box)return;const ent=eplan();
@@ -189,7 +218,8 @@
  const refresh=S.refresh;S.refresh=()=>{refresh();enhanceHub();enhancePermissions();enhanceContract();groupPlans();};
  S.enter=enterSettings;S.openSection=(index)=>{go('settings');activateSection(index);};
  if(typeof openSettingsCategory==='function'){const old=openSettingsCategory;g.openSettingsCategory=function(action){if(settingsCanManage()&&(action==='clinic'||action==='protocol')){S.openSection(action==='clinic'?0:2);return;}return old(action);};}
- S.automationRows=automationRows;S.permissionStatus=permissionStatus;S.comparison=comparison;S.templates=templates;S.direct=direct;
+ S.effectiveAccess=effectiveAccess;S.automationRows=automationRows;S.permissionStatus=permissionStatus;S.comparison=comparison;S.templates=templates;S.direct=direct;
  g.addEventListener('carestep:automation-settings-saved',()=>{statusAt=0;if(document.querySelector('#settings.active-view'))void loadAutomation(true);});
+ document.addEventListener('click',async e=>{const b=e.target.closest('[data-cs-contract-retry]');if(!b)return;b.disabled=true;b.textContent='조회 중…';try{if(typeof loadBillingOverview==='function')await loadBillingOverview(true);else if(typeof loadClinicDetail==='function'&&typeof selectedClinic!=='undefined'&&selectedClinic)await loadClinicDetail(selectedClinic);}catch{toast('계약 정보를 불러오지 못했습니다. 다시 시도해주세요.');}finally{if(b.isConnected){b.disabled=false;b.textContent='계약 정보 다시 조회';}}});
  enhanceHub();enhancePermissions();enhanceContract();groupPlans();
 })(window);
