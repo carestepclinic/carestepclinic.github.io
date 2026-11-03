@@ -1,8 +1,8 @@
 /* One navigation tree over the existing views. Routes contain no clinical data. */
 (function(g){
  'use strict';
- const practice={ops:['병원 운영','업무 체크리스트'],intake:['환자 관리','사전문진'],calc:['진료','처방·처치 계산'],ward:['진료','입원·처치 보드'],surgery:['진료','마취기록지'],dental:['진료','치과기록지'],neuro:['진료','신경검사 기록지'],chronic:['진료','만성질환 기록지'],ophthalmic:['진료','안과기록지'],protocols:['진료','진료 프로토콜']};
- const views={dashboard:['','오늘 업무'],patients:['환자 관리','환자·보호자'],library:['보호자 관리','보호자 안내자료'],builder:['보호자 관리','안내자료 작성'],followup:['보호자 관리','상담·후속관리'],training:['병원 운영','직원 교육'],pilot:['병원 운영','운영 통계'],settings:['설정·계정','병원 설정'],onboarding:['도움말·문의','처음 사용 설정'],voice:['도움말·문의','문의·요청']};
+ const practice={ops:['병원 운영','업무 체크리스트'],intake:['환자·보호자','사전문진'],calc:['진료','처방·처치 계산'],ward:['진료','입원·처치 보드'],surgery:['진료','마취기록지'],dental:['진료','치과기록지'],neuro:['진료','신경검사 기록지'],chronic:['진료','만성질환 기록지'],ophthalmic:['진료','안과기록지'],protocols:['진료','진료 프로토콜']};
+ const views={dashboard:['','오늘 업무'],patients:['환자·보호자','환자 목록'],library:['환자·보호자','보호자 안내자료'],builder:['환자·보호자','안내자료 작성'],followup:['환자·보호자','상담·후속관리'],training:['병원 운영','직원 교육'],pilot:['병원 운영','운영 통계'],settings:['설정·계정','병원 설정'],onboarding:['도움말·문의','처음 사용 설정'],voice:['도움말·문의','문의·요청']};
  const account={my:'내 계정',team:'직원·권한',billing:'요금제·구독',security:'보안·데이터',legal:'이용약관·개인정보'};
  const nav=document.querySelector('.clinic-navigation');let signature='';
  function accountAllowed(tab){if(!account[tab])return false;const manager=saasMode!=='auth'||['owner','admin'].includes(saasMe?.role);return tab==='team'?saasPermission('team.manage',manager):tab==='billing'?saasPermission('billing.manage',manager):true;}
