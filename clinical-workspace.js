@@ -1,3 +1,43 @@
+/* Shared first-screen filters. Existing record modules own querying and permissions. */
+(function(g){
+ 'use strict';
+ function mount(form){
+  if(!form||form.dataset.listLayout)return;
+  const status=form.querySelector('select[name=status],select[data-filter=status]');
+  if(!status)return;
+  form.dataset.listLayout='compact';
+  const host=form.parentElement,submit=form.querySelector('button[type=submit],button:not([type])');
+  const statusLabel=status.closest('label');statusLabel.hidden=true;
+  const details=document.createElement('details');details.className='record-list-details';
+  const summary=document.createElement('summary');summary.textContent='상세 조건';details.append(summary);
+  const advanced=document.createElement('div');advanced.className='record-list-advanced';details.append(advanced);
+  for(const name of ['from','to','vet']){
+   const input=form.querySelector('[name='+name+'],[data-filter='+name+']');
+   if(input){advanced.append(input.closest('label'));if(input.value)details.open=true;}
+  }
+  if(details.open)summary.textContent='상세 조건 · 적용 중';
+  form.append(details);
+  const bar=document.createElement('div');bar.className='record-list-shortcuts';bar.setAttribute('role','group');bar.setAttribute('aria-label','기록 상태');
+  for(const option of status.options){
+   const button=document.createElement('button');button.type='button';button.dataset.recordStatus=option.value;
+   button.textContent=({inProgress:'작성 중',complete:'작성 완료',amended:'완료 후 수정'})[option.value]||(option.value?option.textContent:'전체 상태');
+   button.setAttribute('aria-pressed',String(status.value===option.value));button.disabled=!!submit?.disabled;
+   button.onclick=()=>{if(submit?.disabled)return;status.value=option.value;for(const b of bar.querySelectorAll('[data-record-status]'))b.setAttribute('aria-pressed',String(b.dataset.recordStatus===status.value));form.requestSubmit(submit);};
+   bar.append(button);
+  }
+  let reset=host.querySelector('[data-filter-reset],[data-search-reset]');
+  if(!reset){reset=document.createElement('button');reset.type='button';reset.onclick=()=>{if(submit?.disabled)return;for(const input of form.querySelectorAll('input,select'))input.value='';form.requestSubmit(submit);};}
+  reset.textContent='검색 조건 초기화';reset.classList.add('record-list-reset');reset.disabled=!!submit?.disabled;bar.append(reset);
+  form.after(bar);
+  for(const box of host.querySelectorAll('.dn-list-conditions,.nr-search-applied'))if(!box.textContent.trim())box.hidden=true;
+  form.addEventListener('submit',()=>{
+   const from=form.querySelector('[name=from],[data-filter=from]'),to=form.querySelector('[name=to],[data-filter=to]');
+   if(from?.value&&to?.value&&from.value>to.value)details.open=true;
+  },true);
+ }
+ g.RecordListLayout={mount};
+})(window);
+
 (function(g){
  'use strict';
  const VERSION='clinical-review-20261026-v1';
@@ -249,7 +289,7 @@
   function anesthesiaVet(r){const b=r.body||{};return b.careTeam?.veterinarianName||(b.careTeam?.veterinarianId?memberName(b.careTeam.veterinarianId):'')||b.anesthesiaSheet?.surgeon||'';}
   function anesthesiaRows(){const q=query.trim().toLowerCase(),f=anesthesiaFilters;return rows.filter(r=>r.kind==='surgery').filter(r=>{const b=r.body||{},d=anesthesiaDate(r),s=b.anesthesiaSheet||{};return (!f.status||f.status==='deleted'||r.status===f.status)&&(!f.from||d>=f.from)&&(!f.to||d<=f.to)&&(!f.vet||anesthesiaVet(r).toLowerCase().includes(f.vet.toLowerCase()))&&[r.patient?.name,r.patient?.guardianName,r.patient?.chartNumber,r.patient?.externalPatientId,b.quickPatient?.chartNumber,b.title,b.careTeam?.chiefComplaint,s.operation,s.diagnosis].join(' ').toLowerCase().includes(q);});}
   function anesthesiaList(){return '<section class="cl-anesthesia-list"><form data-anesthesia-search class="cl-anesthesia-filters"><label>검색<input type="search" name="query" value="'+esc(query)+'" placeholder="환자·보호자·차트번호·수술명" aria-label="마취기록 검색"></label><label>기록 상태<select name="status">'+[['','전체 상태'],['active','진행 중'],['recovery','회복'],['closed','종료'],['deleted','삭제함']].map(([v,t])=>'<option value="'+v+'" '+(anesthesiaFilters.status===v?'selected':'')+'>'+t+'</option>').join('')+'</select></label><label>시작일<input type="date" name="from" value="'+esc(anesthesiaFilters.from)+'"></label><label>종료일<input type="date" name="to" value="'+esc(anesthesiaFilters.to)+'"></label><label>담당 수의사<input name="vet" value="'+esc(anesthesiaFilters.vet)+'"></label><button type="submit" '+(loading?'disabled':'')+'>검색</button></form><p data-anesthesia-filter-error role="alert" hidden></p><div data-cl-list class="cl-anesthesia-results">'+caseList()+'</div></section>';}
-  function bindAnesthesiaList(){const f=root.querySelector('[data-anesthesia-search]');if(!f)return;f.onsubmit=e=>{e.preventDefault();const from=f.elements.from.value,to=f.elements.to.value,msg=root.querySelector('[data-anesthesia-filter-error]');if(from&&to&&from>to){msg.textContent='종료일은 시작일 이후로 선택해주세요.';msg.hidden=false;f.elements.to.focus();return;}query=f.elements.query.value.trim();const wasDeleted=deleted;anesthesiaFilters={status:f.elements.status.value,from,to,vet:f.elements.vet.value.trim()};deleted=anesthesiaFilters.status==='deleted';if(wasDeleted!==deleted){void load();return;}render();};}
+  function bindAnesthesiaList(){const f=root.querySelector('[data-anesthesia-search]');if(!f)return;f.onsubmit=e=>{e.preventDefault();const from=f.elements.from.value,to=f.elements.to.value,msg=root.querySelector('[data-anesthesia-filter-error]');if(from&&to&&from>to){msg.textContent='종료일은 시작일 이후로 선택해주세요.';msg.hidden=false;f.elements.to.focus();return;}query=f.elements.query.value.trim();const wasDeleted=deleted;anesthesiaFilters={status:f.elements.status.value,from,to,vet:f.elements.vet.value.trim()};deleted=anesthesiaFilters.status==='deleted';if(wasDeleted!==deleted){void load();return;}render();};g.RecordListLayout?.mount(f);}
   function caseList(){if(tab==='surgery'&&!active())return anesthesiaRows().map(r=>{const b=r.body||{},p=r.patient||{},chart=p.chartNumber||p.externalPatientId||b.quickPatient?.chartNumber;return '<article class="cl-record-list-card"><button class="cl-case" data-cl-case="'+esc(r.id)+'"><b>'+esc(p.name||'환자')+'</b><span>'+esc(anesthesiaDate(r)||'기록일 미입력')+' · '+esc(b.deleted?'삭제됨':statusNames[r.status]||r.status)+'</span><span>'+esc([p.guardianName?'보호자 '+p.guardianName:'보호자 미입력',chart?'차트 '+chart:'차트번호 미입력'].join(' · '))+'</span><span>'+esc(anesthesiaVet(r)||'담당 수의사 미지정')+'</span><span>'+esc(b.anesthesiaSheet?.operation||b.title||'수술명 미입력')+'</span></button>'+(medical()&&!b.deleted?'<footer><button data-list-delete="'+esc(r.id)+'" aria-label="'+esc((p.name||'환자')+' '+anesthesiaDate(r)+' 마취기록 삭제')+'">삭제</button></footer>':'')+'</article>';}).join('')||'<p class="cl-anesthesia-empty">해당하는 마취기록이 없습니다.</p>';const q=query.toLowerCase();return (tab==='surgery'?anesthesiaRows():rows.filter(r=>(deleted||closed||r.status!=='closed')&&[r.patient?.name,r.body.quickPatient?.chartNumber,r.body.title,r.body.location].join(' ').toLowerCase().includes(q))).map(r=>`<button class="cl-case ${r.id===selected?'selected':''}" data-cl-case="${esc(r.id)}"><b>${esc(r.patient?.name||'환자')}</b><span>${r.patient_id?'등록 환자':'빠른 진료'}${r.body.quickPatient?.chartNumber?' · 차트 '+esc(r.body.quickPatient.chartNumber):''}</span><span>${tab==='surgery'?esc(r.body.anesthesiaSheet?.operation||r.body.title||'수술명 미입력'):kindNames[r.kind]+' · '+esc(r.body.location||r.body.title)}</span><span>${r.body.deleted?'삭제됨':statusNames[r.status]}${tab==='surgery'?' · '+fmtDate(r.created_at||r.createdAt):' · 미완료 '+handoffTasks(r.body.tasks||[]).length+'개'}</span></button>`).join('')||'<p>'+ (tab==='surgery'?'마취기록이 없습니다. 새 마취 기록에서 환자를 선택하거나 직접 입력하세요.':'조회된 진료 건이 없습니다.')+'</p>';}
   let listDeleting=false;
   async function deleteListRecord(id){

@@ -422,3 +422,28 @@ body:has(#practice.active-view :is(.cl-workspace:is([data-section=ward],[data-se
 #practiceRoot .cl-anesthesia-page:has(.cl-anesthesia-filters)>.cl-toolbar{padding:0;min-height:44px}
 
 #practiceRoot .cl-anesthesia-page:has(.cl-anesthesia-filters)>.cl-toolbar>div:first-child{display:none}
+
+/* Match chronic-record search, advanced conditions and status shortcuts. */
+#practiceRoot form[data-list-layout=compact] .record-list-advanced>label:first-child{grid-column:auto}
+:is(.record-layout,.cl-anesthesia-page) form[data-list-layout=compact]{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,3fr);align-items:end;gap:10px;margin:10px 0 8px;width:100%}
+:is(.record-layout,.cl-anesthesia-page) form[data-list-layout=compact]>[hidden]{display:none!important}
+:is(.record-layout,.cl-anesthesia-page) form[data-list-layout=compact]>label{grid-column:auto;display:grid;gap:4px;margin:0;min-width:0;font-size:14px;font-weight:600}
+:is(.record-layout,.cl-anesthesia-page) .record-list-details{grid-column:1/-1;min-width:0;margin:4px 0 0;padding:0;border:0;background:transparent}
+:is(.record-layout,.cl-anesthesia-page) form[data-list-layout=compact]>label:first-child{max-width:540px;width:100%}
+:is(.record-layout,.cl-anesthesia-page) form[data-list-layout=compact]>button{justify-self:start}
+:is(.record-layout,.cl-anesthesia-page) .record-list-details>summary{cursor:pointer;padding:6px 0;font-size:13px;font-weight:600}
+:is(.record-layout,.cl-anesthesia-page) .record-list-advanced{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:8px 0;align-items:start}
+:is(.record-layout,.cl-anesthesia-page) .record-list-advanced>label{display:grid;gap:4px;min-width:0;margin:0;grid-column:auto;align-self:start;font-size:14px;font-weight:600}
+:is(.record-layout,.cl-anesthesia-page) .record-list-shortcuts{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin:8px 0}
+:is(.record-layout,.cl-anesthesia-page) .record-list-shortcuts button{width:auto;margin:0;padding:5px 8px;min-height:38px;font:inherit;font-size:13px;line-height:1.5;border:1px solid #b8cae0;border-radius:8px;background:#fff;color:inherit}
+:is(.record-layout,.cl-anesthesia-page) .record-list-shortcuts button[aria-pressed=true]{background:#eaf0ff;color:#1748b3;border-color:#a9bfff}
+:is(.record-layout,.cl-anesthesia-page) .record-list-shortcuts .record-list-reset{margin-left:auto;background:transparent;border-color:transparent;text-decoration:underline}
+:is(.record-layout,.cl-anesthesia-page) .record-list-shortcuts button:disabled{opacity:.5;cursor:wait}
+@media(max-width:700px){
+ :is(.record-layout,.cl-anesthesia-page) form[data-list-layout=compact]{grid-template-columns:minmax(0,1fr) auto}
+ :is(.record-layout,.cl-anesthesia-page) .record-list-advanced{grid-template-columns:1fr 1fr}
+ :is(.record-layout,.cl-anesthesia-page) .record-list-advanced>label:last-child{grid-column:1/-1}
+ :is(.record-layout,.cl-anesthesia-page) .record-list-shortcuts button{min-height:42px}
+ :is(.record-layout,.cl-anesthesia-page) .record-list-shortcuts .record-list-reset{margin-left:0}
+ :is(.record-layout,.cl-anesthesia-page) form[data-list-layout=compact] input{font-size:16px}
+}
