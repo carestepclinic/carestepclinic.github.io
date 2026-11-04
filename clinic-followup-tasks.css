@@ -50,3 +50,31 @@
 #followupPriority{margin-bottom:12px}
 #followupGuideStep5Body .guide-final-row{min-width:0}#followupGuideStep5Body p{font-size:14px;line-height:1.6}
 #followupOperationHistory{margin-top:12px;border:1px solid #dbe5f5;border-radius:12px;padding:12px;background:white}#followupOperationHistory>summary{font-weight:700;cursor:pointer}.flow-delivery-history{max-height:400px;overflow:auto}.flow-delivery-history>div{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px 0;border-bottom:1px solid #eef2f7}
+/* Shared typography and spacing for consultation/follow-up. */
+#followup{font-family:inherit;font-size:15px;line-height:1.55}
+#followup input,#followup select,#followup textarea,#followup button{font-family:inherit}
+#followup h3{font-size:20px;font-weight:700}#followup h4{font-size:17px;font-weight:700}
+#followup .btn,#followup .followup-guide-mode{font-size:14px!important;font-weight:600;min-height:40px;padding:8px 12px!important;border-radius:10px}
+#followup .field-label,#followup .guide-summary-box b,#followup .guide-final-row b{font-size:15px;font-weight:600}
+#followup .guide-step-head p,#followup .guide-callout,#followup .followup-guide-status,#followup .guide-final-row span,#followup .guide-summary-box span,#followup .messaging-consent,#followup .messaging-badge,#followup .followup-card-date,#followup .followup-message-editor-head,#followup .followup-message-edit-note{font-size:13px;line-height:1.5}
+#followup .followup-guide-step b{font-size:14px;font-weight:600}#followup .followup-guide-step>span:not(.guide-num){font-size:12px}
+#followup>.followup-hero,#followup .followup-guide-top>div:first-child,#followup .eyebrow{display:none}
+#followup .followup-guide-top{margin:0 0 10px;align-items:center}#followup .followup-guide-mode-tabs{width:100%;align-items:center}
+#followupGoBuilder{margin-left:auto}
+#followup .followup-guide-shell{padding:12px;border:0;background:transparent}
+#followup .guide-step-card{padding:12px;border:0;background:transparent}
+#followup .followup-guide-nav{padding:8px 0;margin:8px 0;gap:8px}
+#followup .guide-step-head{margin-bottom:8px}#followup .guide-callout{padding:8px 10px;margin-top:8px}
+#followup .followup-card,#followup .messaging-card,#followup .internal-followup-board{border-radius:12px;padding:14px}
+#followup .followup-card h4{margin-bottom:8px}
+#followupRecipientPreview .followup-message-edit-note:not(.edited){display:none}
+#followup .guide-final-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#followupPlanHelp{margin-top:10px;font-size:13px;color:#52657d}#followupPlanHelp summary{cursor:pointer;font-weight:600}#followupPlanHelp p{font-size:13px!important;line-height:1.6}
+#followup .journey-card b,#followup .journey-detail-desc,#followup .journey-stage-preview-row,#followup .followup-preset-head span{font-size:14px}
+#followup .followup-message-failure{grid-template-columns:100px minmax(0,1fr) auto;padding:12px 0;border-bottom:1px solid #e2e8f0}
+#followup .followup-work-when,#followup .message-failure-main,#followup .internal-followup-row,#followup .flow-delivery-history{font-size:14px}
+#followup .message-failure-main>span{font-size:13px;line-height:1.5}
+#followup .followup-operation-overview{padding:12px;margin-bottom:12px}#followup .followup-operation-head p{font-size:13px}
+@media(max-width:700px){#followup .guide-final-grid{grid-template-columns:1fr}#followup .followup-guide-shell{padding:0}#followup .followup-guide-mode-tabs{gap:6px}#followupGoBuilder{margin-left:0}#followup .followup-message-failure{grid-template-columns:1fr}#followup .followup-message-failure .followup-work-actions{justify-content:flex-start}#followup .followup-mobile-stepper b{font-size:11px;line-height:1.4}#followup .guide-step-tools{flex-wrap:wrap}}
+#followup .messaging-privacy,#followup .messaging-template-help,#followup .messaging-platform,#followup .followup-preset-status,#followup .followup-work-when small,#followup .journey-tag,#followup .journey-detail-desc{font-size:13px;line-height:1.55;color:#52657d}
+@media(max-width:700px){#followup .followup-guide-nav{display:grid;grid-template-columns:60px minmax(0,1fr) 100px;gap:8px;align-items:stretch}#followup .followup-guide-nav-left,#followup .followup-guide-nav-right{display:contents}#followup .followup-guide-status{display:none}#followup .followup-guide-nav .btn{min-width:0!important;min-height:44px;width:100%;white-space:normal;padding:8px!important}#followupGuideBack{grid-column:1}#followupGuideSkip{grid-column:2}#followupGuideNext{grid-column:3}}
