@@ -78,3 +78,30 @@
 @media(max-width:700px){#followup .guide-final-grid{grid-template-columns:1fr}#followup .followup-guide-shell{padding:0}#followup .followup-guide-mode-tabs{gap:6px}#followupGoBuilder{margin-left:0}#followup .followup-message-failure{grid-template-columns:1fr}#followup .followup-message-failure .followup-work-actions{justify-content:flex-start}#followup .followup-mobile-stepper b{font-size:11px;line-height:1.4}#followup .guide-step-tools{flex-wrap:wrap}}
 #followup .messaging-privacy,#followup .messaging-template-help,#followup .messaging-platform,#followup .followup-preset-status,#followup .followup-work-when small,#followup .journey-tag,#followup .journey-detail-desc{font-size:13px;line-height:1.55;color:#52657d}
 @media(max-width:700px){#followup .followup-guide-nav{display:grid;grid-template-columns:60px minmax(0,1fr) 100px;gap:8px;align-items:stretch}#followup .followup-guide-nav-left,#followup .followup-guide-nav-right{display:contents}#followup .followup-guide-status{display:none}#followup .followup-guide-nav .btn{min-width:0!important;min-height:44px;width:100%;white-space:normal;padding:8px!important}#followupGuideBack{grid-column:1}#followupGuideSkip{grid-column:2}#followupGuideNext{grid-column:3}}
+/* Compact follow-up context and grouped delivery history. */
+#followupContextSummary{display:none}
+body:has(#followup.active-view) #caseContextBar{padding:8px 12px;min-height:0}
+body:has(#followup.active-view) #caseContextBar>:not(#followupContextSummary){display:none!important}
+body:has(#followup.active-view) #followupContextSummary{display:block;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+#followup .guide-callout[hidden]{display:none!important}
+#followup .guide-summary-box.good{background:#f8fafc;border-color:#dbe5f5}
+#followup .guide-summary-box{padding:10px 12px}
+#followup .guide-summary-box b{font-weight:500}
+#followup .guide-summary-box:first-child b{font-weight:700}
+#followup .followup-empty,#followupPriority>div>p{margin:8px 0;font-size:14px;color:#52657d}
+#followup .followup-history-patient{padding:8px 0;border-bottom:1px solid #e2e8f0}
+#followup .followup-history-patient>summary{cursor:pointer;display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+#followup .followup-history-patient>summary b{font-weight:600}
+#followup .followup-history-patient>summary span,#followup [data-history-identity]{font-size:13px;color:#52657d}
+#followup .followup-history-row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 0;color:#52657d}
+#followup .internal-followup-columns{display:grid;grid-template-columns:50px minmax(160px,1.5fr) minmax(180px,1fr) minmax(140px,1fr);gap:10px;font-size:13px;color:#52657d}
+@media(min-width:761px){#followup .internal-field-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}#followup .internal-followup-edit{padding:8px 0}}
+@media(max-width:760px){#followup .internal-followup-columns{display:none}}
+#followup .journey-card b,#followup .followup-card h4{overflow-wrap:anywhere}
+#followup .followup-card h4{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
+#followup .followup-card h4:focus,#followup .followup-card h4:hover{display:block;overflow:visible}
+#followup .followup-card h4.expanded{display:block;overflow:visible}
+#followup .crm-head p,#followup .crm-foot,#followup .crm-main>span,#followup .crm-kpi>span,#followup .followup-operation-kpi>span,#followup .guardian-survey-head p{font-size:13px;line-height:1.55}
+#followup .crm-empty,#followup .guardian-survey-empty,#followup .journey-empty{padding:12px;min-height:0;font-size:14px;line-height:1.55}
+#followup .crm-filter,#followup .crm-badge,#followup .crm-case-id,#followup .guardian-survey-foot{font-size:13px;line-height:1.5}
+#followup .crm-panel,#followup .guardian-survey-panel{padding:14px;border-radius:12px}
