@@ -23,7 +23,7 @@
   const key=identity();if(loading&&scope===key)return;const id=++requestId;if(scope!==key){scope=key;items=[];legacyPlans=[];}if(saasMode!=='auth'||!saasMe||!followupAllowed(false)){items=[];legacyPlans=[];loading=false;render();return;}loading=true;error='';render();
   try{const d=await saasRequest('/saas/followup/tasks');if(identity()!==key||requestId!==id)return;if(!Array.isArray(d.items))throw Error('업무 조회 형식을 확인하지 못했습니다.');items=d.items;legacyPlans=d.legacyPlans||[];error=d.legacyTruncated?'이전 계획 50건까지 표시했습니다. 전환 후 새로고침하면 다음 계획을 확인할 수 있습니다.':d.truncated?'600건까지 표시했습니다. 오늘 업무에서 기간을 좁혀 확인하세요.':'';}
   catch(e){if(identity()===key&&requestId===id)error=e.message||'업무를 불러오지 못했습니다.';}
-  finally{if(identity()===key&&requestId===id){loading=false;render();}}
+  finally{if(identity()===key&&requestId===id){loading=false;render();if(analyticsSnapshot()&&!analyticsLoading)void loadAnalytics(false);}}
  }
  const label=x=>({completed:'완료',held:'보류',scheduled:'예정',overdue:'지연'})[x.operationalStatus||x.status]||'예정';
  function watchDialog(dialog,key){const timer=setInterval(()=>{if(key!==identity()){dialog.close();dialog.remove();}},500);dialog.addEventListener('close',()=>clearInterval(timer),{once:true});}
@@ -56,5 +56,30 @@
   }catch(e){toast(e.message||'계획을 확인하지 못했습니다.');}
  }
  function mount(){const operation=document.getElementById('followupOperationShell');if(operation&&!document.getElementById('internalFollowupBoard')){const section=document.createElement('section');section.id='internalFollowupBoard';section.className='internal-followup-board';operation.prepend(section);void load();void loadFollowupTeamMembers().then(()=>{if(followupGuideStep===3)renderPlan(document.getElementById('guideCalendarIntro'));});}}
- window.ClinicFollowupTasks={counts:()=>{const rows=scope===identity()?items.filter(x=>x.status!=='completed'):[];const today=new Date(Date.now()+32400000).toISOString().slice(0,10);return {total:rows.length,today:rows.filter(x=>x.dueDate===today).length,attention:rows.filter(x=>x.operationalStatus==='overdue').length};},plan,valid,payload,renderPlan,load,render,open,bind,buttons,enhance,mount};
+ let analytics=null,analyticsKey='',analyticsError='',analyticsLoading=false,analyticsRequest=0;
+ const analyticsIdentity=()=>JSON.stringify([identity(),followupAnalyticsPeriodDays()]);
+ function analyticsSnapshot(){return analyticsKey===analyticsIdentity()?analytics:null;}
+ function renderAnalytics(){
+  const mount=document.getElementById('internalFollowupAnalytics');if(!mount)return;
+  const allowed=saasMode==='auth'&&!!saasMe&&followupAnalyticsAllowed(false),data=analyticsSnapshot();
+  const exportButton=document.getElementById('exportFollowupAnalytics');if(exportButton)exportButton.disabled=!allowed||!data||analyticsLoading||!!analyticsError;
+  if(!allowed){mount.innerHTML='<p>운영 분석을 사용할 수 있는 병원 계정으로 로그인해주세요.</p>';return;}
+  if(analyticsKey!==analyticsIdentity()){mount.innerHTML='<p>통계 새로고침을 눌러 처리 현황을 확인하세요.</p>';return;}
+  if(analyticsLoading||analyticsError||!data){mount.innerHTML=`<p ${analyticsError?'role="alert"':''}>${esc(analyticsError||(analyticsLoading?'처리 현황 확인 중…':'통계 새로고침을 눌러주세요.'))}</p>`;return;}
+  const t=data.totals,percent=t.total?Math.round(t.completed/t.total*100):0;
+  const table=(title,rows,key)=>`<div class="analytics-card"><h4>${title}</h4>${rows.length?`<table><thead><tr><th scope="col">구분</th><th scope="col">전체</th><th scope="col">예정</th><th scope="col">완료</th><th scope="col">보류</th><th scope="col">지연</th></tr></thead><tbody>${rows.map(x=>`<tr><th scope="row">${esc(key(x))}</th>${['total','scheduled','completed','held','overdue'].map(k=>`<td>${Number(x[k])||0}</td>`).join('')}</tr>`).join('')}</tbody></table>`:'<p>집계할 업무가 없습니다.</p>'}</div>`;
+  mount.innerHTML=`<p>${esc(data.from)} ~ ${esc(data.to)} · 한국 시간 · 예정일 기준</p><div class="followup-analytics-kpis">${[['전체',t.total],['예정',t.scheduled],['완료',t.completed],['보류',t.held],['지연',t.overdue],['완료율',percent+'%']].map(([k,v])=>`<div class="analytics-kpi"><span>${k}</span><b>${v}</b></div>`).join('')}</div><div class="followup-analytics-grid">${table('단계별 처리',data.stages,x=>'D+'+x.stageDay)}${table('담당자별 처리',data.staff,x=>x.assigneeUserId?(followupMemberById(x.assigneeUserId)?.displayName||'기존 담당자'):'미배정')}</div>`;
+ }
+ async function loadAnalytics(showToast=true){
+  const key=analyticsIdentity();if(analyticsLoading&&analyticsKey===key)return;if(saasMode!=='auth'||!saasMe||!followupAnalyticsAllowed(showToast)){analytics=null;analyticsKey='';renderAnalytics();return;}
+  const request=++analyticsRequest;analyticsKey=key;analytics=null;analyticsError='';analyticsLoading=true;renderAnalytics();
+  try{const days=followupAnalyticsPeriodDays(),d=await saasRequest('/saas/followup/tasks?view=analytics&days='+days);if(key!==analyticsIdentity()||request!==analyticsRequest)return;
+   if(d?.ok!==true||!d.totals||!Array.isArray(d.stages)||!Array.isArray(d.staff))throw Error('통계 응답을 확인하지 못했습니다.');analytics=d;await loadFollowupTeamMembers();if(key!==analyticsIdentity()||request!==analyticsRequest)return;if(showToast)toast('후속관리 업무 통계를 새로고침했습니다.');
+  }catch(e){if(key===analyticsIdentity()&&request===analyticsRequest){analytics=null;analyticsError=e.message||'통계를 불러오지 못했습니다.';}}
+  finally{if(request===analyticsRequest){analyticsLoading=false;renderAnalytics();}}
+ }
+ function analyticsCsv(){const d=analyticsSnapshot();if(!d||analyticsError||analyticsLoading)return '';const rows=[['기간',d.from,d.to],['구분','항목','전체','예정','완료','보류','지연']],add=(group,label,x)=>rows.push([group,label,...['total','scheduled','completed','held','overdue'].map(k=>Number(x[k])||0)]);add('요약','전체',d.totals);d.stages.forEach(x=>add('단계','D+'+x.stageDay,x));d.staff.forEach(x=>add('담당자',x.assigneeUserId?(followupMemberById(x.assigneeUserId)?.displayName||'기존 담당자'):'미배정',x));return '\ufeff'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/^[=+\-@\t\r]/,"'$&").replace(/"/g,'""')+'"').join(',')).join('\r\n');}
+ function exportAnalytics(){if(!followupAnalyticsAllowed(true))return;const content=analyticsCsv();if(!content){toast('먼저 통계를 새로고침해주세요.');return;}downloadTextFile('후속관리_업무집계.csv',content,'text/csv;charset=utf-8');}
+
+ window.ClinicFollowupTasks={analyticsSnapshot,renderAnalytics,loadAnalytics,analyticsCsv,exportAnalytics,counts:()=>{const rows=scope===identity()?items.filter(x=>x.status!=='completed'):[];const today=new Date(Date.now()+32400000).toISOString().slice(0,10);return {total:rows.length,today:rows.filter(x=>x.dueDate===today).length,attention:rows.filter(x=>x.operationalStatus==='overdue').length};},plan,valid,payload,renderPlan,load,render,open,bind,buttons,enhance,mount};
 })();

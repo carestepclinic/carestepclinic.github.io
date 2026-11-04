@@ -1805,10 +1805,9 @@
                     if(results.excludedCount>0)card('확인이 필요한 예방 이력 '+Number(results.excludedCount)+'건','기록과 예정일을 확인해주세요.','충돌 일정 확인·수정',preventiveReview);
                     else chip('예방 이력 충돌 없음',preventiveReview);
                 }
-                const h=sync?.heartbeat,age=Date.now()-Date.parse(h?.last_seen_at),healthy=!!h&&Number.isFinite(age)&&age<=Math.max(35,(Number(h.interval_minutes)||15)*2+5)*60000&&h.status!=='failed',googleOK=google?.connected&&google.calendarId;
-                const googleText=google?(google.connected?(google.calendarId?'Google 정상':'Google 캘린더 선택 필요'):'Google 연결 확인 필요'):'Google 조회 미확인',syncText=sync?(healthy?'eFriends 응답 정상':'eFriends 서버 PC 확인 필요'):'eFriends 조회 미확인';
-                if(googleOK&&healthy)chip('Google · eFriends 정상',integrationStatus);
-                else card('연동 확인 필요',googleText+' · '+syncText,'연동 상태 확인',integrationStatus);
+                const h=sync?.heartbeat,age=Date.now()-Date.parse(h?.last_seen_at),healthy=!!h&&Number.isFinite(age)&&age<=Math.max(35,(Number(h.interval_minutes)||15)*2+5)*60000&&h.status!=='failed';
+                if(healthy)chip('eFriends 응답 정상',integrationStatus);
+                else card('연동 확인 필요',sync?'eFriends 서버 PC 확인 필요':'eFriends 조회 미확인','연동 상태 확인',integrationStatus);
                 note.textContent='확인 시각 '+workTime(cached.at)+' · 자동 재발송 없음';
             }else if((typeof saasPermission==='function'?saasPermission('messages.read',['owner','admin'].includes(saasMe?.role)):['owner','admin'].includes(saasMe?.role))){chips.append(el('span','업무 상태 확인 중…'));}
             else{chip('병원 운영 현황은 관리자에게 문의',()=>{});note.textContent='선택 환자의 자료와 오늘 업무를 확인하세요.';}
@@ -1822,9 +1821,9 @@
             if(!(typeof saasPermission==='function'?saasPermission('messages.read',['owner','admin'].includes(saasMe?.role)):['owner','admin'].includes(saasMe?.role))){cached=null;render();return;}
             if(pendingKey===key)return;if(!force&&loaded===key){render();return;}
             const revision=++generation;pendingKey=key;render();
-            try{const out=await Promise.allSettled([api('/preventive/results?date='+day),api('/operations/integrations'),saasRequest('/saas/google-calendar/status',{method:'GET',redirect:'error'})]);if(revision!==generation||currentDraftSession()!==session)return;
+            try{const out=await Promise.allSettled([api('/preventive/results?date='+day),api('/operations/integrations')]);if(revision!==generation||currentDraftSession()!==session)return;
                 const value=i=>out[i].status==='fulfilled'&&out[i].value?.ok===true?out[i].value:null;
-                cached={session,results:value(0),sync:value(1),google:value(2),at:new Date().toISOString()};loaded=key;render();
+                cached={session,results:value(0),sync:value(1),at:new Date().toISOString()};loaded=key;render();
             }finally{if(revision===generation)pendingKey='';}
         }
         document.getElementById('refreshWorkFirst')?.addEventListener('click',()=>{void load(true);});
@@ -2135,13 +2134,10 @@
     }
     async function integrationStatus(){
         if(!workAdmin())return;
-        const session=settingsSession(),{body}=dialog('Google · eFriends 연동 상태'),rows=el('section');
-        const load=async()=>{if(settingsSession()!==session){rows.replaceChildren(el('p','로그인이 바뀌었습니다. 다시 열어주세요.'));return;}rows.replaceChildren(el('p','연동 상태 확인 중…'));const responses=await Promise.allSettled([saasRequest('/saas/google-calendar/status',{method:'GET',redirect:'error'}),api('/operations/integrations',undefined,{redirect:'error'}),saasRequest('/saas/r65/manual-sync',{method:'GET',redirect:'error'})]);
+        const session=settingsSession(),{body}=dialog('eFriends 연동 상태'),rows=el('section');
+        const load=async()=>{if(settingsSession()!==session){rows.replaceChildren(el('p','로그인이 바뀌었습니다. 다시 열어주세요.'));return;}rows.replaceChildren(el('p','연동 상태 확인 중…'));const responses=await Promise.allSettled([api('/operations/integrations',undefined,{redirect:'error'}),saasRequest('/saas/r65/manual-sync',{method:'GET',redirect:'error'})]);
             if(settingsSession()!==session){rows.replaceChildren(el('p','로그인이 바뀌었습니다. 다시 열어주세요.'));return;}rows.replaceChildren();
-            const google=responses[0].status==='fulfilled'?responses[0].value:null,g=workCard(rows);g.append(el('strong','Google Calendar'));
-            g.append(el('p',google?.ok===true?(google.connected===true?'계정 연결됨 · '+(google.calendarId?'캘린더 선택됨: '+(google.calendarName||'CARESTEP 후속관리'):'캘린더 선택 필요'):({reconnect_required:'재인증 필요',disconnected:'계정 연결 필요'})[google.status]||'연결 상태 확인 필요'):'연결 상태를 조회하지 못했습니다.'));
-            button(g,'캘린더 설정 위치 보기',()=>{const node=document.getElementById('googleCalendarStatus');if(node){node.scrollIntoView({block:'center'});body.closest('dialog')?.close();}else g.append(el('p','후속관리 설정의 캘린더 단계에서 연결·선택할 수 있습니다.'));});
-            const sync=responses[1].status==='fulfilled'?responses[1].value:null,manual=responses[2].status==='fulfilled'?responses[2].value:null,e=workCard(rows);e.append(el('strong','eFriends 동기화'));
+            const sync=responses[0].status==='fulfilled'?responses[0].value:null,manual=responses[1].status==='fulfilled'?responses[1].value:null,e=workCard(rows);e.append(el('strong','eFriends 동기화'));
             if(sync?.ok===true){const h=sync.heartbeat,last=sync.lastSuccess,age=h?Date.now()-Date.parse(h.last_seen_at):Infinity,late=!Number.isFinite(age)||age>Math.max(35,(Number(h?.interval_minutes)||15)*2+5)*60000;e.append(el('p',!h?'서버 PC 연결 기록 없음':h.status==='failed'?'서버 PC 동기화 오류':late?'서버 PC 응답 지연 · 연결 확인 필요':h.status==='syncing'?'동기화 처리 중':'서버 PC 응답 확인'),el('p','마지막 응답 '+workTime(h?.last_seen_at)+' · 다음 예정 '+workTime(h?.next_expected_at)),el('p','최근 반영 완료 '+workTime(last?.finished_at)+(last?.status==='completed_with_errors'?' · 일부 오류 있음':'')),el('p',last?'최근 반영: 신규 '+Number(last.events_created||0)+'건 · 수정 '+Number(last.events_updated||0)+'건 · 오류 '+Number(last.errors||0)+'건':'반영 완료 기록 없음'));}else e.append(el('p','동기화 상태를 조회하지 못했습니다.'));
             e.append(el('p',manual?.ok===true?(manual.enabled&&manual.agentVerified?'EMR 최신 백업 불러오기 요청 가능 · 15분 자동 동기화 유지':'EMR 백업 불러오기 요청 불가 · 설치·승인 상태 확인 필요'):'EMR 백업 불러오기 가능 여부 확인 필요'));
             button(e,'EMR 백업 불러오기 설정 열기',async()=>{if(typeof go==='function')go('settings');await window.R65ManualSync?.refresh(true);const management=document.getElementById('r61-management');if(management)management.open=true;document.getElementById('r65-manual-controls')?.scrollIntoView({block:'center'});body.closest('dialog')?.close();});
