@@ -15,3 +15,29 @@
 #followupRecipientPreview [data-recipient-media] img{display:block;width:100%;max-width:360px;height:auto;margin:10px auto;border:1px solid #dbe5f5;border-radius:12px}
 #followupRecipientPreview .followup-card-date{white-space:normal;text-align:right}
 @media(max-width:700px){#followupRecipientPreview .followup-cards{grid-template-columns:1fr}}
+
+/* Step four: current delivery first, optional history last. */
+#followupGuideStep4Body .followup-messaging-head{justify-content:flex-end}
+#followupGuideStep4Body .followup-messaging-head>div{display:none}
+#followupGuideStep4Body .messaging-grid{margin-top:6px}
+#followupGuideStep4Body .messaging-grid>.messaging-card:first-child>p,#followupGuideStep4Body .messaging-fields>.wide>small{display:none}
+#followupGuideStep4Body .messaging-grid>.messaging-card:first-child .messaging-fields{grid-template-columns:1.1fr 1.4fr 1fr;align-items:end}
+#followupGuideStep4Body .messaging-grid>.messaging-card:first-child .messaging-fields>.wide{grid-column:auto}
+#followupGuideStep4Body #followupRecipientPreview{margin-top:12px}
+#followupMessageConfirm{padding:12px 0}
+#followupMessageConfirm .messaging-consent{margin-top:0}
+#followupMessageHistory,#followupMessagePresetDetails{border:1px solid #dbe5f5;border-radius:12px;padding:12px;margin-top:10px;background:#fff}
+#followupMessageHistory>summary,#followupMessagePresetDetails>summary,#followupMessageConfirm summary{cursor:pointer;font-size:14px;font-weight:700;line-height:1.6}
+#followupMessageHistory>summary #messagingQueueSummary{font-size:13px!important;font-weight:400;margin-left:12px}
+#followupMessageHistory .messaging-queue-list{max-height:420px;overflow:auto;overscroll-behavior:contain}
+#followupMessageHistory #refreshMessagingJobs{margin-bottom:8px}
+#followupMessageConfirm>details{margin-top:10px}
+#followupMessagePresetDetails .followup-preset-panel{margin:10px 0 0}
+@media(max-width:700px){#followupGuideStep4Body .messaging-grid>.messaging-card:first-child .messaging-fields{grid-template-columns:1fr}#followupMessageHistory>summary #messagingQueueSummary{display:block;margin:4px 0 0}#followupMessageHistory .messaging-queue-list{max-height:55vh}}
+#followupGuideStep4Body .messaging-grid>.messaging-card:first-child .messaging-fields>.wide>small{display:none!important}
+#guideMessagingIntro{padding:12px!important}
+#guideMessagingIntro .eyebrow{display:none}
+#guideMessagingIntro .guide-step-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+#guideMessagingIntro .guide-step-head h4{margin:0 0 4px}
+#guideMessagingIntro .guide-callout{border:0;background:transparent;padding:0;margin:0}
+#guideMessagingIntro .guide-step-tools{flex-shrink:0}
