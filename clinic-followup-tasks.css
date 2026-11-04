@@ -105,3 +105,30 @@ body:has(#followup.active-view) #followupContextSummary{display:block;font-size:
 #followup .crm-empty,#followup .guardian-survey-empty,#followup .journey-empty{padding:12px;min-height:0;font-size:14px;line-height:1.55}
 #followup .crm-filter,#followup .crm-badge,#followup .crm-case-id,#followup .guardian-survey-foot{font-size:13px;line-height:1.5}
 #followup .crm-panel,#followup .guardian-survey-panel{padding:14px;border-radius:12px}
+/* Staff workflow controls: optional tasks, delivery consent and readable responses. */
+#followup .survey-kpi span,#followup .survey-kpi small,#followup .survey-badge,#followup .survey-when,#followup .survey-when b,#followup .survey-main>span,#followup .survey-comment{font-size:13px;line-height:1.55}
+#followup .survey-main>b,#followup .survey-empty{font-size:14px;line-height:1.55}
+#followup .survey-empty{padding:12px;min-height:0}
+#followup .guide-summary-box.neutral{border-color:#dbe5f5;background:#f8fafc}
+#followup .followup-secondary{padding:10px 12px;margin:10px 0;border:1px solid #dbe5f5;border-radius:12px;background:#fff}
+#followup .followup-secondary>summary,#followup .followup-method>summary{cursor:pointer;font-size:14px;font-weight:600}
+#followup .followup-secondary>div{border:0;padding:12px 0 0;margin:0}
+#followup .followup-method{margin-top:10px;font-size:13px}
+#followup .followup-operation-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+#followup .followup-operation-kpi:nth-child(n+3){display:none}
+#followup .internal-followup-edit,#followup .internal-followup-columns{grid-template-columns:100px minmax(160px,1.5fr) minmax(180px,1fr) minmax(140px,1fr)}
+#followup .internal-day-toggle{display:flex;gap:8px;align-items:center;margin:0;cursor:pointer}
+#followup .internal-day-toggle input{width:20px;height:20px;flex:none;accent-color:#2854ff;padding:0}
+#followup .internal-followup-edit:has([data-task-enabled]:not(:checked)){background:#f5f7fa}
+#followup .internal-followup-edit input:disabled,#followup .internal-followup-edit select:disabled{color:#65758b;background:#f1f4f8}
+#followupVisibleSender{margin-top:10px;padding-top:8px;border-top:1px solid #dbe5f5}
+#followupVisibleSender [data-sender-value]{font-size:14px;padding:5px 0}
+#followup .messaging-fields>.wide:has(#followupVisibleSender){grid-column:1/-1}
+#followup .messaging-fields .messaging-consent{margin:6px 0 0;padding:10px;font-size:13px}
+#followup .messaging-consent label{display:flex;gap:8px;align-items:flex-start;line-height:1.6}
+#followup .messaging-consent input{flex:none;margin-top:3px}
+#followupFinalReview{font-size:14px;margin-bottom:12px;overflow-wrap:anywhere}
+#followupFinalReview b{min-width:95px}
+@media(max-width:760px){#followup .internal-followup-edit{grid-template-columns:1fr 1fr}#followup .internal-day-toggle{grid-column:1/-1}#followup .internal-followup-edit>label:nth-of-type(2){grid-column:1/-1}}
+@media(max-width:700px){body:has(#followup.active-view.guide-mode-setup) #followupGuideNav{position:fixed;left:0;right:0;bottom:0;z-index:80;background:#fff;border-top:1px solid #dbe5f5;margin:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -3px 12px #173b5c12}#followup.guide-mode-setup{padding-bottom:110px}#followupFinalReview>div{flex-direction:column;gap:4px}}
+@media(max-width:700px){body:has(#followup.active-view.guide-mode-setup :is(input:not([type=checkbox]),textarea,select):focus) #followupGuideNav{visibility:hidden;pointer-events:none}#followup :is(input,textarea,select){scroll-margin-block:120px}}
