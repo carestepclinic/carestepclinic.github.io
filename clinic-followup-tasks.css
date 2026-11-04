@@ -41,3 +41,12 @@
 #guideMessagingIntro .guide-step-head h4{margin:0 0 4px}
 #guideMessagingIntro .guide-callout{border:0;background:transparent;padding:0;margin:0}
 #guideMessagingIntro .guide-step-tools{flex-shrink:0}
+#followupGuideStep2Body.has-applied-plan:not(.show-plan-browser) #patientJourneyPanel{display:none}
+.flow-plan-summary{background:white;border:1px solid #dbe5f5;border-radius:12px;padding:8px 14px;margin-bottom:12px}
+.flow-plan-summary>div{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid #eef2f7}.flow-plan-summary>div:last-child{border:0}.flow-plan-summary b{min-width:45px}
+#followupGuideShell #scheduleFollowupMessages{display:none}
+#followupMobileStepper{grid-template-columns:repeat(5,minmax(0,1fr))}
+#followupAnalyticsDetails{padding:12px;margin-top:12px;background:white;border:1px solid #dbe5f5;border-radius:12px}#followupAnalyticsDetails>summary{cursor:pointer;font-weight:700}
+#followupPriority{margin-bottom:12px}
+#followupGuideStep5Body .guide-final-row{min-width:0}#followupGuideStep5Body p{font-size:14px;line-height:1.6}
+#followupOperationHistory{margin-top:12px;border:1px solid #dbe5f5;border-radius:12px;padding:12px;background:white}#followupOperationHistory>summary{font-weight:700;cursor:pointer}.flow-delivery-history{max-height:400px;overflow:auto}.flow-delivery-history>div{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px 0;border-bottom:1px solid #eef2f7}
