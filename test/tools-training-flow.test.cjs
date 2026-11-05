@@ -52,31 +52,40 @@ async function educationTopics(p,hq=false){await p.evaluate(async hq=>{
  training.courses=[make('내과 교육','내과'),make('실무 교육','접수 · 응대','practice'),make('실무 보충','접수·응대',undefined,{format:'practice'}),make('공통 주제 A','간호'),make('공통 주제 B','간호','practice'),make('미분류 자료','', 'practice'),{...make('초안','비공개 주제'),status:'draft'}, {...make('병원 지침','병원 SOP · 감염·안전'),kind:'sop',owned:true}];
  await app.open({reuse:false});
 },hq);}
-for(const width of [390,1280])test('education types constrain topics, clear incompatible selections and preserve shared topics '+width,async t=>{
+
+for(const width of [390,1280])test('education search and type work without a redundant topic filter '+width,async t=>{
  const p=await page(t,'training',width);await educationTopics(p);
- const types=p.locator('[data-course-type]'),topics=p.locator('[data-category]');
+ const types=p.locator('[data-course-type]');
+ assert.equal(await p.locator('[data-category]').count(),0);
  assert.deepEqual(await types.locator('option').evaluateAll(es=>es.map(e=>e.value)),['','disease','practice']);
- assert.equal(await topics.locator('option').filter({hasText:'접수·응대'}).count(),1);
- assert.equal(await topics.locator('option').filter({hasText:'비공개 주제'}).count(),0);
- assert.equal(await p.evaluate(()=>document.querySelector('[data-course-type]').closest('label').nextElementSibling===document.querySelector('[data-category]').closest('label')),true);
  const reads=await p.evaluate(()=>calls.length);
- await topics.selectOption('내과');assert.equal(await p.locator('.st-card').count(),1);
- await types.focus();await types.selectOption('practice');assert.equal(await topics.inputValue(),'');assert.equal(await p.locator('.st-card').count(),4);
+ await types.selectOption('disease');assert.equal(await p.locator('.st-card').count(),2);
+ await types.focus();await types.selectOption('practice');assert.equal(await p.locator('.st-card').count(),4);
  assert.equal(await types.evaluate(e=>e===document.activeElement),true);
- assert.equal(await topics.locator('option').filter({hasText:'내과'}).count(),0);
- await topics.selectOption('접수·응대');assert.equal(await p.locator('.st-card').count(),2);
- await topics.selectOption('간호');await types.selectOption('disease');assert.equal(await topics.inputValue(),'간호');assert.equal(await p.locator('.st-card').count(),1);
- await p.locator('[data-tab=mine]').click();await p.locator('[data-tab=library]').click();assert.equal(await types.inputValue(),'disease');assert.equal(await topics.inputValue(),'간호');
- await p.locator('[data-st=clear]').click();assert.equal(await p.locator('.st-card').count(),6);assert.equal(await types.inputValue(),'');assert.equal(await topics.inputValue(),'');
+ await p.locator('[data-search]').fill('접수');assert.equal(await p.locator('.st-card').count(),2);
+ await p.locator('[data-tab=mine]').click();await p.locator('[data-tab=library]').click();
+ assert.equal(await types.inputValue(),'practice');assert.equal(await p.locator('[data-search]').inputValue(),'접수');
+ assert.equal(await p.locator('[data-category]').count(),0);assert.equal(await p.locator('.st-card').count(),2);
+ await p.locator('[data-st=clear]').click();assert.equal(await p.locator('.st-card').count(),6);assert.equal(await types.inputValue(),'');
  assert.equal(await p.evaluate(()=>calls.length),reads);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
+ await p.screenshot({path:resolve(root,'../education-simple-'+width+'.png'),fullPage:false});
 });
 
-test('HQ education management uses the same dependent filters including review drafts',async t=>{
+test('HQ education filters keep drafts accessible without topic selection',async t=>{
  const p=await page(t);await p.goto(origin+'/fixture?mode=training&hq=1');await educationTopics(p,true);
- await p.locator('[data-course-type]').selectOption('disease');assert.equal(await p.locator('[data-category] option').filter({hasText:'비공개 주제'}).count(),1);
- await p.locator('[data-category]').selectOption('비공개 주제');assert.equal(await p.locator('.st-card').count(),1);
- await p.locator('[data-course-type]').selectOption('practice');assert.equal(await p.locator('[data-category]').inputValue(),'');assert.equal(await p.locator('.st-card').count(),4);
- await p.locator('[data-tab=library]').click();assert.equal(await p.locator('[data-category] option').filter({hasText:'비공개 주제'}).count(),0);
+ assert.equal(await p.locator('[data-category]').count(),0);
+ await p.locator('[data-course-type]').selectOption('disease');assert.equal(await p.locator('.st-card').count(),3);
+ await p.locator('[data-search]').fill('초안');assert.equal(await p.locator('.st-card').count(),1);
+ await p.locator('[data-st=clear]').click();await p.locator('[data-course-type]').selectOption('practice');assert.equal(await p.locator('.st-card').count(),4);
+ await p.locator('[data-tab=library]').click();assert.equal(await p.locator('.st-card').count(),6);assert.equal(await p.locator('[data-category]').count(),0);
+});
+
+test('SOP business area remains independent from education filters',async t=>{
+ const p=await page(t);await educationTopics(p);await p.locator('[data-tab=sop]').click();
+ await p.locator('[data-category]').selectOption('감염·안전');assert.equal(await p.locator('.st-card').count(),1);
+ await p.locator('[data-tab=library]').click();assert.equal(await p.locator('[data-category]').count(),0);assert.equal(await p.locator('.st-card').count(),6);
+ await p.locator('[data-course-type]').selectOption('disease');assert.equal(await p.locator('.st-card').count(),2);
+ await p.locator('[data-tab=sop]').click();assert.equal(await p.locator('[data-category]').inputValue(),'감염·안전');assert.equal(await p.locator('.st-card').count(),1);
 });
 
 for(const width of [390,768,1440])test('SOP compact cards group versions and retain selected layout '+width,async t=>{
