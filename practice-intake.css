@@ -1,0 +1,22 @@
+
+/* Guardian intake: selection first, scoped to intake forms and summaries. */
+.pt .intake-form{max-width:920px;margin:auto}
+.pt .intake-fields,.pt .intake-systems{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.pt .intake-form label{margin:0 0 12px;display:block;font-size:14px;line-height:1.5}
+.pt .intake-form input,.pt .intake-form select,.pt .intake-form textarea{font:inherit;box-sizing:border-box;max-width:100%}
+.pt .intake-form input:not([type=checkbox]),.pt .intake-form select{min-height:44px}
+.pt .intake-form textarea{min-height:70px;resize:vertical}
+.pt .intake-section{border:1px solid #d5e0f0;border-radius:12px;background:#fff;margin:12px 0;padding:12px 14px}
+.pt .intake-section>summary{cursor:pointer;font-weight:700;min-height:28px;line-height:1.6}
+.pt .intake-section[open]>summary{margin-bottom:12px}
+.pt .intake-section summary span{font-size:12px;font-weight:400;color:#456482;margin-left:8px}
+.pt .intake-systems fieldset{min-width:0;border:1px solid #d5e0f0;border-radius:8px;padding:10px;margin:0}
+.pt .intake-systems legend{font-weight:600;padding:0 4px}
+.pt .intake-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin:8px 0}
+.pt .intake-checks label,.pt .intake-form .pt-choice{display:flex;align-items:flex-start;gap:8px;margin:0;padding:8px 0}
+.pt .intake-checks input,.pt .intake-form .pt-choice input{width:18px;height:18px;flex-shrink:0;margin:2px 0}
+.pt .intake-form [hidden]{display:none!important}
+.pt .intake-submit{display:flex;justify-content:flex-end;gap:8px;padding:12px 0}
+.pt .intake-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pt .intake-summary p{margin:0;padding:10px;background:#f5f8fc;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:600px){.pt .intake-fields,.pt .intake-systems,.pt .intake-summary{grid-template-columns:1fr}.pt .intake-section{padding:10px}.pt .intake-submit{justify-content:stretch}.pt .intake-submit button{flex:1;min-height:44px}}

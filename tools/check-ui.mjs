@@ -26,7 +26,7 @@ export const uiFiles = new Set([
   'practice-calculator-ease.js','practice-products.js','practice-prescription.js','practice-prescription-ui.js',
   'practice-nutrition-foods.js','practice-nutrition-foods.css','practice-food-catalog.json','practice-nutrition.js','practice-calcium-transfusion.js','practice-emergency.js', 'practice-cri-presets.js',
   'practice-library.js','practice-library-dose.js',
-  'practice-calculator-simple.js','practice-acid-base.js','practice-calculator-workspace.js','practice-reference.js','practice-reference-ui.js','practice-calculators.js','practice-tools.js','practice-clinic.js','practice-intake.js','practice-tools.css','intake.html',
+  'practice-calculator-simple.js','practice-acid-base.js','practice-calculator-workspace.js','practice-reference.js','practice-reference-ui.js','practice-calculators.js','practice-tools.js','practice-clinic.js','practice-intake.js','practice-intake.css','practice-tools.css','intake.html',
   'training-automation.js','training-automation.css',
   'guardian-studio.js','guardian-studio.css',
   'staff-training-pdf.js','pretendard-regular-1.3.9.ttf','pdf-lib-1.17.1.min.js','pdf-fontkit-1.1.1.min.js','PDF-LIB-LICENSE.txt','PDF-FONTKIT-LICENSE.txt',
