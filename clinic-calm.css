@@ -394,3 +394,117 @@
 @media print {
  .cs-patient-header,.cs-record-navigation{display:none!important}
 }
+
+/* Guardian and hospital workspaces share the clinical screen language.
+   Scope to controls and navigation: generated documents and status colours keep
+   their own styles. No form visibility, order, value or action is changed. */
+@media screen {
+ .clinic-calm #appView :is(#library,#followup,#settings,#account,#training) {font-size:15px;line-height:1.55;min-width:0}
+ .clinic-calm #appView :is(#library,#followup,#settings,#account,#training) :is(button,input,select,textarea) {font-family:inherit}
+ .clinic-calm #appView :is(#library,#settings,#account,#training) :is(.btn,.cs-button,.cs-setting-link,.st-button,.st-tabs button) {font-size:14px!important;line-height:1.45;font-weight:600;min-height:40px;border-radius:8px;box-shadow:none}
+ .clinic-calm #appView :is(#library,#settings,#account) :is(.section-head,.settings-hub-head) {gap:10px 16px;margin:0 0 12px}
+ .clinic-calm #appView :is(#library,#settings,#account) :is(.section-head p,.settings-hub-head p:not(.eyebrow)) {font-size:14px;line-height:1.55;color:var(--cs-muted);margin:4px 0 0}
+
+ /* Find a resource, then create it: one stable toolbar, naturally sized cards. */
+ .clinic-calm #library>.section-head {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}
+ .clinic-calm #library #searchInput {grid-column:1;grid-row:1;width:100%;max-width:none;min-height:44px;font-size:15px}
+ .clinic-calm #library>.section-head>.btn {grid-column:2;grid-row:1;width:auto;justify-self:end}
+ .clinic-calm #library .cards-grid {grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:12px;align-items:stretch}
+ .clinic-calm #library .resource-card {padding:14px;gap:10px;min-height:0;border-color:var(--cs-line);border-radius:10px;box-shadow:none}
+ .clinic-calm #library .resource-card:hover {transform:none;border-color:var(--cs-accent);box-shadow:none}
+ .clinic-calm #library .resource-card h4 {font-size:17px!important;line-height:1.45;overflow-wrap:anywhere}
+ .clinic-calm #library .resource-card p {font-size:14px!important;line-height:1.55}
+ .clinic-calm #library .workflow-next-note {font-size:13px;line-height:1.5;border-color:var(--cs-line);background:var(--cs-paper);padding:8px 10px}
+ .clinic-calm #library :is(.chip,.purpose-chip,.recent-chip) {font:inherit;font-size:14px;font-weight:600;line-height:1.4;min-height:40px;padding:8px 12px;border-radius:8px;border-color:var(--cs-line)}
+ .clinic-calm #library :is(.chip.active,.purpose-chip.active) {background:var(--cs-accent);border-color:var(--cs-accent);color:#fff}
+ .clinic-calm #library :is(.clinic-library-filters,.clinic-library-recent) {border-color:var(--cs-line);border-radius:10px;background:var(--cs-paper)}
+ .clinic-calm #library :is(.clinic-library-filter-status,.library-result-meta,.library-filter-label,.category) {font-size:13px;line-height:1.5}
+ .clinic-calm #library .clinic-library-filter-status {gap:8px;flex-wrap:wrap}
+ .clinic-calm #library .clinic-library-filters>summary {min-height:40px;align-content:center;font-size:14px}
+
+ /* Only builder chrome is themed; the PDF and guardian output are untouched. */
+ .clinic-calm #builder .builder-controls {padding:14px}
+ .clinic-calm #builder .builder-controls :is(.btn,.field-label,.med-field label) {font-size:14px!important}
+ .clinic-calm #builder .builder-controls :is(.builder-material-choice,.builder-extra-outputs,.builder-save-options) {border-color:var(--cs-line);border-radius:10px}
+ .clinic-calm #builder :is(.builder-controls,.builder-panel-tabs) [aria-pressed=true] {background:var(--cs-accent);border-color:var(--cs-accent);color:white}
+ .clinic-calm #builder .builder-flow-bar {gap:8px;margin-bottom:10px;font-size:13px}
+ .clinic-calm #builder .builder-case-context {background:var(--cs-paper);border-color:var(--cs-line);box-shadow:none;border-radius:10px;margin:0 0 12px;padding:12px}
+ .clinic-calm #builder .builder-case-context span {font-size:13px;color:var(--cs-muted)}
+ .clinic-calm #builder .builder-case-context strong {font-size:15px;color:var(--cs-ink)}
+ .clinic-calm #builder .wizard-step {font:inherit;font-size:13px;font-weight:600;line-height:1.4;min-height:44px;border-radius:8px}
+ .clinic-calm #builder .wizard-step b {font-size:13px;width:24px;height:24px}
+ .clinic-calm #builder .wizard-step.active {background:var(--cs-tint);border-color:var(--cs-accent);color:var(--cs-accent-hover)}
+ .clinic-calm #builder .wizard-step.active b {background:var(--cs-accent);color:#fff}
+ .clinic-calm #builder .wizard-pane-title h4 {font-size:18px;line-height:1.4}
+ .clinic-calm #builder .wizard-pane-title p {font-size:14px;line-height:1.5}
+
+ /* Preserve done/skipped/error semantics while unifying the current step. */
+ .clinic-calm #followup :is(.followup-guide-step.current,.followup-mobile-stepper button.current) {border-color:var(--cs-accent);background:var(--cs-tint);color:var(--cs-accent-hover);box-shadow:none}
+ .clinic-calm #followup .followup-guide-step.current .guide-num {background:var(--cs-accent);color:#fff}
+ .clinic-calm #followup :is(.followup-guide-mode.active,.crm-filter.active) {background:var(--cs-accent);border-color:var(--cs-accent);color:#fff}
+ .clinic-calm #followup .followup-guide-step {padding:10px;border-radius:10px}
+ .clinic-calm #followup :is(.followup-card,.messaging-card,.internal-followup-board,.flow-plan-summary,.followup-secondary) {border-color:var(--cs-line);border-radius:10px;box-shadow:none}
+ .clinic-calm #followup .internal-day-toggle input {accent-color:var(--cs-accent)}
+ .clinic-calm #followup :is(.internal-followup-board,#guideCalendarIntro) {container-type:inline-size}
+ .clinic-calm #followup .internal-followup-edit :is(input,select) {border-color:#bccbc5}
+ @container (max-width:700px) {
+  .clinic-calm #followup .internal-followup-columns {display:none}
+  .clinic-calm #followup .internal-followup-edit {grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px 0}
+  .clinic-calm #followup .internal-followup-edit>:is(.internal-day-toggle,label:nth-of-type(2)) {grid-column:1/-1}
+  .clinic-calm #followup .internal-field-label {position:static;width:auto;height:auto;overflow:visible;clip-path:none}
+ }
+ @container (max-width:440px) {
+  .clinic-calm #followup .internal-followup-edit {grid-template-columns:minmax(0,1fr)}
+ }
+
+ /* Settings navigation stays separate from settings values and save handlers. */
+ .clinic-calm #appView :is(#settings,#account) :is(.settings-hub,.cs-settings-section,.cs-settings-legacy,.cs-permission-quick,.cs-comparison,.cs-contract) {border-color:var(--cs-line);border-radius:10px;background:var(--cs-paper);box-shadow:none}
+ .clinic-calm #appView :is(#settings,#account) .settings-hub {padding:14px}
+ .clinic-calm #appView :is(#settings,#account) .cs-settings-shell {gap:12px}
+ .clinic-calm #appView :is(#settings,#account) .cs-settings-nav {gap:4px}
+ .clinic-calm #appView :is(#settings,#account) .cs-settings-nav .cs-button {border-color:transparent;background:transparent;color:var(--cs-muted);padding:10px 12px}
+ .clinic-calm #appView :is(#settings,#account) .cs-settings-nav .cs-button[aria-pressed=true] {background:var(--cs-tint);color:var(--cs-accent-hover);box-shadow:inset 3px 0 var(--cs-accent);border-color:var(--cs-line)}
+ .clinic-calm #appView :is(#settings,#account) .cs-setting-link {background:#f7f9f6;border-color:var(--cs-line);color:var(--cs-ink);padding:10px 12px}
+ .clinic-calm #appView :is(#settings,#account) :is(.cs-setting-link:hover,.cs-button:hover:not(:disabled)) {background:var(--cs-tint);border-color:var(--cs-accent)}
+ .clinic-calm #appView :is(#settings,#account) :is(.cs-setting-link small,.cs-help,.image-size-guide,.image-size-guide b,.image-size-guide small,.toggle-row) {font-size:13px!important;line-height:1.55;color:var(--cs-muted)}
+ .clinic-calm #appView :is(#settings,#account) :is(.cs-settings-section h4,.account-pane-head h3) {font-size:18px;line-height:1.4;margin:0 0 10px}
+ .clinic-calm #appView :is(#settings,#account) :is(.cs-settings-search,.cs-settings-select,.cs-inline-form input:not([type=checkbox]),.cs-inline-form select,.cs-inline-form textarea) {border-color:#bccbc5;color:var(--cs-ink);font-size:15px;min-height:40px}
+ .clinic-calm #appView :is(#settings,#account) .cs-inline-form .field-label {font-size:14px;font-weight:600}
+ .clinic-calm #appView :is(#settings,#account) .cs-inline-form .form-grid {gap:12px;margin-top:12px}
+ .clinic-calm #appView :is(#settings,#account) .settings-actions {gap:8px;padding-block:10px;margin-top:12px;border-color:var(--cs-line)}
+ .clinic-calm #appView :is(#settings,#account) .settings-role-badge {color:var(--cs-muted);border-color:var(--cs-line);font-size:12px;font-weight:600}
+
+ /* Training and SOP use the same navigation and card density as clinical work. */
+ .clinic-calm :is(#training .staff-training,.st-dialog) {--st-ink:var(--cs-ink);--st-muted:var(--cs-muted);--st-line:var(--cs-line);--st-blue:var(--cs-accent);font-family:inherit;font-size:15px;line-height:1.55}
+ .clinic-calm #training .st-heading {gap:12px;margin-bottom:12px}
+ .clinic-calm #training .st-heading h1 {font-size:22px;margin:0 0 4px}
+ .clinic-calm #training .st-tabs {gap:4px;padding:4px;margin-bottom:12px;border-radius:10px;background:#eef2ef}
+ .clinic-calm #training .st-tabs button[aria-current=page] {background:var(--cs-accent);border-color:var(--cs-accent);color:white}
+ .clinic-calm #training .st-tabs button[aria-current=page] span {background:white;color:var(--cs-accent-hover)}
+ .clinic-calm #training .st-toolbar {margin:12px 0;gap:10px}
+ .clinic-calm #training .st-toolbar label {min-width:0;flex:1 1 160px}
+ .clinic-calm #training .st-toolbar label:first-child {flex:2 1 240px;min-width:0}
+ .clinic-calm #training :is(input:not([type=checkbox]):not([type=radio]),select) {font-size:15px;min-height:40px;border-color:#bccbc5;padding:8px 10px}
+ .clinic-calm #training .st-grid {gap:12px}
+ .clinic-calm #training .st-card {padding:14px;border-radius:10px;box-shadow:none}
+ .clinic-calm #training .st-card h2 {font-size:17px;line-height:1.45}
+ .clinic-calm #training .st-card>.st-actions {padding-top:8px}
+ .clinic-calm #training .st-empty {padding:20px 14px;border-radius:10px;background:#f7f9f6;font-size:14px}
+ .clinic-calm #training .st-button:hover:not(.st-primary):not(:disabled) {background:var(--cs-tint)}
+
+ @media(max-width:760px) {
+  .clinic-calm #library>.section-head {grid-template-columns:minmax(0,1fr);gap:10px}
+  .clinic-calm #library>.section-head>.btn {grid-column:1;grid-row:1;justify-self:start}
+  .clinic-calm #library #searchInput {grid-column:1;grid-row:2}
+  .clinic-calm #appView :is(#library,#followup,#settings,#account,#training) :is(.btn,.chip,.purpose-chip,.recent-chip,.cs-button,.cs-setting-link,.st-button,.st-tabs button) {min-height:44px}
+  .clinic-calm #appView :is(#library,#followup,#settings,#account,#training) :is(input:not([type=checkbox]):not([type=radio]),select,textarea) {font-size:16px!important;min-height:44px;max-width:100%;min-width:0}
+  .clinic-calm #appView :is(#settings,#account) .settings-hub {padding:10px}
+  .clinic-calm #appView :is(#settings,#account) .cs-settings-section {padding:12px}
+  .clinic-calm #training .st-toolbar label {flex-basis:100%}
+  .clinic-calm #training .st-toolbar :is(input,select) {width:100%}
+  .clinic-calm #training .st-tabs {display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .clinic-calm #builder .builder-controls {padding:12px}
+  .clinic-calm #builder .builder-controls :is(input:not([type=checkbox]):not([type=radio]),select,textarea) {font-size:16px!important;min-height:44px}
+  .clinic-calm #builder .wizard-step {padding:8px 3px;font-size:12px}
+ }
+}
