@@ -508,3 +508,84 @@
   .clinic-calm #builder .wizard-step {padding:8px 3px;font-size:12px}
  }
 }
+
+/* Daily work, patient directory and staff intake: presentation only. */
+@media screen {
+ .clinic-calm #appView :is(#dashboard,#patients,.pt-intake-workspace) {font-size:15px;line-height:1.55;min-width:0}
+ .clinic-calm #appView :is(#dashboard,#patients,.pt-intake-workspace) :is(button,.btn,input,select) {font-family:inherit;font-size:14px!important;line-height:1.5;border-radius:8px}
+ .clinic-calm #appView :is(#dashboard,#patients,.pt-intake-workspace) :is(button,.btn) {min-height:40px;white-space:normal}
+ .clinic-calm #dashboard :is(.work-first-dashboard,.pt-today-ward) {border:1px solid var(--cs-line);border-radius:10px;background:var(--cs-paper);box-shadow:none;padding:14px}
+ .clinic-calm #dashboard .clinic-section-tabs {gap:6px;border-color:var(--cs-line);margin-bottom:10px}
+ .clinic-calm #dashboard .clinic-section-tabs button {padding:10px 12px;border-color:var(--cs-line);color:var(--cs-muted);background:#fff}
+ .clinic-calm #dashboard .clinic-section-tabs button[aria-selected=true] {background:var(--cs-accent);border-color:var(--cs-accent);color:#fff}
+ .clinic-calm #workFirstDashboard .care-inbox {padding:0 0 8px}
+ .clinic-calm #workFirstDashboard .care-inbox nav {margin:8px 0;gap:6px}
+ .clinic-calm #workFirstDashboard .care-inbox nav button {padding:8px 10px;color:var(--cs-muted);border-color:var(--cs-line)}
+ .clinic-calm #workFirstDashboard .care-inbox nav button[aria-pressed=true] {background:var(--cs-tint);color:var(--cs-accent-hover);border-color:var(--cs-accent)}
+ .clinic-calm #dashboard .care-task {padding:12px;margin:8px 0;border-color:var(--cs-line);border-radius:10px}
+ .clinic-calm #dashboard .care-task h3 {font-size:16px;line-height:1.5;margin:0 0 4px}
+ .clinic-calm #dashboard .care-task :is(p,small) {font-size:14px;line-height:1.5;letter-spacing:normal}
+ .clinic-calm #dashboard :is(.pt-today-ward-head,.pt-today-ward-footer) {gap:8px;flex-wrap:wrap}
+ .clinic-calm #dashboard .pt-today-ward-head h3 {font-size:18px;margin:0}
+ .clinic-calm #dashboard .pt-today-ward-list {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:8px;margin:10px 0}
+ .clinic-calm #dashboard .pt-today-ward-patient {margin:0;padding:10px 12px;border-color:var(--cs-line);min-width:0;background:#fff}
+ .clinic-calm #dashboard .pt-today-ward-patient:hover {border-color:var(--cs-accent);background:var(--cs-tint)}
+ .clinic-calm #dashboard .pt-today-ward-patient b {font-size:16px;line-height:1.5;overflow-wrap:anywhere}
+ .clinic-calm #dashboard .pt-today-ward-patient small {font-size:13px;line-height:1.5;color:var(--cs-muted);overflow-wrap:anywhere}
+ .clinic-calm #dashboard .pt-today-ward-open {color:var(--cs-accent);font-size:14px;flex-shrink:0}
+ .clinic-calm #dashboard .pt-today-ward-time {font-size:12px;color:var(--cs-muted);margin-top:8px}
+
+ .clinic-calm #patients .patient-crm-head {gap:10px;margin-bottom:12px}
+ .clinic-calm #patients .patient-crm-head h3 {font-size:20px;line-height:1.4;margin:0 0 4px}
+ .clinic-calm #patients .patient-crm-head p {font-size:14px;color:var(--cs-muted)}
+ .clinic-calm #patients .patient-crm-actions {gap:8px;flex-wrap:wrap}
+ .clinic-calm #patients :is(.patient-crm-list-panel,.patient-crm-detail) {min-height:0;padding:14px}
+ .clinic-calm #patients .patient-crm-layout {gap:12px}
+ .clinic-calm #patients .patient-search-toolbar {display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ .clinic-calm #patients .patient-crm-search {flex:2 1 320px;min-width:0}
+ .clinic-calm #patients .patient-search-toolbar>select {flex:1 1 140px;min-width:0;max-width:100%}
+ .clinic-calm #appView #patients #patientCrmSearch {min-width:0;min-height:44px;font-size:15px!important}
+ .clinic-calm #patients .patient-search-recent {padding:10px;margin-block:10px;background:#f7f9f6;border-color:var(--cs-line);border-radius:8px}
+ .clinic-calm #patients :is(.patient-search-recent-head,.patient-crm-result-meta,.patient-search-pagination) {font-size:13px;line-height:1.5;color:var(--cs-muted)}
+ .clinic-calm #patients .clinic-patient-columns {background:#eef2ef;color:var(--cs-muted);border-radius:8px;font-size:13px}
+ .clinic-calm #patients .clinic-patient-row {border-color:var(--cs-line);padding:12px;min-height:64px}
+ .clinic-calm #patients .clinic-patient-row:hover {background:#f3f7f4;border-color:var(--cs-accent)}
+ .clinic-calm #patients .clinic-patient-row.active {background:var(--cs-tint);border-color:var(--cs-accent);box-shadow:inset 3px 0 var(--cs-accent)}
+ .clinic-calm #patients .clinic-patient-cell {min-width:0;overflow-wrap:anywhere}
+ .clinic-calm #patients .clinic-patient-cell b {font-size:14px;line-height:1.5;color:var(--cs-ink)}
+ .clinic-calm #patients .clinic-patient-name b {font-size:16px}
+ .clinic-calm #patients .clinic-patient-cell small {font-size:13px;line-height:1.5;color:var(--cs-muted)}
+ .clinic-calm #patients .clinic-home-status.linked {color:var(--cs-accent-hover);background:var(--cs-tint)}
+ .clinic-calm #patients .patient-crm-empty {min-height:0;padding:24px 12px;border-radius:8px}
+ .clinic-calm #patients .patient-crm-empty :is(b,span) {font-size:14px!important;line-height:1.6}
+
+ .clinic-calm #practiceRoot .pt-intake-workspace .pt-toolbar {gap:8px;margin-bottom:12px}
+ .clinic-calm #practiceRoot .pt-intake-workspace .pt-status-filters {gap:6px;margin-block:10px}
+ .clinic-calm #practiceRoot .pt-intake-workspace .pt-status-filters button {word-break:keep-all;flex:1 1 130px;justify-content:space-between;padding:9px 12px;border-color:var(--cs-line);background:#fff;color:var(--cs-muted)}
+ .clinic-calm #practiceRoot .pt-intake-workspace .pt-status-filters button[aria-pressed=true] {background:var(--cs-accent);border-color:var(--cs-accent);color:#fff}
+ .clinic-calm #practiceRoot .pt-intake-workspace .pt-status-filters strong {background:#eef2ef;color:var(--cs-ink);font-size:14px}
+ .clinic-calm #practiceRoot .pt-intake-workspace .pt-intake-filters {gap:8px;align-items:end}
+ .clinic-calm #practiceRoot .pt-intake-workspace :is(input,.pt-intake-advanced summary) {font-size:15px!important;min-height:44px}
+ .clinic-calm #practiceRoot .pt-intake-workspace .pt-card {padding:14px;border-color:var(--cs-line);border-radius:10px;box-shadow:none}
+ .clinic-calm #practiceRoot .pt-intake-workspace .pt-heading h3 {font-size:17px;line-height:1.5;margin:0}
+ .clinic-calm #practiceRoot .pt-intake-workspace .pt-heading h3 small {font-size:14px;font-weight:400;color:var(--cs-muted)}
+ .clinic-calm #practiceRoot .pt-intake-workspace :is(.pt-excerpt,.pt-intake-purpose,.pt-card-footer small) {font-size:14px;line-height:1.55}
+ .clinic-calm #practiceRoot .pt-intake-workspace .pt-help {font-size:13px;line-height:1.55;color:var(--cs-muted)}
+ .clinic-calm #practiceRoot .pt-intake-workspace .pt-empty {padding:24px 14px;border-radius:10px;background:#f7f9f6}
+ @media(max-width:760px) {
+  .clinic-calm #appView :is(#dashboard,#patients,.pt-intake-workspace) :is(button,.btn,summary) {min-height:44px}
+  .clinic-calm #appView :is(#patients,.pt-intake-workspace) :is(input:not([type=checkbox]),select) {font-size:16px!important;min-height:44px}
+  .clinic-calm #appView #patients #patientCrmSearch {font-size:16px!important}
+  .clinic-calm #patients .patient-crm-actions {display:flex;justify-content:flex-start}
+  .clinic-calm #patients .patient-crm-actions .btn {flex:1 1 130px}
+  .clinic-calm #patients :is(.patient-crm-list-panel,.patient-crm-detail) {padding:10px}
+  .clinic-calm #patients .patient-crm-search {flex-basis:100%}
+  .clinic-calm #patients .patient-search-toolbar>select {flex-basis:120px}
+  .clinic-calm #dashboard :is(.work-first-dashboard,.pt-today-ward) {padding:10px}
+  .clinic-calm #workFirstDashboard .care-inbox nav {display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .clinic-calm #workFirstDashboard .care-inbox nav button:first-child {grid-column:1/-1}
+  .clinic-calm #practiceRoot .pt-intake-workspace .pt-status-filters {display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .clinic-calm #practiceRoot .pt-intake-workspace .pt-status-filters button:first-child {grid-column:1/-1}
+  .clinic-calm #practiceRoot .pt-intake-workspace .pt-card-footer {gap:8px;flex-wrap:wrap}
+ }
+}
