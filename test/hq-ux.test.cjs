@@ -47,6 +47,22 @@ async function fixture(t,width=1280){
   return page;
 }
 async function billing(page){await page.evaluate(()=>showView('billing'));await page.locator('.plan-card').first().waitFor({state:'attached'});await page.evaluate(()=>loadPaymentAutomation());await page.waitForFunction(()=>document.getElementById('hqPaymentProvider').textContent==='정상');}
+
+for(const width of [390,1440])test('integrations loads without removed Calendar and failed messaging can retry '+width,async t=>{
+ const p=await fixture(t,width);await p.evaluate(()=>{
+   window.integrationFail=false;window.integrationReads=[];
+   req=async(path,o)=>{integrationReads.push(path);if(path.includes('/calendar'))throw Error('Removed calendar must not load');if(path==='/hq/integrations/messaging'){if(integrationFail)throw Error('시험 연동 조회 실패');return {platform:{apiConfigured:true},jobs:{sent:7},enabledClinics:2};}return baseReq(path,o);};
+   showView('integrations');
+ });
+ await p.waitForFunction(()=>document.getElementById('msgSent').textContent==='7');
+ assert.equal(await p.locator('#msgEnabledClinics').innerText(),'2');assert.equal(await p.evaluate(()=>integrationReads.some(x=>x.includes('/calendar'))),false);
+ await p.evaluate(()=>integrationFail=true);if(width<768)await p.locator('#hqToolsToggle').click();await p.locator('#refresh').click();if(width<768)await p.keyboard.press('Escape');
+ await p.locator('#integrations').getByRole('button',{name:'다시 시도',exact:true}).waitFor();
+ assert.ok((await p.locator('#integrations').innerText()).includes('시험 연동 조회 실패'));
+ await p.evaluate(()=>integrationFail=false);await p.locator('#integrations').getByRole('button',{name:'다시 시도',exact:true}).click();
+ await p.waitForFunction(()=>!document.querySelector('#integrations button[data-retry]')&&document.getElementById('msgQueueSummary').textContent.includes('완료 7'));
+ assert.equal(await p.locator('#integrations').getByRole('button',{name:'다시 시도',exact:true}).count(),0);assert.equal(await p.evaluate(()=>writes.length),0);
+});
 test('dashboard keeps its current title after loading and places work before collapsed statistics',async t=>{
  const p=await fixture(t,390);
  await p.evaluate(async()=>{

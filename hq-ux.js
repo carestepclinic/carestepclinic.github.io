@@ -319,7 +319,7 @@
   }
   function viewLoader(view,force=true){
     return ({protocols:()=>window.CarestepHqProtocols?.open({reuse:!force}),training:()=>window.CarestepTraining?.open({reuse:!force}),dashboard:()=>loadOverview({reuse:!force}),approval:loadApproval,clinics:()=>loadClinics({forceCatalog:force}),onboarding:loadOnboardingPortfolio,customerSuccess:loadCustomerSuccess,billing:()=>loadBilling({forceCatalog:force}),usageBilling:loadUsageBilling,
-      integrations:()=>Promise.all([loadCalendarIntegration(),loadMessagingIntegration()]),senders:()=>Promise.all([loadSenderOnboarding(),loadMessagingIntegration()]),
+      integrations:async()=>{if(await loadMessagingIntegration()===false)throw Error(byId('msgQueueSummary')?.textContent||'외부 연동 상태를 불러오지 못했습니다.');},senders:()=>Promise.all([loadSenderOnboarding(),loadMessagingIntegration()]),
       journeys:loadPatientJourneysHQ,surveys:()=>loadGuardianSurveyHQ({reuse:!force}),crm:()=>loadFollowupCrmHQ({reuse:!force}),content:()=>loadContent({reuse:!force}),voice:()=>loadVoice({reuse:!force}),production:loadProductionLaunch,audit:loadAudit})[view];
   }
   const pendingViews=new Map();
