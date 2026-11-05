@@ -58,7 +58,7 @@ test('dashboard keeps its current title after loading and places work before col
  assert.equal(await p.locator('#hqDashboardDiagnostics').evaluate(el=>el.open),false);
  assert.equal(await p.locator('#kPending').isVisible(),false);
  assert.ok(await p.locator('.approval-center').evaluate(el=>el.getBoundingClientRect().top<200));
- await p.locator('#hqOverviewMetrics>summary').click();assert.equal(await p.locator('#kPending').innerText(),'2');
+ await p.locator('#hqOverviewMetrics>summary').click();await p.waitForFunction(()=>document.getElementById('kPending').textContent==='2');assert.equal(await p.locator('#kPending').innerText(),'2');
  await p.locator('#hqOverviewMetrics>summary').click();
  await p.evaluate(()=>{document.activeElement.blur();scrollTo(0,0);});
  if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,'hq-next-dashboard-390.png'),fullPage:true});
@@ -77,13 +77,13 @@ test('action center resolves regions independently, never shows a pending zero, 
  assert.equal(await p.locator('#acPaymentFailed').innerText(),'확인 중');
  await p.evaluate(()=>{
   window.actionRun2=loadHqActionCenter();
-  for(const task of actionPending.slice(10))task.path==='/hq/payments/overview'?task.reject(Error('시험 결제 조회 실패')):task.resolve(task.path.includes('/hq/clinics?')?{clinics:[{}]}:{ok:true,db:true,platform:{oauthAppConfigured:true}});
+  for(const task of actionPending.slice(8))task.path==='/hq/payments/overview'?task.reject(Error('시험 결제 조회 실패')):task.resolve(task.path.includes('/hq/clinics?')?{clinics:[{}]}:{ok:true,db:true,platform:{oauthAppConfigured:true}});
  });
  await p.evaluate(()=>actionRun2);
  assert.equal(await p.locator('#acClinicPending').innerText(),'1');
  assert.equal(await p.locator('#acPaymentFailed').innerText(),'확인 필요');
  assert.equal(await p.locator('#acTotalPending').innerText(),'일부 조회 실패');
- await p.evaluate(async()=>{for(const task of actionPending.slice(0,10))task.resolve({clinics:Array(9).fill({}),ok:true,db:true});await actionRun1;});
+ await p.evaluate(async()=>{for(const task of actionPending.slice(0,8))task.resolve({clinics:Array(9).fill({}),ok:true,db:true});await actionRun1;});
  assert.equal(await p.locator('#acClinicPending').innerText(),'1');
  assert.match(await p.locator('#approvalCenterError').textContent(),/시험 결제 조회 실패/);
 });
@@ -243,7 +243,7 @@ test('failed onboarding refresh retains prior rows with an error and retries wit
  assert.match(await p.locator('#onboarding .hq-load-status').innerText(),/시험 개통 조회 실패.*이전 결과/);
  assert.equal(await p.locator('#onboardingRows .hq-compact-main-row').count(),2);
  await p.evaluate(()=>onboardFail=false);await p.locator('#onboarding .hq-load-status button').click();
- await p.locator('#onboarding .hq-load-status[data-state="ready"]').waitFor();
+ await p.locator('#onboarding .hq-load-status[data-state="ready"]').waitFor({state:'attached'});
  assert.ok(await p.locator('#onboarding .hq-load-status').evaluate(el=>el.getBoundingClientRect().height<=28));
 });
 test('hospital overview prioritizes actual charge, hides secondary settings and disambiguates statuses',async t=>{
@@ -304,11 +304,11 @@ test('hospital refresh reads current catalog while preserving its contract and p
  });
  await p.locator('.hq-catalog-comparison summary').click();
  assert.match(await p.locator('.hq-contract-summary').innerText(),/79,000원[\s\S]*86,900원/);
- await p.evaluate(async()=>{syntheticPlans[1].monthlyPriceKrw=89000;await loadClinicDetail('A');});
+ await p.evaluate(async()=>{syntheticPlans[1].monthlyPriceKrw=89000;await loadClinicDetail('A',{forceCatalog:true});});
  await p.locator('.hq-catalog-comparison summary').click();
  assert.match(await p.locator('.hq-contract-summary').innerText(),/79,000원[\s\S]*97,900원/);
  assert.ok(await p.evaluate(()=>catalogReads>=2));assert.equal(await p.evaluate(()=>writes.length),0);
- await p.evaluate(async()=>{req=path=>path==='/hq/plans'?Promise.reject(Error('catalog unavailable')):baseReq(path);await loadClinicDetail('A');});
+ await p.evaluate(async()=>{req=path=>path==='/hq/plans'?Promise.reject(Error('catalog unavailable')):baseReq(path);await loadClinicDetail('A',{forceCatalog:true});});
  await p.locator('.hq-catalog-comparison summary').click();
  assert.match(await p.locator('.hq-contract-summary').innerText(),/불러오지 못했습니다/);
  await p.locator('.hq-subscription-editor').getByRole('button',{name:'수정',exact:true}).click();
@@ -340,7 +340,7 @@ async function contentFixture(t,width=1280){
   });
   return p;
 }
-async function contentPage(p){await p.evaluate(()=>showView('content'));await p.locator('#content .hq-load-status[data-state="ready"]').waitFor();}
+async function contentPage(p){await p.evaluate(()=>showView('content'));await p.locator('#content .hq-load-status[data-state="ready"]').waitFor({state:'attached'});}
 
 test('every HQ menu has a unique destination and opens its matching accessible heading',async t=>{
   const p=await fixture(t);
@@ -400,7 +400,7 @@ test('content loading/error never reports zero data and retry restores real empt
   await p.locator('#contentSearch').fill('검색');assert.match(await p.locator('#content .hq-load-status').innerText(),/조회하지 못했습니다/);
   assert.equal(await p.locator('#contentBulkDelete').isDisabled(),true);
   await p.evaluate(()=>{contentFail=false;contentReply=[];});
-  await p.locator('#content .hq-load-status button').click();await p.locator('#content .hq-load-status[data-state="ready"]').waitFor();
+  await p.locator('#content .hq-load-status button').click();await p.locator('#content .hq-load-status[data-state="ready"]').waitFor({state:'attached'});
   assert.equal(await p.locator('#contentTotal').innerText(),'0');
   assert.match(await p.locator('#contentTable').innerText(),/등록된 중앙 콘텐츠가 없습니다/);
 });
@@ -416,7 +416,7 @@ test('content keeps the newest load and restores category, checkbox and search t
   assert.equal(await p.locator('#contentTotal').innerText(),'3');
   await p.locator('#contentCategory').selectOption('수술');await p.locator('#contentDueOnly').check();await p.locator('#contentSearch').fill('시험 게시');
   await p.evaluate(()=>{history.replaceState(null,'','#content');$('contentCategory').innerHTML='<option value="all">전체 분류</option>';$('contentDueOnly').checked=false;$('contentSearch').value='';CarestepHqUX.restoreRoute();});
-  await p.locator('#content .hq-load-status[data-state="ready"]').waitFor();
+  await p.locator('#content .hq-load-status[data-state="ready"]').waitFor({state:'attached'});
   assert.equal(await p.locator('#contentCategory').inputValue(),'수술');assert.equal(await p.locator('#contentDueOnly').isChecked(),true);
   assert.equal(await p.locator('#contentSearch').inputValue(),'시험 게시');assert.equal(await p.locator('[data-content-row]').count(),1);
 });
@@ -669,7 +669,7 @@ test('CRM loading and failure remain distinct from a successful empty result; re
   assert.doesNotMatch(await p.locator('#crmHqClinicTable').innerText(),/집계된 후속관리가 없습니다/);
   await p.evaluate(()=>{feedbackFail='';crmReply={overall:{},byClinic:[],byJourney:[]};});
   await p.locator('#crm .hq-load-status button').click();
-  await p.locator('#crm .hq-load-status[data-state="ready"]').waitFor();
+  await p.locator('#crm .hq-load-status[data-state="ready"]').waitFor({state:'attached'});
   assert.equal(await p.locator('#crmHqActive').innerText(),'0');
   assert.match(await p.locator('#crmHqClinicTable').innerText(),/선택한 기간에 집계된 후속관리가 없습니다/);
 });
@@ -680,7 +680,7 @@ test('Customer Voice distinguishes a failed lookup from no requests and supports
   assert.doesNotMatch(await p.locator('#voiceResultSummary').innerText(),/조회 0건/);
   await p.evaluate(()=>{feedbackFail='';voiceReply=[];});
   await p.locator('#voice .hq-load-status button').click();
-  await p.locator('#voice .hq-load-status[data-state="ready"]').waitFor();
+  await p.locator('#voice .hq-load-status[data-state="ready"]').waitFor({state:'attached'});
   assert.match(await p.locator('#voiceResultSummary').innerText(),/조회 0건/);
   assert.match(await p.locator('#voiceTable').innerText(),/해당하는 병원 요청이 없습니다/);
 });
@@ -727,7 +727,7 @@ test('restored feedback deep links retain filters and fit a narrow screen',async
   const p=await feedbackFixture(t,390);
   for(const view of ['crm','voice']){
     await p.evaluate(view=>{history.replaceState(null,'','#'+view);CarestepHqUX.restoreRoute();},view);
-    await p.locator('#'+view+' .hq-load-status[data-state="ready"]').waitFor();
+    await p.locator('#'+view+' .hq-load-status[data-state="ready"]').waitFor({state:'attached'});
     assert.equal(await p.locator('.view.active').getAttribute('id'),view);
     assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
     if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`hq-${view}-390.png`),fullPage:true});
@@ -992,7 +992,7 @@ test('first portfolio load uses final columns and a failure remains different fr
  assert.match(await p.locator('#hqAdoptionResults').innerText(),/조회 실패/);
  await p.getByRole('button',{name:'다시 시도',exact:true}).click();
  await p.evaluate(()=>portfolioJobs[1].resolve({summary:{total:0},clinics:[]}));
- await p.locator('#customerSuccess .hq-load-status[data-state="ready"]').waitFor();
+ await p.locator('#customerSuccess .hq-load-status[data-state="ready"]').waitFor({state:'attached'});
  assert.match(await p.locator('#hqAdoptionResults').innerText(),/전체 0곳 · 현재 표시 0곳/);
  await p.evaluate(()=>showView('onboarding'));
  assert.equal(await p.locator('.onboarding-table th').count(),5);
