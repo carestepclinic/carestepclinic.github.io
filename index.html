@@ -1060,6 +1060,41 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="practice-tools.css?v=20261101-intake-compact">
 <link rel="stylesheet" href="clinic-navigation.css?v=20261103-clinical-groups">
 <link rel="stylesheet" href="clinic-settings.css?v=20261103-settings-unified"><script src="clinic-capabilities.js?v=20261103-settings"></script>
+<style id="clinic-onboarding-start">
+#onboarding{font-size:14px;line-height:1.6}
+#onboarding :is(button,input,select){font:inherit}
+#onboarding .btn{min-height:40px;font-size:14px;padding:8px 12px;border-radius:9px}
+#onboarding h4{font-size:16px;margin:18px 0 8px}
+#onboarding p,#onboarding .onboarding-help{font-size:14px;line-height:1.6}
+#onboarding .onboarding-hero{padding:18px;gap:16px}
+#onboarding .onboarding-hero h3{font-size:22px}
+#onboarding .onboarding-score span{font-size:13px}
+#onboarding .onboarding-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+#onboardingLoadStatus{font-size:13px;color:#53657d}
+#onboarding .onboarding-grid{margin:8px 0;gap:12px}
+#onboarding .onboarding-step{grid-template-columns:28px minmax(0,1fr);align-items:start;padding:14px;gap:10px}
+#onboarding .onboarding-step h4{font-size:15px;margin:0 0 4px}
+#onboarding.clinic-management-view .onboarding-step p{font-size:14px!important}
+#onboarding .onboarding-step-num{width:28px;height:28px;font-size:14px;border-radius:8px}
+#onboarding .onboarding-step-actions{grid-column:2;justify-content:flex-start}
+#onboarding .onboarding-step:has(#onboardingMessagingDetails){grid-column:1/-1}
+#onboarding .onboarding-setup-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+#onboarding .onboarding-setup-grid button{text-align:left;padding:14px;border:1px solid #d5dfef;border-radius:12px;background:white;color:#173b5c;cursor:pointer}
+#onboarding .onboarding-setup-grid button:hover{background:#edf4ff}
+#onboarding .onboarding-setup-grid b,#onboarding .onboarding-setup-grid span{display:block}
+#onboarding .onboarding-setup-grid span{font-size:13px;color:#53657d;margin-top:5px}
+#onboarding>details{display:block;border:1px solid #d5dfef;border-radius:12px;background:white;padding:12px 14px;margin-top:14px}
+#onboarding summary{cursor:pointer;min-height:32px;font-size:14px;font-weight:600}
+#onboardingMessagingDetails{grid-column:1/-1;min-width:0}
+#onboarding :is(.onboarding-solapi-substep,.onboarding-solapi-note,.onboarding-message-inline p,.onboarding-inline-badge,.onboarding-payment span,.onboarding-payment b,.onboarding-complete,.onboarding-privacy){font-size:13px;line-height:1.6}
+#onboarding :is(.onboarding-solapi-head b,.onboarding-solapi-substep b,.onboarding-message-inline-head b){font-size:14px}
+#onboarding .onboarding-solapi-controls{display:flex;gap:8px;flex-wrap:wrap}
+#onboarding .onboarding-solapi-controls select{min-width:0;max-width:100%}
+#onboarding .onboarding-admin-check-head{margin-top:12px}
+@media(max-width:900px){#onboarding .onboarding-setup-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){#onboarding .onboarding-setup-grid{grid-template-columns:1fr}#onboarding .onboarding-hero{padding:14px}#onboarding .btn{min-height:44px}#onboarding .onboarding-tools{align-items:flex-start}#onboarding .onboarding-tools button{flex-shrink:0}#onboarding .onboarding-message-row{display:flex;flex-direction:column;align-items:stretch}#onboarding .onboarding-message-row input{min-width:0;width:100%}}
+
+</style>
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -2018,14 +2053,26 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 
       <section id="onboarding" class="view">
         <div class="onboarding-hero">
-          <div><p class="eyebrow">CLINIC ONBOARDING · GO-LIVE CENTER · v10.4-G</p><h3>병원 사용 준비 상태를 확인하세요.</h3><p>병원정보·직원·문자·후속관리 설정과 첫 업무 흐름을 확인하세요. 실제 환자정보를 입력하기 전에는 저장되지 않는 샘플 환자로 전체 흐름을 체험할 수 있습니다.</p></div>
-          <div class="onboarding-score"><span>사용 준비 상태</span><div><strong id="onboardingScore">0/6</strong> <span id="onboardingPercent">0%</span></div><div class="onboarding-progress-track"><div id="onboardingProgressFill" class="onboarding-progress-fill" style="width:0%"></div></div><span id="onboardingScoreNote">상태를 확인하는 중입니다.</span></div>
+          <div><p class="eyebrow">CARESTEP CLINIC</p><h3>우리 병원에 필요한 설정부터 시작하세요.</h3><p>병원정보와 직원 권한을 먼저 확인하고, 사용할 기능의 기본값을 설정하세요. 문자·외부 연동은 해당 기능을 사용할 때 연결하면 됩니다.</p></div>
+          <div class="onboarding-score"><span>기본 준비 · 병원정보 / 직원</span><div><strong id="onboardingScore">—/2</strong> <span id="onboardingPercent">0%</span></div><div class="onboarding-progress-track"><div id="onboardingProgressFill" class="onboarding-progress-fill" style="width:0%"></div></div><span id="onboardingScoreNote">상태를 확인하는 중입니다.</span></div>
         </div>
-        <div class="onboarding-starter"><div><h4>빠른 시작</h4><p>샘플 체험은 바로 시작할 수 있습니다. 실제 개통은 외부 서비스 연결·승인에 따라 시간이 더 걸릴 수 있습니다. 처음부터 순서대로 보거나, 샘플 환자 ‘코코’로 자료 작성과 후속관리 흐름만 먼저 체험하세요.</p><div class="onboarding-five-min"><div><b>1단계 · 병원</b><span>기본정보 저장</span></div><div><b>2단계 · 팀</b><span>직원 초대 또는 건너뛰기</span></div><div><b>3단계 · 발송</b><span>SOLAPI와 테스트 문자</span></div><div><b>4단계 · 일정</b><span>내부 일정·업무 확인</span></div><div><b>5단계 · 체험</b><span>샘플 자료와 후속관리 계획</span></div></div></div><div class="onboarding-starter-actions"><button id="startFiveMinuteGuide" class="btn btn-primary" type="button">빠른 시작 가이드 시작</button><button id="startSampleExperience" class="btn btn-secondary" type="button">샘플 환자 체험</button></div></div>
-        <div id="onboardingSteps" class="onboarding-grid"><div class="voice-empty">온보딩 상태를 불러오는 중입니다.</div></div>
+        <div class="onboarding-tools"><span id="onboardingLoadStatus" role="status" aria-live="polite">저장된 상태를 확인합니다.</span><button class="btn btn-secondary" type="button" data-onboarding-action="refresh">상태 새로고침</button></div>
+        <h4>1. 기본 준비</h4>
+        <div id="onboardingSteps" class="onboarding-grid"></div>
+        <h4>2. 사용할 기능 설정</h4><p class="onboarding-help">필요한 항목만 설정하세요. 이 목록은 설정 바로가기이며, 열어본 것만으로 완료 처리하지 않습니다.</p>
+        <div class="onboarding-setup-grid">
+          <button type="button" data-onboarding-section="2"><b>약품·함량 / 입원실</b><span>자주 쓰는 농도·분말 조제 기준, 입원실 구성</span></button>
+          <button type="button" data-onboarding-go="records"><b>진료 기록지</b><span>마취·치과·신경·안과·만성질환 · 환자를 선택해 작성</span></button>
+          <button type="button" data-onboarding-section="3"><b>자료·직원 교육</b><span>보호자 안내자료·교육 배정·우리 병원 SOP</span></button>
+          <button type="button" data-onboarding-section="4"><b>HOME 공개·자동발송</b><span>동기화 기록 공개 범위, 접종·사상충 발송 ON/OFF</span></button>
+          <button type="button" data-onboarding-section="5"><b>요금제·구독</b><span>우리 병원 이용 기능·한도·결제 조건</span></button>
+          <button type="button" data-onboarding-section="6"><b>보안·데이터</b><span>계정 보안·데이터 관리·연동 진단</span></button>
+        </div>
+        <details id="onboardingOptional"><summary>3. 보호자 안내·문자 연결 <span id="onboardingOptionalCount"></span></summary><p>보호자 안내와 후속관리를 사용할 때 진행하세요. 미완료여도 권한·구독에 포함된 진료 기능을 이용할 수 있습니다.</p><div id="onboardingOptionalSteps" class="onboarding-grid"></div></details>
+        <details class="onboarding-starter"><summary>화면 사용 안내·샘플 체험</summary><p>화면 안내는 실제 데이터를 변경하지 않습니다. 샘플 체험은 보호자 자료 작성 흐름을 확인하는 용도입니다.</p><div class="onboarding-starter-actions"><button id="startFiveMinuteGuide" class="btn btn-secondary" type="button">화면 사용 안내</button><button id="startSampleExperience" class="btn btn-secondary" type="button">샘플 환자 체험</button></div></details>
         <div id="onboardingPayment" class="onboarding-payment"><div><b>결제 · 구독 준비</b><span>무료체험 중에는 선택사항입니다. 유료 전환 전에 카드 등록과 요금제를 확인하세요.</span></div><button class="btn btn-secondary" type="button" data-onboarding-action="billing">결제 · 구독 관리</button></div>
-        <div id="onboardingComplete" class="onboarding-complete onboarding-hidden"><b>✓ CARESTEP 사용 준비 완료</b><br>병원 정보, 직원, 문자 발송, 첫 보호자 안내자료, 첫 후속관리까지 모두 확인됐습니다. 이제 일상 진료에서 CARESTEP을 바로 사용할 수 있습니다.</div>
-        <div class="onboarding-admin-check"><div class="onboarding-admin-check-head"><div><h4>관리자 배포·연동 점검</h4><p>일상 업무와 분리해 Worker, DB, 화면 버전과 자동화·외부 연동 상태를 확인합니다.</p></div><div><button id="refreshOnboardingAdminCheck" class="btn btn-secondary" type="button">지금 점검</button> <button id="openOperationsSettings" class="btn btn-ghost" type="button">상세 점검 화면</button></div></div><div class="onboarding-admin-grid"><div><span>Clinic 화면</span><b id="onboardingCheckClinic">v10.6-A</b></div><div><span>Worker</span><b id="onboardingCheckWorker">확인 전</b></div><div><span>Database</span><b id="onboardingCheckDatabase">확인 전</b></div><div><span>자동화 경고</span><b id="onboardingCheckAutomation">확인 전</b></div></div></div>
+        <div id="onboardingComplete" class="onboarding-complete onboarding-hidden"><b>기본 준비 확인 완료</b><br>사용할 기능의 설정을 확인한 뒤 업무를 시작하세요. 직원별 사용 범위는 권한과 구독에 따라 다릅니다.</div>
+        <details class="onboarding-admin-check"><summary>운영 진단 · 문제가 있을 때 확인</summary><div class="onboarding-admin-check-head"><div><h4>관리자 배포·연동 점검</h4><p>일상 업무와 분리해 Worker, DB, 화면 버전과 자동화·외부 연동 상태를 확인합니다.</p></div><div><button id="refreshOnboardingAdminCheck" class="btn btn-secondary" type="button">지금 점검</button> <button id="openOperationsSettings" class="btn btn-ghost" type="button">상세 점검 화면</button></div></div><div class="onboarding-admin-grid"><div><span>Clinic 화면</span><b id="onboardingCheckClinic">v10.6-A</b></div><div><span>Worker</span><b id="onboardingCheckWorker">확인 전</b></div><div><span>Database</span><b id="onboardingCheckDatabase">확인 전</b></div><div><span>자동화 경고</span><b id="onboardingCheckAutomation">확인 전</b></div></div></details>
         <div class="onboarding-privacy">처음 사용 설정에는 완료 상태와 개인을 식별하지 않는 운영 정보만 저장합니다. 환자명·보호자명·전화번호·복약정보는 처음 사용 설정 체크리스트에 저장하지 않습니다.</div>
       </section>
 
@@ -4746,17 +4793,19 @@ const CARESTEP_SCREEN_HELP={practice:'업무 체크리스트·사전문진·처�
 function renderScreenHelp(view){const bar=$('screenHelpBar'),copy=CARESTEP_SCREEN_HELP[view]||'현재 화면의 주요 업무를 확인하세요.';if(!bar)return;bar.querySelector('span').innerHTML=`<b>화면 도움말</b> · ${escapeHtml(copy)}`;const btn=$('openScreenGuide');if(btn)btn.textContent=view==='onboarding'?'가이드 다시 보기':'빠른 시작 가이드';}
 let onboardingTourIndex=0,onboardingTourSample=false;
 const ONBOARDING_TOUR_STEPS=[
-  {title:'병원 기본정보',text:'병원명과 대표전화는 자료와 보호자 안내에 자동 반영됩니다.',view:'settings',target:'#hospitalName'},
-  {title:'직원·권한',text:'직원을 초대하고 접수·수의사·관리자 역할에 맞는 화면을 제공합니다.',view:'account',tab:'team'},
-  {title:'메시지·알림톡',text:'SOLAPI 연결, 발신번호 선택과 테스트 문자 수신까지 확인합니다.',view:'followup',target:'.followup-messaging'},
-  {title:'일정·업무',text:'후속관리 계획의 업무와 예정일을 확인하고 CARESTEP에서 완료·보류를 기록합니다.',view:'followup',target:'#internalFollowupBoard'},
-  {title:'샘플 환자 전체 흐름',text:'샘플 코코로 자료 선택부터 보호자 안내자료와 후속관리 계획 흐름을 안전하게 체험합니다.',view:'builder',sample:true}
+  {title:'병원 기본정보',text:'병원명·연락처·로고를 한 번 저장해 문서에 사용합니다.',settingsSection:0},
+  {title:'직원·권한',text:'직원 초대 후 기록지별 열람·작성·삭제 권한을 확인하세요.',settingsSection:1},
+  {title:'진료 기본설정',text:'약품 함량·조제 기준과 입원실을 설정하세요. 기록지 설정은 환자별 기록 안에서 조정합니다.',settingsSection:2},
+  {title:'자료·직원 교육',text:'보호자 안내자료와 병원 SOP를 확인하고 직원 교육을 배정하세요.',settingsSection:3},
+  {title:'HOME·자동화',text:'동기화 기록 공개 범위와 자동발송을 확인하세요. 문자 연결은 사용할 때 진행합니다.',settingsSection:4},
+  {title:'요금제·구독',text:'계약 기능·사용 한도·결제 조건을 확인하세요.',settingsSection:5},
+  {title:'보호자 자료 샘플 체험',text:'샘플 환자로 안내자료 작성 흐름을 확인합니다. 실제 보호자에게 게시·발송하지 마세요.',view:'builder',sample:true}
 ];
 function renderOnboardingTour(){const box=$('onboardingTour'),step=ONBOARDING_TOUR_STEPS[onboardingTourIndex];if(!box||!step)return;box.classList.remove('hidden');$('onboardingTourProgress').textContent=`${onboardingTourIndex+1} / ${ONBOARDING_TOUR_STEPS.length}`;$('onboardingTourTitle').textContent=step.title;$('onboardingTourText').textContent=step.text;$('onboardingTourPrev').disabled=onboardingTourIndex===0;$('onboardingTourNext').textContent=onboardingTourIndex===ONBOARDING_TOUR_STEPS.length-1?'가이드 완료':'다음';$('onboardingSampleBadge')?.classList.toggle('hidden',!onboardingTourSample&&!step.sample);}
 function startFiveMinuteGuide(){onboardingTourIndex=0;onboardingTourSample=false;renderOnboardingTour();}
 async function prepareOnboardingSample(){if(!await startNewCaseSafely())return false;const sample=templates.find(x=>String(x.title||'').includes('췌장염'))||templates[0];if(sample)switchCaseTemplate(sample.id,{preserveIdentity:false,notify:false});if($('patientName'))$('patientName').value='샘플 코코';if($('guardianName'))$('guardianName').value='샘플 보호자';if($('dischargeDate'))$('dischargeDate').value=new Date().toISOString().slice(0,10);if($('includePatientNames'))$('includePatientNames').checked=true;readCaseInfoFromForm();currentCasePhase='editing';renderBuilder();updateReadiness();renderGlobalCaseBadge();return true;}
 async function startSampleExperience(){onboardingTourIndex=ONBOARDING_TOUR_STEPS.length-1;onboardingTourSample=true;if(!await prepareOnboardingSample())return;go('builder');renderOnboardingTour();toast('샘플 환자 코코를 불러왔습니다. CRM과 서버에는 저장되지 않습니다.');}
-async function openOnboardingTourStep(){const step=ONBOARDING_TOUR_STEPS[onboardingTourIndex];if(!step)return;if(step.sample){if(await prepareOnboardingSample())go('builder');return;}go(step.view);if(step.tab)setTimeout(()=>setAccountTab(step.tab),80);if(step.target)setTimeout(()=>document.querySelector(step.target)?.scrollIntoView({behavior:'smooth',block:'center'}),180);}
+async function openOnboardingTourStep(){const step=ONBOARDING_TOUR_STEPS[onboardingTourIndex];if(!step)return;if(step.sample){if(await prepareOnboardingSample())go('builder');return;}if(step.settingsSection!==undefined){ClinicSettings.openSection(step.settingsSection);return;}go(step.view);if(step.tab)setTimeout(()=>setAccountTab(step.tab),80);if(step.target)setTimeout(()=>document.querySelector(step.target)?.scrollIntoView({behavior:'smooth',block:'center'}),180);}
 function moveOnboardingTour(delta){if(delta>0&&onboardingTourIndex===ONBOARDING_TOUR_STEPS.length-1){$('onboardingTour')?.classList.add('hidden');toast('빠른 시작 가이드를 완료했습니다. 실제 설정 완료율은 시작 설정 화면에서 확인할 수 있습니다.');return;}onboardingTourIndex=Math.max(0,Math.min(ONBOARDING_TOUR_STEPS.length-1,onboardingTourIndex+delta));renderOnboardingTour();}
 function onboardingStepReason(step){if(step.done)return '';const label=step.state==='attention'?'확인 필요':step.state==='waiting'?'대기 중':'아직 설정되지 않음';return `<div class="onboarding-step-reason"><b>${label}</b> · ${escapeHtml(step.detail||'오른쪽 해결 버튼으로 설정을 진행하세요.')}</div>`;}
 function renderOnboardingAdminCheck(){const d=careDeploymentState,worker=String(d?.worker?.build||d?.worker?.version||'확인 전'),database=String(d?.database?.version||'확인 전'),alerts=d?Number(d.summary?.automationAlerts||0):null;if($('onboardingCheckClinic'))$('onboardingCheckClinic').textContent=`v${CARESTEP_CLIENT_VERSION}`;if($('onboardingCheckWorker'))$('onboardingCheckWorker').textContent=worker==='확인 전'?worker:`v${worker}`;if($('onboardingCheckDatabase'))$('onboardingCheckDatabase').textContent=database==='확인 전'?database:`v${database}`;if($('onboardingCheckAutomation'))$('onboardingCheckAutomation').textContent=alerts===null?'확인 전':alerts?`${alerts}건 확인 필요`:'정상';}
@@ -4991,7 +5040,7 @@ function switchCaseTemplate(nextTemplateId,{preserveIdentity=true,notify=true}={
 function onboardingStepAction(key,state){
   const step=(state?.steps||[]).find(x=>x.key===key)||{};
   if(key==='messaging')return step.done?'<span class="invoice-status paid">완료</span>':step.state==='waiting'?'<span class="onboarding-inline-badge wait">설정 진행 중</span>':step.state==='attention'?'<span class="onboarding-inline-badge bad">확인 필요</span>':'<span class="onboarding-inline-badge">3단계 연결</span>';
-  if(step.done)return '<span class="invoice-status paid">완료</span>';
+  if(step.done)return ['profile','team'].includes(key)?`<button class="btn btn-secondary" type="button" data-onboarding-action="${escapeHtml(key)}">설정 확인</button>`:'<span class="invoice-status paid">완료</span>';
   if(key==='profile')return '<button class="btn btn-primary" type="button" data-onboarding-action="profile">병원정보 입력</button>';
   if(key==='team')return `<button class="btn btn-primary" type="button" data-onboarding-action="team">직원 초대</button>${state?.team?.skipped?'':'<button class="btn btn-ghost" type="button" data-onboarding-action="team_skip">나중에</button>'}`;
   if(key==='package')return '<button class="btn btn-primary" type="button" data-onboarding-action="package">첫 자료 작성</button>';
@@ -5019,24 +5068,53 @@ function onboardingMessagingInline(state){
     controls=`<div class="onboarding-solapi-controls"><select id="onboardingSenderSelect" class="input" ${active.length?'':'disabled'}><option value="">${active.length?'발신번호 선택':'승인된 발신번호 없음'}</option>${options}</select><button class="btn btn-primary" type="button" data-onboarding-action="messaging_sender_save" ${active.length?'':'disabled'}>${senderReady?'발신번호 저장됨':'선택 · 저장'}</button><button class="btn btn-secondary" type="button" data-onboarding-action="messaging_sender_refresh">발신번호 새로고침</button></div><div class="onboarding-solapi-note">${escapeHtml(access.message||'SOLAPI에서 ACTIVE 상태인 발신번호만 사용할 수 있습니다.')}</div>`;
   }
   const testDisabled=senderReady?'':'disabled',testLabel=mt.delivered?'테스트 다시 보내기':'테스트 문자 보내기';
-  return `<div class="onboarding-solapi-flow"><div class="onboarding-solapi-head"><b>이 화면에서 문자 연동을 끝까지 완료하세요</b>${statusBadge}</div><div class="onboarding-solapi-substeps"><div class="onboarding-solapi-substep ${step1}"><b>1 · SOLAPI 연결</b>${oauthConnected?'병원 자체 SOLAPI 계정 연결됨':'병원 SOLAPI 계정을 OAuth2로 연결'}</div><div class="onboarding-solapi-substep ${step2}"><b>2 · 발신번호</b>${senderReady?`선택 완료 · ${escapeHtml(selected)}`:accessStatus==='no_sender'?'SOLAPI에서 병원 번호 등록/승인 필요':'ACTIVE 발신번호 확인 후 선택'}</div><div class="onboarding-solapi-substep ${step3}"><b>3 · 테스트 문자</b>${mt.delivered?'실제 휴대폰 수신 확인 완료':mt.pending?'전달상태 확인 중':'병원 담당자 휴대폰으로 1건 확인'}</div></div>${controls}<div class="onboarding-message-inline" style="grid-column:auto;margin-top:9px"><div class="onboarding-message-inline-head"><b>3단계 · 테스트 문자 실제 수신 확인</b>${senderReady?`<span class="onboarding-inline-badge ok">✓ 발신번호 ${escapeHtml(selected)}</span>`:'<span class="onboarding-inline-badge wait">발신번호 선택 후 활성화</span>'}</div><p>테스트 문자는 즉시 발송되며 수신번호는 CARESTEP D1에 저장하지 않습니다. 발신번호를 저장하면 자동발송도 함께 활성화됩니다.</p><div class="onboarding-message-row"><input id="onboardingMessageTestPhone" class="input" inputmode="tel" autocomplete="off" placeholder="테스트 받을 휴대폰 번호 · 01012345678" ${testDisabled}><button id="onboardingMessageSend" class="btn btn-primary" type="button" data-onboarding-action="messaging_test_send" ${testDisabled}>${testLabel}</button><button class="btn btn-secondary" type="button" data-onboarding-action="messaging_test_status" ${hasTest?'':'disabled'}>전달상태 확인</button></div><div class="onboarding-message-links"><button class="btn btn-ghost" type="button" data-onboarding-action="messaging_settings">카카오 알림톡 설정 (선택) · 상세 발송 설정</button></div><div class="onboarding-solapi-note"><b>알림톡은 Go-Live 필수 단계가 아닙니다.</b> SMS/LMS 테스트를 먼저 완료한 뒤, 병원 카카오 비즈니스 채널과 승인 템플릿이 준비되면 추가 연결할 수 있습니다.</div><div id="onboardingMessageDelivery" class="onboarding-message-delivery"></div></div></div>`;
+  return `<div class="onboarding-solapi-flow"><div class="onboarding-solapi-head"><b>이 화면에서 문자 연동을 끝까지 완료하세요</b>${statusBadge}</div><div class="onboarding-solapi-substeps"><div class="onboarding-solapi-substep ${step1}"><b>1 · SOLAPI 연결</b>${oauthConnected?'병원 자체 SOLAPI 계정 연결됨':'병원 SOLAPI 계정 연결'}</div><div class="onboarding-solapi-substep ${step2}"><b>2 · 발신번호</b>${senderReady?`선택 완료 · ${escapeHtml(selected)}`:accessStatus==='no_sender'?'SOLAPI에서 병원 번호 등록/승인 필요':'승인된 발신번호 선택'}</div><div class="onboarding-solapi-substep ${step3}"><b>3 · 테스트 문자</b>${mt.delivered?'실제 휴대폰 수신 확인 완료':mt.pending?'전달상태 확인 중':'병원 담당자 휴대폰으로 1건 확인'}</div></div>${controls}<div class="onboarding-message-inline" style="grid-column:auto;margin-top:9px"><div class="onboarding-message-inline-head"><b>3단계 · 테스트 문자 실제 수신 확인</b>${senderReady?`<span class="onboarding-inline-badge ok">✓ 발신번호 ${escapeHtml(selected)}</span>`:'<span class="onboarding-inline-badge wait">발신번호 선택 후 활성화</span>'}</div><p>테스트 문자는 즉시 발송되며 병원 SOLAPI 이용료가 발생합니다. 발신번호를 저장하면 자동발송도 함께 활성화됩니다.</p><div class="onboarding-message-row"><input id="onboardingMessageTestPhone" class="input" inputmode="tel" autocomplete="off" placeholder="테스트 받을 휴대폰 번호 · 01012345678" ${testDisabled}><button id="onboardingMessageSend" class="btn btn-primary" type="button" data-onboarding-action="messaging_test_send" ${testDisabled}>${testLabel}</button><button class="btn btn-secondary" type="button" data-onboarding-action="messaging_test_status" ${hasTest?'':'disabled'}>전달상태 확인</button></div><div class="onboarding-message-links"><button class="btn btn-ghost" type="button" data-onboarding-action="messaging_settings">카카오 알림톡 설정 (선택) · 상세 발송 설정</button></div><div class="onboarding-solapi-note"><b>알림톡은 선택 기능입니다.</b> SMS/LMS 테스트를 먼저 완료한 뒤, 병원 카카오 비즈니스 채널과 승인 템플릿이 준비되면 추가 연결할 수 있습니다.</div><div id="onboardingMessageDelivery" class="onboarding-message-delivery"></div></div></div>`;
+}
+function onboardingBasicStatus(d){
+  const steps=['profile','team'].map(key=>(d?.steps||[]).find(x=>x.key===key)||{key,label:key==='profile'?'병원 기본정보':'직원·권한',state:'unknown',detail:'저장 상태 확인 필요'});
+  const completed=steps.filter(x=>x.done).length;return {steps,completed,ready:completed===2,percent:completed*50};
 }
 function renderOnboardingStatus(){
-  const d=onboardingState,steps=d?.steps||[],completed=Number(d?.completed)||0,total=Number(d?.stepCount)||6,percent=Number(d?.percent)||0,typedPhone=$('onboardingMessageTestPhone')?.value||'';
-  if($('onboardingScore'))$('onboardingScore').textContent=`${completed}/${total}`;if($('onboardingPercent'))$('onboardingPercent').textContent=`${percent}%`;if($('onboardingProgressFill'))$('onboardingProgressFill').style.width=`${percent}%`;if($('onboardingScoreNote'))$('onboardingScoreNote').textContent=d?.ready?'모든 설정이 완료되었습니다.':'완료되지 않은 항목부터 순서대로 진행하세요.';
-  const list=$('onboardingSteps');if(list)list.innerHTML=steps.length?steps.map((x,idx)=>`<article class="onboarding-step ${escapeHtml(x.state||'todo')}"><div class="onboarding-step-num">${x.done?'✓':idx+1}</div><div><h4>${escapeHtml(x.label)}</h4><p>${escapeHtml(x.detail||'')}</p></div><div class="onboarding-step-actions">${onboardingStepAction(x.key,d)}</div>${onboardingStepReason(x)}${x.key==='messaging'?onboardingMessagingInline(d):''}</article>`).join(''):'<div class="voice-empty">온보딩 상태를 불러오지 못했습니다.</div>';
-  if(typedPhone&&$('onboardingMessageTestPhone'))$('onboardingMessageTestPhone').value=typedPhone;renderMessagingTestDelivery();
-  const payment=$('onboardingPayment'),p=d?.payment||{};if(payment){const span=payment.querySelector('span');if(span)span.textContent=p.ready?`등록 카드 ${p.maskedNumber||'확인됨'} · ${p.subscriptionStatus||'구독'} 상태`:(d?.planCode==='PILOT'?'무료체험 중에는 선택사항입니다. 유료 전환 전에 카드를 등록하세요.':'유료 구독을 위해 결제카드를 등록해주세요.');payment.classList.toggle('done',!!p.ready);}
-  $('onboardingComplete')?.classList.toggle('onboarding-hidden',!d?.ready);
-  const nav=$('onboardingNavBadge');if(nav){nav.textContent=`${completed}/${total}`;nav.classList.toggle('done',!!d?.ready);nav.hidden=!!d?.ready;nav.closest('button')?.classList.toggle('onboarding-pending',!d?.ready);}
-  const banner=$('onboardingDashboardBanner');if(banner){banner.classList.toggle('show',!!(saasMode==='auth'&&saasMe&&saasPermission('settings.manage',['owner','admin'].includes(saasMe.role))&&!d?.ready));if($('onboardingDashboardTitle'))$('onboardingDashboardTitle').textContent=d?.ready?'CARESTEP 사용 준비 완료':`CARESTEP 사용 준비 ${completed}/${total}`;if($('onboardingDashboardText'))$('onboardingDashboardText').textContent=d?.ready?'모든 개통 단계가 완료되었습니다.':`아직 ${Math.max(0,total-completed)}단계가 남았습니다. 다음 설정을 이어서 진행하세요.`;if($('onboardingDashboardFill'))$('onboardingDashboardFill').style.width=`${percent}%`;}
+  const d=onboardingState,basic=onboardingBasicStatus(d),typedPhone=$('onboardingMessageTestPhone')?.value||'',selectedSender=$('onboardingSenderSelect')?.value||'',expanded=$('onboardingMessagingDetails')?.open;
+  $('onboardingScore').textContent=d?`${basic.completed}/2`:'—/2';$('onboardingPercent').textContent=d?`${basic.percent}%`:'';$('onboardingProgressFill').style.width=`${basic.percent}%`;
+  $('onboardingScoreNote').textContent=basic.ready?'기본 준비 확인 완료 · 사용할 기능을 선택하세요.':'병원정보와 직원 초대·권한을 확인하세요.';
+  const render=(x,idx)=>`<article class="onboarding-step ${escapeHtml(x.state||'todo')}"><div class="onboarding-step-num">${x.done?'✓':idx+1}</div><div><h4>${escapeHtml(x.label||x.key)}</h4><p>${escapeHtml(x.detail||'설정에서 현재 상태를 확인하세요.')}</p></div><div class="onboarding-step-actions">${onboardingStepAction(x.key,d)}</div>${x.key==='messaging'?`<details id="onboardingMessagingDetails" ${expanded?'open':''}><summary>문자 연결·발신번호·테스트</summary>${onboardingMessagingInline(d)}</details>`:''}</article>`;
+  $('onboardingSteps').innerHTML=basic.steps.map(render).join('');
+  const optional=(d?.steps||[]).filter(x=>!['profile','team','calendar'].includes(x.key));
+  $('onboardingOptionalSteps').innerHTML=optional.map(render).join('')||'<p>상태를 확인한 뒤 연결 항목을 표시합니다.</p>';
+  $('onboardingOptionalCount').textContent=optional.length?`· ${optional.filter(x=>x.done).length}/${optional.length} 확인됨`:'';
+  if(typedPhone&&$('onboardingMessageTestPhone'))$('onboardingMessageTestPhone').value=typedPhone;
+  if(selectedSender&&$('onboardingSenderSelect')&&[...$('onboardingSenderSelect').options].some(x=>x.value===selectedSender))$('onboardingSenderSelect').value=selectedSender;
+  renderMessagingTestDelivery();
+  const payment=$('onboardingPayment'),p=d?.payment||{};payment.querySelector('span').textContent=p.ready?`등록 카드 ${p.maskedNumber||'확인됨'} · ${p.subscriptionStatus||'구독'} 상태`:d?'계약 가격·이용 기능·결제수단은 요금제·구독에서 확인하세요.':'구독 상태 확인 필요';
+  payment.classList.toggle('done',!!p.ready);$('onboardingComplete').classList.toggle('onboarding-hidden',!basic.ready);
+  const nav=$('onboardingNavBadge');if(nav){nav.textContent=d?`${basic.completed}/2`:'확인';nav.classList.toggle('done',basic.ready);nav.hidden=basic.ready;nav.closest('button')?.classList.toggle('onboarding-pending',!basic.ready);}
+  const banner=$('onboardingDashboardBanner');if(banner){banner.classList.toggle('show',!!(saasMode==='auth'&&saasMe&&settingsCanManage()&&!basic.ready));$('onboardingDashboardTitle').textContent=d?`기본 준비 ${basic.completed}/2`:'처음 사용 설정 확인';$('onboardingDashboardText').textContent='병원정보·직원 권한을 확인하고 필요한 기능을 설정하세요.';$('onboardingDashboardFill').style.width=`${basic.percent}%`;}
   renderOnboardingAdminCheck();
 }
+let onboardingRead=null,onboardingReadScope='',onboardingStatusScope='';
 async function loadOnboardingStatus(showToast=false,autoOpen=false){
-  if(saasMode!=='auth'||!saasMe||!saasPermission('settings.manage',['owner','admin'].includes(saasMe.role))){onboardingState=null;renderOnboardingStatus();return null;}
-  try{const d=await saasRequest('/saas/onboarding');onboardingState=d.onboarding||null;if(onboardingState?.senderAccess)messagingSenderAccess=onboardingState.senderAccess;if(onboardingState?.solapiOauth)messagingOauth=onboardingState.solapiOauth;if(onboardingState?.senderAccess?.senderIds)messagingSenderIds=onboardingState.senderAccess.senderIds;if(onboardingState?.messageTest){messagingTestDeliveryState={...onboardingState.messageTest};renderMessagingTestDelivery();if(onboardingState.messageTest.pending)setTimeout(()=>startMessagingTestDeliveryPolling(false),0);}renderOnboardingStatus();if(showToast)toast('시작 설정 상태를 새로고침했습니다.');if(autoOpen&&onboardingState&&!onboardingState.ready&&!onboardingAutoOpened){const key=`carestep_onboarding_seen_${saasMe.clinic?.id||''}`;if(!sessionStorage.getItem(key)){sessionStorage.setItem(key,'1');onboardingAutoOpened=true;go('onboarding');setTimeout(startFiveMinuteGuide,250);}}return onboardingState;}catch(e){if(showToast)toast(e.message||'시작 설정 상태 조회 실패');return null;}
+  const scope=JSON.stringify([clinicReadScope(),saasToken]);
+  if(saasMode!=='auth'||!saasMe||!settingsCanManage()){onboardingState=null;onboardingStatusScope='';renderOnboardingStatus();return null;}
+  if(onboardingRead&&onboardingReadScope===scope)return onboardingRead;
+  if(onboardingStatusScope!==scope){onboardingState=null;onboardingStatusScope=scope;renderOnboardingStatus();}
+  onboardingReadScope=scope;
+  const current=()=>JSON.stringify([clinicReadScope(),saasToken])===scope&&settingsCanManage();
+  $('onboardingLoadStatus').textContent='저장 상태 확인 중…';$('onboarding').setAttribute('aria-busy','true');
+  const pending=(async()=>{try{
+    const d=await saasRequest('/saas/onboarding');if(!current())return null;
+    if(!d.onboarding||!Array.isArray(d.onboarding.steps))throw Error('설정 상태를 확인하지 못했습니다.');
+    onboardingState=d.onboarding;
+    if(onboardingState.senderAccess)messagingSenderAccess=onboardingState.senderAccess;
+    if(onboardingState.solapiOauth)messagingOauth=onboardingState.solapiOauth;
+    if(onboardingState.senderAccess?.senderIds)messagingSenderIds=onboardingState.senderAccess.senderIds;
+    if(onboardingState.messageTest){messagingTestDeliveryState={...onboardingState.messageTest};if(onboardingState.messageTest.pending)setTimeout(()=>{if(current())startMessagingTestDeliveryPolling(false);},0);}
+    renderOnboardingStatus();$('onboardingLoadStatus').textContent='마지막 확인 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});if(showToast)toast('처음 사용 설정 상태를 확인했습니다.');return onboardingState;
+  }catch(e){if(current()){$('onboardingLoadStatus').textContent='조회 실패 · '+(onboardingState?'이전 확인 상태입니다. ':'')+'상태 새로고침을 눌러주세요.';if(showToast)toast(e.message);}return null;}
+  finally{if(current())$('onboarding').removeAttribute('aria-busy');if(onboardingReadScope===scope)onboardingRead=null;}})();
+  onboardingRead=pending;return pending;
 }
-async function markOnboardingStep(step){try{const d=await saasRequest('/saas/onboarding/mark',{method:'POST',body:JSON.stringify({step})});onboardingState=d.onboarding||onboardingState;renderOnboardingStatus();return onboardingState;}catch(e){toast(e.message||'시작 설정 상태 저장 실패');return null;}}
+async function markOnboardingStep(step){const scope=JSON.stringify([clinicReadScope(),saasToken]);try{const d=await saasRequest('/saas/onboarding/mark',{method:'POST',body:JSON.stringify({step})});if(scope!==JSON.stringify([clinicReadScope(),saasToken]))return null;onboardingState=d.onboarding||onboardingState;renderOnboardingStatus();return onboardingState;}catch(e){if(scope===JSON.stringify([clinicReadScope(),saasToken]))toast(e.message||'시작 설정 상태 저장 실패');return null;}}
 
 async function refreshOnboardingSolapi(){
   await loadMessagingSettings(false);await loadSolapiSenders(false);await loadOnboardingStatus(false,false);const a=messagingSenderAccess||{};if(a.status==='ready')toast(`SOLAPI 권한 확인 완료 · 사용 가능한 발신번호 ${(a.activeSenderIds||[]).length}개`);else if(a.status==='no_sender')toast('SOLAPI 연결은 정상입니다. 승인 완료된 발신번호가 아직 없습니다.');else if(a.status==='permission_missing')toast('senderid:read 권한을 다시 승인해주세요.');else if(a.status==='token_error')toast('SOLAPI 인증 토큰 확인이 필요합니다. 계정을 다시 연결해주세요.');else if(a.message)toast(a.message);
@@ -5046,6 +5124,9 @@ async function saveOnboardingSender(){
   try{const s=messagingSettings||{},d=await saasRequest('/saas/messaging/settings',{method:'PUT',body:JSON.stringify({enabled:true,senderNumber:sender,defaultChannel:'mms',kakaoPfId:s.kakaoPfId||'',kakaoTemplateId:s.kakaoTemplateId||'',smsFallback:s.smsFallback!==false,mmsFirst:true,mmsLmsFallback:true})});messagingSettings=d.settings||messagingSettings;messagingSenderOnboarding=d.senderOnboarding||messagingSenderOnboarding;messagingPlatform=d.platform||messagingPlatform;messagingOauth=d.oauth||messagingOauth;messagingSenderAccess=d.senderAccess||messagingSenderAccess;messagingSenderIds=d.senderIds||messagingSenderIds;await loadOnboardingStatus(false,false);toast('발신번호를 저장하고 모바일 카드 MMS 우선 발송을 활성화했습니다. 이제 테스트 문자를 보내주세요.');return true;}catch(e){toast(e.message||'발신번호 저장 실패');return false;}
 }
 async function handleOnboardingAction(action){
+  if(!settingsCanManage()){toast('설정 관리 권한이 필요합니다.');return;}
+  if(action==='refresh'){await loadOnboardingStatus(true);return;}
+  if(['profile','team','billing'].includes(action)){ClinicSettings.openSection({profile:0,team:1,billing:5}[action]);return;}
   if(action==='profile'){go('settings');setTimeout(()=>$('hospitalName')?.focus(),80);return;}
   if(action==='team'){go('account');setTimeout(()=>$('saasInviteRole')?.focus(),80);return;}
   if(action==='team_skip'){if(confirm('현재는 Owner 단독으로 시작하고 직원 초대는 나중에 진행할까요?')){await markOnboardingStep('team_skip');toast('직원 초대를 나중에 진행하도록 표시했습니다.');}return;}
@@ -10008,7 +10089,7 @@ $('hospitalLogo').addEventListener('change',e=>{
   const reader=new FileReader(); reader.onload=()=>{hospital.logo=reader.result; $('logoPreview').innerHTML=`<img src="${hospital.logo}" alt="로고 미리보기"/>`;}; reader.readAsDataURL(file);
 });
 
-$('onboardingSteps')?.addEventListener('click',e=>{const b=e.target.closest('[data-onboarding-action]');if(b)handleOnboardingAction(b.dataset.onboardingAction);});
+$('onboarding')?.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!settingsCanManage())return;if(b.dataset.onboardingSection!==undefined)ClinicSettings.openSection(Number(b.dataset.onboardingSection));else if(b.dataset.onboardingGo==='records')ClinicSettings.openSection(2);else if(b.dataset.onboardingAction&&!b.closest('#onboardingPayment'))handleOnboardingAction(b.dataset.onboardingAction);});
 $('onboardingPayment')?.addEventListener('click',e=>{const b=e.target.closest('[data-onboarding-action]');if(b)handleOnboardingAction(b.dataset.onboardingAction);});
 $('startFiveMinuteGuide')?.addEventListener('click',startFiveMinuteGuide);
 $('startSampleExperience')?.addEventListener('click',startSampleExperience);
