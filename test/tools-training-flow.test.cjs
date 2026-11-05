@@ -22,7 +22,7 @@ function bootstrap(){
  if(path==='/operations/sources')return {sources:[{id:'v3',title:'교육 3',version:1,items:['준비 확인','마감 확인']}]};
  if(path.startsWith('/operations/'))return structuredClone({runs,manager:true,userId:'owner',members:training.members,templates:[{id:'t1',revision:1,source_status:'published',source_version_id:'s1',current_version_id:'s1',body:{title:'시험 서식',items:['확인']}}]});
  if(path.startsWith('/intakes/')){const before=new URL('http://local'+path).searchParams.get('before');if(before&&pageDelay)await new Promise(r=>setTimeout(r,pageDelay));if(before&&pageFail)throw Error('이전 기록 조회 실패');const n=before?Number(before):0;return {items:[intake(n)],next:n===3?'':String(n+1),canEdit:true};}return {ok:true,items:[],libraries:[]};};
- window.app=new URLSearchParams(location.search).get('mode')==='training'?StaffTraining.mount(document.getElementById('root'),{identity:()=>actor,request,separateSop:new URLSearchParams(location.search).has('separate'),canChecklist:()=>true,checklist:id=>window.checklistSource=id}):PracticeTools.mount(document.getElementById('root'),{identity:()=>actor,ready:()=>true,can:()=>true,patient:()=>null,navigate:()=>app.open(),request});app.open();
+ window.app=new URLSearchParams(location.search).get('mode')==='training'?StaffTraining.mount(document.getElementById('root'),{identity:()=>actor,request,common:new URLSearchParams(location.search).has('hq'),separateSop:new URLSearchParams(location.search).has('separate'),canChecklist:()=>!!training.actor.capabilities.manage,checklist:id=>window.checklistSource=id}):PracticeTools.mount(document.getElementById('root'),{identity:()=>actor,ready:()=>true,can:()=>true,patient:()=>null,navigate:()=>app.open(),request});app.open();
 }
 before(async()=>{browser=await chromium.launch({headless:true,executablePath:process.env.HQ_TEST_BROWSER});server=http.createServer((req,res)=>{const u=new URL(req.url,'http://local');if(u.pathname==='/fixture'){res.setHeader('Content-Type','text/html');return res.end('<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="stylesheet" href="/clinic-organization.css"><link rel="stylesheet" href="/practice-tools.css"><link rel="stylesheet" href="/staff-training.css"><link rel="stylesheet" href="/hospital-operations.css"><style>body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb}main{max-width:1200px;padding:14px;margin:auto}</style><div id="appView"><section id="training"><main id="root"></main></section></div>'+['clinic-tab-position','staff-training','practice-tools'].map(n=>'<script src="/'+n+'.js"></script>').join('')+'<script>('+bootstrap.toString()+')()</script>');}try{res.setHeader('Content-Type',extname(u.pathname)==='.js'?'text/javascript':extname(u.pathname)==='.html'?'text/html':'text/css');res.end(readFileSync(resolve(root,u.pathname.slice(1))));}catch{res.writeHead(404);res.end();}});await new Promise(r=>server.listen(0,'127.0.0.1',r));origin='http://127.0.0.1:'+server.address().port;});
 after(async()=>{await browser?.close();if(server)await new Promise(r=>server.close(r));});
@@ -41,7 +41,63 @@ test('training background refresh retains edited search and cursor; reports pagi
 test('CLINIC main navigation honors unsaved work dialog cancellation',async t=>{const p=await page(t,'ops'),sample=await p.evaluate(()=>({runs,training}));await p.goto(origin+'/index.html');await p.evaluate(({runs,training})=>{saasMode='auth';saasSessionMeta={id:'review'};saasMe={role:'owner',clinic:{id:'review'},user:{id:'owner'}};saasRequest=async(path,o={})=>{if(o.method&&o.method!=='GET')throw Error('Unexpected write');return path==='/saas/training/'?training:{ok:true,runs,manager:false,templates:[],members:training.members,items:[]};};showApp();go('practice');},sample);await p.locator('[data-run]').first().click();await p.locator('[data-check]').first().click();await p.locator('[name=note]').fill('보호할 메모');p.once('dialog',d=>d.dismiss());await p.evaluate(()=>go('training'));assert.equal(await p.locator('#practice').evaluate(e=>e.classList.contains('active-view')),true);assert.equal(await p.locator('[name=note]').inputValue(),'보호할 메모');p.once('dialog',d=>d.accept());await p.evaluate(()=>go('training'));assert.equal(await p.locator('#training').evaluate(e=>e.classList.contains('active-view')),true);assert.equal(await p.locator('.pt-dialog[open]').count(),0);});
 
 for(const width of [390,768,1440]){
- test('separate education and SOP restore independent state and expose eligible checklist action '+width,async t=>{const p=await page(t,'training',width);await p.goto(origin+'/fixture?mode=training&separate=1');await p.locator('[data-search]').fill('교육 1');await p.evaluate(async()=>{app.prepareSection('sop');await app.open({reuse:true});});assert.equal(await p.locator('[data-search]').inputValue(),'');await p.locator('[data-search]').fill('교육 3');await p.locator('[data-st=checklist]').click();assert.equal(await p.evaluate(()=>checklistSource),'v3');await p.evaluate(async()=>{app.prepareSection('education');await app.open({reuse:true});});assert.equal(await p.locator('[data-search]').inputValue(),'교육 1');await p.evaluate(async()=>{app.prepareSection('sop');await app.open({reuse:true});});assert.equal(await p.locator('[data-search]').inputValue(),'교육 3');assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);});
+ test('separate education and SOP restore independent state and expose eligible checklist action '+width,async t=>{const p=await page(t,'training',width);await p.goto(origin+'/fixture?mode=training&separate=1');await p.locator('[data-search]').fill('교육 1');await p.evaluate(async()=>{app.prepareSection('sop');await app.open({reuse:true});});assert.equal(await p.locator('[data-search]').inputValue(),'');await p.locator('[data-search]').fill('교육 3');await p.locator('.st-card-manage>summary').click();await p.locator('[data-st=checklist]').click();assert.equal(await p.evaluate(()=>checklistSource),'v3');await p.evaluate(async()=>{app.prepareSection('education');await app.open({reuse:true});});assert.equal(await p.locator('[data-search]').inputValue(),'교육 1');await p.evaluate(async()=>{app.prepareSection('sop');await app.open({reuse:true});});assert.equal(await p.locator('[data-search]').inputValue(),'교육 3');assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);});
  test('SOP shortcut opens prefilled template without saving automatically '+width,async t=>{const p=await page(t,'ops',width);await p.evaluate(()=>app.templateFromSop('v3'));await p.locator('dialog [name=title]').waitFor();assert.equal(await p.locator('[name=title]').inputValue(),'교육 3');assert.equal(await p.locator('[name=items]').inputValue(),'준비 확인\n마감 확인');assert.equal(await p.evaluate(()=>calls.filter(x=>x.method!=='GET').length),0);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);});
 }
 test('completed checklist rows collapse on reopen and memo failure keeps input',async t=>{const p=await page(t,'ops');await p.locator('[data-run]').first().click();await p.locator('[data-fast="0"]').click();await p.locator('[data-fast="0"]').filter({hasText:'미확인으로 변경'}).waitFor();await p.locator('dialog [data-close]').click();await p.locator('[data-run]').first().click();assert.equal(await p.locator('[data-done-checks]').evaluate(e=>e.open),false);assert.equal(await p.locator('[data-fast="0"]').isVisible(),false);await p.locator('[data-check="1"]').click();await p.locator('[name=state]').selectOption('held');await p.locator('[name=note]').fill('재확인 필요');await p.evaluate(()=>fail=true);await p.locator('dialog button[type=submit]').click();await p.getByText('시험 연결 실패',{exact:true}).waitFor();assert.equal(await p.locator('[name=note]').inputValue(),'재확인 필요');});
+
+async function educationTopics(p,hq=false){await p.evaluate(async hq=>{
+ const make=(id,category,format,body)=>({id,course_id:id,current_version_id:id,title:id,category,format,body,kind:'education',version:1,status:'published',owned:hq,common:true});
+ training.actor.common=hq;
+ training.courses=[make('내과 교육','내과'),make('실무 교육','접수 · 응대','practice'),make('실무 보충','접수·응대',undefined,{format:'practice'}),make('공통 주제 A','간호'),make('공통 주제 B','간호','practice'),make('미분류 자료','', 'practice'),{...make('초안','비공개 주제'),status:'draft'}, {...make('병원 지침','병원 SOP · 감염·안전'),kind:'sop',owned:true}];
+ await app.open({reuse:false});
+},hq);}
+for(const width of [390,1280])test('education types constrain topics, clear incompatible selections and preserve shared topics '+width,async t=>{
+ const p=await page(t,'training',width);await educationTopics(p);
+ const types=p.locator('[data-course-type]'),topics=p.locator('[data-category]');
+ assert.deepEqual(await types.locator('option').evaluateAll(es=>es.map(e=>e.value)),['','disease','practice']);
+ assert.equal(await topics.locator('option').filter({hasText:'접수·응대'}).count(),1);
+ assert.equal(await topics.locator('option').filter({hasText:'비공개 주제'}).count(),0);
+ assert.equal(await p.evaluate(()=>document.querySelector('[data-course-type]').closest('label').nextElementSibling===document.querySelector('[data-category]').closest('label')),true);
+ const reads=await p.evaluate(()=>calls.length);
+ await topics.selectOption('내과');assert.equal(await p.locator('.st-card').count(),1);
+ await types.focus();await types.selectOption('practice');assert.equal(await topics.inputValue(),'');assert.equal(await p.locator('.st-card').count(),4);
+ assert.equal(await types.evaluate(e=>e===document.activeElement),true);
+ assert.equal(await topics.locator('option').filter({hasText:'내과'}).count(),0);
+ await topics.selectOption('접수·응대');assert.equal(await p.locator('.st-card').count(),2);
+ await topics.selectOption('간호');await types.selectOption('disease');assert.equal(await topics.inputValue(),'간호');assert.equal(await p.locator('.st-card').count(),1);
+ await p.locator('[data-tab=mine]').click();await p.locator('[data-tab=library]').click();assert.equal(await types.inputValue(),'disease');assert.equal(await topics.inputValue(),'간호');
+ await p.locator('[data-st=clear]').click();assert.equal(await p.locator('.st-card').count(),6);assert.equal(await types.inputValue(),'');assert.equal(await topics.inputValue(),'');
+ assert.equal(await p.evaluate(()=>calls.length),reads);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
+});
+
+test('HQ education management uses the same dependent filters including review drafts',async t=>{
+ const p=await page(t);await p.goto(origin+'/fixture?mode=training&hq=1');await educationTopics(p,true);
+ await p.locator('[data-course-type]').selectOption('disease');assert.equal(await p.locator('[data-category] option').filter({hasText:'비공개 주제'}).count(),1);
+ await p.locator('[data-category]').selectOption('비공개 주제');assert.equal(await p.locator('.st-card').count(),1);
+ await p.locator('[data-course-type]').selectOption('practice');assert.equal(await p.locator('[data-category]').inputValue(),'');assert.equal(await p.locator('.st-card').count(),4);
+ await p.locator('[data-tab=library]').click();assert.equal(await p.locator('[data-category] option').filter({hasText:'비공개 주제'}).count(),0);
+});
+
+for(const width of [390,768,1440])test('SOP compact cards group versions and retain selected layout '+width,async t=>{
+ const p=await page(t,'training',width);await p.evaluate(async()=>{
+ training.courses=Array.from({length:18},(_,i)=>({id:'s'+i,course_id:'sop'+i,current_version_id:'s'+i,title:String(i+1).padStart(2,'0')+'. '+['진료 시작·마감 점검','보호자 접수·응대와 안전한 진료 안내','수술 준비·감염관리'][i%3],category:'병원 SOP · '+['병원 운영','접수·보호자 응대','검사·수술'][i%3],kind:'sop',version:1,status:'published',owned:true,updated_at:'2026-11-05'}));
+ training.courses.push({...training.courses[0],id:'s0-v2',version:2,status:'draft'});training.courses.push({...training.courses[1],id:'s1-deleted',deleted_at:'2026-11-05'});await app.open({reuse:false});
+ });await p.locator('[data-tab=sop]').click();
+ assert.equal(await p.locator('.st-sop-card').count(),18);assert.match(await p.locator('.st-sop-card h2').first().innerText(),/^01\./);assert.match(await p.locator('.st-sop-card h2').nth(17).innerText(),/^18\./);
+ assert.equal(await p.locator('[data-course-type]').count(),0);assert.equal(await p.locator('[data-category] option').filter({hasText:'병원 SOP'}).count(),0);
+ assert.equal(await p.locator('.st-list-view').count(),0);assert.equal(await p.locator('.st-card-manage[open]').count(),0);
+ const cols=await p.locator('.st-grid').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length);assert.equal(cols,width===390?1:width===768?2:4);
+ assert.ok((await p.locator('.st-sop-card').first().boundingBox()).height<300);
+ assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
+ await p.screenshot({path:resolve(root,'../sop-compact-'+width+'.png'),fullPage:true});
+ await p.locator('.st-card-manage>summary').first().click();assert.equal(await p.locator('.st-card-manage').first().locator('section').count(),2);
+ await p.locator('[data-st=checklist]').first().click();assert.equal(await p.evaluate(()=>checklistSource),'s0');assert.equal(await p.evaluate(()=>calls.filter(c=>c.method!=='GET').length),0);
+ await p.locator('.st-filter-options>summary').click();await p.locator('[data-layout]').selectOption('list');assert.equal(await p.locator('.st-list-view').count(),1);
+ await p.locator('[data-tab=library]').click();await p.locator('[data-tab=sop]').click();await p.locator('.st-filter-options>summary').click();assert.equal(await p.locator('[data-layout]').inputValue(),'list');
+ await p.locator('[data-layout]').selectOption('cards');await p.locator('[data-tab=library]').click();await p.locator('[data-tab=sop]').click();assert.equal(await p.locator('[data-layout]').inputValue(),'cards');assert.equal(await p.locator('.st-list-view').count(),0);
+});
+
+test('staff SOP cards show only published versions without administrative actions',async t=>{
+ const p=await page(t);await p.evaluate(async()=>{training.actor.capabilities={};training.courses.push({...training.courses[3],id:'draft',version:2,status:'draft'});await app.open({reuse:false});});await p.locator('[data-tab=sop]').click();assert.equal(await p.locator('.st-sop-card').count(),1);assert.equal(await p.locator('.st-card-manage').count(),0);assert.equal(await p.locator('[data-st=edit-course]').count(),0);assert.equal(await p.locator('[data-st=assign]').count(),0);assert.equal(await p.locator('[data-st=document]').count(),1);
+});

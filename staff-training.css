@@ -46,3 +46,23 @@ body:has(#training.active-view) .st-heading h1,body:has(#training.active-view) .
 @media(max-width:700px){.st-heading{flex-direction:row;align-items:center;gap:10px}.st-heading p{font-size:14px}.st-heading>.st-button{flex:none}.st-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}.st-tabs button{white-space:normal;padding:8px 5px;font-size:14px}.st-toolbar{margin:12px 0;gap:8px}.st-filter-options{grid-column:1/-1}.st-filter-options>summary{padding:7px 0;min-height:36px}.st-filter-options>div{display:grid;grid-template-columns:1fr 1fr}.st-filter-options label{min-width:0!important}.st-mine-controls,.st-report-filters{display:grid;grid-template-columns:1fr 1fr}.st-mine-controls>label:first-child,.st-report-filters>label:first-child{grid-column:1/-1;min-width:0}.st-report-filters label{min-width:0}.st-table-wrap table{min-width:0}.st-table-wrap thead{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}.st-table-wrap tbody,.st-table-wrap tr,.st-table-wrap td{display:block}.st-table-wrap tr{margin-bottom:12px;padding:10px;border:1px solid var(--st-line);border-radius:12px}.st-table-wrap td{border:0;padding:4px;font-size:15px}.st-table-wrap td:before{content:attr(data-label) ' · ';font-size:14px;color:var(--st-muted);font-weight:400}}
 
 .st-gap-review-item{padding:14px;border:1px solid #d6e2ef;border-radius:10px;margin-bottom:12px}.st-gap-review-item label{display:block;margin:10px 0}.st-gap-review-item select,.st-gap-review-item textarea{width:100%;box-sizing:border-box}.st-gap-review-item textarea{min-height:85px}
+
+/* Compact SOP shelf: keep routine reading actions visible and management secondary. */
+.staff-training.st-sop-area .st-grid:not(.st-list-view){grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));align-items:start;gap:12px}
+#training .st-sop-card,.staff-training .st-sop-card{padding:14px;gap:8px;border-radius:12px}
+.staff-training .st-sop-card h2{font-size:17px;line-height:1.45;margin:6px 0;overflow-wrap:anywhere}
+.staff-training .st-sop-card p{font-size:13px;line-height:1.5;margin:4px 0;color:var(--st-muted)}
+.staff-training .st-sop-card .st-tag{font-size:12px;line-height:1.5;padding:3px 7px}
+#training .st-sop-card .st-sop-primary,.staff-training .st-sop-card .st-sop-primary{padding-top:4px;margin:0;gap:6px}
+.staff-training .st-sop-card .st-button{font-family:inherit;font-size:14px;line-height:1.4;min-height:40px;padding:8px 10px;border-radius:9px}
+.staff-training .st-sop-card>.st-card-manage{border-top:1px solid var(--st-line);font-size:13px}
+.staff-training .st-sop-card>.st-card-manage>summary{min-height:36px;padding:7px 0;box-sizing:border-box}
+.staff-training .st-sop-card .st-card-manage section{padding:8px 0}
+.staff-training .st-list-view>.st-sop-card{grid-template-columns:minmax(0,1fr) auto}
+.staff-training .st-toolbar [data-category],.staff-training .st-toolbar [data-course-type]{min-width:160px}
+@media(max-width:700px){
+ .staff-training.st-sop-area .st-grid:not(.st-list-view){grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))}
+ .staff-training .st-list-view>.st-sop-card{grid-template-columns:1fr}
+ .staff-training .st-sop-card .st-button,.staff-training .st-sop-card>.st-card-manage>summary{min-height:44px}
+ .staff-training .st-toolbar [data-category],.staff-training .st-toolbar [data-course-type]{min-width:0;width:100%}
+}
