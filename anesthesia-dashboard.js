@@ -93,6 +93,8 @@
    panel('measurement').hidden=false;
    const extra=document.createElement('details');extra.className='ad-extra-procedure';extra.innerHTML='<summary>추가 처치·설정 기록</summary>';procedure.hidden=false;extra.append(procedure);dashboard.after(extra);
   }
+  // Keep planned medication visible below monitoring; never treat preparation as administration.
+  if(pending&&a.onePage)dashboard.after(pending);
   const reminder=query('[data-ar-reminder]');if(reminder)timing.after(reminder);
   const status=sheet.querySelector(':scope>p[role=status]');if(status){if(/^기록 \d+건$/.test(status.textContent.trim()))status.remove();else header?.firstElementChild?.append(status);}header?.setAttribute('aria-label','현재 마취 환자');
  }
