@@ -93,6 +93,15 @@
    panel('measurement').hidden=false;
    const extra=document.createElement('details');extra.className='ad-extra-procedure';extra.innerHTML='<summary>추가 처치·설정 기록</summary>';procedure.hidden=false;extra.append(procedure);dashboard.after(extra);
   }
+  // Reuse each live widget once. Only visual order changes; save/event handlers remain attached.
+  if(a.onePage){
+   sheet.classList.add('cs-anesthesia-workspace');
+   const basic=sheet.querySelector('.ad-patient-setup'),medication=sheet.querySelector('.ad-medications');
+   if(basic)sheet.append(basic);
+   if(settings){dashboard.querySelector('.ad-entry').append(settings);if(quick&&(view.quickEntry?.kind==='setting'||view.quickEntry?.kind==='infusion'))settings.after(quick);}
+   if(medication){medication.classList.add('cs-drug-preparation');timing.before(medication);}
+   for(const note of sheet.querySelectorAll('.ae-metric>small'))if(note.textContent.trim()==='미측정')note.classList.add('cs-unmeasured-note');
+  }
   // Keep planned medication visible below monitoring; never treat preparation as administration.
   if(pending&&a.onePage)dashboard.after(pending);
   const reminder=query('[data-ar-reminder]');if(reminder)timing.after(reminder);
