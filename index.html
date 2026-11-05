@@ -443,6 +443,30 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
 .screen-help-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;padding:9px 12px;border:1px solid #dce6f5;border-radius:11px;background:#f7faff;color:#52637c;font-size:10px;line-height:1.5}.screen-help-bar b{color:#2458ad}.screen-help-bar button{flex:none;border:0;background:transparent;color:#2563d8;font:inherit;font-weight:850;cursor:pointer}.onboarding-starter{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;margin-top:14px;padding:14px 16px;border:1px solid #d9e5f7;border-radius:15px;background:#fff}.onboarding-starter h4{margin:0 0 4px;font-size:13px}.onboarding-starter p{margin:0;color:#6e7c91;font-size:9.5px;line-height:1.55}.onboarding-starter-actions{display:flex;gap:7px;flex-wrap:wrap}.onboarding-five-min{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:10px}.onboarding-five-min div{padding:10px;border:1px solid #e1e8f2;border-radius:11px;background:#fbfcff}.onboarding-five-min b,.onboarding-five-min span{display:block}.onboarding-five-min b{font-size:9.5px;color:#263958}.onboarding-five-min span{margin-top:3px;font-size:8.5px;color:#758297;line-height:1.4}.onboarding-step-reason{grid-column:2/-1;margin-top:-2px;padding:7px 9px;border-radius:9px;background:#f7f9fc;color:#66758a;font-size:8.5px;line-height:1.5}.onboarding-step.attention .onboarding-step-reason{background:#fff0ee;color:#8e473e}.onboarding-step.waiting .onboarding-step-reason{background:#fff8e6;color:#7a641f}.onboarding-admin-check{margin-top:12px;padding:14px;border:1px solid #dfe7f2;border-radius:14px;background:#fff}.onboarding-admin-check-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.onboarding-admin-check-head h4{margin:0;font-size:12px}.onboarding-admin-check-head p{margin:3px 0 0;color:#758197;font-size:9px}.onboarding-admin-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:10px}.onboarding-admin-grid div{padding:9px;border:1px solid #e3e9f2;border-radius:10px;background:#fafcff}.onboarding-admin-grid span,.onboarding-admin-grid b{display:block}.onboarding-admin-grid span{font-size:8px;color:#7a8799}.onboarding-admin-grid b{margin-top:3px;font-size:10px}.onboarding-tour{position:fixed;right:22px;bottom:22px;z-index:320;width:min(390px,calc(100vw - 24px));padding:16px;border:1px solid #bcd1f6;border-radius:16px;background:#fff;box-shadow:0 20px 60px rgba(20,43,82,.24)}.onboarding-tour.hidden{display:none}.onboarding-tour-top{display:flex;justify-content:space-between;gap:10px}.onboarding-tour-top span{color:#245fcf;font-size:9px;font-weight:900}.onboarding-tour h4{margin:6px 0 5px;font-size:15px}.onboarding-tour p{margin:0;color:#66758a;font-size:10px;line-height:1.6}.onboarding-tour-actions{display:flex;justify-content:space-between;gap:8px;margin-top:12px}.onboarding-tour-actions>div{display:flex;gap:6px}.onboarding-sample-badge{display:inline-flex;margin-top:9px;padding:5px 8px;border-radius:999px;background:#eaf7f1;color:#16704e;font-size:8.5px;font-weight:900}
 @media(max-width:900px){.onboarding-five-min{grid-template-columns:repeat(2,1fr)}.onboarding-admin-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:650px){.screen-help-bar{align-items:flex-start}.onboarding-starter{grid-template-columns:1fr}.onboarding-five-min{grid-template-columns:1fr}.onboarding-admin-check-head{align-items:flex-start;flex-direction:column}.onboarding-tour{right:12px;bottom:12px}.onboarding-tour-actions{align-items:stretch;flex-direction:column}.onboarding-tour-actions>div .btn{flex:1}}
+
+/* Compact A4 medication checklist: pack whole weekly blocks by measured height. */
+.med-check-page{padding:28px 36px 46px;color:#263247}
+.med-check-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid #b6c8e2;padding-bottom:8px}
+.med-check-heading h1{font-size:23px;line-height:1.25;margin:0}
+.med-check-heading>span{font-size:11px;line-height:1.4;white-space:nowrap}
+.med-check-identity{font-size:12px;line-height:1.4;margin-top:7px;overflow-wrap:anywhere}
+.med-check-note{font-size:11px;line-height:1.45;margin:7px 0 10px;color:#536078}
+.med-check-content{display:grid;gap:12px}
+.med-check-week{break-inside:avoid;page-break-inside:avoid;margin:0}
+.med-check-week h2{font-size:12px;line-height:17px;margin:0 0 4px;color:#1f4d88}
+.med-check-page .med-check-table{margin:0}
+.med-check-page .med-check-table th,.med-check-page .med-check-table td{padding:5px 3px;font-size:11px;line-height:1.3;overflow-wrap:anywhere}
+.med-check-page .med-check-table th:first-child,.med-check-page .med-check-table td:first-child{width:auto}
+.med-check-page .med-check-table th>span{display:block;font-size:9px;font-weight:500;margin-top:2px}
+.med-check-page .med-check-med b{font-size:12px;line-height:1.35}
+.med-check-page .med-check-med span{font-size:10px;line-height:1.4;margin-top:3px;color:#536078}
+.med-check-page .med-day-checks{gap:4px}
+.med-check-page .med-time-check{gap:4px;min-height:15px}
+.med-check-page .med-check-time-label{font-size:10px;line-height:1.2}
+.med-check-page .med-check-box{width:14px;height:14px;border-radius:2px}
+.med-check-recheck{font-size:11px;line-height:1.4;margin-top:10px}
+.med-check-page .pdf-footer{left:36px;right:36px;bottom:18px;padding-top:8px}
+
 </style>
 <style id="carestep-v10-3-c-category-system">
 .library-filter-block{margin:12px 0;padding:13px 14px;border:1px solid #e1e8f2;border-radius:14px;background:#fbfcff}.library-filter-label{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:9px}.library-filter-label b{font-size:11px;color:#1c2a43}.library-filter-label span,.library-result-meta{font-size:9px;color:#77849a}.purpose-filter-row,.filter-row{display:flex;gap:7px;flex-wrap:wrap}.purpose-chip{border:1px solid #dbe3ef;background:#fff;border-radius:10px;padding:9px 12px;font-size:10px;font-weight:850;color:#536177;cursor:pointer}.purpose-chip:hover,.purpose-chip.active{border-color:#1f5eff;background:#eef4ff;color:#1f5eff}.purpose-chip.journey-link{margin-left:auto;background:#16233c;color:#fff;border-color:#16233c}.library-result-meta{margin:10px 2px;font-weight:750}.resource-top>span:first-child{display:flex;gap:5px;align-items:center;flex-wrap:wrap}.purpose-badge{display:inline-flex;padding:4px 7px;border-radius:999px;background:#eef2f7;color:#56657a;font-size:8px;font-weight:900}.purpose-badge.procedure{background:#fff2e8;color:#ad5d18}.purpose-badge.discharge{background:#eef4ff;color:#245fd4}.purpose-badge.education{background:#ecf8f1;color:#18734b}.purpose-badge.clinic{background:#f1edff;color:#6843bf}
@@ -5387,12 +5411,62 @@ function medicationExpectedSlots(m){
   const match=String(m?.frequency||'').match(/하루\s*(\d+)\s*회/);
   return match?Number(match[1])||0:0;
 }
+var medicationCheckLayoutCache;
+function medicationCheckWeekHtml(block){
+  const days=Array.from({length:block.endDay-block.startDay+1},(_,i)=>block.startDay+i);
+  const heads=days.map(day=>`<th scope="col">${day}일차<span>${escapeHtml(actualDateFor(day-1)||'')}</span></th>`).join('');
+  const rows=block.meds.map(m=>{
+    const times=parseMedTimes(m.times),slots=times.length?times:['완료'];
+    const schedule=[m.dose,m.frequency,m.meal,`${m.durationDays}일`].filter(Boolean).join(' · ');
+    const cells=days.map(day=>{
+      if(day>m.durationDays)return `<td class="med-check-inactive" data-day="${day}">—</td>`;
+      if(!medicationDueOnDay(m,day))return `<td class="med-check-inactive med-check-eod-rest" data-day="${day}">휴약</td>`;
+      return `<td data-day="${day}"><div class="med-day-checks">${slots.map(time=>`<span class="med-time-check"><span class="med-check-time-label">${escapeHtml(time)}</span><span class="med-check-box"></span></span>`).join('')}</div></td>`;
+    }).join('');
+    return `<tr data-med-index="${m.checkIndex}"><td class="med-check-med"><b>${escapeHtml(m.name)}</b><span>${escapeHtml(schedule)}</span>${times.length?'':'<span>시간 미설정</span>'}</td>${cells}</tr>`;
+  }).join('');
+  return `<section class="med-check-week" data-start-day="${block.startDay}" data-end-day="${block.endDay}"><h2>${block.startDay}-${block.endDay}일차${block.continued?' · 이어서':''}</h2><table class="med-check-table"><colgroup><col style="width:190px">${days.map(()=>'<col>').join('')}</colgroup><thead><tr><th scope="col">약 · 1회 용량 / 복용법</th>${heads}</tr></thead><tbody>${rows}</tbody></table></section>`;
+}
+function medicationCheckPages(rows,maxDays){
+  if(!maxDays)return [];
+  const key=JSON.stringify([rows,caseInfo.dischargeDate,document.fonts?.status]);
+  if(medicationCheckLayoutCache?.key===key)return medicationCheckLayoutCache.pages;
+  const weeks=[];
+  for(let startDay=1;startDay<=maxDays;startDay+=7)weeks.push({startDay,endDay:Math.min(maxDays,startDay+6),meds:rows.filter(m=>m.durationDays>=startDay)});
+  // Measure the same print markup at A4 width, independently of preview zoom.
+  const probe=document.createElement('div');probe.className='pdf-page med-check-page med-check-probe';probe.setAttribute('aria-hidden','true');
+  probe.style.cssText='position:absolute;left:-10000px;top:0;visibility:hidden;pointer-events:none;height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important';
+  probe.innerHTML=weeks.map(medicationCheckWeekHtml).join('');document.body.append(probe);
+  const pages=[];let blocks=[],used=0;
+  const budget=860,gap=12;
+  const finish=()=>{if(blocks.length)pages.push(blocks);blocks=[];used=0;};
+  try{
+    [...probe.children].forEach((node,i)=>{
+      const week=weeks[i],height=Math.ceil(node.getBoundingClientRect().height);
+      if(height<=budget){
+        if(blocks.length&&used+gap+height>budget)finish();
+        used+=(blocks.length?gap:0)+height;blocks.push(week);return;
+      }
+      // Very long instructions or many daily times may need a continued week.
+      const rowHeights=[...node.querySelectorAll('tbody tr')].map(row=>Math.ceil(row.getBoundingClientRect().height));
+      const overhead=height-rowHeights.reduce((sum,h)=>sum+h,0)+4;
+      let part=[],partHeight=overhead,continued=false;
+      const appendPart=()=>{if(part.length){used+=(blocks.length?gap:0)+partHeight;blocks.push({...week,meds:part,continued});part=[];partHeight=overhead;continued=true;}};
+      week.meds.forEach((m,row)=>{
+        if(used+(blocks.length?gap:0)+partHeight+rowHeights[row]>budget){appendPart();finish();}
+        part.push(m);partHeight+=rowHeights[row];
+      });appendPart();
+    });finish();
+  }finally{probe.remove();}
+  medicationCheckLayoutCache={key,pages};return pages;
+}
 function medicationCheckMeta(list=validMedications()){
   const meds=(list||[]).filter(m=>String(m.name||'').trim());
-  const rows=meds.map(m=>({...m,durationDays:parseMedicationDurationDays(m.duration)}));
+  const rows=meds.map((m,checkIndex)=>({...m,checkIndex,durationDays:parseMedicationDurationDays(m.duration)}));
   const invalid=rows.filter(m=>!m.durationDays);
   const maxDays=rows.length&&!invalid.length?Math.max(...rows.map(m=>m.durationDays)):0;
-  return {meds:rows,invalid,maxDays,pageCount:maxDays?Math.ceil(maxDays/7):0,valid:!!rows.length&&!invalid.length};
+  const pages=maxDays?medicationCheckPages(rows,maxDays):[];
+  return {meds:rows,invalid,maxDays,pages,pageCount:pages.length,valid:!!rows.length&&!invalid.length};
 }
 function medicationCheckLabel(){
   const meta=medicationCheckMeta();
@@ -8769,30 +8843,13 @@ function renderMedicationCheckSheet(){
     $('pdfDocument').innerHTML=`<div class="pdf-page med-check-page"><div class="pdf-brandline"></div>${pdfHeader('투약 체크표','투약일수가 확인되어야 정확한 기간의 체크표를 만들 수 있습니다.','FOLLOW-UP · MEDICATION CHECK')}<div class="pdf-callout warn"><strong>투약 기간(일수)을 확인해주세요.</strong><p>${escapeHtml(names)}의 투약일수가 입력되지 않았습니다. 복약정보에서 각 약의 투약 기간을 숫자로 입력해주세요. 예: 3 · 5 · 14</p></div>${pdfFooter()}</div>`;
     $('pdfDocument').classList.remove('hidden');$('messagePreview').classList.add('hidden');$('phonePreview').classList.add('hidden');return;
   }
-  const pages=[];
-  for(let pageIndex=0;pageIndex<meta.pageCount;pageIndex++){
-    const startDay=pageIndex*7+1;
-    const endDay=Math.min(meta.maxDays,startDay+6);
-    const days=Array.from({length:endDay-startDay+1},(_,i)=>startDay+i);
-    const heads=days.map(day=>`<th>${day}일차<br><span style="font-size:6.5px;font-weight:600">${escapeHtml(actualDateFor(day-1)||'')}</span></th>`).join('');
-    const pageMeds=meta.meds.filter(m=>m.durationDays>=startDay);
-    const rows=pageMeds.map(m=>{
-      const times=parseMedTimes(m.times);
-      const slots=times.length?times:['완료'];
-      const scheduleText=[m.dose,m.frequency,times.length?times.join(' / '):'시간 미설정',m.meal].filter(Boolean).join(' · ');
-      const cells=days.map(day=>{
-        if(day>m.durationDays)return `<td class="med-check-inactive"><span>—</span></td>`;
-        if(!medicationDueOnDay(m,day))return `<td class="med-check-inactive med-check-eod-rest"><span>격일<br>휴약</span></td>`;
-        return `<td><div class="med-day-checks">${slots.map(time=>`<span class="med-time-check"><span class="med-check-time-label">${escapeHtml(time)}</span><span class="med-check-box"></span></span>`).join('')}</div></td>`;
-      }).join('');
-      return `<tr><td class="med-check-med"><b>${escapeHtml(compactText(m.name,28))}</b><span>${escapeHtml(scheduleText)}</span><em>${m.durationDays}일 투약${isEodMedication(m)?' · EOD':''}</em></td>${cells}</tr>`;
-    }).join('');
-    const pageTitle=pageIndex===0?`${meta.maxDays}일 투약 체크표`:`${meta.maxDays}일 투약 체크표 · ${pageIndex+1}/${meta.pageCount}`;
-    const rangeText=`${startDay}–${endDay}일차${caseInfo.dischargeDate?` · ${actualDateFor(startDay-1)} ~ ${actualDateFor(endDay-1)}`:''}`;
-    const last=pageIndex===meta.pageCount-1;
-    const hasEod=meta.meds.some(isEodMedication);
-    pages.push(`<div class="pdf-page med-check-page"><div class="pdf-brandline"></div>${pdfHeader(pageTitle,`${rangeText} · 약마다 입력한 투약일수까지만 체크칸을 표시합니다.`,'FOLLOW-UP · MEDICATION CHECK')}<div class="pdf-callout"><strong>처방 라벨과 복약 안내표가 기준입니다.</strong><p>CARESTEP은 병원이 입력한 투약일수와 시간만 사용합니다.${hasEod?' EOD 약은 관리 시작일을 1일차 복용일로 하여 1·3·5일차처럼 격일로 체크칸을 표시합니다.':''} 종료일 이후 칸은 — 로 표시하며, 용량·시간을 임의로 변경하거나 놓친 약을 두 번 투여하지 마세요.</p></div><table class="med-check-table"><thead><tr><th>약 / 투약법</th>${heads}</tr></thead><tbody>${rows}</tbody></table>${last?`<div class="med-check-legend"><div><b>약별 기간 자동 반영</b><br>3일 처방은 3일차까지만, 5일 처방은 5일차까지만 체크합니다. 가장 긴 처방기간을 기준으로 전체 표의 길이가 정해집니다.</div><div><b>${hasEod?'EOD · 격일 복용':'시간별 투약 후 체크'}</b><br>${hasEod?'EOD 약은 1일차부터 2일에 1회 복용일에만 □가 표시되고 사이 날짜는 “격일 휴약”으로 표시됩니다.':'08:00 · 20:00처럼 시간이 등록된 약은 각 시간 옆의 □를 따로 표시합니다. 시간이 없는 약은 날짜별 완료 □ 한 칸만 표시합니다.'}</div></div><div class="pdf-callout warn"><strong>다음 재진</strong><p>${escapeHtml(recheckLabel())} · 체크표와 남은 약, 이상반응 기록을 함께 준비해주세요.</p></div>`:''}${pdfFooter()}</div>`);
-  }
+  const hasEod=meta.meds.some(isEodMedication);
+  const identity=[caseInfo.patientName?'환자 '+caseInfo.patientName:'환자 미입력',caseInfo.guardianName?'보호자 '+caseInfo.guardianName:'',hospitalName()].filter(Boolean).join(' · ');
+  const pages=meta.pages.map((blocks,pageIndex)=>{
+    const startDay=blocks[0].startDay,endDay=blocks.at(-1).endDay;
+    const range=caseInfo.dischargeDate?actualDateFor(startDay-1)+' ~ '+actualDateFor(endDay-1):startDay+'-'+endDay+'일차';
+    return '<div class="pdf-page med-check-page"><div class="pdf-brandline"></div><header class="med-check-heading"><h1>'+meta.maxDays+'일 투약 체크표</h1><span>'+escapeHtml(range)+' · '+(pageIndex+1)+' / '+meta.pageCount+'</span></header><div class="med-check-identity">'+escapeHtml(identity)+'</div><p class="med-check-note">투약 후 해당 시간의 □에 표시하세요. —는 투약 종료입니다.'+(hasEod?' 격일 약은 1일차부터 복용하며 사이 날짜는 휴약입니다.':'')+' 처방 라벨을 따르고 놓친 약을 두 번 투여하지 마세요.</p><div class="med-check-content">'+blocks.map(medicationCheckWeekHtml).join('')+'</div><div class="med-check-recheck"><b>다음 재진</b> '+escapeHtml(recheckLabel())+'</div>'+pdfFooter()+'</div>';
+  });
   $('pdfDocument').dataset.r61Patient=window.crmCurrentPatient?.()?.patientId||'';
   $('pdfDocument').innerHTML=pages.join('');
   $('pdfDocument').classList.remove('hidden');$('messagePreview').classList.add('hidden');$('phonePreview').classList.add('hidden');
