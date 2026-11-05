@@ -6,7 +6,7 @@ const http=require('node:http');
 const {chromium}=require('playwright');
 let browser,server,origin;
 const root=resolve(__dirname,'..');
-const allowed=new Set(['guardian-studio.js','guardian-studio.css','hq.html','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
+const allowed=new Set(['clinic-capabilities.js','guardian-studio.js','guardian-studio.css','hq.html','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
 before(async()=>{
   server=http.createServer((req,res)=>{
     const file=new URL(req.url,'http://localhost').pathname.slice(1);
@@ -238,7 +238,7 @@ for(const width of [390,1280])test(`onboarding and subscription tables show five
 });
 test('failed onboarding refresh retains prior rows with an error and retries without claiming current data',async t=>{
  const p=await fixture(t);await onboardingPage(p);
- await p.evaluate(()=>onboardFail=true);await p.locator('#onboardingRefresh').click();
+ await p.evaluate(()=>onboardFail=true);await p.locator('#refresh').click();
  await p.locator('#onboarding .hq-load-status[data-state="error"]').waitFor();
  assert.match(await p.locator('#onboarding .hq-load-status').innerText(),/시험 개통 조회 실패.*이전 결과/);
  assert.equal(await p.locator('#onboardingRows .hq-compact-main-row').count(),2);
@@ -396,8 +396,8 @@ test('content loading/error never reports zero data and retry restores real empt
   const p=await contentFixture(t);await p.evaluate(()=>{contentFail=true;showView('content');});
   await p.locator('#content .hq-load-status[data-state="error"]').waitFor();
   assert.deepEqual(await p.locator('.hq-content-kpis strong').allTextContents(),['—','—','—','—']);
-  assert.match(await p.locator('#contentResultSummary').innerText(),/조회 실패/);
-  await p.locator('#contentSearch').fill('검색');assert.match(await p.locator('#contentResultSummary').innerText(),/조회 실패/);
+  assert.match(await p.locator('#content .hq-load-status').innerText(),/조회하지 못했습니다/);
+  await p.locator('#contentSearch').fill('검색');assert.match(await p.locator('#content .hq-load-status').innerText(),/조회하지 못했습니다/);
   assert.equal(await p.locator('#contentBulkDelete').isDisabled(),true);
   await p.evaluate(()=>{contentFail=false;contentReply=[];});
   await p.locator('#content .hq-load-status button').click();await p.locator('#content .hq-load-status[data-state="ready"]').waitFor();
@@ -431,7 +431,7 @@ test('content status writes once, blocks navigation during save, then reloads co
   await p.evaluate(()=>{contentWriteDelay=false;releaseContent();});
   await p.waitForFunction(()=>$('contentPublished').textContent==='0');
   assert.deepEqual((await p.evaluate(()=>writes))[0],{path:'/hq/content/sample-live',method:'PATCH',body:{status:'archived'}});
-  assert.match(await p.locator('#contentBulkResult').innerText(),/게시 중단 완료 1건/);
+  assert.match(await p.locator('#contentBulkResult').innerText(),/공개 중단 완료 1건/);
   assert.equal(await p.locator('#contentRefresh').isDisabled(),false);
 });
 
@@ -676,7 +676,7 @@ test('CRM loading and failure remain distinct from a successful empty result; re
 test('Customer Voice distinguishes a failed lookup from no requests and supports retry',async t=>{
   const p=await feedbackFixture(t);await p.evaluate(()=>{feedbackFail='voice';showView('voice');});
   await p.locator('#voice .hq-load-status[data-state="error"]').waitFor();
-  assert.match(await p.locator('#voiceResultSummary').innerText(),/조회 실패/);
+  assert.match(await p.locator('#voice .hq-load-status').innerText(),/조회하지 못했습니다/);
   assert.doesNotMatch(await p.locator('#voiceResultSummary').innerText(),/조회 0건/);
   await p.evaluate(()=>{feedbackFail='';voiceReply=[];});
   await p.locator('#voice .hq-load-status button').click();
@@ -1106,8 +1106,8 @@ test('audit renders safe Korean summaries, preserves raw data and ignores an old
   window.a1=loadAudit();window.a2=loadAudit();
  });
  await p.evaluate(async()=>{auditReads[1]({events:[{action:'content.status',actor:'HQ',targetType:'content',targetId:'test-id',detail:{title:'<script>시험</script>',from:'published',to:'archived'}}]});await a2;});
- assert.match(await p.locator('#auditList').innerText(),/콘텐츠 게시 상태 변경/);
- assert.match(await p.locator('.hq-audit-summary').innerText(),/변경 전.*게시 완료/s);
+ assert.match(await p.locator('#auditList').innerText(),/콘텐츠 공개 상태 변경/);
+ assert.match(await p.locator('.hq-audit-summary').innerText(),/변경 전.*공개 중/s);
  assert.equal(await p.locator('.hq-audit-raw pre').isVisible(),false);
  await p.locator('.hq-audit-raw summary').click();assert.match(await p.locator('.hq-audit-raw').innerText(),/test-id/);
  assert.equal(await p.locator('#auditList script').count(),0);

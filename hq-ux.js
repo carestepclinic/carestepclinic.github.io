@@ -11,7 +11,15 @@
   const filterIds=['clinicSearch','clinicStatus','clinicApproval','journeySearch','journeyScope','journeyStatusFilter','billingMonth','hqSubscriptionSearch','crmHqPeriod','voiceType','voiceStatus','contentSearch','contentStatus','contentCategory','contentDueOnly','surveyHqPeriod','hqSurveyScope','hqSubscriptionStatus','customerSuccessSearch','customerSuccessStatus','customerSuccessPlan','customerSuccessSignal','onboardingSearch','onboardingStatusFilter'];
   const safeNumber=n=>n!==null&&n!==undefined&&n!==''&&Number.isFinite(Number(n));
   const won=n=>safeNumber(n)?`${Number(n).toLocaleString('ko-KR')}원`:'금액 확인 필요';
-  const latest=key=>{const n=(sequences.get(key)||0)+1;sequences.set(key,n);return ()=>sequences.get(key)===n;};
+  const hqReadScope=()=>JSON.stringify([endpoint(),hqSessionToken(),key()]);
+  let readEpoch=0,navigationEpoch=0,listChangeSequence=0;
+  const listReads=new Map();
+  const latest=key=>{const n=(sequences.get(key)||0)+1,owner=hqReadScope(),epoch=readEpoch;sequences.set(key,n);return ()=>sequences.get(key)===n&&owner===hqReadScope()&&epoch===readEpoch;};
+  function listSignature(view){return JSON.stringify([hqReadScope(),view,view==='crm'?byId('crmHqPeriod').value:view==='surveys'?byId('surveyHqPeriod').value:view==='voice'?[byId('voiceType').value,byId('voiceStatus').value]:'']);}
+  function listState(view){const signature=listSignature(view);let state=listReads.get(view);if(!state||state.signature!==signature){state={signature,good:false,freshAt:0,failed:false,pending:null};listReads.set(view,state);const region=regions.get(view);if(region)region.at=null;}return state;}
+  function beginList(view){const state=listState(view);state.failed=false;return {keep:state.good,current:latest(view+'-data')};}
+  function wrapList(view,load){return async function(options={}){const state=listState(view);if(options.reuse&&state.pending)return state.pending;if(options.reuse&&state.good&&!state.failed&&Date.now()-state.freshAt<30000&&!(view==='content'&&byId('contentCategory').dataset.restoreValue!==undefined))return true;const position=currentView===view?window.scrollY:null,nav=navigationEpoch,change=listChangeSequence;let moved=false;const onScroll=()=>{if(window.scrollY!==position)moved=true;};window.addEventListener('scroll',onScroll,{passive:true});const work=Promise.resolve(load(options));state.pending=work;try{return await work;}finally{window.removeEventListener('scroll',onScroll);if(state.pending===work)state.pending=null;if(change!==listChangeSequence)state.freshAt=0;if(position!==null&&!moved&&nav===navigationEpoch&&currentView===view)window.scrollTo({top:position,behavior:'instant'});}};}
+
   const changes=(before,after)=>after.filter(x=>!before.some(y=>y.key===x.key&&y.value===x.value)).map(x=>({...x,before:before.find(y=>y.key===x.key)?.value??''}));
   function priceText(plan,net) {
     if(plan==='PILOT')return {detail:'PRO 기능 30일 무료체험',total:'무료체험 · 0원'};
@@ -230,13 +238,14 @@
     const target=byId(id);if(!target)return;
     let record=regions.get(id);
     if(!record||!record.box.isConnected){const box=document.createElement('div');box.className='hq-load-status';box.setAttribute('role','status');box.setAttribute('aria-live','polite');if(target.matches('.view')&&target.querySelector('.head'))target.querySelector('.head').append(box);else if(target.matches('.view,#hqRateEditor'))target.prepend(box);else target.before(box);record={box,at:record?.at||null};regions.set(id,record);}
+    const list=listReads.get(id);if(list){if(state==='ready'){list.good=true;list.freshAt=Date.now();list.failed=false;}if(state==='error'){list.failed=true;list.freshAt=0;}}
     if(state==='ready')record.at=new Date();
     record.box.dataset.state=state;target.setAttribute('aria-busy',String(state==='loading'));
     if(id==='hqBillingChannels')record.box.hidden=billingPane!=='subscriptions';
     record.box.replaceChildren();
     const label=document.createElement('span');
     const checked=record.at?record.at.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}):'';
-    label.textContent=state==='loading'?'불러오는 중…':state==='error'?`조회하지 못했습니다. ${error||'잠시 후 다시 시도해주세요.'}${checked?' · 마지막 확인 '+checked+' (이전 결과)':''}`:`마지막 확인 ${checked}`;
+    label.textContent=state==='loading'?(list?.good?'새로 확인 중 · 이전 결과 표시':'불러오는 중…'):state==='error'?`조회하지 못했습니다. ${error||'잠시 후 다시 시도해주세요.'}${checked?' · 마지막 확인 '+checked+' (이전 결과)':''}`:`마지막 확인 ${checked}`;
     record.box.append(label);
     if(state==='error'&&retry){const button=document.createElement('button');button.type='button';button.className='btn small';button.textContent='다시 시도';button.onclick=()=>retry();record.box.append(button);}
   }
@@ -280,7 +289,7 @@
   function viewLoader(view,force=true){
     return ({protocols:()=>window.CarestepHqProtocols?.open({reuse:!force}),training:()=>window.CarestepTraining?.open({reuse:!force}),dashboard:loadOverview,approval:loadApproval,clinics:loadClinics,onboarding:loadOnboardingPortfolio,customerSuccess:loadCustomerSuccess,billing:loadBilling,usageBilling:loadUsageBilling,
       integrations:()=>Promise.all([loadCalendarIntegration(),loadMessagingIntegration()]),senders:()=>Promise.all([loadSenderOnboarding(),loadMessagingIntegration()]),
-      journeys:loadPatientJourneysHQ,surveys:loadGuardianSurveyHQ,crm:loadFollowupCrmHQ,content:loadContent,voice:loadVoice,production:loadProductionLaunch,audit:loadAudit})[view];
+      journeys:loadPatientJourneysHQ,surveys:()=>loadGuardianSurveyHQ({reuse:!force}),crm:()=>loadFollowupCrmHQ({reuse:!force}),content:()=>loadContent({reuse:!force}),voice:()=>loadVoice({reuse:!force}),production:loadProductionLaunch,audit:loadAudit})[view];
   }
   const pendingViews=new Map();
   async function reloadView(view=currentView,{force=true}={}){
@@ -300,7 +309,7 @@
     if(check&&!allowLeave())return false;
     viewPositions.set(currentView,window.scrollY||0);
     if(view!=='clinics'&&!pendingClinicReturn)clinicReturnContext=null;
-    currentView=view;
+    currentView=view;navigationEpoch++;
     document.querySelectorAll('[data-material-view]').forEach(button=>{
       if(button.dataset.materialView===view)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
     });
@@ -655,9 +664,9 @@
   saveMessagingRates=()=>reviewedSave('rates',()=>originalRatesSave());
   const crmCountIds=['crmHqActive','crmHqReview','crmHqCritical','crmHqRisk','crmHqSurvey','crmHqMessage'];
   loadFollowupCrmHQ=async function(){
-    const current=latest('crm-data'),days=byId('crmHqPeriod').value;
-    saveState();setRegion('crm','loading');clearCounts(crmCountIds);
-    for(const id of ['crmHqClinicTable','crmHqJourneyTable'])byId(id).innerHTML='<div class="empty">후속관리 현황을 불러오는 중입니다.</div>';
+    const {current,keep}=beginList('crm'),days=byId('crmHqPeriod').value;
+    saveState();setRegion('crm','loading');if(!keep)clearCounts(crmCountIds);
+    if(!keep)for(const id of ['crmHqClinicTable','crmHqJourneyTable'])byId(id).replaceChildren();
     try{
       const data=await req('/hq/followup-crm?days='+encodeURIComponent(days));
       if(!current())return;
@@ -665,8 +674,8 @@
       crmAnalytics=data;renderFollowupCrmHQ();setRegion('crm','ready');
     }catch(error){
       if(!current())return;
-      clearCounts(crmCountIds);
-      for(const id of ['crmHqClinicTable','crmHqJourneyTable'])byId(id).innerHTML='<div class="empty">조회하지 못했습니다. 위의 다시 시도를 눌러주세요.</div>';
+      if(!keep)clearCounts(crmCountIds);
+      if(!keep)for(const id of ['crmHqClinicTable','crmHqJourneyTable'])byId(id).innerHTML='<div class="empty">조회하지 못했습니다. 위의 다시 시도를 눌러주세요.</div>';
       setRegion('crm','error',{error:error.message,retry:()=>loadFollowupCrmHQ()});
     }
   };
@@ -680,7 +689,7 @@
     }
   };
   const contentCounts=['contentTotal','contentPublished','contentArchived','contentReviewDue'];
-  const contentStates={published:'게시 중',archived:'보관 · 게시 중단',draft:'초안',review:'검수 중',deleted:'삭제 이력'};
+  const contentStates={published:'공개 중',archived:'공개 중단',draft:'초안',review:'검토 중',deleted:'삭제 이력'};
   let contentReady=false;
   const contentDue=x=>x.status==='published'&&!!x.reviewDueAt&&Number.isFinite(Date.parse(x.reviewDueAt))&&Date.parse(x.reviewDueAt)<=Date.now();
   const contentDate=value=>value&&Number.isFinite(Date.parse(value))?new Date(value).toLocaleDateString('ko-KR'):'미등록';
@@ -690,12 +699,11 @@
   }
   loadContent=async function({keepResult=false}={}){
     if(activeSave)return;
-    const current=latest('content-data');contentReady=false;contents=[];
+    const {current,keep}=beginList('content');contentReady=false;if(!keep)contents=[];
     globalThis.GuardianStudio?.refresh();
-    setRegion('content','loading');clearCounts(contentCounts);lockContent(true);
+    setRegion('content','loading');if(!keep)clearCounts(contentCounts);lockContent(true);
     if(!keepResult)byId('contentBulkResult').textContent='';
-    byId('contentResultSummary').textContent='자료 목록을 불러오는 중입니다.';
-    byId('contentTable').innerHTML='<div class="empty">자료 목록을 불러오는 중입니다.</div>';
+    if(!keep){byId('contentResultSummary').textContent='';byId('contentTable').replaceChildren();}
     updateContentBulkUi();
     try{
       const data=await req('/hq/content');if(!current())return;
@@ -711,9 +719,7 @@
       renderContent();setRegion('content','ready');
     }catch(error){
       if(!current())return;
-      contents=[];contentReady=false;clearCounts(contentCounts);
-      byId('contentResultSummary').textContent='조회 실패 · 자료 건수를 확인하지 못했습니다.';
-      byId('contentTable').innerHTML='<div class="empty">조회하지 못했습니다. 위의 다시 시도를 눌러주세요.</div>';
+      contentReady=false;if(!keep){contents=[];clearCounts(contentCounts);byId('contentResultSummary').textContent='';byId('contentTable').replaceChildren();}
       setRegion('content','error',{error:error.message,retry:()=>loadContent({keepResult:true})});
     }finally{if(current()){lockContent(false);saveState();}}
   };
@@ -729,7 +735,7 @@
     const q=byId('contentSearch').value.trim().toLowerCase(),status=byId('contentStatus').value,category=byId('contentCategory').value,dueOnly=byId('contentDueOnly').checked;
     const rows=contents.filter(x=>(status==='all'?x.status!=='deleted':x.status===status)&&(category==='all'||x.category===category)&&(!dueOnly||contentDue(x))&&(!q||`${x.title||''} ${hqCategoryLabel(x.category)} ${x.contentId||''}`.toLowerCase().includes(q)));
     byId('contentResultSummary').textContent=`현재 조건 ${fmt(rows.length)}건 · 전체 자료 ${fmt(contents.filter(x=>x.status!=='deleted').length)}건 (삭제 제외)`;
-    byId('contentTable').innerHTML=rows.length?`<div class="table-wrap" tabindex="0" aria-label="중앙 콘텐츠 목록"><table class="table hq-content-table"><thead><tr><th>선택</th><th>교육자료</th><th>게시 상태</th><th>품질 점수</th><th>검토 정보</th><th>병원별 제공 설정</th><th>관리</th></tr></thead><tbody>${rows.map(x=>`<tr data-content-row="${esc(x.contentId)}"><td data-label="선택">${x.status==='archived'?`<label class="hq-content-check"><input type="checkbox" data-content-bulk value="${esc(x.contentId)}" aria-label="${esc(x.title)} 선택"><span>선택</span></label>`:'—'}</td><td data-label="교육자료" class="hq-content-title"><b>${esc(x.title||'제목 없음')}</b><span class="muted">${esc(hqCategoryLabel(x.category))} · 버전 ${esc(x.version||'미등록')}</span></td><td data-label="게시 상태"><span class="status ${esc(x.status)}">${esc(contentStates[x.status]||x.status||'확인 필요')}</span></td><td data-label="품질 점수">${safeNumber(x.qualityScore)?fmt(x.qualityScore)+' / 100':'미등록'}</td><td data-label="검토 정보">${esc(x.reviewerName||'검토자 미등록')}<br><span class="${contentDue(x)?'hq-content-due':'muted'}">재검토 ${esc(contentDate(x.reviewDueAt))}${contentDue(x)?' · 기한 도래':''}</span></td><td data-label="병원별 제공 설정">${x.status==='published'?`허용 ${fmt(x.enabledClinics)}곳 · 숨김 ${fmt(x.disabledClinics)}곳`:'현재 제공 중 아님'}</td><td data-label="관리"><div class="hq-content-actions">${['published','archived'].includes(x.status)?`<button class="btn small" data-guardian-document="${esc(x.contentId)}">자료 열기·수정</button>`:''}${x.status==='published'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="archived">게시 중단</button>`:x.status==='archived'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="published">다시 게시</button><button class="btn small danger" data-content-delete="${esc(x.contentId)}">삭제</button>`:'—'}</div></td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">${contents.length?'선택한 조건에 해당하는 자료가 없습니다. 검색 조건을 초기화해보세요.':'등록된 중앙 콘텐츠가 없습니다.'}</div>`;
+    byId('contentTable').innerHTML=rows.length?`<div class="table-wrap" tabindex="0" aria-label="중앙 콘텐츠 목록"><table class="table hq-content-table"><thead><tr><th>선택</th><th>교육자료</th><th>공개 상태</th><th>품질 점수</th><th>검토 정보</th><th>병원별 제공 설정</th><th>관리</th></tr></thead><tbody>${rows.map(x=>`<tr data-content-row="${esc(x.contentId)}"><td data-label="선택">${x.status==='archived'?`<label class="hq-content-check"><input type="checkbox" data-content-bulk value="${esc(x.contentId)}" aria-label="${esc(x.title)} 선택"><span>선택</span></label>`:'—'}</td><td data-label="교육자료" class="hq-content-title"><b>${esc(x.title||'제목 없음')}</b><span class="muted">${esc(hqCategoryLabel(x.category))} · 버전 ${esc(x.version||'미등록')}</span></td><td data-label="공개 상태"><span class="status ${esc(x.status)}">${esc(contentStates[x.status]||x.status||'확인 필요')}</span></td><td data-label="품질 점수">${safeNumber(x.qualityScore)?fmt(x.qualityScore)+' / 100':'미등록'}</td><td data-label="검토 정보">${esc(x.reviewerName||'검토자 미등록')}<br><span class="${contentDue(x)?'hq-content-due':'muted'}">재검토 ${esc(contentDate(x.reviewDueAt))}${contentDue(x)?' · 기한 도래':''}</span></td><td data-label="병원별 제공 설정">${x.status==='published'?`허용 ${fmt(x.enabledClinics)}곳 · 숨김 ${fmt(x.disabledClinics)}곳`:'현재 제공 중 아님'}</td><td data-label="관리"><div class="hq-content-actions">${['published','archived'].includes(x.status)?`<button class="btn small" data-guardian-document="${esc(x.contentId)}">자료 열기·수정</button>`:''}${x.status==='published'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="archived">공개 중단</button>`:x.status==='archived'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="published">다시 공개</button><button class="btn small danger" data-content-delete="${esc(x.contentId)}">삭제</button>`:'—'}</div></td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">${contents.length?'선택한 조건에 해당하는 자료가 없습니다. 검색 조건을 초기화해보세요.':'등록된 중앙 콘텐츠가 없습니다.'}</div>`;
     byId('contentTable').querySelectorAll('[data-guardian-document]').forEach(b=>b.onclick=()=>globalThis.GuardianStudio?.published(b.dataset.guardianDocument));
     byId('contentTable').querySelectorAll('[data-content-status]').forEach(b=>b.onclick=()=>patchContent(b.dataset.contentStatus,b.dataset.next));
     byId('contentTable').querySelectorAll('[data-content-delete]').forEach(b=>b.onclick=()=>deleteContent(b.dataset.contentDelete));
@@ -740,7 +746,7 @@
     if(activeSave||!contentReady)return false;
     const targets=[...new Set(ids)].map(id=>contents.find(x=>x.contentId===id)).filter(x=>x&&(status==='archived'?x.status==='published':x.status==='archived'));
     if(!targets.length)return false;
-    const action=status==='archived'?'게시 중단':status==='published'?'다시 게시':'삭제';
+    const action=status==='archived'?'공개 중단':status==='published'?'다시 공개':'삭제';
     const names=targets.slice(0,5).map(x=>x.title||x.contentId).join('\n')+(targets.length>5?`\n외 ${targets.length-5}건`:'');
     const impact=status?'연결된 자동생성 회복관리 일정의 상태도 함께 변경됩니다.':'연결된 자동생성 회복관리 일정도 삭제 처리됩니다. 과거 운영 이력용 최소 정보는 보존됩니다. 화면에서 삭제를 되돌릴 수 없습니다.';
     if(!confirm(`${targets.length}건을 ${action}할까요?\n\n${names}\n\n${impact}`))return false;
@@ -778,7 +784,7 @@
   };
   byId('contentBulkDelete').onclick=()=>bulkDeleteArchivedContent();
   const voiceTypes={condition:'질환 자료 요청',feature:'기능 제안',inquiry:'문의'};
-  const voiceStates={new:'신규',reviewing:'검토 중',planned:'제작 예정',building:'제작 중',review:'검수 중',published:'공개 완료',answered:'답변 완료',hold:'보류'};
+  const voiceStates={new:'신규',reviewing:'접수 검토',planned:'제작 예정',building:'제작 중',review:'내용 검토',published:'공개 완료',answered:'답변 완료',hold:'보류'};
   function voiceControlsDisabled(disabled){
     byId('voice').querySelectorAll('select,button').forEach(el=>{
       el.disabled=disabled||(el.matches('.voice-save')&&el.closest('tr')?.querySelector('.voice-status')?.value===el.closest('tr')?.dataset.savedStatus);
@@ -786,10 +792,9 @@
   }
   loadVoice=async function(){
     if(activeSave)return;
-    const current=latest('voice-data'),type=byId('voiceType').value,status=byId('voiceStatus').value;
+    const {current,keep}=beginList('voice'),type=byId('voiceType').value,status=byId('voiceStatus').value;
     saveState();setRegion('voice','loading');
-    byId('voiceResultSummary').textContent='요청 목록을 불러오는 중입니다.';
-    byId('voiceTable').innerHTML='<div class="empty">요청 목록을 불러오는 중입니다.</div>';
+    if(!keep){byId('voiceResultSummary').textContent='';byId('voiceTable').replaceChildren();}voiceControlsDisabled(true);
     try{
       const data=await req(`/hq/voice?type=${encodeURIComponent(type)}&status=${encodeURIComponent(status)}`);
       if(!current())return;
@@ -797,10 +802,9 @@
       voice=data.requests;renderVoice();setRegion('voice','ready');
     }catch(error){
       if(!current())return;
-      byId('voiceResultSummary').textContent='조회 실패 · 요청 건수를 확인하지 못했습니다.';
-      byId('voiceTable').innerHTML='<div class="empty">조회하지 못했습니다. 위의 다시 시도를 눌러주세요.</div>';
+      if(!keep){byId('voiceResultSummary').textContent='';byId('voiceTable').replaceChildren();}
       setRegion('voice','error',{error:error.message,retry:()=>loadVoice()});
-    }
+    }finally{if(current())voiceControlsDisabled(false);}
   };
   renderVoice=function(){
     byId('voiceResultSummary').textContent=`조회 ${voice.length.toLocaleString('ko-KR')}건 · 최신순${voice.length>=250?' · 최근 250건까지 표시':''}`;
@@ -952,19 +956,18 @@
   }
   surveyPending();
   loadGuardianSurveyHQ=async function(){
-    const current=latest('survey-data'),days=byId('surveyHqPeriod').value;
-    saveState();surveyReady=false;surveyPending();setRegion('surveys','loading');
-    byId('hqSurveyScopeNote').textContent=`최근 ${days}일 집계를 확인하고 있습니다.`;
-    for(const id of ['surveyHqClinicTable','surveyHqJourneyTable'])byId(id).innerHTML='<div class="empty">회복응답을 불러오는 중입니다.</div>';
+    const {current,keep}=beginList('surveys'),days=byId('surveyHqPeriod').value;
+    saveState();surveyReady=false;if(!keep){surveyPending();byId('hqSurveyScopeNote').textContent='';for(const id of ['surveyHqClinicTable','surveyHqJourneyTable'])byId(id).replaceChildren();}setRegion('surveys','loading');
     try{
       const data=await req('/hq/surveys?days='+encodeURIComponent(days));if(!current())return;
       if(data.ok===false||!data.overall||!Array.isArray(data.byClinic)||!Array.isArray(data.byJourney))throw Error('회복응답 조회 결과를 확인할 수 없습니다.');
       surveyAnalytics=data;surveyReady=true;renderGuardianSurveyHQ();setRegion('surveys','ready');
     }catch(error){
       if(!current())return;
-      surveyPending();byId('surveyHqRate').textContent='응답률 확인 필요';byId('surveyHqOpenMeta').textContent='미확인 건수 확인 필요';
+      if(!keep){surveyPending();byId('surveyHqRate').textContent='응답률 확인 필요';byId('surveyHqOpenMeta').textContent='미확인 건수 확인 필요';
       byId('hqSurveyScopeNote').textContent='선택한 기간의 결과를 조회하지 못했습니다.';
       for(const id of ['surveyHqClinicTable','surveyHqJourneyTable'])byId(id).innerHTML='<div class="empty">조회하지 못했습니다. 위의 다시 시도를 눌러주세요.</div>';
+      }
       setRegion('surveys','error',{error:error.message,retry:()=>loadGuardianSurveyHQ()});
     }
   };
@@ -1200,7 +1203,7 @@
   const auditActions={
     'clinic.signup':'병원 가입 신청','clinic.approval':'가입 승인 상태 변경','clinic.update':'병원 설정 변경','clinic.content':'병원별 콘텐츠 설정 변경',
     'subscription.update':'구독 설정 변경','subscription.canceled':'구독 해지','subscription.channel_changed':'구독 계약 채널 변경','subscription.plan_scheduled':'요금제 변경 예약','subscription.cancel_scheduled':'구독 해지 예약','subscription.cancel_revoked':'구독 해지 예약 취소',
-    'plan.update':'공통 요금제 변경','content.status':'콘텐츠 게시 상태 변경','content.delete':'콘텐츠 삭제','content.category':'콘텐츠 분류 변경','content.category.reset':'콘텐츠 분류 초기화','content.short_bulk_repair':'콘텐츠 일괄 정리',
+    'plan.update':'공통 요금제 변경','content.status':'콘텐츠 공개 상태 변경','content.delete':'콘텐츠 삭제','content.category':'콘텐츠 분류 변경','content.category.reset':'콘텐츠 분류 초기화','content.short_bulk_repair':'콘텐츠 일괄 정리',
     'billing.payment_succeeded':'구독 결제 성공','billing.payment_failed':'구독 결제 실패','billing.method_registered':'결제 수단 등록','billing.messaging_rates':'메시지 원가 단가 변경','billing.overage_final_succeeded':'추가 사용료 정산 완료','billing.test_failure_simulated':'결제 실패 시험 실행',
     'sender.onboarding.review':'발신번호 신청 검토','voice.status':'병원 요청 처리 상태 변경','integration.calendar.update':'캘린더 연동 설정 변경',
     'production.checklist.update':'운영 체크리스트 변경','incident.status':'장애 처리 상태 변경','backup.create':'구성백업 생성','backup.restore':'구성백업 복원',
@@ -1258,11 +1261,19 @@
     }else if(event.key==='Enter'&&quickActive>=0){event.preventDefault();options[quickActive].click();}
     else if(event.key==='Tab')hideHqQuickResults();
   });
+  loadContent=wrapList('content',loadContent);
+  loadVoice=wrapList('voice',loadVoice);
+  loadFollowupCrmHQ=wrapList('crm',loadFollowupCrmHQ);
+  loadGuardianSurveyHQ=wrapList('surveys',loadGuardianSurveyHQ);
+  const listRequest=req;
+  req=async function(url,options={}){const result=await listRequest(url,options);if(options.method&&!['GET','HEAD'].includes(options.method.toUpperCase())){listChangeSequence++;for(const state of listReads.values()){state.freshAt=0;state.pending=null;}pendingViews.clear();}return result;};
+  // Keep one refresh action per screen. Component buttons remain for their own panels.
+  for(const id of ['onboardingRefresh','customerSuccessRefresh','crmHqRefresh','surveyHqRefresh','journeyRefresh','auditRefresh']){const button=byId(id);if(button)button.hidden=true;}
   const loginOverlay=byId('loginOverlay'),shell=document.querySelector('.shell');
   function syncAuthenticationPresentation(){
     const locked=!loginOverlay.classList.contains('hidden');document.body.classList.toggle('hq-auth-locked',locked);shell.inert=locked;
     byId('hqHeaderTools').inert=locked;byId('hqMenuToggle').disabled=locked;byId('hqToolsToggle').disabled=locked;
-    if(locked){pendingViews.clear();hideHqQuickResults();document.body.classList.remove('hq-menu-open');byId('hqNavBackdrop').hidden=true;}
+    if(locked){readEpoch++;listReads.clear();viewPositions.clear();pendingViews.clear();for(const id of ['contentTable','voiceTable','crmHqClinicTable','crmHqJourneyTable','surveyHqClinicTable','surveyHqJourneyTable'])byId(id)?.replaceChildren();hideHqQuickResults();document.body.classList.remove('hq-menu-open');byId('hqNavBackdrop').hidden=true;}
   }
   new MutationObserver(syncAuthenticationPresentation).observe(loginOverlay,{attributes:true,attributeFilter:['class']});syncAuthenticationPresentation();
 

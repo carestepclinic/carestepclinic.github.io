@@ -5,7 +5,7 @@
  let pdfReady;
  function pdfModule(){if(!pdfReady)pdfReady=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=new URL('staff-training-pdf.js?v=20261026edu-review',assetBase).href;const timer=setTimeout(()=>{script.remove();pdfReady=null;reject(Error('PDF 도구를 불러오지 못했습니다. 연결을 확인하고 다시 다운로드해주세요.'));},30000);script.onload=()=>{clearTimeout(timer);if(global.StaffTrainingPDF)resolve(global.StaffTrainingPDF);else{pdfReady=null;reject(Error('PDF 도구를 불러오지 못했습니다.'));}};script.onerror=()=>{clearTimeout(timer);script.remove();pdfReady=null;reject(Error('PDF 도구를 불러오지 못했습니다. 연결을 확인하고 다시 다운로드해주세요.'));};document.head.append(script);});return pdfReady;}
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const status=s=>({draft:'작성 중',review:'검토 대기',published:'승인됨',withdrawn:'공개 중단',deleted:'삭제됨'})[s]||'확인 필요';
+ const status=s=>({draft:'작성 중',review:'검토 대기',published:'공개 중',withdrawn:'공개 중단',deleted:'삭제됨'})[s]||'확인 필요';
  const keys=['clinical','nursing','counseling'];
  const practiceKeys=['objectives','knowledge','workflow','checklist','reporting','scenarios'];
  const practiceLabels=['학습 목표','핵심 지식','업무 순서','업무 체크리스트','보고·인계 기준','상황별 예시'];
