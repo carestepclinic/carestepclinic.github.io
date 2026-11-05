@@ -5,6 +5,7 @@ const $=id=>document.getElementById(id);
 const homeTypes=new Set(['pdf','summary','medcheck']);
 let root,search,manual,delivery='home',previewPage=0,queued=false;
 let previewTimer=0,previewPending=false,previewKey='',stepBefore=0;
+const panelPositions={};let writeFocus=null;
 function previewVisible(){return root?.classList.contains('active-view')&&!(matchMedia('(max-width:1050px)').matches&&root.dataset.panel==='write');}
 function queuePreview(){
  previewPending=true;clearTimeout(previewTimer);previewTimer=0;
@@ -19,14 +20,38 @@ function text(id,value){const n=$(id);if(n&&n.textContent!==value)n.textContent=
 function requestSync(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;sync();});}
 function confirmTemplateChange(){
  const fields=['caseProcedure','caseMedication','caseFeeding','caseActivity','caseProtection','caseExtra'];
- const changed=fields.some(id=>$(id)?.value?.trim())||typeof validMedications==='function'&&validMedications().length>0||$('recheckManual')?.value||$('recheckMode')?.value!=='14';
+ const changed=fields.some(id=>$(id)?.value?.trim())||typeof validMedications==='function'&&validMedications().length>0||$('recheckManual')?.value||!!$('recheckMode')?.value;
  const following=typeof activePatientJourney!=='undefined'&&!!activePatientJourney;
  if(!changed&&!following)return true;
  return global.confirm('안내자료를 변경하면 현재 입력한 진단·개별 안내·복약·재진·후속관리 계획이 초기화됩니다. 환자명·보호자명·관리 시작일은 유지됩니다. 변경할까요?');
 }
 function hook(name,after){const old=global[name];if(typeof old!=='function')return;global[name]=function(...args){const result=old.apply(this,args);after(...args);return result;};}
 function showSearch(){search.open=true;setWizardStep(1);$('templateSearch')?.focus({preventScroll:true});search.scrollIntoView({block:'nearest'});}
-function panelMode(mode){root.dataset.panel=mode;root.querySelectorAll('[data-builder-panel]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.builderPanel===mode)));if(mode==='preview')flushPreview();fitPreview();}
+function panelMode(mode){
+ const before=root.dataset.panel||'write',mobile=matchMedia('(max-width:1050px)').matches;
+ if(before!==mode&&mobile){panelPositions[before]=scrollY;if(before==='write'&&root.querySelector('.builder-controls').contains(document.activeElement)&&document.activeElement.matches('input,select,textarea'))writeFocus=document.activeElement;}
+ root.dataset.panel=mode;root.querySelectorAll('[data-builder-panel]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.builderPanel===mode)));
+ if(mode==='preview')flushPreview();fitPreview();
+ if(before!==mode&&mobile)requestAnimationFrame(()=>{const target=mode==='preview'?root.querySelector('.preview-wrap'):root.querySelector('.wizard-steps');scrollTo({top:panelPositions[mode]??(target.getBoundingClientRect().top+scrollY-12),behavior:'instant'});if(mode==='write'&&writeFocus?.isConnected)writeFocus.focus({preventScroll:true});});
+}
+function refreshMedications(){
+ const rows=[...$('medicationRows').querySelectorAll('.med-row')];
+ rows.forEach((row,i)=>{
+  if(!row.querySelector('[data-med-toggle]')){
+   const toggle=button('입력 접기',()=>{const expanded=row.dataset.expanded==='true';rows.forEach(n=>{n.dataset.expanded='false';});row.dataset.expanded=String(!expanded);syncMedicationCards();},'btn btn-ghost');toggle.dataset.medToggle='';
+   row.querySelector('.med-card-actions').prepend(toggle);const summary=el('p',null,'builder-med-summary');row.querySelector('.med-card-head').after(summary);row.dataset.expanded=String(i===rows.length-1);
+  }
+ });
+ syncMedicationCards();requestSync();
+}
+function syncMedicationCards(){
+ for(const row of $('medicationRows').querySelectorAll('.med-row')){
+  const grid=row.querySelector('.med-card-grid'),open=row.dataset.expanded==='true',toggle=row.querySelector('[data-med-toggle]');
+  if(!toggle)continue;grid.hidden=!open;toggle.textContent=open?'입력 접기':'수정';toggle.setAttribute('aria-expanded',String(open));
+  const get=k=>row.querySelector('[data-med-field="'+k+'"]')?.value?.trim();
+  row.querySelector('.builder-med-summary').textContent=[get('dose')||'용량 미입력',get('frequency')||'횟수 미입력',get('times')||'시간 미입력',get('duration')?get('duration')+'일':'기간 미입력'].join(' · ');
+ }
+}
 function selectDelivery(mode){delivery=mode;root.dataset.delivery=mode;root.querySelectorAll('[data-builder-delivery]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.builderDelivery===mode)));syncOutputs();}
 function syncOutputs(){
  if(!root)return;
@@ -44,14 +69,23 @@ function syncOutputs(){
  $('builderExtraOutputs').firstElementChild.textContent='추가 자료'+(extraCount?' · '+extraCount+'종 선택':'');
  text('selectedOutputSummary',(home?'HOME 게시':'파일·복사')+' 대상 '+chosen.length+'종 · '+(chosen.map(outputLabel).join(' · ')||'자료를 선택하세요'));
  const excluded=selected.filter(k=>!homeTypes.has(k));
- text('builderDeliveryNote',home?'HOME 게시와 복약 일정 등록은 별도입니다.'+(excluded.length?' 파일 전용 '+excluded.length+'종은 파일 저장에서 이용하세요.':''):'체크한 자료를 저장합니다. 미리보기와 저장 대상은 별도로 선택합니다.');
+ text('builderDeliveryNote',home?'HOME 게시와 복약 일정 등록은 별도입니다.'+(excluded.length?' 파일 전용 '+excluded.length+'종은 파일 저장에서 이용하세요.':''):'');
+ $('builderDeliveryNote').hidden=!home;
  root.querySelector('.builder-home-send').hidden=!home;
  root.querySelector('.builder-save-options').hidden=home;
  for(const id of ['builderFileOptions','outputFormatMode','batchDownloadMode','individualDownloadPanel'])$(id)?.classList.toggle('builder-file-only-hidden',home);
  const format=selectedOutputFileFormat();
  text('builderFileOptionsLabel','저장 옵션 · '+(format==='pdf'?'PDF':'이미지')+(batchModeNeeded(selected)?' · '+(selectedBatchDownloadMode()==='zip'?'ZIP 묶음':'개별 파일'):''));
- text('previewTargetSummary','현재 보는 자료 · '+outputLabel(currentOutput)+(selected.includes(currentOutput)?'':' · 전달 대상에 포함되지 않음'));
- text('secondaryOutputBtn',outputLabel(currentOutput)+(['sms','kakao'].includes(currentOutput)?' · TXT 저장':' · 인쇄'));
+ const viewingLabel=currentOutput==='mobile4'?'휴대폰용 안내 카드 · D+1':currentOutput==='mobile'?'휴대폰용 안내 카드 · D+'+($('mobileDaySelect')?.value||1):outputLabel(currentOutput);
+ text('previewTargetSummary',viewingLabel+(selected.includes(currentOutput)?'':' · 전달 대상에 포함되지 않음'));
+ text('secondaryOutputBtn',viewingLabel+(['sms','kakao'].includes(currentOutput)?' · TXT 저장':' · 인쇄'));
+ const final=typeof currentWizardStep==='number'&&currentWizardStep===5;
+ $('builderFinalActions').hidden=!final;$('selectedOutputSummary').hidden=!final;
+ $('builderSendNow').hidden=!home;$('generateOutputBtn').hidden=home;
+ $('builderSendNow').disabled=!chosen.length;
+ text('builderSendNow','선택 '+chosen.length+'종 HOME 게시');
+ if(typeof builderOutputBusy!=='undefined'&&builderOutputBusy){$('generateOutputBtn').disabled=true;text('generateOutputBtn','파일 준비 중…');}
+ $('builderExportError').hidden=home||$('builderExportError').textContent==='';
 }
 function previewPages(){return [...$('pdfDocument').children].filter(n=>n.matches('.page,.pdf-page,.med-page'));}
 function fitPreview(){
@@ -101,7 +135,7 @@ function sync(){
  text('builderDraftSummary',$('clinicDraftTools')?.querySelector('input')?.checked?'초안 임시보관 · 켜짐':'초안 임시보관 · 꺼짐');
  const cloud=$('clinicSyncStatus');if(cloud)cloud.setAttribute('aria-label','병원 설정 동기화 상태 · 작성 초안 저장과 별개');
  text('builderMaterialChoice',ready?($('builderContextEducation')?.textContent||'선택한 자료'):'안내자료 검색·선택');
- syncOutputs();paintStepStatus();
+ syncOutputs();paintStepStatus();syncMedicationCards();
  const returning=typeof builderEditReturnKey!=='undefined'&&!!builderEditReturnKey&&currentWizardStep!==5;
  $('builderQuickReturn').hidden=!returning;
  if(previewPending&&previewVisible()&&!previewTimer)queuePreview();
@@ -110,6 +144,16 @@ function mount(){
  root=$('builder');if(!root||$('builderFlowBar'))return;
  root.classList.add('builder-flow');root.dataset.panel='write';
  const controls=root.querySelector('.builder-controls'),context=root.querySelector('.builder-case-context'),pane=root.querySelector('[data-wizard-pane="1"]');
+ const nav=root.querySelector('.wizard-nav'),actions=el('div',null,'builder-final-actions');actions.id='builderFinalActions';actions.hidden=true;
+ const sendNow=button('HOME 게시',()=>$('sendBuilderMaterialsBtn').click(),'btn btn-primary');sendNow.id='builderSendNow';
+ nav.prepend($('selectedOutputSummary'));actions.append($('generateOutputBtn'),sendNow);nav.append(actions);
+ const error=el('p',null,'builder-export-error');error.id='builderExportError';error.hidden=true;error.setAttribute('role','alert');nav.prepend(error);
+ $('downloadTargetSummary').hidden=true;
+ const previewActions=el('div',null,'builder-preview-actions');previewActions.append($('previewTargetSummary'),$('secondaryOutputBtn'));root.querySelector('.preview-toolbar').after(previewActions);
+ const previewToggle=button('미리보기',()=>panelMode('preview'));previewToggle.id='builderMobilePreview';nav.append(previewToggle);
+ const back=button('작성으로 돌아가기',()=>panelMode('write'),'btn btn-primary builder-mobile-return');back.id='builderMobileReturn';root.append(back);
+ controls.addEventListener('focusin',e=>{if(e.target.matches('input,select,textarea'))writeFocus=e.target;});
+ refreshMedications();
  const originalRender=global.renderCurrentOutput;
  global.renderCurrentOutput=function(...args){clearTimeout(previewTimer);previewTimer=0;previewPending=false;return originalRender.apply(this,args);};
  root.querySelectorAll('[data-wizard-step]').forEach(n=>{const state=el('small',null,'builder-step-state');n.append(state);});
@@ -159,6 +203,6 @@ function mount(){
  if(global.ResizeObserver)new ResizeObserver(()=>{fitPreview();if(previewVisible()&&previewPending)queuePreview();}).observe(root.querySelector('.preview-wrap'));
  selectDelivery('home');panelMode('write');sync();paintPreview();
 }
-global.CarestepBuilderFlow={confirmTemplateChange,mount,selectDelivery,panelMode,queuePreview,flushPreview};
+global.CarestepBuilderFlow={confirmTemplateChange,mount,selectDelivery,panelMode,queuePreview,flushPreview,refreshMedications};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })(window);

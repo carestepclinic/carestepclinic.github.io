@@ -78,6 +78,30 @@ body.builder-guide-active #clinicSyncStatus[data-state="error"],body.builder-gui
  #builder .builder-preview-pages .btn{min-height:40px}
 }
 
+/* One delivery summary, reachable actions, and compact optional medication input. */
+#builder .builder-save-options,#builder .builder-viewing-label,#builder .preview-toolbar #previewLabel{display:none!important}
+#builder .builder-final-actions{display:flex;flex:2 1 220px;gap:6px}
+#builder .builder-final-actions .btn{width:100%;background:#2855ee;color:white;border-color:#2855ee}
+#builder .wizard-nav #selectedOutputSummary{flex:1 0 100%;margin:0;padding:0;background:none;border:0;line-height:1.5;overflow-wrap:anywhere}
+#builder .builder-export-error{flex:1 0 100%;margin:0;color:#b42318;font-size:13px}
+#builder .builder-preview-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;margin:6px 0}
+#builder .builder-preview-actions p{margin:0}
+#builder .builder-med-empty{padding:12px 0;margin:0;color:#526680;font-size:14px}
+#builder .builder-med-summary{font-size:13px;line-height:1.6;margin:6px 0;color:#334b68;overflow-wrap:anywhere}
+#builder .med-card{padding:10px;margin:0}
+#builder .med-card-head{gap:8px;flex-wrap:wrap}
+#builder .med-card-actions{flex-wrap:wrap}
+#builder .med-card .med-card-action{font:inherit;font-size:13px;min-height:36px}
+#builder .med-card-grid .med-field>small{font-size:12px!important}
+#builder #builderMobilePreview,#builder #builderMobileReturn{display:none}
+@media(max-width:1050px){
+ #builder #builderMobilePreview{display:block}
+ #builder[data-panel="preview"] #builderMobileReturn{display:block;position:fixed;bottom:max(12px,env(safe-area-inset-bottom));right:16px;z-index:30;box-shadow:0 2px 8px #2345}
+ #builder[data-panel="preview"] .preview-wrap{padding-bottom:64px}
+ #builder .input{font-size:16px}
+ #builder .wizard-nav #builderMobilePreview{flex:0 0 auto}
+}
+
 /* Keep attention on unresolved input and publication status. */
 #builder.builder-flow .readiness-list .ready-item.ok{display:none}
 #builder.builder-flow .readiness-list:empty{display:none}
@@ -108,3 +132,5 @@ body.builder-guide-active #clinicSyncStatus[data-state="error"],body.builder-gui
  #builder .builder-step-state{font-size:10px}
  #builder .wizard-nav #builderQuickReturn:not([hidden]){flex-basis:100%;order:3}
 }
+
+#builder.builder-flow #sendBuilderMaterialsBtn{display:none!important}
