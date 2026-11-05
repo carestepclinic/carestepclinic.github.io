@@ -467,6 +467,31 @@ h1{font-size:34px;margin:0 0 10px;letter-spacing:-1.2px}.login-copy{color:var(--
 .med-check-recheck{font-size:11px;line-height:1.4;margin-top:10px}
 .med-check-page .pdf-footer{left:36px;right:36px;bottom:18px;padding-top:8px}
 
+/* Guardian sheets: readable A4 spacing, with measured continuation pages. */
+.pdf-page.guardian-print-page{padding:36px 42px 60px;overflow:hidden;overflow-wrap:anywhere;font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif}
+.guardian-print-page .pdf-head{padding-bottom:14px;gap:14px}
+.guardian-print-page .pdf-title{max-width:565px;min-width:0}
+.guardian-print-page .pdf-title h1{font-size:25px!important;line-height:1.3!important}
+.guardian-print-page .pdf-logo{width:90px;height:55px;flex-shrink:0}
+.guardian-print-page .pdf-section{margin-top:16px}
+.guardian-print-page .pdf-section h2{font-size:18px;margin-bottom:8px}
+.guardian-print-page .pdf-section p,.guardian-print-page .pdf-section li{font-size:14px;line-height:1.6}
+.guardian-print-page .pdf-callout{margin-top:12px;padding:11px 14px}
+.guardian-print-page .pdf-callout p{font-size:14px;line-height:1.6;margin:6px 0 0}
+.guardian-print-page .tracking-strip{margin-top:12px;padding:10px 12px}
+.guardian-print-page .numbered-list{gap:7px}
+.guardian-print-page .numbered-item{padding:9px 11px;gap:9px}
+.guardian-print-page .numbered-item p{margin:0;font-size:14px;line-height:1.55}
+.guardian-print-page .pdf-footer{left:42px;right:42px;bottom:24px;padding-top:9px;gap:12px}
+.guardian-page-number{margin-left:auto;white-space:nowrap;font-variant-numeric:tabular-nums}
+.guardian-page-body{display:flow-root}
+.guardian-page-body>*{max-width:100%}
+.guardian-print-page .cover-summary{position:static;margin-top:28px}
+.guardian-print-page .cover-hero{margin-top:40px}
+.guardian-continuation .pdf-head{padding-bottom:10px}
+.guardian-continuation .pdf-title h1{font-size:22px!important}
+.guardian-continuation .pdf-section:first-child{margin-top:12px}
+
 </style>
 <style id="carestep-v10-3-c-category-system">
 .library-filter-block{margin:12px 0;padding:13px 14px;border:1px solid #e1e8f2;border-radius:14px;background:#fbfcff}.library-filter-label{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:9px}.library-filter-label b{font-size:11px;color:#1c2a43}.library-filter-label span,.library-result-meta{font-size:9px;color:#77849a}.purpose-filter-row,.filter-row{display:flex;gap:7px;flex-wrap:wrap}.purpose-chip{border:1px solid #dbe3ef;background:#fff;border-radius:10px;padding:9px 12px;font-size:10px;font-weight:850;color:#536177;cursor:pointer}.purpose-chip:hover,.purpose-chip.active{border-color:#1f5eff;background:#eef4ff;color:#1f5eff}.purpose-chip.journey-link{margin-left:auto;background:#16233c;color:#fff;border-color:#16233c}.library-result-meta{margin:10px 2px;font-weight:750}.resource-top>span:first-child{display:flex;gap:5px;align-items:center;flex-wrap:wrap}.purpose-badge{display:inline-flex;padding:4px 7px;border-radius:999px;background:#eef2f7;color:#56657a;font-size:8px;font-weight:900}.purpose-badge.procedure{background:#fff2e8;color:#ad5d18}.purpose-badge.discharge{background:#eef4ff;color:#245fd4}.purpose-badge.education{background:#ecf8f1;color:#18734b}.purpose-badge.clinic{background:#f1edff;color:#6843bf}
@@ -1485,7 +1510,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
               <div id="readinessPanel" class="readiness-panel"></div>
               <label class="field-label">전달할 자료</label>
               <div id="outputChooser" class="output-chooser">
-                <div class="output-option active selected" data-output="pdf"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="pdf" checked /><span class="output-copy"><b>보호자 안내자료</b><small>8P · PDF 또는 페이지별 이미지</small></span></label><button class="output-preview-btn" type="button" data-preview-output="pdf">미리보기</button></div>
+                <div class="output-option active selected" data-output="pdf"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="pdf" checked /><span class="output-copy"><b>보호자 안내자료</b><small>분량별 자동 나눔 · PDF 또는 페이지별 이미지</small></span></label><button class="output-preview-btn" type="button" data-preview-output="pdf">미리보기</button></div>
                 <div class="output-option" data-output="summary"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="summary" /><span class="output-copy"><b>핵심 요약 · 1장</b><small>오늘의 개별 안내와 재진 일정</small></span></label><button class="output-preview-btn" type="button" data-preview-output="summary">미리보기</button></div>
                 <div class="output-option" data-output="meds"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="meds" /><span class="output-copy"><b>복약 안내표</b><small>약 이름·용량·횟수·시간을 안내하는 문서</small></span></label><button class="output-preview-btn" type="button" data-preview-output="meds">미리보기</button></div>
                 <div class="output-option" data-output="medcheck"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="medcheck" /><span class="output-copy"><b>투약 체크표</b><small>투약 후 직접 체크하는 날짜·시간별 문서</small></span></label><button class="output-preview-btn" type="button" data-preview-output="medcheck">미리보기</button></div>
@@ -5580,6 +5605,7 @@ function medicationPageHtml(standalone=false){
 function renderMedicationSheet(){
   readCaseInfoFromForm();
   $('pdfDocument').innerHTML=medicationPageHtml(true);
+  paginateGuardianDocument();
   $('pdfDocument').classList.remove('hidden'); $('messagePreview').classList.add('hidden'); $('phonePreview').classList.add('hidden');
 }
 
@@ -8682,6 +8708,89 @@ function pdfHeader(title, subtitle, kicker='CARESTEP VETERINARY EDUCATION'){
   return `<header class="pdf-head"><div class="pdf-title"><span class="page-kicker">${escapeHtml(kicker)}</span><h1 class="page-title">${escapeHtml(title)}</h1><p class="page-subtitle">${escapeHtml(subtitle)}</p></div><div class="pdf-logo">${logoHtml()}</div></header>`;
 }
 function pdfFooter(){ return `<footer class="pdf-footer"><span>${footerClinicLine()}</span><span>${escapeHtml(hospital.license)}</span></footer>`; }
+// Measure at the exported A4 size, independently of preview zoom or hidden tabs.
+// Keep readable type; overflow continues onto another sheet instead of being clipped.
+function paginateGuardianDocument(root=$('pdfDocument'),force=false){
+  if(!root?.querySelectorAll)return;
+  let sourceRoot=root;
+  if(force&&root.__guardianPrintResult===root.innerHTML&&root.__guardianPrintSource){sourceRoot=document.createElement('div');sourceRoot.innerHTML=root.__guardianPrintSource;}
+  const originals=[...sourceRoot.querySelectorAll(':scope > .pdf-page')];
+  if(!originals.length||originals.every(p=>p.dataset.guardianPaginated==='1'||p.classList.contains('med-check-page')))return;
+  const sourceHtml=sourceRoot.innerHTML;
+  const host=document.createElement('div');
+  host.className='pdf-document guardian-pagination-probe';
+  host.style.cssText='position:fixed;left:-20000px;top:0;width:794px;min-width:794px;zoom:1;visibility:hidden;pointer-events:none;box-shadow:none';
+  host.setAttribute('aria-hidden','true');document.body.appendChild(host);
+  const result=[];
+  try{
+    for(const source of originals){
+      if(source.classList.contains('med-check-page')||source.dataset.guardianPaginated==='1'){result.push(source.cloneNode(true));continue;}
+      const original=source.cloneNode(true);original.classList.add('guardian-print-page');
+      const header=original.querySelector(':scope > .pdf-head');
+      const footer=original.querySelector(':scope > .pdf-footer');
+      const brand=original.querySelector(':scope > .pdf-brandline');
+      const queue=[...original.childNodes].filter(n=>n!==header&&n!==footer&&n!==brand);
+      let page,body,limit,continued=0;
+      const nextPage=()=>{
+        page=original.cloneNode(false);page.dataset.guardianPaginated='1';
+        if(continued)page.classList.add('guardian-continuation');
+        if(brand)page.appendChild(brand.cloneNode(true));
+        if(header){const h=header.cloneNode(true);if(continued){const title=h.querySelector('h1');if(title)title.append(' · 이어서');h.querySelector('p')?.remove();}page.appendChild(h);}
+        body=document.createElement('div');body.className='guardian-page-body';page.appendChild(body);
+        if(footer){const f=footer.cloneNode(true),number=document.createElement('span');number.className='guardian-page-number';number.textContent='1 / 1';f.appendChild(number);page.appendChild(f);}host.appendChild(page);
+        limit=(page.querySelector('.pdf-footer')?.getBoundingClientRect().top||page.getBoundingClientRect().bottom-48)-14;
+        result.push(page);continued++;
+      };
+      const fits=()=>{
+        const nodes=[body,...body.querySelectorAll('*')];
+        return nodes.every(n=>n.getBoundingClientRect().bottom<=limit+.25&&n.scrollWidth<=n.clientWidth+2);
+      };
+      const atomic=n=>n.nodeType===1&&n.matches('li,tr,.numbered-item,.pdf-mini,.mistake,.question-card,.timeline-box,.check-card-item');
+      // Return the remainder; preserve all text, links, rows and list order.
+      const place=(node,target,splitAtomic=false)=>{
+        const full=node.cloneNode(true);target.appendChild(full);
+        if(fits())return null;
+        full.remove();
+        if(atomic(node)&&!splitAtomic)return node;
+        if(node.nodeType===3){
+          const chars=Array.from(node.textContent);let lo=0,hi=chars.length;
+          const text=document.createTextNode('');target.appendChild(text);
+          while(lo<hi){const mid=Math.ceil((lo+hi)/2);text.textContent=chars.slice(0,mid).join('');if(fits())lo=mid;else hi=mid-1;}
+          if(!lo){text.remove();return node;}
+          text.textContent=chars.slice(0,lo).join('');return document.createTextNode(chars.slice(lo).join(''));
+        }
+        if(node.nodeType!==1||!node.childNodes.length)return node;
+        const part=node.cloneNode(false),rest=node.cloneNode(false);target.appendChild(part);
+        const children=[...node.childNodes];
+        for(let i=0;i<children.length;i++){
+          const tail=place(children[i],part,splitAtomic);
+          if(tail){
+            rest.appendChild(tail.cloneNode(true));children.slice(i+1).forEach(c=>rest.appendChild(c.cloneNode(true)));
+            // Do not strand a section title or a number without its text.
+            if(!part.textContent.trim()||(part.children.length&&[...part.children].every(c=>c.matches('h2,h3,b,.check-square')))){part.remove();return node;}
+            return rest;
+          }
+        }
+        // Fixed-size / grid containers can overflow even after all children fit.
+        if(!fits()){part.remove();return node;}
+        return null;
+      };
+      nextPage();
+      while(queue.length){
+        const node=queue.shift();let rest=place(node,body);
+        if(rest&&body.textContent.trim()==='')rest=place(node,body,true);
+        if(rest){
+          if(body.textContent.trim()==='')throw new Error('안내자료의 큰 표·이미지를 확인해주세요. 출력 영역을 넘는 내용이 있습니다.');
+          queue.unshift(rest);nextPage();
+        }
+      }
+    }
+    const total=result.length;
+    result.forEach((p,i)=>{const number=p.querySelector('.guardian-page-number');if(number)number.textContent=(i+1)+' / '+total;});
+    root.replaceChildren(...result);
+    root.__guardianPrintSource=sourceHtml;root.__guardianPrintResult=root.innerHTML;
+  }finally{host.remove();}
+}
 function timelineBox(t,day){
   const d=timelineProfile(t,day);
   return `<div class="timeline-box"><span class="timeline-day">D+${day}</span>${actualDateFor(day)?`<span class="timeline-date">${escapeHtml(actualDateFor(day))}</span>`:''}<h3>${escapeHtml(d.title)}</h3><div class="timeline-focus"><b>오늘의 핵심</b><span>${escapeHtml(d.focus)}</span></div>${checklist(d.items)}<div class="timeline-note">${escapeHtml(d.note)}</div></div>`;
@@ -8724,13 +8833,14 @@ function renderAdvancedPdf(){ refreshQrData();
   const planRows=customPlanEntries();
   pages.push(`<div class="pdf-page"><div class="pdf-brandline"></div>${pdfHeader('이 환자의 개별 퇴원계획','담당 수의사가 안내한 투약·식사·활동·보호장비·재진 지시를 한 페이지에 정리했습니다.','01 · INDIVIDUAL DISCHARGE PLAN')}<div class="pdf-callout"><strong>이 페이지의 개별 지시가 공통 안내보다 우선합니다.</strong><p>환자 상태와 시행한 진료에 따라 관리방법이 달라질 수 있습니다. 아래 내용은 이번 환자에게 입력된 병원 지시입니다.</p></div><section class="pdf-section"><div class="staff-plan"><table><tbody>${planRows.length?planRows.map(([a,b])=>`<tr><td>${escapeHtml(a)}</td><td>${escapeHtml(b)}</td></tr>`).join(''):`<tr><td>개별 지시</td><td>별도 입력 없음 · 담당 수의사의 퇴원 설명과 처방전을 우선해 주세요.</td></tr>`}</tbody></table></div></section><section class="pdf-section"><h2>회복 일정</h2><div class="pdf-grid">${timelineDays.map(day=>`<div class="pdf-mini"><strong>D+${day}</strong><span>${escapeHtml(actualDateFor(day)||`관리 시작 후 ${day}일`)}</span></div>`).join('')}</div></section><div class="pdf-callout warn"><strong>다음 재진</strong><p>${escapeHtml(recheckLabel())}${caseInfo.recheckMode?' · 재진 전 기록표·사진·영상·복약 여부를 준비해주세요.':' · 병원에서 별도로 안내한 일정을 확인해주세요.'}</p></div>${pdfFooter()}</div>`);
   if(hasMeds) pages.push(medicationPageHtml(false));
-  pages.push(`<div class="pdf-page"><div class="pdf-brandline"></div>${pdfHeader('가장 먼저 지켜야 할 5가지','집에서 확인할 핵심 관리 원칙을 한눈에 확인하세요.',`${pageNo.quick} · QUICK START`)}<div class="pdf-callout"><strong>개별 처방이 가장 우선입니다.</strong><p>아래 내용은 공통 보호자 교육을 위한 기준입니다. 환자의 식사·투약·운동·재검 일정은 담당 수의사의 퇴원 지시를 우선하세요.</p></div><div class="tracking-strip"><b>이 자료에서 집중해서 기록할 항목</b><div>${trackingChips(t)}</div></div><section class="pdf-section"><div class="numbered-list">${key5.map((x,i)=>`<div class="numbered-item"><b>${i+1}</b><div><strong>${escapeHtml(compactText(x,34))}</strong><p>${escapeHtml(x)}</p></div></div>`).join('')}</div></section><section class="pdf-section"><h2>${escapeHtml(s1[0])}</h2>${checklist(s1[1])}</section>${pdfFooter()}</div>`);
+  pages.push(`<div class="pdf-page"><div class="pdf-brandline"></div>${pdfHeader('가장 먼저 지켜야 할 5가지','집에서 확인할 핵심 관리 원칙을 한눈에 확인하세요.',`${pageNo.quick} · QUICK START`)}<div class="pdf-callout"><strong>개별 처방이 가장 우선입니다.</strong><p>아래 내용은 공통 보호자 교육을 위한 기준입니다. 환자의 식사·투약·운동·재검 일정은 담당 수의사의 퇴원 지시를 우선하세요.</p></div><div class="tracking-strip"><b>이 자료에서 집중해서 기록할 항목</b><div>${trackingChips(t)}</div></div><section class="pdf-section"><div class="numbered-list">${key5.map((x,i)=>`<div class="numbered-item"><b>${i+1}</b><div><p>${escapeHtml(x)}</p></div></div>`).join('')}</div></section><section class="pdf-section"><h2>${escapeHtml(s1[0])}</h2>${checklist(s1[1])}</section>${pdfFooter()}</div>`);
   pages.push(`<div class="pdf-page"><div class="pdf-brandline"></div>${pdfHeader('집에서 관리하는 방법','식사·투약·환경·증상 기록을 일관된 방식으로 관리하세요.',`${pageNo.home} · HOME CARE`)}<section class="pdf-section"><h2>${escapeHtml(s2[0])}</h2>${checklist(s2[1])}</section><section class="pdf-section"><h2>${escapeHtml(s3[0])}</h2>${checklist(s3[1])}</section><section class="pdf-section"><h2>보호자가 자주 하는 실수</h2><div class="mistake-grid">${mistakes.map(([a,b])=>`<div class="mistake"><strong>${escapeHtml(a)}</strong><span>${escapeHtml(b)}</span></div>`).join('')}</div></section>${pdfFooter()}</div>`);
   timelineGroups.forEach((days,i)=>pages.push(`<div class="pdf-page"><div class="pdf-brandline"></div>${pdfHeader('회복 타임라인 · '+days.map(d=>'D+'+d).join(' / '),baseDateLabel()?`관리 시작일 ${baseDateLabel()} 기준입니다.`:'관리 시작일을 D+0으로 두고 변화를 기록하세요.',`${pn(4+medPageCount+i)} · RECOVERY TIMELINE`)}<div class="timeline-grid">${days.map(d=>timelineBox(t,d)).join('')}</div><div class="pdf-callout"><strong>개별 진료 계획 우선</strong><p>표시된 날짜는 교육용 관찰 시점입니다. 검사·재진·투약 일정은 담당 수의사의 안내를 따르세요.</p></div><section class="pdf-section"><h2>병원에 전달할 정보</h2>${checklist(stageHandoff(t,days))}</section>${pdfFooter()}</div>`));
   pages.push(`<div class="pdf-page"><div class="pdf-brandline"></div>${pdfHeader('30초 위험신호 카드','아래 변화가 보이면 보호자 판단으로 오래 기다리기보다 의료진의 안내를 받으세요.',`${pageNo.red} · RED FLAGS`)}<div class="pdf-callout danger"><strong>빠른 확인이 필요한 신호</strong>${checklist(t.redFlags)}</div><section class="pdf-section"><h2>병원에 연락할 때 같이 알려주세요</h2>${checklist(['현재 가장 심한 증상 한 가지','증상이 시작된 정확한 시간과 횟수','마지막 식사·물 섭취·약 복용 시간','소변·대변 상태와 최근 변화','가능한 경우 사진 또는 10~30초 영상'])}</section><section class="pdf-section"><h2>하지 말아야 할 것</h2><div class="pdf-grid"><div class="pdf-mini"><strong>임의 재투약</strong><span>토했다고 같은 약을 자동으로 다시 투약하지 않습니다.</span></div><div class="pdf-mini"><strong>사람용 약</strong><span>진통제·소화제 등 사람용 약을 임의로 추가하지 않습니다.</span></div><div class="pdf-mini"><strong>억지 급여</strong><span>의식·호흡·삼킴이 불안정한 상태에서 음식이나 물을 억지로 먹이지 않습니다.</span></div><div class="pdf-mini"><strong>장시간 대기</strong><span>호흡곤란·의식저하·지속 출혈 등 응급신호는 다음날까지 기다리지 않습니다.</span></div></div></section>${pdfFooter()}</div>`);
   pages.push(`<div class="pdf-page"><div class="pdf-brandline"></div>${pdfHeader('7일 회복 기록표 & 진료 질문','매일 1분씩 기록하면 재진 때 훨씬 정확한 정보를 전달할 수 있습니다.',`${pageNo.log} · CARE LOG`)}<section class="pdf-section"><h2>7일 기록표</h2><table class="pdf-table week-table"><thead><tr><th>날짜</th><th>${escapeHtml(recordRows[0]||'식사')}</th><th>${escapeHtml(recordRows[1]||'약')}</th><th>${escapeHtml(recordRows[2]||'증상')}</th><th>메모</th></tr></thead><tbody>${weekRows}</tbody></table></section><section class="pdf-section"><h2>진료실에서 물어볼 질문</h2><div class="question-grid">${qs}</div></section><div class="contact-strip"><div><strong>${escapeHtml(hospitalName())}</strong><div style="font-size:10px;color:#c1c9d6;margin-top:4px">${hospital.director?`대표원장 ${escapeHtml(hospital.director)} · `:''}CARESTEP 보호자 안내자료</div></div>${qrDataUrl?`<div class="qr-contact"><img src="${qrDataUrl}" alt="병원 QR"><div><span>${contactLine()}<br>${escapeHtml(hospital.license)}</span><small>예약·병원정보 QR</small></div></div>`:`<span>${contactLine()}<br>${escapeHtml(hospital.license)}</span>`}</div>${pdfFooter()}</div>`);
   $('pdfDocument').dataset.r61Patient=window.crmCurrentPatient?.()?.patientId||'';
   $('pdfDocument').innerHTML=pages.join('');
+  paginateGuardianDocument();
   $('pdfDocument').classList.remove('hidden'); $('messagePreview').classList.add('hidden'); $('phonePreview').classList.add('hidden');
 }
 function renderCheckCard(day){
@@ -8740,6 +8850,7 @@ function renderCheckCard(day){
   const items=d.items.map((x,i)=>`<div class="check-card-item"><div class="box"></div><div><strong>${escapeHtml(compactText(x,42))}</strong><span>${escapeHtml(x)}</span></div></div>`).join('');
   const handoff=(d.handoff||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join('');
   $('pdfDocument').innerHTML=`<div class="pdf-page check-card-page"><div class="pdf-brandline"></div><div class="clinical-watermark">CARESTEP</div><div class="check-card-hero"><div class="check-card-title"><span class="page-kicker">CARESTEP CLINICAL CHECK CARD · ${escapeHtml(profileFor(t).label||categoryLabel(t.category))}</span><div class="check-card-day">D+${day}</div>${actualDateFor(day)?`<div class="check-card-date">${escapeHtml(actualDateFor(day))}</div>`:''}<h1>${escapeHtml(d.title)}</h1><p>${escapeHtml(templateDisplayTitle(t))} · ${escapeHtml(d.note)}</p></div><div class="pdf-logo">${logoHtml()}</div></div><div class="clinical-focus"><b>오늘의 핵심</b><span>${escapeHtml(d.focus)}</span></div><div class="check-card-items">${items}</div><div class="handoff-box"><strong>병원에 전달하면 좋은 정보</strong><ul>${handoff}</ul></div><div class="check-card-red"><strong>이런 변화는 기다리지 말고 병원에 알려주세요</strong><ul>${d.redFlags.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div><div class="memo-lines compact"><h3>오늘 메모</h3><div class="memo-line"></div><div class="memo-line"></div></div>${pdfFooter()}</div>`;
+  paginateGuardianDocument();
   $('pdfDocument').classList.remove('hidden'); $('messagePreview').classList.add('hidden'); $('phonePreview').classList.add('hidden');
 }
 function mobilePatientLine(){
@@ -8775,6 +8886,7 @@ function renderStaffSheet(){
   const checks=[['환자·보호자 확인','환자명, 보호자명, 오늘 시행한 진료/수술을 확인'],['투약 설명','복약 안내표의 약 이름·1회 용량·횟수·시간·식사관계·기간을 처방 라벨과 대조'],['식사 설명','오늘 첫 식사 시점·1회량·금지 음식 또는 처방식 안내'],['활동 제한','산책·점프·계단·목욕·재활 등 제한 범위를 설명'],['상처·보호장비','상처 확인법, 넥카라/보호복 유지기간을 설명'],['위험신호','바로 병원에 연락해야 할 변화 2~3개를 소리 내어 안내'],['재진 일정','재진 날짜와 방문 목적을 보호자와 함께 확인'],['자료 전달','퇴원 1P 요약·보호자 PDF 또는 D+ 카드/모바일 이미지를 전달']];
   const cards=checks.map(([a,b])=>`<div class="staff-check"><span class="box"></span><div><strong>${escapeHtml(a)}</strong><span>${escapeHtml(b)}</span></div></div>`).join('');
   $('pdfDocument').innerHTML=`<div class="pdf-page staff-page"><div class="pdf-brandline"></div>${pdfHeader('직원용 퇴원교육 · 60초 설명','보호자에게 같은 순서와 같은 핵심으로 설명하기 위한 직원용 1페이지 가이드입니다.','REAL DISCHARGE · STAFF')}<div class="staff-script"><span class="tag">60-SECOND SCRIPT</span><p>${escapeHtml(staffScript(t))}</p></div><section class="pdf-section"><h2>퇴원 전 8가지 확인</h2><div class="staff-check-grid">${cards}</div></section><div class="staff-plan"><table><tbody>${planRows}</tbody></table></div><div class="staff-sign"><div>설명 직원 __________________</div><div>확인 시각 __________________</div></div>${pdfFooter()}</div>`;
+  paginateGuardianDocument();
   $('pdfDocument').classList.remove('hidden'); $('messagePreview').classList.add('hidden'); $('phonePreview').classList.add('hidden'); $('phonePreview').classList.add('hidden');
 }
 async function downloadMobileCard(){
@@ -8828,6 +8940,7 @@ function renderDischargeSummary(){
   const red=(t.redFlags||[]).slice(0,3).map(x=>`<li>${escapeHtml(compactText(x,80))}</li>`).join('');
   const patientBits=[];if(caseInfo.includeNames&&caseInfo.patientName)patientBits.push(caseInfo.patientName);if(caseInfo.procedure)patientBits.push(caseInfo.procedure);if(baseDateLabel())patientBits.push(`퇴원 ${baseDateLabel()}`);
   $('pdfDocument').innerHTML=`<div class="pdf-page summary-page"><div class="pdf-brandline"></div>${pdfHeader('퇴원 당일 1페이지 요약','오늘 집에서 바로 확인해야 할 개별지시·복약·재진·위험신호만 한 장에 정리했습니다.','HANDOFF · DISCHARGE SUMMARY')}<div class="summary-hero"><strong>${escapeHtml(t.title)}</strong><p>${escapeHtml(patientBits.join(' · ')||t.description)}</p></div><div class="summary-grid">${planHtml}<div class="summary-box summary-wide"><b>복약 핵심</b><span>${medsText}</span></div><div class="summary-box"><b>다음 재진</b><span>${escapeHtml(recheckLabel())}</span></div><div class="summary-box"><b>D+1 확인</b><span>${escapeHtml(compactText(timelineProfile(t,1).focus,95))}</span></div><div class="summary-box summary-wide summary-red"><b>기다리지 말고 병원에 알려야 할 변화</b><ul>${red}</ul></div></div><div class="summary-contact"><span><b>${escapeHtml(hospitalName())}</b>${hospital.director?` · 대표원장 ${escapeHtml(hospital.director)}`:''}<br>${escapeHtml(hospital.phone||'병원 대표전화')}</span>${qrDataUrl?`<span><img src="${qrDataUrl}" alt="QR" style="width:52px;height:52px"></span>`:`<span>${escapeHtml(hospital.address||'')}</span>`}</div>${pdfFooter()}</div>`;
+  paginateGuardianDocument();
   $('pdfDocument').classList.remove('hidden');$('messagePreview').classList.add('hidden');$('phonePreview').classList.add('hidden');
 }
 function renderMedicationCheckSheet(){
@@ -8885,14 +8998,18 @@ function renderCurrentOutput(){
   $('mobileDayControl')?.classList.toggle('hidden',currentOutput!=='mobile');
   const btn=$('generateOutputBtn'), sec=$('secondaryOutputBtn'), hint=$('outputHint');
   if(currentOutput==='pdf'){btn.textContent=`고급 PDF ${pdfCount}P 생성 · 다운로드`;sec.textContent='인쇄 / PDF 저장';hint.textContent=medPages?`복약 안내표 ${medPages}페이지가 포함되어 총 ${pdfCount}페이지입니다. 아래에서 PNG 또는 PDF를 선택해 저장하세요.`:'복약표 미입력 상태로 8페이지입니다. 아래에서 PNG 또는 PDF를 선택해 저장하세요.';renderAdvancedPdf();}
-  else if(currentOutput==='summary'){btn.textContent='퇴원 1P 요약 PDF 다운로드';sec.textContent='인쇄 / PDF 저장';hint.textContent='보호자가 퇴원 당일 가장 먼저 보는 한 장 요약입니다. PNG 또는 PDF로 저장할 수 있습니다.';renderDischargeSummary();}
+  else if(currentOutput==='summary'){btn.textContent='퇴원 요약 PDF 다운로드';sec.textContent='인쇄 / PDF 저장';hint.textContent='보호자가 퇴원 당일 가장 먼저 보는 한 장 요약입니다. PNG 또는 PDF로 저장할 수 있습니다.';renderDischargeSummary();}
   else if(currentOutput==='meds'){btn.textContent='복약 안내표 PDF 다운로드';sec.textContent='인쇄 / PDF 저장';hint.textContent=medPages?`입력한 ${validMedications().length}종 약을 ${medPages}페이지 일정표로 구성합니다. PNG 또는 PDF로 저장할 수 있습니다.`:'약을 입력하면 복약 안내표를 생성할 수 있습니다.';renderMedicationSheet();}
   else if(currentOutput==='medcheck'){const meta=medicationCheckMeta();btn.textContent=`${medicationCheckLabel()} PDF 다운로드`;sec.textContent='인쇄 / PDF 저장';hint.textContent=meta.valid?`최장 ${meta.maxDays}일 처방 기준 · ${meta.pageCount}페이지 · PNG 또는 PDF로 저장할 수 있습니다.`:'각 약의 투약 기간(일수)을 입력하면 처방기간에 맞춰 자동 생성됩니다.';renderMedicationCheckSheet();}
   else if(currentOutput==='kakao'||currentOutput==='sms'){btn.textContent=currentOutput==='sms'?'문자 문구 복사':'카카오톡 문구 복사';sec.textContent='TXT 다운로드';hint.textContent='복사하거나 TXT로 저장한 뒤 사용하세요. 실제 문자 발송·예약은 후속관리에서 진행합니다.';renderMessageOutput(currentOutput);}
   else if(['d1','d3','d7','d14'].includes(currentOutput)){const day=Number(currentOutput.replace('d',''));btn.textContent=`D+${day} 일자별 체크표 PDF 다운로드`;sec.textContent='인쇄 / PDF 저장';hint.textContent=`D+${day}${actualDateFor(day)?` · ${actualDateFor(day)}`:''} 확인 내용을 1페이지로 정리합니다. PNG 또는 PDF로 저장할 수 있습니다.`;renderCheckCard(day);}
   else if(currentOutput==='mobile'){readCaseInfoFromForm();mobileDay=Number($('mobileDaySelect')?.value||1);btn.textContent='1080×1920 PNG 다운로드';sec.textContent='현재 카드 인쇄 / PDF 저장';hint.textContent=`D+${mobileDay}${actualDateFor(mobileDay)?` · ${actualDateFor(mobileDay)}`:''} 보호자 휴대폰용 카드입니다. PNG 또는 PDF를 선택해 저장할 수 있습니다.`;renderMobileCard(mobileDay);}
   else if(currentOutput==='mobile4'){btn.textContent='D+1·3·7·14 모바일 4종 ZIP';sec.textContent='D+1 카드 인쇄 / PDF 저장';hint.textContent='D+1·3·7·14 카드 4종을 PNG 또는 PDF로 만들고, 개별 파일 또는 ZIP으로 받을 수 있습니다.';renderMobileCard(1);}
-  else if(currentOutput==='staff'){btn.textContent='직원용 1P PDF 다운로드';sec.textContent='인쇄 / PDF 저장';hint.textContent='직원이 60초 설명과 퇴원 전 8가지 확인을 같은 순서로 진행하는 1페이지 자료입니다. PNG 또는 PDF로 저장할 수 있습니다.';renderStaffSheet();}
+  else if(currentOutput==='staff'){btn.textContent='직원용 PDF 다운로드';sec.textContent='인쇄 / PDF 저장';hint.textContent='직원이 60초 설명과 퇴원 전 8가지 확인을 같은 순서로 진행하는 1페이지 자료입니다. PNG 또는 PDF로 저장할 수 있습니다.';renderStaffSheet();}
+  if(['pdf','summary','meds','medcheck','staff'].includes(currentOutput)||/^d\d+$/.test(currentOutput)){
+    const count=$('pdfDocument').querySelectorAll('.pdf-page').length;
+    if(count){$('selectedStatus').textContent=categoryLabel(t.category)+' · '+templateSpeciesLabel(t)+' · '+count+'P';if(currentOutput==='pdf')btn.textContent='보호자 안내자료 PDF 다운로드';if(currentOutput!=='medcheck')hint.textContent='총 '+count+'페이지 · 내용이 길면 다음 페이지로 이어집니다. PNG 또는 PDF로 저장할 수 있습니다.';}
+  }
   updateSelectedOutputUi();
   if(!clinicEducationReady()){$('previewLabel').textContent='예시 미리보기 · 보호자 안내자료 선택 필요';$('selectedStatus').textContent='확정된 환자 자료가 아닙니다';}
   window.dispatchEvent(new Event('carestep:output-rendered'));
@@ -9872,9 +9989,9 @@ async function downloadDischargePackage(){
     const followFolder=zip.folder('01_후속관리');
     const base=safeFileName(`${hospitalName()}_${caseInfo.patientName||templateDisplayTitle(t)}_${templateDisplayTitle(t)}`);
     let count=0;
-    if(selected.summary){await addRenderedPdfToZip(todayFolder,`${base}_퇴원1P요약.pdf`,renderDischargeSummary);count++;}
-    if(selected.pdf){await addRenderedPdfToZip(todayFolder,`${base}_보호자교육_${8+medicationPageCount()}P.pdf`,renderAdvancedPdf);count++;}
-    if(selected.meds){await addRenderedPdfToZip(todayFolder,`${base}_복약일정표_${medicationPageCount()}P.pdf`,renderMedicationSheet);count++;}
+    if(selected.summary){await addRenderedPdfToZip(todayFolder,`${base}_퇴원요약.pdf`,renderDischargeSummary);count++;}
+    if(selected.pdf){await addRenderedPdfToZip(todayFolder,`${base}_보호자교육.pdf`,renderAdvancedPdf);count++;}
+    if(selected.meds){await addRenderedPdfToZip(todayFolder,`${base}_복약일정표.pdf`,renderMedicationSheet);count++;}
     if(selected.medcheck){await addRenderedPdfToZip(todayFolder,`${base}_${medicationCheckFileLabel()}.pdf`,renderMedicationCheckSheet);count++;}
     if(selected.staff){await addRenderedPdfToZip(todayFolder,`${base}_직원용_퇴원체크리스트.pdf`,renderStaffSheet);count++;}
     if(selected.d1){await addRenderedPdfToZip(followFolder,`${base}_D+1_일자별 체크표.pdf`,()=>renderCheckCard(1));count++;}
@@ -10237,6 +10354,8 @@ async function exportPdfElement(filename,options={}){
   if(!hospital.name){toast('먼저 병원정보에서 병원명을 저장해주세요.');go('settings');return;}
   if(typeof html2pdf==='undefined')throw new Error('PDF library unavailable');
 
+  if(document.fonts?.ready)await document.fonts.ready;
+  paginateGuardianDocument($('pdfDocument'),true);
   const sourcePages=[...$('pdfDocument').querySelectorAll('.pdf-page')];
   if(!sourcePages.length){toast('생성할 PDF 페이지가 없습니다.');return;}
 
@@ -10374,10 +10493,12 @@ body{display:block!important}
   w.document.close();
   setTimeout(()=>{try{w.focus();w.print();}catch(e){console.error(e);toast('휴대폰용 안내 카드 인쇄창을 열지 못했습니다.');}},650);
 }
-function printCurrent(){
+async function printCurrent(){
   if(currentOutput==='kakao'||currentOutput==='sms'){window.print();return;}
   if(currentOutput==='mobile'||currentOutput==='mobile4'){printMobilePreview();return;}
   const w=window.open('','','width=900,height=1000'); if(!w){toast('팝업을 허용해주세요.');return;}
+  if(document.fonts?.ready)await document.fonts.ready;
+  paginateGuardianDocument($('pdfDocument'),true);
   const css=document.querySelector('style')?.innerHTML||'';
   w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>CARESTEP</title><style>${css}body{background:#fff}.pdf-document{box-shadow:none;margin:0 auto}
 /* v5.4 MEDICATION SCHEDULE */
@@ -10418,9 +10539,9 @@ function printCurrent(){
 function selectedOutputFileFormat(){return document.querySelector('input[name="outputFileFormat"]:checked')?.value==='pdf'?'pdf':'png';}
 function outputSupportsFileFormat(type){return ['pdf','summary','meds','medcheck','d1','d3','d7','d14','mobile','mobile4','staff'].includes(String(type||''));}
 function documentOutputDescriptor(type){
-  if(type==='pdf')return {label:`보호자교육_${8+medicationPageCount()}P`,render:renderAdvancedPdf};
-  if(type==='summary')return {label:'퇴원1P요약',render:renderDischargeSummary};
-  if(type==='meds')return {label:`복약일정표_${medicationPageCount()}P`,render:renderMedicationSheet};
+  if(type==='pdf')return {label:'보호자교육',render:renderAdvancedPdf};
+  if(type==='summary')return {label:'퇴원요약',render:renderDischargeSummary};
+  if(type==='meds')return {label:`복약일정표`,render:renderMedicationSheet};
   if(type==='medcheck')return {label:medicationCheckFileLabel(),render:renderMedicationCheckSheet};
   if(type==='staff')return {label:'직원용_퇴원교육',render:renderStaffSheet};
   if(['d1','d3','d7','d14'].includes(type)){const day=Number(type.replace('d',''));return {label:`D+${day}_일자별 체크표`,render:()=>renderCheckCard(day)};}
@@ -10429,6 +10550,7 @@ function documentOutputDescriptor(type){
 async function renderedOutputPngBlobs(renderFn){
   if(typeof html2pdf==='undefined')throw new Error('이미지 변환 라이브러리를 불러오지 못했습니다.');
   renderFn();await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));if(document.fonts?.ready)await document.fonts.ready;
+  paginateGuardianDocument($('pdfDocument'),true);
   const sourcePages=[...$('pdfDocument').querySelectorAll('.pdf-page')];if(!sourcePages.length)throw new Error('이미지로 변환할 페이지가 없습니다.');
   const blobs=[];
   for(const src of sourcePages){
