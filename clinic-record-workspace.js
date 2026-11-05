@@ -1,0 +1,50 @@
+/* Shared record identity and patient-scoped navigation. No clinical writes. */
+(function(g){
+ 'use strict';
+ const names={surgery:'마취',dental:'치과',neuro:'신경',ophthalmic:'안과',chronic:'만성질환'};
+ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const validDate=v=>/^\d{4}-\d{2}-\d{2}$/.test(v||'')&&Number.isFinite(Date.parse(v))&&new Date(v).toISOString().slice(0,10)===v;
+ const today=()=>new Date(Date.now()+32400000).toISOString().slice(0,10);
+ function age(birth,date){if(!validDate(birth)||!validDate(date)||birth>date)return '';const [y,m,d]=date.split('-').map(Number),[by,bm,bd]=birth.split('-').map(Number),n=(y-by)*12+m-bm-(d<bd?1:0);return n<1?'1개월 미만':[n>=12?Math.floor(n/12)+'세':'',n%12?n%12+'개월':''].filter(Boolean).join(' ');}
+ function context(item,chart={},state={}){if(!item)return null;const p={...item.patient,...chart.patient},date=chart.date||item.created_at?.slice(0,10)||'';return {recordId:item.id||'',patientId:item.patient_id||'',patient:{...p,name:item.patient?.name||'',species:item.body?.species},date,weight:chart.weight??item.body?.weight??null,age:chart.age||age(p.birthDate,date||today()),clinicalStatus:chart.clinicalStatus||'',...state};}
+ function demographics(c){const p=c.patient||{},sex=['male','female'].includes(p.sex)?(p.neutered==='yes'?'중성화 ':p.neutered==='no'?'미중성화 ':'')+(p.sex==='male'?'수컷':'암컷'):p.sex&&p.sex!=='unknown'&&p.sex!=='미확인'?p.sex:'성별 미입력';return [p.breed||'품종 미입력',sex,c.age||'나이 미입력',c.weight!=null&&c.weight!==''?c.weight+' kg':'체중 미입력'].join(' · ');}
+ function recordMatches(rows,target){return rows.filter(r=>r.category===target&&!r.deleted&&!r.body?.deleted);}
+ function status(c,text=''){if(c.state==='conflict')return ['conflict','동시 수정 확인'];if(c.state==='saving'||/저장 중/.test(text))return ['saving','저장 중'];if(c.state==='error'||/저장 실패/.test(text))return ['error','저장 실패'];if(c.state==='editing'||/미저장|입력 중/.test(text))return ['editing','작성 중'];if(c.state==='saved'||/저장 완료/.test(text))return ['saved','저장 완료'];return ['record','기록 조회'];}
+ function mount(root,a){
+  let frame=0,epoch=0,signature='',lastRoute='',header=null,viewport=null;
+  const valid=(n,k,route)=>n===epoch&&a.adapter.ready()&&a.adapter.identity()===k&&a.route()===route;
+  const schedule=()=>{if(!frame)frame=requestAnimationFrame(()=>{frame=0;sync();});};
+  function clear(){epoch++;signature='';lastRoute='';header?.remove();header=null;root.classList.remove('cs-patient-workspace');}
+  function sync(){
+   if(!a.adapter.ready()){clear();return;}const nav=root.querySelector('.cs-record-navigation');if(!nav){header?.remove();header=null;root.classList.remove('cs-patient-workspace');return;}
+   const c=a.context(),node=a.node(),route=a.route();if(lastRoute!==route){epoch++;lastRoute=route;signature='';}
+   if(!c?.patient?.name){header?.remove();header=null;root.classList.remove('cs-patient-workspace');nav.setAttribute('aria-label','전체 기록지 이동');return;}
+   root.classList.add('cs-patient-workspace');node?.classList.add('cs-record-content');nav.setAttribute('aria-label','현재 환자의 기록 찾기');
+   if(!header?.isConnected){header=document.createElement('section');header.className='cs-patient-header';header.setAttribute('aria-label','현재 기록의 환자');header.innerHTML='<div class="cs-patient-copy"><strong data-cs-name></strong><span data-cs-demographics></span><small data-cs-record></small></div><div class="cs-patient-actions"><span data-cs-save role="status" aria-live="polite"></span><button type="button" data-cs-entry>기록 입력 ↓</button></div>';nav.before(header);signature='';header.querySelector('[data-cs-entry]').onclick=()=>{const input=node?.querySelector('[data-ae-inline] input:not([type=hidden]):not(:disabled),textarea:not(:disabled),input:not([type=hidden]):not(:disabled)');if(input){input.scrollIntoView({block:'center',behavior:'smooth'});input.focus({preventScroll:true});}};}
+   const saveText=route==='surgery'?node?.querySelector('[data-ae-state]')?.textContent||'':'';const [kind,label]=status(c,saveText),sig=JSON.stringify([c,kind,label]);if(sig!==signature){signature=sig;header.querySelector('[data-cs-name]').textContent=c.patient.name;header.querySelector('[data-cs-demographics]').textContent=demographics(c);header.querySelector('[data-cs-record]').textContent=[names[route]+' 기록',c.date||'날짜 미입력',c.clinicalStatus==='complete'?'작성 완료':c.clinicalStatus?'작성 중':'',c.patient.guardianName?'보호자 '+c.patient.guardianName:'',c.patient.chartNumber||c.patient.externalPatientId?'차트 '+(c.patient.chartNumber||c.patient.externalPatientId):''].filter(Boolean).join(' · ');const badge=header.querySelector('[data-cs-save]');badge.textContent=(kind==='saved'?'✓ ':kind==='error'||kind==='conflict'?'! ':'')+label;badge.dataset.state=kind;}
+   // Hide only duplicate identity text; action controls and clinical status remain in their own modules.
+   for(const el of node?.querySelectorAll('.dn-pinned-patient,.nr-head>div:first-child:not(.nr-actions),.cs-original-patient')||[])el.classList.add('cs-identity-superseded');
+   for(const el of node?.querySelectorAll('.nr-actions [data-save-state]')||[])el.classList.add('cs-identity-superseded');
+   root.style.setProperty('--cs-patient-height',Math.ceil(header.getBoundingClientRect().height)+'px');
+   const button=header.querySelector('[data-cs-entry]');button.hidden=!node?.querySelector('[data-ae-inline] input:not(:disabled),textarea:not(:disabled),input:not([type=hidden]):not(:disabled)');
+  }
+  async function choose(target){
+   if(!names[target]||!a.allowed(target)||target===a.route())return;const c=a.context();if(!c?.recordId){a.navigate(target);return;}
+   const route=a.route(),k=a.adapter.identity(),n=++epoch,d=a.modal(c.patient.name+' · '+names[target]+' 기록','<p data-cs-find role="status">이 환자의 기록을 찾는 중…</p><div data-cs-results></div><button type="button" data-cs-all>전체 '+names[target]+' 기록으로 이동</button><small class="cs-route-hint">전체 기록으로 이동하면 이전에 열었던 다른 환자가 표시될 수 있습니다.</small>');
+   d.querySelector('[data-cs-all]').onclick=()=>{if(valid(n,k,route)&&a.close()){epoch++;a.navigate(target);}};
+   const live=()=>valid(n,k,route)&&d.isConnected&&d.open;
+   let rows=[],cursor='',seen=new Set();
+   async function load(){const out=d.querySelector('[data-cs-find]');try{const params=new URLSearchParams({caseId:c.recordId});if(cursor)params.set('cursor',cursor);const r=await a.adapter.request('/practice/clinical/patient-summary?'+params);if(!live())return;if(c.patientId&&r.patient?.id!==c.patientId)throw Error('환자 연결을 확인할 수 없습니다. 전체 기록에서 환자를 확인해주세요.');rows=[...new Map([...rows,...recordMatches(r.items||[],target)].map(x=>[x.id,x])).values()];cursor=r.nextCursor||'';if(cursor&&seen.has(cursor))throw Error('이전 기록 조회가 반복되어 중단했습니다. 다시 시도해주세요.');if(cursor)seen.add(cursor);
+     out.textContent=rows.length?rows.length+'개 · 기록 날짜를 선택하세요.':cursor?'현재 조회 범위에 기록이 없습니다. 이전 기록을 더 확인할 수 있습니다.':'이 환자의 '+names[target]+' 기록이 없습니다.';
+     d.querySelector('[data-cs-results]').innerHTML=rows.map((r,i)=>'<button type="button" class="cs-record-choice" data-cs-pick="'+i+'"><b>'+esc(r.date||r.created_at||'날짜 미기록')+'</b><span>'+esc(r.title||r.diagnosis||names[target]+' 기록')+'</span><small>'+esc(r.clinicalStatus==='complete'?'작성 완료':'기록 열기')+'</small></button>').join('')+(cursor?'<button type="button" data-cs-more>이전 기록 더 보기</button>':'');
+     d.querySelectorAll('[data-cs-pick]').forEach(b=>b.onclick=()=>{if(!live())return;const record={...rows[+b.dataset.csPick],patientId:c.patientId||r.patient?.id||''};if(a.close()){epoch++;a.navigate(target,record);}});d.querySelector('[data-cs-more]')?.addEventListener('click',e=>{e.currentTarget.disabled=true;void load();});
+    }catch(e){if(live()){out.textContent=e.message||'기록을 불러오지 못했습니다.';const retry=document.createElement('button');retry.textContent='다시 시도';retry.onclick=()=>{retry.remove();void load();};out.append(retry);}}
+   }
+   await load();
+  }
+  const observer=new MutationObserver(schedule);observer.observe(root,{childList:true,subtree:true,characterData:true});root.addEventListener('input',schedule);root.addEventListener('change',schedule);
+  const size=()=>{const vv=g.visualViewport,offset=Math.max(0,vv?g.innerHeight-vv.height-vv.offsetTop:0);root.style.setProperty('--cs-keyboard',offset+'px');schedule();};viewport=g.visualViewport;viewport?.addEventListener('resize',size);viewport?.addEventListener('scroll',size);size();
+  return {sync,schedule,choose,clear,dispose(){clear();observer.disconnect();cancelAnimationFrame(frame);root.removeEventListener('input',schedule);root.removeEventListener('change',schedule);viewport?.removeEventListener('resize',size);viewport?.removeEventListener('scroll',size);}};
+ }
+ const api={context,demographics,recordMatches,status,age,mount};if(typeof module==='object'&&module.exports)module.exports=api;else g.ClinicRecordWorkspace=api;
+})(typeof window==='undefined'?globalThis:window);
