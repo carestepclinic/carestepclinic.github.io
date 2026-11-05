@@ -1384,16 +1384,16 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
             </section>
             <div id="builderEditReturn" class="builder-edit-return" hidden><span>수정 후 출력으로 돌아가 PDF를 다시 확인해주세요.</span><button id="builderReturnToOutput" class="btn btn-secondary" type="button">수정 후 출력으로</button></div>
             <div class="wizard-steps" id="wizardSteps">
-              <button class="wizard-step active" type="button" data-wizard-step="1"><b>1</b><span>환자</span></button>
-              <button class="wizard-step" type="button" data-wizard-step="2"><b>2</b><span>퇴원지시</span></button>
+              <button class="wizard-step active" type="button" data-wizard-step="1"><b>1</b><span>환자·자료</span></button>
+              <button class="wizard-step" type="button" data-wizard-step="2"><b>2</b><span>개별 안내</span></button>
               <button class="wizard-step" type="button" data-wizard-step="3"><b>3</b><span>복약</span></button>
               <button class="wizard-step" type="button" data-wizard-step="4"><b>4</b><span>재진</span></button>
-              <button class="wizard-step" type="button" data-wizard-step="5"><b>5</b><span>출력</span></button>
+              <button class="wizard-step" type="button" data-wizard-step="5"><b>5</b><span>확인·전달</span></button>
             </div>
             <div class="wizard-progress"><span id="wizardProgress"></span></div>
 
             <div class="wizard-pane active" data-wizard-pane="1">
-              <div class="wizard-pane-title"><div><h4>① 환자와 보호자 안내자료</h4><p>등록 환자를 불러오거나 직접 입력한 뒤 보호자 안내자료를 선택하세요. D+ 날짜는 관리 시작일을 기준으로 계산됩니다.</p></div><span class="privacy-badge">입력 중 · 게시 시 서버 저장</span></div>
+              <div class="wizard-pane-title"><div><h4>환자·안내자료</h4><p>환자와 안내자료를 선택하고 관리 시작일을 확인하세요.</p></div><span class="privacy-badge">입력 중 · 게시 시 서버 저장</span></div>
               <label class="field-label" for="templateSearch">보호자 안내자료 검색</label>
               <div class="template-search-wrap">
                 <div class="template-search-box">
@@ -1412,7 +1412,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
                 <div class="case-grid">
                   <div><label class="field-label" for="patientName">환자명</label><input id="patientName" class="input" autocomplete="off" placeholder="예: 코코" /></div>
                   <div><label class="field-label" for="guardianName">보호자명</label><input id="guardianName" class="input" autocomplete="off" placeholder="예: 김○○" /></div>
-                  <div class="span-2"><label class="field-label" for="dischargeDate">퇴원일 / 관리 시작일</label><input id="dischargeDate" class="input" type="date" min="1900-01-01" max="2099-12-31" autocomplete="off" /></div>
+                  <div class="span-2"><label class="field-label" for="dischargeDate">관리 시작일</label><input id="dischargeDate" class="input" type="date" min="1900-01-01" max="2099-12-31" autocomplete="off" /></div>
                   <div class="span-2"><label class="case-toggle"><input id="includePatientNames" type="checkbox" checked /> <span>보호자 PDF 첫 페이지와 복약 안내표 첫 페이지에 환자명·보호자명을 표시합니다.</span></label></div>
                 </div>
                 <div id="caseDatePreview" class="case-date-preview"></div>
@@ -1421,8 +1421,8 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
             </div>
 
             <div class="wizard-pane" data-wizard-pane="2">
-              <div class="wizard-pane-title"><div><h4>② 담당 수의사 개별 퇴원지시</h4><p>이번 환자에게 필요한 내용만 입력합니다. 공통 보호자 안내자료보다 이 지시가 우선합니다.</p></div><span class="memory-badge">작성 중에는 이 탭에서 유지</span></div>
-              <div class="preset-toolbar"><button id="applyClinicPreset" class="btn btn-secondary" type="button">저장한 퇴원 안내 불러오기</button><button id="saveClinicPreset" class="btn btn-ghost" type="button">현재 안내를 병원 서식으로 저장</button><button id="deleteClinicPreset" class="btn btn-ghost" type="button">저장한 서식 삭제</button></div><div id="clinicPresetStatus" class="preset-status"></div>
+              <div class="wizard-pane-title"><div><h4>개별 안내</h4><p>이번 환자에게 필요한 내용만 입력합니다. 공통 보호자 안내자료보다 이 지시가 우선합니다.</p></div><span class="memory-badge">작성 중에는 이 탭에서 유지</span></div>
+              <div class="preset-toolbar"><button id="applyClinicPreset" class="btn btn-secondary" type="button">병원 서식 불러오기</button><button id="saveClinicPreset" class="btn btn-ghost" type="button">병원 서식으로 저장</button><button id="deleteClinicPreset" class="btn btn-ghost" type="button">저장한 서식 삭제</button></div><div id="clinicPresetStatus" class="preset-status"></div>
               <div class="quick-draft"><span>현재 질환의 기존 교육내용에서 식사·활동·보호 관련 문구를 찾아 <b>빈칸에만</b> 초안으로 넣습니다.</span><button id="applyTemplateDraft" class="btn btn-secondary" type="button">초안 빠르게 채우기</button></div>
               <div class="discharge-panel" style="margin-top:0">
                 <div class="discharge-grid">
@@ -1437,41 +1437,34 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
             </div>
 
             <div class="wizard-pane" data-wizard-pane="3">
-              <div class="wizard-pane-title"><div><h4>③ 복약정보</h4><p>약 이름·용량·횟수·시간·투약일수를 입력하면 복약표와 투약기간에 맞는 체크표가 자동 생성됩니다. EOD는 2일에 1회로 표시됩니다.</p></div><span class="privacy-badge">입력 중 · 자료 게시·일정 등록 시 서버 저장</span></div>
-              <div class="med-preset-bar">
-                <button class="med-preset" type="button" data-med-preset="qd">+ 하루 1회 · 08:00</button>
-                <button class="med-preset" type="button" data-med-preset="bid">+ 하루 2회 · 08/20시</button>
-                <button class="med-preset" type="button" data-med-preset="tid">+ 하루 3회 · 8시간 간격</button>
-                <button class="med-preset" type="button" data-med-preset="qid">+ 하루 4회 · 6시간 간격</button>
-                <button class="med-preset" type="button" data-med-preset="eod">+ EOD · 2일에 1회 · 08:00</button>
-                <button class="med-preset" type="button" data-med-preset="blank">+ 빈 약 카드</button>
-              </div>
+              <div class="wizard-pane-title"><div><h4>복약 안내</h4><p>약을 추가하면 복약표와 날짜별 투약 체크표에 반영됩니다.</p></div><span class="privacy-badge">입력 중 · 자료 게시·일정 등록 시 서버 저장</span></div>
+              
               <div class="medication-panel" style="margin-top:0">
                 <div id="medicationRows" class="medication-rows"></div>
-                <div class="medication-actions"><button id="addMedication" class="btn btn-secondary" type="button">+ 새 약 추가</button><span>최대 8종 · 비슷한 처방은 <b>복제</b> 후 수정하세요.<br>투약시간과 <b>투약일수</b>를 입력하면 약별 기간에 맞춰 체크표가 자동 생성됩니다. EOD는 관리 시작일 기준 격일로 계산합니다.</span></div>
+                <div class="medication-actions"><button id="addMedication" class="btn btn-secondary" type="button">+ 새 약 추가</button><span>최대 8종 · 같은 용법은 약 카드의 복제로 추가하세요.</span></div>
                 <div id="medSchedulePreview" class="med-schedule-preview"></div>
               </div>
             </div>
 
             <div class="wizard-pane" data-wizard-pane="4">
-              <div class="wizard-pane-title"><div><h4>④ 재진 일정</h4><p>퇴원일 기준 D+ 날짜를 자동 계산하거나 직접 날짜를 지정합니다.</p></div></div>
+              <div class="wizard-pane-title"><div><h4>재진 일정</h4><p>관리 시작일 기준으로 재진일을 계산합니다.</p></div></div>
               <div class="recheck-panel">
                 <div class="recheck-big"><div><label class="field-label" for="recheckMode">재진 시점</label><select id="recheckMode" class="input"><option value="">미정 / 별도 안내</option><option value="3">D+3</option><option value="7">D+7</option><option value="14" selected>D+14</option><option value="30">D+30</option><option value="60">D+60</option><option value="custom">직접 날짜 지정</option></select></div><div><label class="field-label" for="recheckManual">직접 날짜</label><input id="recheckManual" class="input hidden" type="date" min="1900-01-01" max="2099-12-31" autocomplete="off" /></div></div>
-                <div id="recheckResult" class="recheck-result">퇴원일을 입력하면 재진 날짜를 자동 계산합니다.</div>
+                <div id="recheckResult" class="recheck-result">관리 시작일을 입력하면 재진 날짜를 계산합니다.</div>
                 <div class="calendar-action"><button id="downloadCalendarBtn" class="btn btn-secondary" type="button">재진 일정 파일(.ics) 다운로드</button><span id="calendarStatus" class="calendar-status">재진 날짜가 정해지면 활성화됩니다.</span></div>
                 <div class="recheck-help">재진 일정은 보호자 PDF·직원용 체크리스트·모바일 카드에 함께 반영됩니다. 개별 환자 상태에 따라 담당 수의사가 최종 확인해주세요.</div>
               </div>
             </div>
 
             <div class="wizard-pane output-section-compact" data-wizard-pane="5">
-              <div class="wizard-pane-title"><div><h4>⑤ 자료 확인·게시·저장</h4><p>자료를 확인한 뒤 HOME에 게시하거나 파일로 저장하세요. 후속관리는 아래 버튼으로 이어갈 수 있습니다.</p></div></div>
+              <div class="wizard-pane-title"><div><h4>확인·전달</h4><p>전달할 자료와 전달 방법을 선택하세요.</p></div></div>
               <div id="readinessPanel" class="readiness-panel"></div>
-              <label class="field-label">출력물 선택 · 미리보기 · 다운로드</label>
+              <label class="field-label">전달할 자료</label>
               <div id="outputChooser" class="output-chooser">
-                <div class="output-option active selected" data-output="pdf"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="pdf" checked /><span class="output-copy"><b>고급 보호자 자료</b><small>8P · PDF 또는 페이지별 이미지</small></span></label><button class="output-preview-btn" type="button" data-preview-output="pdf">미리보기</button></div>
-                <div class="output-option" data-output="summary"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="summary" /><span class="output-copy"><b>퇴원 1P 요약</b><small>당일 핵심만 한 장</small></span></label><button class="output-preview-btn" type="button" data-preview-output="summary">미리보기</button></div>
-                <div class="output-option" data-output="meds"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="meds" /><span class="output-copy"><b>복약 안내표 · 문서</b><small>약 이름·용량·횟수·시간을 안내하는 문서</small></span></label><button class="output-preview-btn" type="button" data-preview-output="meds">미리보기</button></div>
-                <div class="output-option" data-output="medcheck"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="medcheck" /><span class="output-copy"><b>투약 체크표 · 문서</b><small>투약 후 직접 체크하는 날짜·시간별 문서</small></span></label><button class="output-preview-btn" type="button" data-preview-output="medcheck">미리보기</button></div>
+                <div class="output-option active selected" data-output="pdf"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="pdf" checked /><span class="output-copy"><b>보호자 안내자료</b><small>8P · PDF 또는 페이지별 이미지</small></span></label><button class="output-preview-btn" type="button" data-preview-output="pdf">미리보기</button></div>
+                <div class="output-option" data-output="summary"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="summary" /><span class="output-copy"><b>핵심 요약 · 1장</b><small>오늘의 개별 안내와 재진 일정</small></span></label><button class="output-preview-btn" type="button" data-preview-output="summary">미리보기</button></div>
+                <div class="output-option" data-output="meds"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="meds" /><span class="output-copy"><b>복약 안내표</b><small>약 이름·용량·횟수·시간을 안내하는 문서</small></span></label><button class="output-preview-btn" type="button" data-preview-output="meds">미리보기</button></div>
+                <div class="output-option" data-output="medcheck"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="medcheck" /><span class="output-copy"><b>투약 체크표</b><small>투약 후 직접 체크하는 날짜·시간별 문서</small></span></label><button class="output-preview-btn" type="button" data-preview-output="medcheck">미리보기</button></div>
                 <div class="output-option" data-output="kakao"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="kakao" /><span class="output-copy"><b>카카오용 문구</b><small>복사·TXT 저장 후 카카오톡에서 직접 전송</small></span></label><button class="output-preview-btn" type="button" data-preview-output="kakao">미리보기</button></div>
                 <div class="output-option" data-output="sms"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="sms" /><span class="output-copy"><b>문자용 안내 문구</b><small>복사·TXT 저장용 · 여기서는 발송하지 않습니다</small></span></label><button class="output-preview-btn" type="button" data-preview-output="sms">미리보기</button></div>
                 <div class="output-option" data-output="d1"><label class="output-select-wrap"><input class="output-select" type="checkbox" value="d1" /><span class="output-copy"><b>D+1 체크카드</b><small>질환별 첫날 핵심</small></span></label><button class="output-preview-btn" type="button" data-preview-output="d1">미리보기</button></div>
@@ -1506,12 +1499,12 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
                 <p class="individual-download-note">브라우저가 여러 파일 다운로드 허용을 물으면 허용해주세요. 차단되면 각 파일의 ‘다운로드’를 하나씩 누르면 됩니다.</p>
               </div>
               <div id="mobileDayControl" class="mobile-day-control hidden"><label class="field-label" for="mobileDaySelect">모바일 카드 시점</label><select id="mobileDaySelect" class="input"><option value="1">D+1</option><option value="3">D+3</option><option value="7">D+7</option><option value="14">D+14</option></select></div>
-              <div class="info-box"><strong>병원정보 자동 반영</strong><span>병원명 · 로고 · 대표원장 · 대표전화 · 주소 · 홈페이지 · 라이선스 번호</span></div>
+              
               <section class="builder-delivery-options" aria-label="자료 게시와 저장">
-                <div class="builder-followup-handoff builder-home-send"><b>HOME에 자료 게시</b><span>선택한 고급 보호자 자료·퇴원 요약·투약 체크표를 PDF로 확인한 뒤 HOME 자료함에 게시합니다.</span><button id="sendBuilderMaterialsBtn" class="btn btn-primary" type="button">보호자 HOME에 게시</button><small>문자는 발송하지 않습니다. 게시 후 알림이 켜진 연결 기기에 푸시를 시도하며, 수신 여부는 보장되지 않습니다.</small></div>
+                <div class="builder-followup-handoff builder-home-send"><b>HOME에 자료 게시</b><span>선택한 자료를 PDF로 확인한 뒤 보호자의 HOME 자료함에 게시합니다.</span><button id="sendBuilderMaterialsBtn" class="btn btn-primary" type="button">보호자 HOME에 게시</button><small>문자는 발송하지 않습니다. 게시 후 알림이 켜진 연결 기기에 푸시를 시도하며, 수신 여부는 보장되지 않습니다.</small></div>
                 <div class="builder-save-options"><b>파일로 저장하거나 인쇄하기</b><div class="output-actions"><div class="output-action-target"><p id="downloadTargetSummary"></p><button id="generateOutputBtn" class="btn btn-secondary">선택한 자료 작성 · 다운로드</button></div><div class="output-action-target"><p id="previewTargetSummary"></p><button id="secondaryOutputBtn" class="btn btn-secondary">현재 미리보기 인쇄 / PDF 저장</button></div></div><small>문서 저장·인쇄와 HOME 복약 일정·알림 등록은 별도입니다.</small></div>
               </section>
-              <div class="builder-followup-handoff builder-next-work"><b>다음 업무 · 후속관리</b><span>출력·게시를 마친 뒤 이동하세요. 현재 환자정보와 질환·복약 입력을 이어서 사용합니다.</span><button id="continueToFollowupBtn" class="btn btn-secondary" type="button">현재 정보로 후속관리 계속 →</button></div>
+              <div class="builder-followup-handoff builder-next-work"><b>후속관리 연결</b><span>현재 환자와 복약 정보를 이어서 사용합니다.</span><button id="continueToFollowupBtn" class="btn btn-secondary" type="button">현재 정보로 후속관리 계속 →</button></div>
               <p id="outputHint" class="output-hint">여러 출력물은 개별 파일 또는 ZIP으로 받을 수 있습니다. 파란 테두리는 현재 미리보기 항목입니다.</p>
               <button class="btn btn-ghost btn-block" data-go="settings">병원정보 수정</button>
             </div>
@@ -5040,7 +5033,7 @@ function beginNewCase(confirmFirst=false,silent=false){
 function clinicDraftBadge({active,phase='editing',patientName='',topic='',samePatient=true}){if(!active)return '자료 작성 전';if(!samePatient)return '작성 환자 확인 필요';if(!patientName.trim())return '자료 작성 중 · 환자 확인 필요';const label=({editing:'자료 작성 중',generated:'자료 출력 완료',followup:'후속관리 중',completed:'자료 작성 완료'})[phase]||'자료 작성 중';return [label,patientName,topic].filter(Boolean).join(' · ');}
 function renderGlobalCaseBadge(){const el=$('globalCaseBadge');readCaseInfoFromForm();const t=templates.find(x=>x.id===currentTemplateId)||templates[0],phaseMap={editing:['작성 중','progress'],generated:['출력 완료','ok'],followup:['후속관리 중','progress'],completed:['완료','ok']},ph=phaseMap[currentCasePhase]||['작성 중','progress'],who=caseInfo.patientName||'환자명 미입력',topic=clinicEducationReady()?(templateDisplayTitle(t)||'자료 미선택'):'보호자 안내자료 선택 필요';if(el){const selected=window.crmMaterialContext?.(),draft=window.crmCurrentPatient?.();el.textContent=clinicDraftBadge({active:caseHasActiveWork(),phase:currentCasePhase,patientName:caseInfo.patientName||'',topic,samePatient:!selected?.patientId||selected.patientId===draft?.patientId});el.title=el.textContent;}const bar=$('caseContextBar'),active=caseHasActiveWork();if(el)el.hidden=!active;if($('globalNewCase'))$('globalNewCase').hidden=!active;if(bar)bar.classList.toggle('hidden',!active);const st=$('caseContextState');if(st){st.className=`ux-state ${ph[1]}`;st.textContent=ph[0];}if($('caseContextTitle'))$('caseContextTitle').textContent=`${who} · ${topic}`;if($('caseContextMeta')){const d=caseInfo.dischargeDate?` · 관리 시작 ${caseInfo.dischargeDate}`:'';$('caseContextMeta').textContent=(currentCasePhase==='followup'?'후속관리 설정':currentCasePhase==='generated'?'출력 완료':`자료 작성 ${currentWizardStep}/5 · ${wizardStepName(currentWizardStep)}`)+d;}updateDailyWorkflowIndicators();}
 function resetDiseaseSpecificCaseForTemplate(nextTemplateId){readCaseInfoFromForm();const keep={patientName:caseInfo.patientName,guardianName:caseInfo.guardianName,dischargeDate:caseInfo.dischargeDate||localTodayIso(),includeNames:caseInfo.includeNames};currentTemplateId=nextTemplateId;clearPreparedIndividualArtifacts();resetFollowupCaseNonce();resetMessagingCaseState();resetFollowupMessageEdits();activePatientJourney=null;activeJourneyStageSelection=[];patientJourneySelectedId='';patientJourneyBrowserSyncKey='';try{sessionStorage.removeItem(patientJourneySessionKey());}catch{}clearCaseInfo();caseInfo.patientName=keep.patientName;caseInfo.guardianName=keep.guardianName;caseInfo.dischargeDate=keep.dischargeDate;caseInfo.includeNames=keep.includeNames;if($('patientName'))$('patientName').value=keep.patientName;if($('guardianName'))$('guardianName').value=keep.guardianName;if($('dischargeDate'))$('dischargeDate').value=keep.dischargeDate;if($('includePatientNames'))$('includePatientNames').checked=keep.includeNames;currentCasePhase='editing';currentWizardStep=1;renderBuilder();renderGlobalCaseBadge();}
-function switchCaseTemplate(nextTemplateId,{preserveIdentity=true,notify=true}={}){const next=templates.find(x=>x.id===nextTemplateId);if(!next)return false;if(next.id===currentTemplateId){clinicConfirmEducation();return true;}if(preserveIdentity)resetDiseaseSpecificCaseForTemplate(next.id);else{currentTemplateId=next.id;beginNewCase(false,true);}clinicSetEducationChoice(next.id);renderSelect();renderBuilder();renderBuilderContext();markRecentTemplate(currentTemplateId);applyPackagePreset(true);updateReadiness();renderTemplateSearch();if(notify)toast(`보호자 안내자료를 ${templateDisplayTitle(next)}(으)로 변경했습니다. 환자명·보호자명·관리 시작일은 유지하고 이전 질환의 개별지시·복약·후속관리 계획은 자동 초기화했습니다.`);return true;}
+function switchCaseTemplate(nextTemplateId,{preserveIdentity=true,notify=true}={}){const next=templates.find(x=>x.id===nextTemplateId);if(!next)return false;if(next.id===currentTemplateId){clinicConfirmEducation();return true;}if(preserveIdentity&&window.CarestepBuilderFlow&&!window.CarestepBuilderFlow.confirmTemplateChange())return false;if(preserveIdentity)resetDiseaseSpecificCaseForTemplate(next.id);else{currentTemplateId=next.id;beginNewCase(false,true);}clinicSetEducationChoice(next.id);renderSelect();renderBuilder();renderBuilderContext();markRecentTemplate(currentTemplateId);applyPackagePreset(true);updateReadiness();renderTemplateSearch();if(notify)toast(`보호자 안내자료를 ${templateDisplayTitle(next)}(으)로 변경했습니다. 환자명·보호자명·관리 시작일은 유지하고 이전 질환의 개별지시·복약·후속관리 계획은 자동 초기화했습니다.`);return true;}
 
 
 
@@ -5233,7 +5226,7 @@ function recordPilotUsage(type,extra={}){
   workflowSettings.usage=[...(workflowSettings.usage||[]),event].slice(-500);saveWorkflowSettings();renderPilotDashboard();saasRecordUsageEvent(event.type,event.templateId,{elapsedMs:event.elapsedMs,fileCount:event.fileCount,outputs:event.outputs});return event.id;
 }
 function templateNameById(id){return templateDisplayTitle(templates.find(t=>t.id===id)||{})||id||'--';}
-function outputLabel(k){if(k==='medcheck')return medicationCheckLabel();const m={package:'보호자 안내자료 묶음',individual_batch:'개별 출력물 묶음',pdf:'보호자 PDF',summary:'퇴원 1P 요약',meds:'복약 안내표',kakao:'카카오톡용 안내 문구',sms:'문자용 안내 문구',d1:'D+1 체크카드',d3:'D+3 체크카드',d7:'D+7 체크카드',d14:'D+14 체크카드',mobile:'모바일 카드',mobileall:'모바일 4종',mobile4:'모바일 4종',calendar:'재진 일정 파일',followup:'후속관리 자동화',staff:'직원 체크리스트'};return m[k]||k;}
+function outputLabel(k){if(k==='medcheck')return medicationCheckLabel();const m={package:'보호자 안내자료 묶음',individual_batch:'개별 출력물 묶음',pdf:'보호자 안내자료',summary:'핵심 요약 · 1장',meds:'복약 안내표',kakao:'카카오톡용 안내 문구',sms:'문자용 안내 문구',d1:'D+1 체크카드',d3:'D+3 체크카드',d7:'D+7 체크카드',d14:'D+14 체크카드',mobile:'모바일 카드',mobileall:'모바일 4종',mobile4:'모바일 4종',calendar:'재진 일정 파일',followup:'후속관리 자동화',staff:'직원 체크리스트'};return m[k]||k;}
 function pilotPackageEvents(){return (workflowSettings.usage||[]).filter(e=>e.type==='package');}
 function pilotStats(){
   const pkg=pilotPackageEvents(); const ms=pkg.map(e=>Number(e.elapsedMs)||0).filter(Boolean).sort((a,b)=>a-b); const avg=ms.length?ms.reduce((a,b)=>a+b,0)/ms.length:0; const med=ms.length?(ms.length%2?ms[(ms.length-1)/2]:(ms[ms.length/2-1]+ms[ms.length/2])/2):0; const best=ms.length?ms[0]:0; const under=ms.length?ms.filter(x=>x<=120000).length/ms.length*100:0; const ratings=(workflowSettings.feedback||[]).map(f=>Number(f.rating)).filter(x=>x>0); const rating=ratings.length?ratings.reduce((a,b)=>a+b,0)/ratings.length:0; return {pkgCount:pkg.length,avg,med,best,under,rating,feedbackCount:ratings.length};
@@ -5552,12 +5545,12 @@ function customPlanHtml(){
 }
 function updateRecheckPreview(){
   readCaseInfoFromForm();
-  const manual=$('recheckManual'); if(manual) manual.classList.toggle('hidden',caseInfo.recheckMode!=='custom');
+  const manual=$('recheckManual'); if(manual){manual.classList.toggle('hidden',caseInfo.recheckMode!=='custom');manual.parentElement.hidden=caseInfo.recheckMode!=='custom';}
   const el=$('recheckResult');
   const label=recheckLabel();
   if(el){
     if(caseInfo.recheckMode==='custom') el.innerHTML=caseInfo.recheckManual?`<b>재진</b> ${escapeHtml(label)}`:'직접 날짜를 선택해주세요.';
-    else if(caseInfo.recheckMode) el.innerHTML=recheckDateValue()?`<b>재진</b> ${escapeHtml(label)}`:`퇴원일 입력 후 <b>D+${escapeHtml(caseInfo.recheckMode)}</b> 날짜가 자동 계산됩니다.`;
+    else if(caseInfo.recheckMode) el.innerHTML=recheckDateValue()?`<b>재진</b> ${escapeHtml(label)}`:`관리 시작일 입력 후 <b>D+${escapeHtml(caseInfo.recheckMode)}</b> 날짜가 계산됩니다.`;
     else el.textContent='재진일은 별도로 안내하는 것으로 표시됩니다.';
   }
   updateCalendarAction();
@@ -5941,11 +5934,11 @@ function renderTemplateSearch(){
   if(!input||!results||!selected)return;
   const current=templates.find(t=>t.id===currentTemplateId)||templates[0];
   if(current){
-    selected.innerHTML=`<div><b>${clinicEducationReady()?'선택된 보호자 안내자료':'예시 보호자 안내자료 · 선택 필요'} · ${escapeHtml(templateDisplayTitle(current))}</b><span>다른 자료로 바꾸면 환자명·보호자명·관리 시작일은 유지하고 이전 질환의 개별지시·복약·후속관리 계획은 자동 초기화됩니다.</span></div><div class="template-classification"><span class="category">${escapeHtml(categoryLabel(current.category))}</span><span class="species-badge">${escapeHtml(templateSpeciesLabel(current))}</span></div>`;
+    selected.innerHTML=`<div><b>${clinicEducationReady()?'선택된 보호자 안내자료':'예시 보호자 안내자료 · 선택 필요'} · ${escapeHtml(templateDisplayTitle(current))}</b><span></span></div><div class="template-classification"><span class="category">${escapeHtml(categoryLabel(current.category))}</span><span class="species-badge">${escapeHtml(templateSpeciesLabel(current))}</span></div>`;
   }else selected.innerHTML='<div><b>보호자 안내자료를 선택해주세요.</b><span>위 검색창에서 질환명이나 증상을 검색하세요.</span></div>';
   const confirmButton=$('confirmBuilderEducation');if(confirmButton)confirmButton.hidden=clinicEducationReady()||!current;
   const q=input.value.trim();
-  if(!q){results.innerHTML='';if(hint)hint.innerHTML='검색어를 입력하면 관련 보호자 안내자료만 표시됩니다. <b>예: 췌장염, 구토, 피부, 방광염</b>';return;}
+  if(!q){results.innerHTML='';if(hint)hint.textContent='';return;}
   const matches=templateSearchMatches(q);
   if(hint)hint.innerHTML=`<span class="template-result-count">${matches.length}개 결과</span> · 가장 관련도가 높은 순으로 표시합니다.`;
   results.innerHTML=matches.length?matches.map(t=>`<button type="button" class="template-search-result" data-template-search-id="${escapeHtml(t.id)}"><span class="category">${escapeHtml(categoryLabel(t.category))}</span><span class="species-badge">${escapeHtml(templateSpeciesLabel(t))}</span><strong>${escapeHtml(templateDisplayTitle(t))}</strong><small>${escapeHtml(templateDisplayShort(t)||t.description||'')}</small></button>`).join(''):`<div class="template-search-empty"><b>검색 결과가 없습니다.</b><br>질환명 대신 증상이나 진료과를 입력해보세요. 예: ‘가려움’, ‘눈’, ‘소변’, ‘구토’</div>`;
@@ -8826,7 +8819,7 @@ function renderCurrentOutput(){
   readCaseInfoFromForm(); const medPages=medicationPageCount(); const pdfCount=8+medPages;
   const statusMap={pdf:`${pdfCount}P`,summary:'1P',meds:medPages?`${medPages}P`:'MEDS',medcheck:'1P',kakao:'KAKAO',sms:'SMS',d1:'D+1',d3:'D+3',d7:'D+7',d14:'D+14',mobile:'MOBILE',mobile4:'4 FILE',staff:'STAFF'};
   $('selectedStatus').textContent=`${categoryLabel(t.category)} · ${templateSpeciesLabel(t)} · ${statusMap[currentOutput]||''}`;
-  const labels={pdf:'고급 보호자 자료 미리보기',summary:'퇴원 당일 1페이지 요약 미리보기',meds:'복약 안내표 미리보기',medcheck:medicationCheckLabel()+' 미리보기',kakao:'카카오톡 문구 미리보기',sms:'문자 문구 미리보기',d1:'D+1 체크카드 미리보기',d3:'D+3 체크카드 미리보기',d7:'D+7 체크카드 미리보기',d14:'D+14 체크카드 미리보기',mobile:'휴대폰 카드 미리보기',mobile4:'D+1·3·7·14 모바일 카드 4종',staff:'직원용 퇴원교육 미리보기'};
+  const labels={pdf:'보호자 안내자료 미리보기',summary:'핵심 요약 미리보기',meds:'복약 안내표 미리보기',medcheck:medicationCheckLabel()+' 미리보기',kakao:'카카오톡 문구 미리보기',sms:'문자 문구 미리보기',d1:'D+1 체크카드 미리보기',d3:'D+3 체크카드 미리보기',d7:'D+7 체크카드 미리보기',d14:'D+14 체크카드 미리보기',mobile:'휴대폰 카드 미리보기',mobile4:'D+1·3·7·14 모바일 카드 4종',staff:'직원용 퇴원교육 미리보기'};
   $('previewLabel').textContent=labels[currentOutput]||'미리보기';
   $('mobileDayControl')?.classList.toggle('hidden',currentOutput!=='mobile');
   const btn=$('generateOutputBtn'), sec=$('secondaryOutputBtn'), hint=$('outputHint');
@@ -8860,7 +8853,7 @@ function beginBuilderEdit(target){
   const field=$(route[1]);if(field){const input=target==='medication'?field.querySelector('input'):field;input?.focus({preventScroll:true});field.scrollIntoView({block:'center',behavior:'smooth'});}
 }
 function returnToBuilderOutput(){readCaseInfoFromForm();builderEditReturnKey=null;setWizardStep(5);}
-function wizardStepName(step){return ({1:'환자',2:'퇴원지시',3:'복약',4:'재진',5:'출력'})[step]||'';}
+function wizardStepName(step){return ({1:'환자·자료',2:'개별 안내',3:'복약',4:'재진',5:'확인·전달'})[step]||'';}
 function setWizardStep(step){
   if(Number(step)>1&&!clinicEducationReady()){toast('이번 진료에 맞는 보호자 안내자료를 먼저 선택해주세요.');step=1;$('templateSearch')?.focus({preventScroll:true});}
   currentWizardStep=Math.max(1,Math.min(5,Number(step)||1));
@@ -8869,7 +8862,7 @@ function setWizardStep(step){
   const prog=$('wizardProgress'); if(prog) prog.style.width=`${currentWizardStep*20}%`;
   if($('wizardStepLabel')) $('wizardStepLabel').textContent=`${currentWizardStep} / 5 · ${wizardStepName(currentWizardStep)}`;
   if($('wizardPrev')) $('wizardPrev').disabled=currentWizardStep===1;
-  if($('wizardNext')) { const nextLabels={1:'다음: 퇴원지시 →',2:'다음: 복약 입력 →',3:'다음: 재진 일정 →',4:'다음: 출력 확인 →'}; $('wizardNext').textContent=nextLabels[currentWizardStep]||'다음 →'; $('wizardNext').disabled=currentWizardStep===5; $('wizardNext').style.visibility=currentWizardStep===5?'hidden':'visible'; }
+  if($('wizardNext')) { const nextLabels={1:'다음: 개별 안내 →',2:'다음: 복약 →',3:'다음: 재진 →',4:'다음: 확인·전달 →'}; $('wizardNext').textContent=nextLabels[currentWizardStep]||'다음 →'; $('wizardNext').disabled=currentWizardStep===5; $('wizardNext').style.visibility=currentWizardStep===5?'hidden':'visible'; }
   if(currentWizardStep===5){builderEditReturnKey=null;readCaseInfoFromForm();updateReadiness();renderCurrentOutput();}
   renderBuilderContext();
   const controls=document.querySelector('.builder-controls'); if(controls) controls.scrollTo({top:0,behavior:'smooth'});
@@ -10697,5 +10690,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-settings.js?v=20261103-settings-unified"></script>
 <link rel="stylesheet" href="clinic-followup-tasks.css?v=20261104-followup-controls">
 <script src="clinic-followup-tasks.js?v=20261104-followup-controls"></script>
+<link rel="stylesheet" href="builder-flow.css?v=20261105-compact">
+<script src="builder-flow.js?v=20261105-compact"></script>
 </body>
 </html>
