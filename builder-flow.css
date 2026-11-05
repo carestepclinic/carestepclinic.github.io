@@ -84,3 +84,27 @@ body.builder-guide-active #clinicSyncStatus[data-state="error"],body.builder-gui
 #builder.builder-flow #r61-builder-progress[data-phase="preview"][data-stale="false"]{display:none!important}
 #builder.builder-flow[data-delivery="file"] .readiness-home{display:none}
 #builder.builder-flow .readiness-home{margin-top:10px;padding-top:10px}
+
+/* Separate completion, delivery selection and viewing; keep navigation reachable. */
+#builder .wizard-step{flex-wrap:wrap;gap:3px;align-content:center}
+#builder .builder-step-state{flex-basis:100%;font-size:11px;line-height:1.3;font-weight:400;color:#526680}
+#builder .wizard-step.active .builder-step-state{color:inherit}
+#builder .wizard-nav{position:sticky;bottom:0;z-index:5;background:#fff;padding:10px 0 max(10px,env(safe-area-inset-bottom));border-top:1px solid #d7e2f3;box-shadow:0 -6px 10px #fff;flex-wrap:wrap;gap:6px}
+#builder .wizard-nav .btn{flex:1 1 auto}
+#builder #builderEditReturn{display:none!important}
+#builder .output-option.active:not(.selected){background:#fff;border-color:#d7e2f3;box-shadow:none}
+#builder .output-preview-btn[aria-pressed="true"]{color:#334b68;background:#edf1f6;border-color:#b9c7d9}
+#builder .builder-viewing-label{display:block;font-size:11px;color:#526680;font-weight:600;margin-top:4px}
+#builder .builder-extra-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+#builder .builder-extra-outputs .output-option{margin:0}
+#builder .recheck-big:has(#recheckManual.hidden)>div:first-child{grid-column:1/-1}
+#builder .builder-manage-options,#builder .builder-file-options{margin:10px 0;padding:8px 10px;border:1px solid #d7e2f3;border-radius:9px}
+#builder .builder-manage-options[open]>.btn{margin:8px 4px 0 0}
+#builder .builder-file-options .output-format-mode,#builder .builder-file-options .batch-download-mode{margin:8px 0 0}
+#builder .builder-optional-note{font-size:12px;color:#526680;line-height:1.5;margin:8px 0}
+#builder .builder-fix{display:block;margin-top:5px;min-height:32px;font-size:12px;padding:4px 8px}
+@media(max-width:500px){
+ #builder .builder-extra-grid{grid-template-columns:minmax(0,1fr)}
+ #builder .builder-step-state{font-size:10px}
+ #builder .wizard-nav #builderQuickReturn:not([hidden]){flex-basis:100%;order:3}
+}

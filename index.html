@@ -1382,7 +1382,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
               <div><span>입력한 진단·수술</span><strong id="builderContextProcedure">미입력</strong></div>
               <button id="builderChangeEducation" class="btn btn-secondary" type="button">보호자 안내자료 변경</button>
             </section>
-            <div id="builderEditReturn" class="builder-edit-return" hidden><span>수정 후 출력으로 돌아가 PDF를 다시 확인해주세요.</span><button id="builderReturnToOutput" class="btn btn-secondary" type="button">수정 후 출력으로</button></div>
+            <div id="builderEditReturn" class="builder-edit-return" hidden><span>수정한 내용을 확인·전달에서 다시 확인하세요.</span><button id="builderReturnToOutput" class="btn btn-secondary" type="button">확인·전달로 돌아가기</button></div>
             <div class="wizard-steps" id="wizardSteps">
               <button class="wizard-step active" type="button" data-wizard-step="1"><b>1</b><span>환자·자료</span></button>
               <button class="wizard-step" type="button" data-wizard-step="2"><b>2</b><span>개별 안내</span></button>
@@ -1423,7 +1423,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
             <div class="wizard-pane" data-wizard-pane="2">
               <div class="wizard-pane-title"><div><h4>개별 안내</h4><p>이번 환자에게 필요한 내용만 입력합니다. 공통 보호자 안내자료보다 이 지시가 우선합니다.</p></div><span class="memory-badge">작성 중에는 이 탭에서 유지</span></div>
               <div class="preset-toolbar"><button id="applyClinicPreset" class="btn btn-secondary" type="button">병원 서식 불러오기</button><button id="saveClinicPreset" class="btn btn-ghost" type="button">병원 서식으로 저장</button><button id="deleteClinicPreset" class="btn btn-ghost" type="button">저장한 서식 삭제</button></div><div id="clinicPresetStatus" class="preset-status"></div>
-              <div class="quick-draft"><span>현재 질환의 기존 교육내용에서 식사·활동·보호 관련 문구를 찾아 <b>빈칸에만</b> 초안으로 넣습니다.</span><button id="applyTemplateDraft" class="btn btn-secondary" type="button">초안 빠르게 채우기</button></div>
+              <div class="quick-draft"><span>현재 질환의 기존 교육내용에서 식사·활동·보호 관련 문구를 찾아 <b>빈칸에만</b> 초안으로 넣습니다.</span><button id="applyTemplateDraft" class="btn btn-secondary" type="button">기존 자료에서 안내 불러오기</button></div>
               <div class="discharge-panel" style="margin-top:0">
                 <div class="discharge-grid">
                   <div class="span-2"><label class="field-label" for="caseProcedure">진단 / 수술 / 시술명</label><input id="caseProcedure" class="input" maxlength="80" autocomplete="off" placeholder="예: 좌측 슬개골 내측탈구 교정술" /></div>
@@ -1479,8 +1479,8 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
               <div id="outputFormatMode" class="output-format-mode" aria-label="출력 파일 형식">
                 <div class="output-format-head"><b>저장할 파일 형식</b><span>파일 저장에 적용됩니다. HOME에는 PDF로 게시합니다.</span></div>
                 <div class="output-format-options">
-                  <label><input type="radio" name="outputFileFormat" value="png" checked><span><b>이미지 (PNG)</b><small>보호자 카톡·문자 전송 권장 · 여러 페이지는 페이지별 PNG</small></span></label>
-                  <label><input type="radio" name="outputFileFormat" value="pdf"><span><b>PDF</b><small>인쇄·문서 보관 권장 · 여러 페이지는 PDF 1개</small></span></label>
+                  <label><input type="radio" name="outputFileFormat" value="png"><span><b>이미지 (PNG)</b><small>보호자 카톡·문자 전송 권장 · 여러 페이지는 페이지별 PNG</small></span></label>
+                  <label><input type="radio" name="outputFileFormat" value="pdf" checked><span><b>PDF</b><small>인쇄·문서 보관 권장 · 여러 페이지는 PDF 1개</small></span></label>
                 </div>
                 <p id="outputFormatHint">카카오톡·문자용 안내 문구는 TXT로 저장하거나 복사합니다.</p>
               </div>
@@ -4514,7 +4514,7 @@ function updateSelectedOutputUi(){
   const modeHint=$('batchDownloadModeHint');if(modeHint)modeHint.textContent=mode==='individual'?'개별 파일을 먼저 준비한 뒤 파일별 다운로드 버튼으로 저장합니다.':'선택한 결과 파일을 ZIP 1개에 묶어 저장합니다.';
   const btn=$('generateOutputBtn');if(btn){btn.disabled=!selected.length;if(!selected.length)btn.textContent='출력물을 하나 이상 선택해주세요';else{const visualLabel=visualSelected?(format==='png'?'이미지':'PDF'):'';if(!needsMode)btn.textContent=visualSelected?`선택한 자료 ${visualLabel} 생성 · 다운로드`:'선택한 문구 복사';else if(mode==='individual')btn.textContent=`선택한 ${selected.length}종 ${visualLabel||'파일'} 개별 준비`;else btn.textContent=`선택한 ${selected.length}종 ${visualLabel||'파일'} ZIP 생성`;}}
   const fileTarget=$('downloadTargetSummary');if(fileTarget)fileTarget.textContent='파일·복사 대상 · '+targets.selectedLabel;
-  const previewTarget=$('previewTargetSummary');if(previewTarget)previewTarget.textContent=(targets.textOnly?'TXT 저장 대상 · ':'인쇄 대상 · ')+targets.previewLabel+(targets.previewSelected?'':' · 현재 미리보기만 선택됨');
+  const previewTarget=$('previewTargetSummary');if(previewTarget)previewTarget.textContent=(targets.textOnly?'TXT 저장 대상 · ':'인쇄 대상 · ')+targets.previewLabel+(targets.previewSelected?'':' · 전달 대상에 포함되지 않음');
   const secondary=$('secondaryOutputBtn');if(secondary)secondary.textContent=targets.textOnly?'현재 문구 TXT 저장':currentOutput==='mobile4'?'D+1 카드 인쇄 / PDF 저장':'현재 미리보기 인쇄 / PDF 저장';
 }
 
@@ -8813,6 +8813,7 @@ function renderMessageOutput(type){
   $('messagePreview').innerHTML=`<div class="message-sheet-head"><span class="page-kicker" style="color:#dbe6ff">${isSms?'SMS':'KAKAO TALK'} · CARESTEP</span><h3>${escapeHtml(templateDisplayTitle(t))}</h3><p>${isSms?'문자':'카카오톡'}에 붙여 넣을 안내 문구입니다. 복사·TXT 저장만 하며, 이 화면에서는 발송하지 않습니다.</p></div><div class="message-sheet-body"><div class="message-bubble ${isSms?'sms':''}" id="activeMessageText">${escapeHtml(text)}</div><div class="message-meta"><span>${text.length}자</span><span>${escapeHtml(hospitalName())}</span></div></div>`;
   $('pdfDocument').classList.add('hidden'); $('messagePreview').classList.remove('hidden'); $('phonePreview').classList.add('hidden');
 }
+function requestBuilderPreview(){if(window.CarestepBuilderFlow?.queuePreview)window.CarestepBuilderFlow.queuePreview();else renderCurrentOutput();}
 function renderCurrentOutput(){
   const t=templates.find(x=>x.id===currentTemplateId)||templates[0];
   document.querySelectorAll('.output-option').forEach(b=>b.classList.toggle('active',b.dataset.output===currentOutput));
@@ -8863,7 +8864,7 @@ function setWizardStep(step){
   if($('wizardStepLabel')) $('wizardStepLabel').textContent=`${currentWizardStep} / 5 · ${wizardStepName(currentWizardStep)}`;
   if($('wizardPrev')) $('wizardPrev').disabled=currentWizardStep===1;
   if($('wizardNext')) { const nextLabels={1:'다음: 개별 안내 →',2:'다음: 복약 →',3:'다음: 재진 →',4:'다음: 확인·전달 →'}; $('wizardNext').textContent=nextLabels[currentWizardStep]||'다음 →'; $('wizardNext').disabled=currentWizardStep===5; $('wizardNext').style.visibility=currentWizardStep===5?'hidden':'visible'; }
-  if(currentWizardStep===5){builderEditReturnKey=null;readCaseInfoFromForm();updateReadiness();renderCurrentOutput();}
+  if(currentWizardStep===5){builderEditReturnKey=null;readCaseInfoFromForm();updateReadiness();requestBuilderPreview();}
   renderBuilderContext();
   const controls=document.querySelector('.builder-controls'); if(controls) controls.scrollTo({top:0,behavior:'smooth'});
 }
@@ -8940,7 +8941,7 @@ function clinicHomePreflight({context,bound,authenticated,educationReady,outputs
     if(context.homeStatus!=='linked')issues.push(context.homeStatus==='invited'?'HOME 초대됨 · 보호자 가입 대기':['not_invited','not_linked'].includes(context.homeStatus)?'보호자 HOME 연결 필요':'HOME 연결 상태 확인 필요');
   }
   if(!educationReady)issues.push('보호자 안내자료 선택 필요');
-  if(!eligible.length)issues.push('게시할 고급 보호자 자료·퇴원 요약·투약 체크표 선택 필요');
+  if(!eligible.length)issues.push('게시할 보호자 안내자료·핵심 요약·투약 체크표 선택 필요');
   if(eligible.includes('medcheck')&&!medicationValid)issues.push('투약 체크표의 약·기간 입력 확인 필요');
   return {ready:issues.length===0,issues,eligible};
 }
@@ -8952,14 +8953,18 @@ function updateReadiness(){
   const checks=[
     [!!hospital.name,'병원정보',hospital.name?'병원명이 저장되어 있습니다.':'병원정보에 병원명을 입력해주세요.'],
     [clinicEducationReady(),'보호자 안내자료',clinicEducationReady()?'질환/수술 자료가 선택되어 있습니다.':'예시 자료입니다. 이번 진료에 맞는 보호자 안내자료를 직접 선택해주세요.'],
-    [!!caseInfo.dischargeDate,'퇴원일','퇴원일을 넣으면 D+ 날짜가 실제 날짜로 표시됩니다.'],
+    [!!caseInfo.dischargeDate,'관리 시작일','관리 시작일을 입력하면 안내 날짜가 계산됩니다.'],
     [!!caseInfo.procedure,'진단·수술명','개별 진단/수술명을 넣으면 보호자 자료가 더 명확해집니다.'],
     [medWarn.length===0,'복약 입력',meds.length?`${meds.length}종 입력 · ${medWarn.length?'확인 필요':'형식 확인 완료'}${medicationCheckMeta(meds).valid?` · 체크표 ${medicationCheckMeta(meds).maxDays}일`:''}`:'약이 없으면 복약자료는 자동 제외됩니다.'],
     [!!recheckIso,'재진 일정',recheckIso?recheckLabel():'재진 날짜 미정 · 일정 파일은 자동 제외']
   ];
-  const remaining=checks.filter(x=>!x[0]).length;
+  const optionalTitles=new Set(['진단·수술명','재진 일정']);
+  const remaining=checks.filter(x=>!x[0]&&!optionalTitles.has(x[1])&&x[1]!=='복약 입력').length+medWarn.length;
   const preflight=clinicHomePreflight({context:window.crmMaterialContext?.(),bound:window.crmCurrentPatient?.(),authenticated:saasMode==='auth',educationReady:clinicEducationReady(),outputs:selectedOutputTypes(),medicationValid:medicationCheckMeta(meds).valid});
-  const html=`<div class="readiness-head"><strong>자료 입력 확인</strong><span class="readiness-score">${remaining?'확인할 항목 '+remaining+'개':'입력 형식 확인 완료'}</span></div><div class="readiness-list">${checks.map(([good,title,desc])=>`<div class="ready-item ${good?'ok':'warn'}"><span class="ready-dot">${good?'✓':'!'}</span><div><b>${escapeHtml(title)}</b><br>${escapeHtml(desc)}</div></div>`).join('')}${medWarn.slice(0,3).map(w=>`<div class="ready-item warn"><span class="ready-dot">!</span><div><b>입력 확인</b><br>${escapeHtml(w)}</div></div>`).join('')}</div><div class="readiness-home" data-ready="${preflight.ready}"><strong>HOME에 공개 전 확인</strong>${preflight.ready?'<p>게시창에서 최종 확인</p>':'<ul>'+preflight.issues.map(issue=>'<li>'+escapeHtml(issue)+'</li>').join('')+'</ul>'}<small>현재 화면 기준입니다. 게시창에서 연결 상태와 PDF 원본을 최종 확인합니다.</small></div>`;
+  const fixTargets={'병원정보':['settings',''],'보호자 안내자료':[1,'templateSearch'],'관리 시작일':[1,'dischargeDate'],'복약 입력':[3,'medicationRows']};
+  const fixButton=title=>{const target=fixTargets[title];return target?'<button type="button" class="btn btn-secondary builder-fix" data-builder-fix="'+target[0]+'" data-builder-field="'+target[1]+'">입력으로 이동</button>':'';};
+  const optional=checks.filter(x=>!x[0]&&optionalTitles.has(x[1])).map(x=>x[1]+' '+(x[1]==='재진 일정'?'미정':'미입력'));
+  const html='<div class="readiness-head"><strong>필수 입력 확인</strong><span class="readiness-score">'+(remaining?'확인 필요 '+remaining+'개':'필수 입력 확인됨')+'</span></div><div class="readiness-list">'+checks.filter(x=>!x[0]&&!optionalTitles.has(x[1])&&x[1]!=='복약 입력').map(x=>'<div class="ready-item warn"><span class="ready-dot">!</span><div><b>'+escapeHtml(x[1])+'</b><br>'+escapeHtml(x[2])+fixButton(x[1])+'</div></div>').join('')+medWarn.map(w=>'<div class="ready-item warn"><span class="ready-dot">!</span><div>'+escapeHtml(w)+fixButton('복약 입력')+'</div></div>').join('')+'</div>'+(optional.length?'<p class="builder-optional-note">선택 입력 · '+optional.map(escapeHtml).join(' · ')+'</p>':'')+'<div class="readiness-home" data-ready="'+preflight.ready+'"><strong>HOME 게시 준비</strong>'+(preflight.ready?'<p>게시창에서 최종 확인</p>':'<ul>'+preflight.issues.map(issue=>'<li>'+escapeHtml(issue)+'</li>').join('')+'</ul>')+'<small>게시창에서 연결 상태와 PDF 원본을 확인합니다.</small></div>';
   if($('readinessPanel')&&$('readinessPanel').innerHTML!==html)$('readinessPanel').innerHTML=html;
   const checkMeta=medicationCheckMeta(meds);
   [['packageMeds','packageMedsLabel']].forEach(([bid,lid])=>{
@@ -10049,18 +10054,18 @@ document.querySelectorAll('#pilotRatingRow [data-rating]').forEach(b=>b.addEvent
 document.querySelectorAll('#pilotFeedbackTags [data-feedback-tag]').forEach(b=>b.addEventListener('click',()=>{const tag=b.dataset.feedbackTag;b.classList.toggle('active');pendingPilotTags=b.classList.contains('active')?[...new Set([...pendingPilotTags,tag])]:pendingPilotTags.filter(x=>x!==tag);}));
 $('savePilotFeedback')?.addEventListener('click',savePilotFeedback);
 
-['patientName','guardianName'].forEach(id=>$(id)?.addEventListener('input',()=>{ readCaseInfoFromForm(); currentCasePhase='editing';renderCurrentOutput(); updateReadiness();renderGlobalCaseBadge();if(id==='patientName'&&$('followupCalendarIncludePatient')?.checked)queueFollowupCalendarReconcile('patient_name_changed'); }));
-$('dischargeDate')?.addEventListener('change',()=>{ readCaseInfoFromForm(); currentCasePhase='editing';updateCaseDatePreview(); updateRecheckPreview(); renderCurrentOutput(); updateReadiness(); renderFollowupCenter();renderGlobalCaseBadge();queueUnifiedFollowupChange('start_date_changed'); });
-$('includePatientNames')?.addEventListener('change',()=>{ readCaseInfoFromForm(); renderCurrentOutput(); });
+['patientName','guardianName'].forEach(id=>$(id)?.addEventListener('input',()=>{ readCaseInfoFromForm(); currentCasePhase='editing';requestBuilderPreview(); updateReadiness();renderGlobalCaseBadge();if(id==='patientName'&&$('followupCalendarIncludePatient')?.checked)queueFollowupCalendarReconcile('patient_name_changed'); }));
+$('dischargeDate')?.addEventListener('change',()=>{ readCaseInfoFromForm(); currentCasePhase='editing';updateCaseDatePreview(); updateRecheckPreview(); requestBuilderPreview(); updateReadiness(); renderFollowupCenter();renderGlobalCaseBadge();queueUnifiedFollowupChange('start_date_changed'); });
+$('includePatientNames')?.addEventListener('change',()=>{ readCaseInfoFromForm(); requestBuilderPreview(); });
 $('clearCaseInfo')?.addEventListener('click',clearCurrentDraftSafely);
-['caseProcedure','caseMedication','caseFeeding','caseActivity','caseProtection','caseExtra'].forEach(id=>$(id)?.addEventListener('input',()=>{readCaseInfoFromForm();renderCurrentOutput();updateReadiness();}));
-$('recheckMode')?.addEventListener('change',()=>{readCaseInfoFromForm();updateRecheckPreview();renderCurrentOutput();updateReadiness();});
-$('recheckManual')?.addEventListener('change',()=>{readCaseInfoFromForm();updateRecheckPreview();renderCurrentOutput();updateReadiness();});
-$('mobileDaySelect')?.addEventListener('change',e=>{mobileDay=Number(e.target.value||1); if(currentOutput==='mobile')renderCurrentOutput();});
+['caseProcedure','caseMedication','caseFeeding','caseActivity','caseProtection','caseExtra'].forEach(id=>$(id)?.addEventListener('input',()=>{readCaseInfoFromForm();requestBuilderPreview();updateReadiness();}));
+$('recheckMode')?.addEventListener('change',()=>{readCaseInfoFromForm();updateRecheckPreview();requestBuilderPreview();updateReadiness();});
+$('recheckManual')?.addEventListener('change',()=>{readCaseInfoFromForm();updateRecheckPreview();requestBuilderPreview();updateReadiness();});
+$('mobileDaySelect')?.addEventListener('change',e=>{mobileDay=Number(e.target.value||1); if(currentOutput==='mobile')requestBuilderPreview();});
 $('addMedication')?.addEventListener('click',()=>{
   readMedicationRowsFromForm();
   if(medications.length>=8){toast('복약 안내표는 최대 8종까지 입력할 수 있습니다.');return;}
-  medications.push(blankMedication()); renderMedicationRows(); updateMedicationPreview(); renderCurrentOutput(); updateReadiness();
+  medications.push(blankMedication()); renderMedicationRows(); updateMedicationPreview(); requestBuilderPreview(); updateReadiness();
   requestAnimationFrame(()=>document.querySelector(`#medicationRows .med-row[data-med-index="${medications.length-1}"]`)?.scrollIntoView({behavior:'smooth',block:'start'}));
 });
 $('medicationRows')?.addEventListener('input',e=>{
@@ -10070,12 +10075,12 @@ $('medicationRows')?.addEventListener('input',e=>{
     if(preview) preview.textContent=e.target.value.trim()||'약 이름을 입력하세요';
   }
   readMedicationRowsFromForm(); updateMedicationPreview(); updateReadiness();
-  if(['pdf','meds','medcheck','staff'].includes(currentOutput)) renderCurrentOutput();
+  if(['pdf','meds','medcheck','staff'].includes(currentOutput)) requestBuilderPreview();
 });
 $('medicationRows')?.addEventListener('change',e=>{
   if(!e.target.matches('[data-med-field]')) return;
   readMedicationRowsFromForm(); updateMedicationPreview(); updateReadiness();
-  if(['pdf','meds','medcheck','staff'].includes(currentOutput)) renderCurrentOutput();
+  if(['pdf','meds','medcheck','staff'].includes(currentOutput)) requestBuilderPreview();
 });
 $('medicationRows')?.addEventListener('keydown',e=>{
   if(e.key!=='Enter' || !e.target.matches('[data-med-time-input]')) return;
@@ -10690,7 +10695,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-settings.js?v=20261103-settings-unified"></script>
 <link rel="stylesheet" href="clinic-followup-tasks.css?v=20261104-followup-controls">
 <script src="clinic-followup-tasks.js?v=20261104-followup-controls"></script>
-<link rel="stylesheet" href="builder-flow.css?v=20261105-compact">
-<script src="builder-flow.js?v=20261105-compact"></script>
+<link rel="stylesheet" href="builder-flow.css?v=20261105-flow2">
+<script src="builder-flow.js?v=20261105-flow2"></script>
 </body>
 </html>
