@@ -374,3 +374,23 @@
   .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-legend label{min-height:44px}
  }
 }
+
+/* Retain patient/date context without covering inputs on a short mobile viewport. */
+@media screen {
+ .clinic-calm #practiceRoot :is([data-cs-weight],[data-cs-date]){display:none}
+ @media(max-width:760px){
+  .clinic-calm #practiceRoot.cs-short-viewport .cs-patient-header{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;padding:6px 8px;gap:6px}
+  .clinic-calm #practiceRoot.cs-short-viewport .cs-patient-copy{gap:2px 6px}
+  .clinic-calm #practiceRoot.cs-short-viewport [data-cs-name]{font-size:18px}
+  .clinic-calm #practiceRoot.cs-short-viewport :is([data-cs-demographics],[data-cs-record]){display:none}
+  .clinic-calm #practiceRoot.cs-short-viewport [data-cs-weight]{display:inline;font-size:13px}
+  .clinic-calm #practiceRoot.cs-short-viewport [data-cs-date]{display:block;flex-basis:100%;font-size:12px;color:var(--cs-muted)}
+  .clinic-calm #practiceRoot.cs-short-viewport .cs-patient-actions{width:auto;flex-direction:column;gap:0;align-items:flex-end}
+  .clinic-calm #practiceRoot.cs-short-viewport [data-cs-save]{font-size:12px}
+  .clinic-calm #practiceRoot.cs-short-viewport [data-cs-entry]{padding:6px 8px}
+  .clinic-calm #practiceRoot.cs-short-viewport .cs-record-content :is(.dn-head,.nr-head,.er-head){position:static}
+ }
+}
+@media print {
+ .cs-patient-header,.cs-record-navigation{display:none!important}
+}
