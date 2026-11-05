@@ -341,6 +341,7 @@ async function contentFixture(t,width=1280){
       {contentId:'sample-deleted',title:'시험 삭제 이력',status:'deleted',category:'내과'},
     ];
     req=async(path,options)=>{
+      if(path==='/hq/guardian-studio/drafts')return {drafts:[],limit:200};
       if(path==='/hq/content'){contentReads++;if(contentFail)throw Error('시험 콘텐츠 조회 실패');return {contents:contentReply.map(x=>({...x}))};}
       if(path.startsWith('/hq/content/')){
         writes.push({path,method:options.method,body:JSON.parse(options.body||'{}')});
@@ -396,14 +397,14 @@ test('central content lists safe text, counts, category and review filters witho
 
 test('content selection covers only visible archived rows, supports partial state and clears with filters',async t=>{
   const p=await contentFixture(t);await contentPage(p);
-  await p.locator('#contentSelectAllArchived').check();
+  await p.locator('#contentManageMode').check();await p.locator('#contentSelectAllArchived').check();
   assert.equal(await p.locator('[data-content-bulk]:checked').count(),2);
   await p.locator('[data-content-bulk]').first().uncheck();
   assert.equal(await p.locator('#contentSelectAllArchived').evaluate(el=>el.indeterminate),true);
   await p.locator('#contentSearch').fill('보관 자료 A');
   assert.equal(await p.locator('[data-content-bulk]:checked').count(),0);
   assert.equal(await p.locator('#contentBulkDelete').isDisabled(),true);
-  await p.locator('#contentSelectAllArchived').check();await p.locator('#contentBulkDelete').click();
+  await p.locator('#contentManageMode').check();await p.locator('#contentSelectAllArchived').check();await p.locator('#contentBulkDelete').click();
   assert.equal(await p.evaluate(()=>writes.length),0);
   assert.match(await p.evaluate(()=>contentConfirms.at(-1)),/1건을 삭제[\s\S]*시험 보관 자료 A[\s\S]*되돌릴 수 없습니다/);
 });
@@ -418,7 +419,7 @@ test('content loading/error never reports zero data and retry restores real empt
   await p.evaluate(()=>{contentFail=false;contentReply=[];});
   await p.locator('#content .hq-load-status button').click();await p.locator('#content .hq-load-status[data-state="ready"]').waitFor({state:'attached'});
   assert.equal(await p.locator('#contentTotal').innerText(),'0');
-  assert.match(await p.locator('#contentTable').innerText(),/등록된 중앙 콘텐츠가 없습니다/);
+  assert.match(await p.locator('#contentTable').innerText(),/등록된 보호자 안내자료가 없습니다/);
 });
 
 test('content keeps the newest load and restores category, checkbox and search through deep links',async t=>{
@@ -447,14 +448,14 @@ test('content status writes once, blocks navigation during save, then reloads co
   await p.evaluate(()=>{contentWriteDelay=false;releaseContent();});
   await p.waitForFunction(()=>$('contentPublished').textContent==='0');
   assert.deepEqual((await p.evaluate(()=>writes))[0],{path:'/hq/content/sample-live',method:'PATCH',body:{status:'archived'}});
-  assert.match(await p.locator('#contentBulkResult').innerText(),/공개 중단 완료 1건/);
+  assert.match(await p.locator('#contentBulkResult').innerText(),/게시 중단 완료 1건/);
   assert.equal(await p.locator('#contentRefresh').isDisabled(),false);
 });
 
 test('content bulk deletion reports partial failure, retains only failed selection and does not retry automatically',async t=>{
   const p=await contentFixture(t);await contentPage(p);
   await p.evaluate(()=>{allowContentWrite=true;contentWriteFail='sample-archive-b';});
-  await p.locator('#contentSelectAllArchived').check();await p.locator('#contentBulkDelete').click();
+  await p.locator('#contentManageMode').check();await p.locator('#contentSelectAllArchived').check();await p.locator('#contentBulkDelete').click();
   await p.waitForFunction(()=>$('contentBulkResult').textContent.includes('결과 확인 필요 1건')&&$('contentArchived').textContent==='1');
   assert.equal(await p.evaluate(()=>writes.length),2);
   assert.match(await p.locator('#contentBulkResult').innerText(),/삭제 완료 1건[\s\S]*시험 보관 자료 B: 시험 콘텐츠 저장 실패/);

@@ -730,7 +730,7 @@
     }
   };
   const contentCounts=['contentTotal','contentPublished','contentArchived','contentReviewDue'];
-  const contentStates={published:'공개 중',archived:'공개 중단',draft:'초안',review:'검토 중',deleted:'삭제 이력'};
+  const contentStates={published:'게시 중',archived:'게시 중단',draft:'작성 중',review:'검토 대기',deleted:'삭제 이력'};
   let contentReady=false;
   const contentDue=x=>x.status==='published'&&!!x.reviewDueAt&&Number.isFinite(Date.parse(x.reviewDueAt))&&Date.parse(x.reviewDueAt)<=Date.now();
   const contentDate=value=>value&&Number.isFinite(Date.parse(value))?new Date(value).toLocaleDateString('ko-KR'):'미등록';
@@ -748,13 +748,13 @@
     updateContentBulkUi();
     try{
       const data=await req('/hq/content');if(!current())return;
-      if(!Array.isArray(data.contents))throw Error('중앙 콘텐츠 조회 결과를 확인할 수 없습니다.');
+      if(!Array.isArray(data.contents))throw Error('보호자 안내자료 조회 결과를 확인할 수 없습니다.');
       contents=data.contents;contentReady=true;
       const category=byId('contentCategory'),selected=category.dataset.restoreValue||category.value;
       delete category.dataset.restoreValue;
       const categories=[...new Set(contents.map(x=>x.category||'').filter(Boolean))].sort((a,b)=>hqCategoryLabel(a).localeCompare(hqCategoryLabel(b),'ko'));
       category.innerHTML='<option value="all">전체 분류</option>'+categories.map(x=>`<option value="${esc(x)}">${esc(hqCategoryLabel(x))}</option>`).join('');
-      category.value=categories.includes(selected)?selected:'all';
+      globalThis.GuardianStudio?.updateCategories();category.value=[...category.options].some(x=>x.value===selected)?selected:'all';
       const counts=[contents.filter(x=>x.status!=='deleted').length,contents.filter(x=>x.status==='published').length,contents.filter(x=>x.status==='archived').length,contents.filter(contentDue).length];
       contentCounts.forEach((id,i)=>byId(id).textContent=fmt(counts[i]));
       renderContent();setRegion('content','ready');
@@ -772,11 +772,12 @@
     byId('contentBulkDelete').disabled=!contentReady||!!activeSave||!selected;
   };
   renderContent=function(){
+    globalThis.GuardianStudio?.filterList();
     if(!contentReady)return;
     const q=byId('contentSearch').value.trim().toLowerCase(),status=byId('contentStatus').value,category=byId('contentCategory').value,dueOnly=byId('contentDueOnly').checked;
     const rows=contents.filter(x=>(status==='all'?x.status!=='deleted':x.status===status)&&(category==='all'||x.category===category)&&(!dueOnly||contentDue(x))&&(!q||`${x.title||''} ${hqCategoryLabel(x.category)} ${x.contentId||''}`.toLowerCase().includes(q)));
-    byId('contentResultSummary').textContent=`현재 조건 ${fmt(rows.length)}건 · 전체 자료 ${fmt(contents.filter(x=>x.status!=='deleted').length)}건 (삭제 제외)`;
-    byId('contentTable').innerHTML=rows.length?`<div class="table-wrap" tabindex="0" aria-label="중앙 콘텐츠 목록"><table class="table hq-content-table"><thead><tr><th>선택</th><th>교육자료</th><th>공개 상태</th><th>품질 점수</th><th>검토 정보</th><th>병원별 제공 설정</th><th>관리</th></tr></thead><tbody>${rows.map(x=>`<tr data-content-row="${esc(x.contentId)}"><td data-label="선택">${x.status==='archived'?`<label class="hq-content-check"><input type="checkbox" data-content-bulk value="${esc(x.contentId)}" aria-label="${esc(x.title)} 선택"><span>선택</span></label>`:'—'}</td><td data-label="교육자료" class="hq-content-title"><b>${esc(x.title||'제목 없음')}</b><span class="muted">${esc(hqCategoryLabel(x.category))} · 버전 ${esc(x.version||'미등록')}</span></td><td data-label="공개 상태"><span class="status ${esc(x.status)}">${esc(contentStates[x.status]||x.status||'확인 필요')}</span></td><td data-label="품질 점수">${safeNumber(x.qualityScore)?fmt(x.qualityScore)+' / 100':'미등록'}</td><td data-label="검토 정보">${esc(x.reviewerName||'검토자 미등록')}<br><span class="${contentDue(x)?'hq-content-due':'muted'}">재검토 ${esc(contentDate(x.reviewDueAt))}${contentDue(x)?' · 기한 도래':''}</span></td><td data-label="병원별 제공 설정">${x.status==='published'?`허용 ${fmt(x.enabledClinics)}곳 · 숨김 ${fmt(x.disabledClinics)}곳`:'현재 제공 중 아님'}</td><td data-label="관리"><div class="hq-content-actions">${['published','archived'].includes(x.status)?`<button class="btn small" data-guardian-document="${esc(x.contentId)}">자료 열기·수정</button>`:''}${x.status==='published'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="archived">공개 중단</button>`:x.status==='archived'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="published">다시 공개</button><button class="btn small danger" data-content-delete="${esc(x.contentId)}">삭제</button>`:'—'}</div></td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">${contents.length?'선택한 조건에 해당하는 자료가 없습니다. 검색 조건을 초기화해보세요.':'등록된 중앙 콘텐츠가 없습니다.'}</div>`;
+    byId('contentResultSummary').textContent=`현재 조건 ${fmt(rows.length)}건 · 게시 관리 자료 ${fmt(contents.filter(x=>x.status!=='deleted').length)}건 (삭제 제외)`;
+    byId('contentTable').innerHTML=rows.length?`<div class="table-wrap" tabindex="0" aria-label="보호자 안내자료 목록"><table class="table hq-content-table"><thead><tr><th class="gs-manage-cell">선택</th><th>안내자료</th><th>게시 상태</th><th>검토 정보</th><th>관리</th></tr></thead><tbody>${rows.map(x=>`<tr data-content-row="${esc(x.contentId)}"><td data-label="선택" class="gs-manage-cell">${x.status==='archived'?`<label class="hq-content-check"><input type="checkbox" data-content-bulk value="${esc(x.contentId)}" aria-label="${esc(x.title)} 선택"><span>선택</span></label>`:'—'}</td><td data-label="안내자료" class="hq-content-title"><b>${esc(x.title||'제목 없음')}</b><span class="muted">${esc(hqCategoryLabel(x.category))}${x.species?' · '+esc(x.species):''} · 버전 ${esc(x.version||'미등록')}</span></td><td data-label="게시 상태"><span class="status ${esc(x.status)}">${esc(contentStates[x.status]||x.status||'확인 필요')}</span></td><td data-label="검토 정보">${esc(x.reviewerName||'검토자 미등록')}<br><span class="${contentDue(x)?'hq-content-due':'muted'}">재검토 ${esc(contentDate(x.reviewDueAt))}${contentDue(x)?' · 기한 도래':''}</span></td><td data-label="관리"><div class="hq-content-actions">${['published','archived'].includes(x.status)?`<button class="btn small" data-guardian-document="${esc(x.contentId)}">자료 열기·수정</button>`:''}${x.status==='published'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="archived">게시 중단</button>`:x.status==='archived'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="published">다시 게시</button><button class="btn small danger" data-content-delete="${esc(x.contentId)}">삭제</button>`:'—'}</div><details class="gs-list-details"><summary>상세 정보</summary><p>품질 점수 ${safeNumber(x.qualityScore)?fmt(x.qualityScore)+' / 100':'미등록'}</p><p>병원별 제공: ${x.status==='published'?`허용 ${fmt(x.enabledClinics)}곳 · 숨김 ${fmt(x.disabledClinics)}곳`:'현재 제공 중 아님'}</p><p>자료 ID: ${esc(x.contentId)}</p></details></td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">${contents.length?'선택한 조건에 해당하는 자료가 없습니다. 검색 조건을 초기화해보세요.':'등록된 보호자 안내자료가 없습니다.'}</div>`;
     byId('contentTable').querySelectorAll('[data-guardian-document]').forEach(b=>b.onclick=()=>globalThis.GuardianStudio?.published(b.dataset.guardianDocument));
     byId('contentTable').querySelectorAll('[data-content-status]').forEach(b=>b.onclick=()=>patchContent(b.dataset.contentStatus,b.dataset.next));
     byId('contentTable').querySelectorAll('[data-content-delete]').forEach(b=>b.onclick=()=>deleteContent(b.dataset.contentDelete));
@@ -787,7 +788,7 @@
     if(activeSave||!contentReady)return false;
     const targets=[...new Set(ids)].map(id=>contents.find(x=>x.contentId===id)).filter(x=>x&&(status==='archived'?x.status==='published':x.status==='archived'));
     if(!targets.length)return false;
-    const action=status==='archived'?'공개 중단':status==='published'?'다시 공개':'삭제';
+    const action=status==='archived'?'게시 중단':status==='published'?'다시 게시':'삭제';
     const names=targets.slice(0,5).map(x=>x.title||x.contentId).join('\n')+(targets.length>5?`\n외 ${targets.length-5}건`:'');
     const impact=status?'연결된 자동생성 회복관리 일정의 상태도 함께 변경됩니다.':'연결된 자동생성 회복관리 일정도 삭제 처리됩니다. 과거 운영 이력용 최소 정보는 보존됩니다. 화면에서 삭제를 되돌릴 수 없습니다.';
     if(!confirm(`${targets.length}건을 ${action}할까요?\n\n${names}\n\n${impact}`))return false;
@@ -812,6 +813,7 @@
   patchContent=(id,status)=>['published','archived'].includes(status)?changeContent([id],status):Promise.resolve(false);
   deleteContent=id=>changeContent([id],null);
   bulkDeleteArchivedContent=()=>changeContent(selectedContentBulkIds(),null);
+  byId('contentManageMode').onchange=event=>{byId('content').classList.toggle('gs-managing',event.target.checked);if(!event.target.checked){byId('contentTable').querySelectorAll('[data-content-bulk]').forEach(x=>x.checked=false);updateContentBulkUi();}};
   byId('contentRefresh').onclick=()=>loadContent();
   byId('contentSearch').oninput=()=>renderContent();
   for(const id of ['contentStatus','contentCategory','contentDueOnly'])byId(id).onchange=()=>renderContent();

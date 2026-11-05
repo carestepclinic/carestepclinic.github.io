@@ -4,3 +4,21 @@
 @media(max-width:620px){.guardian-studio-dialog{width:calc(100vw - 12px);max-height:96dvh;border-radius:12px}.gs-header{padding:14px}.gs-header h2{font-size:19px}.gs-body{padding:16px}.gs-grid{grid-template-columns:1fr;gap:0}.gs-list-head{align-items:stretch;flex-direction:column}.gs-draft-list{grid-template-columns:1fr}.gs-actions{flex-direction:column}.gs-actions .btn{width:100%}.gs-approval{padding:16px}.gs-message:not(:empty),.gs-discard{margin:12px}.gs-preview h3{font-size:22px}}
 
 .gs-schedule-preview{grid-column:1/-1;margin:0;color:#375775;line-height:1.6}
+
+/* Guardian authoring and unified list workflow. */
+#content #guardianStudioRoot{margin:14px 0;padding:14px;background:#f8faff}
+#guardianStudioRoot h2,.gs-published-heading{font-size:16px;margin:0 0 12px}
+#guardianStudioRoot h2 span{font-size:14px;font-weight:400}
+#content:not(.gs-managing) .hq-content-bulk,#content:not(.gs-managing) .gs-manage-cell{display:none}
+.gs-manage-toggle{display:flex;align-items:center;gap:8px;margin:12px 0;font-size:14px}
+.gs-list-details{margin-top:8px;font-size:13px}.gs-list-details p{overflow-wrap:anywhere;margin:6px 0}
+.gs-editor-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.guardian-studio-dialog [id^=gs-]{scroll-margin-top:110px}
+.guardian-studio-dialog .gs-actions{position:sticky;bottom:0;background:#fff;padding:12px 0;margin:16px 0 0;z-index:3;box-shadow:0 -6px 12px #ffffffd9}
+.guardian-studio-dialog .gs-field{margin-bottom:12px}.guardian-studio-dialog .gs-grid{gap:12px}
+.guardian-studio-dialog .gs-body{padding-bottom:0}
+.gs-publish-results{background:#f1f5ff;border:1px solid #d5e0f3;border-radius:12px;padding:16px;margin-bottom:20px}
+.gs-publish-results h3{margin:0 0 8px}.gs-result-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #d5e0f3}
+@media(max-width:620px){.guardian-studio-dialog .gs-actions{flex-direction:row;gap:6px}.guardian-studio-dialog .gs-actions .btn{width:auto;flex:1;min-width:0}.gs-result-row{align-items:flex-start;flex-direction:column}.gs-editor-nav .btn{flex:1 1 40%}}
+
+@media(min-width:651px){#content .hq-content-table{min-width:780px}#content .hq-content-table th:nth-child(2){width:32%}#content .hq-content-table th:nth-child(3){width:13%}#content .hq-content-table th:nth-child(4){width:23%}#content .hq-content-table th:nth-child(5){width:auto}}

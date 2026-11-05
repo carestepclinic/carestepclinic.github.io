@@ -12,15 +12,15 @@ async function fixture(t,width=1280){
  const context=await browser.newContext({viewport:{width,height:900}});await context.route('**/*',route=>route.request().url().startsWith(origin)?route.continue():route.abort());const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));t.after(async()=>{assert.deepEqual(errors,[]);await context.close();});await page.goto(origin+'/hq.html');
  await page.evaluate(()=>{
   hqSessionToken=()=>'synthetic-test-session';document.getElementById('loginOverlay').classList.add('hidden');window.writes=[];window.rows=[];window.doc=()=>({template:{title:'시험 보호자 자료',short:'실제 안내에 사용하지 않는 화면 검증 자료',description:'임상 내용이 없는 시험 자료입니다.',category:'기타',sections:[['설명1',['시험 항목1']],['설명2',['시험 항목2']]],redFlags:['시험1','시험2','시험3'],recordRows:['시험 기록'],kakao:'{{병원명}} 시험',sms:'{{병원명}} 시험'},profile:{label:'시험 관리',tracking:['시험'],questions:['시험'],mistakes:[['시험 행동','시험 설명']],days:Object.fromEntries([1,3,7,14].map(n=>[n,{title:'시험 시점',focus:'시험 관리 초점',note:'시험',items:['시험1','시험2','시험3'],handoff:['시험 전달']}]))}});
-  window.current=null;window.failSave=false;window.holdGenerate=false;window.generateRelease=null;
+  window.reads=[];window.publishReply={};window.current=null;window.failSave=false;window.holdGenerate=false;window.generateRelease=null;
   req=async(path,options={})=>{
-   const method=options.method||'GET',b=JSON.parse(options.body||'{}');if(method!=='GET')writes.push({path,method,b});
+   const method=options.method||'GET',b=JSON.parse(options.body||'{}');if(method==='GET')reads.push(path);if(method!=='GET')writes.push({path,method,b});
    if(path==='/hq/content')return {contents:[{contentId:'source',title:'기존 시험 자료',status:'published',version:'0.1'}]};
    if(path==='/hq/guardian-studio/drafts'&&method==='GET')return {drafts:rows,limit:200};
    if(path==='/hq/guardian-studio/drafts'&&method==='POST'){current={id:'gd_synthetic',contentId:'content_synthetic',title:'시험 보호자 자료',status:'draft',version:b.sourceContentId?'0.2':'0.1',revision:1,document:b.sourceContentId?doc():b.document||{},brief:b.brief,updatedAt:'2026-10-22T01:00:00Z'};rows=[current];return {draft:current};}
    if(path.startsWith('/hq/guardian-studio/published/'))return {document:doc(),status:'published',version:'0.1'};
    if(path.endsWith('/generate')){if(holdGenerate)await new Promise(r=>generateRelease=r);const next=doc();if(current.brief?.stageDays)next.profile.days=Object.fromEntries(current.brief.stageDays.map(n=>[n,{...next.profile.days[1],title:'시험 D+'+n}]));current={...current,document:next,revision:3};rows=[current];return {draft:current,generations:[]};}
-   if(path.endsWith('/publish')){current={...current,status:'published',revision:current.revision+1};rows=[current];return {draft:current,journeySync:{status:'draft'}};}
+   if(path.endsWith('/publish')){current={...current,status:'published',revision:current.revision+1};rows=[current];return {draft:current,journeySync:{status:'draft'},...publishReply};}
    if(path.startsWith('/hq/guardian-studio/drafts/')){if(method==='PUT'){if(failSave)throw Error('시험 저장 충돌 · 최신 자료 확인');current={...current,document:b.document,revision:current.revision+1,title:b.document.template.title};rows=[current];}return {draft:current,generations:[]};}
    return {};
   };
@@ -56,3 +56,50 @@ test('species metadata survives editing, preview and reopening without AI',async
  assert.equal(await p.evaluate(()=>document.querySelector('dialog').scrollWidth<=document.querySelector('dialog').clientWidth),true);
 });
 test('unknown existing species is not silently changed to dog',async t=>{const p=await fixture(t);await p.getByRole('button',{name:'자료 열기·수정',exact:true}).click();await p.getByRole('button',{name:'이 자료의 수정본 만들기',exact:true}).click();assert.equal(await p.getByRole('combobox',{name:'대상 동물',exact:true}).inputValue(),'');});
+
+
+test('search and state filter both drafts and published materials without extra requests',async t=>{
+ const p=await fixture(t);await p.evaluate(async()=>{rows=[{id:'gd_a',title:'찾을 초안',status:'draft',version:'1',updatedAt:'2026-11-01'},{id:'gd_b',title:'작성 실패',status:'failed',version:'1',updatedAt:'2026-11-01'}];await GuardianStudio.refresh();});const before=await p.evaluate(()=>reads.length);
+ await p.locator('#contentSearch').fill('찾을');assert.equal(await p.locator('[data-gs-open]').count(),1);assert.equal(await p.locator('[data-content-row]').count(),0);
+ await p.locator('#contentReset').click();await p.locator('#contentStatus').selectOption('review');assert.equal(await p.locator('[data-gs-open]').count(),1);
+ await p.locator('#contentStatus').selectOption('draft');assert.match(await p.locator('#guardianStudioRoot').innerText(),/작성 실패/);
+ await p.locator('#contentStatus').selectOption('published');assert.equal(await p.locator('#guardianStudioRoot').isVisible(),false);assert.equal(await p.locator('[data-content-row]').count(),1);
+ assert.equal(await p.evaluate(()=>reads.length),before);
+});
+test('review round trip retains reviewer, date and generation choices; body edits clear only attestations',async t=>{
+ const p=await fixture(t);await generate(p);await p.getByRole('button',{name:'저장 후 미리보기·승인 검토',exact:true}).click();
+ await p.getByLabel('검토 수의사 이름',{exact:true}).fill('시험 검토자');await p.getByLabel('재검토 예정일',{exact:true}).fill('2027-11-05');await p.locator('[data-gs-training]').uncheck();await p.locator('[data-gs-protocol]').uncheck();for(const c of await p.locator('[data-gs-check]').all())await c.check();
+ await p.getByRole('button',{name:'본문 수정으로 돌아가기',exact:true}).click();
+ const count=await p.evaluate(()=>writes.filter(x=>x.method==='PUT').length);
+ await p.getByRole('button',{name:'저장 후 미리보기·승인 검토',exact:true}).click();
+ assert.equal(await p.evaluate(()=>writes.filter(x=>x.method==='PUT').length),count);
+ assert.equal(await p.getByLabel('검토 수의사 이름',{exact:true}).inputValue(),'시험 검토자');assert.equal(await p.locator('[data-gs-check]:checked').count(),3);
+ await p.getByRole('button',{name:'본문 수정으로 돌아가기',exact:true}).click();await p.getByLabel('자료 제목',{exact:true}).fill('본문 변경');
+ await p.getByRole('button',{name:'저장 후 미리보기·승인 검토',exact:true}).click();
+ assert.equal(await p.locator('[data-gs-check]:checked').count(),0);assert.equal(await p.getByLabel('재검토 예정일',{exact:true}).inputValue(),'2027-11-05');
+ assert.equal(await p.locator('[data-gs-training]').isChecked(),false);assert.equal(await p.locator('[data-gs-protocol]').isChecked(),false);
+});
+test('creation and editing use consistent categories with explicit custom category',async t=>{
+ const p=await fixture(t);await generate(p);await p.locator('[data-gs-field="t.category"]').selectOption('__custom');await p.getByLabel('직접 입력한 분류',{exact:true}).fill('병원 공통 안내');
+ await p.getByRole('button',{name:'초안 저장',exact:true}).click();await p.getByText('초안을 서버에 저장했습니다.',{exact:true}).waitFor();
+ assert.equal(await p.evaluate(()=>current.document.template.category),'병원 공통 안내');assert.equal(await p.locator('[data-gs-field="t.category"]').inputValue(),'병원 공통 안내');
+});
+test('publication keeps all workflow outcomes and refreshes draft list once',async t=>{
+ const p=await fixture(t);await generate(p);await p.getByRole('button',{name:'저장 후 미리보기·승인 검토',exact:true}).click();
+ await p.getByLabel('검토 수의사 이름',{exact:true}).fill('시험 검토자');await p.getByLabel('재검토 예정일',{exact:true}).fill('2027-11-05');for(const c of await p.locator('[data-gs-check]').all())await c.check();
+ await p.evaluate(()=>{publishReply={journeySync:{status:'retry_needed'},training:{status:'queued'},protocol:{status:'retry_needed'}};reads=[];});
+ await p.getByRole('button',{name:'승인 후 병원 자료실에 게시',exact:true}).click();await p.locator('.gs-publish-results').waitFor();
+ assert.equal(await p.locator('.gs-publish-results .gs-error').count(),2);assert.match(await p.locator('.gs-publish-results').innerText(),/생성 진행 중/);
+ assert.equal(await p.evaluate(()=>reads.filter(x=>x==='/hq/guardian-studio/drafts').length),1);
+ await p.locator('[data-gs-view="protocols"]').click();assert.match(p.url(),/#protocols$/);
+});
+test('parallel draft refreshes share one request and retain filters',async t=>{
+ const p=await fixture(t);await p.evaluate(async()=>{await GuardianStudio.refresh();reads=[];await Promise.all([GuardianStudio.refresh(),GuardianStudio.refresh()]);});assert.equal(await p.evaluate(()=>reads.filter(x=>x==='/hq/guardian-studio/drafts').length),1);
+});
+for(const width of [390,1280])test('fixed editor actions and shared search fit '+width,async t=>{
+ const p=await fixture(t,width);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await generate(p);
+ assert.equal(await p.locator('footer.gs-actions').evaluate(el=>getComputedStyle(el).position),'sticky');
+ const box=await p.getByRole('button',{name:'초안 저장',exact:true}).boundingBox();assert.ok(box.y>=0&&box.y+box.height<=900);
+ await p.locator('[data-gs-jump="gs-timeline"]').click();await p.locator('.gs-day summary').first().click();await p.getByRole('button',{name:'설명 영역 추가',exact:true}).click();assert.equal(await p.locator('.gs-day').first().evaluate(x=>x.open),true);
+ assert.ok(await p.locator('dialog').evaluate(el=>el.scrollWidth<=el.clientWidth+1));
+});
