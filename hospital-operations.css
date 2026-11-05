@@ -1,0 +1,16 @@
+/* Hospital operations: shared spacing, readable reports and compact checklists. */
+.pt-run-dialog .pt-check-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:10px 0;border-bottom:1px solid #dce5f2;align-items:center}
+.pt-run-dialog .pt-check-row p{margin:3px 0;overflow-wrap:anywhere}
+.pt-run-dialog .pt-check-row .pt-actions{margin:0;gap:6px;flex-wrap:wrap}
+.pt-run-dialog [data-done-checks]{margin-top:12px}
+.pt-run-dialog [data-done-checks]>summary{padding:10px 0;cursor:pointer}
+#practice [data-ops] button,#training button,.monthly-toolbar button{font-family:inherit;font-size:14px;min-height:38px;border-radius:9px}
+#monthlyReportPanel{font-size:14px;line-height:1.5}
+.monthly-mini-table{font-size:13px!important;line-height:1.5}
+.monthly-mini-table th,.monthly-mini-table td{padding:9px 10px!important}
+.monthly-usage-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.monthly-usage-grid>div{background:#f4f7fc;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:4px}
+.monthly-usage-grid b{font-size:18px}
+#monthlyHospitalUsage h3{font-size:16px;margin:0 0 10px}
+#monthlyHospitalUsage p{font-size:12px;line-height:1.6}
+@media(max-width:600px){.pt-run-dialog .pt-check-row{grid-template-columns:minmax(0,1fr)}.pt-run-dialog .pt-check-row button{min-height:42px}.monthly-usage-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.monthly-mini-table th,.monthly-mini-table td{padding:8px 5px!important}}

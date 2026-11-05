@@ -1095,6 +1095,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 @media(max-width:600px){#onboarding .onboarding-setup-grid{grid-template-columns:1fr}#onboarding .onboarding-hero{padding:14px}#onboarding .btn{min-height:44px}#onboarding .onboarding-tools{align-items:flex-start}#onboarding .onboarding-tools button{flex-shrink:0}#onboarding .onboarding-message-row{display:flex;flex-direction:column;align-items:stretch}#onboarding .onboarding-message-row input{min-width:0;width:100%}}
 
 </style>
+<link rel="stylesheet" href="hospital-operations.css">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -1945,15 +1946,16 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
           <div class="monthly-report-toolbar no-report-pdf"><div><label class="field-label" for="monthlyReportMonth">리포트 월</label><input id="monthlyReportMonth" class="input" type="month"></div><button id="monthlyReportRefresh" class="btn btn-secondary" type="button">리포트 새로고침</button><span id="monthlyReportStatus" role="status" aria-live="polite" class="monthly-report-status">데이터를 불러오는 중입니다.</span></div>
           <div id="monthlyReportExportSurface" hidden class="monthly-report-export-surface">
             <div class="monthly-report-cover"><div><p class="eyebrow">CARESTEP MONTHLY OPERATIONS REPORT</p><h4 id="monthlyReportTitle">월간 운영 리포트</h4><p id="monthlyReportSubtitle">병원 전체 비식별 운영데이터 기준</p></div><div class="monthly-report-brand"><b>CARESTEP</b><span id="monthlyReportGeneratedAt"></span></div></div>
+            <section id="monthlyHospitalUsage" class="monthly-report-card"></section>
             <div class="monthly-report-kpis">
               <article><span>보호자 안내자료</span><b id="mrPackages">—</b><small id="mrPackagesSub">생성 건수</small></article>
-              <article><span>후속관리 케이스</span><b id="mrFollowCases">—</b><small>등록된 후속관리 건수</small></article>
+              <article><span>후속관리 건</span><b id="mrFollowCases">—</b><small>등록된 후속관리 건수</small></article>
               <article><span>후속관리 완료율</span><b id="mrFollowCompletion">--</b><small id="mrFollowCompletionSub">등록 업무 대비 결과입력</small></article>
               <article><span>문자 성공률</span><b id="mrMessageSuccess">--</b><small id="mrMessageSub">성공 / 실패</small></article>
               <article><span>보호자 응답률</span><b id="mrSurveyResponse">--</b><small id="mrSurveySub">응답 / 초대</small></article>
               <article><span>평균 만족도</span><b id="mrSatisfaction">--</b><small>5점 기준</small></article>
-              <article class="attention"><span>위험 케이스 발견</span><b id="mrRiskCases">—</b><small id="mrRiskSub">주의·악화·연락요청</small></article>
-              <article><span>보호자 관리 접점</span><b id="mrTouchpoints">—</b><small>문자+보호자응답+결과입력</small></article>
+              <article class="attention"><span>주의 신호가 있는 후속관리</span><b id="mrRiskCases">—</b><small id="mrRiskSub">주의·악화·연락요청</small></article>
+              <article><span>발송·응답·결과 기록</span><b id="mrTouchpoints">—</b><small>문자+보호자응답+결과입력</small></article>
             </div>
             <div class="monthly-report-value" id="monthlyReportValue">이번 달 CARESTEP 운영가치를 계산하고 있습니다.</div>
             <div class="monthly-report-compare"><div><p class="eyebrow">MONTH OVER MONTH</p><h4>지난달 대비</h4></div><div id="monthlyReportComparison" class="monthly-comparison-grid"></div></div>
@@ -5161,40 +5163,59 @@ function renderMonthlyOperationsReport(){
   $('mrMessageSuccess').textContent=(Number(m.messagesSent||0)+Number(m.messagesFailed||0))?monthlyPct(m.messageSuccessRate):'--';$('mrMessageSub').textContent=`성공 ${Number(m.messagesSent||0)} · 실패 ${Number(m.messagesFailed||0)} · 예약 ${Number(m.messagesPending||0)}`;
   $('mrSurveyResponse').textContent=Number(m.surveyInvited||0)?monthlyPct(m.surveyResponseRate):'--';$('mrSurveySub').textContent=`응답 ${Number(m.surveyResponded||0)} / 초대 ${Number(m.surveyInvited||0)}`;$('mrSatisfaction').textContent=Number(m.avgSatisfaction)>0?`${Number(m.avgSatisfaction).toFixed(1)}/5`:'--';
   $('mrRiskCases').textContent=Number(m.riskCases||0).toLocaleString('ko-KR');$('mrRiskSub').textContent=`신호 ${Number(m.riskSignals||0)} · 검토 ${Number(m.riskReviewed||0)}`;$('mrTouchpoints').textContent=Number(m.guardianTouchpoints||0).toLocaleString('ko-KR');
-  const value=[];value.push(`이번 달 <b>보호자 안내자료 ${Number(m.packageGenerations||0).toLocaleString('ko-KR')}건</b>을 생성했습니다.`);if(m.followupCases)value.push(`<b>${Number(m.followupCases).toLocaleString('ko-KR')}개 후속관리 케이스</b>가 CARESTEP에 연결됐습니다.`);if(m.guardianTouchpoints)value.push(`문자·보호자응답·결과입력을 합쳐 <b>보호자 관리 접점 ${Number(m.guardianTouchpoints).toLocaleString('ko-KR')}회</b>를 기록했습니다.`);if(m.riskCases)value.push(`그중 <b>${Number(m.riskCases).toLocaleString('ko-KR')}개 케이스</b>에서 주의/악화 신호를 조기에 확인했습니다.`);$('monthlyReportValue').innerHTML=value.join(' ');
-  $('monthlyReportComparison').innerHTML=[monthlyDeltaText('보호자 안내자료 작성',cmp.packageGenerations),monthlyDeltaText('후속관리 케이스',cmp.followupCases),monthlyDeltaText('문자 성공률',cmp.messageSuccessRate,true),monthlyDeltaText('보호자 응답률',cmp.surveyResponseRate,true),monthlyDeltaText('만족도',cmp.avgSatisfaction),monthlyDeltaText('위험 케이스',cmp.riskCases,false,true),monthlyDeltaText('관리 접점',cmp.guardianTouchpoints)].join('');
+  const value=[];value.push(`이번 달 <b>보호자 안내자료 ${Number(m.packageGenerations||0).toLocaleString('ko-KR')}건</b>을 생성했습니다.`);if(m.followupCases)value.push(`<b>후속관리 ${Number(m.followupCases).toLocaleString('ko-KR')}건</b>을 기록했습니다.`);if(m.guardianTouchpoints)value.push(`문자·보호자응답·결과입력을 합쳐 <b>발송·응답·결과 기록 ${Number(m.guardianTouchpoints).toLocaleString('ko-KR')}회</b>를 기록했습니다.`);if(m.riskCases)value.push(`그중 <b>${Number(m.riskCases).toLocaleString('ko-KR')}건의 후속관리</b>에서 주의/악화 신호를 기록했습니다.`);$('monthlyReportValue').innerHTML=value.join(' ');
+  $('monthlyReportComparison').innerHTML=[monthlyDeltaText('보호자 안내자료 작성',cmp.packageGenerations),monthlyDeltaText('후속관리 건',cmp.followupCases),monthlyDeltaText('문자 성공률',cmp.messageSuccessRate,true),monthlyDeltaText('보호자 응답률',cmp.surveyResponseRate,true),monthlyDeltaText('만족도',cmp.avgSatisfaction),monthlyDeltaText('주의 신호가 있는 후속관리',cmp.riskCases,false,true),monthlyDeltaText('발송·응답·결과 기록',cmp.guardianTouchpoints)].join('');
   $('monthlyOutcomeSummary').innerHTML=[['결과 입력',m.outcomesCompleted],['호전',m.outcomesImproved],['안정',m.outcomesStable],['악화',m.outcomesWorsened],['연락 안 됨',m.outcomesUnreachable],['수의사 확인',m.outcomesEscalated]].map(([k,v])=>`<div><span>${k}</span><b>${Number(v||0).toLocaleString('ko-KR')}</b></div>`).join('');
   const tt=c.topTemplates||[];$('monthlyTemplateTable').innerHTML=tt.length?`<table class="monthly-mini-table"><thead><tr><th>보호자 안내자료</th><th class="right">생성</th><th class="right">평균시간</th></tr></thead><tbody>${tt.map(x=>`<tr><td>${escapeHtml(templateNameById(x.templateId))}</td><td class="right">${Number(x.count||0)}건</td><td class="right">${x.avgSeconds?Math.round(x.avgSeconds)+'초':'-'}</td></tr>`).join('')}</tbody></table>`:monthlyReportRowEmpty();
   const jt=c.topJourneys||[];$('monthlyJourneyTable').innerHTML=jt.length?`<table class="monthly-mini-table"><thead><tr><th>후속관리 계획</th><th class="right">완료</th><th class="right">호전</th><th class="right">확인</th></tr></thead><tbody>${jt.map(x=>`<tr><td>${escapeHtml(x.journeyName||'기본 후속관리')}</td><td class="right">${Number(x.completed||0)}</td><td class="right">${Number(x.improved||0)}</td><td class="right">${Number(x.escalated||0)}</td></tr>`).join('')}</tbody></table>`:monthlyReportRowEmpty();
-  const st=c.staff||[];$('monthlyStaffTable').innerHTML=st.length?`<table class="monthly-mini-table"><thead><tr><th>직원</th><th>역할</th><th class="right">패키지</th><th class="right">후속완료</th></tr></thead><tbody>${st.map(x=>`<tr><td>${escapeHtml(x.displayName||'직원')}</td><td>${escapeHtml(saasRoleLabel(x.role).split(' · ')[0])}</td><td class="right">${Number(x.packages||0)}</td><td class="right">${Number(x.followupCompleted||0)}</td></tr>`).join('')}</tbody></table>`:monthlyReportRowEmpty();
+  const st=c.staff||[];$('monthlyStaffTable').innerHTML=st.length?`<table class="monthly-mini-table"><thead><tr><th>직원</th><th>역할</th><th class="right">안내자료 작성</th><th class="right">후속관리 완료</th></tr></thead><tbody>${st.map(x=>`<tr><td>${escapeHtml(x.displayName||'직원')}</td><td>${escapeHtml(saasRoleLabel(x.role).split(' · ')[0])}</td><td class="right">${Number(x.packages||0)}</td><td class="right">${Number(x.followupCompleted||0)}</td></tr>`).join('')}</tbody></table>`:monthlyReportRowEmpty();
+  renderMonthlyHospitalUsage(d.operationsUsage);
   $('monthlyReportMethodology').textContent=c.methodology?.followupCompletion||'월간 운영 지표입니다.';
   $('monthlyReportStatus').textContent=`${month===currentKstMonth()?'이번 달 진행 중':'월 마감 데이터'} · 지난달 ${d.previous?.month||'-'} 비교 · 환자 식별정보 제외`;
 }
-let monthlyReportRequestSequence=0;
+function monthlyHospitalUsageRows(u){if(!u)return [];return [
+ ['진료 기록 · 신규 작성',u.clinical?.total,'건'],['입원',u.clinical?.ward,'건'],['마취·수술',u.clinical?.anesthesia,'건'],['치과',u.clinical?.dental,'건'],['신경검사',u.clinical?.neuro,'건'],['안과',u.clinical?.ophthalmic,'건'],['만성질환',u.clinical?.chronic,'건'],['기타 진료',u.clinical?.other,'건'],
+ ['직원 교육 배정',u.training?.assigned,'건'],['직원 교육 이수',u.training?.completed,'건'],['업무 체크리스트 배정',u.checklists?.assigned,'건'],['완료 업무',u.checklists?.completed,'건'],['기한 지난 미완료 업무',u.checklists?.overdue,'건']];}
+function renderMonthlyHospitalUsage(u){
+ const host=$('monthlyHospitalUsage');if(!host)return;
+ host.innerHTML='<h3>진료·교육·업무 사용 현황</h3>'+(u?'<div class="monthly-usage-grid">'+monthlyHospitalUsageRows(u).map(([label,n,unit])=>'<div><span>'+escapeHtml(label)+'</span><b>'+Number(n||0).toLocaleString('ko-KR')+' '+unit+'</b></div>').join('')+'</div><p class="muted">'+escapeHtml(u.basis||'')+'</p>':'<p class="muted">사용 현황 집계 연결을 준비 중입니다. 기존 지표는 아래에서 확인할 수 있습니다.</p>');
+}
+let monthlyReportRequestSequence=0,monthlyReportScope='',monthlyReportCache=new Map(),monthlyReportPending=new Map();
+function monthlyReportIdentity(){return clinicReadScope()+JSON.stringify([saasMe?.role,saasMe?.permissions]);}
 function setMonthlyReportAvailability(ready){
-  $('monthlyReportExportSurface').hidden=!ready;
+  $('monthlyReportExportSurface').hidden=!monthlyReportState?.current;
   ['monthlyReportPdf','monthlyReportCsv'].forEach(id=>{if($(id))$(id).disabled=!ready;});
 }
 async function loadMonthlyOperationsReport(showToast=true){
+  const scope=monthlyReportIdentity();
+  if(scope!==monthlyReportScope||saasMode!=='auth'||!saasMe){monthlyReportScope=scope;monthlyReportState=null;monthlyReportCache.clear();monthlyReportPending.clear();++monthlyReportRequestSequence;setMonthlyReportAvailability(false);}
   if(saasMode!=='auth'||!saasMe)return;
-  const sequence=++monthlyReportRequestSequence,month=$('monthlyReportMonth')?.value||currentKstMonth();
-  setMonthlyReportAvailability(false);monthlyReportState=null;
-  $('monthlyReportStatus').textContent=`${month} 리포트를 집계하고 있습니다…`;
+  const sequence=++monthlyReportRequestSequence,month=$('monthlyReportMonth')?.value||currentKstMonth(),cached=monthlyReportCache.get(month);
+  const current=()=>sequence===monthlyReportRequestSequence&&scope===monthlyReportIdentity()&&saasMode==='auth';
+  const present=data=>{monthlyReportState=data;renderMonthlyOperationsReport();setMonthlyReportAvailability(true);};
+  if(!showToast&&cached&&Date.now()-cached.at<30000){present(cached.data);return;}
+  setMonthlyReportAvailability(false);
+  const retained=monthlyReportState?.current?.month;
+  $('monthlyReportStatus').textContent=`${month} 집계 중…${retained?' 아래는 '+retained+' 이전 조회 결과입니다.':''}`;
+  let request=monthlyReportPending.get(month);
+  if(!request){request=saasRequest('/saas/reports/monthly?month='+encodeURIComponent(month),{method:'GET'});monthlyReportPending.set(month,request);}
   try{
-    const data=await saasRequest('/saas/reports/monthly?month='+encodeURIComponent(month),{method:'GET'});
-    if(sequence!==monthlyReportRequestSequence)return;
+    const data=await request;
+    if(!current())return;
     if(!data?.current||data.current.month!==month)throw Error('선택한 월의 리포트를 확인할 수 없습니다.');
-    monthlyReportState=data;renderMonthlyOperationsReport();setMonthlyReportAvailability(true);
-    if(showToast)toast(`${month} 운영 리포트를 새로고침했습니다.`);
+    monthlyReportCache.set(month,{at:Date.now(),data});while(monthlyReportCache.size>3)monthlyReportCache.delete(monthlyReportCache.keys().next().value);
+    present(data);if(showToast)toast(`${month} 운영 리포트를 새로고침했습니다.`);
   }catch(e){
-    if(sequence!==monthlyReportRequestSequence)return;
-    $('monthlyReportStatus').textContent=`${month} 조회 실패 · 리포트 새로고침으로 다시 시도해주세요. ${e.message||''}`;
+    if(!current())return;
+    setMonthlyReportAvailability(monthlyReportState?.current?.month===month);
+    $('monthlyReportStatus').textContent=`${month} 조회 실패 · 새로고침으로 다시 시도해주세요.${retained?' 아래는 '+retained+' 이전 조회 결과입니다.':''} ${e.message||''}`;
     if(showToast)toast(e.message||'월간 리포트 조회 실패');
-  }
+  }finally{if(monthlyReportPending.get(month)===request)monthlyReportPending.delete(month);}
 }
-function monthlyReportCsvRows(){const d=monthlyReportState,c=d?.current,m=c?.metrics||{};if(!c)return [];const rows=[['CARESTEP 월간 운영 리포트',c.month],['병원',d.clinic?.name||hospitalName()],[],['지표','값'],['보호자 안내자료 작성',m.packageGenerations],['평균 자료 작성시간(초)',m.avgPackageSeconds],['후속관리 케이스',m.followupCases],['후속관리 등록 업무',m.followupTasksRegistered],['후속관리 결과입력 완료',m.followupTasksCompleted],['후속관리 완료율(%)',m.followupCompletionRate],['문자 성공',m.messagesSent],['문자 실패',m.messagesFailed],['문자 성공률(%)',m.messageSuccessRate],['보호자 응답 초대',m.surveyInvited],['보호자 응답',m.surveyResponded],['보호자 응답률(%)',m.surveyResponseRate],['평균 만족도',m.avgSatisfaction],['위험 케이스',m.riskCases],['보호자 관리 접점',m.guardianTouchpoints],[],['직원','역할','자료 작성','후속완료','전체 이벤트'],...(c.staff||[]).map(x=>[x.displayName,x.role,x.packages,x.followupCompleted,x.events]),[],['보호자 안내자료','자료 작성','평균 생성시간(초)'],...(c.topTemplates||[]).map(x=>[templateNameById(x.templateId),x.count,x.avgSeconds]),[],['후속관리 계획','완료','호전','악화','수의사 확인'],...(c.topJourneys||[]).map(x=>[x.journeyName,x.completed,x.improved,x.worsened,x.escalated])];return rows;}
-function exportMonthlyOperationsCsv(){if(!monthlyReportState?.current){toast('먼저 월간 리포트를 불러와주세요.');return;}const a=document.createElement('a'),blob=csvBlob(monthlyReportCsvRows());a.href=URL.createObjectURL(blob);a.download=`${safeFileName(hospitalName())}_CARESTEP_${monthlyReportState.current.month}_운영리포트.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('월간 운영 리포트 CSV를 저장했습니다.');}
-async function exportMonthlyOperationsPdf(){if(!monthlyReportState?.current){toast('먼저 월간 리포트를 불러와주세요.');return;}const src=$('monthlyReportExportSurface');if(!src)return;if(typeof html2pdf==='undefined'){toast('PDF 라이브러리를 불러오지 못했습니다.');return;}const clone=src.cloneNode(true);clone.style.width='760px';clone.style.border='0';clone.style.borderRadius='0';const host=document.createElement('div');host.style.cssText='position:fixed;left:-10000px;top:0;width:794px;background:#fff;padding:17px;z-index:-99999';host.appendChild(clone);document.body.appendChild(host);try{if(document.fonts?.ready)await document.fonts.ready;await html2pdf().set({margin:[7,7,7,7],filename:`${safeFileName(hospitalName())}_CARESTEP_${monthlyReportState.current.month}_월간운영리포트.pdf`,image:{type:'jpeg',quality:.97},html2canvas:{scale:1.5,backgroundColor:'#ffffff',logging:false},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy'],avoid:['.monthly-report-card','.monthly-report-kpis article']}}).from(clone).save();toast('월간 운영 리포트 PDF를 저장했습니다.');}catch(e){toast(e.message||'PDF 저장에 실패했습니다.');}finally{host.remove();}}
+
+function monthlyReportCsvRows(){const d=monthlyReportState,c=d?.current,m=c?.metrics||{};if(!c)return [];const rows=[['CARESTEP 월간 운영 리포트',c.month],['병원',d.clinic?.name||hospitalName()],[],['지표','값'],['보호자 안내자료 작성',m.packageGenerations],['평균 자료 작성시간(초)',m.avgPackageSeconds],['후속관리 건',m.followupCases],['후속관리 등록 업무',m.followupTasksRegistered],['후속관리 결과입력 완료',m.followupTasksCompleted],['후속관리 완료율(%)',m.followupCompletionRate],['문자 성공',m.messagesSent],['문자 실패',m.messagesFailed],['문자 성공률(%)',m.messageSuccessRate],['보호자 응답 초대',m.surveyInvited],['보호자 응답',m.surveyResponded],['보호자 응답률(%)',m.surveyResponseRate],['평균 만족도',m.avgSatisfaction],['주의 신호가 있는 후속관리',m.riskCases],['발송·응답·결과 기록',m.guardianTouchpoints],[],['직원','역할','자료 작성','후속관리 완료','전체 이벤트'],...(c.staff||[]).map(x=>[x.displayName,x.role,x.packages,x.followupCompleted,x.events]),[],['보호자 안내자료','자료 작성','평균 생성시간(초)'],...(c.topTemplates||[]).map(x=>[templateNameById(x.templateId),x.count,x.avgSeconds]),[],['후속관리 계획','완료','호전','악화','수의사 확인'],...(c.topJourneys||[]).map(x=>[x.journeyName,x.completed,x.improved,x.worsened,x.escalated])];if(d.operationsUsage)rows.push([],['진료·교육·업무','값','단위'],...monthlyHospitalUsageRows(d.operationsUsage),['집계 기준',d.operationsUsage.basis]);return rows;}
+function exportMonthlyOperationsCsv(){if(!monthlyReportState?.current||monthlyReportScope!==monthlyReportIdentity()||monthlyReportState.current.month!==$('monthlyReportMonth')?.value){toast('선택한 월의 리포트를 다시 불러와주세요.');return;}const a=document.createElement('a'),blob=csvBlob(monthlyReportCsvRows());a.href=URL.createObjectURL(blob);a.download=`${safeFileName(hospitalName())}_CARESTEP_${monthlyReportState.current.month}_운영리포트.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('월간 운영 리포트 CSV를 저장했습니다.');}
+async function exportMonthlyOperationsPdf(){if(!monthlyReportState?.current||monthlyReportScope!==monthlyReportIdentity()||monthlyReportState.current.month!==$('monthlyReportMonth')?.value){toast('선택한 월의 리포트를 다시 불러와주세요.');return;}const src=$('monthlyReportExportSurface');if(!src)return;if(typeof html2pdf==='undefined'){toast('PDF 라이브러리를 불러오지 못했습니다.');return;}const clone=src.cloneNode(true);clone.style.width='760px';clone.style.border='0';clone.style.borderRadius='0';const host=document.createElement('div');host.style.cssText='position:fixed;left:-10000px;top:0;width:794px;background:#fff;padding:17px;z-index:-99999';host.appendChild(clone);document.body.appendChild(host);try{if(document.fonts?.ready)await document.fonts.ready;await html2pdf().set({margin:[7,7,7,7],filename:`${safeFileName(hospitalName())}_CARESTEP_${monthlyReportState.current.month}_월간운영리포트.pdf`,image:{type:'jpeg',quality:.97},html2canvas:{scale:1.5,backgroundColor:'#ffffff',logging:false},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy'],avoid:['.monthly-report-card','.monthly-report-kpis article']}}).from(clone).save();toast('월간 운영 리포트 PDF를 저장했습니다.');}catch(e){toast(e.message||'PDF 저장에 실패했습니다.');}finally{host.remove();}}
 
 let pendingPilotEventId='';
 let pendingPilotRating=0;
@@ -10600,8 +10621,8 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-care.js?v=20261031-practical-labels"></script>
 <script src="clinic-account-reads.js?v=20261031-account"></script>
 <script src="clinic-organization.js?v=20261101-clinic-clean"></script>
-<script src="staff-training.js?v=20261105-read-status"></script>
-<script src="staff-training-clinic.js?v=20261101-menu"></script>
+<script src="staff-training.js?v=20261105-operations"></script>
+<script src="staff-training-clinic.js?v=20261105-operations"></script>
 <script src="practice-intake.js?v=20261023a"></script>
 <script src="practice-reference.js?v=20261025reuse1"></script>
 <script src="practice-reference-ui.js?v=20261030-efficient2"></script>
@@ -10663,7 +10684,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 
 <script id="clinic-module-manifest" type="application/json">{"dental": ["dental-record.js?v=20261101-record-identity", "dental-workflow.js?v=20261103-record-workspaces"], "neuro": ["neuro-record.js?v=20261103-record-workspaces"], "ophthalmic": ["ophthalmic-record.js?v=20261103-record-workspaces"], "chronic": ["chronic-record.js?v=20261103-record-workspaces"], "calc": ["practice-acid-base.js?v=20261026tb1", "practice-calcium-transfusion.js?v=20261031-calc-cleanup-2", "practice-emergency.js?v=20261031-calc-cleanup-2", "practice-potassium-mix.js?v=20261031-calc-cleanup-2", "practice-cri-presets.js?v=20261031-calc-clarity-1", "practice-nutrition-foods.js?v=20261031-prunus", "practice-nutrition.js?v=20261031-food1", "practice-calculator-workspace.js?v=20261031-calc-cleanup-2", "practice-calcium-guided.js?v=20261026ca1", "practice-fluid-plan.js?v=20261031-calc-cleanup-2"]}</script>
 <script src="clinic-lazy-modules.js?v=20261105-flow"></script>
-<script src="practice-tools.js?v=20261105-lazy"></script>
+<script src="practice-tools.js?v=20261105-operations"></script>
 <script src="clinic-today-ward.js?v=20261030-todayward1"></script>
 <script src="practice-clinic.js?v=20261103-settings"></script>
 <script src="clinic-settings.js?v=20261103-settings-unified"></script>

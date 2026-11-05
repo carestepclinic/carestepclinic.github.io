@@ -1,5 +1,6 @@
 /* Keep training independent of the selected patient and the material builder. */
 window.CarestepTraining=StaffTraining.mount(document.getElementById('staffTrainingRoot'),{
+ canChecklist:()=>saasPermission('operations.manage',true), checklist:id=>window.CarestepPractice?.templateFromSop(id),
  separateSop:true, navigation:()=>window.ClinicNavigation?.changed(),
  request:(path,options)=>saasRequest('/saas/training'+path,options),
  isReady:()=>saasMode==='auth'&&!!saasMe,
