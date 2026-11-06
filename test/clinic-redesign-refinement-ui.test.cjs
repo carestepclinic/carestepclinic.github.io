@@ -16,6 +16,47 @@ async function page(width=1440){const p=await browser.newPage({viewport:{width,h
  };showApp({deferFullRender:true});go('practice');
  });return {p,errors};}
 async function route(p,key){await p.evaluate(key=>go('practice',{practiceTab:key}),key);await p.waitForFunction(key=>CarestepPractice.route()===key,key);await p.waitForTimeout(60);}
+
+test('next treatment groups exclude ended tasks and separate past from future without writes',async()=>{
+ const {p}=await page(),now=Date.parse('2026-11-06T09:00:00Z');
+ const rooms=[{id:'a',patientCase:{id:'p',status:'active',body:{tasks:[
+ {id:'one',status:'planned',plannedAt:'2026-11-06T10:00:00Z'},
+ {id:'two',status:'held',plannedAt:'2026-11-06T10:00:00Z'},
+ {id:'old',status:'planned',plannedAt:'2026-11-06T08:00:00Z'},
+ {id:'done',status:'done',plannedAt:'2026-11-06T10:00:00Z'},
+ {id:'cancel',status:'cancelled',plannedAt:'2026-11-06T10:00:00Z'},
+ {id:'prn',status:'planned',plannedAt:'2026-11-06T10:00:00Z',medication:{prn:true}},
+ {id:'invalid',status:'planned',plannedAt:''}]}}}];
+ const result=await p.evaluate(({rooms,now})=>{const before=JSON.stringify(rooms),groups=ClinicalWorkspace.wardNextGroups(rooms,now);return {groups:groups.map(g=>[g.late,g.tasks.map(t=>t.id)]),unchanged:JSON.stringify(rooms)===before};},{rooms,now});
+ assert.deepEqual(result.groups,[[true,['old']],[false,['one','two']]]);assert.equal(result.unchanged,true);await p.close();
+});
+for(const width of [390,1266,1600])test('bottom next care groups and custom room layout '+width,async()=>{
+ const {p,errors}=await page(width);await p.evaluate(()=>{
+  const old=saasRequest,at=new Date(Date.now()+3600000).toISOString();
+  const item={id:'ward-next',kind:'admission',status:'active',revision:1,patient:{name:'합성 입원',species:'cat'},body:{species:'cat',weight:4,tasks:['a','b'].map(id=>({id,title:'시험 주사 '+id,category:'injection',status:'planned',plannedAt:at})),orders:[],infusions:[],wardChecks:[]}};records.push(item);
+  saasRequest=async(path,o)=>path.endsWith('/clinical/rooms')?{items:[{id:'dog1',kind:'dog',name:'강아지 01'},{id:'cat1',kind:'cat',name:'고양이 01',patientCase:item},{id:'large1',kind:'large_dog',name:'대형견 01'},{id:'other1',kind:'dog',category:'격리실',name:'격리실'}]}:old(path,o);
+ });await route(p,'ward');await p.waitForSelector('.cs-next-treatment-items button');
+ assert.equal(await p.locator('.cs-next-treatment-items button').count(),1);assert.match(await p.locator('.cs-next-treatments').innerText(),/주사 2종/);
+ assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+ if(width>=1266){const a=await p.locator('[data-room-kind=dog]').boundingBox(),b=await p.locator('[data-room-kind=cat]').boundingBox();assert.ok(b.width>a.width*1.3);assert.ok(b.x>a.x);}
+ await p.screenshot({path:path.resolve(root,'../clinic-redesign-preview/workflow-ward-'+width+'.png'),fullPage:true});
+ await p.locator('.cs-next-treatment-items button').click();await p.waitForSelector('.cl-ward-detail');assert.equal(await p.evaluate(()=>testRequests.filter(r=>r.o?.method==='POST').length),0);assert.deepEqual(errors,[]);await p.close();
+});
+for(const width of [390,1440])test('pending medication phases stay readable and preserve stale protection '+width,async()=>{
+ const {p,errors}=await page(width);await p.evaluate(()=>{records.find(r=>r.id==='cc_surgery').body.anesthesiaMedicationPlans=Array.from({length:5},(_,i)=>({id:'plan'+i,status:'pending',phase:i<3?'premedication':'induction',weight:i===4?6:5,species:'dog',medication:{drug:'합성 약물 '+i,amount:.25,route:'IV',doseUnit:'mg',strength:10,strengthUnit:'mg'}}));});await load(p,'surgery');
+ assert.equal(await p.locator('.cs-pending-phases>section').count(),2);assert.equal(await p.locator('.cs-pending-row').count(),5);if(width>1000)assert.ok((await p.locator('.cs-pending-row').first().boundingBox()).height<110);assert.equal(await p.locator('[data-ar="plan-give"][data-id="plan4"]').isDisabled(),true);
+ assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+ await p.screenshot({path:path.resolve(root,'../clinic-redesign-preview/workflow-anesthesia-'+width+'.png'),fullPage:true});assert.equal(await p.evaluate(()=>testRequests.filter(r=>r.o?.method==='POST').length),0);assert.deepEqual(errors,[]);await p.close();
+});
+test('desktop navigation folds without losing keyboard access or mobile menu',async()=>{
+ const {p,errors}=await page();await route(p,'dental');const toggle=p.locator('.cs-desktop-menu');await toggle.focus();await p.keyboard.press('Enter');assert.equal(await toggle.getAttribute('aria-expanded'),'false');assert.equal(await p.locator('.clinic-navigation').isVisible(),false);await p.keyboard.press('Enter');assert.equal(await p.locator('.clinic-navigation').isVisible(),true);await p.setViewportSize({width:390,height:850});assert.equal(await toggle.isVisible(),false);assert.equal(await p.locator('[data-practice-menu]').isVisible(),true);assert.deepEqual(errors,[]);await p.close();
+});
+test('different anesthesia patient hides previous record during delayed lookup',async()=>{
+ const {p,errors}=await page();await load(p,'surgery');await p.evaluate(()=>{const second=structuredClone(records.find(r=>r.id==='cc_surgery'));second.id='cc_second';second.patient_id='p_second';second.patient.name='새 합성 환자';records.push(second);const old=saasRequest;saasRequest=async(path,o)=>{if(path.endsWith('/cases/cc_second'))await new Promise(r=>window.releaseSecond=r);return old(path,o);};CarestepPractice.surgeryRecord('cc_second','p_second');});await p.waitForTimeout(100);assert.equal(await p.locator('.cs-patient-header').filter({hasText:'합성 마취'}).count(),0);assert.equal(await p.locator('.ar-pending-medications').count(),0);await p.evaluate(()=>releaseSecond());await p.waitForTimeout(100);await p.evaluate(()=>releaseSecond?.());await p.waitForFunction(()=>document.querySelector('.cs-patient-header')?.textContent.includes('새 합성 환자'));assert.deepEqual(errors,[]);await p.close();
+});
+test('calculator shared tools keep record resume and summary together',async()=>{
+ const {p,errors}=await page();await load(p,'surgery');await load(p,'dental');await route(p,'calc');await p.waitForSelector('.pt-organized');assert.equal(await p.locator('.cs-workspace-tools .cs-open-records').count(),1);assert.equal(await p.locator('.cs-workspace-tools .ca-entry').count(),1);assert.equal(await p.locator('.pt-calc-common .pt-clinical-bridge').count(),1);await p.screenshot({path:path.resolve(root,'../clinic-redesign-preview/workflow-calc-context.png'),fullPage:false});assert.deepEqual(errors,[]);await p.close();
+});
 async function load(p,key){await route(p,key);if(key==='surgery')await p.locator('[data-cl-case=cc_surgery]').click();else {const candidates=p.locator('[data-open="cc_'+key+'"],[data-dn-open="cc_'+key+'"],[data-record="cc_'+key+'"],[data-act="open"][data-id="cc_'+key+'"],[data-dn="open"][data-id="cc_'+key+'"]');if(!await candidates.count())throw Error('Missing record selector '+key+' '+await p.locator('[data-body]').innerText());await candidates.first().click();}await p.waitForTimeout(80);}
 
 

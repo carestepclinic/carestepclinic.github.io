@@ -1035,3 +1035,71 @@
  .clinic-calm #practiceRoot .cs-anesthesia-workspace .ar-pending-grid article button {min-height:36px;padding:6px 10px}
  .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-entry label {margin-block:3px;gap:4px}
 }
+/* Workflow overview: compact utilities, phase groups, and a shared next-care strip. */
+@media screen {
+ .clinic-calm #practiceRoot .cs-workspace-tools {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;margin:0 0 8px}
+ .clinic-calm #practiceRoot .cs-workspace-tools:empty {display:none}
+ .clinic-calm #practiceRoot .cs-workspace-tools .cs-open-records {flex:1 1 340px;margin:0;padding:4px 0;border:0;background:transparent}
+ .clinic-calm #practiceRoot .cs-workspace-tools .ca-entry {margin:0;padding:0;border:0;background:transparent}
+ .clinic-calm #practiceRoot .cs-workspace-tools button {min-height:34px;padding:5px 9px;font-size:13px}
+ .clinic-calm #practiceRoot .cs-pending-phases {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:10px}
+ .clinic-calm #practiceRoot .cs-pending-phases h5 {margin:5px 0;font-size:13px;color:var(--cs-muted)}
+ .clinic-calm #practiceRoot .cs-pending-phases .ar-pending-grid {display:flex;flex-direction:column;gap:0}
+ .clinic-calm #practiceRoot .cs-pending-phases .ar-pending-grid article.cs-pending-row {display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:5px 10px;padding:8px 0;border:0;border-bottom:1px solid var(--cs-line);border-radius:0;background:transparent;min-height:0;text-align:left}
+ .clinic-calm #practiceRoot .cs-pending-row>b {flex:1 1 140px;font-size:14px;word-break:normal;overflow-wrap:anywhere}
+ .clinic-calm #practiceRoot .cs-pending-row>strong {font-size:14px;white-space:nowrap}
+ .clinic-calm #practiceRoot .cs-pending-row>details {font-size:12px;margin:0}
+ .clinic-calm #practiceRoot .cs-pending-row>details[open] {flex-basis:100%;order:3}
+ .clinic-calm #practiceRoot .cs-pending-row>.cs-pending-actions {display:flex;gap:5px;margin:0 0 0 auto}
+ .clinic-calm #practiceRoot .cs-pending-row>p {flex-basis:100%;margin:0}
+ .clinic-calm #practiceRoot .cs-next-treatments {margin-top:14px;padding:12px 14px;background:#fff;border:1px solid var(--cs-line);border-radius:12px}
+ .clinic-calm #practiceRoot .cs-next-treatments>header {display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:8px}
+ .clinic-calm #practiceRoot .cs-next-treatments h4 {margin:0;font-size:15px}
+ .clinic-calm #practiceRoot .cs-next-treatments>header>span {font-size:12px;color:var(--cs-muted)}
+ .clinic-calm #practiceRoot .cs-next-treatments>header>button {margin-left:auto}
+ .clinic-calm #practiceRoot .cs-next-treatment-items {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:8px}
+ .clinic-calm #practiceRoot .cs-next-treatment-items>button {display:grid;text-align:left;gap:4px;min-width:0;white-space:normal;padding:10px 12px;background:var(--cs-tint);border:1px solid var(--cs-line);border-radius:8px}
+ .clinic-calm #practiceRoot .cs-next-treatment-items time {font-size:12px;color:var(--cs-muted)}
+ .clinic-calm #practiceRoot .cs-next-treatment-items b {font-size:15px}
+ .clinic-calm #practiceRoot .cs-next-treatment-items span {font-size:13px;overflow-wrap:anywhere}
+ .clinic-calm #practiceRoot .cs-next-treatment-items .cs-next-overdue {background:#fff5ed;border-color:#ebc9a3}
+ .clinic-calm #practiceRoot .cs-next-overdue small {color:#884c18}
+ .clinic-calm #practiceRoot .cs-next-treatments>small {display:block;margin-top:8px;color:var(--cs-muted)}
+ .clinic-calm .pt-today-layout #wardTodayRoot {order:-1}
+ .clinic-calm .cs-today-empty {padding:10px 14px}
+ .clinic-calm .cs-desktop-menu {display:none}
+ @container(min-width:760px) {
+  .clinic-calm #practiceRoot .cl-room-groups,.clinic-calm #practiceRoot .cl-room-groups:not([data-group-count="3"]) {grid-template-columns:var(--room-columns)!important}
+  .clinic-calm #practiceRoot .cl-room-group:not([data-room-kind="dog"]):not([data-room-kind="cat"]):not([data-room-kind="large_dog"]) {grid-column:1/-1}
+ }
+ @media(min-width:801px) {
+  .clinic-calm .cs-desktop-menu {display:block;margin:0 0 10px auto;padding:5px 9px;font-size:12px;min-height:32px}
+  .clinic-calm.cs-menu-collapsed #appView {grid-template-columns:76px minmax(0,1fr)}
+  .clinic-calm.cs-menu-collapsed #appView .sidebar {width:76px;padding:14px 6px}
+  .clinic-calm.cs-menu-collapsed #appView .sidebar>:not(.cs-desktop-menu) {display:none!important}
+  .clinic-calm.cs-menu-collapsed .cs-desktop-menu {margin:0;white-space:normal;width:100%}
+ }
+ @media(max-width:800px) {
+  .clinic-calm #practiceRoot .cs-workspace-tools .cs-open-records {flex-basis:100%}
+  .clinic-calm #practiceRoot .cs-workspace-tools button,.clinic-calm #practiceRoot .cs-pending-row button {min-height:40px}
+  .clinic-calm #practiceRoot .cs-pending-row>b {flex-basis:45%}
+  .clinic-calm #practiceRoot .cs-next-treatment-items {grid-template-columns:repeat(2,minmax(0,1fr))}
+ }
+}
+
+@media screen {
+ .clinic-calm .cs-desktop-menu {font-family:inherit;font-weight:600;color:var(--cs-muted);background:transparent;border:1px solid var(--cs-line);border-radius:8px;cursor:pointer}
+ .clinic-calm .cs-desktop-menu:focus-visible {outline:2px solid var(--cs-accent);outline-offset:2px}
+ @media(min-width:801px){
+ .clinic-calm #appView .clinic-navigation .nav-item[data-clinical-group] {min-height:34px;padding:6px 10px;margin:0}
+ .clinic-calm #appView .clinic-navigation .nav-item[data-clinical-group] .nav-copy b {font-size:13px!important;line-height:1.4}
+ .clinic-calm #appView .clinic-navigation .cs-nav-section-label {margin:8px 10px 3px}
+ .clinic-calm #appView .sidebar-brand {padding-bottom:12px}
+ }
+}
+
+@media screen{
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-clinical-bridge{flex:1 1 260px;margin:0;padding:4px 0;border:0;background:transparent;font-size:13px}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-clinical-bridge>summary{font-size:13px;font-weight:600}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common [data-common-inputs]>label:first-child{min-width:165px}
+}
