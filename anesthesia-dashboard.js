@@ -52,7 +52,7 @@
   const table=query('[data-ar-lazy=table]')?.closest('details');if(table){table.hidden=a.display!=='table';monitor.append(table);}
   const last=query('.ar-last-values');if(last)last.remove();
   const settings=query('.ar-sheet>.ar-settings-summary');if(settings){settings.classList.add('ad-settings');settings.setAttribute('aria-label','마지막으로 기록한 마취·수액 설정');timing.before(settings);settings.querySelector(':scope>b').textContent='현재 설정';if(!a.writable)settings.querySelector(':scope>b').textContent='마지막 설정';for(const p of settings.querySelectorAll('p')){const b=p.querySelector('button');if(b){b.replaceChildren(...[...p.childNodes].filter(n=>n!==b),...b.childNodes);p.replaceChildren(b);}for(const time of p.querySelectorAll('small')){time.title=time.textContent;time.textContent=time.textContent.trim().slice(5);}}}
-  const inline=query('.ae-inline');if(inline)panel('measurement').append(inline);else panel('measurement').innerHTML='<p class="ad-readonly">'+(a.item.status==='closed'?(a.medical?'종료된 기록입니다. 그래프의 측정점을 눌러 기존 기록을 수정할 수 있습니다.':'종료된 기록을 조회하고 있습니다.'):'측정 입력 권한이 없습니다.')+'</p>';
+  const inline=query('.ae-inline');if(inline){panel('measurement').append(inline);panel('measurement').dataset.csSectionTitle='측정 입력';}else panel('measurement').innerHTML='<p class="ad-readonly">'+(a.item.status==='closed'?(a.medical?'종료된 기록입니다. 그래프의 측정점을 눌러 기존 기록을 수정할 수 있습니다.':'종료된 기록을 조회하고 있습니다.'):'측정 입력 권한이 없습니다.')+'</p>';
   query('.ar-live-workspace')?.remove();const meds=query('.ar-medication');if(meds){panel('medication').append(meds);const plan=meds.querySelector('details');if(plan){plan.open=view.planExpanded??false;plan.addEventListener('toggle',()=>{if(plan.isConnected)view.planExpanded=plan.open;});}}
   const prepared=query('.ae-prepared');if(prepared){prepared.querySelector('h4').textContent='준비 약물·누적 투여량';panel('medication').prepend(prepared);}
   const procedure=panel('procedure');procedure.innerHTML='<h4>처치·특이사항</h4>'+(a.writable?'<div class="ad-procedure-actions">'+a.btn('procedure','처치·특이사항 기록')+a.btn('airway','삽관 기록')+'</div>':'')+'<div class="ad-procedure-list">'+rows.filter(r=>r.type==='marker'&&['other','intubation','extubation','infusion','settings'].includes(r.marker)).slice(-6).reverse().map(r=>'<p><time>'+clock(r.observedAt)+'</time><b>'+esc(a.markers[r.marker])+'</b><span>'+esc(a.administration(r)||r.note)+'</span>'+(a.medical?a.btn('edit','수정','data-id="'+esc(r.recordId)+'"'):'')+'</p>').join('')+'</div>';
@@ -102,8 +102,8 @@
    if(medication){medication.classList.add('cs-drug-preparation');timing.before(medication);}
    for(const note of sheet.querySelectorAll('.ae-metric>small'))if(note.textContent.trim()==='미측정')note.classList.add('cs-unmeasured-note');
   }
-  // Keep planned medication visible below monitoring; never treat preparation as administration.
-  if(pending&&a.onePage)dashboard.after(pending);
+  // Pending medication is an immediate action; preparation is never administration.
+  if(pending&&a.onePage){dashboard.before(pending);pending.dataset.csSectionTitle='투약 대기';}
   const reminder=query('[data-ar-reminder]');if(reminder)timing.after(reminder);
   const status=sheet.querySelector(':scope>p[role=status]');if(status){if(/^기록 \d+건$/.test(status.textContent.trim()))status.remove();else header?.firstElementChild?.append(status);}header?.setAttribute('aria-label','현재 마취 환자');
  }
