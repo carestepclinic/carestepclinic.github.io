@@ -85,7 +85,7 @@
   const species=b.querySelector('[data-ref-species]'),weight=b.querySelector('[data-common-weight]');
   const patient=b.querySelector('[data-patient-summary]'),unlink=b.querySelector('[data-manual]');
   common.classList.add('pt-compact-context');
-  const patientDetails=document.createElement('details');patientDetails.className='pt-patient-options';patientDetails.innerHTML='<summary>환자 연결·측정일 확인</summary>';common.append(patientDetails);for(const node of [...common.children])if(node!==patientDetails&&!node.matches('[data-common-inputs],.pt-heading'))patientDetails.append(node);
+  const patientDetails=document.createElement('details');patientDetails.className='pt-patient-options';patientDetails.innerHTML='<summary>환자 불러오기·연결 정보</summary>';common.append(patientDetails);for(const node of [...common.children])if(node!==patientDetails&&!node.matches('[data-common-inputs],.pt-heading'))patientDetails.append(node);
   function patientReview(){if(b.querySelector('[data-record-weight-confirm]')?.closest('label')?.hidden===false)patientDetails.open=true;}const patientObserver=new MutationObserver(patientReview);patientObserver.observe(patientDetails,{subtree:true,attributes:true,attributeFilter:['hidden']});
 
   const intro=b.querySelector(':scope > .pt-notice');

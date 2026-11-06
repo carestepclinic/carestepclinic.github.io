@@ -47,5 +47,20 @@
   for(const [key,path] of Object.entries(paths)){const target=key==='dashboard'?nav.querySelector('.nav-home'):nav.querySelector('[data-nav-group="'+key+'"]>summary');if(!target||target.querySelector('.cs-nav-icon'))continue;const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('viewBox','0 0 24 24');icon.setAttribute('class','cs-nav-icon');icon.setAttribute('aria-hidden','true');icon.setAttribute('focusable','false');const line=document.createElementNS('http://www.w3.org/2000/svg','path');line.setAttribute('d',path);icon.append(line);target.prepend(icon);}
  }
  function init(){if(!nav)return;decorateNavigation();const desktop=document.createElement('button');desktop.type='button';desktop.className='cs-desktop-menu';desktop.setAttribute('aria-controls','clinicMainNavigation');const compact=()=>{const folded=document.body.classList.contains('cs-menu-collapsed');desktop.textContent=folded?'메뉴 열기':'메뉴 접기';desktop.setAttribute('aria-expanded',String(!folded));};desktop.onclick=()=>{document.body.classList.toggle('cs-menu-collapsed');compact();};nav.closest('.sidebar').prepend(desktop);compact();const pill=document.getElementById('saasPlanPill');if(pill&&!pill.closest('.cs-account-details')){const account=document.createElement('details');account.className='cs-account-details';account.innerHTML='<summary>내 계정</summary>';pill.before(account);account.append(pill);const link=document.createElement('button');link.type='button';link.textContent='계정 설정';link.onclick=()=>{account.open=false;go('account',{accountTab:'my'});};account.append(link);}nav.querySelector('[data-nav-guide]')?.addEventListener('click',()=>document.getElementById('openScreenGuide')?.click());document.body.classList.add('clinic-navigation-ready');const sidebar=nav.closest('.sidebar');let toggle=sidebar.querySelector('[data-practice-menu]');if(!toggle){toggle=document.createElement('button');toggle.type='button';toggle.dataset.practiceMenu='';toggle.className='pt-mobile-global-menu';toggle.textContent='전체 메뉴';sidebar.querySelector('.sidebar-brand').append(toggle);}nav.id='clinicMainNavigation';toggle.setAttribute('aria-controls',nav.id);toggle.setAttribute('aria-expanded','false');toggle.onclick=()=>toggle.setAttribute('aria-expanded',String(sidebar.classList.toggle('pt-menu-expanded')));toggle.onkeydown=e=>{if(e.key==='Escape')collapseMobile();};nav.addEventListener('keydown',e=>{if(e.key==='Escape'){collapseMobile();toggle.focus();}});sync(document.querySelector('.view.active-view')?.id||'dashboard');}
+ // Public UI check only. Never reload a clinical form or copy patient data into a new tab.
+ const uiBuild='ward-panels-20261106';
+ let checkedUI='',checkingUI=false,updateDismissed=false;
+ function showUpdate(){
+  if(updateDismissed||document.getElementById('clinicUIUpdate'))return;
+  const host=document.getElementById('appView');if(!host)return;
+  const notice=document.createElement('aside');notice.id='clinicUIUpdate';notice.className='cs-update-notice';notice.setAttribute('role','status');
+  notice.innerHTML='<span>새 화면이 준비됐습니다. 작성 중인 내용은 현재 탭에 유지됩니다.</span><a href="./index.html" target="_blank" rel="noopener">새 탭에서 열기</a><button type="button" aria-label="업데이트 안내 닫기">나중에</button>';
+  notice.querySelector('button').onclick=()=>{updateDismissed=true;notice.remove();};host.prepend(notice);
+ }
+ async function checkUI(){
+  if(checkingUI||document.hidden||!navigator.onLine||updateDismissed)return;checkingUI=true;
+  try{const r=await fetch(new URL('clinic-navigation.js',location.href),{cache:'no-store',credentials:'omit'});if(!r.ok)return;const text=await r.text(),build=text.match(/const uiBuild='([^']+)'/);if(!build)return;if(build[1]!==uiBuild||(checkedUI&&checkedUI!==text))showUpdate();checkedUI=text;}catch{}finally{checkingUI=false;}
+ }
  g.ClinicNavigation={sync,changed,route,remember,resume,permissions,collapseMobile,accountAllowed,practiceAllowed};init();
+ setTimeout(checkUI,30000);setInterval(checkUI,300000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)void checkUI();});
 })(window);

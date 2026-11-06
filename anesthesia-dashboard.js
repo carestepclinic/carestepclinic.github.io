@@ -67,7 +67,7 @@
    sheet.classList.add('ar-single-page');dashboard.querySelector('.ad-entry-tabs')?.remove();
    const phase=recordPhase(a.item,rows);sheet.dataset.recordPhase=phase;
    const phaseBadge=document.createElement('span');phaseBadge.className='ad-phase-badge';phaseBadge.textContent={prep:'마취 준비',live:'마취·수술 기록 중',recovery:'회복 기록',closed:'기록 종료'}[phase];header.firstElementChild?.append(phaseBadge);
-   const basic=document.createElement('details');basic.className='ad-patient-setup';basic.innerHTML='<summary>수술·담당자 정보</summary><div class="ad-basic-actions"></div>';basic.open=view.patientDetailsOpen??phase==='prep';basic.querySelector('summary').addEventListener('click',()=>{view.patientDetailsOpen=!basic.open;});
+   const basic=document.createElement('details');basic.className='ad-patient-setup';basic.innerHTML='<summary>수술·담당자 정보</summary><div class="ad-basic-actions"></div>';basic.open=view.patientDetailsOpen??false;basic.querySelector('summary').addEventListener('click',()=>{view.patientDetailsOpen=!basic.open;});
    if(setup){for(const cell of setup.querySelectorAll('dl>div'))if(['미입력','미확인','미지정'].includes(cell.querySelector('dd')?.textContent))cell.remove();const meta=setup.querySelector('dl');if(meta?.children.length)basic.append(meta);for(const action of setup.querySelectorAll('[data-ar=sheet],[data-ar=team]'))basic.querySelector('.ad-basic-actions').append(action);setup.querySelector('summary').textContent='장비·약물 준비 설정';setup.dataset.arArchive='';}
    const editInfo=basic.querySelector('[data-ar=sheet]');if(editInfo){editInfo.textContent='정보 수정';header.querySelector('.ar-quick-actions')?.prepend(editInfo);}basic.classList.add('ad-inline-details');
    header.after(basic);
@@ -99,7 +99,7 @@
    const basic=sheet.querySelector('.ad-patient-setup'),medication=sheet.querySelector('.ad-medications');
    if(basic)sheet.append(basic);
    if(settings){dashboard.querySelector('.ad-entry').append(settings);if(quick&&(view.quickEntry?.kind==='setting'||view.quickEntry?.kind==='infusion'))settings.after(quick);}
-   const controls=document.createElement('div');controls.className='cs-anesthesia-commandbar';sheet.prepend(controls);if(header)controls.append(header);if(medication){medication.classList.add('cs-drug-preparation');
+   const controls=document.createElement('div');controls.className='cs-anesthesia-commandbar';sheet.prepend(controls);if(header)controls.append(header);const workspace=root.closest('.cl-anesthesia-page'),toolbar=workspace?.querySelector(':scope>.cl-toolbar');if(toolbar){const actions=toolbar.lastElementChild;actions.classList.add('cs-anesthesia-record-actions');const create=actions.querySelector('[data-cl-action=new]'),manage=actions.querySelector('.cl-work-more>div');if(create&&manage)manage.append(create);controls.append(actions);toolbar.remove();}if(medication){medication.classList.add('cs-drug-preparation');
     if(recordPhase(a.item,rows)==='prep')controls.append(medication);
     else {const more=document.createElement('details');more.className='cs-drug-tools';more.innerHTML='<summary>약물 추가·준비</summary>';more.open=!!view.drugToolsOpen||view.quickEntry?.kind==='drug';more.addEventListener('toggle',()=>{if(more.isConnected)view.drugToolsOpen=more.open;});controls.append(more);more.append(medication);}
    }

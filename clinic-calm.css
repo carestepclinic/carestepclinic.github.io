@@ -1259,3 +1259,115 @@
  .clinic-calm #practiceRoot .cs-pending-row>b {flex:1 1 125px}
  .clinic-calm #practiceRoot .cs-pending-row>strong {flex:0 0 auto}
 }
+/* Ward mockup: one panel per room group, consistent patient zones and a slim agenda. */
+@media screen {
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-group {background:#fff!important;border:1px solid var(--cs-line);border-radius:14px;padding:0;overflow:hidden;box-shadow:0 2px 8px #23443808}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-group>header {display:flex;min-height:58px;box-sizing:border-box;padding:12px 14px;margin:0;background:#eaf2ef;border-bottom:1px solid var(--cs-line);gap:6px 12px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-group>header h4 {font-size:18px;gap:8px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-group>header h4:before {content:none}
+ .clinic-calm #practiceRoot .cs-ward-designed svg {width:28px;height:28px;fill:none;stroke:#245f5a;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-group>.cl-room-grid {padding:10px;gap:10px;align-items:stretch;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr))!important}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-room-card.cc-occupied {display:flex;flex-direction:column;border:1px solid #d6dfdb;border-radius:11px;box-shadow:none;background:#fff}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room.occupied {display:flex!important;flex-direction:row;align-items:center;gap:10px;padding:10px!important;min-height:90px;text-align:left;width:100%}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-room-avatar {width:48px;height:54px;background:#f2f0ec;border-radius:10px;display:grid;place-items:center;flex:none}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-room-avatar svg {width:34px;height:34px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-identity {display:flex;flex-wrap:wrap;flex:1;min-width:0;align-items:center;gap:3px 8px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-identity>strong {font-size:21px;overflow-wrap:anywhere}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-top {margin-left:auto;white-space:normal;background:#f5f6f5;border:1px solid #e0e5e2;border-radius:6px;padding:3px 6px;max-width:100%}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-top b {font-size:12px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-patient-demographics {flex-basis:100%;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-room-team {padding:0 12px 6px;min-height:68px;box-sizing:border-box}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-care-team {display:grid;gap:5px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-care-cc {display:flex;gap:7px;line-height:1.5}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-care-cc>b {flex:none}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-care-staff {gap:3px 12px;line-height:1.5;font-size:12px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-room-safety {padding:0 12px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-room-safety:has(>span:empty):not(:has(.cl-alert,.cl-stale)) {display:none}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-details {padding:6px 12px;flex:1}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-details .cl-vital-grid {gap:0;border:1px solid #dce3df;border-radius:9px;background:#fafbf9;overflow:hidden}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-vital-grid>div {border:0;border-bottom:1px solid #dce3df;border-radius:0;background:transparent;padding:5px 9px;min-height:55px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-vital-grid>div:nth-child(odd) {border-right:1px solid #dce3df}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-vital-grid>div:nth-child(n+3) {border-bottom:0}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-vital-grid>div.cl-alert {background:#fff0ed;color:#a7352e}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-vital-grid>div.cl-stale {background:#fff7e6}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-vital-grid strong {font-size:20px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-vital-time {border-top:1px solid #dce3df;background:transparent;padding:4px 10px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-monitor {display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;font-size:12px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-monitor>span {padding:3px 6px;border-radius:7px;display:flex;gap:4px;line-height:1.4}
+ .clinic-calm #practiceRoot .cs-ward-designed .cc-room-next {border:0;background:#f1f4f2;border-radius:7px;padding:6px 9px;margin:4px 12px 0;font-size:12px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cc-room-next p {margin:0;font-size:12px;font-weight:400;color:var(--cs-muted)}
+ .clinic-calm #practiceRoot .cs-ward-designed .cc-room-next small {display:block;font-size:13px;font-weight:650;color:var(--cs-ink)}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-round-action {padding:10px 12px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-round-action button {color:var(--cs-accent)!important;background:#fff!important;border:1px solid var(--cs-accent)!important;border-radius:7px;min-height:40px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-room-missing {padding:0 12px 8px;margin:0}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-vacant-rooms {padding:6px 10px 10px;margin:0;border:0;border-radius:0;background:#fafbf9}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-vacant-rooms>summary {font-size:12px;padding:4px 0;min-height:24px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-vacant-rooms .cl-room-grid {display:grid;grid-template-columns:1fr!important;gap:5px;margin-top:5px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room.vacant {display:flex!important;align-items:center;justify-content:space-between;min-height:42px;gap:10px;padding:7px 10px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room.vacant .cl-room-top {margin:0;border:0;padding:0;background:none}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room.vacant strong {font-size:12px;font-weight:400;color:var(--cs-muted)}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room.vacant strong span {margin-left:10px;font-size:20px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-room-group-idle {display:block}
+ .clinic-calm #practiceRoot .cs-next-treatments {display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;padding:8px 12px;align-items:center}
+ .clinic-calm #practiceRoot .cs-next-treatments>header {display:grid;gap:3px;margin:0;min-width:105px}
+ .clinic-calm #practiceRoot .cs-next-treatments h4 {font-size:16px}
+ .clinic-calm #practiceRoot .cs-next-treatments header>span {font-size:11px;white-space:nowrap}
+ .clinic-calm #practiceRoot .cs-next-treatments>nav {display:flex;flex-wrap:nowrap;gap:5px}
+ .clinic-calm #practiceRoot .cs-next-treatments>nav button {min-height:36px;font-size:12px;padding:5px 8px;white-space:nowrap}
+ .clinic-calm #practiceRoot .cs-next-treatment-items {display:flex;min-width:0;overflow-x:auto;max-height:62px;margin:0;padding:0;gap:7px}
+ .clinic-calm #practiceRoot .cs-next-treatment-items>button {display:grid;grid-template-columns:auto 1fr;flex:0 0 190px;min-width:0;min-height:44px;padding:6px 8px;background:#f1f5f3;border:0;gap:1px 8px}
+ .clinic-calm #practiceRoot .cs-next-treatment-items time {background:var(--cs-accent);color:white;border-radius:6px;padding:5px 7px;grid-row:1/3;font-weight:600;font-size:13px}
+ .clinic-calm #practiceRoot .cs-next-treatment-items .cs-next-overdue {background:#fff2e6}
+ .clinic-calm #practiceRoot .cs-next-treatment-items .cs-next-overdue time {background:#97501b}
+ .clinic-calm #practiceRoot .cs-next-treatment-items>button small {grid-column:2;font-size:11px}
+ .clinic-calm #practiceRoot .cs-next-expanded {grid-template-columns:minmax(0,1fr) auto}
+ .clinic-calm #practiceRoot .cs-next-expanded>.cs-next-treatment-items {grid-column:1/-1;grid-row:2;max-height:150px;flex-wrap:wrap;overflow:auto}
+ .clinic-calm #practiceRoot .cs-next-collapsed {grid-template-columns:1fr auto}
+ .clinic-calm #practiceRoot .cs-ward-designed {padding-bottom:120px}
+ .clinic-calm #practiceRoot .cs-pending-phases {grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px}
+ .clinic-calm #practiceRoot .cs-pending-row>b {flex:1 1 110px}
+ .clinic-calm #practiceRoot .cs-pending-row>strong {flex:0 1 auto}
+ .clinic-calm #practiceRoot .cs-anesthesia-record-actions {display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+ .clinic-calm #practiceRoot .cs-anesthesia-commandbar {gap:5px 10px;padding:5px 0}
+ .clinic-calm #practiceRoot .cs-anesthesia-commandbar>.cs-workspace-tools {flex:0 1 auto;margin:0;padding:0}
+ .clinic-calm #practiceRoot .cs-anesthesia-commandbar>.ar-record-bar {flex-basis:250px}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>[data-common-inputs] {flex:0 0 340px;max-width:none;grid-template-columns:minmax(165px,1fr) minmax(120px,1fr)}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common [data-common-inputs]>label:first-child {min-width:165px}
+ .clinic-calm #practiceRoot .pt-organized .pt-patient-options {flex:1 1 240px;min-width:0}
+ .clinic-calm #practiceRoot .pt-patient-options .pt-clinical-bridge {margin:8px 0;padding:8px;border:1px solid var(--cs-line);border-radius:8px}
+ .cs-loading-frame {padding:16px 0;color:var(--cs-muted)}
+ .cs-loading-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}
+ .cs-loading-grid>div {min-height:280px;padding:18px;border:1px solid var(--cs-line);border-radius:12px;background:#fff}
+ .cs-loading-grid i {display:block;height:25px;margin:0 0 20px;border-radius:7px;background:#edf1ef}
+ .cs-loading-grid i:first-child {width:60%}
+ .cs-loading-grid i:last-child {height:100px}
+ .cs-update-notice {display:flex;align-items:center;gap:12px;margin:6px 0;padding:8px 12px;background:#eef6f2;border:1px solid #c7ddd4;border-radius:8px;font-size:13px}
+ .cs-update-notice[hidden] {display:none}
+ .cs-update-notice a {font-weight:600;white-space:nowrap}
+ .cs-update-notice button {margin-left:auto}
+}
+@media screen and (max-width:900px) {
+ .clinic-calm #practiceRoot .cs-next-treatments {grid-template-columns:1fr auto;gap:5px 8px}
+ .clinic-calm #practiceRoot .cs-next-treatments>header {display:flex;flex-wrap:wrap;gap:4px 8px}
+ .clinic-calm #practiceRoot .cs-next-treatment-items {grid-column:1/-1;grid-row:2}
+ .clinic-calm #practiceRoot .cs-next-treatments>nav button {min-height:40px;padding:5px 7px}
+ .clinic-calm #practiceRoot .cs-next-treatments header>span {white-space:normal;font-size:11px}
+ .clinic-calm #practiceRoot .cs-pending-phases {grid-template-columns:1fr}
+ .clinic-calm #practiceRoot .cs-anesthesia-commandbar .ad-drug-actions {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+ .clinic-calm #practiceRoot .cs-anesthesia-commandbar .ad-drug-actions>* {width:auto;min-width:0;margin:0;grid-column:auto;font-size:12px;padding:5px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room.occupied {min-height:0}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-room-team {min-height:0}
+ .cs-loading-grid {grid-template-columns:1fr}
+ .cs-loading-grid>div {min-height:160px}
+}
+@media screen and (max-width:500px) {
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-group>header h4 {font-size:17px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-group>header {padding:10px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-group>.cl-room-grid {padding:8px}
+ .clinic-calm #practiceRoot .cs-next-treatments h4 {font-size:14px}
+ .clinic-calm #practiceRoot .cs-next-treatments>header {display:grid;gap:1px}
+ .clinic-calm #practiceRoot .cs-next-treatments>nav {gap:3px}
+ .clinic-calm #practiceRoot .cs-next-treatments>nav button {font-size:11px;padding:5px}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>[data-common-inputs] {flex-basis:100%;grid-template-columns:minmax(165px,1fr) minmax(100px,1fr)}
+ .cs-update-notice {flex-wrap:wrap}
+}
