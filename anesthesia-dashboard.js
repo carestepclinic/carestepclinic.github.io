@@ -99,11 +99,22 @@
    const basic=sheet.querySelector('.ad-patient-setup'),medication=sheet.querySelector('.ad-medications');
    if(basic)sheet.append(basic);
    if(settings){dashboard.querySelector('.ad-entry').append(settings);if(quick&&(view.quickEntry?.kind==='setting'||view.quickEntry?.kind==='infusion'))settings.after(quick);}
-   const controls=document.createElement('div');controls.className='cs-anesthesia-commandbar';sheet.prepend(controls);if(header)controls.append(header);if(medication){medication.classList.add('cs-drug-preparation');controls.append(medication);}
+   const controls=document.createElement('div');controls.className='cs-anesthesia-commandbar';sheet.prepend(controls);if(header)controls.append(header);if(medication){medication.classList.add('cs-drug-preparation');
+    if(recordPhase(a.item,rows)==='prep')controls.append(medication);
+    else {const more=document.createElement('details');more.className='cs-drug-tools';more.innerHTML='<summary>약물 추가·준비</summary>';more.open=!!view.drugToolsOpen||view.quickEntry?.kind==='drug';more.addEventListener('toggle',()=>{if(more.isConnected)view.drugToolsOpen=more.open;});controls.append(more);more.append(medication);}
+   }
    for(const note of sheet.querySelectorAll('.ae-metric>small'))if(note.textContent.trim()==='미측정')note.classList.add('cs-unmeasured-note');
   }
   // Pending medication is an immediate action; preparation is never administration.
-  if(pending&&a.onePage){dashboard.before(pending);pending.dataset.csSectionTitle='투약 대기';}
+  if(pending&&a.onePage){
+   const phase=recordPhase(a.item,rows),count=pending.querySelectorAll('[data-ar=plan-give]').length;
+   const fold=document.createElement('details');fold.className='cs-pending-disclosure';
+   fold.innerHTML='<summary>투약 대기 <b>'+count+'개</b><span>실제 투여 시 기록</span></summary>';
+   fold.open=view.pendingPhase===phase&&typeof view.pendingOpen==='boolean'?view.pendingOpen:phase==='prep';
+   view.pendingPhase=phase;view.pendingOpen=fold.open;
+   fold.addEventListener('toggle',()=>{if(fold.isConnected)view.pendingOpen=fold.open;});
+   dashboard.before(fold);fold.append(pending);fold.dataset.csSectionTitle='투약 대기';
+  }
   const reminder=query('[data-ar-reminder]');if(reminder)timing.after(reminder);
   const status=sheet.querySelector(':scope>p[role=status]');if(status){if(/^기록 \d+건$/.test(status.textContent.trim()))status.remove();else header?.firstElementChild?.append(status);}header?.setAttribute('aria-label','현재 마취 환자');
  }

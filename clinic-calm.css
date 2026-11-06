@@ -1076,7 +1076,7 @@
   .clinic-calm .cs-desktop-menu {display:block;margin:0 0 10px auto;padding:5px 9px;font-size:12px;min-height:32px}
   .clinic-calm.cs-menu-collapsed #appView {grid-template-columns:76px minmax(0,1fr)}
   .clinic-calm.cs-menu-collapsed #appView .sidebar {width:76px;padding:14px 6px}
-  .clinic-calm.cs-menu-collapsed #appView .sidebar>:not(.cs-desktop-menu) {display:none!important}
+  .clinic-calm.cs-menu-collapsed #appView .sidebar>:not(.cs-desktop-menu):not(.cs-nav-rail) {display:none!important}
   .clinic-calm.cs-menu-collapsed .cs-desktop-menu {margin:0;white-space:normal;width:100%}
  }
  @media(max-width:800px) {
@@ -1103,3 +1103,75 @@
  .clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-clinical-bridge>summary{font-size:13px;font-weight:600}
  .clinic-calm #practiceRoot .pt-organized .pt-calc-common [data-common-inputs]>label:first-child{min-width:165px}
 }
+
+/* Compact working hierarchy: visible context, one utility row, and next care at hand. */
+@media screen {
+ .clinic-calm .cs-nav-rail {display:none}
+ .clinic-calm #practiceRoot .cs-open-record-menu {position:relative;margin:0;padding:0;border:0;background:transparent}
+ .clinic-calm #practiceRoot .cs-open-record-menu>summary {font:inherit;font-size:13px;min-height:36px;padding:6px 9px;border:1px solid var(--cs-line);border-radius:8px;cursor:pointer}
+ .clinic-calm #practiceRoot .cs-open-record-menu>.cs-open-records {position:absolute;right:0;top:100%;z-index:25;min-width:280px;max-width:calc(100vw - 40px);padding:10px;background:#fff;border:1px solid var(--cs-line);border-radius:10px;box-shadow:0 6px 18px #243c3020}
+ .clinic-calm #practiceRoot .cs-open-record-menu .cs-open-label {display:none}
+ .clinic-calm #practiceRoot .cs-open-record-menu .cs-open-items {display:flex;flex-direction:column}
+ .clinic-calm #practiceRoot .cs-workspace-tools {justify-content:flex-end;margin:0;gap:6px;align-self:center}
+ .clinic-calm #practiceRoot .cs-pending-disclosure {padding:7px 10px;margin:0;border:1px solid var(--cs-line);border-radius:8px;background:var(--cs-tint)}
+ .clinic-calm #practiceRoot .cs-pending-disclosure>summary {cursor:pointer;min-height:30px;font-size:14px;font-weight:600}
+ .clinic-calm #practiceRoot .cs-pending-disclosure>summary>span {font-size:12px;font-weight:400;margin-left:10px;color:var(--cs-muted)}
+ .clinic-calm #practiceRoot .cs-pending-disclosure .ar-pending-medications {border:0;background:transparent;padding:4px 0}
+ .clinic-calm #practiceRoot .cs-drug-tools {position:relative;margin:0;padding:0;border:0;background:transparent}
+ .clinic-calm #practiceRoot .cs-drug-tools>summary {cursor:pointer;border:1px solid var(--cs-line);border-radius:8px}
+ .clinic-calm #practiceRoot .cs-drug-tools[open] {flex-basis:100%}
+ .clinic-calm #practiceRoot .cs-drug-tools[open]>.cs-drug-preparation {padding:8px 0}
+ .clinic-calm #practiceRoot .cl-ward-overview {padding-bottom:160px}
+ .clinic-calm #practiceRoot .cs-next-treatments {position:fixed;left:240px;right:20px;bottom:10px;z-index:18;margin:0;padding:8px 12px;box-shadow:0 3px 20px #233b301c;border-color:#a8c4b8}
+ .clinic-calm #practiceRoot .cs-next-treatments>header {gap:6px;margin:0 0 6px}
+ .clinic-calm #practiceRoot .cs-next-treatments>header button {min-height:32px;padding:4px 9px;font:inherit;font-size:13px;border-radius:8px}
+ .clinic-calm #practiceRoot .cs-next-treatment-items {display:flex;gap:6px;overflow-x:auto;overscroll-behavior-inline:contain;max-height:76px;padding-bottom:3px}
+ .clinic-calm #practiceRoot .cs-next-treatment-items>button {flex:1 0 210px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:1px 8px;padding:6px 9px;align-items:center;min-height:48px;max-width:360px}
+ .clinic-calm #practiceRoot .cs-next-treatment-items>button time {grid-row:1/3;max-width:100px;font-size:12px}
+ .clinic-calm #practiceRoot .cs-next-treatment-items>button b {font-size:14px}
+ .clinic-calm #practiceRoot .cs-next-treatment-items>button span {font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .clinic-calm #practiceRoot .cs-next-treatment-items>button small {grid-column:2;font-size:11px}
+ .clinic-calm #practiceRoot .cs-next-treatment-items>p {margin:4px;font-size:13px}
+ .clinic-calm #practiceRoot .cs-next-treatments>small {margin:3px 0 0;font-size:11px}
+ .clinic-calm:has(dialog[open]) #practiceRoot .cs-next-treatments {visibility:hidden}
+ .clinic-calm #practiceRoot.cs-short-viewport .cs-next-treatments {position:static}
+ .clinic-calm #practiceRoot .cs-room-card .cl-vital-grid>div {min-height:62px;padding:6px 9px}
+ .clinic-calm #practiceRoot .cs-room-card .cl-vital-grid strong {font-size:19px;line-height:1.3}
+ .clinic-calm #practiceRoot .cs-room-card .cl-vital-time {grid-column:1/-1;padding:4px 8px;font-size:12px;background:#fff}
+ .clinic-calm #practiceRoot .cl-room-group.cs-room-group-idle {grid-column:1/-1!important;display:flex;align-items:center;flex-wrap:wrap;gap:8px 20px;padding:8px 12px}
+ .clinic-calm #practiceRoot .cs-room-group-idle>header {display:flex;align-items:center;gap:10px;margin:0;padding:0;border:0}
+ .clinic-calm #practiceRoot .cs-room-group-idle>header :is(h4,p) {margin:0}
+ .clinic-calm #practiceRoot .cs-room-group-idle>.cl-vacant-rooms {margin:0 0 0 auto;padding:0 8px}
+ .clinic-calm #practiceRoot .cs-room-group-idle>.cl-vacant-rooms[open] {flex-basis:100%}
+ .clinic-calm #practiceRoot :is(.cs-anesthesia-commandbar,.cs-workspace-tools,.cl-ward-overview) button {font-family:inherit;font-weight:600;border-radius:8px;line-height:1.4}
+ .clinic-calm #practiceRoot .cl-ward-overview>.cl-toolbar {margin:0;padding:0;min-height:0}
+ .clinic-calm #practiceRoot .cl-ward-overview>.cl-toolbar h3 {font-size:17px;margin:0}
+ .clinic-calm #practiceRoot .cl-ward-overview>.cl-toolbar p {font-size:12px;margin:3px 0}
+ .clinic-calm #practiceRoot .cl-ward-overview>.cl-background {margin:4px 0;font-size:12px}
+ @media(min-width:1100px) {
+  .clinic-calm #practiceRoot:has(>.cs-record-navigation)>.cs-workspace-tools {grid-column:2;grid-row:1}
+  .clinic-calm #practiceRoot.cs-patient-workspace:has(>.cs-record-navigation)>.cs-workspace-tools {grid-row:2}
+  .clinic-calm #practiceRoot>.cs-record-navigation {min-width:0;gap:2px}
+  .clinic-calm #practiceRoot>.cs-record-navigation button {padding-inline:7px}
+  .clinic-calm #practiceRoot>.cs-record-navigation .cs-navigation-scope {flex-basis:100%;font-size:11px;line-height:1.2}
+ }
+ @media(min-width:801px) {
+  .clinic-calm.cs-menu-collapsed #appView .cs-nav-rail {display:flex;flex-direction:column;gap:4px;margin-top:10px}
+  .clinic-calm #appView .cs-nav-rail button {display:flex;flex-direction:column;align-items:center;gap:2px;font:inherit;font-size:12px;padding:5px 2px;min-height:44px;border:0;border-radius:8px;background:transparent;color:var(--cs-muted);cursor:pointer}
+  .clinic-calm #appView .cs-nav-rail button[hidden] {display:none}
+  .clinic-calm #appView .cs-nav-rail button[aria-current=page] {background:var(--cs-tint);color:var(--cs-accent-hover);font-weight:700}
+  .clinic-calm #appView .cs-nav-rail svg {width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .clinic-calm #appView .cs-nav-rail button:focus-visible {outline:2px solid var(--cs-accent);outline-offset:1px}
+  .clinic-calm.cs-menu-collapsed #practiceRoot .cs-next-treatments {left:90px}
+ }
+ @media(max-width:800px) {
+  .clinic-calm #practiceRoot .cs-next-treatments {left:8px;right:8px;bottom:calc(6px + env(safe-area-inset-bottom));padding:6px 8px}
+  .clinic-calm #practiceRoot .cs-next-treatments h4 {font-size:14px}
+  .clinic-calm #practiceRoot .cs-next-treatments>header>span {font-size:11px}
+  .clinic-calm #practiceRoot .cs-next-treatments>header button {min-height:40px}
+  .clinic-calm #practiceRoot .cs-workspace-tools {margin-bottom:6px;flex-wrap:wrap}
+  .clinic-calm #practiceRoot .cs-open-record-menu>summary,.clinic-calm #practiceRoot .cs-pending-disclosure>summary {min-height:40px;padding-block:8px}
+  .clinic-calm #practiceRoot .cs-next-treatment-items>button {flex-basis:220px}
+ }
+}
+@media print {.cs-nav-rail{display:none!important}}
