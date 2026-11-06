@@ -1395,7 +1395,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 
       <section id="patients" class="view">
         <div class="patient-crm-head">
-          <div><p class="eyebrow"></p><h3>환자 목록</h3><p>환자를 선택해 건강기록·자료·복약을 확인하세요.</p></div>
+          <div><p class="eyebrow"></p><p>환자를 선택해 건강기록·자료·복약을 확인하세요.</p></div>
           <div class="patient-crm-actions"><button id="patientCrmRefresh" class="btn btn-secondary" type="button">새로고침</button><button id="patientCrmNewGuardian" class="btn btn-secondary" type="button">+ 보호자 등록</button><button id="patientCrmNewPatient" class="btn btn-primary" type="button">+ 환자 등록</button></div>
         </div>
         <div class="patient-crm-notice"><span>🔒</span><div><b>병원별 분리 · 암호화 저장</b><br>보호자명·연락처, 환자 식별정보와 건강 타임라인 제목·메모는 병원별로 분리해 암호화 저장합니다. 체중·접종·사상충·병원 진료·후속관리 계획은 환자별 날짜순으로 누적됩니다.</div></div>
@@ -2182,17 +2182,17 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
             <div class="span-2">
               <label class="field-label" for="hospitalLogo">병원 로고</label>
               <input id="hospitalLogo" class="input file-input" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" />
-              <div class="image-size-guide">
-                <b>권장 이미지</b>
+              <details class="image-size-guide cs-setting-guidance">
+                <summary>로고 규격·파일 안내</summary>
                 <span>가로형 로고 · 래스터 이미지 기준 <strong>1200 × 700 px</strong> 권장 (최소 600 × 350 px)</span>
                 <span>PNG · WebP · JPG · SVG · 2MB 이하 · 투명 배경은 PNG/SVG 권장</span>
                 <small>PDF와 휴대폰용 안내 카드에서는 로고가 비율을 유지한 채 축소됩니다. 로고 주변의 과도한 빈 여백은 잘라낸 이미지를 사용하면 더 크게 표시됩니다.</small>
-              </div>
+              </details>
               <div id="logoPreview" class="logo-preview">로고 미등록</div>
             </div>
           </div>
           <div class="qr-settings">
-            <h4>보호자 PDF QR 연결</h4><p class="muted" style="font-size:11px">병원 홈페이지·예약페이지·카카오채널 중 하나를 PDF 마지막 페이지에 자동 삽입합니다. 환자정보와 무관한 병원 설정만 저장됩니다.</p>
+            <h4>보호자 PDF QR 연결</h4><details class="cs-setting-guidance"><summary>QR 사용 안내</summary><p>병원 홈페이지·예약페이지·카카오채널 중 하나를 PDF 마지막 페이지에 표시합니다. 아래에서 표시 여부와 연결 주소를 설정하세요.</p></details>
             <div class="settings-subgrid">
               <div><label class="field-label" for="qrMode">QR 연결 대상</label><select id="qrMode" class="input"><option value="website">병원 홈페이지</option><option value="custom">직접 URL 입력</option></select></div>
               <div><label class="field-label" for="qrCustomUrl">직접 URL</label><input id="qrCustomUrl" class="input" placeholder="https://booking.naver.com/..." /></div>
@@ -2217,7 +2217,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
           </section>
           <div class="settings-actions">
             <button id="saveHospital" class="btn btn-primary">병원정보 저장</button>
-            <button id="clearHospital" class="btn btn-ghost">초기화</button>
+            <button id="clearHospital" class="btn btn-ghost">병원정보 초기화</button>
           </div>
         </div>
       </section>
@@ -10345,7 +10345,7 @@ $('saveHospital').addEventListener('click',()=>{
   if(!hospital.name){toast('병원명을 입력해주세요.');return;}
   saveHospitalData(); window.dispatchEvent(new Event('carestep:hospital-saved')); refreshQrData(); renderHospitalMeta(); renderBuilder(); if(saasMode==='auth'&&hospital.name&&hospital.phone)markOnboardingStep('profile').catch(()=>{}); toast('병원정보가 저장되었습니다.');
 });
-$('clearHospital').addEventListener('click',()=>{hospital={...defaultHospital};saveHospitalData();hydrateSettings();renderHospitalMeta();renderBuilder();toast('병원정보를 초기화했습니다.');});
+$('clearHospital').addEventListener('click',async()=>{if(!await window.ClinicSettings?.confirmHospitalReset?.())return;hospital={...defaultHospital};saveHospitalData();hydrateSettings();renderHospitalMeta();renderBuilder();toast('병원정보를 초기화했습니다.');});
 
 
 async function exportPdfElement(filename,options={}){
@@ -10798,7 +10798,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 </script>
 <script src="clinic-reliability.js?v=20261031-practical-terms"></script>
 <script src="patient-breeds.js?v=9.5.3"></script>
-<script src="patient-crm.js?v=20261104-internal-20261031-followup-groups"></script>
+<script src="patient-crm.js?v=20261106-interface11"></script>
 <script src="patient-timeline.js?v=20261031-state-labels"></script>
 <script src="date-input-guard.js?v=20261030-datetime"></script>
 <!-- CARESTEP v9.0.2 Hotfix 26 · Multi-output individual download -->
@@ -10861,18 +10861,18 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <link rel="stylesheet" href="clinical-knowledge.css?v=20261027knowledge1">
 <script src="clinical-knowledge.js?v=20261103-protocol-workflow"></script>
 <script src="anesthesia-efficiency.js?v=20261105-workspace3"></script>
-<script src="anesthesia-dashboard.js?v=20261106-workflow10"></script>
-<script src="anesthesia-record.js?v=20261105-workspace3"></script>
+<script src="anesthesia-dashboard.js?v=20261106-interface11"></script>
+<script src="anesthesia-record.js?v=20261106-interface11"></script>
 <script src="clinical-compact.js?v=20261031-care-consistency-1"></script>
 <script src="clinical-efficiency.js?v=20261101-ward-delete"></script>
 <script src="practice-injection.js?v=20261102-strength-reuse1"></script>
 <script src="practice-injection-workflow.js?v=20261030-consistent1"></script>
 <script src="ward-fluid-care.js?v=20261031-prunus"></script>
-<script src="clinical-workspace.js?v=20261106-workflow9"></script>
+<script src="clinical-workspace.js?v=20261106-interface11"></script>
 <script src="practice-prescription-summary.js?v=20261027knowledge1"></script>
 <script src="practice-prescription-library.js?v=20261030-efficient1"></script>
 <script src="practice-prescription-safety.js?v=20261031-clinical-clarity"></script>
-<script src="clinic-navigation.js?v=20261106-orders2"></script>
+<script src="clinic-navigation.js?v=20261106-interface11"></script>
 
 
 
@@ -10880,19 +10880,19 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinical-assist.js?v=20261103-clinical-assist"></script>
 
 
-<script id="clinic-module-manifest" type="application/json">{"dental": ["dental-record.js?v=20261101-record-identity", "dental-workflow.js?v=20261106-workflow9"], "neuro": ["neuro-record.js?v=20261106-workflow9"], "ophthalmic": ["ophthalmic-record.js?v=20261106-workflow9"], "chronic": ["chronic-record.js?v=20261106-workflow9"], "calc": ["practice-acid-base.js?v=20261026tb1", "practice-calcium-transfusion.js?v=20261031-calc-cleanup-2", "practice-emergency.js?v=20261031-calc-cleanup-2", "practice-potassium-mix.js?v=20261031-calc-cleanup-2", "practice-cri-presets.js?v=20261031-calc-clarity-1", "practice-nutrition-foods.js?v=20261031-prunus", "practice-nutrition.js?v=20261031-food1", "practice-calculator-workspace.js?v=20261031-calc-cleanup-2", "practice-calcium-guided.js?v=20261026ca1", "practice-fluid-plan.js?v=20261031-calc-cleanup-2"]}</script>
+<script id="clinic-module-manifest" type="application/json">{"dental": ["dental-record.js?v=20261101-record-identity", "dental-workflow.js?v=20261106-interface11"], "neuro": ["neuro-record.js?v=20261106-interface11"], "ophthalmic": ["ophthalmic-record.js?v=20261106-interface11"], "chronic": ["chronic-record.js?v=20261106-interface11"], "calc": ["practice-acid-base.js?v=20261026tb1", "practice-calcium-transfusion.js?v=20261031-calc-cleanup-2", "practice-emergency.js?v=20261031-calc-cleanup-2", "practice-potassium-mix.js?v=20261031-calc-cleanup-2", "practice-cri-presets.js?v=20261031-calc-clarity-1", "practice-nutrition-foods.js?v=20261031-prunus", "practice-nutrition.js?v=20261031-food1", "practice-calculator-workspace.js?v=20261031-calc-cleanup-2", "practice-calcium-guided.js?v=20261026ca1", "practice-fluid-plan.js?v=20261031-calc-cleanup-2"]}</script>
 <script src="clinic-lazy-modules.js?v=20261105-flow"></script>
 <script src="clinic-inpatients.js?v=20261106-workflow9"></script>
-<script src="clinic-record-workspace.js?v=20261106-workflow10"></script>
+<script src="clinic-record-workspace.js?v=20261106-interface11"></script>
 <script src="clinic-purchases.js?v=20261106-orders2"></script>
 <script src="practice-tools.js?v=20261106-orders1"></script>
 <script src="clinic-today-ward.js?v=20261106-workflow9"></script>
 <script src="practice-clinic.js?v=20261103-settings"></script>
-<script src="clinic-settings.js?v=20261103-settings-unified"></script>
+<script src="clinic-settings.js?v=20261106-interface11"></script>
 <link rel="stylesheet" href="clinic-followup-tasks.css?v=20261104-followup-controls">
 <script src="clinic-followup-tasks.js?v=20261104-followup-controls"></script>
 <link rel="stylesheet" href="builder-flow.css?v=20261105-flow3">
 <script src="builder-flow.js?v=20261105-flow3"></script>
-<link rel="stylesheet" href="clinic-calm.css?v=20261106-workflow10">
+<link rel="stylesheet" href="clinic-calm.css?v=20261106-interface11">
 </body>
 </html>

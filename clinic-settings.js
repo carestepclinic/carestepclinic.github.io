@@ -282,3 +282,17 @@
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })(window);
+
+/* Confirm the scope of the existing hospital-profile reset before it can run. */
+(function(g){
+ const S=g.ClinicSettings;if(!S)return;let pending=null;
+ const identity=()=>JSON.stringify([typeof saasMode==='undefined'?'':saasMode,typeof saasMe==='undefined'?'':saasMe?.clinic?.id,typeof saasMe==='undefined'?'':saasMe?.user?.id]);
+ S.confirmHospitalReset=()=>{
+  if(pending)return Promise.resolve(false);
+  const key=identity(),previous=document.activeElement,d=document.createElement('dialog');d.className='cs-reset-dialog';d.setAttribute('aria-labelledby','cs-reset-title');
+  d.innerHTML='<h2 id="cs-reset-title">병원정보를 초기화할까요?</h2><p>병원명·대표원장·전화번호·주소·홈페이지·로고와 PDF QR 설정을 기본값으로 바꾸고 저장합니다.</p><p>환자·진료 기록, 직원 권한, 약품 함량과 접종 일정은 유지됩니다. 초기화 후 병원정보를 다시 입력해야 합니다.</p><div class="cs-reset-actions"><button type="button" data-reset-cancel autofocus>취소</button><button type="button" data-reset-confirm>병원정보 초기화</button></div>';
+  let settle;const result=new Promise(resolve=>settle=resolve);pending=d;
+  const finish=ok=>{if(pending!==d)return;pending=null;d.remove();if(previous?.isConnected)previous.focus({preventScroll:true});settle(ok&&identity()===key);};
+  d.querySelector('[data-reset-cancel]').onclick=()=>finish(false);d.querySelector('[data-reset-confirm]').onclick=()=>finish(true);d.addEventListener('cancel',e=>{e.preventDefault();finish(false);});d.addEventListener('close',()=>finish(false));document.body.append(d);d.showModal();return result;
+ };
+})(window);

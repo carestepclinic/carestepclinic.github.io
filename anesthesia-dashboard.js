@@ -132,6 +132,8 @@
   }
   const reminder=query('[data-ar-reminder]');if(reminder)timing.after(reminder);
   if(a.onePage&&reminder){const fold=sheet.querySelector('.cs-pending-disclosure'),alerts=document.createElement('div');alerts.className='cs-anesthesia-alerts';reminder.before(alerts);alerts.append(reminder);if(fold)alerts.append(fold);}
+  // Reuse the original controls in one working row; no save or event handler is replaced.
+  if(a.onePage){const controls=sheet.querySelector('.cs-anesthesia-commandbar'),row=controls?.querySelector('.cs-anesthesia-record-actions');if(row){row.classList.add('cs-record-toolbar');if(header)row.prepend(header);const print=sheet.querySelector('.ar-print-menu');if(print)row.append(print);const more=row.querySelector('.cl-work-more>summary');if(more)more.textContent='기록 관리';}}
   const status=sheet.querySelector(':scope>p[role=status]');if(status){if(/^기록 \d+건$/.test(status.textContent.trim()))status.remove();else header?.firstElementChild?.append(status);}header?.setAttribute('aria-label','현재 마취 환자');
  }
  const api={series,overviewGraph,trendPanels,recordPhase,arrange};if(typeof module==='object'&&module.exports)module.exports=api;else g.AnesthesiaDashboard=api;
