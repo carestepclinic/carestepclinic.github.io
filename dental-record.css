@@ -169,3 +169,35 @@
 }
 
 @media(max-width:760px){.dn .dn-work aside.dn-batch-editor.dn-editor-open{max-height:45dvh}.dn .dn-work:has(.dn-batch-editor.dn-editor-open){padding-bottom:45dvh}}
+
+/* The chart and lesion editor are two work panes, not a page and a modal. */
+@media screen{
+ .dn .dn-work{align-items:start}
+ .dn .dn-work:not(.dn-editor-idle)>:is(.dn-chart-area,aside.dn-editor-open){position:relative;inset:auto;height:72dvh;max-height:760px;min-height:220px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;touch-action:pan-y;min-width:0}
+ .dn .dn-work .dn-tooth-step{position:static;margin:8px 0 12px;padding:6px 0;border-top:1px solid #d1ddea;background:transparent}
+ .dn .dn-work .dn-tooth-step button{flex:1;min-height:44px}
+ .dn .dn-work .dn-editor-heading{top:-1px;padding:6px 0}
+}
+@media screen and (max-width:760px){
+ .dn .dn-work:not(.dn-editor-idle){grid-template-columns:minmax(100px,.8fr) minmax(210px,1.4fr);gap:6px;padding-bottom:0}
+ .dn .dn-work:not(.dn-editor-idle)>:is(.dn-chart-area,aside.dn-editor-open){display:block;height:68dvh;max-height:680px;min-height:190px;padding:7px;border-radius:10px;z-index:auto}
+ .dn .dn-work .dn-grades{grid-template-columns:1fr;gap:8px}
+ .dn .dn-work .dn-score{flex-wrap:wrap;gap:3px}
+ .dn .dn-work .dn-score button{min-width:30px;min-height:40px;padding:4px}
+ .dn .dn-work .dn-flags{grid-template-columns:1fr}
+ .dn .dn-work .dn-chart-toolbar{display:block}
+ .dn .dn-work .dn-chart-toolbar button{width:100%;padding:6px 2px;font-size:12px}
+ .dn .dn-work .dn-view-switch{flex-wrap:wrap}
+ .dn .dn-work .dn-tooth-jump{flex-wrap:wrap}
+ .dn .dn-work .dn-chart-tools{margin:0 0 8px}
+ .dn .dn-work .dn-chart-tools>summary{font-size:12px;padding:6px 0}
+ .dn .dn-work .dn-zoom{display:block}
+ .dn .dn-work .dn-zoom select,.dn .dn-work .dn-tooth-jump input{min-width:0;max-width:100%;width:100%;box-sizing:border-box}
+ .dn .dn-work .dn-type-legend{display:none}
+ .dn .dn-work .dn-quadrant{padding:4px}
+ .dn .dn-work .dn-quadrant>div{flex-wrap:wrap}
+ .dn .dn-work aside.dn-editor-open .dn-editor-heading{align-items:start}
+ .dn .dn-work aside.dn-editor-open h3{font-size:14px;overflow-wrap:anywhere}
+ .dn .dn-work .dn-tooth-step{gap:4px}
+ .dn .dn-work .dn-tooth-step button{font-size:13px;padding:5px}
+}

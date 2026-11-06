@@ -37,7 +37,7 @@
  function arrange(root,a){
   const sheet=root.querySelector('.ar-sheet'),timing=root.querySelector('.ar-timing');if(!sheet||!timing)return;
   const rows=a.rows,view=a.view,tab=view.entryTab||'measurement',keys=view.overviewKeys||Object.keys(series),query=s=>root.querySelector(s);
-  sheet.classList.add('ar-dashboard-sheet','ar-simple');
+  sheet.classList.add('ar-dashboard-sheet','ar-simple');sheet.classList.toggle('cs-anesthesia-closed',a.item.status==='closed');
   const header=query('.ar-record-bar'),actions=query('.ar-quick-actions');actions?.replaceChildren();
   const print=query('.ar-print-menu');if(print)actions?.append(print);query('.ar-secondary')?.remove();
   const setup=query('.ar-summary');if(setup){setup.querySelector('summary').textContent='환자·수술 기본정보 및 설정';sheet.append(setup);}
@@ -119,6 +119,11 @@
 
   }
   if(a.onePage){sheet.classList.add('cs-anesthesia-focused');const basic=sheet.querySelector('.ad-patient-setup'),controls=sheet.querySelector('.cs-anesthesia-commandbar');if(controls){const management=controls.querySelector('.cl-work-more>div'),quick=controls.querySelector('.ar-quick-actions');if(management){if(basic)management.prepend(basic);if(quick)management.append(quick);}}}
+  if(a.item.status==='closed'){
+   const entry=dashboard.querySelector('.ad-entry'),monitor=dashboard.querySelector('.ad-monitor');
+   if(entry&&monitor){const review=document.createElement('details');review.className='cs-closed-review';review.innerHTML='<summary>기록 확인·정정</summary>';entry.before(review);review.append(entry);}
+   const print=sheet.querySelector('.ar-print-menu'),controls=sheet.querySelector('.cs-anesthesia-commandbar');if(print&&controls)controls.append(print);
+  }
   const reminder=query('[data-ar-reminder]');if(reminder)timing.after(reminder);
   if(a.onePage&&reminder){const fold=sheet.querySelector('.cs-pending-disclosure'),alerts=document.createElement('div');alerts.className='cs-anesthesia-alerts';reminder.before(alerts);alerts.append(reminder);if(fold)alerts.append(fold);}
   const status=sheet.querySelector(':scope>p[role=status]');if(status){if(/^기록 \d+건$/.test(status.textContent.trim()))status.remove();else header?.firstElementChild?.append(status);}header?.setAttribute('aria-label','현재 마취 환자');
