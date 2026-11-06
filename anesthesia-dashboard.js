@@ -114,6 +114,9 @@
    view.pendingPhase=phase;view.pendingOpen=fold.open;
    fold.addEventListener('toggle',()=>{if(fold.isConnected)view.pendingOpen=fold.open;});
    dashboard.before(fold);fold.append(pending);fold.dataset.csSectionTitle='투약 대기';
+    pending.querySelector(':scope>header>h4')?.remove();
+    for(const row of pending.querySelectorAll('.cs-pending-row')){const detail=row.querySelector('details'),cancel=row.querySelector('[data-ar=plan-cancel]');if(detail&&cancel){detail.querySelector('summary').textContent='상세';detail.append(cancel);}}
+
   }
   const reminder=query('[data-ar-reminder]');if(reminder)timing.after(reminder);
   const status=sheet.querySelector(':scope>p[role=status]');if(status){if(/^기록 \d+건$/.test(status.textContent.trim()))status.remove();else header?.firstElementChild?.append(status);}header?.setAttribute('aria-label','현재 마취 환자');

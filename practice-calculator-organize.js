@@ -45,7 +45,7 @@
    if(help&&instructions){help.remove();instructions.classList.add('pt-entry-help');}
    const tabs=document.createElement('nav'),load=rx.querySelector('.pt-flow-rx-load');
    tabs.className='pt-prescription-inputs';tabs.setAttribute('aria-label','처방 입력 선택');tabs.innerHTML='<button type="button" data-prescription-text>원문 입력</button><button type="button" data-prescription-photo>사진 입력</button>';
-   rx.querySelector('h3').after(tabs);
+   rx.querySelector('h3').after(tabs);if(modes){let tools=q('.cs-prescription-toolbar');if(!tools){tools=document.createElement('div');tools.className='cs-prescription-toolbar';modes.before(tools);tools.append(modes);}tools.append(tabs);}
    tabs.querySelector('[data-prescription-text]').onclick=()=>{rx.querySelector('[data-mode=text]')?.click();rx.querySelector('[data-rx-text]').focus({preventScroll:true});};
    tabs.querySelector('[data-prescription-photo]').onclick=()=>{const mode=rx.querySelector('[data-mode=image]');if(mode)mode.click();else rx.querySelector('.pt-image-launch')?.click();};
    if(load){
@@ -258,12 +258,10 @@
   }
   function changed(e){if(e.target.closest('[data-result-actions],.pt-drug-management,.pt-view-options'))return;if(!e.target.name&&!e.target.matches('[data-common-weight],[data-ref-species],[data-record-weight-confirm]'))return;clearTimeout(timer);timer=setTimeout(calculate,350);}
   b.addEventListener('input',changed);b.addEventListener('change',changed);
-  const search=q('[data-calc-search]');
-  search.oninput=()=>{const term=search.value.trim().toLowerCase();for(const group of nav.querySelectorAll('.pt-calc-group')){for(const button of group.querySelectorAll('[data-kind]'))button.hidden=!(button.textContent+' '+group.querySelector('h4').textContent).toLowerCase().includes(term);group.hidden=![...group.querySelectorAll('[data-kind]')].some(x=>!x.hidden);}q('[data-calc-empty]').hidden=!!nav.querySelector('.pt-calc-group:not([hidden])');};
   function refresh(){
    frame=0;if(disposed)return;consistentCopy();
    const active=q('[data-kind-panel]:not([hidden])')?.dataset.kindPanel||'batch';
-   if(modes){hide(modes,!['med','batch'].includes(active));modes.querySelector('[data-prescription-manual]').setAttribute('aria-pressed',String(active==='med'));if(active==='med')modes.querySelectorAll('[data-injection-mode]').forEach(x=>{if(x.getAttribute('aria-pressed')!=='false')x.setAttribute('aria-pressed','false');});else if(!modes.querySelector('[data-injection-mode][aria-pressed=true]')){const oral=!rx.hidden;modes.querySelector('[data-injection-mode="'+(oral?'oral':'injection')+'"]').setAttribute('aria-pressed','true');}}
+   if(modes){hide(q('.cs-prescription-toolbar'),!['med','batch'].includes(active));hide(q('.cs-prescription-toolbar>.pt-prescription-inputs'),active!=='batch'||rx.hidden);hide(modes,!['med','batch'].includes(active));modes.querySelector('[data-prescription-manual]').setAttribute('aria-pressed',String(active==='med'));if(active==='med')modes.querySelectorAll('[data-injection-mode]').forEach(x=>{if(x.getAttribute('aria-pressed')!=='false')x.setAttribute('aria-pressed','false');});else if(!modes.querySelector('[data-injection-mode][aria-pressed=true]')){const oral=!rx.hidden;modes.querySelector('[data-injection-mode="'+(oral?'oral':'injection')+'"]').setAttribute('aria-pressed','true');}}
    const batch=q('[data-kind=batch]');if(active==='med'&&batch.getAttribute('aria-pressed')!=='true')batch.setAttribute('aria-pressed','true');
    const mobile=q('[data-calc-jump]');if(mobile)mobile.value=active==='med'?'batch':active;
    for(const [control,link] of managed)hide(link,control.hidden);
