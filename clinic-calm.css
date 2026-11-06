@@ -948,3 +948,90 @@
  .clinic-calm #practiceRoot .cs-patient-actions [data-cs-save] {flex:0 0 auto}
  .clinic-calm #practiceRoot.cs-short-viewport .cs-patient-actions .cs-section-choice {display:none}
 }
+
+/* Clinical workspace refinement: compact controls, occupancy-led space, one page scroll. */
+@media screen {
+ .clinic-calm #appView .clinic-navigation .nav-item {min-height:36px;padding-block:7px}
+ .clinic-calm #appView .clinic-nav-group>summary {min-height:38px;padding-block:8px}
+ .clinic-calm #appView .clinic-navigation .cs-nav-section-label {margin:9px 10px 3px;font-size:11px;line-height:1.4;letter-spacing:.03em;color:var(--cs-muted)}
+ .clinic-calm #appView .clinic-nav-group .nav-submenu {gap:3px;padding-block:3px}
+ .clinic-calm #appView .sidebar-foot {align-items:center;gap:8px;flex-wrap:wrap}
+ .clinic-calm #appView .cs-account-details {font-size:13px;min-width:0;max-width:100%}
+ .clinic-calm #appView .cs-account-details>summary {cursor:pointer;padding:6px 0;color:var(--cs-text)}
+ .clinic-calm #appView .cs-account-details .plan-pill {display:block;white-space:normal;overflow-wrap:anywhere;font-size:11px;margin:8px 0}
+ .clinic-calm #appView .cs-account-details button {min-height:36px;font:inherit;border:1px solid var(--cs-line);border-radius:8px;background:#fff;padding:6px 10px}
+ .clinic-calm #practiceRoot .cs-navigation-scope {font-size:12px;color:var(--cs-muted);align-self:center;white-space:nowrap;margin-right:4px}
+ .clinic-calm #practiceRoot .cs-record-navigation {align-items:center;padding:5px 0;gap:4px;background:transparent;border:0}
+ .clinic-calm #practiceRoot .cs-record-navigation button {min-height:34px;padding:5px 9px;font-size:13px}
+ .clinic-calm #practiceRoot .cs-patient-header {padding:8px 12px;gap:8px;border-radius:10px}
+ .clinic-calm #practiceRoot .cs-patient-copy {gap:3px 10px}
+ .clinic-calm #practiceRoot .cs-patient-copy>strong {font-size:21px}
+ .clinic-calm #practiceRoot .cs-patient-actions {gap:6px}
+ .clinic-calm #practiceRoot .cl-anesthesia-page>.cl-toolbar {padding:0;margin:0 0 5px;min-height:0;gap:6px}
+ .clinic-calm #practiceRoot .cl-anesthesia-page>.cl-toolbar>div:has(>h3[hidden]):not(:has(button,details)) {display:none}
+ .clinic-calm #practiceRoot .cl-anesthesia-page>.cl-toolbar>div:last-child {display:flex;align-items:center;gap:6px;flex-wrap:wrap;width:100%}
+ .clinic-calm #practiceRoot .cl-anesthesia-page>.cl-toolbar .cl-work-more {margin-left:auto}
+ .clinic-calm #practiceRoot .cl-anesthesia-page>.cl-toolbar :is(button,summary) {min-height:34px;padding:5px 10px;font-size:13px}
+ .clinic-calm #practiceRoot .cl-anesthesia-page>.cl-toolbar .pt-primary {background:#fff!important;color:var(--cs-text)!important;border-color:var(--cs-line)!important}
+ .clinic-calm #practiceRoot .cs-anesthesia-commandbar {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 12px;padding:6px 0;border-bottom:1px solid var(--cs-line)}
+ .clinic-calm #practiceRoot .cs-anesthesia-commandbar>.ar-record-bar {display:flex;flex:1 1 260px;gap:8px;align-items:center;flex-wrap:wrap;margin:0;padding:0;border:0;background:transparent}
+ .clinic-calm #practiceRoot .cs-anesthesia-commandbar .ar-record-bar>div:first-child {display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px}
+ .clinic-calm #practiceRoot .cs-anesthesia-commandbar .ar-record-bar small {margin:0;font-size:12px}
+ .clinic-calm #practiceRoot .cs-anesthesia-commandbar .ar-sync-status {flex-basis:100%;margin:0;font-size:12px;color:var(--cs-muted)}
+ .clinic-calm #practiceRoot .cs-anesthesia-commandbar .ar-quick-actions {margin-left:auto;display:flex;align-items:center;gap:6px}
+ .clinic-calm #practiceRoot .cs-anesthesia-commandbar .cs-drug-preparation {flex:0 1 auto;margin:0;padding:0;border:0;background:transparent}
+ .clinic-calm #practiceRoot .cs-anesthesia-commandbar .ad-drug-actions {display:flex;flex-wrap:wrap;gap:5px;margin:0}
+ .clinic-calm #practiceRoot .cs-anesthesia-commandbar :is(button,summary) {min-height:34px;padding:5px 9px;font-size:13px}
+ .clinic-calm #practiceRoot .cs-anesthesia-commandbar .ad-phase-badge {margin:0;padding:3px 8px;font-size:12px}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace {gap:8px}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace>.ar-timing {padding:8px 10px;border:0;border-bottom:1px solid var(--cs-line);border-radius:0;background:transparent}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-time-line {gap:6px}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-time-line>section {padding:6px 8px}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-time-line p {margin:2px 0}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-monitor {border:1px solid var(--cs-line);border-radius:10px;background:#fff;padding:10px}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-monitor>summary {padding:0 0 5px}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-monitor-body {padding:0;border:0}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-entry {padding:10px;border-radius:10px}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-period {margin:4px 0;font-size:12px}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-axis-note {margin:3px 0;font-size:12px}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-values {display:flex;flex-wrap:wrap;gap:6px;padding:8px;border:0;background:transparent;grid-column:1/-1}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-values>div {flex:1 1 110px;padding:6px 8px;background:#fff;border:1px solid var(--cs-line);border-radius:8px}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-values strong {font-size:19px}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ar-pending-medications {padding:8px 10px;margin:0}
+ .clinic-calm #practiceRoot .cl-room-group {container-type:inline-size}
+ .clinic-calm #practiceRoot .cl-room-group>.cl-room-grid {grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))!important}
+ .clinic-calm #practiceRoot .cl-room-group[data-occupied="0"]>.cl-room-grid {display:none}
+ .clinic-calm #practiceRoot .cl-room-group>header {padding-bottom:8px;gap:4px}
+ .clinic-calm #practiceRoot .cs-room-card .cl-room.occupied {padding:12px 14px 6px}
+ .clinic-calm #practiceRoot .cs-room-card .cc-room-next {font-size:14px;line-height:1.55}
+ .clinic-calm #practiceRoot .pt-organized :is(.pt-calc-nav,.pt-calc-menu,.pt-calc-main) {height:auto;max-height:none;overflow:visible}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-nav {position:static}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-menu {margin:8px 0;gap:4px}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-group {gap:3px;margin:0 0 7px}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-group h4 {font-size:12px;margin:2px 7px;color:var(--cs-muted)}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-group button {min-height:35px;padding:6px 9px;font-size:13px;border-color:transparent;background:transparent}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-group button[aria-pressed=true] {background:var(--cs-accent)!important;color:#fff!important}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common {position:static}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-main .pt-card {box-shadow:none;border-radius:10px}
+ @container(min-width:941px) {
+  .clinic-calm #practiceRoot .cl-room-groups {grid-template-columns:var(--room-columns)!important}
+  .clinic-calm #practiceRoot .cl-room-groups:not([data-group-count="3"]) {grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ }
+ @media(max-width:800px) {
+  .clinic-calm #practiceRoot .cs-navigation-scope {flex-basis:100%;font-size:11px}
+  .clinic-calm #practiceRoot .cs-anesthesia-commandbar {align-items:stretch}
+  .clinic-calm #practiceRoot .cs-anesthesia-commandbar>.ar-record-bar {flex-basis:100%}
+  .clinic-calm #practiceRoot .cs-anesthesia-commandbar .cs-drug-preparation {flex-basis:100%}
+  .clinic-calm #practiceRoot .cs-anesthesia-commandbar :is(button,summary),.clinic-calm #practiceRoot .cs-record-navigation button {min-height:40px}
+  .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-values>div {flex:1 1 90px}
+  .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-entry :is(input,select) {font-size:16px;min-height:44px}
+ }
+}
+
+@media screen and (min-width:801px) {
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ar-pending-grid article {display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:center}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ar-pending-grid article>strong {grid-column:2;grid-row:1/span 2}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ar-pending-grid article>div,.clinic-calm #practiceRoot .cs-anesthesia-workspace .ar-pending-grid article>p {grid-column:1/-1;margin:3px 0 0}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ar-pending-grid article button {min-height:36px;padding:6px 10px}
+ .clinic-calm #practiceRoot .cs-anesthesia-workspace .ad-entry label {margin-block:3px;gap:4px}
+}
