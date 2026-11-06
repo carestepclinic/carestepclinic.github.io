@@ -1522,7 +1522,7 @@
 @media screen {
  .clinic-calm #patients>.section-head {margin-top:0;align-items:center}
  .clinic-calm #patients>.section-head p {margin:0}
- .clinic-calm #patients :is(.clinic-patient-columns,.patient-crm-pagination,.patient-search-recent,.patient-crm-detail)[hidden] {display:none!important}
+ .clinic-calm #patients :is(.clinic-patient-columns,.patient-search-pagination,.patient-search-recent,.patient-crm-detail)[hidden] {display:none!important}
  .clinic-calm #patients .patient-crm-result-meta {font-size:13px;margin:8px 0}
  .clinic-calm #practiceRoot :is([data-cs-save],[data-cs-date],.cs-vital-date,.cs-vital-note,.cl-vital-time,.cl-sync-status,.ar-sync-status,.ad-period,.ad-axis-note,.cs-record-missing) {font-size:13px;line-height:1.5}
  .clinic-calm #practiceRoot .cs-patient-actions {gap:6px;align-items:center}
@@ -1567,3 +1567,32 @@
  .clinic-calm .cs-reset-actions {flex-wrap:wrap}
 }
 @media print { .cs-reset-dialog {display:none!important} }
+
+/* Complete the shared workflow controls without changing print content. */
+@media screen {
+ .clinic-calm .record-list-reset[hidden] {display:none!important}
+ .clinic-calm #practiceRoot .cs-next-treatment-items>button :is(time,span,small) {font-size:13px;line-height:1.5}
+ .clinic-calm #practiceRoot .cs-next-treatment-items>button b {font-size:14px}
+ .clinic-calm #practiceRoot .cs-next-treatments>header>span {font-size:13px;line-height:1.5;max-width:none}
+ .clinic-calm #practiceRoot .cs-next-treatment-items {max-height:76px}
+ .clinic-calm .cs-nav-favorites summary {font-size:13px;min-height:36px;align-content:center}
+ .clinic-calm .cs-favorite-options {max-height:55vh;overflow:auto;overscroll-behavior:contain}
+ .cs-action-dialog {box-sizing:border-box;width:min(500px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;padding:20px;border:1px solid #cbd8d2;border-radius:10px;background:#fff;color:#233d35;font:15px/1.6 Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;box-shadow:0 12px 40px #20323e26}
+ .cs-action-dialog::backdrop {background:#20323e55}
+ .cs-action-dialog h2 {font-size:21px;margin:0 0 12px}
+ .cs-action-dialog p {white-space:pre-line;overflow-wrap:anywhere}
+ .cs-action-dialog .cs-action-context {padding:8px 10px;background:#f1f6f3;border-radius:6px;font-weight:600}
+ .cs-action-dialog label {display:grid;gap:6px}
+ .cs-action-dialog input {box-sizing:border-box;min-width:0;width:100%;min-height:44px;font:inherit;font-size:16px;border:1px solid #b7c9c0;border-radius:7px;padding:8px}
+ .cs-action-buttons {display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:16px}
+ .cs-action-buttons button {font:inherit;min-height:44px;padding:8px 14px;border:1px solid #cbd8d2;border-radius:8px;background:white;color:#233d35;cursor:pointer}
+ .cs-action-buttons .cs-action-primary {background:#1d766d;color:#fff;border-color:#1d766d}
+ .cs-action-buttons .cs-action-danger {background:#a4372b;color:#fff;border-color:#a4372b}
+ .cs-action-dialog :is(button,input):focus-visible {outline:3px solid #1d766d;outline-offset:2px}
+}
+@media screen and (max-width:800px) {
+ .clinic-calm #practiceRoot .cs-next-treatments {grid-template-columns:minmax(0,1fr) auto}
+ .clinic-calm #practiceRoot .cs-next-treatment-items {grid-column:1/-1;grid-row:2}
+ .clinic-calm .cs-nav-favorites summary {min-height:44px}
+}
+@media print {.cs-action-dialog {display:none!important}}

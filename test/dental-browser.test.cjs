@@ -260,3 +260,5 @@ for(const width of [390,820,1440])test('compact workflow responsive setup and re
 
 async function printSettings(p){const b=p.locator('[data-dn=print]');if(!await b.isVisible())await p.locator('.dn-print-actions summary').click();await b.click();}
 async function openGrades(p){const d=p.locator('.dn-grade-details');if(!await d.evaluate(e=>e.open))await d.locator('summary').click();}
+
+test('shared confirmation protects and deletes the exact dental record',async()=>{const p=await page();await fill(p);await p.addScriptTag({url:url+'/clinic-dialog.js'});await p.addStyleTag({url:url+'/clinic-calm.css'});await p.locator('[data-dn=delete]').click();await p.locator('.cs-action-dialog').waitFor();assert.match(await p.locator('.cs-action-context').innerText(),/합성/);await p.locator('[data-dialog-cancel]').click();assert.equal(await p.evaluate(()=>!!state.records[0].body.deleted),false);await p.locator('[data-dn=delete]').click();await p.locator('[data-dialog-confirm]').click();await p.waitForFunction(()=>state.records[0].body.deleted===true);assert.equal(await p.locator('.cs-action-dialog').count(),0);await p.close();});

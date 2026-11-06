@@ -27,7 +27,9 @@
   }
   let reset=host.querySelector('[data-filter-reset],[data-search-reset]');
   if(!reset){reset=document.createElement('button');reset.type='button';reset.onclick=()=>{if(submit?.disabled)return;for(const input of form.querySelectorAll('input,select'))input.value='';form.requestSubmit(submit);};}
-  reset.textContent='검색 조건 초기화';reset.classList.add('record-list-reset');reset.disabled=!!submit?.disabled;bar.append(reset);
+  reset.textContent='검색 조건 초기화';reset.classList.add('record-list-reset');
+  const applied=[...form.querySelectorAll('input,select')].filter(el=>!el.disabled&&el.type!=='hidden'&&el.value.trim());reset.hidden=!applied.length;
+  summary.textContent=applied.some(el=>['from','to','vet'].includes(el.name||el.dataset.filter))?'상세 조건 · 적용 중':'상세 조건';reset.disabled=!!submit?.disabled;bar.append(reset);
   form.after(bar);
   for(const box of host.querySelectorAll('.dn-list-conditions,.nr-search-applied'))if(!box.textContent.trim())box.hidden=true;
   form.addEventListener('submit',()=>{
@@ -327,7 +329,7 @@
       if(!current(identity)||tab!=='surgery'||active())return;
       if(!medical()||r.canManage===false||r.item?.kind!=='surgery'||r.item?.body?.category==='dental'||r.item?.body?.deleted)throw Error('삭제 가능한 마취기록인지 다시 확인해주세요.');
       const record=r.item;
-      if(!g.confirm((record.patient?.name||'환자')+' · '+anesthesiaDate(record)+' 마취기록을 삭제함으로 옮길까요?\n환자 정보와 다른 기록은 유지됩니다.'))return;
+      const message=(record.patient?.name||'환자')+' · '+anesthesiaDate(record)+' 마취기록을 삭제함으로 옮길까요?\n환자 정보와 다른 기록은 유지됩니다.';const owner=a.identity();if(!await(g.ClinicDialog?g.ClinicDialog.confirm({title:'마취 기록 삭제',message,confirmLabel:'삭제함으로 이동',destructive:true,valid:()=>current(owner)&&rows.includes(record)}):g.confirm(message)))return;
       await api('/cases/'+encodeURIComponent(id)+'/events','POST',{requestKey:crypto.randomUUID(),revision:record.revision,kind:'case.delete',data:{confirm:true}});
       if(!current(identity)||tab!=='surgery'||active())return;
       caseCache.delete(id);anesthesiaViews.delete(id);
