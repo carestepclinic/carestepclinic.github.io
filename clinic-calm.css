@@ -1371,3 +1371,65 @@
  .clinic-calm #practiceRoot .pt-organized .pt-calc-common>[data-common-inputs] {flex-basis:100%;grid-template-columns:minmax(165px,1fr) minmax(100px,1fr)}
  .cs-update-notice {flex-wrap:wrap}
 }
+/* Ward and record refinement: reserve the next-care row instead of covering patient cards. */
+@media screen {
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-controls {display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;margin:4px 0 8px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-controls>.cl-tabs {flex:0 1 260px;margin:0}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-actions {margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+ .clinic-calm #practiceRoot .cs-ward-designed>.cl-board-count {margin:0 0 4px;font-size:13px}
+ .clinic-calm #practiceRoot .cs-ward-actions .cs-workspace-tools {margin:0;padding:0}
+ .clinic-calm #practiceRoot .cs-ward-designed {padding-bottom:0}
+ .clinic-calm #practiceRoot .cs-ward-room-scroll {overflow:auto;max-height:var(--cs-ward-height,calc(100dvh - 285px));min-height:160px;scrollbar-gutter:stable;overscroll-behavior:contain;padding:2px 2px 8px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-next-treatments {position:static;inset:auto;margin:8px 0 0;box-shadow:0 2px 8px #233b300c}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-group>header {flex-wrap:wrap;gap:4px;padding:10px 12px;min-height:62px;box-sizing:border-box}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-group>header h4 {white-space:nowrap;font-size:16px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-room-team {min-height:70px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-monitor {min-height:60px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cc-room-next {margin-top:auto;min-height:49px;box-sizing:border-box}
+ .clinic-calm #practiceRoot .cs-ward-designed .cc-occupied {display:flex;flex-direction:column;height:100%;box-sizing:border-box}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-grid {align-items:stretch}
+ .clinic-calm #practiceRoot .cs-anesthesia-focused .cs-anesthesia-commandbar {margin:0;padding:3px 0;gap:3px 8px}
+ .clinic-calm #practiceRoot .cs-anesthesia-focused .ad-patient-setup {margin:0;padding:3px 0;border:0;flex:0 1 auto}
+ .clinic-calm #practiceRoot .cs-anesthesia-focused .cs-anesthesia-alerts {display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,.65fr);gap:8px;margin:5px 0}
+ .clinic-calm #practiceRoot .cs-anesthesia-alerts .ar-reminder {margin:0;padding:5px 10px;min-height:38px;box-sizing:border-box}
+ .clinic-calm #practiceRoot .cs-anesthesia-alerts .cs-pending-disclosure {padding:4px 10px}
+ .clinic-calm #practiceRoot .cs-anesthesia-alerts .cs-pending-disclosure[open] {grid-column:1/-1}
+ .clinic-calm #practiceRoot .cs-anesthesia-alerts:has(.ar-reminder[hidden]) {grid-template-columns:1fr}
+ .clinic-calm #practiceRoot .cs-anesthesia-focused .ar-timing {margin:6px 0;padding:6px 8px}
+ .clinic-calm #practiceRoot .cs-anesthesia-focused .ar-timing p {margin:3px 0}
+ .clinic-calm #practiceRoot .cs-anesthesia-focused .ad-settings {margin:3px 0;padding:4px 8px}
+ .clinic-calm #practiceRoot .cs-anesthesia-focused .ad-values {margin:3px 0;gap:5px}
+ .clinic-calm #practiceRoot .cs-anesthesia-focused .ad-values>div {padding:5px 8px}
+ .clinic-calm #practiceRoot .cs-anesthesia-focused .ad-values strong {font-size:17px}
+ .clinic-calm #practiceRoot:has(.cs-anesthesia-focused) .cs-patient-header {padding:5px 8px;margin-bottom:4px}
+ .clinic-calm #practiceRoot:has(.cs-anesthesia-focused) .cs-record-navigation {padding:3px 0;margin:0 0 5px;gap:5px}
+ .clinic-calm #practiceRoot:has(.cs-anesthesia-focused) .cs-record-navigation button {min-height:32px;padding:4px 9px}
+ .clinic-calm #practiceRoot .pt-organized .pt-flow-context {flex:0 1 auto;padding:0;margin:0;font-size:12px;min-height:0}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common {gap:5px 10px;padding:8px 10px}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common [aria-invalid=true] {border-color:#ba7a27}
+ .cs-module-loading {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;min-height:380px;padding:12px 0}
+ .cs-module-loading>div {background:linear-gradient(#edf2f0 48px,transparent 48px),repeating-linear-gradient(transparent 0 75px,#edf2f0 75px 105px,transparent 105px 125px);border:1px solid #dbe6e1;border-radius:12px}
+ @container(max-width:850px) {
+  .clinic-calm #practiceRoot .cs-ward-designed .cl-room-groups {grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .clinic-calm #practiceRoot .cs-ward-designed [data-room-kind=large_dog] {grid-column:1/-1}
+ }
+ @container(max-width:560px) {
+  .clinic-calm #practiceRoot .cs-ward-designed .cl-room-groups {grid-template-columns:minmax(0,1fr)!important}
+ }
+ @media(min-width:801px) {
+  .clinic-calm #appView .clinic-navigation .nav-item {min-height:38px;padding-top:6px;padding-bottom:6px;margin-block:1px}
+  .clinic-calm #appView .clinic-navigation .cs-record-menu>summary {padding:4px 10px;min-height:28px}
+  .clinic-calm #appView .clinic-navigation .cs-record-menu .nav-item {min-height:31px;padding:4px 10px}
+  .clinic-calm #appView .clinic-navigation .cs-nav-section-label {margin:4px 10px 2px}
+  .clinic-calm #practiceRoot:has(.cs-anesthesia-focused) .cs-patient-copy {display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}
+  .clinic-calm #practiceRoot:has(.cs-anesthesia-focused) .cs-patient-copy [data-cs-record] {flex-basis:100%}
+ }
+ @media(max-width:800px) {
+  .clinic-calm #practiceRoot .cs-anesthesia-focused .cs-anesthesia-alerts {grid-template-columns:1fr}
+  .clinic-calm #practiceRoot .cs-ward-room-scroll {max-height:var(--cs-ward-height,calc(100dvh - 290px))}
+  .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-controls>.cl-tabs {flex:1 1 100%}
+  .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-actions {margin-left:0}
+  .clinic-calm #practiceRoot:has(.cs-anesthesia-focused) .cs-record-navigation button {min-height:40px}
+  .cs-module-loading {grid-template-columns:1fr;min-height:360px}
+ }
+}

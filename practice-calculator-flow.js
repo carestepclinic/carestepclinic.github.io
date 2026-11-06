@@ -10,9 +10,9 @@
   const hide=(el,value)=>{if(el&&el.hidden!==value)el.hidden=value;};
   const reveal=el=>{for(let p=el?.parentElement;p&&p!==b;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;el?.focus();el?.scrollIntoView({block:'center',behavior:'smooth'});};
   const species=q('[data-ref-species]'),weight=q('[data-common-weight]');
-  const notice=document.createElement('div');notice.className='pt-flow-context';notice.hidden=true;notice.setAttribute('role','status');notice.innerHTML='<span></span><button type="button">확인</button>';
+  const notice=document.createElement('div');notice.className='pt-flow-context';notice.hidden=true;notice.setAttribute('role','status');notice.innerHTML='<span></span>';
   q('.pt-calc-common')?.append(notice);
-  let missing=null;notice.querySelector('button').onclick=()=>reveal(missing);
+  let missing=null;
 
   // Keep one visible medication query; the optional regimen chooser uses the same query.
   const med=q('[data-calc=dose]'),quick=q('.pt-quick-products'),regimen=q('.pt-medication-flow');
@@ -90,7 +90,7 @@
    const record=q('[data-record-weight-confirm]');
    missing=!species?.value?species:!(Number(weight?.value)>0)?weight:record&&!record.closest('label').hidden&&!record.checked?record:null;
    const needsContext=!['convert','acid'].includes(active);
-   hide(notice,!needsContext||!missing);text(notice.querySelector('span'),missing===species?'동물종 선택 필요':missing===weight?'체중 입력 필요':'기록 체중과 측정일을 확인해주세요.');
+   hide(notice,!needsContext||!missing);for(const field of [species,weight])if(field)field.setAttribute('aria-invalid',String(needsContext&&field===missing));text(notice.querySelector('span'),missing===species?'동물종 선택 필요':missing===weight?'체중 입력 필요':'기록 체중과 측정일을 확인해주세요.');
    // Emergency values remain hidden until the common context is complete; no repeated errors.
    b.classList.toggle('pt-flow-missing-context',!!missing);
    if(emSelect){const selected=emNav.querySelector('[aria-pressed=true]');if(selected&&emSelect.value!==selected.dataset.emFilter)emSelect.value=selected.dataset.emFilter;const count=all('[data-em-row]').filter(x=>!x.hidden).length;for(const opt of emSelect.options){const btn=emNav.querySelector('[data-em-filter="'+opt.value+'"]');text(opt,btn.textContent+(opt.selected?' · '+count+'개':''));}}

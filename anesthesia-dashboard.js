@@ -118,7 +118,9 @@
     for(const row of pending.querySelectorAll('.cs-pending-row')){const detail=row.querySelector('details'),cancel=row.querySelector('[data-ar=plan-cancel]');if(detail&&cancel){detail.querySelector('summary').textContent='상세';detail.append(cancel);}}
 
   }
+  if(a.onePage){sheet.classList.add('cs-anesthesia-focused');const basic=sheet.querySelector('.ad-patient-setup'),controls=sheet.querySelector('.cs-anesthesia-commandbar');if(controls){const management=controls.querySelector('.cl-work-more>div'),quick=controls.querySelector('.ar-quick-actions');if(management){if(basic)management.prepend(basic);if(quick)management.append(quick);}}}
   const reminder=query('[data-ar-reminder]');if(reminder)timing.after(reminder);
+  if(a.onePage&&reminder){const fold=sheet.querySelector('.cs-pending-disclosure'),alerts=document.createElement('div');alerts.className='cs-anesthesia-alerts';reminder.before(alerts);alerts.append(reminder);if(fold)alerts.append(fold);}
   const status=sheet.querySelector(':scope>p[role=status]');if(status){if(/^기록 \d+건$/.test(status.textContent.trim()))status.remove();else header?.firstElementChild?.append(status);}header?.setAttribute('aria-label','현재 마취 환자');
  }
  const api={series,overviewGraph,trendPanels,recordPhase,arrange};if(typeof module==='object'&&module.exports)module.exports=api;else g.AnesthesiaDashboard=api;
