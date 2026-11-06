@@ -25,6 +25,8 @@
   const more=document.createElement('details');more.className='pt-workspace-more';more.innerHTML='<summary>병원 설정</summary><div class="pt-workspace-options"></div>';toolbar.append(more);
   const options=more.querySelector('div');if(settings){settings.open=true;options.append(settings);}if(view)options.append(view);
   q('.pt-calc-common').append(toolbar);
+  // Show the existing patient picker beside species/weight; do not duplicate its click handler.
+  const patientPicker=q('[data-ref-patient]');if(patientPicker){q('[data-common-inputs]')?.append(patientPicker);patientPicker.classList.add('cs-patient-picker');set(patientPicker,'환자 불러오기');}
   queueMicrotask(()=>{const reset=q('.pt-reset-calculation');if(reset){reset.textContent='계산 입력 모두 지우기';reset.title='동물종·체중·계산 입력을 지웁니다. 저장한 병원 약품·기본값은 유지됩니다.';toolbar.insertBefore(reset,more);}const register=q('[data-strength-open]');if(register){register.textContent='약물·함량 등록';register.title='성분별 함량 선택 또는 새 약물 직접 등록';register.setAttribute('aria-haspopup','dialog');toolbar.insertBefore(register,reset||more);}});
 
   // Prescription text/photo, injections and manual entry share the same destination.
@@ -135,6 +137,7 @@
     if(previous&&rx.querySelector('[data-rx-text]').value.trim()){title.textContent='입력 변경 · 이전 결과는 사용할 수 없습니다. 다시 계산 중…';const cards=document.createElement('div');cards.className='pt-previous-results';cards.inert=true;for(const value of previous){const card=document.createElement('div');card.textContent=value;cards.append(card);}placeholder.append(cards);}
    }}
    rx.querySelector('.pt-prescription-result').setAttribute('aria-busy',String(state==='pending'||state==='loading'));
+   rx.classList.toggle('cs-input-first',empty&&!previous&&state!=='pending'&&state!=='loading');
   }
   function scheduleSummary(){
    if(!rx)return;const rows=o.rows?.()||[],date=rx.querySelector('[data-rx-start]').value;

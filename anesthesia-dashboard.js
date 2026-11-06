@@ -121,7 +121,13 @@
   if(a.onePage){sheet.classList.add('cs-anesthesia-focused');const basic=sheet.querySelector('.ad-patient-setup'),controls=sheet.querySelector('.cs-anesthesia-commandbar');if(controls){const management=controls.querySelector('.cl-work-more>div'),quick=controls.querySelector('.ar-quick-actions');if(management){if(basic)management.prepend(basic);if(quick)management.append(quick);}}}
   if(a.item.status==='closed'){
    const entry=dashboard.querySelector('.ad-entry'),monitor=dashboard.querySelector('.ad-monitor');
-   if(entry&&monitor){const review=document.createElement('details');review.className='cs-closed-review';review.innerHTML='<summary>기록 확인·정정</summary>';entry.before(review);review.append(entry);}
+   if(entry&&monitor){
+    const review=document.createElement('details');review.className='cs-closed-review';review.innerHTML='<summary>기록 수정</summary>';review.open=!!view.closedReviewOpen;entry.before(review);review.append(entry);
+    review.addEventListener('toggle',()=>{if(review.isConnected)view.closedReviewOpen=review.open;});
+    for(const el of [...sheet.querySelectorAll('.cs-drug-tools,.ad-extra-procedure,.ar-summary,.ar-history-archive'),...sheet.querySelectorAll('.cs-anesthesia-record-actions>.cc-performer,.cs-anesthesia-record-actions>.cl-work-more')])if(!review.contains(el))review.append(el);
+    const management=root.closest('.cl-anesthesia-page')?.querySelector('.cl-surgery-management');if(management)review.append(management);
+    const note=sheet.querySelector('.ar-direct-status');if(note)note.hidden=true;
+   }
    const print=sheet.querySelector('.ar-print-menu'),controls=sheet.querySelector('.cs-anesthesia-commandbar');if(print&&controls)controls.append(print);
   }
   const reminder=query('[data-ar-reminder]');if(reminder)timing.after(reminder);

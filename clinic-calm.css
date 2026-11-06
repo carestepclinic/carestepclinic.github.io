@@ -1489,3 +1489,41 @@
  .clinic-calm #practiceRoot .cs-next-options{grid-column:auto;grid-row:auto}
  .clinic-calm #practiceRoot .cs-anesthesia-focused .ad-time-line{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+/* Compact overview, readable measurement dates, and input-first calculation. */
+@media screen{
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-controls{display:flex;align-items:center;flex-wrap:wrap;padding:5px 0;gap:8px 12px}
+ .clinic-calm #practiceRoot .cs-ward-controls>.cl-board-count{margin:0;font-size:13px;flex:0 1 auto;color:#48615f}
+ .clinic-calm #practiceRoot .cs-ward-controls>.cl-tabs{flex:1 1 200px;margin:0;padding:3px}
+ .clinic-calm #practiceRoot .cs-ward-controls>.cs-ward-actions{flex:0 0 auto;width:auto;margin:0}
+ .clinic-calm #practiceRoot .cs-ward-designed .cc-occupied{max-width:460px;width:100%;justify-self:start}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-group{align-self:start;min-width:0}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr))}
+ .clinic-calm #practiceRoot .cs-vital-note{font-size:12px;line-height:1.4}
+ .clinic-calm #practiceRoot .cs-vital-date{font-variant-numeric:tabular-nums;font-size:12px;white-space:normal}
+ .clinic-calm #practiceRoot .cl-vital-time{grid-column:1/-1;margin:0;padding:4px 8px}
+ .clinic-calm #practiceRoot .cs-closed-review{padding:10px 12px;border:1px solid #d9e3de;border-radius:10px;background:#fff}
+ .clinic-calm #practiceRoot .cs-closed-review>summary{font-weight:600;cursor:pointer;min-height:32px;align-content:center}
+ .clinic-calm #practiceRoot .cs-closed-review>.cl-work-more{margin-top:8px}
+ .clinic-calm #practiceRoot .pt-organized [data-common-inputs]{align-items:end;gap:8px}
+ .clinic-calm #practiceRoot .pt-organized .cs-patient-picker{flex:0 0 auto;min-height:40px;white-space:nowrap}
+ .clinic-calm #practiceRoot .pt-organized [data-calc=batch].cs-input-first{grid-template-columns:minmax(0,1fr)}
+ .clinic-calm #practiceRoot .pt-organized .cs-input-first .pt-prescription-entry{grid-column:1/-1;width:100%;max-width:920px}
+ .clinic-calm #practiceRoot .pt-organized .cs-input-first .pt-prescription-result{grid-column:1/-1;min-height:0;padding:0;border:0;background:transparent}
+ .clinic-calm #practiceRoot .pt-organized .cs-input-first .pt-result-placeholder{min-height:0;margin:4px 0;padding:4px 0;font-size:13px;text-align:left;background:transparent;border:0}
+ .clinic-calm #practiceRoot .pt-organized .pt-prescription-result .pt-result-placeholder>p{margin:0}
+ .clinic-calm .clinic-navigation [data-clinical-group]{border-top:0;margin-top:2px}
+}
+@media screen and (min-width:801px){
+ .clinic-calm #practiceRoot .cs-room-group-nav[data-group-count="3"],.clinic-calm #practiceRoot .cs-room-group-nav[data-group-count="2"],.clinic-calm #practiceRoot .cs-room-group-nav[data-group-count="1"]{display:none}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-group[data-occupied="0"]>header{display:block;padding:8px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-group[data-occupied="0"]>header p{margin:4px 0 0}
+}
+@media screen and (max-width:800px){
+ .clinic-calm #practiceRoot .cs-ward-controls>.cl-board-count{flex:1 1 auto}
+ .clinic-calm #practiceRoot .cs-ward-controls>.cl-tabs{order:2;flex-basis:100%}
+ .clinic-calm #practiceRoot .cs-ward-controls>.cs-ward-actions{margin-left:auto}
+ .clinic-calm #practiceRoot .cs-ward-designed .cc-occupied{max-width:none}
+ .clinic-calm #practiceRoot .cs-ward-designed .cl-room-grid{grid-template-columns:1fr}
+ .clinic-calm #practiceRoot .pt-organized .cs-patient-picker{min-height:44px}
+}
