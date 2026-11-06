@@ -838,3 +838,52 @@
  .clinic-calm #practiceRoot .cs-anesthesia-workspace>.ar-dashboard {display:flex;flex-direction:column;gap:12px}
  .clinic-calm #practiceRoot .cs-anesthesia-workspace>.ar-dashboard>:is(.ad-monitor,.ad-entry) {width:100%;box-sizing:border-box;position:static}
 }
+
+/* Workflow refinement: scoped to application screens, never exported documents. */
+@media screen {
+ .clinic-calm #practiceRoot .cs-record-navigation {display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+ .clinic-calm #practiceRoot .cs-inpatient-shortcut {margin-left:auto;border-color:var(--cs-accent);color:var(--cs-accent);font-weight:650}
+ .cs-inpatient-list {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:10px}
+ .cs-inpatient-list button {display:flex;flex-direction:column;text-align:left;gap:5px;min-height:88px;padding:12px;border:1px solid #cadbd5;border-radius:12px;background:#f7fbf9;color:#183c35;font:inherit;overflow-wrap:anywhere}
+ .cs-inpatient-list button:hover {background:#eaf5ef;border-color:#478773}
+ .cs-inpatient-list small {font-size:13px;line-height:1.5;color:#526b62}
+ .clinic-calm #practiceRoot .cs-section-choice {display:flex;align-items:center;gap:6px;font-size:12px;white-space:nowrap}
+ .clinic-calm #practiceRoot .cs-section-choice select {width:160px;min-height:38px;font-size:13px}
+ .clinic-calm #practiceRoot .cs-record-content :is(section>h3,section>h4,details>summary) {scroll-margin-top:180px}
+ .clinic-calm #practiceRoot :is(.nr-card,.dn-section,.er-record,.chr-heading) {border-radius:12px}
+ .clinic-calm #practiceRoot .cs-record-content :is(.nr-card,.dn-section) {padding:14px;margin-block:10px}
+ .clinic-calm #practiceRoot .cs-record-content :is(h3,h4) {font-size:16px;line-height:1.45;margin:0 0 10px}
+ .clinic-calm #practiceRoot .cs-record-content :is(label,summary) {line-height:1.5}
+ .clinic-calm #practiceRoot .cs-record-content :is(.nr-actions,.dn-actions,.ar-actions,.er-jumps,.chr-tabs) {gap:6px;flex-wrap:wrap}
+ .clinic-calm #practiceRoot .cs-record-content :is(input,select,textarea) {border-color:#c8d6d2;border-radius:8px}
+ .clinic-calm #practiceRoot .pt-rx-review {background:#edf6f1;border:1px solid #cfdfd7;border-radius:12px;padding:10px;gap:8px}
+ .clinic-calm #practiceRoot .pt-rx-review [aria-pressed=true] {background:var(--cs-accent);color:white}
+ .clinic-calm #practiceRoot .pt-rx-results {gap:10px}
+ .clinic-calm #practiceRoot .pt-rx :is(.pt-rx-result,.pt-rx-course-summary) {font-variant-numeric:tabular-nums;line-height:1.5}
+ .clinic-calm .cs-today-surgery {padding-top:12px;border-top:1px solid #dce5e0;margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
+ .clinic-calm .cs-today-surgery h4 {width:100%;margin:0;font-size:15px}
+ .clinic-calm .cs-today-surgery button {display:flex;gap:6px;flex-direction:column;text-align:left;min-width:160px;flex:1;padding:10px;background:#f1f6f3;border:1px solid #cbded4;border-radius:10px;color:#234739}
+ .clinic-calm .cs-today-surgery small {font-size:12px;font-weight:400}
+ .clinic-calm #builder .builder-layout {grid-template-columns:minmax(400px,.95fr) minmax(0,1.05fr);gap:20px}
+ .clinic-calm #builder .builder-controls {border:1px solid #dbe4df;border-radius:14px;background:#fff}
+ .clinic-calm #builder .wizard-nav {position:sticky;bottom:0;background:#fff;padding:10px 0;border-top:1px solid #e1e8e3;z-index:4}
+ .clinic-calm #builder .wizard-nav .btn {min-height:42px}
+}
+@media screen and (max-width:900px) {
+ .clinic-calm #builder .builder-layout {grid-template-columns:minmax(0,1fr)}
+ .clinic-calm #practiceRoot .cs-inpatient-shortcut {margin-left:0}
+}
+@media screen and (max-width:600px) {
+ .clinic-calm #practiceRoot .cs-patient-actions {flex-wrap:wrap;gap:8px}
+ .clinic-calm #practiceRoot .cs-patient-actions [data-cs-entry] {white-space:nowrap;min-width:96px}
+ .clinic-calm #practiceRoot .cs-patient-actions:has(.cs-section-choice:not([hidden])) [data-cs-entry] {display:none}
+ .clinic-calm #practiceRoot .cs-section-choice {width:100%;justify-content:space-between}
+ .clinic-calm #practiceRoot .cs-section-choice select {flex:1;max-width:240px;font-size:16px;min-height:44px}
+ .clinic-calm #practiceRoot .cs-record-navigation {gap:4px}
+ .clinic-calm #practiceRoot .cs-record-navigation button {flex:1 0 auto;min-height:44px}
+ .clinic-calm #practiceRoot .cs-record-navigation .cs-inpatient-shortcut {flex-basis:100%;background:#edf6f1}
+ .clinic-calm #practiceRoot .cs-record-content :is(.nr-card,.dn-section) {padding:10px}
+ .clinic-calm #builder .builder-controls {padding:10px!important}
+ .clinic-calm #builder .wizard-nav {padding-bottom:max(10px,env(safe-area-inset-bottom))}
+ .clinic-calm #practiceRoot.cs-short-viewport .cs-section-choice {display:none}
+}
