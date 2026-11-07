@@ -87,3 +87,13 @@ test('mobile lower preview button returns to the same field and scroll position'
 });
 
  test('PDF library loading failure keeps input and does not report a generated document',async t=>{const {p,errors}=await page(t);await p.evaluate(()=>{setWizardStep(5);CarestepBuilderFlow.selectDelivery('file');window.html2pdf=undefined;window.generatedMarks=0;window.markBuilderOutputGenerated=()=>generatedMarks++;window.printCalls=0;window.printCurrent=()=>printCalls++;});await p.locator('#generateOutputBtn').click();await p.waitForFunction(()=>!document.getElementById('builderExportError').hidden);assert.equal(await p.evaluate(()=>generatedMarks),0);assert.equal(await p.evaluate(()=>printCalls),0);assert.equal(await p.locator('#patientName').inputValue(),'검증 환자');assert.equal(await p.locator('#generateOutputBtn').isEnabled(),true);assert.deepEqual(errors,[]);});
+
+for(const width of [390,1440])test('checklist start time stays visible and editable in medication step '+width,async t=>{
+ const {p,errors}=await page(t,width);
+ await p.clock.install({time:new Date('2026-11-07T07:00:00Z')});
+ await p.evaluate(()=>{document.getElementById('dischargeDate').value='2026-11-07';readCaseInfoFromForm();medications=[{name:'검증약',dose:'1정',frequency:'하루 2회',times:'08:00, 20:00',duration:'7'}];renderMedicationRows();updateMedicationPreview();setWizardStep(3);});
+ const input=p.locator('#medicationCheckStartTime');await input.scrollIntoViewIfNeeded();assert.equal(await input.isVisible(),true);assert.equal(await input.inputValue(),'16:00');
+ const bounds=await input.boundingBox();assert.ok(bounds.x>=0&&bounds.x+bounds.width<=width);
+ await input.fill('18:00');await input.press('Tab');assert.equal(await p.evaluate(()=>caseInfo.medicationCheckStart.time),'18:00');
+ await p.evaluate(()=>{setWizardStep(4);setWizardStep(3);});assert.equal(await input.inputValue(),'18:00');assert.deepEqual(errors,[]);
+});
