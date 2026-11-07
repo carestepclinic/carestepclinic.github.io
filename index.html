@@ -4293,11 +4293,11 @@ function renderBillingContractComparison(){
 
 function renderBillingOverview(){
   const d=billingOverviewState,auth=saasMode==='auth'&&saasMe,provider=d?.provider||{},sub=d?.subscription||{},method=d?.paymentMethod,channel=d?.channel||saasMe?.clinic?.subscriptionChannel||{channel:'direct',billingOwner:'carestep'};
-  const badge=$('billingProviderBadge');if(badge){badge.className='billing-provider '+(provider.configured?'on':'warn');badge.textContent=provider.configured?'Toss Payments · 연결됨':'Toss Payments · 설정 필요';}
-  if($('billingManageLock')){const lock=$('billingManageLock');lock.classList.toggle('hidden',!auth||!!d?.canManage);lock.textContent=channel.channel==='partner'&&channel.billingOwner==='partner'?`${channel.partnerName||'제휴사'}를 통해 구독 중입니다. 요금제·구독 변경은 제휴사 또는 CARESTEP HQ에 문의해주세요.`:'원장·관리자 계정에서 결제수단과 구독을 변경할 수 있습니다.';}
+  const badge=$('billingProviderBadge');if(badge){badge.className='billing-provider '+(provider.configured?'on':'warn');badge.textContent=!d?(billingOverviewLoading?'결제 정보 확인 중':'결제 정보 확인 필요'):provider.configured?'Toss Payments · 연결됨':'Toss Payments · 설정 필요';}
+  if($('billingManageLock')){const lock=$('billingManageLock');lock.classList.toggle('hidden',!auth||!d||!!d.canManage);lock.textContent=channel.channel==='partner'&&channel.billingOwner==='partner'?`${channel.partnerName||'제휴사'}를 통해 구독 중입니다. 요금제·구독 변경은 제휴사 또는 CARESTEP HQ에 문의해주세요.`:'원장·관리자 계정에서 결제수단과 구독을 변경할 수 있습니다.';}
   renderBillingContractComparison();
   const controls=['billingPlanSelect','billingCycleSelect','billingSchedulePlan','billingRegisterCard','billingCancelSubscription','billingUndoCancel','billingRetryPayment'];controls.forEach(id=>{if($(id))$(id).disabled=!auth||!d?.canManage||billingOverviewLoading||!!d?.stale;});
-  if(!auth||!d){if($('billingSubscriptionSummary'))$('billingSubscriptionSummary').textContent='로그인 후 결제·구독 정보를 확인합니다.';if($('accountUxNextPayment'))$('accountUxNextPayment').textContent='--';return;}
+  if(!auth||!d){const message=!auth?'로그인 후 결제·구독 정보를 확인합니다.':billingOverviewLoading?'결제·구독 정보를 불러오는 중…':'결제·구독 정보를 확인하지 못했습니다. 새로고침해주세요.';if($('billingSubscriptionSummary'))$('billingSubscriptionSummary').textContent=message;if($('billingCardBox'))$('billingCardBox').textContent=message;if($('accountUxNextPayment'))$('accountUxNextPayment').textContent='--';return;}
   if($('billingCurrentPlan'))$('billingCurrentPlan').textContent=`${sub.planCode||saasMe?.clinic?.plan||'-'} · ${sub.billingCycle==='annual'?'연':'월'}`;
   const next=sub.status==='trialing'?(sub.trialEndsAt||sub.currentPeriodEnd):(sub.nextPaymentAt||sub.currentPeriodEnd),nextLabel=next?billingDate(next):'-';if($('billingNextDate'))$('billingNextDate').textContent=nextLabel;if($('accountUxNextPayment'))$('accountUxNextPayment').textContent=nextLabel;
   if($('billingPaymentState'))$('billingPaymentState').textContent=billingStatusLabel(sub.status)+(sub.paymentGraceActive?' · 유예기간':'')+(sub.cancelAtPeriodEnd?' · 해지 예정':'');
@@ -5853,6 +5853,7 @@ function renderClinicLibraryRecent(){
   const host=$('clinicLibraryRecent');if(!host)return;const q=String($('searchInput')?.value||'').trim(),filtered=!!q||currentPurpose!=='all'||currentFilter!=='전체';
   host.hidden=filtered;if(filtered){host.replaceChildren();return;}
   const rows=window.ClinicOrganization?.recentTemplates(templates,workflowSettings.recent||[])||[];
+  if(!rows.length){host.hidden=true;host.replaceChildren();return;}
   host.innerHTML='<h4>최근 사용 자료</h4>'+(rows.length?'<div class="clinic-recent-template-list">'+rows.map(t=>'<button type="button" class="btn btn-secondary open-builder" data-critical-template="'+escapeHtml(t.id)+'" data-id="'+escapeHtml(t.id)+'">'+escapeHtml(templateDisplayTitle(t))+'</button>').join('')+'</div>':'<p>자료를 선택하면 이곳에서 다시 찾을 수 있습니다.</p>');
 }
 function resetClinicLibraryFilters(){
@@ -5874,8 +5875,9 @@ function renderLibrary(){
     data=templates.filter(t=>currentFilter==='전체'||t.category===currentFilter);
   }
   if(currentPurpose!=='all')data=data.filter(t=>templatePurpose(t)===currentPurpose);
-  const summary=`${PURPOSE_LABELS[currentPurpose]||PURPOSE_LABELS.all} · ${categoryLabel(currentFilter)}`;if($('libraryFilterSummary'))$('libraryFilterSummary').textContent=summary;if($('libraryResultMeta'))$('libraryResultMeta').textContent=`${summary} · ${data.length}개 자료`;
-  const active=$('clinicLibraryActiveFilters');if(active)active.textContent=(q?'검색: '+String($('searchInput').value).trim()+' · ':'')+summary;if($('clinicLibraryReset'))$('clinicLibraryReset').hidden=!q&&currentPurpose==='all'&&currentFilter==='전체';
+  const summary=`${PURPOSE_LABELS[currentPurpose]||PURPOSE_LABELS.all} · ${categoryLabel(currentFilter)}`;if($('libraryFilterSummary'))$('libraryFilterSummary').textContent=summary;if($('libraryResultMeta'))$('libraryResultMeta').textContent=`${data.length}개 자료`;
+  let outputNote=$('clinicLibraryOutputs');if(!outputNote){outputNote=document.createElement('p');outputNote.id='clinicLibraryOutputs';outputNote.className='cs-library-outputs';$('libraryGrid').before(outputNote);}outputNote.textContent='자료 선택 후 PDF·복약표·문자 안내를 만들 수 있습니다.';
+  const active=$('clinicLibraryActiveFilters');if(active)active.textContent=[q?'검색: '+String($('searchInput').value).trim():'',currentPurpose!=='all'?PURPOSE_LABELS[currentPurpose]:'',currentFilter!=='전체'?categoryLabel(currentFilter):''].filter(Boolean).join(' · ');if($('clinicLibraryReset'))$('clinicLibraryReset').hidden=!q&&currentPurpose==='all'&&currentFilter==='전체';
   renderClinicLibraryRecent();
   $('libraryGrid').innerHTML=data.map(cardTemplate).join('') || '<div class="panel">조건에 맞는 자료가 없습니다. 검색·필터 초기화로 전체 자료를 확인하세요.</div>';
   bindBuilderButtons();
@@ -10816,9 +10818,9 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="r83-clinic.js?v=20261031-practical-terms"></script>
 <script src="clinic-read-flow.js?v=flow-20261017"></script>
 <script src="home-access-clinic.js?v=20261031-practical-terms"></script>
-<script src="clinic-care.js?v=20261031-practical-labels"></script>
+<script src="clinic-care.js?v=20261107-interface-cohesion"></script>
 <script src="clinic-account-reads.js?v=20261031-account"></script>
-<script src="clinic-organization.js?v=20261101-clinic-clean"></script>
+<script src="clinic-organization.js?v=20261107-interface-cohesion"></script>
 <script src="staff-training.js?v=20261105-training-simple"></script>
 <script src="staff-training-clinic.js?v=20261105-operations"></script>
 <script src="practice-intake.js?v=20261105-selection"></script>
@@ -10854,7 +10856,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="practice-calculator-settings.js?v=20261030-efficient1"></script>
 <script src="practice-calculator-flow.js?v=20261031-calc-cleanup-2"></script>
 <script src="practice-calculator-clarity.js?v=20261031-calc-clarity-1"></script>
-<script src="practice-calculator-organize.js?v=20261031-practical-labels"></script>
+<script src="practice-calculator-organize.js?v=20261107-interface-cohesion"></script>
 <link rel="stylesheet" href="practice-calculator-organize.css?v=20261031-compact-header">
 <link rel="stylesheet" href="practice-calculator-clarity.css?v=20261031-calc-clarity-1">
 <script src="clinical-protocol-starters.js?v=20261027wardux1"></script>
@@ -10884,16 +10886,16 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script id="clinic-module-manifest" type="application/json">{"dental": ["dental-record.js?v=20261101-record-identity", "dental-workflow.js?v=20261106-workflow12"], "neuro": ["neuro-record.js?v=20261106-workflow12"], "ophthalmic": ["ophthalmic-record.js?v=20261106-workflow12"], "chronic": ["chronic-record.js?v=20261106-workflow12"], "calc": ["practice-acid-base.js?v=20261026tb1", "practice-calcium-transfusion.js?v=20261031-calc-cleanup-2", "practice-emergency.js?v=20261031-calc-cleanup-2", "practice-potassium-mix.js?v=20261031-calc-cleanup-2", "practice-cri-presets.js?v=20261031-calc-clarity-1", "practice-nutrition-foods.js?v=20261031-prunus", "practice-nutrition.js?v=20261031-food1", "practice-calculator-workspace.js?v=20261031-calc-cleanup-2", "practice-calcium-guided.js?v=20261026ca1", "practice-fluid-plan.js?v=20261031-calc-cleanup-2"]}</script>
 <script src="clinic-lazy-modules.js?v=20261105-flow"></script>
 <script src="clinic-inpatients.js?v=20261106-workflow9"></script>
-<script src="clinic-record-workspace.js?v=20261106-interface11"></script>
-<script src="clinic-purchases.js?v=20261106-workflow12"></script>
-<script src="practice-tools.js?v=20261106-workflow12"></script>
+<script src="clinic-record-workspace.js?v=20261107-interface-cohesion"></script>
+<script src="clinic-purchases.js?v=20261107-interface-cohesion"></script>
+<script src="practice-tools.js?v=20261107-interface-cohesion"></script>
 <script src="clinic-today-ward.js?v=20261106-workflow9"></script>
 <script src="practice-clinic.js?v=20261103-settings"></script>
-<script src="clinic-settings.js?v=20261106-interface11"></script>
+<script src="clinic-settings.js?v=20261107-interface-cohesion"></script>
 <link rel="stylesheet" href="clinic-followup-tasks.css?v=20261104-followup-controls">
 <script src="clinic-followup-tasks.js?v=20261104-followup-controls"></script>
 <link rel="stylesheet" href="builder-flow.css?v=20261105-flow3">
 <script src="builder-flow.js?v=20261105-flow3"></script>
-<link rel="stylesheet" href="clinic-calm.css?v=20261106-workflow12">
+<link rel="stylesheet" href="clinic-calm.css?v=20261107-interface-cohesion">
 </body>
 </html>

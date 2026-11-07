@@ -2,7 +2,7 @@
 (function(global){
  'use strict';
  const $=id=>document.getElementById(id),tabs=new Map();
- let workspace=null,timelineOpen=null;
+ let workspace=null,timelineOpen=null,todayControl=null,todayPicked=false,todayResolved=false;
  function ageLabel(birth,today=new Date(Date.now()+32400000).toISOString().slice(0,10)){
   const valid=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v+'T00:00:00Z'))&&new Date(v+'T00:00:00Z').toISOString().slice(0,10)===v;
   const day=String(birth||'').slice(0,10);if(!valid(day)||!valid(today)||day>today)return '나이 미입력';
@@ -32,6 +32,7 @@
  }
  function updateTodayCounts(){
   const attention=global.carestepAttentionSummary?.(),clinical=global.carestepClinicalSummary?.();
+  if(todayControl&&!todayResolved&&!todayPicked&&attention?.state==='ready'&&clinical?.state==='ready'){todayResolved=true;if(!attention.total&&clinical.total>0)todayControl.select('clinical');}
   for(const [key,label,value] of [['attention','상담·승인·발송 확인',attention],['clinical','진료·예방·후속관리',clinical]]){
    const button=$('clinicToday-tab-'+key);if(!button)continue;
    const suffix=!value||value.state==='loading'?'확인 중':value.state==='failed'?'조회 실패':value.state==='unavailable'?'이용 불가':key==='attention'?'확인 '+value.total+'항목 · 대상 '+(value.targets??value.total)+'건':'업무 '+value.total+'건';
@@ -78,7 +79,8 @@
   if(existing){for(const n of [...existing.children])if(n.tagName!=='SUMMARY')clinical.append(n);existing.remove();}
   for(const id of ['workFirstBacklog','workFirstCleanupStatus']){const n=$(id);if(n)clinical.append(n);}
   const attention=document.createElement('section');attention.append(box);
-  createTabs(queue,[['attention','상담·승인·발송 확인',attention],['clinical','진료·예방·후속관리',clinical]],{prefix:'clinicToday',selected:'attention'});
+  todayControl=createTabs(queue,[['attention','상담·승인·발송 확인',attention],['clinical','진료·예방·후속관리',clinical]],{prefix:'clinicToday',selected:'attention'});
+  queue.querySelector('[role=tablist]').addEventListener('click',()=>todayPicked=true);queue.querySelector('[role=tablist]').addEventListener('keydown',()=>todayPicked=true);
   const toolbar=document.createElement('div');toolbar.className='clinic-today-toolbar';const nav=queue.querySelector('[role="tablist"]');nav.before(toolbar);toolbar.append(nav);const refresh=$('refreshWorkFirst');if(refresh)toolbar.append(refresh);host.querySelector('.work-first-head')?.remove();
   grid.append(queue);updateTodayCounts();
   const explorer=document.createElement('details');explorer.id='clinicTaskExplorer';explorer.className='clinic-task-explorer';explorer.innerHTML='<summary>상담·일정 상세 보기</summary>';

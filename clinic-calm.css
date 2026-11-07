@@ -1596,3 +1596,58 @@
  .clinic-calm .cs-nav-favorites summary {min-height:44px}
 }
 @media print {.cs-action-dialog {display:none!important}}
+
+/* Shared clinical work surfaces: compact controls, one page scroll and clear selection. */
+@media screen {
+ .clinic-calm #practiceRoot .cs-ward-room-scroll {max-height:none;min-height:0;overflow:visible;scrollbar-gutter:auto}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-next-treatments {position:static;inset:auto}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:6px 12px;padding:10px 12px}
+ .clinic-calm #practiceRoot .pt-organized [data-common-inputs] {display:flex;flex-wrap:wrap;align-items:end;gap:8px;min-width:0}
+ .clinic-calm #practiceRoot .pt-organized [data-common-inputs]>label {flex:0 1 140px;min-width:100px;margin:0}
+ .clinic-calm #practiceRoot .pt-organized [data-common-inputs]>.cs-patient-picker {flex:0 0 auto;min-height:40px;margin:0}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-mobile-calc-select {grid-column:1/-1;margin:0;padding:0;border:0;background:transparent}
+ .clinic-calm #practiceRoot .pt-organized .pt-patient-options {grid-column:1/-1;margin:0;padding:0;border:0}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-view-tools {margin:0;padding:0;gap:6px;justify-content:flex-end}
+ .clinic-calm #practiceRoot .pt-organized .pt-flow-context {grid-column:1/-1;min-height:0;margin:0}
+ .clinic-calm #practiceRoot .pt-organized .pt-workspace-more .pt-drug-management>summary {display:none}
+ .clinic-calm #practiceRoot .cs-list-tools {display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px;margin:0 0 6px}
+ .clinic-calm #practiceRoot .cs-record-switcher {margin:0;border:0;padding:0;background:transparent}
+ .clinic-calm #practiceRoot .cs-record-switcher>summary {cursor:pointer;font-size:14px;padding:8px 10px;min-height:40px;box-sizing:border-box}
+ .clinic-calm #practiceRoot .cs-list-tools .cs-record-navigation {margin:4px 0;padding:5px;flex-wrap:wrap}
+ .clinic-calm #practiceRoot .cs-list-tools .cs-workspace-tools {margin:0;padding:0}
+ .clinic-calm :is(.clinic-section-tabs [aria-selected=true],.cs-settings-nav [aria-pressed=true],.nr-filters [aria-pressed=true],.dn-filters [aria-pressed=true],.cs-record-filters [aria-pressed=true]) {background:var(--cs-teal,#126a64)!important;color:#fff!important;border-color:var(--cs-teal,#126a64)!important;box-shadow:none!important}
+ .clinic-calm :is(button,a,input,select,summary):focus:not(:focus-visible) {outline:none}
+ .clinic-calm :is(button,a,input,select,summary):focus-visible {outline:2px dashed #886126;outline-offset:3px}
+ .clinic-calm #library .resource-includes,.clinic-calm #library .status-live {display:none}
+ .clinic-calm #library .resource-card {gap:8px;padding:14px}
+ .clinic-calm #library .resource-card h4 {font-size:17px;line-height:1.45;margin:0}
+ .clinic-calm #library .resource-card p {font-size:14px;line-height:1.55;margin:0;color:#536966}
+ .clinic-calm .cs-library-outputs {font-size:13px;color:#536966;margin:8px 0}
+ .clinic-calm .clinic-library-filter-status:has(>span:empty) {display:none}
+ .clinic-calm .cs-module-loading {display:block;min-height:100px;padding:14px;border:1px solid var(--cs-line);border-radius:10px;background:#f5f8f6}
+ .clinic-calm .cs-module-loading>div {display:none}
+ .clinic-calm .cs-module-loading p {margin:0;color:#536966;font-size:14px}
+ .clinic-calm .cs-status-rows>div {display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+ .clinic-calm .cs-status-rows>div>b {flex:1}
+ .clinic-calm .cs-status-rows button {min-height:36px;padding:5px 10px}
+ .clinic-calm .care-inbox nav button {font-size:14px;min-height:40px}
+ .clinic-calm :is(#practiceRoot,#library,#settings,#dashboard) button {font-family:inherit;border-radius:8px}
+ .clinic-calm :is(.cl-patient-demographics,.cs-record-identity,.cs-record-missing,.purchase-row small) {font-size:13px;line-height:1.5}
+ .clinic-calm #practiceRoot .cs-patient-copy>strong {font-size:19px;line-height:1.4}
+}
+@media screen and (max-width:800px) {
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common {grid-template-columns:minmax(0,1fr);padding:8px}
+ .clinic-calm #practiceRoot .pt-organized [data-common-inputs]>label {flex:1 1 110px}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-view-tools {justify-content:flex-start}
+ .clinic-calm #practiceRoot .cs-list-tools {justify-content:flex-start}
+ .clinic-calm #practiceRoot .cs-list-tools button {min-height:44px}
+}
+
+@media screen and (max-width:800px) {
+ .clinic-calm #practiceRoot .pt-organized [data-common-inputs] {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:7px}
+ .clinic-calm #practiceRoot .pt-organized [data-common-inputs]>label {min-width:0}
+ .clinic-calm #practiceRoot .pt-organized [data-common-inputs]>.cs-patient-picker {padding:5px;font-size:13px;max-width:90px;min-width:0}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-view-tools {display:flex;flex-wrap:wrap}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-view-tools>.pt-reset-calculation {width:auto;flex:1 1 150px;min-width:0}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-view-tools>.pt-workspace-more {width:auto;flex:1 1 130px;min-width:0;margin:0}
+}

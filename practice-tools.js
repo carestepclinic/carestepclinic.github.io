@@ -44,7 +44,7 @@
    if(!tab){root.querySelector('[data-body]').textContent='사용 가능한 실무 도구 권한이 없습니다.';return;}
    const requestedTab=tab;
    if(g.ClinicLazyModules?.needs(tab)){
-    const notice=root.querySelector('[data-notice]');notice.textContent='화면 준비 중…';notice.setAttribute('role','status');const placeholder=root.querySelector('[data-body]');if(placeholder&&!placeholder.textContent.trim())placeholder.innerHTML='<div class="cs-module-loading" aria-busy="true" aria-label="화면 준비 중"><div></div><div></div><div></div></div>';
+    const notice=root.querySelector('[data-notice]');notice.textContent='화면 준비 중…';notice.setAttribute('role','status');const placeholder=root.querySelector('[data-body]');if(placeholder&&!placeholder.textContent.trim())placeholder.innerHTML='<div class="cs-module-loading" aria-busy="true" aria-label="화면 준비 중"><p>화면을 준비하고 있습니다…</p></div>';
     try{await g.ClinicLazyModules.ensure(tab);}catch(error){if(moduleTicket!==moduleOpenSequence||!current(key)||tab!==requestedTab)return;root.querySelector('.cs-module-loading')?.remove();notice.textContent='화면을 불러오지 못했습니다. ';const retry=document.createElement('button');retry.textContent='다시 시도';retry.onclick=()=>open();notice.append(retry);return;}
     if(moduleTicket!==moduleOpenSequence||!current(key)||tab!==requestedTab)return;
     notice.textContent='';root.querySelector('.cs-module-loading')?.remove();
