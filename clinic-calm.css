@@ -1886,3 +1886,14 @@
  .clinic-calm #dashboard .pt-today-layout:has(.cs-today-ward-empty) .cs-today-empty {height:100%;display:flex;align-items:center}
  .clinic-calm #dashboard .cs-today-empty .pt-today-summary {width:100%}
 }
+
+/* Compact list context and a non-interactive record loading placeholder. */
+@media screen {
+ .clinic-calm #workFirstDashboard .work-first-section-head>div {display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-width:0}
+ .clinic-calm #workFirstListTitle[hidden] {display:none}
+ .clinic-calm #workFirstListMeta {display:inline;margin:0;font-size:13px}
+ .clinic-calm #workFirstDashboard #clinicClinicalFreshness {margin:0;font-size:12px;line-height:1.5;color:var(--cs-muted);overflow-wrap:anywhere}
+ .clinic-calm #practiceRoot .cs-record-placeholder {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;min-height:110px;padding:14px;background:transparent}
+ .clinic-calm #practiceRoot .cs-record-placeholder>span {display:block;border-radius:8px;background:linear-gradient(#e7efec 0 20px,transparent 20px 32px,#edf2f0 32px 45px,transparent 45px 58px,#edf2f0 58px 71px);height:80px}
+ @media(max-width:600px){.clinic-calm #practiceRoot .cs-record-placeholder {grid-template-columns:1fr}.clinic-calm #practiceRoot .cs-record-placeholder>span:not(:first-child){display:none}}
+}

@@ -20,7 +20,7 @@ for(const width of [390,1440])test('initial load omits optional modules, first r
 });
 test('late module response cannot replace a newer record tab',async t=>{
  const {p}=await fixture(t);let release;const gate=new Promise(r=>release=r);await p.route('**/dental-record.js?*',async r=>{await gate;await r.continue();});
- await goTab(p,'dental');await p.locator('[data-notice]').filter({hasText:'화면 준비 중'}).waitFor();await goTab(p,'neuro');await p.locator('[data-nr=new]').waitFor();release();await p.waitForFunction(()=>!!window.DentalRecord);
+ await goTab(p,'dental');await p.locator('[data-notice]').filter({hasText:'화면을 불러오는 중'}).waitFor();await goTab(p,'neuro');await p.locator('[data-nr=new]').waitFor();release();await p.waitForFunction(()=>!!window.DentalRecord);
  assert.equal(await p.evaluate(()=>CarestepPractice.route()),'neuro');assert.equal(await p.locator('[data-nr=new]').count(),1);assert.equal(await p.locator('[data-dn=new]').count(),0);
 });
 test('failed optional file is retryable without duplicate handlers',async t=>{
@@ -28,7 +28,7 @@ test('failed optional file is retryable without duplicate handlers',async t=>{
  await goTab(p,'dental');await p.locator('[data-notice] button').waitFor();fail=false;await p.locator('[data-notice] button').click();await p.locator('[data-dn=new]').waitFor();assert.equal(requests.filter(x=>x==='/dental-record.js').length,2);assert.equal(await p.locator('[data-dn=new]').count(),1);
 });
 test('identity removal during loading does not restore the prior workspace',async t=>{
- const {p}=await fixture(t);let release;const gate=new Promise(r=>release=r);await p.route('**/dental-record.js?*',async r=>{await gate;await r.continue();});await goTab(p,'dental');await p.locator('[data-notice]').filter({hasText:'화면 준비 중'}).waitFor();await p.evaluate(()=>{saasMe=null;saasToken='';CarestepPractice.clear();});release();await p.waitForFunction(()=>!!window.DentalRecord);assert.equal(await p.locator('[data-dn=new]').count(),0);
+ const {p}=await fixture(t);let release;const gate=new Promise(r=>release=r);await p.route('**/dental-record.js?*',async r=>{await gate;await r.continue();});await goTab(p,'dental');await p.locator('[data-notice]').filter({hasText:'화면을 불러오는 중'}).waitFor();await p.evaluate(()=>{saasMe=null;saasToken='';CarestepPractice.clear();});release();await p.waitForFunction(()=>!!window.DentalRecord);assert.equal(await p.locator('[data-dn=new]').count(),0);
 });
 test('calculator optional definitions load together and are reused',async t=>{
  const {p,requests}=await fixture(t);await goTab(p,'calc');await p.waitForFunction(()=>window.ClinicLazyModules&&!ClinicLazyModules.needs('calc'));await p.waitForFunction(()=>document.querySelector('[data-body]')?.textContent.includes('응급'));
