@@ -3258,6 +3258,7 @@ const templates = [
   },
   {
     "id": "cognitive",
+    "species": "dog",
     "title": "노령견 인지기능저하증 가정관리",
     "short": "노령견 인지기능저하 관리",
     "category": "노령",
@@ -3531,6 +3532,8 @@ function inferUnifiedCategory(item={},raw=''){
   const direct=String(raw||item.category||'').trim();if(CATEGORY_CODES.includes(direct))return direct;
   const text=`${item.id||''} ${item.title||item.name||''} ${item.short||''} ${item.description||''} ${direct}`.toLowerCase();
   if(item._studio&&!item._studioCentral)return '병원제작';
+  // A source explicitly classified as surgery must not become prevention because its description mentions recurrence prevention.
+  if(direct==='수술'||direct==='시술')return '수술시술';
   if(/항암|종양|암\b|종괴|완화|유선|비장/.test(text))return '종양중증';
   if(/접종|백신|사상충|건강검진|예방|중성화 전|수술 전 검사/.test(text))return '예방관리';
   if(/재활|운동|체중|노령|인지|삶의.?질|보행/.test(text))return '재활생활';
@@ -5863,6 +5866,12 @@ function templateDisplayShort(t={}){
   if(short.length>90)return '';
   return short;
 }
+function templateCardSummary(t={}){
+  const normalize=value=>String(value||'').toLowerCase().replace(/강아지|고양이|반려견|반려묘|[\s·ㆍ/()\-]/g,'');
+  const title=normalize(templateDisplayTitle(t));
+  const useful=value=>{const text=String(value||'').replace(/\s+/g,' ').trim(),key=normalize(text);return key&&!title.includes(key)&&!key.includes(title)?text:'';};
+  return useful(t.description)||useful(templateDisplayShort(t));
+}
 function clinicHeaderIdentity(mode,me,profile){
   if(mode==='demo')return {name:profile?.name||'체험 화면 병원',loading:false};
   if(!me?.clinic)return {name:'병원 정보 확인 중',loading:true};
@@ -5883,7 +5892,7 @@ function cardTemplate(t){
   return `<article class="resource-card" data-title="${escapeHtml(t.title)}" data-category="${t.category}">
     <div class="resource-top"><span><span class="purpose-badge ${escapeHtml(purpose)}">${escapeHtml(PURPOSE_LABELS[purpose])}</span><span class="category">${escapeHtml(categoryLabel(t.category))}</span><span class="species-badge">${escapeHtml(templateSpeciesLabel(t))}</span></span><span class="status-live">● 사용 가능</span></div>
     <h4>${escapeHtml(templateDisplayTitle(t))}</h4>
-    ${templateDisplayShort(t)?`<p>${escapeHtml(templateDisplayShort(t))}</p>`:''}
+    ${templateCardSummary(t)?`<p>${escapeHtml(templateCardSummary(t))}</p>`:''}
     <div class="resource-includes"><span>8–9P PDF</span><span>복약표</span><span>카톡·문자 문구</span><span>D+1·3·7·14</span></div>
     <div class="card-actions"><button class="btn btn-primary open-builder library-primary-copy" type="button" data-critical-template="${t.id}" data-id="${t.id}">이 자료로 만들기 →</button></div>
   </article>`;
@@ -10939,14 +10948,14 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-record-workspace.js?v=20261107-workflow-continuity"></script>
 <script src="clinic-purchases.js?v=20261107-toolbar-vendors"></script>
 <script src="practice-tools.js?v=20261107-workflow-polish"></script>
-<script src="clinic-today-ward.js?v=20261106-workflow9"></script>
+<script src="clinic-today-ward.js?v=20261107-review4"></script>
 <script src="practice-clinic.js?v=20261103-settings"></script>
 <script src="clinic-settings.js?v=20261107-interface-cohesion"></script>
 <link rel="stylesheet" href="clinic-followup-tasks.css?v=20261104-followup-controls">
 <script src="clinic-followup-tasks.js?v=20261104-followup-controls"></script>
 <link rel="stylesheet" href="builder-flow.css?v=20261105-flow3">
 <script src="builder-flow.js?v=20261105-flow3"></script>
-<link rel="stylesheet" href="clinic-calm.css?v=20261107-workflow-polish">
+<link rel="stylesheet" href="clinic-calm.css?v=20261107-review4">
 <script src="clinic-update-notice.js?v=20261107-review-polish"></script>
 </body>
 </html>

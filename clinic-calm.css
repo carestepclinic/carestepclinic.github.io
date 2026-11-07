@@ -1867,3 +1867,22 @@
  .clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-patient-options[open]{grid-column:1/-1;grid-row:3}
  .clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-mobile-calc-select{grid-column:1/-1;grid-row:4;margin:0}
 }
+/* Keep confirmed empty summaries small so today's actionable work stays near the top. */
+@media screen {
+ .clinic-calm #dashboard .pt-today-ward.cs-today-ward-empty {display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:10px 12px}
+ .clinic-calm #dashboard .cs-today-ward-empty .pt-today-ward-head {display:contents}
+ .clinic-calm #dashboard .cs-today-ward-empty .pt-today-ward-head h3 {font-size:15px}
+ .clinic-calm #dashboard .cs-today-ward-empty .pt-today-ward-head>button {display:none}
+ .clinic-calm #dashboard .cs-today-ward-empty .pt-today-ward-list {display:none}
+ .clinic-calm #dashboard .cs-today-ward-empty>[role=status] {margin:0;flex:1 1 80px}
+ .clinic-calm #dashboard .cs-today-ward-empty .pt-today-ward-footer {margin:0}
+ .clinic-calm #dashboard .cs-today-ward-empty .pt-today-ward-time {margin:0;flex-basis:100%}
+ .clinic-calm #dashboard .pt-today-ward[aria-busy=true]>[role=status] {color:var(--cs-accent);font-weight:600}
+ .clinic-calm #dashboard .cs-today-empty .pt-today-summary h3 {font-size:15px}
+ .clinic-calm #dashboard .cs-today-empty .pt-today-summary {gap:4px 10px}
+}
+@media screen and (min-width:1100px) {
+ .clinic-calm #dashboard .pt-today-layout:has(#wardTodayRoot:not([hidden]) .cs-today-ward-empty):has(#practiceTodayRoot:not([hidden]) .cs-today-empty) {grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+ .clinic-calm #dashboard .pt-today-layout:has(.cs-today-ward-empty) .cs-today-empty {height:100%;display:flex;align-items:center}
+ .clinic-calm #dashboard .cs-today-empty .pt-today-summary {width:100%}
+}
