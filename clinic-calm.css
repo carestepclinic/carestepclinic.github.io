@@ -1752,6 +1752,36 @@
  .clinic-calm #practiceRoot .cs-list-actionbar>.cs-list-tools {flex-basis:100%;order:3;gap:5px}
  .clinic-calm #practiceRoot .cs-list-tools button {font-size:13px;padding:6px 8px}
 }
+/* Reviewed shared workspace controls. */
+@media screen {
+ .cs-update-notice{position:fixed;bottom:14px;right:14px;z-index:9999;display:flex;align-items:center;gap:12px;padding:14px;max-width:min(680px,calc(100vw - 28px));box-sizing:border-box;background:#fff;border:1px solid #92bdb5;border-radius:12px;box-shadow:0 4px 24px #193a3026;font-family:inherit;font-size:14px;line-height:1.5;color:#153332}
+ .cs-update-notice>div{display:grid;gap:3px}.cs-update-notice span{font-size:12px}.cs-update-notice a,.cs-update-notice button{white-space:nowrap;font:inherit;padding:9px 12px;border-radius:8px;border:1px solid #b8d0ca;background:#fff;color:#14615c}.cs-update-notice a{background:#176b67;color:white;text-decoration:none}
+ .clinic-calm #r61-today-overview{padding:0;margin:8px 0}
+ .clinic-calm .r61-normal-status{margin:4px 0;padding:6px 10px;border:1px solid #dbe5e1;border-radius:8px;font-size:13px;background:#f7faf8}
+ .clinic-calm .r61-normal-status>summary{cursor:pointer;color:#506c65}
+ .clinic-calm .r61-overview-grid:empty{display:none}
+ .clinic-calm .work-first-kpis{display:flex!important;flex-wrap:wrap;gap:6px!important;margin:8px 0!important}
+ .clinic-calm .work-first-kpi{display:flex!important;align-items:center;gap:10px;padding:8px 12px!important;min-height:40px!important;flex:0 1 auto;text-align:left}
+ .clinic-calm .work-first-kpi[hidden]{display:none!important}
+ .clinic-calm .work-first-kpi b{font-size:17px!important;margin:0!important}.clinic-calm .work-first-kpi small{display:none}
+ .clinic-calm #practiceRoot :is(.cs-list-actionbar,.er-list-actions){display:flex;justify-content:flex-end!important;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 10px;width:100%}
+ .clinic-calm #practiceRoot .cs-list-actionbar>.cs-list-tools{order:0;flex:1;justify-content:flex-start;margin:0}
+ .clinic-calm #practiceRoot .cs-list-actionbar>button{order:1;margin-left:0!important}
+ .clinic-calm #practiceRoot .cs-list-actionbar>button:not(.pt-primary){order:2}
+}
+@media screen and (min-width:1100px){
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common{grid-template-columns:minmax(340px,1.5fr) minmax(190px,1fr) auto;gap:6px 14px;align-items:end}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>[data-common-inputs]{grid-column:1;grid-row:1;display:flex;flex-wrap:wrap;gap:8px}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-mobile-calc-select{grid-column:2;grid-row:1;min-width:0;align-self:start;margin-top:28px}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-calc-view-tools{grid-column:3;grid-row:1;align-self:start;margin-top:28px}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-flow-context{grid-column:1;grid-row:2}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-patient-options{grid-column:2/-1;grid-row:2}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-patient-options[open]{grid-column:1/-1;grid-row:3}
+ .clinic-calm #practiceRoot .er-filters{grid-template-columns:minmax(240px,2fr) minmax(160px,1fr) auto!important;max-width:none}
+ .clinic-calm #practiceRoot .er-filters>button{justify-self:start;margin-left:0}
+}
+@media screen and (max-width:640px){.cs-update-notice{flex-wrap:wrap;gap:8px}.cs-update-notice>div{flex-basis:100%}.clinic-calm .work-first-kpi{font-size:13px}.clinic-calm #practiceRoot .cs-list-actionbar>.cs-list-tools{order:3;flex-basis:100%}}
+@media print{.cs-update-notice{display:none!important}}
 /* Checklist workspace: compact controls and shared calm design. */
 .clinic-calm #practiceRoot .pt-ops-workspace{font-family:inherit;color:#153332}
 .clinic-calm #practiceRoot .pt-ops-workspace .pt-section-intro{margin:0 0 12px}
@@ -1780,3 +1810,5 @@
 .clinic-calm #practiceRoot .pt-ops-workspace .pt-footnote{margin:14px 0;font-size:13px;color:#62766f}
 .clinic-calm .cs-permission-help{display:block;grid-column:1/-1;font-weight:400;font-size:12px;line-height:1.55;color:#526d67;margin-top:4px}
 @media(max-width:640px){.clinic-calm #practiceRoot .pt-ops-workspace .pt-toolbar{display:flex}.clinic-calm #practiceRoot .pt-ops-workspace .pt-toolbar>.pt-bar{flex-wrap:wrap}.clinic-calm #practiceRoot .pt-ops-workspace .pt-toolbar>.pt-bar:last-child{margin-left:auto}.clinic-calm #practiceRoot .pt-ops-workspace .pt-status-filters button{min-height:44px;padding:7px 10px}.clinic-calm #practiceRoot .pt-ops-workspace input{font-size:16px}.clinic-calm #practiceRoot .pt-ops-workspace .pt-search{max-width:none}}
+
+@media screen and (min-width:1281px){.clinic-calm #practiceRoot .pt-organized .pt-calc-common{grid-template-columns:minmax(0,1fr) auto}.clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-calc-view-tools{grid-column:2}.clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-patient-options{grid-column:2}.clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-patient-options[open]{grid-column:1/-1}}

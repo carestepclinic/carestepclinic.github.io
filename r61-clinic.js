@@ -1785,7 +1785,7 @@
     function mountTodayOverview(){
         const dashboard=document.getElementById('dashboard'),host=document.getElementById('workFirstDashboard');
         if(!dashboard||!host||document.getElementById('r61-today-overview'))return;
-        const box=el('section'),chips=el('div'),rows=el('div'),note=el('small');box.id='r61-today-overview';box.setAttribute('aria-label','발송·자료·연동 상태');chips.className='r61-status-chips';rows.className='r61-overview-grid';note.className='r61-overview-note';box.append(chips,rows,note);
+        const box=el('section'),chips=el('div'),rows=el('div'),note=el('small');box.id='r61-today-overview';box.setAttribute('aria-label','발송·자료·연동 상태');chips.className='r61-status-chips';rows.className='r61-overview-grid';note.className='r61-overview-note';const normal=el('details'),normalTitle=el('summary','발송·연동 상태 보기');normal.className='r61-normal-status';normal.append(normalTitle,chips,note);box.append(rows,normal);
         const metrics=host.querySelector('.work-first-kpis');if(metrics)host.insertBefore(box,metrics);else host.append(box);
         let cached=null,loaded='',generation=0,pendingKey='',renderKey='';const active=()=>dashboard.classList.contains('active-view');
         function render(){
