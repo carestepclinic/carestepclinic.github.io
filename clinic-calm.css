@@ -1365,7 +1365,8 @@
 /* Ward and record refinement: reserve the next-care row instead of covering patient cards. */
 @media screen {
  .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-controls {gap:6px 12px;margin:4px 0 8px}
- .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-controls>.cl-tabs {flex:0 1 260px;margin:0}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-controls>.cl-tabs {flex:0 0 auto;width:max-content;max-width:100%;margin:0}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-controls>.cl-tabs>button {flex:0 0 auto;min-width:84px;white-space:nowrap}
  .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-actions {margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
  .clinic-calm #practiceRoot .cs-ward-designed>.cl-board-count {margin:0 0 4px;font-size:13px}
  .clinic-calm #practiceRoot .cs-ward-actions .cs-workspace-tools {margin:0;padding:0}
@@ -1418,7 +1419,7 @@
  @media(max-width:800px) {
   .clinic-calm #practiceRoot .cs-anesthesia-focused .cs-anesthesia-alerts {grid-template-columns:1fr}
   .clinic-calm #practiceRoot .cs-ward-room-scroll {max-height:var(--cs-ward-height,calc(100dvh - 290px))}
-  .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-controls>.cl-tabs {flex:1 1 100%}
+  .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-controls>.cl-tabs {flex:0 0 auto;width:max-content}
   .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-actions {margin-left:0}
   .clinic-calm #practiceRoot:has(.cs-anesthesia-focused) .cs-record-navigation button {min-height:40px}
   .cs-module-loading {grid-template-columns:1fr;min-height:360px}
@@ -1484,8 +1485,8 @@
 /* Compact overview, readable measurement dates, and input-first calculation. */
 @media screen{
  .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-controls{display:flex;align-items:center;flex-wrap:wrap;padding:5px 0;gap:8px 12px}
- .clinic-calm #practiceRoot .cs-ward-controls>.cl-board-count{margin:0;font-size:13px;flex:0 1 auto;color:#48615f}
- .clinic-calm #practiceRoot .cs-ward-controls>.cl-tabs{flex:1 1 200px;margin:0;padding:3px}
+ .clinic-calm #practiceRoot .cs-ward-controls>.cl-board-count{margin:0;font-family:inherit;font-size:15px;font-weight:700;line-height:1.5;flex:0 1 auto;color:var(--cs-ink)}
+ .clinic-calm #practiceRoot .cs-ward-controls>.cl-tabs{flex:0 0 auto;margin:0;padding:3px}
  .clinic-calm #practiceRoot .cs-ward-controls>.cs-ward-actions{flex:0 0 auto;width:auto;margin:0}
  .clinic-calm #practiceRoot .cs-ward-designed .cc-occupied{max-width:460px;width:100%;justify-self:start}
  .clinic-calm #practiceRoot .cs-ward-designed .cl-room-group{align-self:start;min-width:0}
@@ -1512,7 +1513,7 @@
 }
 @media screen and (max-width:800px){
  .clinic-calm #practiceRoot .cs-ward-controls>.cl-board-count{flex:1 1 auto}
- .clinic-calm #practiceRoot .cs-ward-controls>.cl-tabs{order:2;flex-basis:100%}
+ .clinic-calm #practiceRoot .cs-ward-controls>.cl-tabs{order:2;flex-basis:auto}
  .clinic-calm #practiceRoot .cs-ward-controls>.cs-ward-actions{margin-left:auto}
  .clinic-calm #practiceRoot .cs-ward-designed .cc-occupied{max-width:none}
  .clinic-calm #practiceRoot .cs-ward-designed .cl-room-grid{grid-template-columns:1fr}
