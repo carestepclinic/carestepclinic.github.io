@@ -56,8 +56,8 @@
   if(todayControl&&!todayResolved&&!todayPicked&&attention?.state==='ready'&&clinical?.state==='ready'){todayResolved=true;if(!attention.total&&clinical.total>0)todayControl.select('clinical');}
   for(const [key,label,value] of [['attention','상담·승인·발송 확인',attention],['clinical','진료·예방·후속관리',clinical]]){
    const button=$('clinicToday-tab-'+key);if(!button)continue;
-   const suffix=!value||value.state==='loading'?'확인 중':value.state==='failed'?'조회 실패':value.state==='unavailable'?'이용 불가':key==='attention'?'확인 '+value.total+'항목 · 대상 '+(value.targets??value.total)+'건':'업무 '+value.total+'건';
-   const text=label+' · '+suffix+(value?.stale?' · 최신 조회 실패':value?.refreshing?' · 갱신 중':'');if(button.textContent!==text)button.textContent=text;
+   const suffix=!value||value.state==='loading'?'확인 중':value.state==='failed'?'':value.state==='unavailable'?'이용 불가':key==='attention'?'확인 '+value.total+'항목 · 대상 '+(value.targets??value.total)+'건':'업무 '+value.total+'건';
+   const text=label+(suffix?' · '+suffix:'')+(value?.refreshing?' · 갱신 중':'');if(button.textContent!==text)button.textContent=text;
   }
  }
  function createTabs(root,entries,{prefix,selected,onChange=()=>{}}){

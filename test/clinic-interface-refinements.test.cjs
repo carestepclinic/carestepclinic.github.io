@@ -16,6 +16,15 @@ async function page(width=1440){const p=await browser.newPage({viewport:{width,h
  };showApp({deferFullRender:true});go('practice');
  });return {p,errors};}
 async function route(p,key){await p.evaluate(key=>go('practice',{practiceTab:key}),key);await p.waitForFunction(key=>CarestepPractice.route()===key,key);await p.waitForTimeout(60);}
+for(const width of [390,1440])test('record primary actions match and mobile search stays beside input '+width,async()=>{
+ const {p,errors}=await page(width);let color;
+ for(const key of ['surgery','dental','neuro','ophthalmic','chronic']){await route(p,key);const button=p.locator('.cs-list-actionbar>.pt-primary');await button.waitFor();const next=await button.evaluate(e=>getComputedStyle(e).backgroundColor);if(color)assert.equal(next,color,key);color=next;
+ if(width===390){const form=p.locator('.record-filters,.cl-anesthesia-filters').first(),input=await form.locator(':scope>label:first-child input').boundingBox(),search=await form.locator(':scope>button[type=submit],:scope>button:not([type])').first().boundingBox();assert.ok(Math.abs(input.y-search.y)<8,key);}
+ }
+ assert.deepEqual(errors,[]);await p.close();
+});
+test('calculator empty status takes no space and reset remains available',async()=>{const {p}=await page(390);await route(p,'calc');await p.waitForSelector('.pt-calc-common');const size=await p.locator('.pt-settings-status').evaluate(e=>({empty:!e.textContent.trim(),height:e.getBoundingClientRect().height}));if(size.empty)assert.equal(size.height,0);assert.equal(await p.getByRole('button',{name:'계산 입력 모두 지우기',exact:true}).isVisible(),true);await p.close();});
+test('settings save controls remain in normal flow',async()=>{const {p}=await page();await p.evaluate(()=>go('settings'));await p.locator('.cs-inline-form .settings-actions').first().waitFor();assert.equal(await p.locator('.cs-inline-form .settings-actions').first().evaluate(e=>getComputedStyle(e).position),'static');await p.close();});
 
 
 
@@ -41,3 +50,29 @@ test('dashboard groups failure messages and retry preserves clear failure state'
 });
 
 test('all five record lists group primary and secondary actions',async()=>{const {p,errors}=await page();for(const key of ['surgery','dental','neuro','ophthalmic','chronic']){await route(p,key);await p.locator('.cs-list-actionbar').waitFor();assert.equal(await p.locator('.cs-list-actionbar .cs-list-tools').count(),1,key);}assert.deepEqual(errors,[]);await p.close();});
+
+test('retained record lists never accumulate controls after repeated navigation',async()=>{
+ const {p,errors}=await page();
+ for(let cycle=0;cycle<4;cycle++)for(const key of ['surgery','dental','neuro','ophthalmic','chronic']){
+  await route(p,key);await p.locator('.cs-list-actionbar').waitFor();
+  for(const selector of ['.cs-record-navigation','.cs-list-tools','.cs-record-switcher','[data-cs-inpatient]'])assert.equal(await p.locator(selector).count(),1,key+' cycle '+cycle+' '+selector);
+  assert.equal(await p.locator('[data-clinical-summary],.ca-entry').count(),0);
+ }
+ await p.evaluate(()=>{window.mutationCount=0;window.auditObserver=new MutationObserver(x=>mutationCount+=x.length);auditObserver.observe(document.getElementById('practiceRoot'),{childList:true,subtree:true});});
+ await p.waitForTimeout(350);const mutations=await p.evaluate(()=>{auditObserver.disconnect();return mutationCount;});assert.ok(mutations<5,'idle toolbar must settle: '+mutations);
+ await p.locator('[data-cs-inpatient]').click();await p.locator('dialog[open]').waitFor();assert.deepEqual(errors,[]);await p.close();
+});
+for(const width of [390,1440])test('chronic cards and search use readable available width '+width,async()=>{
+ const {p}=await page(width);await route(p,'chronic');await p.locator('.chr-patient-group').waitFor();
+ const bounds=await p.evaluate(()=>{const rect=s=>document.querySelector(s).getBoundingClientRect().toJSON();return {scope:rect('.chr-list-scope'),card:rect('.chr-patient-group'),record:rect('.chr-latest>.er-record'),input:rect('.record-filters input[name=q]'),search:rect('.record-filters>button')};});
+ assert.ok(bounds.card.y>=bounds.scope.bottom);assert.ok(bounds.record.width>bounds.card.width*.8);
+ if(width===390)assert.ok(Math.abs(bounds.input.y-bounds.search.y)<8,JSON.stringify(bounds));
+ await p.screenshot({path:path.resolve(root,'../clinic-redesign-preview/chronic-compact-'+width+'.png')});await p.close();
+});
+for(const width of [390,1100,1800])test('supplies responsive columns preserve long names and actions '+width,async()=>{
+ const {p,errors}=await page(width);await p.evaluate(async()=>{const host=document.createElement('section');document.getElementById('practiceRoot').replaceChildren(host);const categories=['의약품','수술실 용품','진료 용품'].map((name,i)=>({id:'c'+i,name}));const data={revision:0,userId:'owner',manager:true,categories,vendors:[],items:categories.flatMap((c,i)=>[0,1].map(n=>({id:c.id+n,name:n?'긴 제품명 확인용 멸균 일회용 카테터 및 수액 연결 세트 100개입':'시험 물품',categoryId:c.id,status:'needed',urgent:!n,quantity:12,unit:'개',spec:'100mg',note:'주문 요청 메모와 긴 규격이 잘리지 않고 줄바꿈되어야 합니다.',events:[],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()})))};window.supplies=ClinicPurchases.mount(host,{identity:()=> 'test',ready:()=>true,request:async()=>structuredClone(data)});await supplies.open();});
+ const layout=await p.evaluate(()=>({width:document.querySelector('.cs-purchases').getBoundingClientRect().width,columns:getComputedStyle(document.querySelector('.purchase-category-grid')).gridTemplateColumns,overflow:[...document.querySelectorAll('.purchase-item,.purchase-row-actions,.purchase-section')].filter(x=>x.scrollWidth>x.clientWidth+2).map(x=>x.className)}));
+ assert.deepEqual(layout.overflow,[]);if(layout.width>=1320)assert.equal(layout.columns.split(' ').length,3);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+ await p.locator('[data-urgent-only]').click();assert.match(await p.locator('[data-mode=needed]').innerText(),/긴급 3/);assert.match(await p.locator('[data-mode=needed]').getAttribute('title'),/전체 6건/);
+ await p.screenshot({path:path.resolve(root,'../clinic-redesign-preview/supplies-compact-'+width+'.png'),fullPage:true});assert.deepEqual(errors,[]);await p.close();
+});

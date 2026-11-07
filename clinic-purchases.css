@@ -48,3 +48,12 @@
 .cs-purchases .purchase-row-urgent .purchase-item-title strong{color:#86251e}
 .cs-purchases .purchase-urgent{background:#b72c23;color:#fff;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap}
 .cs-purchases .purchase-row-urgent:focus-within{outline:2px solid #bb453a;outline-offset:-2px}
+/* Three categories fit only when each column can keep a readable item width. */
+@container (min-width:1320px){
+ .cs-purchases .purchase-category-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+ .purchase-category-grid .purchase-row{grid-template-columns:18px minmax(0,1fr);padding:9px 10px;gap:3px 8px}
+ .purchase-category-grid .purchase-row-actions{grid-column:2;justify-content:flex-end;max-width:none}
+ .purchase-category-grid .purchase-row-actions :is(button,summary){min-height:32px;padding:4px 8px}
+ .purchase-category-grid .purchase-item p{margin:2px 0}
+ .purchase-category-grid .purchase-section>summary{padding:7px 10px}
+}

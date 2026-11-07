@@ -2,7 +2,14 @@
 (function(g){
  'use strict';
  const manifest=JSON.parse(document.getElementById('clinic-module-manifest')?.textContent||'{}');
- const loaded=new Set(),pending=new Map();
+ const loaded=new Set(),pending=new Map(),preloaded=new Set();
+ function preload(group){
+  for(const src of manifest[group]||[]){
+   if(loaded.has(src)||preloaded.has(src))continue;
+   const link=document.createElement('link');link.rel='preload';link.as='script';link.href=src;
+   preloaded.add(src);document.head.append(link);
+  }
+ }
  function load(src){
   if(loaded.has(src))return Promise.resolve();
   if(pending.has(src))return pending.get(src);
@@ -14,5 +21,6 @@
   });
   pending.set(src,task);task.then(()=>pending.delete(src),()=>pending.delete(src));return task;
  }
- g.ClinicLazyModules={needs:group=>(manifest[group]||[]).some(src=>!loaded.has(src)),async ensure(group){for(const src of manifest[group]||[])await load(src);}};
+ // Fetch the selected screen's files together, but execute in dependency order.
+ g.ClinicLazyModules={needs:group=>(manifest[group]||[]).some(src=>!loaded.has(src)),async ensure(group){preload(group);for(const src of manifest[group]||[])await load(src);}};
 })(window);

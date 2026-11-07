@@ -55,6 +55,11 @@
    const button=header.querySelector('[data-cs-entry]');const closed=route==='surgery'&&!!node?.querySelector('.cs-anesthesia-closed');button.hidden=closed||!entryField(node);
    sectionTargets=[...(node?.querySelectorAll('section>h3,section>h4,details.nr-card>summary,.ad-monitor>summary,.ad-entry h3,[data-cs-section-title]')||[])].filter(el=>!el.closest('[hidden],[inert]')&&el.textContent.trim()).slice(0,20);const sectionLabel=el=>el.dataset.csSectionTitle||el.textContent.trim(),choice=header.querySelector('[data-cs-section]'),sectionKey=sectionTargets.map(sectionLabel).join('|');if(choice.dataset.sections!==sectionKey){choice.dataset.sections=sectionKey;choice.innerHTML='<option value="">구역 선택</option>'+sectionTargets.map((el,i)=>'<option value="'+i+'">'+esc(sectionLabel(el).slice(0,50))+'</option>').join('');}choice.parentElement.hidden=closed||sectionTargets.length<2;choice.onchange=()=>{if(choice.value==='')return;const target=sectionTargets[Number(choice.value)];if(target?.isConnected){for(let p=target.parentElement;p&&p!==node;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;target.scrollIntoView({block:'start',behavior:'auto'});target.setAttribute('tabindex','-1');target.focus({preventScroll:true});}choice.value='';};
   }
+  // Shared controls must not remain inside a retained record DOM when its shell
+  // is rebuilt. Only remove chrome; preserve each record controller and inputs.
+  function releaseChrome(){
+   for(const el of root.querySelectorAll('.cs-list-tools,.cs-workspace-tools,.cs-record-navigation'))el.remove();
+  }
   async function choose(target){
    if(!names[target]||!a.allowed(target)||target===a.route())return;const c=a.context();if(!c?.recordId){a.navigate(target);return;}
    const route=a.route(),k=a.adapter.identity(),n=++epoch,d=a.modal(c.patient.name+' · '+names[target]+' 기록','<p data-cs-find role="status">이 환자의 기록을 찾는 중…</p><div data-cs-results></div><button type="button" data-cs-all>전체 '+names[target]+' 기록으로 이동</button><small class="cs-route-hint">전체 기록으로 이동하면 이전에 열었던 다른 환자가 표시될 수 있습니다.</small>');
@@ -71,7 +76,7 @@
   }
   const observer=new MutationObserver(schedule);observer.observe(root,{childList:true,subtree:true,characterData:true});root.addEventListener('input',schedule);root.addEventListener('change',schedule);
   const size=()=>{const v=viewportState(g.innerWidth,g.innerHeight,g.visualViewport);root.style.setProperty('--cs-keyboard',v.offset+'px');root.classList.toggle('cs-short-viewport',v.compact);schedule();};viewport=g.visualViewport;viewport?.addEventListener('resize',size);viewport?.addEventListener('scroll',size);g.addEventListener?.('resize',size);root.addEventListener('toggle',schedule,true);size();
-  return {sync,schedule,choose,clear,dispose(){clear();observer.disconnect();cancelAnimationFrame(frame);root.removeEventListener('input',schedule);root.removeEventListener('change',schedule);viewport?.removeEventListener('resize',size);viewport?.removeEventListener('scroll',size);g.removeEventListener?.('resize',size);root.removeEventListener('toggle',schedule,true);}};
+  return {sync,schedule,choose,clear,releaseChrome,dispose(){clear();observer.disconnect();cancelAnimationFrame(frame);root.removeEventListener('input',schedule);root.removeEventListener('change',schedule);viewport?.removeEventListener('resize',size);viewport?.removeEventListener('scroll',size);g.removeEventListener?.('resize',size);root.removeEventListener('toggle',schedule,true);}};
  }
  const api={context,displayAge,displaySex,demographics,recordMatches,status,savedText,listIdentity,age,entryField,focusEntry,viewportState,mount};if(typeof module==='object'&&module.exports)module.exports=api;else g.ClinicRecordWorkspace=api;
 })(typeof window==='undefined'?globalThis:window);
