@@ -70,7 +70,7 @@ async function alarmFixture(t,mode='suspended'){
   const root=document.getElementById('root');root.innerHTML='<section data-ar-reminder><span data-reminder-text></span><button data-reminder-ack></button><button data-reminder-sound></button><small data-reminder-note></small></section>';
   window.alarmState={key:'synthetic-alarm',bucket:0,next:Date.now()+300000};window.alarmView={};
   window.alarmController=AnesthesiaRecord.createReminder({root,valid:()=>root.isConnected,state:()=>alarmState,view:alarmView});
- },mode);return p;
+ },mode);assert.equal(await p.locator('.cs-reminder-settings').evaluate(e=>e.open),false);await p.locator('.cs-reminder-settings>summary').click();assert.ok(await p.locator('[data-reminder-sound]').isVisible());return p;
 }
 test('sound tests immediately, resumes suspended audio each interval and does not repeat a bucket',async t=>{
  const p=await alarmFixture(t);await p.locator('[data-reminder-sound]').click();await p.waitForFunction(()=>tones===3);

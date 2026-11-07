@@ -38,7 +38,7 @@
   },true);
  }
  g.RecordListLayout={mount};
-})(window);
+})(typeof window==='undefined'?globalThis:window);
 
 (function(g){
  'use strict';

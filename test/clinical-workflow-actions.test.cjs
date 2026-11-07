@@ -1,8 +1,8 @@
 const {test,before,after}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),{chromium}=require('playwright');
 const root=path.resolve(__dirname,'..');let browser;
 before(async()=>browser=await chromium.launch({headless:true,executablePath:process.env.HQ_TEST_BROWSER}));after(async()=>browser?.close());
-async function fixture(t,width=1440,medical=true){
- const p=await browser.newPage({viewport:{width,height:900}}),errors=[];p.setDefaultTimeout(6000);p.on('pageerror',e=>errors.push(e.message));await p.route('http://localhost/**',r=>r.fulfill({body:'<!doctype html><html lang="ko"><body></body></html>',contentType:'text/html'}));await p.goto('http://localhost/');await p.unroute('http://localhost/**');await p.route('**/*',r=>r.abort());await p.setContent('<!doctype html><html lang="ko"><meta name="viewport" content="width=device-width"><body style="margin:12px"><main id="root"></main></body></html>');
+async function fixture(t,width=1440,medical=true,now='2026-11-07T03:30:00Z'){
+ const p=await browser.newPage({viewport:{width,height:900}}),errors=[];p.setDefaultTimeout(6000);await p.clock.setFixedTime(new Date(now));p.on('pageerror',e=>errors.push(e.message));await p.route('http://localhost/**',r=>r.fulfill({body:'<!doctype html><html lang="ko"><body></body></html>',contentType:'text/html'}));await p.goto('http://localhost/');await p.unroute('http://localhost/**');await p.route('**/*',r=>r.abort());await p.setContent('<!doctype html><html lang="ko"><meta name="viewport" content="width=device-width"><body style="margin:12px"><main id="root"></main></body></html>');
  for(const f of ['clinical-workspace.css','staff-training.css','clinical-knowledge.css','clinical-care-ui.css'])await p.addStyleTag({content:fs.readFileSync(path.join(root,f),'utf8')});
  for(const f of ['clinical-compact.js','clinical-knowledge.js','clinical-workspace.js'])await p.addScriptTag({content:fs.readFileSync(path.join(root,f),'utf8')});
  await p.evaluate(({medical})=>{
@@ -27,7 +27,7 @@ async function medications(p){await p.evaluate(()=>{const at=new Date();at.setMi
 for(const width of [390,1440])test('ward actions reachable without nested detail menus '+width,async t=>{
  const p=await fixture(t,width);await medications(p);await p.evaluate(()=>app.open('ward'));
  assert.match(await p.locator('.cl-board-count').innerText(),/입원 중 1 \/ 전체 1실 · 빈방 0실/);assert.equal(await p.locator('.cl-work-more .cl-board-count').count(),0);
- assert.match(await p.locator('.cc-pending-total').innerText(),/남은 처치 2회 · 약물 3종/);
+ assert.equal(await p.locator('.cc-pending-total').innerText(),'오늘 남은 2회 · 지연 1회');
  await p.evaluate(()=>app.openPatient('case1'));await p.locator('[data-cl-action=ward-calendar-task]').first().click();
  const hub=p.locator('.cl-task-hub');await hub.waitFor();assert.equal(await hub.locator('.cl-task-hub-item').count(),3);
  for(const name of ['투약 완료','보류·미실시','지시 수정','복사','이동'])assert.equal(await hub.getByRole('button',{name,exact:true}).first().isVisible(),true);
@@ -41,8 +41,11 @@ for(const width of [390,1440])test('ward actions reachable without nested detail
 test('task hub copy/move retains existing schedule validation and does not write on opening',async t=>{
  const p=await fixture(t);await medications(p);await p.evaluate(()=>app.open('ward'));await p.evaluate(()=>app.openPatient('case1'));await p.locator('[data-cl-action=ward-calendar-task]').first().click();await p.locator('[data-cl-action=hub-move]').first().click();await p.locator('dialog [name=scheduleMode]').waitFor();assert.equal(await p.locator('dialog [name=scheduleMode]').inputValue(),'move');assert.equal(await p.locator('[data-schedule-pick]').count(),1);assert.equal(await p.evaluate(()=>calls.some(x=>x.method!=='GET')),false);
 });
-test('cancellation label distinguishes one schedule from all remaining schedules',async t=>{
- const p=await fixture(t);await medications(p);await p.evaluate(()=>app.open('ward'));await p.evaluate(()=>app.openPatient('case1'));await p.locator('[data-cl-action=ward-calendar-task]').first().click();await p.locator('.cl-task-delete>summary').first().click();await p.locator('[data-cl-action=ward-med-delete]').first().click();assert.equal(await p.locator('dialog [type=submit]').innerText(),'예정 처치 취소');await p.locator('dialog [name=amendScope]').selectOption('remaining');assert.equal(await p.locator('dialog [type=submit]').innerText(),'남은 일정 중단');assert.equal(await p.evaluate(()=>calls.some(x=>x.method!=='GET')),false);
+test('single schedule cancellation submits only the selected medication without an obsolete confirmation form',async t=>{
+ const p=await fixture(t);await medications(p);await p.evaluate(()=>app.open('ward'));await p.evaluate(()=>app.openPatient('case1'));await p.locator('[data-cl-action=ward-calendar-task]').first().click();await p.locator('.cl-task-delete>summary').first().click();
+ assert.equal(await p.evaluate(()=>calls.some(x=>x.method!=='GET')),false);
+ await p.locator('[data-cl-action=ward-med-delete][data-id=t0]').click();await p.waitForFunction(()=>calls.some(x=>x.method==='POST')&&!document.querySelector('#root').inert);
+ const writes=await p.evaluate(()=>calls.filter(x=>x.method!=='GET'));assert.equal(writes.length,1);assert.equal(writes[0].url,'/practice/clinical/cases/case1/events');assert.equal(writes[0].body.kind,'medication.amend');assert.deepEqual(writes[0].body.data,{taskId:'t0',scope:'single',cancel:true,confirm:true});assert.equal(await p.locator('dialog').count(),0);
 });
 test('observation unknown and observed absent remain distinguishable',async t=>{
  const p=await fixture(t);await p.evaluate(()=>app.open('ward'));await p.locator('.cl-room-details').evaluate(e=>e.open=true);assert.match(await p.locator('[data-monitor=urine]').innerText(),/미관찰/);assert.match(await p.locator('[data-monitor=vomiting]').innerText(),/관찰되지 않음/);assert.notEqual(await p.locator('[data-monitor=urine]').getAttribute('class'),await p.locator('[data-monitor=vomiting]').getAttribute('class'));
