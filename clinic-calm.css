@@ -1913,3 +1913,32 @@
  @media(max-width:800px){.clinic-calm #appView button:is(.cs-refresh-button,[id*="refresh" i],[data-refresh],[data-act="refresh"],[data-st="refresh"],[data-dn="refresh"],[data-nr="refresh"],[data-cl-action="refresh"],[data-internal-refresh],[data-directory-refresh],[data-workspace-refresh],[data-reload-plan],[data-act="compare"]){min-height:44px!important;height:44px!important}}
  @media(max-width:760px){.clinic-calm #practiceRoot .purchase-actions .purchase-status-row {margin-right:auto;flex:1 1 170px}.clinic-calm #practiceRoot .purchase-actions .purchase-status-row [data-notice]{flex:1 1 100%;font-size:12px}.clinic-calm #practiceRoot .purchase-actions {align-items:flex-end}.clinic-calm #training .st-tabs [data-st="refresh"]{margin-left:auto}}
 }
+
+/* Protocol controls and cards share the redesigned clinical palette. */
+@media screen {
+ .clinic-calm #practiceRoot .cl-workspace[data-section="protocols"] {--cl-accent:var(--cs-accent);--cl-border:var(--cs-line);font-family:inherit;color:var(--cs-ink)}
+ .clinic-calm #practiceRoot .cl-workspace[data-section="protocols"] button {font-family:inherit;font-size:14px;line-height:1.4;border-radius:8px}
+ .clinic-calm #practiceRoot .cl-protocol-browsebar {gap:8px 12px;margin:8px 0}
+ .clinic-calm #practiceRoot :is(.cl-protocol-sources,.cl-protocol-shortcuts,.cl-protocol-statusbar) button {min-height:40px;padding:8px 12px;border:1px solid var(--cs-line);background:#fff;color:var(--cs-ink);font-weight:600}
+ .clinic-calm #practiceRoot .cl-protocol-sources button[aria-pressed="true"] {background:var(--cs-accent)!important;color:#fff!important;border-color:var(--cs-accent)!important}
+ .clinic-calm #practiceRoot :is(.cl-protocol-shortcuts,.cl-protocol-statusbar) button[aria-pressed="true"] {background:var(--cs-tint)!important;color:var(--cs-accent-hover)!important;border-color:var(--cs-accent)!important}
+ .clinic-calm #practiceRoot .cl-protocol-grid {gap:10px;align-items:start}
+ .clinic-calm #practiceRoot .cl-workspace .cl-protocol-card {background:#fff;border:1px solid var(--cs-line);border-radius:12px;color:var(--cs-ink);padding:12px 58px 12px 14px;font-weight:400;line-height:1.5;height:auto}
+ .clinic-calm #practiceRoot .cl-workspace .cl-protocol-card:hover {background:var(--cs-tint);border-color:var(--cs-accent)}
+ .clinic-calm #practiceRoot .cl-protocol-card strong {font-size:15px;line-height:1.45;margin:4px 0;font-weight:700}
+ .clinic-calm #practiceRoot .cl-protocol-card :is(.cl-protocol-meta,small) {font-size:12px;font-weight:400;color:var(--cs-muted)}
+ .clinic-calm #practiceRoot .cl-workspace .cl-protocol-family {border-color:var(--cs-line);border-radius:12px}
+ .clinic-calm #practiceRoot .cl-workspace .cl-protocol-favorite {font-size:20px;min-width:36px;min-height:36px;border:0;background:transparent;color:var(--cs-muted);padding:4px}
+ .clinic-calm #practiceRoot .cl-workspace .cl-protocol-favorite[aria-pressed="true"] {background:var(--cs-tint)!important;color:var(--cs-accent-hover)!important}
+ .clinic-calm #practiceRoot .cl-protocol-notice:not([role="alert"]) {background:var(--cs-tint);color:var(--cs-ink)}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-controls {justify-content:flex-start;padding:5px 8px}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-controls>.cl-tabs {order:0;flex:0 0 auto}
+ .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-controls>.cs-ward-actions {margin-left:auto;display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;min-width:0;max-width:100%}
+ .clinic-calm #practiceRoot .cs-ward-actions>.cl-board-count {margin:0;font-family:inherit;font-size:15px;font-weight:700;line-height:1.5;color:var(--cs-ink)}
+ @media(max-width:800px){
+  .clinic-calm #practiceRoot :is(.cl-protocol-sources,.cl-protocol-shortcuts,.cl-protocol-statusbar) button {min-height:44px}
+  .clinic-calm #practiceRoot .cl-workspace .cl-protocol-favorite {min-width:44px;min-height:44px}
+  .clinic-calm #practiceRoot .cs-ward-designed .cs-ward-controls>.cs-ward-actions {flex:1 1 100%;width:100%}
+  .clinic-calm #practiceRoot .cs-ward-actions>.cl-board-count {flex:1 1 150px;font-size:14px}
+ }
+}
