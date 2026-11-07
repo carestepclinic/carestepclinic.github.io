@@ -1812,3 +1812,11 @@
 @media(max-width:640px){.clinic-calm #practiceRoot .pt-ops-workspace .pt-toolbar{display:flex}.clinic-calm #practiceRoot .pt-ops-workspace .pt-toolbar>.pt-bar{flex-wrap:wrap}.clinic-calm #practiceRoot .pt-ops-workspace .pt-toolbar>.pt-bar:last-child{margin-left:auto}.clinic-calm #practiceRoot .pt-ops-workspace .pt-status-filters button{min-height:44px;padding:7px 10px}.clinic-calm #practiceRoot .pt-ops-workspace input{font-size:16px}.clinic-calm #practiceRoot .pt-ops-workspace .pt-search{max-width:none}}
 
 @media screen and (min-width:1281px){.clinic-calm #practiceRoot .pt-organized .pt-calc-common{grid-template-columns:minmax(0,1fr) auto}.clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-calc-view-tools{grid-column:2}.clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-patient-options{grid-column:2}.clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-patient-options[open]{grid-column:1/-1}}
+
+/* Record navigation stays visible beside the list actions. */
+@media screen {
+ .clinic-calm #practiceRoot .cs-list-tools>.cs-record-switcher {min-width:0;max-width:100%}
+ .clinic-calm #practiceRoot .cs-list-tools .cs-record-navigation {margin:0;padding:0;gap:4px;overflow:visible;flex-wrap:wrap}
+ .clinic-calm #practiceRoot .cs-list-tools .cs-navigation-scope {display:none}
+ .clinic-calm #practiceRoot .cs-list-actionbar>.cs-list-tools {min-width:0}
+}

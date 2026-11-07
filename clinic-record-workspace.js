@@ -41,7 +41,7 @@
    let listTools=root.querySelector('.cs-list-tools'),switcher=root.querySelector('.cs-record-switcher');
    if(!c?.patient?.name){
     if(!listTools){listTools=document.createElement('div');listTools.className='cs-list-tools';root.prepend(listTools);}
-    if(!switcher){switcher=document.createElement('details');switcher.className='cs-record-switcher';switcher.innerHTML='<summary>다른 기록지</summary>';listTools.append(switcher);}
+    if(!switcher){switcher=document.createElement('div');switcher.className='cs-record-switcher';listTools.append(switcher);}
     if(nav.parentElement!==switcher)switcher.append(nav);if(inpatientButton&&inpatientButton.parentElement!==listTools)listTools.append(inpatientButton);if(tools.parentElement!==listTools)listTools.append(tools);const form=root.querySelector('.record-filters,.cl-list-filters');const actions=root.querySelector('.dn-head-actions,.er-list-actions,.nr-actions')||root.querySelector('[data-cl-action=new]')?.parentElement||form?.previousElementSibling;if(actions&&actions!==listTools&&actions.querySelector('button')&&!actions.contains(nav)&&!actions.classList.contains('cs-open-records')){actions.classList.add('cs-list-actionbar');if(listTools.parentElement!==actions)actions.append(listTools);}
    }else if(listTools){listTools.before(nav);if(inpatientButton)nav.append(inpatientButton);root.prepend(tools);listTools.remove();}
    if(!c?.patient?.name){header?.remove();header=null;root.classList.remove('cs-patient-workspace');nav.setAttribute('aria-label','전체 기록지 이동');return;}

@@ -32,9 +32,9 @@ for(const width of [390,1280,1600])test('compact calculator, record actions and 
  assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
  await p.screenshot({path:path.resolve(root,'../clinic-redesign-preview/cohesion-calc-'+width+'.png'),fullPage:true});
  await route(p,'dental');await p.waitForSelector('.cs-record-switcher');
- assert.equal(await p.locator('.cs-record-switcher').getAttribute('open'),null);
+ assert.equal(await p.locator('.cs-record-switcher summary').count(),0);
+ assert.ok(await p.locator('.cs-record-navigation').isVisible());
  assert.equal(await p.locator('[data-cs-inpatient]').count(),1);
- await p.locator('.cs-record-switcher summary').click();
  await p.waitForTimeout(150);assert.equal(await p.locator('.cs-record-navigation').count(),1);
  await p.evaluate(()=>{workflowSettings.recent=[];go('library');renderLibrary();});
  assert.equal(await p.locator('#clinicLibraryRecent').isVisible(),false);
