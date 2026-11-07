@@ -31,7 +31,7 @@
   return [...rows].sort(order==='recent'?(a,b)=>String(b.groupUpdatedAt||b.updated_at).localeCompare(String(a.groupUpdatedAt||a.updated_at))||name(a,b):name);
  }
  function groupCourses(rows){
-  const groups=new Map();for(const row of rows){if(!groups.has(row.course_id))groups.set(row.course_id,[]);groups.get(row.course_id).push(row);}
+  const groups=new Map();for(const row of rows){const key=row.course_id||row.id;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(row);}
   return [...groups.values()].map(versions=>{versions.sort((a,b)=>b.version-a.version);const published=versions.find(v=>v.status==='published'&&v.current_version_id===v.id);return {...(published||versions[0]),versions,groupUpdatedAt:versions.map(v=>v.updated_at||'').sort().at(-1)};});
  }
  function mount(root,adapter){
@@ -98,7 +98,7 @@
     return;
    }
    const filtered=filterCourses(data,tab,query,tab==='sop'?category:'',['sop','trash'].includes(tab)?'':courseType);
-   const rows=sortCourses(tab==='sop'?groupCourses(filtered):filtered,sort);
+   const rows=sortCourses(tab==='sop'||(adapter.common&&tab==='manage')?groupCourses(filtered):filtered,sort);
    if(tab==='trash'){
     host.innerHTML='<p class="st-count">'+rows.length+'개 자료</p>'+(rows.length?'<div class="st-grid">'+rows.map(c=>`<article class="st-card"><span class="st-tag">삭제됨 · ${c.common?'공통':'우리 병원'}</span><h2>${esc(c.title)}</h2><p>${esc(typeLabel(c))} · 삭제 ${shortDate(c.deleted_at)}</p><p>${c.course_deleted_at?'자료 전체':c.version+'판'} · 이수 기록 보존</p>${canDelete(c)?btn('복원',c.course_deleted_at?'restore-course':'restore-version',`data-course="${esc(c.course_id)}" data-id="${esc(c.id)}"`):'<p>공개 검토 권한이 있는 관리자에게 복원을 요청해주세요.</p>'}</article>`).join('')+'</div>':'<div class="st-empty">삭제한 자료가 없습니다.</div>');return;
    }
@@ -136,7 +136,7 @@
    if(!ready()){data=null;shell();notice('병원 직원 계정으로 로그인하면 교육센터를 사용할 수 있습니다.');return;}
    if(reuse&&data&&Date.now()-loadedAt<30000){if(!dialog&&(resumeScroll!==null||root.querySelector('[data-tab][aria-current=page]')?.dataset.tab!==tab))render();resumeArea();return;}
    if(reuse&&listPending?.seq===sequence)return listPending.promise;
-   const seq=++sequence;if(!data){shell();root.querySelector('[data-content]').innerHTML='<div class="st-empty st-loading" aria-busy="true">교육자료와 내 교육을 불러오는 중입니다…</div>';}else notice('목록을 업데이트하는 중입니다. 기존 자료를 계속 볼 수 있습니다.');
+   const seq=++sequence;if(!data){shell();root.querySelector('[data-content]').innerHTML='<div class="st-empty st-loading" aria-busy="true">'+(adapter.common?'교육자료를 불러오는 중입니다…':'교육자료와 내 교육을 불러오는 중입니다…')+'</div>';}else notice('목록을 업데이트하는 중입니다. 기존 자료를 계속 볼 수 있습니다.');
    try{const request=adapter.request('/',{method:'GET'});listPending={seq,promise:request.catch(()=>{})};const result=await request;if(seq!==sequence||current!==(adapter.identity?.()||''))return;const y=global.scrollY,focused=root.contains(document.activeElement)?document.activeElement:null,field=focused?.matches('input,select')?Object.keys(focused.dataset)[0]:'',caret=focused?.selectionStart;data=result;loadedAt=Date.now();message='';render();resumeArea();if(field){const el=root.querySelector('[data-'+field.replace(/[A-Z]/g,c=>'-'+c.toLowerCase())+']');el?.focus({preventScroll:true});if(caret!=null)el?.setSelectionRange?.(caret,caret);global.scrollTo({top:y,behavior:'instant'});}}
    catch(e){if(seq!==sequence)return;if(!data){shell();root.querySelector('[data-content]').innerHTML=btn('다시 불러오기','refresh');}loadedAt=0;notice((e.message||'교육자료를 불러오지 못했습니다.')+(data?' 기존 목록을 유지했습니다. 새로고침으로 다시 확인해주세요.':''),true);}finally{if(listPending?.seq===seq)listPending=null;}
   }

@@ -22,6 +22,7 @@ async function setup(t,kind,width=1440){
     else{req=request;loadOverview=async()=>{};if(window.CarestepHqUX)CarestepHqUX.restoreRoute=()=>{};}
   },kind);
   const ids=kind==='clinic'?{first:'#saasLoginEmail',secret:'#saasLoginPassword',button:'#saasLoginBtn',form:'#saasLoginForm',path:'/saas/login'}:{first:'#endpoint',secret:'#hqKey',button:'#connect',form:'#hqLoginForm',path:'/hq/session'};
+  if(kind==='hq')await p.locator('.hq-login-advanced summary').click();
   await p.locator(ids.first).fill(kind==='clinic'?'test@example.com':'https://example.invalid');await p.locator(ids.secret).fill('test-only-secret');
   return {p,...ids};
 }

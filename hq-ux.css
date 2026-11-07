@@ -434,3 +434,29 @@ button,input,select,textarea{font-family:inherit}
 @media(max-width:600px){.hq-material-tabs{gap:4px;padding:4px;margin-bottom:14px}.hq-material-tabs .btn{padding:8px 5px;font-size:13px}#protocols .toolbar{flex-wrap:wrap}#protocols .toolbar label{display:grid;gap:5px}}
 
 .hq-read-summary{font-size:12px;color:#60738f;line-height:1.5;margin:4px 0}.hq-load-status[hidden]{display:none!important}
+
+/* HQ uses the same calm visual hierarchy as CLINIC. */
+:root{--blue:#19766f;--bg:#f6f5f1;--ink:#183c45;--muted:#566f76;--line:#d6e1df}
+body{background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font-family:inherit}
+.btn,.staff-training .st-button,.gs-button{font-size:14px;font-weight:600;line-height:1.4;min-height:40px;border-radius:8px}
+.btn.primary,.staff-training .st-primary{background:var(--blue);border-color:var(--blue)}
+.hq-material-tabs{background:#eaf1ee;margin-bottom:16px}
+.hq-material-tabs [aria-current=page]{background:var(--blue);border-color:var(--blue)}
+.hq-material-tabs .btn:focus-visible,button:focus-visible{outline-color:#19766f}
+.hq-nav-item.active,#nav button.active,.cs-quick.active{background:#e5f1ed;color:#12635e;border-color:#a9cbc5}
+.card,.hq-protocol-card,.staff-training .st-card{border-color:var(--line);border-radius:12px;box-shadow:0 2px 6px #183c4505}
+.hq-protocol-card{display:flex;flex-direction:column;gap:6px;padding:16px}
+.hq-protocol-card p{margin:0;line-height:1.6;font-size:13px}
+.hq-protocol-card .btn{align-self:flex-start;margin-top:auto}
+.hq-protocol-filters{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin:12px 0}
+.hq-protocol-filters label{display:grid;gap:5px;font-size:13px;min-width:150px}
+.hq-protocol-filters [data-protocol-count]{margin-left:auto;color:var(--muted);font-size:13px;padding:10px 0}
+.gs-draft-group{min-width:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:white}
+.gs-draft-group>.gs-draft{width:100%;border:0;padding:4px;box-shadow:none;text-align:left}
+.gs-draft-group details{border-top:1px solid var(--line);margin-top:8px;padding-top:8px;font-size:13px}
+.gs-draft-group details .gs-draft{width:100%;margin-top:8px;text-align:left}
+.gs-draft-group p{margin:0 0 8px}.gs-draft-group small{overflow-wrap:anywhere}
+.hq-login-advanced{margin:14px 0;font-size:14px}.hq-login-advanced summary{cursor:pointer;color:var(--muted)}
+.hq-read-summary{font-size:13px;color:var(--muted)}
+@media(max-width:650px){.hq-protocol-filters{gap:8px}.hq-protocol-filters label{flex:1 1 130px;min-width:0}.hq-protocol-filters select{width:100%}.hq-protocol-filters [data-protocol-count]{flex-basis:100%;padding:0}.btn,.staff-training .st-button,.gs-button{min-height:44px}.hq-protocol-card{padding:14px}}

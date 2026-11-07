@@ -63,14 +63,39 @@ test('failed protocol read is retryable and old responses cannot replace a newer
  const p=await fixture(t);await p.evaluate(()=>{failList=true;showView('protocols');});await p.getByRole('button',{name:'다시 시도',exact:true}).waitFor();
  assert.match(await p.locator('[data-protocol-status]').innerText(),/불러오지 못했습니다/);
  await p.evaluate(()=>failList=false);await p.getByRole('button',{name:'다시 시도',exact:true}).click();await p.locator('.hq-protocol-card').first().waitFor();
- await p.evaluate(()=>{window.pending=[];req=()=>new Promise(resolve=>pending.push(resolve));CarestepHqProtocols.open();CarestepHqProtocols.open();pending[1]({items:[{id:'new',title:'최신 결과',status:'draft'}]});});
+ await p.evaluate(()=>{window.pending=[];req=path=>path==='/hq/content'?Promise.resolve({contents:[]}):new Promise(resolve=>pending.push(resolve));CarestepHqProtocols.open();CarestepHqProtocols.open();pending[1]({items:[{id:'new',title:'최신 결과',status:'draft'}]});});
  await p.waitForFunction(()=>document.querySelector('[data-protocol-list]').textContent.includes('최신 결과'));
  await p.evaluate(()=>pending[0]({items:[{id:'old',title:'오래된 결과',status:'draft'}]}));
  assert.doesNotMatch(await p.locator('[data-protocol-list]').innerText(),/오래된/);
 });
 test('disconnect clears protocol content and rejects in-flight response',async t=>{
  const p=await fixture(t);await p.evaluate(()=>showView('protocols'));await p.locator('.hq-protocol-card').first().waitFor();
- await p.evaluate(()=>{req=()=>new Promise(resolve=>window.finish=resolve);CarestepHqProtocols.open();owner='';document.getElementById('loginOverlay').classList.remove('hidden');});
+ await p.evaluate(()=>{req=path=>path==='/hq/content'?Promise.resolve({contents:[]}):new Promise(resolve=>window.finish=resolve);CarestepHqProtocols.open();owner='';document.getElementById('loginOverlay').classList.remove('hidden');});
  await p.evaluate(()=>finish({items:[{id:'late',title:'늦은 응답',status:'draft'}]}));
  assert.equal(await p.locator('.hq-protocol-card').count(),0);assert.match(await p.locator('[data-protocol-status]').innerText(),/HQ 연결 후/);
+});
+
+test('HQ specialty labels stay distinct and material navigation works during a pending refresh',async t=>{
+ const p=await fixture(t);assert.deepEqual(await p.evaluate(()=>['내과','안과','피부과','치과','응급','기타'].map(hqCategoryLabel)),['내과','안과','피부과','치과','응급','기타']);
+ await p.evaluate(()=>{const original=req;req=(path,o)=>path==='/hq/content'?new Promise(resolve=>window.finishContent=resolve):original(path,o);showView('content');});
+ await p.locator('#content [data-material-view=protocols]').click();await p.locator('.hq-protocol-card').first().waitFor();
+ assert.equal(await p.locator('.view.active').getAttribute('id'),'protocols');
+ await p.evaluate(()=>finishContent({contents:[]}));assert.equal(await p.locator('.view.active').getAttribute('id'),'protocols');assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+
+test('protocol animal, field and sort filters use saved metadata and preserve selection on refresh',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>{const original=req;req=(path,o)=>path==='/hq/training/knowledge-protocols'?Promise.resolve({items:[{id:'a',title:'가 자료',status:'draft',species:'dog',category:'내과',revision:2,updatedAt:'2026-11-01',sourceCurrent:true},{id:'b',title:'나 자료',status:'published',species:'cat',sourceContentId:'source-eye',revision:3,updatedAt:'2026-11-02',sourceCurrent:false}]}):path==='/hq/content'?Promise.resolve({contents:[{contentId:'source-eye',category:'안과'}]}):original(path,o);showView('protocols');});
+ await p.locator('.hq-protocol-card').first().waitFor();assert.match(await p.locator('.hq-protocol-card').first().innerText(),/나 자료/);
+ await p.locator('[data-protocol-species]').selectOption('cat');await p.locator('[data-protocol-field]').selectOption('안과');assert.equal(await p.locator('.hq-protocol-card').count(),1);assert.match(await p.locator('.hq-protocol-card').innerText(),/수정 3판/);
+ await p.locator('[data-protocol-refresh]').click();await p.waitForFunction(()=>document.getElementById('protocols').getAttribute('aria-busy')==='false');assert.equal(await p.locator('[data-protocol-field]').inputValue(),'안과');assert.equal(await p.locator('.hq-protocol-card').count(),1);
+});
+
+test('HQ training groups published and draft versions without merging unrelated courses',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>{const original=req;req=(path,o)=>path==='/hq/training/'?Promise.resolve({actor:{common:true,capabilities:{edit:true,review:true}},courses:[{id:'v1',course_id:'courseA',title:'동일 제목',version:1,status:'published',current_version_id:'v1',owned:true,common:true,kind:'education',updated_at:'2026-11-01'},{id:'v2',course_id:'courseA',title:'동일 제목',version:2,status:'draft',current_version_id:'v1',owned:true,common:true,kind:'education',updated_at:'2026-11-02'},{id:'v3',course_id:'courseB',title:'동일 제목',version:1,status:'draft',owned:true,common:true,kind:'education'}],assignments:[],members:[],categories:[]}):original(path,o);showView('training');});
+ await p.locator('#training .st-card').first().waitFor();assert.equal(await p.locator('#training .st-card').count(),2);assert.match(await p.locator('#training .st-card').first().innerText(),/버전 관리 · 2개/);assert.equal(await p.locator('[data-st=edit-course][data-id=v2]').count(),1);assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+
+test('guardian category filtering keeps drafts visible and same content drafts together',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>{const original=req;req=(path,o)=>path.endsWith('/drafts')?Promise.resolve({drafts:[{id:'d1',contentId:'c1',title:'안과 자료',status:'draft',version:'0.1',category:'안과',updatedAt:'2026-11-01'},{id:'d2',contentId:'c1',title:'안과 자료',status:'draft',version:'0.2',category:'안과',updatedAt:'2026-11-02'},{id:'d3',contentId:'c2',title:'안과 자료',status:'draft',version:'0.1',category:'안과',updatedAt:'2026-11-01'}],limit:200}):original(path,o);showView('content');});
+ await p.locator('.gs-draft-group').first().waitFor();await p.locator('#contentCategory').selectOption('안과');assert.equal(await p.locator('.gs-draft-group').count(),2);assert.equal(await p.locator('[data-gs-open=d2]').isVisible(),true);assert.equal(await p.locator('[data-gs-open=d1]').isVisible(),false);await p.locator('.gs-draft-group details summary').click();assert.equal(await p.locator('[data-gs-open=d1]').isVisible(),true);
 });

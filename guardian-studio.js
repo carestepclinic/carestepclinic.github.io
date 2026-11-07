@@ -115,8 +115,11 @@
   const q=document.getElementById('contentSearch').value.trim().toLowerCase(),state=document.getElementById('contentStatus').value,category=document.getElementById('contentCategory').value,due=document.getElementById('contentDueOnly').checked;
   const ready=x=>x.status==='draft'||x.status==='review';
   const items=listItems.filter(x=>!due&&(['all','draft','review'].includes(state))&&(state==='all'||(state==='review'?ready(x):!ready(x)))&&(category==='all'||(x.document?.template?.category||x.brief?.category||x.category)===category)&&(!q||[x.title,x.id,x.contentId,x.brief?.condition,x.brief?.species,x.brief?.category,x.document?.template?.category].filter(Boolean).join(' ').toLowerCase().includes(q)));
-  root.hidden=due||category!=='all'||!['all','draft','review'].includes(state);
-  root.innerHTML=`<h2>작성·검토 대기 <span>${items.length}건</span></h2>${items.length?`<div class="gs-draft-list">${items.map(x=>`<button type="button" class="gs-draft" data-gs-open="${e(x.id)}"><b>${e(x.title)}</b><span>${e(status[x.status]||x.status)} · 버전 ${e(x.version)}</span><small>저장 ${e(new Date(x.updatedAt).toLocaleString('ko-KR'))}</small></button>`).join('')}</div>`:'<p class="gs-empty">현재 조건에 맞는 작성·검토 대기 자료가 없습니다.</p>'}${listLimit?'<p class="sub">초안은 최근 200개 작성 기록에서 검색합니다.</p>':''}`;
+  root.hidden=due||!['all','draft','review'].includes(state);
+  const groups=new Map();
+  for(const item of items){const key=item.contentId||item.id;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(item);}
+  const draftButton=x=>`<button type="button" class="gs-draft" data-gs-open="${e(x.id)}"><b>${e(x.title)}</b><span>${e(status[x.status]||x.status)} · 버전 ${e(x.version||'미정')}</span><small>저장 ${e(x.updatedAt?new Date(x.updatedAt).toLocaleString('ko-KR'):'시각 미등록')}</small></button>`;
+  root.innerHTML=`<h2>작성·검토 대기 <span>${groups.size}개 자료 · 초안 ${items.length}건</span></h2>${items.length?`<div class="gs-draft-list">${[...groups.values()].map(versions=>{versions.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));const latest=versions[0],published=typeof contents!=='undefined'&&Array.isArray(contents)?contents.find(x=>latest.contentId&&x.contentId===latest.contentId&&x.status==='published'):null;return `<article class="gs-draft-group">${published?`<p class="muted">현재 공개본 · v${e(published.version)}</p>`:''}${draftButton(latest)}${versions.length>1?`<details><summary>이전 초안 ${versions.length-1}건</summary>${versions.slice(1).map(draftButton).join('')}</details>`:''}</article>`;}).join('')}</div>`:'<p class="gs-empty">현재 조건에 맞는 작성·검토 대기 자료가 없습니다.</p>'}${listLimit?'<p class="sub">초안은 최근 200개 작성 기록에서 검색합니다.</p>':''}`;
  }
  async function refresh(){
   const owner=identity();if(listPending?.owner===owner)return listPending.promise;

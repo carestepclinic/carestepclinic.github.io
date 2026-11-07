@@ -330,7 +330,7 @@
     const key=JSON.stringify([endpoint(),hqSessionToken(),view,billingPane,selectedClinic,...filterIds.map(id=>byId(id)?.value)]);
     if(pendingViews.has(key))return pendingViews.get(key);
     const work=(async()=>{try{
-      if(['protocols','dashboard','billing','usageBilling','clinics','onboarding','customerSuccess','surveys','crm','voice','content'].includes(view)){await loader();return;}
+      if(['training','protocols','dashboard','billing','usageBilling','clinics','onboarding','customerSuccess','surveys','crm','voice','content'].includes(view)){await loader();return;}
       await region(view,loader,()=>{},()=>reloadView(view));
     }finally{if(currentView===view)restoreClinicReturn(view);}})();
     pendingViews.set(key,work);try{return await work;}finally{if(pendingViews.get(key)===work)pendingViews.delete(key);}
@@ -730,12 +730,12 @@
     }
   };
   const contentCounts=['contentTotal','contentPublished','contentArchived','contentReviewDue'];
-  const contentStates={published:'게시 중',archived:'게시 중단',draft:'작성 중',review:'검토 대기',deleted:'삭제 이력'};
+  const contentStates={published:'공개 중',archived:'공개 중단',draft:'작성 중',review:'검토 대기',deleted:'삭제 이력'};
   let contentReady=false;
   const contentDue=x=>x.status==='published'&&!!x.reviewDueAt&&Number.isFinite(Date.parse(x.reviewDueAt))&&Date.parse(x.reviewDueAt)<=Date.now();
   const contentDate=value=>value&&Number.isFinite(Date.parse(value))?new Date(value).toLocaleDateString('ko-KR'):'미등록';
   function lockContent(locked){
-    byId('content').querySelectorAll('button,input,select').forEach(el=>el.disabled=locked);
+    byId('content').querySelectorAll('button:not([data-material-view]),input,select').forEach(el=>el.disabled=locked);
     if(!locked)updateContentBulkUi();
   }
   loadContent=async function({keepResult=false}={}){
