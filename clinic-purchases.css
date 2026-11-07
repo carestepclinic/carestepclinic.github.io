@@ -43,3 +43,8 @@
 @media(max-width:800px){.cs-purchases .purchase-group-actions :is(button,label){min-height:44px}.cs-purchases .purchase-group-actions label{flex-basis:100%}}
 
 .purchase-catalog-row>span{flex:1;min-width:0}.purchase-catalog-row [data-catalog-delete]{color:#a32633;border-color:#ecc9cd}
+/* Urgency is conveyed by text, contrast and an outline, never color alone. */
+.cs-purchases .purchase-row-urgent{background:#fff5f3;border-left:4px solid #c7352c;padding-left:10px}
+.cs-purchases .purchase-row-urgent .purchase-item-title strong{color:#86251e}
+.cs-purchases .purchase-urgent{background:#b72c23;color:#fff;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.cs-purchases .purchase-row-urgent:focus-within{outline:2px solid #bb453a;outline-offset:-2px}

@@ -30,6 +30,27 @@
   if(accepted===0&&failed===0&&!(pending>0))return notice.attempted===0?'시도하지 않음 · 발송 대상 없음':'접수·실패 기록 0건 · 시도 여부 확인 필요';
   return ['접수 '+accepted+'건','실패 '+failed+'건',pending?'결과 미확정 '+pending+'건':'','기기 수신·보호자 열람은 별도'].filter(Boolean).join(' · ');
  }
+ function groupPreventiveRows(list,rows){
+  const groups=new Map();
+  for(const row of list.querySelectorAll(':scope > .work-first-row')){
+   const item=rows.find(x=>String(x.id)===row.dataset.workId&&String(x.sourceType||'')===row.dataset.workType);
+   if(!item||!['vaccination','heartworm'].includes(item.sourceType)||!item.patientId||!item.guardianId)continue;
+   const key=JSON.stringify([item.guardianId,item.patientId,item.dueDate]);
+   if(!groups.has(key))groups.set(key,[]);groups.get(key).push({row,item});
+  }
+  for(const entries of groups.values()){
+   if(entries.length<2)continue;
+   const group=document.createElement('section');group.className='cs-preventive-group';
+   const head=document.createElement('header'),label=document.createElement('b'),first=entries[0];
+   label.textContent=(first.item.patientName||'환자명 확인')+' · 예방 업무 '+entries.length+'건';head.append(label);
+   first.row.before(group);group.append(head);
+   entries.forEach(({row,item},index)=>{
+    row.querySelector('.work-first-main > b').textContent=item.title||workFirstReason(item);
+    if(index>0)row.querySelector('.work-quick-secondary')?.remove();
+    group.append(row);
+   });
+  }
+ }
  function updateTodayCounts(){
   const attention=global.carestepAttentionSummary?.(),clinical=global.carestepClinicalSummary?.();
   if(todayControl&&!todayResolved&&!todayPicked&&attention?.state==='ready'&&clinical?.state==='ready'){todayResolved=true;if(!attention.total&&clinical.total>0)todayControl.select('clinical');}
@@ -224,7 +245,7 @@
    const loaded=workspace?.recordsLoaded;if(showWorkspaceTab('records',patient.id)&&loaded)return original(patient,guardian);
   };
  }
- global.ClinicOrganization={mountCompactSearch,mountPatientHeader,clinicalRows,noticeLabel,updateTodayCounts,ageLabel,recentTemplates,taskPreview,createTabs,mountHospitalManagement,organizeWorkspace,showWorkspaceTab,mountDashboard,syncNav};
+ global.ClinicOrganization={groupPreventiveRows,mountCompactSearch,mountPatientHeader,clinicalRows,noticeLabel,updateTodayCounts,ageLabel,recentTemplates,taskPreview,createTabs,mountHospitalManagement,organizeWorkspace,showWorkspaceTab,mountDashboard,syncNav};
  if(typeof module!=='undefined')module.exports=global.ClinicOrganization;
  if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();}
 })(typeof window==='undefined'?globalThis:window);
