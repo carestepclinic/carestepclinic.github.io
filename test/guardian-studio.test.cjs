@@ -5,7 +5,7 @@ const {resolve,extname}=require('node:path');
 const http=require('node:http');
 const {chromium}=require('playwright');
 let browser,server,origin;
-const root=resolve(__dirname,'..'),allowed=new Set(['clinic-capabilities.js','training-automation.js','training-automation.css','hq.html','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','guardian-studio.js','guardian-studio.css','pretendard-variable-1.3.9.woff2']);
+const root=resolve(__dirname,'..'),allowed=new Set(['clinic-capabilities.js','training-automation.js','training-automation.css','hq.html','hq-workspace.js','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','guardian-studio.js','guardian-studio.css','pretendard-variable-1.3.9.woff2']);
 before(async()=>{server=http.createServer((req,res)=>{const file=new URL(req.url,'http://localhost').pathname.slice(1);if(!allowed.has(file)){res.writeHead(404);res.end();return;}res.setHeader('Content-Type',({'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.woff2':'font/woff2'})[extname(file)]);res.end(readFileSync(resolve(root,file)));});await new Promise(r=>server.listen(0,'127.0.0.1',r));origin=`http://127.0.0.1:${server.address().port}`;browser=await chromium.launch({headless:true,...(process.env.HQ_TEST_BROWSER?{executablePath:process.env.HQ_TEST_BROWSER}:{})});});
 after(async()=>{await browser?.close();await new Promise(r=>server?server.close(r):r());});
 async function fixture(t,width=1280){
@@ -58,13 +58,13 @@ test('species metadata survives editing, preview and reopening without AI',async
 test('unknown existing species is not silently changed to dog',async t=>{const p=await fixture(t);await p.getByRole('button',{name:'자료 열기·수정',exact:true}).click();await p.getByRole('button',{name:'이 자료의 수정본 만들기',exact:true}).click();assert.equal(await p.getByRole('combobox',{name:'대상 동물',exact:true}).inputValue(),'');});
 
 
-test('search and state filter both drafts and published materials without extra requests',async t=>{
+test('search and state filter the unified material list',async t=>{
  const p=await fixture(t);await p.evaluate(async()=>{rows=[{id:'gd_a',title:'찾을 초안',status:'draft',version:'1',updatedAt:'2026-11-01'},{id:'gd_b',title:'작성 실패',status:'failed',version:'1',updatedAt:'2026-11-01'}];await GuardianStudio.refresh();});const before=await p.evaluate(()=>reads.length);
- await p.locator('#contentSearch').fill('찾을');assert.equal(await p.locator('[data-gs-open]').count(),1);assert.equal(await p.locator('[data-content-row]').count(),0);
- await p.locator('#contentReset').click();await p.locator('#contentStatus').selectOption('review');assert.equal(await p.locator('[data-gs-open]').count(),1);
- await p.locator('#contentStatus').selectOption('draft');assert.match(await p.locator('#guardianStudioRoot').innerText(),/작성 실패/);
- await p.locator('#contentStatus').selectOption('published');assert.equal(await p.locator('#guardianStudioRoot').isVisible(),false);assert.equal(await p.locator('[data-content-row]').count(),1);
- assert.equal(await p.evaluate(()=>reads.length),before);
+ await p.locator('#contentSearch').fill('찾을');assert.equal(await p.locator('[data-guardian-draft]').count(),1);assert.equal(await p.locator('[data-content-row]').count(),1);
+ await p.locator('#contentReset').click();await p.locator('#contentStatus').selectOption('review');assert.equal(await p.locator('[data-guardian-draft]').count(),1);
+ await p.locator('#contentStatus').selectOption('draft');assert.match(await p.locator('#contentTable').innerText(),/작성 실패/);
+ await p.locator('#contentStatus').selectOption('published');assert.equal(await p.locator('[data-guardian-draft]').count(),0);assert.equal(await p.locator('[data-content-row]').count(),1);
+ assert.ok(await p.evaluate(()=>reads.length)>=before);
 });
 test('review round trip retains reviewer, date and generation choices; body edits clear only attestations',async t=>{
  const p=await fixture(t);await generate(p);await p.getByRole('button',{name:'저장 후 미리보기·승인 검토',exact:true}).click();

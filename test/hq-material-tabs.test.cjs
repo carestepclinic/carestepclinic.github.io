@@ -20,7 +20,7 @@ async function fixture(t,width=1280,hash=''){
    if(p==='/hq/training/knowledge-protocols/preview')return {targets:[]};
    if(p==='/hq/training/knowledge-protocols/p1')return {document:{id:'p1',status:'draft',revision:1,body:{title:'시험 질환 A',disease:'시험',species:'dog',summary:'시험 요약',steps:[]},sources:[],gaps:[],gapResolutions:[]}};
    if(p==='/hq/training/')return {actor:{capabilities:{}},courses:[],assignments:[],members:[],categories:[]};
-   if(p==='/hq/guardian-content/drafts')return {drafts:[],limit:200};
+   if(p==='/hq/guardian-studio/drafts')return {drafts:[],limit:200};
    return {contents:[],categories:[],drafts:[],items:[]};
   };
   document.getElementById('loginOverlay').classList.add('hidden');
@@ -96,8 +96,8 @@ test('HQ training groups published and draft versions without merging unrelated 
 });
 
 test('guardian category filtering keeps drafts visible and same content drafts together',async t=>{
- const p=await fixture(t);await p.evaluate(()=>{const original=req;req=(path,o)=>path.endsWith('/drafts')?Promise.resolve({drafts:[{id:'d1',contentId:'c1',title:'안과 자료',status:'draft',version:'0.1',category:'안과',updatedAt:'2026-11-01'},{id:'d2',contentId:'c1',title:'안과 자료',status:'draft',version:'0.2',category:'안과',updatedAt:'2026-11-02'},{id:'d3',contentId:'c2',title:'안과 자료',status:'draft',version:'0.1',category:'안과',updatedAt:'2026-11-01'}],limit:200}):original(path,o);showView('content');});
- await p.locator('.gs-draft-group').first().waitFor();await p.locator('#contentCategory').selectOption('안과');assert.equal(await p.locator('.gs-draft-group').count(),2);assert.equal(await p.locator('[data-gs-open=d2]').isVisible(),true);assert.equal(await p.locator('[data-gs-open=d1]').isVisible(),false);await p.locator('.gs-draft-group details summary').click();assert.equal(await p.locator('[data-gs-open=d1]').isVisible(),true);
+ const p=await fixture(t);await p.evaluate(()=>{const original=req;req=(path,o)=>path.split('?')[0].endsWith('/drafts')?Promise.resolve({drafts:[{id:'d1',contentId:'c1',title:'안과 자료',status:'draft',version:'0.1',category:'안과',updatedAt:'2026-11-01'},{id:'d2',contentId:'c1',title:'안과 자료',status:'draft',version:'0.2',category:'안과',updatedAt:'2026-11-02'},{id:'d3',contentId:'c2',title:'안과 자료',status:'draft',version:'0.1',category:'안과',updatedAt:'2026-11-01'}],limit:200}):original(path,o);showView('content');});
+ await p.locator('[data-content-row]').first().waitFor();await p.locator('#contentCategory').selectOption('안과');assert.equal(await p.locator('[data-content-row]').count(),2);assert.equal(await p.locator('[data-guardian-draft=d2]').isVisible(),true);assert.equal(await p.locator('[data-guardian-draft=d1]').isVisible(),false);await p.locator('[data-content-row=c1] details summary').click();assert.equal(await p.locator('[data-guardian-draft=d1]').isVisible(),true);
 });
 
 function protocolOperationsData(){

@@ -36,7 +36,7 @@ export const uiFiles = new Set([
   'staff-training-pdf.js','pretendard-regular-1.3.9.ttf','pdf-lib-1.17.1.min.js','pdf-fontkit-1.1.1.min.js','PDF-LIB-LICENSE.txt','PDF-FONTKIT-LICENSE.txt',
   'staff-training.js','staff-training.css','staff-training-clinic.js','staff-training-hq.js',
   'clinic-reliability.js', 'clinic-organization.js', 'clinic-organization.css', 'home-display.js', 'deployment-status.js', 'home-insights.js', 'home-insights.css', 'home-navigation.js', 'home-navigation.css', 'home-readability.css', 'pretendard-variable-1.3.9.woff2', 'PRETENDARD-LICENSE.txt',
-  'home-reminders.js', 'clinic-read-flow.js', 'carestep-ui.css', 'clinic-care.js', 'home-care.js', 'index.html', 'hq-ux.js', 'hq-ux.css', 'hq.html', 'home.html', 'carestep-workflow.css', 'home-access-clinic.js', 'home-access-clinic.css', 'r61-clinic.js', 'r61-route.js', 'r65-clinic.js',
+  'home-reminders.js', 'clinic-read-flow.js', 'carestep-ui.css', 'clinic-care.js', 'home-care.js', 'index.html', 'hq-workspace.js','hq-ux.js', 'hq-ux.css', 'hq.html', 'home.html', 'carestep-workflow.css', 'home-access-clinic.js', 'home-access-clinic.css', 'r61-clinic.js', 'r61-route.js', 'r65-clinic.js',
   'r83-clinic.js', 'carestep-home.js', 'date-input-guard.js', 'patient-breeds.js',
   'patient-crm.js', 'patient-timeline.js', 'sw.js', 'carestep-home.css',
   'carestep-home-response-edit.css', 'patient-crm.css', 'manifest.webmanifest',

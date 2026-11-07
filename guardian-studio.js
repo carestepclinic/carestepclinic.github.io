@@ -6,7 +6,7 @@
  const identity=()=>hqSessionToken()||key()||'';
  let dialog=null,draft=null,dirty=false,busy=false,sequence=0,listSequence=0,importFile=null,importCandidates=[];
  const status={draft:'검토 대기',generating:'AI 생성 중',failed:'생성 확인 필요',published:'게시 중'};
- let listOwner='',listLoaded=false,listAt=0,listItems=[],listLimit=false,listPending=null,reviewState={};
+ let listOwner='',listLoaded=false,listAt=0,listItems=[],listLimit=false,listPending=null,listCursor=null,listQuery='',searchTimer=null,reviewState={};
  const categories=['내과','안과','피부과','수술','치과','비뇨기','신경','종양','응급','예방','노령','기타'];
  function categoryField(key,selected='내과'){const options=categories.map(x=>[x,x]);if(selected&&!categories.includes(selected))options.push([selected,selected+' (기존 분류)']);options.push(['__custom','직접 입력']);return selectField('분류',key,options,selected)+field('직접 입력한 분류',key+'Custom');}
  function syncCategory(){dialog?.querySelectorAll('[data-gs-field$=categoryCustom]').forEach(el=>el.closest('label').hidden=value(el.dataset.gsField.replace('Custom',''))!=='__custom');}
@@ -27,8 +27,8 @@
  function message(text,error=false){const el=dialog?.querySelector('.gs-message');if(el){el.textContent=text;el.classList.toggle('gs-error',error);el.focus();}}
  function lock(on){busy=on;dialog?.setAttribute('aria-busy',String(on));dialog?.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=on);}
  async function action(task){if(busy)return;lock(true);try{await task();}catch(err){message(err.message||'작업을 완료하지 못했습니다.',true);}finally{lock(false);}}
- function close(force=false){if(busy)return;if(dirty&&!force){dialog.querySelector('.gs-discard').hidden=false;dialog.querySelector('[data-gs-action="continue"]').focus();return;}sequence++;dialog?.close();dialog?.remove();dialog=null;draft=null;dirty=false;}
- function shell(title){if(dialog){if(dirty||busy)return false;close(true);}const d=document.createElement('dialog');d.className='guardian-studio-dialog';d.setAttribute('aria-labelledby','guardianStudioTitle');d.innerHTML=`<header class="gs-header"><div><span class="gs-eyebrow">보호자 안내자료</span><h2 id="guardianStudioTitle">${e(title)}</h2></div>${button('닫기','close')}</header><div class="gs-message" role="status" aria-live="polite" tabindex="-1"></div><div class="gs-discard" hidden><p>저장하지 않은 변경사항이 있습니다.</p>${button('작성 계속','continue',true)}${button('저장하지 않고 닫기','discard')}</div><div class="gs-body"></div>`;document.body.append(d);dialog=d;draft=null;dirty=false;reviewState={};importFile=null;importCandidates=[];sequence++;d.addEventListener('cancel',event=>{event.preventDefault();close();});d.addEventListener('input',event=>{if(event.target.matches('[data-gs-field]')&&!['reviewer','reviewDate'].includes(event.target.dataset.gsField)){dirty=true;reviewState.checks={};d.querySelectorAll('[data-gs-check]').forEach(c=>c.checked=false);}});d.addEventListener('change',syncCategory);d.addEventListener('click',click);d.showModal();return true;}
+ function close(force=false){if(busy)return;if(dirty&&!force){CarestepHqWorkspace.discard(dialog,()=>close(true));return;}sequence++;dialog?.close();dialog?.remove();dialog=null;draft=null;dirty=false;}
+ function shell(title){if(dialog){if(dirty||busy)return false;close(true);}const d=document.createElement('dialog');d.className='guardian-studio-dialog';d.setAttribute('aria-labelledby','guardianStudioTitle');d.innerHTML=`<header class="gs-header"><div><span class="gs-eyebrow">보호자 안내자료</span><h2 id="guardianStudioTitle">${e(title)}</h2></div>${button('닫기','close')}</header><div class="gs-message" role="status" aria-live="polite" tabindex="-1"></div><div class="gs-discard" hidden><p>저장하지 않은 변경사항이 있습니다.</p>${button('작성 계속','continue',true)}${button('저장하지 않고 닫기','discard')}</div><div class="gs-body"></div>`;document.body.append(d);dialog=d;draft=null;dirty=false;reviewState={};importFile=null;importCandidates=[];sequence++;d.addEventListener('cancel',event=>{event.preventDefault();close();});d.addEventListener('input',event=>{if(event.target.matches('[data-gs-field]')&&!['reviewer','reviewDate'].includes(event.target.dataset.gsField)){dirty=true;reviewState.checks={};d.querySelectorAll('[data-gs-check]').forEach(c=>c.checked=false);}});d.addEventListener('change',syncCategory);d.addEventListener('click',click);CarestepHqWorkspace.documentView(d,'보호자 안내자료');d.showModal();return true;}
  function body(html){dialog.querySelector('.gs-body').innerHTML=html;}
  const value=key=>dialog.querySelector(`[data-gs-field="${key}"]`)?.value.trim()||'';
  const lineValue=key=>value(key).split('\n').map(x=>x.trim()).filter(Boolean);
@@ -110,34 +110,41 @@
   const select=document.getElementById('contentCategory');if(!select)return;
   for(const item of listItems){const name=item.document?.template?.category||item.brief?.category||item.category||'';if(name&&![...select.options].some(x=>x.value===name)){const option=document.createElement('option');option.value=name;option.textContent=name;select.append(option);}}
  }
+ function queryKey(){return JSON.stringify([document.getElementById('contentSearch').value.trim(),document.getElementById('contentCategory').value]);}
  function filterList(){
-  if(!listLoaded)return;
-  const q=document.getElementById('contentSearch').value.trim().toLowerCase(),state=document.getElementById('contentStatus').value,category=document.getElementById('contentCategory').value,due=document.getElementById('contentDueOnly').checked;
-  const ready=x=>x.status==='draft'||x.status==='review';
-  const items=listItems.filter(x=>!due&&(['all','draft','review'].includes(state))&&(state==='all'||(state==='review'?ready(x):!ready(x)))&&(category==='all'||(x.document?.template?.category||x.brief?.category||x.category)===category)&&(!q||[x.title,x.id,x.contentId,x.brief?.condition,x.brief?.species,x.brief?.category,x.document?.template?.category].filter(Boolean).join(' ').toLowerCase().includes(q)));
-  root.hidden=due||!['all','draft','review'].includes(state);
-  const groups=new Map();
-  for(const item of items){const key=item.contentId||item.id;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(item);}
-  const draftButton=x=>`<button type="button" class="gs-draft" data-gs-open="${e(x.id)}"><b>${e(x.title)}</b><span>${e(status[x.status]||x.status)} · 버전 ${e(x.version||'미정')}</span><small>저장 ${e(x.updatedAt?new Date(x.updatedAt).toLocaleString('ko-KR'):'시각 미등록')}</small></button>`;
-  root.innerHTML=`<h2>작성·검토 대기 <span>${groups.size}개 자료 · 초안 ${items.length}건</span></h2>${items.length?`<div class="gs-draft-list">${[...groups.values()].map(versions=>{versions.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));const latest=versions[0],published=typeof contents!=='undefined'&&Array.isArray(contents)?contents.find(x=>latest.contentId&&x.contentId===latest.contentId&&x.status==='published'):null;return `<article class="gs-draft-group">${published?`<p class="muted">현재 공개본 · v${e(published.version)}</p>`:''}${draftButton(latest)}${versions.length>1?`<details><summary>이전 초안 ${versions.length-1}건</summary>${versions.slice(1).map(draftButton).join('')}</details>`:''}</article>`;}).join('')}</div>`:'<p class="gs-empty">현재 조건에 맞는 작성·검토 대기 자료가 없습니다.</p>'}${listLimit?'<p class="sub">초안은 최근 200개 작성 기록에서 검색합니다.</p>':''}`;
+  root.hidden=false;if(!listLoaded)return;
+  root.innerHTML=listCursor?'<button type="button" class="btn" data-gs-more>이전 작성 기록 더 불러오기</button>':'';
+  root.querySelector('[data-gs-more]')?.addEventListener('click',()=>refresh({more:true}));
+  globalThis.CarestepHqUX?.renderMaterials();
  }
- async function refresh(){
-  const owner=identity();if(listPending?.owner===owner)return listPending.promise;
+ function search(){clearTimeout(searchTimer);searchTimer=setTimeout(()=>refresh(),250);}
+ async function refresh({more=false}={}){
+  const owner=identity(),query=queryKey();if(listPending?.owner===owner&&listPending.query===query)return listPending.promise;
+  if(more&&(!listCursor||query!==listQuery))return;
   const seq=++listSequence,keep=listLoaded&&listOwner===owner;
-  root.querySelector('[data-gs-list-status]')?.remove();if(!keep){root.innerHTML='';listLoaded=false;listAt=0;listItems=[];}
+  root.hidden=false;root.querySelector('[data-gs-list-status]')?.remove();if(!keep){root.innerHTML='';listLoaded=false;listAt=0;listItems=[];listCursor=null;}
   const notice=document.createElement('p');notice.dataset.gsListStatus='';notice.setAttribute('role','status');notice.textContent=keep?'초안 목록 확인 중':'초안 목록 불러오는 중';root.prepend(notice);
+  const [q,category]=JSON.parse(query),params=new URLSearchParams();if(q)params.set('q',q);if(category!=='all')params.set('category',category);if(more)params.set('cursor',listCursor);
   const promise=(async()=>{try{
-   const r=await api('/drafts');if(seq!==listSequence||owner!==identity())return;
+   const r=await api('/drafts'+(params.size?'?'+params:''));if(seq!==listSequence||owner!==identity()||query!==queryKey())return;
    if(!Array.isArray(r.drafts))throw Error('초안 목록을 확인할 수 없습니다.');
-   listItems=r.drafts.filter(x=>x.status!=='published');listLimit=r.drafts.length>=r.limit;listOwner=owner;listLoaded=true;listAt=Date.now();updateCategories();filterList();
+   listItems=more?[...new Map([...listItems,...r.drafts].map(x=>[x.id,x])).values()]:r.drafts;listCursor=r.pagination?.nextCursor||null;listQuery=query;listOwner=owner;listLoaded=true;listAt=Date.now();updateCategories();filterList();
   }catch(error){if(seq!==listSequence||owner!==identity())return;notice.className='gs-error';notice.innerHTML=`최신 초안 조회 실패${keep?' · 이전 목록 표시 · 마지막 확인 '+e(new Date(listAt).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})):''} ${button('다시 확인','refresh')}`;
   }finally{if(listPending?.promise===promise)listPending=null;}})();
-  listPending={owner,promise};return promise;
+  listPending={owner,query,promise};return promise;
+ }
+ async function history(contentId,button){
+  if(button.disabled)return;button.disabled=true;const owner=identity();let cursor=button.dataset.cursor||'';
+  try{const p=new URLSearchParams({contentId});if(cursor)p.set('cursor',cursor);const r=await api('/drafts?'+p);if(owner!==identity()||!button.isConnected)return;
+   const host=button.previousElementSibling,existing=new Set([...host.querySelectorAll('[data-gs-open],[data-guardian-draft]')].map(x=>x.dataset.gsOpen||x.dataset.guardianDraft));
+   for(const d of r.drafts||[]){if(existing.has(d.id))continue;const b=document.createElement('button');b.type='button';b.className='btn small';b.dataset.gsOpen=d.id;b.textContent=(status[d.status]||d.status)+' · 버전 '+(d.version||'미정')+' · '+(d.updatedAt||'').slice(0,10);b.onclick=()=>open(d.id);host.append(b);}
+   button.dataset.cursor=r.pagination?.nextCursor||'';button.textContent=button.dataset.cursor?'이전 이력 더 보기':'전체 작성 이력 확인 완료';button.disabled=!button.dataset.cursor;
+  }catch(error){if(button.isConnected){button.textContent='이력 조회 실패 · 다시 시도';button.disabled=false;}}
  }
  root.addEventListener('click',event=>{const b=event.target.closest('button');if(b?.dataset.gsOpen)open(b.dataset.gsOpen);else if(b?.dataset.gsAction==='new')intro();else if(b?.dataset.gsAction==='refresh')refresh();});
  window.addEventListener('beforeunload',event=>{if(dirty||busy){event.preventDefault();event.returnValue='';}});
- function reset(){listItems=[];listPending=null;reviewState={};listOwner='';listLoaded=false;listAt=0;listSequence++;sequence++;busy=false;dirty=false;dialog?.close();dialog?.remove();dialog=null;draft=null;root.innerHTML='';}
+ function reset(){clearTimeout(searchTimer);listCursor=null;listQuery='';listItems=[];listPending=null;reviewState={};listOwner='';listLoaded=false;listAt=0;listSequence++;sequence++;busy=false;dirty=false;dialog?.close();dialog?.remove();dialog=null;draft=null;root.innerHTML='';}
  new MutationObserver(()=>{if(!document.getElementById('loginOverlay').classList.contains('hidden'))reset();}).observe(document.getElementById('loginOverlay'),{attributes:true,attributeFilter:['class']});
  document.getElementById('guardianNew').addEventListener('click',intro);
- window.GuardianStudio={refresh,published,reset,filterList,updateCategories};
+ window.GuardianStudio={refresh,published,open,history,search,reset,filterList,updateCategories,items:()=>listOwner===identity()?listItems:[]};
 })();

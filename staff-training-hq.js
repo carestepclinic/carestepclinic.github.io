@@ -13,7 +13,7 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
  const search=root.querySelector('[data-protocol-search]'),filter=root.querySelector('[data-protocol-filter]');
  const labels={draft:'검토 대기',published:'공개 중',archived:'공개 중단'};
  const species={dog:'강아지',cat:'고양이',both:'강아지·고양이 공통'};
- const stateKey='carestep_hq_protocol_filters_v1';
+ const stateKey='carestep_hq_protocol_filters_v1',pageWindow={};
  const extra=document.createElement('div');extra.className='hq-protocol-filters';
  extra.innerHTML='<label>대상 동물<select class="input" data-protocol-species><option value="all">전체 동물</option><option value="dog">강아지 · 공통 포함</option><option value="cat">고양이 · 공통 포함</option><option value="both">강아지·고양이 공통</option></select></label><label>진료 분야<select class="input" data-protocol-field><option value="all">전체 분야</option></select></label><label>정렬<select class="input" data-protocol-sort><option value="recent">최근 검토순</option><option value="title">제목순</option><option value="review">검토 대기 우선</option></select></label><button type="button" class="btn" data-protocol-reset>조건 초기화</button><span data-protocol-count role="status"></span><p data-protocol-conditions></p>';
  const quick=document.createElement('div');quick.className='hq-protocol-quick';quick.setAttribute('aria-label','처리할 프로토콜 모아보기');
@@ -51,7 +51,8 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
   extra.querySelector('[data-protocol-conditions]').textContent=conditions.length?'적용 조건 · '+conditions.join(' · '):'전체 자료';
   list.replaceChildren();
   if(!rows.length){const p=document.createElement('p');p.className='empty';p.textContent=failed?(queueCounts.failed>source.length?'실패 작업 상세를 아직 확인하지 못했습니다. 생성·진행 현황에서 확인해주세요.':'검색 조건에 맞는 생성 실패 작업이 없습니다.'):items.length?'검색 조건에 맞는 진료 프로토콜이 없습니다.':'저장된 진료 프로토콜이 없습니다. 생성·진행 현황에서 준비할 자료를 확인하세요.';list.append(p);return;}
-  for(const item of rows){
+  const shown=CarestepHqWorkspace.slice(rows,pageWindow,JSON.stringify([ownerKey(),triage,q,filter.value,animal.value,field.value,sort.value]));
+  for(const item of shown){
    const card=document.createElement('article');card.className='card hq-protocol-card';
    const heading=document.createElement('h2');heading.textContent=item.title||'제목 없음';
    const meta=document.createElement('p');meta.className='muted';meta.textContent=[failed?'생성 실패':labels[item.status]||'상태 확인 필요',species[item.species]||'',fieldOf(item),item.revision?'수정 '+item.revision+'판':'',item.sourceCurrent===false?'원본 변경 확인':''].filter(Boolean).join(' · ');
@@ -60,6 +61,7 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
    const open=document.createElement('button');open.type='button';open.className='btn';open.textContent=failed?'실패 원인·재시도 열기':'본문·검토 열기';open.onclick=()=>{if(!ready())return;const adapter=sessionAdapter();if(failed)ClinicalKnowledge.openQueue(adapter,'protocol',{status:'failed',jobId:item.id});else ClinicalKnowledge.openProtocol(adapter,encodeURIComponent(item.id),true,()=>{ClinicalKnowledge.close();load();});};
    card.append(heading,meta);if(dates.textContent)card.append(dates);if(next.textContent)card.append(next);card.append(open);list.append(card);
   }
+  CarestepHqWorkspace.pager(list,pageWindow,rows.length,draw);
  }
  async function load({reuse=false}={}){
   const owner=ownerKey();

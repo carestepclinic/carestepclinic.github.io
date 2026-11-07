@@ -37,7 +37,7 @@
  function mount(root,adapter){
   if(!root)throw Error('Training root missing');
   root.classList.add('staff-training');
-  let listPending=null,loadedAt=0,listWindowKey='',listLimit=24;
+  let listPending=null,loadedAt=0,listWindowKey='',listLimit=24,hqStatus='all';const hqWindow={};
   let area='education',areaTabs={education:'library',sop:'sop'},resumeScroll=null;
   let data=null,tab=adapter.common?'manage':'library',query='',category='',courseType='',sequence=0,identity='',busy=false,dialog=null,dirty=false,activeDoc=null,activeAssignment=null,activeSupplement=null,requestKey='',message='',sort='number',view='',tabState={},returnFocus=null,manageView='assign',mineFilter='all',mineQuery='',reportQuery='',reportMember='',reportState='all',reportDue='all',reportPage=0;
   const ready=()=>!adapter.isReady||adapter.isReady();
@@ -52,7 +52,7 @@
   function switchTab(value){if(value===tab)return;remember();++sequence;tab=value;const state=tabState[stateKey()]||{};query=state.query||'';category=state.category||'';courseType=state.courseType||'';sort=state.sort||'number';view=state.view||'cards';message='';render();const button=root.querySelector('[data-tab="'+tab+'"]');button?.focus({preventScroll:true});requestAnimationFrame(()=>{if(state.scroll!=null)global.scrollTo({top:state.scroll,behavior:'instant'});else global.CarestepTabPosition?.reveal(root.querySelector('.st-tabs'));});}
   const localToday=()=>new Date(Date.now()+32400000).toISOString().slice(0,10);
   function learningState(a){return a.completed_at?'done':a.status!=='published'?'unavailable':a.due_date&&a.due_date<localToday()?'overdue':a.opened_at?'learning':'new';}
-  function trainingControls(){const toolbar=root.querySelector('.st-toolbar');if(!toolbar)return;const details=document.createElement('details');details.className='st-filter-options';details.innerHTML='<summary>정렬·보기</summary><div></div>';for(const key of ['sort','layout']){const label=toolbar.querySelector('[data-'+key+']')?.closest('label');if(label)details.lastElementChild.append(label);}toolbar.append(details);}
+  function trainingControls(){if(adapter.common)return;const toolbar=root.querySelector('.st-toolbar');if(!toolbar)return;const details=document.createElement('details');details.className='st-filter-options';details.innerHTML='<summary>정렬·보기</summary><div></div>';for(const key of ['sort','layout']){const label=toolbar.querySelector('[data-'+key+']')?.closest('label');if(label)details.lastElementChild.append(label);}toolbar.append(details);}
   function tabCourses(){return filterCourses(data,tab,'','','');}
   function syncFilters(){
    const types=root.querySelector('[data-course-type]'),topics=root.querySelector('[data-category]');
@@ -85,7 +85,7 @@
     ${tab==='trash'?'<p class="st-info">삭제한 자료는 직원에게 표시되지 않습니다. 본문과 이수 기록은 보존되며, 복원해도 자동으로 다시 공개되지 않습니다.</p>':''}
     ${tab==='manage'&&!adapter.common?'<nav class="st-subtabs" aria-label="교육 관리 작업">'+btn('교육 배정','manage-view','data-view="assign" aria-pressed="'+(manageView==='assign')+'"')+btn('이수 현황','manage-view','data-view="report" aria-pressed="'+(manageView==='report')+'"')+'</nav>':''}
     ${tab==='mine'?`<div class="st-summary"><b>학습할 교육 ${pending}개</b><span>이수 ${mine.filter(a=>a.completed_at).length}개 · 읽던 자료와 이수 기록은 서버에 저장됩니다.</span></div>`:''}
-    ${tab!=='mine'&&!(tab==='manage'&&!adapter.common&&manageView==='report')?`<div class="st-toolbar"><label>${tab==='sop'?'업무지침 검색':'교육자료 검색'}<input type="search" data-search placeholder="${tab==='sop'?'업무지침 제목·업무 분야':'질환·실무 주제·교육 제목'}" value="${esc(query)}"></label>${tab==='sop'?'<label>업무 분야<select data-category aria-label="업무 분야"></select></label>':''}<label>정렬<select data-sort><option value="number" ${sort==='number'?'selected':''}>번호·제목순</option><option value="recent" ${sort==='recent'?'selected':''}>최근 수정순</option></select></label><label>보기<select data-layout><option value="cards" ${(view||'cards')==='cards'?'selected':''}>카드</option><option value="list" ${view==='list'?'selected':''}>목록</option></select></label>${!['sop','trash'].includes(tab)?`<label>교육 종류<select data-course-type aria-label="교육 종류"><option value="">전체 교육</option><option value="disease" ${courseType==='disease'?'selected':''}>질환·증상 교육</option><option value="practice" ${courseType==='practice'?'selected':''}>병원 실무 교육</option></select></label>`:''}${adapter.common&&can.edit&&tab==='manage'?btn('일괄 생성·진행 현황','automation'):''}${can.edit&&((adapter.common&&tab==='manage')||(!adapter.common&&tab==='sop'))?btn(tab==='sop'?'SOP 작성':'교육자료 만들기','create','',true):''}</div>`:''}
+    ${tab!=='mine'&&!(tab==='manage'&&!adapter.common&&manageView==='report')?`<div class="st-toolbar"><label>${tab==='sop'?'업무지침 검색':'교육자료 검색'}<input type="search" data-search placeholder="${tab==='sop'?'업무지침 제목·업무 분야':'질환·실무 주제·교육 제목'}" value="${esc(query)}"></label>${tab==='sop'||adapter.common?'<label>분류<select data-category aria-label="분류"></select></label>':''}${adapter.common?'<label>상태<select data-hq-status>'+[['all','전체 상태'],['draft','작성 중'],['review','검토 대기'],['published','공개 중'],['withdrawn','공개 중단']].map(([v,t])=>'<option value="'+v+'" '+(hqStatus===v?'selected':'')+'>'+t+'</option>').join('')+'</select></label>':''}<label>정렬<select data-sort><option value="number" ${sort==='number'?'selected':''}>번호·제목순</option><option value="recent" ${sort==='recent'?'selected':''}>최근 수정순</option></select></label><label>보기<select data-layout><option value="cards" ${(view||'cards')==='cards'?'selected':''}>카드</option><option value="list" ${view==='list'?'selected':''}>목록</option></select></label>${!['sop','trash'].includes(tab)?`<label>교육 종류<select data-course-type aria-label="교육 종류"><option value="">전체 교육</option><option value="disease" ${courseType==='disease'?'selected':''}>질환·증상 교육</option><option value="practice" ${courseType==='practice'?'selected':''}>병원 실무 교육</option></select></label>`:''}${adapter.common&&can.edit&&tab==='manage'?btn('일괄 생성·진행 현황','automation'):''}${can.edit&&((adapter.common&&tab==='manage')||(!adapter.common&&tab==='sop'))?btn(tab==='sop'?'SOP 작성':'교육자료 만들기','create','',true):''}</div>`:''}
     ${tab==='manage'&&!adapter.common?(manageView==='report'?`<section class="st-report"><h2>직원별 교육 현황</h2>${can.manage?'<div data-report></div>':'<p>교육 관리 권한이 필요합니다.</p>'}</section>`:'<p class="st-info">공통 자료는 HQ에서 제작합니다. 교육자료를 선택하고 교육받을 직원을 지정하세요.</p>'):''}
     ${tab==='mine'?'<div class="st-mine-controls"><label>내 교육 검색<input type="search" data-mine-search value="'+esc(mineQuery)+'" placeholder="교육 제목"></label><label>학습 상태<select data-mine-filter>'+[['pending','미완료'],['overdue','기한 초과'],['learning','학습 중'],['new','학습 전'],['done','이수 완료'],['all','전체 · 미완료 우선']].map(([id,label])=>'<option value="'+id+'" '+(mineFilter===id?'selected':'')+'>'+label+'</option>').join('')+'</select></label></div>':''}<div data-list ${tab==='manage'&&!adapter.common&&manageView==='report'?'hidden':''}></div>`;
    trainingControls();syncFilters();renderList();renderReport();root.querySelectorAll('.st-card-manage').forEach(e=>{e.open=expanded.includes(e.dataset.course);});
@@ -97,15 +97,17 @@
     host.innerHTML=rows.length?`<div class="st-grid">${rows.map(a=>`<article class="st-card"><span class="st-tag ${a.completed_at?'st-approved':''}">${a.completed_at?'이수 완료':a.status==='deleted'?'자료 삭제됨':a.status!=='published'?'공개 중단':learningState(a)==='overdue'?'기한 초과':a.opened_at?'학습 중':'학습 전'}</span><h2>${esc(a.title)}</h2><p>${a.version}판 · ${a.completed_at?'이수일 '+shortDate(a.completed_at):'기한 '+shortDate(a.due_date)}</p>${a.score!=null?`<p>최근 점수 ${a.score}점</p>`:''}${a.status==='deleted'?'<p>기존 이수 기록은 보존됩니다.</p>':''}${a.status==='published'?btn(a.completed_at?'다시 보기':a.opened_at?'학습 이어가기':'학습 시작','learn',`data-id="${esc(a.version_id)}" data-assignment="${esc(a.id)}"`,!a.completed_at):'<p>관리자에게 최신 교육자료를 확인해주세요.</p>'}</article>`).join('')}</div>`:'<div class="st-empty"><b>'+(data.assignments.some(a=>a.user_id===actor().userId)?'현재 조건에 맞는 교육이 없습니다.':'아직 배정된 교육이 없습니다.')+'</b><p>학습 상태를 바꾸거나 교육자료실에서 학습을 시작하세요.</p></div>';
     return;
    }
-   const filtered=filterCourses(data,tab,query,tab==='sop'?category:'',['sop','trash'].includes(tab)?'':courseType);
-   const rows=sortCourses(tab==='sop'||(adapter.common&&tab==='manage')?groupCourses(filtered):filtered,sort);
+   const filtered=filterCourses(data,tab,query,tab==='sop'||adapter.common?category:'',['sop','trash'].includes(tab)?'':courseType);
+   const rows=sortCourses(tab==='sop'||(adapter.common&&tab==='manage')?groupCourses(filtered):filtered,sort).filter(c=>!adapter.common||hqStatus==='all'||(c.versions||[c]).some(v=>v.status===hqStatus));
    if(tab==='trash'){
-    host.innerHTML='<p class="st-count">'+rows.length+'개 자료</p>'+(rows.length?'<div class="st-grid">'+rows.map(c=>`<article class="st-card"><span class="st-tag">삭제됨 · ${c.common?'공통':'우리 병원'}</span><h2>${esc(c.title)}</h2><p>${esc(typeLabel(c))} · 삭제 ${shortDate(c.deleted_at)}</p><p>${c.course_deleted_at?'자료 전체':c.version+'판'} · 이수 기록 보존</p>${canDelete(c)?btn('복원',c.course_deleted_at?'restore-course':'restore-version',`data-course="${esc(c.course_id)}" data-id="${esc(c.id)}"`):'<p>공개 검토 권한이 있는 관리자에게 복원을 요청해주세요.</p>'}</article>`).join('')+'</div>':'<div class="st-empty">삭제한 자료가 없습니다.</div>');return;
+    const shown=adapter.common?global.CarestepHqWorkspace.slice(rows,hqWindow,JSON.stringify([identity,tab,query,category,courseType,sort,hqStatus])):rows;
+    host.innerHTML='<p class="st-count">'+rows.length+'개 자료</p>'+(rows.length?'<div class="st-grid">'+shown.map(c=>`<article class="st-card"><span class="st-tag">삭제됨 · ${c.common?'공통':'우리 병원'}</span><h2>${esc(c.title)}</h2><p>${esc(typeLabel(c))} · 삭제 ${shortDate(c.deleted_at)}</p><p>${c.course_deleted_at?'자료 전체':c.version+'판'} · 이수 기록 보존</p>${canDelete(c)?btn('복원',c.course_deleted_at?'restore-course':'restore-version',`data-course="${esc(c.course_id)}" data-id="${esc(c.id)}"`):'<p>공개 검토 권한이 있는 관리자에게 복원을 요청해주세요.</p>'}</article>`).join('')+'</div>':'<div class="st-empty">삭제한 자료가 없습니다.</div>');if(adapter.common)global.CarestepHqWorkspace.pager(host,hqWindow,rows.length,renderList);return;
    }
-   const windowKey=JSON.stringify([identity,tab,query,category,courseType,sort,view||'cards']);if(windowKey!==listWindowKey){const saved=tabState[stateKey()];listLimit=saved?.listWindowKey===windowKey?Math.max(24,saved.listLimit||24):24;listWindowKey=windowKey;}if(tabState[stateKey()])Object.assign(tabState[stateKey()],{listLimit,listWindowKey});const shown=adapter.common||tab==='sop'?rows:rows.slice(0,listLimit);
-   const active=[query&&'검색: '+query,tab==='sop'&&category,courseType&&courseTypeLabels[courseType]].filter(Boolean);
+   const windowKey=JSON.stringify([identity,tab,query,category,courseType,sort,view||'cards']);if(windowKey!==listWindowKey){const saved=tabState[stateKey()];listLimit=saved?.listWindowKey===windowKey?Math.max(24,saved.listLimit||24):24;listWindowKey=windowKey;}if(tabState[stateKey()])Object.assign(tabState[stateKey()],{listLimit,listWindowKey});const shown=adapter.common?global.CarestepHqWorkspace.slice(rows,hqWindow,windowKey+hqStatus):tab==='sop'?rows:rows.slice(0,listLimit);
+   const active=[query&&'검색: '+query,(tab==='sop'||adapter.common)&&category,adapter.common&&hqStatus!=='all'&&status(hqStatus),courseType&&courseTypeLabels[courseType]].filter(Boolean);
    host.innerHTML=(active.length?'<div class="st-filter-state"><span>'+active.map(esc).join(' · ')+'</span>'+btn('조건 해제','clear')+'</div>':'')+
-    '<p class="st-count" role="status" aria-live="polite">'+rows.length+'개 자료'+(active.length?' · 검색 결과':'')+'</p>'+(rows.length?'<div class="st-grid '+((view|| 'cards')==='list'?'st-list-view':'')+'">'+shown.map(c=>courseCard(c)).join('')+'</div>'+(shown.length<rows.length?'<div class="cs-list-more">'+btn('자료 더 보기 · '+shown.length+' / '+rows.length,'list-more')+'</div>':''):'<div class="st-empty"><b>'+(active.length?'조건에 맞는 자료가 없습니다.':'아직 표시할 자료가 없습니다.')+'</b><p>'+(active.length?'현재 탭의 검색 조건을 해제하거나 바꿔주세요.':tab==='sop'?'병원에서 사용하는 업무 절차를 작성하고 검토 후 공개하세요.':'HQ에서 공개한 교육자료를 여기에서 확인할 수 있습니다.')+'</p>'+(active.length?btn('검색 초기화','clear'):'')+'</div>');
+    '<p class="st-count" role="status" aria-live="polite">'+rows.length+'개 자료'+(active.length?' · 검색 결과':'')+'</p>'+(rows.length?'<div class="st-grid '+((view|| 'cards')==='list'?'st-list-view':'')+'">'+shown.map(c=>courseCard(c)).join('')+'</div>'+(!adapter.common&&shown.length<rows.length?'<div class="cs-list-more">'+btn('자료 더 보기 · '+shown.length+' / '+rows.length,'list-more')+'</div>':''):'<div class="st-empty"><b>'+(active.length?'조건에 맞는 자료가 없습니다.':'아직 표시할 자료가 없습니다.')+'</b><p>'+(active.length?'현재 탭의 검색 조건을 해제하거나 바꿔주세요.':tab==='sop'?'병원에서 사용하는 업무 절차를 작성하고 검토 후 공개하세요.':'HQ에서 공개한 교육자료를 여기에서 확인할 수 있습니다.')+'</p>'+(active.length?btn('검색 초기화','clear'):'')+'</div>');
+   if(adapter.common)global.CarestepHqWorkspace.pager(host,hqWindow,rows.length,renderList);
   }
   function courseCard(c){
    const own=c.owned&&(adapter.common||c.kind==='sop'),can=actor().capabilities,versions=c.versions||[c],draft=versions.find(v=>['draft','review'].includes(v.status));
@@ -132,7 +134,7 @@
   }
   async function load({reuse=false}={}){
    const current=adapter.identity?.()||'';
-   if(current!==identity){loadedAt=0;listPending=null;mineFilter='all';mineQuery='';reportQuery='';reportMember='';reportState='all';reportDue='all';reportPage=0;manageView='assign';identity=current;tabState={};areaTabs={education:'library',sop:'sop'};resumeScroll=null;sort='number';view='';data=null;query='';category='';courseType='';if(dialog){dirty=false;closeDialog();}}
+   if(current!==identity){hqStatus='all';hqWindow.signature='';loadedAt=0;listPending=null;mineFilter='all';mineQuery='';reportQuery='';reportMember='';reportState='all';reportDue='all';reportPage=0;manageView='assign';identity=current;tabState={};areaTabs={education:'library',sop:'sop'};resumeScroll=null;sort='number';view='';data=null;query='';category='';courseType='';if(dialog){dirty=false;closeDialog();}}
    if(!ready()){data=null;shell();notice('병원 직원 계정으로 로그인하면 교육센터를 사용할 수 있습니다.');return;}
    if(reuse&&data&&Date.now()-loadedAt<30000){if(!dialog&&(resumeScroll!==null||root.querySelector('[data-tab][aria-current=page]')?.dataset.tab!==tab))render();resumeArea();return;}
    if(reuse&&listPending?.seq===sequence)return listPending.promise;
@@ -142,6 +144,7 @@
   }
   function closeDialog(){
    if(busy){notice('처리 결과를 확인하고 있습니다.');return false;}
+   if(dirty&&adapter.common&&global.CarestepHqWorkspace){global.CarestepHqWorkspace.discard(dialog,()=>{dirty=false;closeDialog();});return false;}
    if(dirty&&!global.confirm('저장하지 않은 변경사항을 취소하고 닫을까요?'))return false;
    const old=dialog;dialog=null;dirty=false;activeDoc=null;activeAssignment=null;activeSupplement=null;
    if(old){old.close();old.remove();returnFocus?.focus?.();}return true;
@@ -152,7 +155,7 @@
    dialog.innerHTML=`<header><h2 id="stDialogTitle">${esc(title)}</h2>${btn('닫기','close')}</header><p class="st-status" data-dialog-status role="status" aria-live="polite"></p><div class="st-dialog-body">${body}</div>`;
    dialog.addEventListener('cancel',e=>{e.preventDefault();closeDialog();});
    dialog.addEventListener('click',handle);dialog.addEventListener('input',()=>{if(dialog?.querySelector('[data-editor],[data-supplement-create],[data-supplement-apply],[data-gap-review]'))dirty=true;});
-   document.body.append(dialog);dialog.showModal();return true;
+   document.body.append(dialog);if(adapter.common)global.CarestepHqWorkspace?.documentView(dialog,'직원 교육자료');dialog.showModal();return true;
   }
   async function mutate(action){
    if(busy)return;
@@ -342,7 +345,7 @@
    if(a==='manage-view'){manageView=b.dataset.view;render();root.querySelector('[data-st=manage-view][data-view='+manageView+']')?.focus({preventScroll:true});return;}
    if(a==='report-page'){reportPage+=Number(b.dataset.step);renderReportRows();return;}
    if(a==='section'){const target=dialog?.querySelector('#'+b.dataset.section);target?.scrollIntoView({block:'start',behavior:'auto'});target?.focus({preventScroll:true});return;}
-   if(a==='clear'){query='';category='';courseType='';render();return;}
+   if(a==='clear'){hqStatus='all';query='';category='';courseType='';render();return;}
    if(a==='reopen-publication'){await openDocument(id,'',false,true);return;}
    if(a==='edit-course'){await openDocument(id,'',true);return;}
    if(a==='revision-dialog'){revisionDialog();return;}
@@ -433,7 +436,7 @@
   }
   root.addEventListener('click',handle);
   root.addEventListener('input',e=>{if(e.target.matches('[data-mine-search]')){mineQuery=e.target.value;renderList();}if(e.target.matches('[data-search]')){query=e.target.value;renderList();}});
-  root.addEventListener('change',e=>{if(e.target.matches('[data-mine-filter]')){mineFilter=e.target.value;renderList();}if(e.target.matches('[data-category]')){category=e.target.value;renderList();}if(e.target.matches('[data-course-type]')){courseType=e.target.value;syncFilters();renderList();}if(e.target.matches('[data-sort]')){sort=e.target.value;renderList();}if(e.target.matches('[data-layout]')){view=e.target.value;renderList();}});
+  root.addEventListener('change',e=>{if(e.target.matches('[data-hq-status]')){hqStatus=e.target.value;renderList();}if(e.target.matches('[data-mine-filter]')){mineFilter=e.target.value;renderList();}if(e.target.matches('[data-category]')){category=e.target.value;renderList();}if(e.target.matches('[data-course-type]')){courseType=e.target.value;syncFilters();renderList();}if(e.target.matches('[data-sort]')){sort=e.target.value;renderList();}if(e.target.matches('[data-layout]')){view=e.target.value;renderList();}});
   global.addEventListener('beforeunload',e=>{if(dirty||busy){e.preventDefault();e.returnValue='';}});
   function clear(){
    if(adapter.common)global.TrainingAutomation?.close();

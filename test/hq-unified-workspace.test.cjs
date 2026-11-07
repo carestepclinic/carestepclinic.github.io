@@ -1,0 +1,75 @@
+const {test,before,after}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
+const {chromium}=require('playwright');
+const root=path.resolve(__dirname,'..');let browser,server,origin;
+before(async()=>{
+ server=http.createServer((req,res)=>{const name=new URL(req.url,'http://localhost').pathname.slice(1);if(name.includes('/')||!/^[-\w.]+\.(html|js|css|woff2)$/.test(name)||!fs.existsSync(path.join(root,name))){res.writeHead(404);res.end();return;}res.setHeader('Content-Type',({'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.woff2':'font/woff2'})[path.extname(name)]);res.end(fs.readFileSync(path.join(root,name)));});
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));origin='http://127.0.0.1:'+server.address().port;
+ browser=await chromium.launch({headless:true,...(process.env.HQ_TEST_BROWSER?{executablePath:process.env.HQ_TEST_BROWSER}:{})});
+});
+after(async()=>{await browser?.close();await new Promise(r=>server.close(r));});
+async function fixture(t,width=1280,hash=''){
+ const context=await browser.newContext({viewport:{width,height:900}});await context.route('**/*',r=>r.request().url().startsWith(origin)?r.continue():r.abort());
+ const p=await context.newPage(),errors=[];p.setDefaultTimeout(7000);p.on('pageerror',e=>errors.push(e.message));t.after(async()=>{assert.deepEqual(errors,[]);await context.close();});await p.goto(origin+'/hq.html'+hash);
+ await p.evaluate(()=>{
+  window.reads=[];window.writes=[];window.owner='synthetic';hqSessionToken=()=>owner;window.failList=false;
+  const docs=[{id:'p1',title:'시험 질환 A',status:'draft',species:'dog',sourceCurrent:true},{id:'p2',title:'시험 질환 B',status:'published',species:'cat',sourceCurrent:true}];
+  req=async(p,o)=>{if(o?.method&&o.method!=='GET'){writes.push(p);throw Error('unexpected write');}reads.push(p);
+   if(p==='/hq/training/knowledge-protocols'){if(failList)throw Error('시험 조회 실패');return {items:docs,queue:{counts:{completed:2,queued:1,failed:1},items:[]}};}
+   if(p==='/hq/training/knowledge-protocols/preview')return {targets:[]};
+   if(p==='/hq/training/knowledge-protocols/p1')return {document:{id:'p1',status:'draft',revision:1,body:{title:'시험 질환 A',disease:'시험',species:'dog',summary:'시험 요약',steps:[]},sources:[],gaps:[],gapResolutions:[]}};
+   if(p==='/hq/training/')return {actor:{capabilities:{}},courses:[],assignments:[],members:[],categories:[]};
+   if(p==='/hq/guardian-studio/drafts')return {drafts:[],limit:200};
+   return {contents:[],categories:[],drafts:[],items:[]};
+  };
+  document.getElementById('loginOverlay').classList.add('hidden');
+ });return p;
+}
+async function voicePage(t,width=1280){
+ const p=await fixture(t,width);await p.evaluate(()=>{
+  window.voiceData=Array.from({length:60},(_,i)=>({id:'v'+i,title:'문의 '+i,clinicName:'시험 병원 '+i,type:'inquiry',status:'new',adminNote:'기존 메모',details:'<img src=x>\n문의 전체 내용',createdAt:'2026-11-01',updatedAt:'2026-11-02'}));window.failSave=false;window.delaySave=false;
+  const old=req;req=async(path,o={})=>{if(path.startsWith('/hq/voice')){if(o.method==='PATCH'){writes.push({path,body:JSON.parse(o.body)});if(delaySave)await new Promise(r=>window.releaseSave=r);if(failSave)throw Error('합성 저장 실패');Object.assign(voiceData.find(x=>path.endsWith('/'+x.id)),JSON.parse(o.body));return {ok:true};}reads.push(path);const u=new URL(path,'https://fixture.test');let rows=voiceData.filter(x=>u.searchParams.get('status')==='all'||x.status===u.searchParams.get('status'));if(u.searchParams.get('q'))rows=rows.filter(x=>(x.title+x.clinicName).includes(u.searchParams.get('q')));const start=u.searchParams.has('cursor')?50:0;return {requests:structuredClone(rows.slice(start,start+50)),pagination:{nextCursor:rows.length>start+50?'older':null}};}return old(path,o);};showView('voice');
+ });await p.locator('[data-voice=v0]').waitFor();return p;
+}
+test('Voice status and memo survive filters, pages, refresh and navigation; failed save can be retried once',async t=>{
+ const p=await voicePage(t);const row=()=>p.locator('[data-voice=v0]');await row().locator('.voice-status').selectOption('reviewing');await row().locator('.voice-note').fill('확인할 메모\n둘째 줄');
+ await p.locator('#voiceStatus').selectOption('answered');await p.locator('#voiceTable .empty').waitFor();await p.locator('#voiceStatus').selectOption('all');await row().waitFor();assert.equal(await row().locator('.voice-note').inputValue(),'확인할 메모\n둘째 줄');
+ await p.locator('#voiceTable .hq-pagination').getByRole('button',{name:'다음',exact:true}).click();await p.locator('#voiceTable .hq-pagination').getByRole('button',{name:'이전',exact:true}).click();assert.equal(await row().locator('.voice-status').inputValue(),'reviewing');
+ await p.evaluate(()=>showView('content'));await p.evaluate(()=>showView('voice'));await row().waitFor();await p.locator('#voiceRefresh').click();await p.waitForFunction(()=>!document.querySelector('#voiceType').disabled);assert.equal(await row().locator('.voice-note').inputValue(),'확인할 메모\n둘째 줄');assert.deepEqual(await p.evaluate(()=>writes),[]);
+ await p.evaluate(()=>failSave=true);await row().locator('.voice-save').click();await row().getByText(/합성 저장 실패/).waitFor();await p.evaluate(()=>{failSave=false;delaySave=true;});await row().locator('.voice-save').dblclick();assert.equal(await row().locator('.voice-note').isDisabled(),true);await p.evaluate(()=>releaseSave());await p.waitForFunction(()=>writes.length===2&&!CarestepHqUX.isSaving());assert.deepEqual(await p.evaluate(()=>writes[1].body),{status:'reviewing',adminNote:'확인할 메모\n둘째 줄'});
+});
+test('Voice pages include earlier server records and title or clinic search reaches them',async t=>{
+ const p=await voicePage(t);assert.equal(await p.locator('[data-voice]').count(),24);await p.getByRole('button',{name:'이전 요청 더 불러오기',exact:true}).click();await p.waitForFunction(()=>reads.some(x=>x.includes('cursor=')));assert.match(await p.locator('#voiceResultSummary').innerText(),/60건/);
+ await p.locator('#hqVoiceSearch').fill('시험 병원 59');await p.locator('.hq-voice-search').getByRole('button',{name:'검색',exact:true}).click();await p.locator('[data-voice=v59]').waitFor();assert.equal(await p.locator('[data-voice]').count(),1);assert.ok((await p.evaluate(()=>reads)).some(x=>new URL(x,'https://t.test').searchParams.get('q')==='시험 병원 59'));assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+test('Voice cancellation uses an explicit dialog and logout clears drafts and stale confirmation',async t=>{
+ const p=await voicePage(t);await p.locator('[data-voice=v0] .voice-note').fill('미저장 메모');await p.locator('[data-voice=v0] .voice-cancel').click();await p.locator('[data-hq-confirm-cancel]').click();assert.equal(await p.locator('[data-voice=v0] .voice-note').inputValue(),'미저장 메모');await p.locator('[data-voice=v0] .voice-cancel').click();await p.evaluate(()=>document.getElementById('loginOverlay').classList.remove('hidden'));await p.locator('.hq-confirm').waitFor({state:'detached'});await p.evaluate(()=>{owner='new-session';document.getElementById('loginOverlay').classList.add('hidden');return loadVoice();});await p.locator('[data-voice=v0]').waitFor();assert.equal(await p.locator('[data-voice=v0] .voice-note').inputValue(),'기존 메모');assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+for(const width of [390,1440])test('Voice editable table and common confirmation fit '+width,async t=>{
+ const p=await voicePage(t,width);await p.locator('[data-voice=v0] .voice-note').fill('메모');await p.locator('[data-voice=v0] .voice-cancel').click();assert.ok(await p.locator('.hq-confirm').evaluate(e=>e.scrollWidth<=e.clientWidth+1));await p.locator('[data-hq-confirm-cancel]').click();assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+});
+async function materials(p){await p.evaluate(()=>{
+ window.materials=Array.from({length:60},(_,i)=>({contentId:'c'+i,title:'자료 '+String(i).padStart(2,'0'),status:'published',category:i%2?'안과':'내과',species:'dog',version:1,updatedAt:'2026-11-01'}));window.drafts=[{id:'gd_old',contentId:'c0',title:'자료 00',category:'내과',species:'dog',status:'draft',version:2,updatedAt:'2026-11-01'},{id:'gd_new',contentId:'c0',title:'자료 00',category:'내과',species:'dog',status:'review',version:3,updatedAt:'2026-11-02'}];
+ const old=req;req=async(path,o)=>{if(path==='/hq/content'){reads.push(path);return {contents:materials};}if(path.startsWith('/hq/guardian-studio/drafts')){reads.push(path);const u=new URL(path,'https://fixture.test');if(u.searchParams.has('contentId'))return {drafts:[...drafts,{id:'gd_history',contentId:'c0',title:'자료 00',status:'published',version:1,updatedAt:'2026-10-01'}]};if(u.searchParams.get('q')==='오래된 자료')return {drafts:[{id:'gd_older',contentId:'old',title:'오래된 자료',status:'draft',category:'내과',species:'dog'}]};return {drafts,limit:200,pagination:{nextCursor:null}};}return old(path,o);};showView('content');
+ });await p.locator('[data-guardian-draft=gd_new]').waitFor();}
+test('Guardian published and draft versions share one row, page size is bounded and history fetches older versions',async t=>{
+ const p=await fixture(t);await materials(p);assert.equal(await p.locator('[data-content-row]').count(),24);assert.equal(await p.locator('[data-content-row=c0]').count(),1);const row=p.locator('[data-content-row=c0]');assert.equal(await row.locator('[data-guardian-document]').count(),1);assert.equal(await row.locator('[data-guardian-draft=gd_new]').isVisible(),true);await row.locator('summary').click();await row.locator('[data-guardian-history]').click();await row.locator('[data-gs-open=gd_history]').waitFor();
+ await p.locator('#contentTable .hq-pagination').getByRole('button',{name:'다음',exact:true}).click();assert.equal(await p.locator('[data-content-row]').count(),24);await p.locator('#contentTable .hq-pagination').getByRole('button',{name:'다음',exact:true}).click();assert.equal(await p.locator('[data-content-row]').count(),12);
+ await p.locator('#contentCategory').selectOption('안과');assert.equal(await p.locator('[data-content-row]').count(),24);assert.match(await p.locator('#contentTable .hq-pagination').innerText(),/1–24 \/ 30/);assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+test('Guardian search reaches drafts outside the initial loaded window and stale query replies are ignored',async t=>{
+ const p=await fixture(t);await materials(p);await p.locator('#contentSearch').fill('오래된 자료');await p.locator('[data-content-row=old]').waitFor();assert.ok((await p.evaluate(()=>reads)).some(x=>new URL(x,'https://t.test').searchParams.get('q')==='오래된 자료'));
+ await p.evaluate(()=>{const old=req;window.pendingSearch={};req=(path,o)=>path.includes('/drafts?')&&!path.includes('contentId')?new Promise(r=>pendingSearch[new URL(path,'https://t.test').searchParams.get('q')]=r):old(path,o);});
+ await p.locator('#contentSearch').fill('이전 검색');await p.waitForFunction(()=>pendingSearch['이전 검색']);await p.locator('#contentSearch').fill('최신 검색');await p.waitForFunction(()=>pendingSearch['최신 검색']);await p.evaluate(()=>pendingSearch['최신 검색']({drafts:[{id:'gd_latest',title:'최신 검색',status:'draft'}]}));await p.locator('[data-content-row=gd_latest]').waitFor();await p.evaluate(()=>pendingSearch['이전 검색']({drafts:[{id:'gd_stale',title:'이전 검색',status:'draft'}]}));assert.equal(await p.locator('[data-content-row=gd_stale]').count(),0);assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+for(const view of ['training','protocols'])test(view+' paginates and preserves page on return, filters reset to page one',async t=>{
+ const p=await fixture(t);await p.evaluate(view=>{const old=req;req=(path,o)=>path==='/hq/training/'?Promise.resolve({actor:{common:true,capabilities:{edit:true,review:true}},assignments:[],members:[],courses:Array.from({length:60},(_,i)=>({id:'v'+i,course_id:'c'+i,title:'교육 '+String(i).padStart(2,'0'),kind:'education',category:i%2?'안과':'내과',version:1,status:'draft',owned:true,common:true}))}):path==='/hq/training/knowledge-protocols'?Promise.resolve({items:Array.from({length:60},(_,i)=>({id:'p'+i,title:'프로토콜 '+String(i).padStart(2,'0'),status:'draft',species:'dog',category:i%2?'안과':'내과'})),queue:{counts:{},items:[]}}):old(path,o);showView(view);},view);
+ const selector=view==='training'?'#training .st-card':'.hq-protocol-card',pager=p.locator('#'+view+' .hq-pagination');await p.locator(selector).first().waitFor();assert.equal(await p.locator(selector).count(),24);await pager.getByRole('button',{name:'다음',exact:true}).click();assert.match(await pager.innerText(),/25–48/);await p.evaluate(()=>showView('content'));await p.evaluate(view=>showView(view),view);await p.locator(selector).first().waitFor();assert.match(await pager.innerText(),/25–48/);await p.locator(view==='training'?'#training [data-category]':'[data-protocol-field]').selectOption('안과');assert.match(await pager.innerText(),/1–24 \/ 30/);assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+test('Subscription zero-match search announces the result and keyboard reset restores rows',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>{const old=req;req=(path,o)=>path==='/hq/subscriptions'?Promise.resolve({subscriptions:[{clinicId:'A',clinicName:'시험 병원',planCode:'BASIC',status:'active',billingCycle:'monthly',credit:{}}]}):path==='/hq/plans'?Promise.resolve({plans:[]}):old(path,o);showView('billing');});await p.locator('#subscriptionTable .hq-compact-main-row').waitFor();await p.locator('#hqSubscriptionSearch').fill('없는 병원');await p.locator('#hqSubscriptionResults').getByRole('button').waitFor();assert.match(await p.locator('#hqSubscriptionResults').innerText(),/검색 결과 0건/);assert.equal(await p.locator('#subscriptionTable .hq-compact-main-row:visible').count(),0);await p.locator('#hqSubscriptionResults button').press('Enter');assert.equal(await p.locator('#subscriptionTable .hq-compact-main-row:visible').count(),1);assert.equal(await p.locator('#hqSubscriptionSearch').inputValue(),'');assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+for(const width of [390,1440])test('Document workspaces and discard keep protocol changes until explicit cancellation '+width,async t=>{
+ const p=await fixture(t,width);await p.evaluate(()=>showView('protocols'));await p.locator('.hq-protocol-card').first().getByRole('button').click();const d=p.locator('dialog.hq-document-workspace');await d.waitFor();assert.equal(await d.getAttribute('data-hq-document'),'진료 프로토콜');assert.ok(await d.evaluate(e=>e.scrollWidth<=e.clientWidth+1));const input=d.locator('[name=title]');await input.fill('수정한 제목');await d.locator('[data-ck-close]').click();await d.locator('[data-hq-stay]').click();assert.equal(await input.inputValue(),'수정한 제목');await d.locator('[data-ck-close]').click();await d.locator('[data-hq-discard-confirm]').click();await d.waitFor({state:'detached'});assert.deepEqual(await p.evaluate(()=>writes),[]);
+});

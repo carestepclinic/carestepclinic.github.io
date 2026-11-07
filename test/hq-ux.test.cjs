@@ -6,7 +6,7 @@ const http=require('node:http');
 const {chromium}=require('playwright');
 let browser,server,origin;
 const root=resolve(__dirname,'..');
-const allowed=new Set(['deployment-status.js','clinic-capabilities.js','guardian-studio.js','guardian-studio.css','hq.html','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
+const allowed=new Set(['deployment-status.js','clinic-capabilities.js','guardian-studio.js','guardian-studio.css','hq.html','hq-workspace.js','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
 before(async()=>{
   server=http.createServer((req,res)=>{
     const file=new URL(req.url,'http://localhost').pathname.slice(1);
@@ -21,7 +21,7 @@ after(async()=>{await browser?.close();await new Promise(r=>server?server.close(
 async function fixture(t,width=1280){
   const context=await browser.newContext({viewport:{width,height:900}});
   await context.route('**/*',route=>route.request().url().startsWith(origin)?route.continue():route.abort());
-  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  const page=await context.newPage(),errors=[];page.setDefaultTimeout(8000);page.on('pageerror',e=>errors.push(e.message));
   t.after(async()=>{assert.deepEqual(errors,[]);await context.close();});
   await page.goto(origin+'/hq.html');
   await page.evaluate(()=>{
@@ -151,7 +151,7 @@ for(const width of [390,1280])test(`journey pagination preserves approval bounda
  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  assert.ok(await detail.evaluate(el=>el.getBoundingClientRect().width>=el.closest('table').getBoundingClientRect().width*.95));
  await p.locator('#journeySelectAllReview').check();assert.equal(await p.locator('[data-journey-bulk]:checked').count(),20);
- await p.locator('#journeyBulkApprove').click();assert.equal(await p.evaluate(()=>writes.length),0);
+ await p.locator('#journeyBulkApprove').click();await p.locator('[data-hq-confirm-cancel]').click();assert.equal(await p.evaluate(()=>writes.length),0);
  await p.evaluate(()=>{journeyBulkBusy=true;updateJourneyBulkUi();});
  assert.equal(await p.getByRole('button',{name:'다음',exact:true}).isDisabled(),true);
  assert.equal(await p.locator('[data-journey-status-quick]').first().isDisabled(),true);
@@ -180,7 +180,7 @@ for(const width of [390,1280])test(`plan comparison shows saved amounts and a si
  await p.locator('[data-plan="PRO"] .monthly').fill('170000');
  await p.locator('[data-choose-plan="BASIC"]').click();
  assert.equal(await p.locator('[data-plan="PRO"]').isVisible(),true);
- assert.equal(await p.locator('[data-plan="PRO"] .monthly').inputValue(),'170000');
+ assert.equal(await p.locator('[data-plan="PRO"] .monthly').inputValue(),'170000');await p.locator('[data-hq-confirm-cancel]').click();
  assert.equal(await p.evaluate(()=>writes.length),0);
  await p.locator('[data-plan="PRO"]').getByRole('button',{name:'수정 취소',exact:true}).click();
  if(process.env.HQ_SCREENSHOTS){await p.evaluate(()=>{document.activeElement.blur();scrollTo(0,0);});await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,`hq-next-plans-${width}.png`),fullPage:true});}
@@ -353,7 +353,7 @@ async function contentFixture(t,width=1280){
       return baseReq(path,options);
     };
     loadHqActionCenter=async()=>{};
-    window.confirm=message=>{contentConfirms.push(message);return window.allowContentWrite===true;};
+    // Confirmation is exercised through the actual in-page dialog below.
   });
   return p;
 }
@@ -406,7 +406,7 @@ test('content selection covers only visible archived rows, supports partial stat
   assert.equal(await p.locator('#contentBulkDelete').isDisabled(),true);
   await p.locator('#contentManageMode').check();await p.locator('#contentSelectAllArchived').check();await p.locator('#contentBulkDelete').click();
   assert.equal(await p.evaluate(()=>writes.length),0);
-  assert.match(await p.evaluate(()=>contentConfirms.at(-1)),/1건을 삭제[\s\S]*시험 보관 자료 A[\s\S]*되돌릴 수 없습니다/);
+  assert.match(await p.locator('.hq-confirm').innerText(),/1건을 삭제[\s\S]*시험 보관 자료 A[\s\S]*되돌릴 수 없습니다/);await p.locator('[data-hq-confirm-cancel]').click();assert.equal(await p.evaluate(()=>writes.length),0);
 });
 
 test('content loading/error never reports zero data and retry restores real empty result',async t=>{
@@ -441,7 +441,7 @@ test('content keeps the newest load and restores category, checkbox and search t
 test('content status writes once, blocks navigation during save, then reloads confirmed state',async t=>{
   const p=await contentFixture(t);await contentPage(p);
   await p.evaluate(()=>{allowContentWrite=true;contentWriteDelay=true;});
-  await p.locator('[data-content-status="sample-live"]').dblclick();
+  await p.locator('[data-content-status="sample-live"]').click();await p.locator('[data-hq-confirm-accept]').dblclick();
   await p.waitForFunction(()=>writes.length===1);
   assert.equal(await p.locator('#contentRefresh').isDisabled(),true);
   await p.evaluate(()=>showView('voice'));assert.equal(await p.locator('.view.active').getAttribute('id'),'content');
@@ -455,7 +455,7 @@ test('content status writes once, blocks navigation during save, then reloads co
 test('content bulk deletion reports partial failure, retains only failed selection and does not retry automatically',async t=>{
   const p=await contentFixture(t);await contentPage(p);
   await p.evaluate(()=>{allowContentWrite=true;contentWriteFail='sample-archive-b';});
-  await p.locator('#contentManageMode').check();await p.locator('#contentSelectAllArchived').check();await p.locator('#contentBulkDelete').click();
+  await p.locator('#contentManageMode').check();await p.locator('#contentSelectAllArchived').check();await p.locator('#contentBulkDelete').click();await p.locator('[data-hq-confirm-accept]').click();
   await p.waitForFunction(()=>$('contentBulkResult').textContent.includes('결과 확인 필요 1건')&&$('contentArchived').textContent==='1');
   assert.equal(await p.evaluate(()=>writes.length),2);
   assert.match(await p.locator('#contentBulkResult').innerText(),/삭제 완료 1건[\s\S]*시험 보관 자료 B: 시험 콘텐츠 저장 실패/);
@@ -561,7 +561,7 @@ test('plan review shows target/before/after; cancel writes nothing; confirmed do
   assert.match(await p.locator('dialog').innerText(),/BASIC 공통 요금제 변경[\s\S]*기존 계약[\s\S]*79,000원[\s\S]*80,000원/);
   await p.locator('[data-review-cancel]').click();assert.equal(await p.evaluate(()=>writes.length),0);
   await p.locator('#hqTabpayments').click();assert.equal(await p.locator('#hqTabplans').getAttribute('aria-selected'),'true');
-  assert.equal(await card.locator('.monthly').inputValue(),'80000');
+  assert.equal(await card.locator('.monthly').inputValue(),'80000');await p.locator('[data-hq-confirm-cancel]').click();
   await card.locator('.save-plan').dblclick();await p.locator('[data-review-save]').click();
   await p.waitForFunction(()=>writes.length===1&&document.querySelector('[data-plan="BASIC"]')?.dataset.editing==='false');
   assert.equal(await p.evaluate(()=>writes.length),1);
@@ -580,7 +580,7 @@ test('another editor cannot discard a dirty draft; saving locks inputs until res
   const basic=p.locator('[data-plan="BASIC"]'),pro=p.locator('[data-plan="PRO"]');
   await basic.getByRole('button',{name:'수정',exact:true}).click();await basic.locator('.monthly').fill('81000');
   await p.locator('[data-choose-plan="PRO"]').click();
-  assert.equal(await basic.getAttribute('data-editing'),'true');assert.equal(await pro.getAttribute('data-editing'),'false');
+  assert.equal(await basic.getAttribute('data-editing'),'true');assert.equal(await pro.getAttribute('data-editing'),'false');await p.locator('[data-hq-confirm-cancel]').click();
   await p.evaluate(()=>{req=async(path,o)=>{if(o?.method==='PATCH'){await new Promise(r=>window.releaseSave=r);}return baseReq(path,o);};});
   await basic.locator('.save-plan').click();await p.locator('[data-review-save]').click();
   assert.equal(await basic.locator('.monthly').isDisabled(),true);
@@ -1082,7 +1082,7 @@ test('sender compact view retains note in the action row and submits exactly the
  const row=p.locator('[data-sender-clinic="A"]');await row.waitFor();
  assert.equal(await row.locator('td').count(),5);
  await row.locator('summary').click();await row.locator('.sender-review-note').fill('추가 확인 완료');
- await p.evaluate(()=>window.confirm=()=>true);await row.locator('.sender-register').click();
+ await row.locator('.sender-register').click();await p.locator('[data-hq-confirm-accept]').click();
  await p.waitForFunction(()=>writes.length===1);
  const [write]=await p.evaluate(()=>writes);assert.equal(write.body.reviewNote,'추가 확인 완료');assert.equal(write.body.status,'registering');
  await p.locator('#senderSearch').fill('찾을수없는병원');assert.match(await p.locator('#senderOnboardingTable').innerText(),/조건에 맞는/);
@@ -1227,4 +1227,12 @@ test('subscription review cannot write to a newly selected hospital',async t=>{
  const p=await fixture(t);await p.evaluate(async()=>{plans=syntheticPlans;selectedClinic='A';showView('clinics');await loadClinics();});
  await p.locator('.hq-subscription-editor').getByRole('button',{name:'수정',exact:true}).click();await p.locator('#subPrice').fill('88000');await p.locator('#saveSub').click();
  await p.evaluate(()=>selectedClinic='B');await p.locator('[data-review-save]').click();assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+
+test('discard confirmation resumes the selected plan once and cancel keeps its draft',async t=>{
+ const p=await fixture(t);await billing(p);await p.locator('#hqTabplans').click();const card=p.locator('[data-plan="BASIC"]');await card.getByRole('button',{name:'수정',exact:true}).click();await card.locator('.monthly').fill('81000');await p.locator('[data-choose-plan="PRO"]').click();await p.locator('[data-hq-confirm-cancel]').click();assert.equal(await card.locator('.monthly').inputValue(),'81000');await p.locator('[data-choose-plan="PRO"]').click();await p.locator('[data-hq-confirm-accept]').click();await p.locator('[data-plan="PRO"]').waitFor({state:'visible'});assert.equal(await card.locator('.monthly').inputValue(),'79000');assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+test('content confirmation is invalidated when target status or HQ selection changes',async t=>{
+ const p=await contentFixture(t);await contentPage(p);await p.locator('[data-content-status="sample-live"]').click();await p.evaluate(()=>contents.find(x=>x.contentId==='sample-live').status='archived');await p.locator('[data-hq-confirm-accept]').click();await p.locator('.hq-confirm').waitFor({state:'detached'});assert.deepEqual(await p.evaluate(()=>writes),[]);
+ await p.evaluate(()=>{contents.find(x=>x.contentId==='sample-live').status='published';renderContent();});await p.locator('[data-content-status="sample-live"]').click();await p.evaluate(()=>selectedClinic='another-hospital');await p.locator('.hq-confirm').waitFor({state:'detached'});assert.deepEqual(await p.evaluate(()=>writes),[]);
 });
