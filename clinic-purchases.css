@@ -32,7 +32,7 @@
 @media print{.purchase-toolbar,.purchase-status-row,.purchase-searchbar,.purchase-filters,.purchase-selection,.purchase-bulk,.purchase-row-actions,.purchase-check{display:none!important}.purchase-row{display:block;break-inside:avoid}.purchase-section{break-inside:auto}}
 #practiceRoot .cs-purchases .purchase-status-row [data-notice]{background:transparent!important;padding:0!important;min-height:0!important;border:0!important;box-shadow:none!important}
 .cs-purchases{container-type:inline-size}
-@container (min-width:960px){.cs-purchases .purchase-category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}.purchase-category-grid .purchase-section{margin-bottom:0}.purchase-category-grid .purchase-empty:last-child{grid-column:1/-1}.purchase-category-grid .purchase-row-actions{max-width:180px}.purchase-category-grid .purchase-row{gap:8px;padding:12px}.purchase-category-grid .purchase-section>summary{font-size:16px}}
+@container (min-width:960px){.cs-purchases .purchase-group-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}.purchase-group-grid .purchase-section{margin-bottom:0}.purchase-group-grid .purchase-empty:last-child{grid-column:1/-1}.purchase-group-grid .purchase-row-actions{max-width:180px}.purchase-group-grid .purchase-row{gap:8px;padding:12px}.purchase-group-grid .purchase-section>summary{font-size:16px}}
 
 .cs-purchases .purchase-group-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #dce5e0;background:#f4f8f5;font-size:13px}
 .cs-purchases .purchase-group-actions label{display:flex;align-items:center;gap:7px;min-height:40px}
@@ -50,10 +50,24 @@
 .cs-purchases .purchase-row-urgent:focus-within{outline:2px solid #bb453a;outline-offset:-2px}
 /* Three categories fit only when each column can keep a readable item width. */
 @container (min-width:1320px){
- .cs-purchases .purchase-category-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
- .purchase-category-grid .purchase-row{grid-template-columns:18px minmax(0,1fr);padding:9px 10px;gap:3px 8px}
- .purchase-category-grid .purchase-row-actions{grid-column:2;justify-content:flex-end;max-width:none}
- .purchase-category-grid .purchase-row-actions :is(button,summary){min-height:32px;padding:4px 8px}
- .purchase-category-grid .purchase-item p{margin:2px 0}
- .purchase-category-grid .purchase-section>summary{padding:7px 10px}
+ .cs-purchases .purchase-group-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+ .purchase-group-grid .purchase-row{grid-template-columns:18px minmax(0,1fr);padding:9px 10px;gap:3px 8px}
+ .purchase-group-grid .purchase-row-actions{grid-column:2;justify-content:flex-end;max-width:none}
+ .purchase-group-grid .purchase-row-actions :is(button,summary){min-height:32px;padding:4px 8px}
+ .purchase-group-grid .purchase-item p{margin:2px 0}
+ .purchase-group-grid .purchase-section>summary{padding:7px 10px}
 }
+
+/* Vendor groups share the responsive category layout. */
+.cs-purchases .purchase-group-grid .purchase-section {min-width:0}
+.cs-purchases .purchase-group-grid .purchase-section>summary {flex-wrap:wrap;overflow-wrap:anywhere}
+.cs-purchases .purchase-group-grid .purchase-group-contact {padding:6px 10px;overflow-wrap:anywhere}
+.cs-purchases .purchase-group-grid .purchase-group-actions {padding:6px 10px;gap:4px 6px}
+.cs-purchases .purchase-group-grid .purchase-group-actions label {flex-basis:100%;min-height:32px}
+.cs-purchases .purchase-group-grid .purchase-group-actions button {padding:6px 8px;min-height:36px;white-space:normal}
+@container (min-width:960px) {
+ .purchase-group-grid .purchase-row {grid-template-columns:18px minmax(0,1fr);padding:9px 10px;gap:3px 8px}
+ .purchase-group-grid .purchase-row-actions {grid-column:2;justify-content:flex-end;max-width:none;flex-wrap:wrap}
+}
+@media(max-width:800px) {.cs-purchases .purchase-group-grid .purchase-group-actions :is(button,label) {min-height:44px}}
+.cs-purchases .purchase-group-contact:empty{display:none}

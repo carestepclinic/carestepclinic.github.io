@@ -1820,3 +1820,12 @@
  .clinic-calm #practiceRoot .cs-list-tools .cs-navigation-scope {display:none}
  .clinic-calm #practiceRoot .cs-list-actionbar>.cs-list-tools {min-width:0}
 }
+
+/* Shared record toolbar sizing, including the anesthesia list. */
+@media screen {
+ .clinic-calm #appView #practiceRoot :is(.cs-list-actionbar,.er-list-actions,.cs-record-navigation) button {box-sizing:border-box;font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;font-size:14px!important;font-weight:600!important;line-height:20px!important;letter-spacing:normal;min-height:40px!important;height:40px!important;padding:8px 12px!important;border-radius:8px!important;white-space:nowrap}
+ .clinic-calm #appView #practiceRoot .cs-record-navigation button {padding-block:8px!important}
+}
+@media screen and (max-width:800px) {
+ .clinic-calm #appView #practiceRoot :is(.cs-list-actionbar,.er-list-actions,.cs-record-navigation) button {min-height:44px!important;height:44px!important}
+}
