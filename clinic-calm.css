@@ -1851,3 +1851,19 @@
 
 @media screen{.clinic-calm .cs-preventive-shared>select{min-width:180px;max-width:100%;font-size:14px}.clinic-calm .cs-preventive-shared>.work-quick-secondary{width:auto}.clinic-calm #workFirstDashboard .cs-preventive-item .work-first-main{min-width:0}}
 @media screen and (max-width:640px){.clinic-calm #workFirstDashboard .cs-preventive-item .work-first-actions{grid-column:1;justify-content:flex-start}}
+
+/* Keep patient controls together and make observation freshness explicit. */
+@media screen{
+ .clinic-calm #practiceRoot .cs-observation-date{display:block;margin:5px 0 0;font-size:12px;line-height:1.5;color:#526361}
+ .clinic-calm #practiceRoot .cs-observation-date.cs-vital-previous{display:table;color:#775013}
+}
+@media screen and (min-width:1100px){
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common{grid-template-columns:minmax(440px,1fr) auto;align-items:end}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>[data-common-inputs]{display:grid;grid-template-columns:minmax(150px,180px) minmax(120px,160px) max-content;align-items:end;min-width:0;width:auto;flex-basis:auto}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common [data-common-inputs]>label{min-width:0;width:auto}
+ .clinic-calm #practiceRoot .pt-organized [data-common-inputs]>.cs-patient-picker{grid-column:3;grid-row:1;margin:0;align-self:end;white-space:nowrap}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-calc-view-tools{grid-column:2;grid-row:1;margin-top:0;align-self:end}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-patient-options{grid-column:2;grid-row:2}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-patient-options[open]{grid-column:1/-1;grid-row:3}
+ .clinic-calm #practiceRoot .pt-organized .pt-calc-common>.pt-mobile-calc-select{grid-column:1/-1;grid-row:4;margin:0}
+}

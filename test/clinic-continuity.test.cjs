@@ -47,7 +47,33 @@ test('group assignment stops on failure and ignores stale account responses',asy
 
 for(const width of [390,1440])test('ward shows today and old measurement dates without changing values '+width,async()=>{
  const {p,errors}=await page('dental',width);try{
- await p.evaluate(()=>{const old=saasRequest,now=new Date().toISOString(),past=new Date(Date.now()-9*86400000).toISOString();const item={id:'ward-test',kind:'admission',status:'active',revision:1,patient:{name:'시험 입원환자',species:'cat'},body:{species:'cat',weight:4,tasks:[],orders:[],infusions:[],wardChecks:[],wardVitals:{weightKG:{value:4,observedAt:now},temperature:{value:38.5,observedAt:now},heartRate:{value:130,observedAt:past}}}};saasRequest=async(path,o)=>path.endsWith('/clinical/rooms')?{items:[{id:'cat1',name:'고양이 01',kind:'cat',patientCase:item}]}:old(path,o);go('practice',{practiceTab:'ward'});});
- const card=p.locator('.cc-occupied').first();await card.waitFor();assert.match(await card.innerText(),/이전 측정 · 9일 전/);assert.match(await card.innerText(),/오늘/);assert.match(await card.innerText(),/130/);assert.match(await card.innerText(),/38.5/);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);await p.screenshot({path:path.resolve(root,'../continuity-ward-'+width+'.png'),fullPage:true});
+ await p.evaluate(()=>{const old=saasRequest,now=new Date().toISOString(),past=new Date(Date.now()-9*86400000).toISOString();const item={id:'ward-test',kind:'admission',status:'active',revision:1,patient:{name:'시험 입원환자',species:'cat'},body:{species:'cat',weight:4,tasks:[],orders:[],infusions:[],wardChecks:[],latestMonitoring:{observedAt:past,appetite:'normal',activity:'normal'},wardVitals:{weightKG:{value:4,observedAt:now},temperature:{value:38.5,observedAt:now},heartRate:{value:130,observedAt:past}}}};saasRequest=async(path,o)=>path.endsWith('/clinical/rooms')?{items:[{id:'cat1',name:'고양이 01',kind:'cat',patientCase:item}]}:old(path,o);go('practice',{practiceTab:'ward'});});
+ const card=p.locator('.cc-occupied').first();await card.waitFor();assert.match(await card.innerText(),/이전 측정 · 9일 전/);assert.match(await card.innerText(),/오늘/);assert.match(await card.innerText(),/130/);assert.match(await card.innerText(),/성별 미입력/);assert.match(await card.locator('.cs-observation-date').innerText(),/이전 관찰/);assert.match(await card.innerText(),/38.5/);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);await p.screenshot({path:path.resolve(root,'../continuity-ward-'+width+'.png'),fullPage:true});
+ }finally{await p.close();}
+});
+
+for(const width of [1100,1440,1920])test('calculator patient species weight occupy one desktop row '+width,async()=>{
+ const {p,errors}=await page('dental',width);try{
+ await p.evaluate(()=>go('practice',{practiceTab:'calc'}));await p.locator('.cs-patient-picker').waitFor();
+ const boxes=await p.locator('[data-common-inputs]').evaluate(el=>[...el.querySelectorAll(':scope>label select,:scope>label input,:scope>.cs-patient-picker')].map(x=>({text:x.outerHTML.slice(0,90),y:x.getBoundingClientRect().bottom,x:x.getBoundingClientRect().x,right:x.getBoundingClientRect().right})));
+ assert.equal(boxes.length,3,JSON.stringify(boxes));assert.ok(Math.max(...boxes.map(x=>x.y))-Math.min(...boxes.map(x=>x.y))<4,JSON.stringify(boxes));
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);await p.screenshot({path:path.resolve(root,'../polish-calculator-'+width+'.png'),fullPage:true});
+ }finally{await p.close();}
+});
+test('single preventive row retains identity date and action without repeated task labels',async()=>{
+ const {p,errors}=await page('dental');try{
+ await p.evaluate(()=>{go('dashboard');window.workFirstOpenQuickRecord=async(item,type)=>{window.singleCall={id:item.id,type}};});await p.waitForTimeout(500);
+ await p.evaluate(()=>{renderWorkFirstRows(document.getElementById('workFirstList'),[{id:'one',sourceType:'heartworm',patientId:'p',guardianId:'g',patientName:'시험 환자',guardianName:'시험 보호자',title:'심장사상충 예방',dueDate:'2026-11-07',action:{assignee:'시험 담당'}}],12);document.getElementById('clinicToday-tab-clinical')?.click();});
+ const row=p.locator('.cs-preventive-single');assert.equal((await row.innerText()).split('심장사상충 예방').length-1,1);assert.match(await row.innerText(),/시험 환자/);assert.match(await row.innerText(),/시험 보호자/);assert.match(await row.innerText(),/시험 담당/);assert.ok(await row.locator('.work-first-when b').textContent());await row.locator('[data-work-record=heartworm]').click();assert.deepEqual(await p.evaluate(()=>singleCall),{id:'one',type:'heartworm'});assert.deepEqual(errors,[]);
+ }finally{await p.close();}
+});
+for(const width of [390,1440])test('checklist controls remain usable during loading failure retry and date races '+width,async()=>{
+ const {p,errors}=await page('dental',width);try{
+ await p.evaluate(()=>{const original=saasRequest;window.pendingOps=[];saasRequest=(path,o)=>path.includes('/operations/?')?new Promise((resolve,reject)=>pendingOps.push({path,resolve,reject})):original(path,o);go('practice',{practiceTab:'ops'});});
+ const search=p.locator('[data-ops-search]');await search.waitFor();await p.locator('[data-date]').fill('2026-12-15');await p.waitForFunction(()=>pendingOps.some(x=>x.path.includes('2026-12-15')));await search.fill('검사');await p.locator('[data-ops-filter=all]').click();assert.match(await p.locator('[data-ops-list]').innerText(),/불러오는 중/);assert.equal(await p.locator('[data-ops-filter=all] strong').innerText(),'—');
+ await p.evaluate(()=>{pendingOps.at(-1).reject(Error('시험 조회 실패'));window.beforeRetry=pendingOps.length;});await p.locator('[data-retry]').waitFor();assert.equal(await search.inputValue(),'검사');await p.locator('[data-retry]').click();await p.waitForFunction(()=>pendingOps.length>beforeRetry);
+ await p.evaluate(()=>window.staleOps=pendingOps.at(-1));await p.locator('[data-date]').fill('2026-11-06');await p.locator('[data-date]').dispatchEvent('change');await p.waitForFunction(()=>pendingOps.at(-1).path.includes('2026-11-06'));
+ await p.evaluate(()=>{const response={runs:[],templates:[],members:[],manager:true};pendingOps.at(-1).resolve(response);});await p.waitForFunction(()=>!!document.querySelector('[data-ops-count]'));assert.equal(await search.inputValue(),'검사');assert.equal(await p.locator('[data-ops-filter=all]').getAttribute('aria-pressed'),'true');
+ await p.evaluate(()=>staleOps.resolve({runs:[{id:'stale',body:{title:'과거 응답'}}]}));await p.waitForTimeout(150);assert.doesNotMatch(await p.locator('[data-body]').innerText(),/과거 응답/);assert.equal(await p.locator('[data-date]').inputValue(),'2026-11-06');assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);
  }finally{await p.close();}
 });

@@ -39,7 +39,13 @@
    if(!groups.has(key))groups.set(key,[]);groups.get(key).push({row,item});
   }
   for(const entries of groups.values()){
-   if(entries.length<2)continue;
+   if(entries.length<2){
+    const {row,item}=entries[0];row.classList.add('cs-preventive-single');
+    row.querySelector('.work-first-when > span')?.remove();
+    const description=row.querySelector('.work-first-main > span');
+    if(description)description.textContent='보호자 '+(item.guardianName||'미확인')+(item.action?.assignee?' · 담당 '+item.action.assignee:'');
+    continue;
+   }
    const group=document.createElement('section');group.className='cs-preventive-group';
    const head=document.createElement('header'),identity=document.createElement('div'),label=document.createElement('b'),meta=document.createElement('span'),first=entries[0];
    label.textContent=(first.item.patientName||'환자명 확인')+' · 예방 업무 '+entries.length+'건';
