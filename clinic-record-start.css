@@ -1,0 +1,35 @@
+/* Shared new-record page, scoped away from saved record editors. */
+.cs-record-start{width:100%;color:#243746;font-size:15px}
+.cs-record-start>header{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #d9e3e1;padding:0 0 12px;margin:0;background:transparent;position:static}
+.cs-record-start h2{margin:0;font-size:22px;line-height:1.4}
+.cs-record-start button,.cs-record-start input,.cs-record-start select{font:inherit;box-sizing:border-box;min-height:44px;border:1px solid #bdcfcb;border-radius:8px;padding:10px 12px;background:#fff;color:inherit;max-width:100%}
+.cs-record-start button{cursor:pointer}.cs-record-start button:disabled{cursor:default;opacity:.55}
+.cs-record-start .cs-start-state{margin:10px 0;color:#526875;font-size:14px}
+.cs-start-card{border:1px solid #d9e3e1;border-radius:12px;background:#fff;padding:18px;margin-top:12px}
+.cs-start-modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 18px}
+.cs-record-start .cs-start-modes button[aria-pressed=true],.cs-record-start [data-start-submit]{background:#137c74;border-color:#137c74;color:#fff;font-weight:700}
+.cs-start-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px}
+.cs-record-start label{display:flex;flex-direction:column;gap:6px;font-weight:600;min-width:0;margin:0}
+.cs-start-grid input,.cs-start-grid select{width:100%}
+.cs-start-extra{border:0;border-top:1px solid #d9e3e1;border-radius:0;padding:12px 0 0;margin:18px 0 0;background:transparent}
+.cs-start-extra>summary{color:#526875;font-size:14px;cursor:pointer;padding:4px 0}.cs-start-extra>.cs-start-grid{margin-top:12px}
+.cs-record-start form{margin:0}.cs-record-start footer{position:static;display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:16px 0 0;padding:12px 0 0;border-top:1px solid #d9e3e1;background:transparent}
+.cs-record-start footer small{font-size:13px;color:#526875}.cs-start-error{color:#a32626;margin:12px 0 0;white-space:pre-wrap}.cs-start-error:empty{display:none}
+.cs-start-discard{padding:12px;background:#fff5df;border:1px solid #ddc58a;border-radius:10px}.cs-start-discard p{margin:0 0 8px}.cs-start-discard button+button{margin-left:8px}
+.cs-record-start [data-start-search-form]{display:flex;align-items:end;gap:8px;margin:0 0 10px}.cs-record-start [data-start-search-form] label{flex:1}
+.cs-record-start [data-start-results]{display:grid;gap:6px}.cs-record-start [data-start-results] button{display:flex;flex-wrap:wrap;gap:8px;text-align:left}.cs-record-start [data-start-picked]{font-size:14px;color:#526875;margin:12px 0}
+.cs-start-options{margin:18px 0 0;padding:12px;border:1px solid #d9e3e1;border-radius:8px;display:flex;flex-wrap:wrap;gap:8px 16px}.cs-start-options legend{font-weight:700;padding:0 4px}.cs-start-options label{flex-direction:row;align-items:center;font-weight:400}.cs-start-options input{min-height:0;width:auto}
+.cs-record-start [aria-invalid=true]{border-color:#b63030;outline:1px solid #b63030}
+@media(max-width:600px){.cs-start-card{padding:12px}.cs-start-grid{gap:12px 8px}.cs-record-start footer small{flex-basis:100%}.cs-record-start [data-start-submit]{width:100%}.cs-record-start button{padding:9px 10px}.cs-start-discard button+button{margin:6px 0 0}.cs-record-start h2{font-size:20px}}
+/* Keep legacy record themes from changing the shared entry controls. */
+.cs-record-start.cs-record-start label{margin:0;padding:0;font-size:15px;line-height:1.5;font-weight:600}
+.cs-record-start.cs-record-start input,.cs-record-start.cs-record-start select{font-size:15px;font-weight:400;line-height:1.4;margin:0;min-height:44px}
+.cs-record-start.cs-record-start .cs-start-extra{border:0;border-top:1px solid #d9e3e1;border-radius:0;padding:12px 0 0;margin:18px 0 0;background:transparent}
+.cs-record-start.cs-record-start .cs-start-extra>summary{padding:4px 0;margin:0;font-size:14px;line-height:1.5;color:#526875}
+.cs-record-start.cs-record-start .cs-start-options label{flex-direction:row;margin:0;font-weight:400;font-size:14px}
+.cs-record-start.cs-record-start .cs-start-options input{min-height:0;width:18px;height:18px;padding:0;flex:none}
+#appView #practiceRoot .cs-record-start :is(button,input,select){font-family:inherit;letter-spacing:normal;min-height:44px;border-radius:8px;padding:10px 12px;line-height:1.4}
+#appView #practiceRoot .cs-record-start button{font-size:14px;font-weight:600}
+#appView #practiceRoot .cs-record-start :is(input,select){font-size:16px;font-weight:400}
+#appView #practiceRoot .cs-record-start .cs-start-options input{min-height:0;width:18px;height:18px;padding:0}
+#appView #practiceRoot .cs-record-start .cs-start-extra>summary{font-weight:600}

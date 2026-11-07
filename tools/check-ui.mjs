@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 export const uiFiles = new Set([
  'clinic-dialog.js','clinic-update-notice.js',
  'clinic-purchases.js','clinic-purchases.css',
- 'clinic-calm.css','clinic-record-workspace.js','clinic-inpatients.js',
+ 'clinic-calm.css','clinic-record-workspace.js','clinic-record-start.js','clinic-record-start.css','clinic-inpatients.js',
  'builder-flow.js','builder-flow.css',
  'clinic-lazy-modules.js','hospital-operations.css',
  'clinic-followup-tasks.js','clinic-followup-tasks.css',
