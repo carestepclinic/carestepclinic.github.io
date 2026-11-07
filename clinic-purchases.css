@@ -41,3 +41,5 @@
 .cs-purchase-dialog .purchase-order-context{font-weight:650;font-size:15px}
 .cs-purchase-dialog .purchase-order-items{max-height:28vh;overflow:auto;padding-left:24px;font-size:14px;overflow-wrap:anywhere}
 @media(max-width:800px){.cs-purchases .purchase-group-actions :is(button,label){min-height:44px}.cs-purchases .purchase-group-actions label{flex-basis:100%}}
+
+.purchase-catalog-row>span{flex:1;min-width:0}.purchase-catalog-row [data-catalog-delete]{color:#a32633;border-color:#ecc9cd}
