@@ -70,7 +70,7 @@
   }
   function shell(){
    root.classList.toggle('st-sop-area',tab==='sop');
-   root.innerHTML=`<header class="st-heading"><div><span class="st-eyebrow">${adapter.common?'CARESTEP HQ':'CARESTEP CLINIC'}</span><h1>${adapter.common?'직원 교육자료':tab==='sop'?'업무지침(SOP)':'직원 교육'}</h1><p>${adapter.common?'승인한 공통 교육자료를 각 병원 교육센터에 제공합니다.':tab==='sop'?'업무지침을 열어 확인하고 필요한 자료를 수정하세요.':'교육자료를 찾거나 배정된 교육을 이어서 학습하세요.'}</p></div>${btn('새로고침','refresh')}</header><p data-status class="st-status" role="status" aria-live="polite"></p><div data-content></div>`;
+   root.innerHTML=`<header class="st-heading" ${!adapter.common&&data?'hidden':''}><div><span class="st-eyebrow">${adapter.common?'CARESTEP HQ':'CARESTEP CLINIC'}</span><h1>${adapter.common?'직원 교육자료':tab==='sop'?'업무지침(SOP)':'직원 교육'}</h1><p>${adapter.common?'승인한 공통 교육자료를 각 병원 교육센터에 제공합니다.':tab==='sop'?'업무지침을 열어 확인하고 필요한 자료를 수정하세요.':'교육자료를 찾거나 배정된 교육을 이어서 학습하세요.'}</p></div>${adapter.common||!data?btn('새로고침','refresh'):''}</header><p data-status class="st-status" role="status" aria-live="polite"></p><div data-content></div>`;
   }
   function render(){
    adapter.navigation?.();const expanded=[...root.querySelectorAll('.st-card-manage[open]')].map(e=>e.dataset.course);shell();notice(message);const host=root.querySelector('[data-content]');
@@ -80,7 +80,7 @@
    const tabs=adapter.common?[['manage','공통 교육 관리'],['library','공개 자료']]:(adapter.separateSop&&area==='sop'?[['sop','업무지침(SOP)']]:[['mine','내 교육'],['library','교육자료실'],...(!adapter.separateSop?[['sop','병원 SOP']]:[]),...(can.edit||can.review||can.manage?[['manage','교육 배정·이수']]:[])]);
    if(can.edit||can.review)tabs.push(['trash','삭제한 자료']);
    const mine=data.assignments.filter(a=>a.user_id===actor().userId),pending=mine.filter(a=>!a.completed_at&&a.status==='published').length;
-   host.innerHTML=`<nav class="st-tabs" aria-label="교육센터 메뉴">${tabs.map(([id,label])=>`<button type="button" data-st="tab" data-tab="${id}" aria-current="${tab===id?'page':'false'}">${label}${id==='mine'&&pending?` <span>${pending}</span>`:''}</button>`).join('')}</nav>
+   host.innerHTML=`<nav class="st-tabs" aria-label="교육센터 메뉴">${tabs.map(([id,label])=>`<button type="button" data-st="tab" data-tab="${id}" aria-current="${tab===id?'page':'false'}">${label}${id==='mine'&&pending?` <span>${pending}</span>`:''}</button>`).join('')}${!adapter.common?btn('새로고침','refresh'):''}</nav>
     ${tab==='sop'?'<p class="st-info">업무 수행·완료는 병원 운영의 업무 체크리스트에서 기록합니다.</p>':''}
     ${tab==='trash'?'<p class="st-info">삭제한 자료는 직원에게 표시되지 않습니다. 본문과 이수 기록은 보존되며, 복원해도 자동으로 다시 공개되지 않습니다.</p>':''}
     ${tab==='manage'&&!adapter.common?'<nav class="st-subtabs" aria-label="교육 관리 작업">'+btn('교육 배정','manage-view','data-view="assign" aria-pressed="'+(manageView==='assign')+'"')+btn('이수 현황','manage-view','data-view="report" aria-pressed="'+(manageView==='report')+'"')+'</nav>':''}

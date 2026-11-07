@@ -1897,3 +1897,19 @@
  .clinic-calm #practiceRoot .cs-record-placeholder>span {display:block;border-radius:8px;background:linear-gradient(#e7efec 0 20px,transparent 20px 32px,#edf2f0 32px 45px,transparent 45px 58px,#edf2f0 58px 71px);height:80px}
  @media(max-width:600px){.clinic-calm #practiceRoot .cs-record-placeholder {grid-template-columns:1fr}.clinic-calm #practiceRoot .cs-record-placeholder>span:not(:first-child){display:none}}
 }
+
+/* Refresh belongs to the current toolbar, with a common secondary control. */
+@media screen {
+ .clinic-calm #appView button:is(.cs-refresh-button,[id*="refresh" i],[data-refresh],[data-act="refresh"],[data-st="refresh"],[data-dn="refresh"],[data-nr="refresh"],[data-cl-action="refresh"],[data-internal-refresh],[data-directory-refresh],[data-workspace-refresh],[data-reload-plan],[data-act="compare"]) {box-sizing:border-box;font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;font-size:14px!important;font-weight:600!important;line-height:20px!important;letter-spacing:normal;min-height:40px!important;height:40px!important;padding:8px 12px!important;border:1px solid var(--cs-line)!important;border-radius:8px!important;background:#fff!important;color:var(--cs-ink)!important;box-shadow:none!important;white-space:nowrap;flex-shrink:0}
+ .clinic-calm #appView button:is(.cs-refresh-button,[id*="refresh" i],[data-refresh],[data-act="refresh"],[data-st="refresh"],[data-dn="refresh"],[data-nr="refresh"],[data-cl-action="refresh"],[data-internal-refresh],[data-directory-refresh],[data-workspace-refresh],[data-reload-plan],[data-act="compare"]):hover:not(:disabled) {background:var(--cs-tint)!important;border-color:var(--cs-accent)!important}
+ .clinic-calm #appView button:is(.cs-refresh-button,[id*="refresh" i],[data-refresh],[data-act="refresh"],[data-st="refresh"],[data-dn="refresh"],[data-nr="refresh"],[data-cl-action="refresh"],[data-internal-refresh],[data-directory-refresh],[data-workspace-refresh],[data-reload-plan],[data-act="compare"]):disabled {opacity:.55;cursor:default}
+ .clinic-calm #appView :is(.st-heading,.cl-toolbar)[hidden] {display:none!important}
+ .clinic-calm #training .st-tabs {display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:0}
+ .clinic-calm #training .st-tabs [data-st="refresh"] {margin-left:auto}
+ .clinic-calm #practiceRoot .purchase-toolbar {align-items:center;margin-bottom:8px}
+ .clinic-calm #practiceRoot .purchase-actions {min-width:0;gap:8px}
+ .clinic-calm #practiceRoot .purchase-actions .purchase-status-row {margin:0;min-height:0;gap:8px;flex:0 1 auto;flex-wrap:wrap}
+ .clinic-calm #practiceRoot .purchase-actions .purchase-status-row [data-notice] {max-width:38ch;overflow-wrap:anywhere}
+ @media(max-width:800px){.clinic-calm #appView button:is(.cs-refresh-button,[id*="refresh" i],[data-refresh],[data-act="refresh"],[data-st="refresh"],[data-dn="refresh"],[data-nr="refresh"],[data-cl-action="refresh"],[data-internal-refresh],[data-directory-refresh],[data-workspace-refresh],[data-reload-plan],[data-act="compare"]){min-height:44px!important;height:44px!important}}
+ @media(max-width:760px){.clinic-calm #practiceRoot .purchase-actions .purchase-status-row {margin-right:auto;flex:1 1 170px}.clinic-calm #practiceRoot .purchase-actions .purchase-status-row [data-notice]{flex:1 1 100%;font-size:12px}.clinic-calm #practiceRoot .purchase-actions {align-items:flex-end}.clinic-calm #training .st-tabs [data-st="refresh"]{margin-left:auto}}
+}

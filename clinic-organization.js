@@ -194,7 +194,7 @@
    const kpis=security?.querySelector('.saas-kpi-grid');if(kpis){const d=disclosure([kpis,$('saasSubscriptionDetail'),$('saasBillingMeter')],'accountUsage','제공 범위 · 사용량');billingPane?.append(d);}
    const diag=account.querySelector('.saas-diag');if(diag){diag.querySelector('b')?.remove();disclosure([...diag.children],'accountDiagnostics','시스템 진단');}
    const legal=account.querySelector('.production-governance-grid');if(legal){const danger=[...legal.querySelectorAll('.danger-zone')];const withdraw=$('withdrawAccountBtn')?.closest('.governance-box');if(withdraw&&!danger.includes(withdraw))danger.push(withdraw);const d=disclosure(danger,'accountImportantActions','중요 작업 · 삭제 및 탈퇴');if(d)legal.append(d);}
-   for(const tab of ['team','security','legal']){const head=account.querySelector(`[data-account-pane="${tab}"] .account-pane-head`);if(head){const refresh=document.createElement('button');refresh.type='button';refresh.className='btn btn-ghost';refresh.textContent='새로고침';refresh.addEventListener('click',()=>globalThis.saasLoadAccountTab?.(tab,true));head.append(refresh);}}
+   for(const tab of ['team','security','legal']){const head=account.querySelector(`[data-account-pane="${tab}"] .account-pane-head`);if(head){const refresh=document.createElement('button');refresh.type='button';refresh.className='btn btn-ghost cs-refresh-button';refresh.textContent='새로고침';refresh.addEventListener('click',()=>globalThis.saasLoadAccountTab?.(tab,true));head.append(refresh);}}
   }
   function saveScope(id,inputs,copy,successEvent){
    const button=$(id);if(!button||$(id+'Scope'))return;
