@@ -475,3 +475,22 @@ body:has(#practice.active-view :is(.cl-workspace:is([data-section=ward],[data-se
  #practiceRoot :is(.record-layout[data-record-mode=list],.cl-anesthesia-page:has(.cl-anesthesia-list)) :is(.record-list-reset,[data-reset-filters]){margin-left:0}
  #practiceRoot :is(.record-layout[data-record-mode=list],.cl-anesthesia-page:has(.cl-anesthesia-list)) :is(.dn-record-list-card,.nr-list-item,.cl-record-list-card) footer button{min-height:42px}
 }
+
+/* New anesthesia records use the workspace page, without an overlay or nested scrolling. */
+.cl-anesthesia-page .cl-create-page{display:block;position:static;inset:auto;width:100%;max-width:none;max-height:none;margin:0;padding:0;overflow:visible;border:0;border-radius:0;background:transparent;box-shadow:none}
+.cl-create-page>header{padding:0 0 12px;border-bottom:1px solid var(--cl-border);align-items:center}
+.cl-create-page>header h2{margin:0;font-size:21px}
+.cl-create-page>form{border:1px solid var(--cl-border);border-radius:12px;background:#fff;padding:18px;margin-top:12px}
+.cl-create-page .cl-create-status{margin:8px 0;color:#526875;font-size:14px}
+.cl-create-page .cl-form-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.cl-create-page .cl-start-modes{margin:0 0 16px}
+.cl-create-page .cl-start-modes button[aria-pressed=true],.cl-create-page .pt-primary{background:#137c74;border-color:#137c74;color:#fff}
+.cl-create-page .cl-create-extra{border-top:1px solid var(--cl-border);padding-top:8px;margin-top:12px}
+.cl-create-page .cl-create-extra>summary{color:#526875;font-size:14px}
+.cl-create-page .cl-create-extra>.cl-care-team-form{padding:0;border:0;margin:0}
+.cl-create-page form>footer{position:static;display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:12px 0 0;padding:12px 0 0;border-top:1px solid var(--cl-border);background:transparent}
+.cl-create-page .cl-create-note{font-size:13px;color:#526875}
+.cl-create-page [data-cl-discard]:not([hidden]){padding:12px;background:#fff5df;border:1px solid #ddc58a;border-radius:10px}
+.cl-create-page [data-cl-discard] p{margin:0 0 8px}
+.cl-create-page label,.cl-create-page input,.cl-create-page select{min-width:0;max-width:100%}
+@media(max-width:600px){.cl-create-page>form{padding:12px}.cl-create-page .cl-form-grid{gap:8px}.cl-create-page .cl-create-note{flex-basis:100%}.cl-create-page .cl-start-modes button{padding:8px;font-size:14px}}
