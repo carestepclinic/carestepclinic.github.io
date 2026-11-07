@@ -26,7 +26,7 @@
   const options=more.querySelector('div');if(settings){settings.open=true;options.append(settings);}if(view)options.append(view);
   q('.pt-calc-common').append(toolbar);
   // Show the existing patient picker beside species/weight; do not duplicate its click handler.
-  const patientPicker=q('[data-ref-patient]');if(patientPicker){q('[data-common-inputs]')?.append(patientPicker);patientPicker.classList.add('cs-patient-picker');set(patientPicker,'환자 불러오기');}
+  const patientPicker=q('[data-patient-search]');if(patientPicker){q('[data-common-inputs]')?.append(patientPicker);patientPicker.classList.add('cs-patient-picker');set(patientPicker,'환자 불러오기');patientPicker.addEventListener('click',()=>{const details=q('.pt-patient-options');if(details)details.open=true;queueMicrotask(()=>q('[data-patient-picker] input')?.focus({preventScroll:true}));});}
   set(q('.pt-patient-options>summary'),'연결 정보·측정일');
   const mobileNav=q('.pt-mobile-calc-select');if(mobileNav)q('.pt-calc-common').append(mobileNav);
   queueMicrotask(()=>{const reset=q('.pt-reset-calculation');if(reset){reset.textContent='계산 입력 모두 지우기';reset.title='동물종·체중·계산 입력을 지웁니다. 저장한 병원 약품·기본값은 유지됩니다.';toolbar.insertBefore(reset,more);}const register=q('[data-strength-open]');if(register){register.textContent='약물·함량 등록';register.title='성분별 함량 선택 또는 새 약물 직접 등록';register.setAttribute('aria-haspopup','dialog');options.prepend(register);}});
@@ -264,7 +264,7 @@
   function changed(e){if(e.target.closest('[data-result-actions],.pt-drug-management,.pt-view-options'))return;if(!e.target.name&&!e.target.matches('[data-common-weight],[data-ref-species],[data-record-weight-confirm]'))return;clearTimeout(timer);timer=setTimeout(calculate,350);}
   b.addEventListener('input',changed);b.addEventListener('change',changed);
   function refresh(){
-   frame=0;if(disposed)return;consistentCopy();
+   frame=0;if(disposed)return;consistentCopy();set(patientPicker,q('[data-patient-summary]')?.dataset.patientSelected==='true'?'환자 변경':'환자 불러오기');
    const active=q('[data-kind-panel]:not([hidden])')?.dataset.kindPanel||'batch';
    if(modes){hide(q('.cs-prescription-toolbar'),!['med','batch'].includes(active));hide(q('.cs-prescription-toolbar>.pt-prescription-inputs'),active!=='batch'||rx.hidden);hide(modes,!['med','batch'].includes(active));modes.querySelector('[data-prescription-manual]').setAttribute('aria-pressed',String(active==='med'));if(active==='med')modes.querySelectorAll('[data-injection-mode]').forEach(x=>{if(x.getAttribute('aria-pressed')!=='false')x.setAttribute('aria-pressed','false');});else if(!modes.querySelector('[data-injection-mode][aria-pressed=true]')){const oral=!rx.hidden;modes.querySelector('[data-injection-mode="'+(oral?'oral':'injection')+'"]').setAttribute('aria-pressed','true');}}
    const batch=q('[data-kind=batch]');if(active==='med'&&batch.getAttribute('aria-pressed')!=='true')batch.setAttribute('aria-pressed','true');

@@ -30,23 +30,34 @@
   if(accepted===0&&failed===0&&!(pending>0))return notice.attempted===0?'시도하지 않음 · 발송 대상 없음':'접수·실패 기록 0건 · 시도 여부 확인 필요';
   return ['접수 '+accepted+'건','실패 '+failed+'건',pending?'결과 미확정 '+pending+'건':'','기기 수신·보호자 열람은 별도'].filter(Boolean).join(' · ');
  }
- function groupPreventiveRows(list,rows){
+ function groupPreventiveRows(list,rows,assignGroup){
   const groups=new Map();
   for(const row of list.querySelectorAll(':scope > .work-first-row')){
    const item=rows.find(x=>String(x.id)===row.dataset.workId&&String(x.sourceType||'')===row.dataset.workType);
    if(!item||!['vaccination','heartworm'].includes(item.sourceType)||!item.patientId||!item.guardianId)continue;
-   const key=JSON.stringify([item.guardianId,item.patientId,item.dueDate]);
+   const key=JSON.stringify([item.guardianId,item.patientId,String(item.dueDate||'').slice(0,10)]);
    if(!groups.has(key))groups.set(key,[]);groups.get(key).push({row,item});
   }
   for(const entries of groups.values()){
    if(entries.length<2)continue;
    const group=document.createElement('section');group.className='cs-preventive-group';
-   const head=document.createElement('header'),label=document.createElement('b'),first=entries[0];
-   label.textContent=(first.item.patientName||'환자명 확인')+' · 예방 업무 '+entries.length+'건';head.append(label);
+   const head=document.createElement('header'),identity=document.createElement('div'),label=document.createElement('b'),meta=document.createElement('span'),first=entries[0];
+   label.textContent=(first.item.patientName||'환자명 확인')+' · 예방 업무 '+entries.length+'건';
+   meta.textContent=(first.row.querySelector('.work-first-when b')?.textContent||first.item.dueDate||'예정일 미확인')+' · 보호자 '+(first.item.guardianName||'미확인');identity.append(label,meta);head.append(identity);
+   const shared=document.createElement('div');shared.className='cs-preventive-shared';
+   const source=first.row.querySelector('[data-work-assign]');
+   if(source&&assignGroup){const select=source.cloneNode(true);select.removeAttribute('data-work-assign');select.dataset.workGroupAssign='';select.setAttribute('aria-label','표시된 예방 업무 '+entries.length+'건 담당자 지정');select.options[0].textContent='묶음 담당자 지정';
+    const values=entries.map(e=>e.row.querySelector('[data-work-assign]')?.value||'');select.value=values.every(v=>v===values[0])?values[0]:'';
+    select.onchange=async()=>{if(!select.value)return;const controls=[...group.querySelectorAll('button,select')].map(b=>({b,disabled:b.disabled}));controls.forEach(({b})=>b.disabled=true);try{await assignGroup(entries.map(e=>e.item),select.value);}finally{if(group.isConnected)controls.forEach(({b,disabled})=>b.disabled=disabled);}};shared.append(select);
+   }
+   const secondary=first.row.querySelector('.work-quick-secondary');if(secondary)shared.append(secondary);head.append(shared);
    first.row.before(group);group.append(head);
-   entries.forEach(({row,item},index)=>{
-    row.querySelector('.work-first-main > b').textContent=item.title||workFirstReason(item);
-    if(index>0)row.querySelector('.work-quick-secondary')?.remove();
+   entries.forEach(({row,item})=>{
+    row.classList.add('cs-preventive-item');row.querySelector('.work-first-when')?.remove();
+    const main=row.querySelector('.work-first-main');main.querySelector('b').textContent=item.title||(item.sourceType==='vaccination'?'예방접종':'심장사상충 예방');
+    const description=main.querySelector(':scope > span');if(description)description.textContent=item.action?.assignee?'담당 '+item.action.assignee:'담당자 미지정';
+    row.querySelector('.work-quick-secondary')?.remove();
+    const individual=row.querySelector('[data-work-assign]');if(individual&&assignGroup){const details=document.createElement('details');details.className='cs-preventive-assignee';const summary=document.createElement('summary');summary.textContent='개별 담당';individual.before(details);details.append(summary,individual);}
     group.append(row);
    });
   }

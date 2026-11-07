@@ -1829,3 +1829,25 @@
 @media screen and (max-width:800px) {
  .clinic-calm #appView #practiceRoot :is(.cs-list-actionbar,.er-list-actions,.cs-record-navigation) button {min-height:44px!important;height:44px!important}
 }
+
+/* Stable record actions, grouped preventive work and explicit measurement age. */
+@media screen {
+ .clinic-calm .cs-preventive-group>header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+ .clinic-calm .cs-preventive-group>header>div:first-child{display:grid;gap:3px}
+ .clinic-calm .cs-preventive-group>header span{font-size:13px;font-weight:400}
+ .clinic-calm .cs-preventive-shared{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+ .clinic-calm #workFirstDashboard .work-first-row.cs-preventive-item{grid-template-columns:minmax(0,1fr) auto}
+ .clinic-calm .cs-preventive-assignee{font-size:13px;order:2}
+ .clinic-calm .cs-preventive-assignee summary{cursor:pointer;padding:6px}
+ .clinic-calm #practiceRoot .cs-vital-previous{display:inline-block;font-size:12px;line-height:1.5;background:#fff1d6;border-radius:4px;padding:2px 5px;color:#775013;font-weight:600}
+ .clinic-calm #practiceRoot .cs-previous-measurement:not(.cl-alert):not(.cl-stale) strong{color:#526361}
+ .clinic-calm #practiceRoot .pt-organized [data-common-inputs]>.cs-patient-picker{max-width:none;min-height:40px;padding:8px 12px;font-size:14px;font-weight:600}
+}
+@media screen and (max-width:640px){
+ .clinic-calm #workFirstDashboard .work-first-row.cs-preventive-item{grid-template-columns:minmax(0,1fr)}
+ .clinic-calm .cs-preventive-shared{width:100%}
+ .clinic-calm #practiceRoot .pt-organized [data-common-inputs]>.cs-patient-picker{min-height:44px}
+}
+
+@media screen{.clinic-calm .cs-preventive-shared>select{min-width:180px;max-width:100%;font-size:14px}.clinic-calm .cs-preventive-shared>.work-quick-secondary{width:auto}.clinic-calm #workFirstDashboard .cs-preventive-item .work-first-main{min-width:0}}
+@media screen and (max-width:640px){.clinic-calm #workFirstDashboard .cs-preventive-item .work-first-actions{grid-column:1;justify-content:flex-start}}

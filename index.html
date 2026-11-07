@@ -1487,7 +1487,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 
             <div class="wizard-pane" data-wizard-pane="3">
               <div class="wizard-pane-title"><div><h4>복약 안내</h4><p>약을 추가하면 복약표와 날짜별 투약 체크표에 반영됩니다.</p></div><span class="privacy-badge">입력 중 · 자료 게시·일정 등록 시 서버 저장</span></div>
-              
+
               <div class="medication-panel" style="margin-top:0">
                 <div id="medicationRows" class="medication-rows"></div>
                 <div class="medication-actions"><button id="addMedication" class="btn btn-secondary" type="button">복약 안내 추가</button><span>최대 8종 · 같은 용법은 약 카드의 복제로 추가하세요.</span></div>
@@ -1548,7 +1548,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
                 <p class="individual-download-note">브라우저가 여러 파일 다운로드 허용을 물으면 허용해주세요. 차단되면 각 파일의 ‘다운로드’를 하나씩 누르면 됩니다.</p>
               </div>
               <div id="mobileDayControl" class="mobile-day-control hidden"><label class="field-label" for="mobileDaySelect">휴대폰용 안내 카드 시점</label><select id="mobileDaySelect" class="input"><option value="1">D+1</option><option value="3">D+3</option><option value="7">D+7</option><option value="14">D+14</option></select></div>
-              
+
               <section class="builder-delivery-options" aria-label="자료 게시와 저장">
                 <div class="builder-followup-handoff builder-home-send"><b>HOME에 자료 게시</b><span>선택한 자료를 PDF로 확인한 뒤 보호자의 HOME 자료함에 게시합니다.</span><button id="sendBuilderMaterialsBtn" class="btn btn-primary" type="button">보호자 HOME에 게시</button><small>문자는 발송하지 않습니다. 게시 후 알림이 켜진 연결 기기에 푸시를 시도하며, 수신 여부는 보장되지 않습니다.</small></div>
                 <div class="builder-save-options"><b>파일로 저장하거나 인쇄하기</b><div class="output-actions"><div class="output-action-target"><p id="downloadTargetSummary"></p><button id="generateOutputBtn" class="btn btn-secondary">선택한 자료 작성 · 다운로드</button></div><div class="output-action-target"><p id="previewTargetSummary"></p><button id="secondaryOutputBtn" class="btn btn-secondary">현재 미리보기 인쇄 / PDF 저장</button></div></div><small>문서 저장·인쇄와 HOME 복약 일정·알림 등록은 별도입니다.</small></div>
@@ -4904,6 +4904,17 @@ function workFirstRequestAdvance(){workFirstAdvancePending=true;}
 function workFirstFocusNext(){if(!workFirstAdvancePending)return;workFirstAdvancePending=false;requestAnimationFrame(()=>{const row=$('workFirstList')?.querySelector('.work-first-row');if(!row)return;row.classList.add('work-next');row.tabIndex=-1;row.focus({preventScroll:true});row.scrollIntoView({behavior:'smooth',block:'nearest'});setTimeout(()=>row.classList.remove('work-next'),2400);});}
 async function workFirstOpenQuickRecord(item,type){if(!item?.patientId||!item?.guardianId){toast('환자 연결 정보를 확인하지 못했습니다.');return;}workFirstQuickContext={patientId:item.patientId,type,advanceOnSave:['vaccination','heartworm','visit'].includes(type)};const opened=await window.R61PatientRoute.open({guardianId:item.guardianId,patientId:item.patientId,type,taskId:String(item.id||'')});if(!opened)workFirstQuickContext=null;}
 async function workFirstAssign(item,userId){if(!userId||!item)return;const member=(careOperationsTeam||[]).find(x=>x.userId===userId),name=member?.displayName||member?.email||'';try{if(item.sourceType==='home')await saasRequest(`/saas/home-followups/${encodeURIComponent(item.id)}/action`,{method:'PATCH',body:JSON.stringify({status:'in_progress',assigneeUserId:userId,assignee:name})});else if(['vaccination','heartworm'].includes(item.sourceType))await saasRequest(`/saas/preventive-events/${encodeURIComponent(item.eventId)}/recall`,{method:'PATCH',body:JSON.stringify({status:'in_progress',assignee:name})});else return;workFirstRequestAdvance();careSignalOperationsChanged();toast(`${name||'직원'} 담당으로 지정했습니다.`);await loadFollowupScheduleBoard(false);}catch(e){toast(e.message||'담당자를 지정하지 못했습니다.');await loadFollowupScheduleBoard(false);}}
+let workFirstGroupAssignBusy=false;
+async function workFirstAssignGroup(items,userId){
+ if(workFirstGroupAssignBusy||!userId)return;
+ const scope=workFirstCleanupScope(),member=(careOperationsTeam||[]).find(x=>x.userId===userId);
+ const targets=[...new Map(items.filter(x=>['vaccination','heartworm'].includes(x.sourceType)&&x.eventId).map(x=>[x.eventId,x])).values()];
+ if(!scope||!member||!targets.length)return;
+ workFirstGroupAssignBusy=true;let done=0,problem='';const name=member.displayName||member.email||'';
+ try{for(const item of targets){if(scope!==workFirstCleanupScope())return;try{await saasRequest('/saas/preventive-events/'+encodeURIComponent(item.eventId)+'/recall',{method:'PATCH',body:JSON.stringify({status:'in_progress',assignee:name})});if(scope!==workFirstCleanupScope())return;done++;}catch(e){problem=e.message||'담당자 지정 실패';break;}}
+ if(scope!==workFirstCleanupScope())return;careSignalOperationsChanged();await loadFollowupScheduleBoard(false);if(scope!==workFirstCleanupScope())return;toast(done+' / '+targets.length+'건 담당자 지정'+(problem?' · '+problem+' · 남은 항목을 확인해주세요.':' 완료'));
+ }finally{workFirstGroupAssignBusy=false;}
+}
 async function workFirstResolve(item){if(!item||item.sourceType!=='home'||!confirm(`${item.patientName||'환자'} 업무를 완료 처리할까요?`))return;const commit=async()=>{try{await saasRequest(`/saas/home-followups/${encodeURIComponent(item.id)}/action`,{method:'PATCH',body:JSON.stringify({status:'resolved',assignee:careOperationActor(),note:'오늘 업무 빠른 처리에서 완료'})});workFirstRequestAdvance();careSignalOperationsChanged();await loadFollowupScheduleBoard(false);toast('완료했습니다. 다음 업무를 선택했습니다.');}catch(e){toast(e.message||'완료 처리하지 못했습니다.');}};careDeferredAction('업무 완료 처리를 준비했습니다',commit,8000);}
 async function workFirstRetryMessage(item){if(!item||item.sourceType!=='message')return;const last4=item.external?.recipientLast4||'----';if(!confirm(`${item.patientName||'환자'} 보호자 번호 끝 ${last4}자리로 실패한 ${scheduleBoardChannelLabel(item.sourceChannel)} 발송을 지금 재시도할까요?`))return;try{await saasRequest(`/saas/followup/messages/${encodeURIComponent(item.id)}/quick-retry`,{method:'POST',body:'{}'});workFirstRequestAdvance();careSignalOperationsChanged();toast('재발송을 접수했습니다. 다음 업무를 선택합니다.');await loadFollowupScheduleBoard(false);}catch(e){toast(e.message||'빠른 재시도에 실패했습니다. 발송 관리에서 다시 확인해주세요.');}}
 window.addEventListener('carestep:quick-record-saved',async e=>{const c=workFirstQuickContext;if(!c||c.patientId!==e.detail?.patientId)return;workFirstQuickContext=null;if(c.advanceOnSave)workFirstRequestAdvance();await loadFollowupScheduleBoard(false);});
@@ -4954,7 +4965,7 @@ function renderWorkFirstRows(list,rows,limit){
   list.innerHTML=rows.length?rows.slice(0,limit).map(x=>{const urgent=x.action?.breached||x.action?.priority==='urgent',warn=x.operationalStatus==='failed'||x.operationalStatus==='overdue',canConsult=x.sourceType==='home'&&x.responseCode==='concern',preventive=['vaccination','heartworm'].includes(x.sourceType),canAssign=['home','vaccination','heartworm'].includes(x.sourceType),quickType=preventive?x.sourceType:x.sourceType==='visit'?'visit':'',canClean=workFirstCleanupCandidates([x]).length>0,primary=canConsult?`<button class="btn btn-primary" type="button" data-work-consult="${escapeHtml(x.id)}">바로 답변</button>`:preventive?`<button class="btn btn-primary" type="button" data-work-record="${escapeHtml(quickType)}">${x.sourceType==='vaccination'?'접종':'사상충'} 완료 기록</button>`:x.sourceType==='message'?`<button class="btn btn-primary" type="button" data-work-retry>재시도</button>${canClean?`<button class="btn btn-secondary" type="button" data-work-cleanup>확인 후 정리</button>`:''}`:x.sourceType==='home'?`<button class="btn btn-primary" type="button" data-work-resolve>완료</button>`:x.sourceType==='visit'?`<button class="btn btn-primary" type="button" data-work-record="visit">진료 기록</button>`:'';return `<article class="work-first-row ${urgent?'urgent':warn?'warn':''}" data-work-type="${escapeHtml(x.sourceType||'')}" data-work-id="${escapeHtml(x.id)}" data-work-patient-id="${escapeHtml(x.patientId||'')}" data-work-guardian-id="${escapeHtml(x.guardianId||'')}"><div class="work-first-when"><b>${escapeHtml(scheduleBoardDateLabel(x.dueDate))}</b><span>${escapeHtml(scheduleBoardChannelLabel(x.sourceType||x.sourceChannel||'home'))}</span></div><div class="work-first-main"><b>${escapeHtml(x.patientName||'환자명 미확인')} · ${escapeHtml(x.title||workFirstReason(x))}</b><span>${escapeHtml(workFirstReason(x))} · 보호자 ${escapeHtml(x.guardianName||'미확인')}${x.action?.assignee?` · 담당 ${escapeHtml(x.action.assignee)}`:''}</span>${x.sourceType==='message'&&x.external?.recipientLast4?`<small class="work-quick-status">수신번호 끝 ${escapeHtml(x.external.recipientLast4)}자리 확인</small>`:''}</div><div class="work-first-actions">${canAssign?`<select class="care-assignee-select" data-work-assign aria-label="담당자 즉시 지정">${careAssigneeOptions(x)}</select>`:''}${primary}<div class="work-quick-secondary"><button class="btn btn-secondary" type="button" data-work-record="weight">체중</button><button class="btn btn-secondary" type="button" data-work-record="note">메모</button><button class="btn btn-secondary" type="button" data-work-patient>환자 보기</button></div></div></article>`}).join(''):'<div class="schedule-board-empty">현재 이 범주에서 처리할 업무가 없습니다.</div>';
   list.querySelectorAll('.work-first-row').forEach(row=>{const item=rows.find(x=>String(x.id)===row.dataset.workId&&String(x.sourceType||'')===row.dataset.workType);if(!item)return;row.querySelector('[data-work-consult]')?.addEventListener('click',()=>{workFirstConsultQuickId=item.id;openCareConsultReply(item.id);});row.querySelector('[data-work-assign]')?.addEventListener('change',e=>workFirstAssign(item,e.target.value));row.querySelector('[data-work-resolve]')?.addEventListener('click',()=>workFirstResolve(item));row.querySelector('[data-work-retry]')?.addEventListener('click',()=>workFirstRetryMessage(item));row.querySelector('[data-work-cleanup]')?.addEventListener('click',()=>workFirstAcknowledgeMessages([item]));row.querySelectorAll('[data-work-record]').forEach(b=>b.addEventListener('click',()=>workFirstOpenQuickRecord(item,b.dataset.workRecord)));row.querySelector('[data-work-patient]')?.addEventListener('click',()=>window.R61PatientRoute.open({guardianId:item.guardianId,patientId:item.patientId,taskId:String(item.id||'')}));});
  window.ClinicFollowupTasks?.enhance(list,rows);
- window.ClinicOrganization?.groupPreventiveRows(list,rows);
+ window.ClinicOrganization?.groupPreventiveRows(list,rows,workFirstAssignGroup);
 }
 function renderWorkFirstDashboard(){
   const list=$('workFirstList');if(!list)return;const rawBuckets=workFirstBuckets(),buckets=Object.fromEntries(Object.entries(rawBuckets).map(([key,rows])=>[key,window.ClinicOrganization?.clinicalRows(rows,window.carestepAttentionSummary?.().consult)||rows])),labels={all:'업무 목록',preventive:'오늘 접종·사상충',care:'오늘 진료·후속관리',consult:'보호자 상담 필요',delivery:'발송 실패·미열람',unassigned:'담당자 미지정',overdue:'지연 업무'};
@@ -10314,7 +10325,7 @@ $('medicationRows')?.addEventListener('click',e=>{
   if(removeBtn){
     readMedicationRowsFromForm();
     if(Number.isInteger(idx)) medications.splice(idx,1);
-  
+
     renderMedicationRows(); updateMedicationPreview(); renderCurrentOutput(); updateReadiness();
   }
 });
@@ -10824,7 +10835,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="home-access-clinic.js?v=20261031-practical-terms"></script>
 <script src="clinic-care.js?v=20261107-interface-cohesion"></script>
 <script src="clinic-account-reads.js?v=20261031-account"></script>
-<script src="clinic-organization.js?v=20261107-interface-cohesion"></script>
+<script src="clinic-organization.js?v=20261107-workflow-continuity"></script>
 <script src="staff-training.js?v=20261105-training-simple"></script>
 <script src="staff-training-clinic.js?v=20261105-operations"></script>
 <script src="practice-intake.js?v=20261105-selection"></script>
@@ -10860,7 +10871,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="practice-calculator-settings.js?v=20261030-efficient1"></script>
 <script src="practice-calculator-flow.js?v=20261031-calc-cleanup-2"></script>
 <script src="practice-calculator-clarity.js?v=20261031-calc-clarity-1"></script>
-<script src="practice-calculator-organize.js?v=20261107-interface-cohesion"></script>
+<script src="practice-calculator-organize.js?v=20261107-workflow-continuity"></script>
 <link rel="stylesheet" href="practice-calculator-organize.css?v=20261031-compact-header">
 <link rel="stylesheet" href="practice-calculator-clarity.css?v=20261031-calc-clarity-1">
 <script src="clinical-protocol-starters.js?v=20261027wardux1"></script>
@@ -10875,7 +10886,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="practice-injection.js?v=20261102-strength-reuse1"></script>
 <script src="practice-injection-workflow.js?v=20261030-consistent1"></script>
 <script src="ward-fluid-care.js?v=20261031-prunus"></script>
-<script src="clinical-workspace.js?v=20261106-workflow12"></script>
+<script src="clinical-workspace.js?v=20261107-workflow-continuity"></script>
 <script src="practice-prescription-summary.js?v=20261027knowledge1"></script>
 <script src="practice-prescription-library.js?v=20261030-efficient1"></script>
 <script src="practice-prescription-safety.js?v=20261031-clinical-clarity"></script>
@@ -10890,9 +10901,9 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script id="clinic-module-manifest" type="application/json">{"dental": ["dental-record.js?v=20261101-record-identity", "dental-workflow.js?v=20261106-workflow12"], "neuro": ["neuro-record.js?v=20261106-workflow12"], "ophthalmic": ["ophthalmic-record.js?v=20261106-workflow12"], "chronic": ["chronic-record.js?v=20261107-review-polish"], "calc": ["practice-acid-base.js?v=20261026tb1", "practice-calcium-transfusion.js?v=20261031-calc-cleanup-2", "practice-emergency.js?v=20261031-calc-cleanup-2", "practice-potassium-mix.js?v=20261031-calc-cleanup-2", "practice-cri-presets.js?v=20261031-calc-clarity-1", "practice-nutrition-foods.js?v=20261031-prunus", "practice-nutrition.js?v=20261031-food1", "practice-calculator-workspace.js?v=20261031-calc-cleanup-2", "practice-calcium-guided.js?v=20261026ca1", "practice-fluid-plan.js?v=20261031-calc-cleanup-2"]}</script>
 <script src="clinic-lazy-modules.js?v=20261105-flow"></script>
 <script src="clinic-inpatients.js?v=20261106-workflow9"></script>
-<script src="clinic-record-workspace.js?v=20261107-visible-records"></script>
+<script src="clinic-record-workspace.js?v=20261107-workflow-continuity"></script>
 <script src="clinic-purchases.js?v=20261107-toolbar-vendors"></script>
-<script src="practice-tools.js?v=20261107-interface-cohesion"></script>
+<script src="practice-tools.js?v=20261107-workflow-continuity"></script>
 <script src="clinic-today-ward.js?v=20261106-workflow9"></script>
 <script src="practice-clinic.js?v=20261103-settings"></script>
 <script src="clinic-settings.js?v=20261107-interface-cohesion"></script>
@@ -10900,7 +10911,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-followup-tasks.js?v=20261104-followup-controls"></script>
 <link rel="stylesheet" href="builder-flow.css?v=20261105-flow3">
 <script src="builder-flow.js?v=20261105-flow3"></script>
-<link rel="stylesheet" href="clinic-calm.css?v=20261107-toolbar-vendors">
+<link rel="stylesheet" href="clinic-calm.css?v=20261107-workflow-continuity">
 <script src="clinic-update-notice.js?v=20261107-review-polish"></script>
 </body>
 </html>
