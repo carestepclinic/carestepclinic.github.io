@@ -460,3 +460,19 @@ button,input,select,textarea{font-family:inherit}
 .hq-login-advanced{margin:14px 0;font-size:14px}.hq-login-advanced summary{cursor:pointer;color:var(--muted)}
 .hq-read-summary{font-size:13px;color:var(--muted)}
 @media(max-width:650px){.hq-protocol-filters{gap:8px}.hq-protocol-filters label{flex:1 1 130px;min-width:0}.hq-protocol-filters select{width:100%}.hq-protocol-filters [data-protocol-count]{flex-basis:100%;padding:0}.btn,.staff-training .st-button,.gs-button{min-height:44px}.hq-protocol-card{padding:14px}}
+
+/* HQ operations filters share the primary palette and remain usable at narrow widths. */
+.hq-protocol-quick{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.hq-protocol-filters [data-protocol-conditions]{grid-column:1/-1;margin:0;color:var(--muted);overflow-wrap:anywhere}
+.hq-protocol-filters [data-protocol-reset]{align-self:end;justify-self:start}
+.hq-protocol-next{font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+.hq-audit-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.hq-audit-filters label{display:grid;gap:6px;font-size:14px;min-width:0}
+.hq-audit-filters .input{width:100%;min-width:0;box-sizing:border-box}
+.hq-audit-filters>button{align-self:end;justify-self:start}
+#hqAuditSummary{grid-column:1/-1;margin:0;color:var(--muted);font-size:13px;overflow-wrap:anywhere}
+.hq-deployment-card b,.hq-deployment-card p{overflow-wrap:anywhere}
+.hq-deployment-card[data-state="schema_missing"],.hq-deployment-card[data-state="automation_warning"]{border-color:#c58a40}
+.hq-protocol-quick .btn.primary{background:#137c74;color:#fff;border-color:#137c74}
+.ck-jobs [data-ck-job]:focus{outline:2px solid #137c74;outline-offset:4px}
+@media(max-width:650px){.hq-audit-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.hq-audit-filters>label:nth-child(3){grid-column:1/-1}.hq-protocol-quick .btn{flex:1 1 calc(50% - 8px)}.hq-deployment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}

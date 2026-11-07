@@ -4,11 +4,11 @@
   const byId=id=>document.getElementById(id);
   const regions=new Map(),sequences=new Map(),editors=new Map(),viewPositions=new Map();
   const stateKey='carestep_hq_ui_v20261020';
-  let currentView='dashboard',billingPane='subscriptions',restoring=false,reviewOpen=false;
+  let currentView='dashboard',billingPane='subscriptions',restoring=false,reviewOpen=false,closeReview=null;
   let activeSave=null,quickSequence=0,clinicListSequence=0,clinicDetailSequence=0;
   const clinicPanes=new Map();
   let clinicFocusRequested='';
-  const filterIds=['clinicSearch','clinicStatus','clinicApproval','journeySearch','journeyScope','journeyStatusFilter','billingMonth','hqSubscriptionSearch','crmHqPeriod','voiceType','voiceStatus','contentSearch','contentStatus','contentCategory','contentDueOnly','surveyHqPeriod','hqSurveyScope','hqSubscriptionStatus','customerSuccessSearch','customerSuccessStatus','customerSuccessPlan','customerSuccessSignal','onboardingSearch','onboardingStatusFilter'];
+  const filterIds=['hqAuditFrom','hqAuditTo','hqAuditClinic','hqAuditAction','hqAuditActor','clinicSearch','clinicStatus','clinicApproval','journeySearch','journeyScope','journeyStatusFilter','billingMonth','hqSubscriptionSearch','crmHqPeriod','voiceType','voiceStatus','contentSearch','contentStatus','contentCategory','contentDueOnly','surveyHqPeriod','hqSurveyScope','hqSubscriptionStatus','customerSuccessSearch','customerSuccessStatus','customerSuccessPlan','customerSuccessSignal','onboardingSearch','onboardingStatusFilter'];
   const safeNumber=n=>n!==null&&n!==undefined&&n!==''&&Number.isFinite(Number(n));
   const won=n=>safeNumber(n)?`${Number(n).toLocaleString('ko-KR')}원`:'금액 확인 필요';
   const hqReadScope=()=>JSON.stringify([endpoint(),hqSessionToken(),key()]);
@@ -143,19 +143,23 @@
     edit.onclick=()=>{
       if(activeSave||!allowLeave())return;
       for(const other of editors.values())if(other!==editor&&other.editing)cancelEdit(other);
-      editor.editing=true;updateEditor(editor);fields.find(x=>!x.disabled)?.focus();
+      editor.owner=hqReadScope();editor.epoch=readEpoch;editor.clinic=selectedClinic;editor.editing=true;updateEditor(editor);fields.find(x=>!x.disabled)?.focus();
     };
     cancel.onclick=()=>cancelEdit(editor);
     fields.forEach(x=>{x.addEventListener('input',()=>updateEditor(editor));x.addEventListener('change',()=>updateEditor(editor));});
     save.textContent='변경 내용 확인';updateEditor(editor);return editor;
   }
+  function editorIsCurrent(editor){
+    return byId('loginOverlay').classList.contains('hidden')&&!!(hqSessionToken()||key())&&editor.owner===hqReadScope()&&editor.epoch===readEpoch&&editor.root.isConnected&&editors.get(editor.key)===editor&&editor.editing&&(editor.key!=='subscription'||editor.clinic===selectedClinic);
+  }
   function review(editor){
     const diff=changes(editor.baseline,snapshot(editor));if(!diff.length)return Promise.resolve(false);
     return new Promise(resolve=>{
-      reviewOpen=true;
+      reviewOpen=true;const confirmedSnapshot=JSON.stringify(snapshot(editor));let finished=false;
       const dialog=document.createElement('dialog');dialog.className='hq-review';dialog.setAttribute('aria-labelledby','hqReviewTitle');
       dialog.innerHTML=`<h2 id="hqReviewTitle">${esc(editor.title)}</h2><p>${esc(editor.effect)}</p><table class="hq-review-table"><thead><tr><th>항목</th><th>변경 전</th><th>변경 후</th></tr></thead><tbody>${diff.map(x=>{const field=editor.fields.find((_,i)=>editor.baseline[i]?.key===x.key);return `<tr><th>${esc(x.label)}</th><td>${esc(formatted(x.before,field))}</td><td>${esc(formatted(x.value,field))}</td></tr>`;}).join('')}</tbody></table><div class="hq-review-actions"><button type="button" class="btn" data-review-cancel>돌아가서 수정</button><button type="button" class="btn primary" data-review-save>확인 후 저장</button></div>`;
-      const finish=value=>{reviewOpen=false;dialog.close();dialog.remove();resolve(value);};
+      const finish=value=>{if(finished)return;finished=true;const accepted=value&&editorIsCurrent(editor)&&confirmedSnapshot===JSON.stringify(snapshot(editor));reviewOpen=false;closeReview=null;dialog.close();dialog.remove();resolve(accepted);};
+      closeReview=()=>finish(false);
       dialog.querySelector('[data-review-cancel]').onclick=()=>finish(false);
       dialog.querySelector('[data-review-save]').onclick=()=>finish(true);
       dialog.addEventListener('cancel',event=>{event.preventDefault();finish(false);});
@@ -164,13 +168,13 @@
   }
   async function reviewedSave(key,save){
     const editor=editors.get(key);
-    if(!editor||!editor.editing||activeSave||reviewOpen)return false;
+    if(!editor||!editorIsCurrent(editor)||activeSave||reviewOpen)return false;
     if(editor.fields.some(x=>x.type==='number'&&!x.disabled&&!x.checkValidity())){editor.fields.find(x=>x.type==='number'&&!x.disabled&&!x.checkValidity()).reportValidity();return false;}
-    if(!await review(editor))return false;
+    if(!await review(editor)||!editorIsCurrent(editor))return false;
     activeSave=key;for(const e of editors.values())if(e.root.isConnected)updateEditor(e);
     try{
       const saved=await save();
-      if(saved===true){editor.baseline=snapshot(editor);editor.editing=false;}
+      if(saved===true&&editorIsCurrent(editor)){editor.baseline=snapshot(editor);editor.editing=false;}
       return saved;
     }finally{activeSave=null;for(const e of editors.values())if(e.root.isConnected)updateEditor(e);}
   }
@@ -363,7 +367,7 @@
     for(const id of filterIds){
       const el=byId(id),value=saved.filters?.[id];if(!el)continue;
       if(el.type==='checkbox'&&typeof value==='boolean')el.checked=value;
-      else if(typeof value==='string'){if(id==='contentCategory')el.dataset.restoreValue=value;else el.value=value;}
+      else if(typeof value==='string'){if(id==='contentCategory'||id==='hqAuditAction')el.dataset.restoreValue=value;else el.value=value;}
     }
     selectedClinic=typeof saved.clinic==='string'?saved.clinic:'';
     customerSuccessQuick=['all','action','risk','trial3','payment','inactive14'].includes(saved.adoptionQuick)?saved.adoptionQuick:'all';
@@ -473,7 +477,7 @@
   const closeCompactMenu=setupCompactHeader();
 
   let clinicReturnContext=null,pendingClinicReturn=null,selectedPlanCode='BASIC';
-  const clinicLinkAttributes=['data-sub-clinic','data-billing-clinic','data-report-clinic','data-open-onboarding-clinic','data-cs-clinic','data-cs-action-clinic','data-clinic','data-quick-clinic'];
+  const clinicLinkAttributes=['data-audit-clinic','data-sub-clinic','data-billing-clinic','data-report-clinic','data-open-onboarding-clinic','data-cs-clinic','data-cs-action-clinic','data-clinic','data-quick-clinic'];
   function captureClinicReturn(source){
     const attribute=clinicLinkAttributes.find(key=>source?.hasAttribute(key));
     return {view:currentView,pane:billingPane,scroll:window.scrollY||0,listScroll:byId('clinicList').scrollTop,
@@ -1272,15 +1276,29 @@
     if(key==='billingCycle')return ({monthly:'월간',annual:'연간'})[value]||String(value);
     return String(value);
   }
-  loadAudit=async function(){
-    const current=latest('audit-read');
-    const d=await req('/hq/audit');if(!current())return;audit=d.events||[];
-    byId('auditList').innerHTML=audit.length?`<div class="table-wrap" tabindex="0" aria-label="운영 감사로그"><table class="table hq-audit-table hq-responsive-table"><thead><tr><th scope="col">시각</th><th scope="col">작업자</th><th scope="col">작업</th><th scope="col">대상</th><th scope="col">변경 내용</th></tr></thead><tbody>${audit.map(x=>{
+  const auditClinicId=(x,detail)=>x.clinicId||detail.clinicId||(x.targetType==='clinic'?x.targetId:'');
+  function renderAudit(){
+    const action=byId('hqAuditAction'),selection=action.dataset.restoreValue??action.value??'all';delete action.dataset.restoreValue;
+    const actions=[...new Set(audit.map(x=>x.action).filter(Boolean))];if(selection!=='all'&&selection&&!actions.includes(selection))actions.push(selection);
+    action.replaceChildren(new Option('전체 작업','all'));for(const value of actions.sort((a,b)=>(auditActions[a]||a).localeCompare(auditActions[b]||b,'ko')))action.add(new Option(auditActions[value]||value,value));action.value=selection||'all';
+    const from=byId('hqAuditFrom').value,to=byId('hqAuditTo').value,clinic=byId('hqAuditClinic').value.trim().toLowerCase(),actor=byId('hqAuditActor').value.trim().toLowerCase();
+    if(from&&to&&from>to){byId('hqAuditSummary').textContent='시작일은 종료일보다 늦을 수 없습니다.';byId('auditList').innerHTML='<div class="empty">조회 기간을 확인해주세요.</div>';return;}
+    const lower=from?Date.parse(from+'T00:00:00+09:00'):-Infinity,upper=to?Date.parse(to+'T00:00:00+09:00')+86400000:Infinity;
+    const rows=audit.filter(x=>{const detail=auditDetail(x.detail),when=Date.parse(x.createdAt),id=auditClinicId(x,detail);return ((!from&&!to)||(Number.isFinite(when)&&when>=lower&&when<upper))&&(!clinic||[id,detail.clinicName,x.clinicName,x.targetType==='clinic'?x.targetName:''].join(' ').toLowerCase().includes(clinic))&&(action.value==='all'||x.action===action.value)&&(!actor||String(x.actor==='HQ'||!x.actor?'HQ 운영자':x.actor).toLowerCase().includes(actor));});
+    byId('hqAuditSummary').textContent=`${rows.length}건 표시 · 서버에서 불러온 최근 기록 ${audit.length}건 내 검색 · 날짜 기준: 한국시간`;
+    byId('auditList').innerHTML=rows.length?`<div class="table-wrap" tabindex="0" aria-label="운영 감사로그"><table class="table hq-audit-table hq-responsive-table"><thead><tr><th scope="col">시각</th><th scope="col">작업자</th><th scope="col">작업</th><th scope="col">대상</th><th scope="col">변경 내용</th></tr></thead><tbody>${rows.map(x=>{
       const detail=auditDetail(x.detail),known=auditActions[x.action],summary=Object.entries(auditFields).filter(([key])=>Object.hasOwn(detail,key)).map(([key,label])=>`<div><dt>${label}</dt><dd>${esc(auditDisplay(detail[key],key))}</dd></div>`).join('');
-      const targetName=detail.clinicName||detail.title||x.targetName||'';
-      return `<tr><td data-label="시각">${esc(date(x.createdAt))}</td><td data-label="작업자">${esc(x.actor==='HQ'||!x.actor?'HQ 운영자':x.actor)}</td><td data-label="작업"><b>${esc(known||'운영 작업 · 원본 코드 확인')}</b></td><td data-label="대상">${esc(auditTargets[x.targetType]||'기타 대상')}${targetName?'<br><b>'+esc(targetName)+'</b>':''}</td><td data-label="변경 내용">${summary?'<dl class="hq-audit-summary">'+summary+'</dl>':'<span class="muted">변경 내용은 원본 상세에서 확인하세요.</span>'}<details class="hq-audit-raw"><summary>원본 상세</summary><p>작업 코드: ${esc(x.action)}<br>대상 유형: ${esc(x.targetType)}<br>대상 ID: ${esc(x.targetId)}</p><pre>${esc(typeof x.detail==='string'?x.detail:JSON.stringify(x.detail??{},null,2))}</pre></details></td></tr>`;
-    }).join('')}</tbody></table></div>`:'<div class="empty">기록된 운영 작업이 없습니다.</div>';
+      const targetName=detail.clinicName||detail.title||x.targetName||'',clinicId=auditClinicId(x,detail),clinicLink=clinicId?`<br><button type="button" class="btn small" data-audit-clinic="${esc(clinicId)}">관련 병원 열기</button>`:'';
+      return `<tr><td data-label="시각">${esc(x.createdAt?new Date(x.createdAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}):'미확인')}</td><td data-label="작업자">${esc(x.actor==='HQ'||!x.actor?'HQ 운영자':x.actor)}</td><td data-label="작업"><b>${esc(known||'운영 작업 · 원본 코드 확인')}</b></td><td data-label="대상">${esc(auditTargets[x.targetType]||'기타 대상')}${targetName?'<br><b>'+esc(targetName)+'</b>':''}${clinicLink}</td><td data-label="변경 내용">${summary?'<dl class="hq-audit-summary">'+summary+'</dl>':'<span class="muted">변경 내용은 원본 상세에서 확인하세요.</span>'}<details class="hq-audit-raw"><summary>원본 상세</summary><p>작업 코드: ${esc(x.action)}<br>대상 유형: ${esc(x.targetType)}<br>대상 ID: ${esc(x.targetId)}</p><pre>${esc(typeof x.detail==='string'?x.detail:JSON.stringify(x.detail??{},null,2))}</pre></details></td></tr>`;
+    }).join('')}</tbody></table></div>`:`<div class="empty">${audit.length?'검색 조건에 맞는 운영 기록이 없습니다. 조건을 초기화해 다시 확인하세요.':'서버에서 반환한 운영 기록이 없습니다.'}</div>`;
+  }
+  loadAudit=async function(){
+    const current=latest('audit-read');byId('hqAuditSummary').textContent='최근 운영 기록을 불러오는 중…';
+    try{const d=await req('/hq/audit');if(!current())return;audit=d.events||[];renderAudit();}
+    catch(error){if(current())byId('hqAuditSummary').textContent='조회 실패'+(audit.length?' · 이전에 불러온 기록입니다.':'');throw error;}
   };
+  for(const id of ['hqAuditFrom','hqAuditTo','hqAuditClinic','hqAuditAction','hqAuditActor'])byId(id).addEventListener(['hqAuditClinic','hqAuditActor'].includes(id)?'input':'change',()=>{renderAudit();saveState();});
+  byId('hqAuditReset').onclick=()=>{for(const id of ['hqAuditFrom','hqAuditTo','hqAuditClinic','hqAuditActor'])byId(id).value='';byId('hqAuditAction').value='all';delete byId('hqAuditAction').dataset.restoreValue;renderAudit();saveState();};
   byId('auditRefresh').onclick=()=>reloadView('audit');
   const quickInput=byId('hqQuickClinicSearch'),quickBox=byId('hqQuickClinicResults');
   quickInput.setAttribute('role','combobox');quickInput.setAttribute('aria-autocomplete','list');quickInput.setAttribute('aria-controls',quickBox.id);quickInput.setAttribute('aria-expanded','false');
@@ -1319,7 +1337,7 @@
   function syncAuthenticationPresentation(){
     const locked=!loginOverlay.classList.contains('hidden');document.body.classList.toggle('hq-auth-locked',locked);shell.inert=locked;
     byId('hqHeaderTools').inert=locked;byId('hqMenuToggle').disabled=locked;byId('hqToolsToggle').disabled=locked;
-    if(locked){readEpoch++;clinicListSequence++;clinicDetailSequence++;hqActionLoadSequence++;plans=[];planCatalog=null;planPending=null;clinicListSnapshot=null;overviewReads.clear();listReads.clear();viewPositions.clear();pendingViews.clear();for(const id of ['contentTable','voiceTable','crmHqClinicTable','crmHqJourneyTable','surveyHqClinicTable','surveyHqJourneyTable'])byId(id)?.replaceChildren();hideHqQuickResults();document.body.classList.remove('hq-menu-open');byId('hqNavBackdrop').hidden=true;}
+    if(locked){readEpoch++;closeReview?.();for(const editor of editors.values()){if(editor.editing)cancelEdit(editor);editor.owner=null;}hqDeploymentState=null;hqDeploymentSequence++;audit=[];byId('auditList').replaceChildren();byId('hqAuditSummary').textContent='HQ 연결 후 기록을 확인할 수 있습니다.';if(byId('hqDeploymentCard'))renderHqDeploymentStatus();clinicListSequence++;clinicDetailSequence++;hqActionLoadSequence++;plans=[];planCatalog=null;planPending=null;clinicListSnapshot=null;overviewReads.clear();listReads.clear();viewPositions.clear();pendingViews.clear();for(const id of ['contentTable','voiceTable','crmHqClinicTable','crmHqJourneyTable','surveyHqClinicTable','surveyHqJourneyTable'])byId(id)?.replaceChildren();hideHqQuickResults();document.body.classList.remove('hq-menu-open');byId('hqNavBackdrop').hidden=true;}
   }
   new MutationObserver(syncAuthenticationPresentation).observe(loginOverlay,{attributes:true,attributeFilter:['class']});syncAuthenticationPresentation();
 

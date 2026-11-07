@@ -31,3 +31,11 @@ test('incomplete schema counts show an explanation and a failed reload clears ol
 test('both entry points load the helper and Home cache includes the same versioned asset',()=>{
  for(const entry of [index,read('home.html')])assert.match(entry,/<script src="deployment-status.js\?v=deployment-check-20261019a"><\/script>/);const sw=read('sw.js');const c=vm.createContext({self:{addEventListener(){}},Set,URL});vm.runInContext(sw.slice(0,sw.indexOf("self.addEventListener('install'"))+';this.assets=ASSETS;',c);assert.ok(c.assets.includes('./deployment-status.js?v=deployment-check-20261019a'));for(const name of c.assets)assert.ok(existsSync(new URL('../'+name.split('?')[0],import.meta.url)));
 });
+
+test('HQ operations rely on complete schema evidence, not identical historical release labels',()=>{
+ const inspectHQ=ctx.window.CarestepDeployment.inspectOperations;
+ assert.equal(inspectHQ(data()).state,'ok');
+ for(const schema of [undefined,{status:'compatible',compatible:true},{status:'compatible',compatible:true,missingCount:0,tablesExpected:37,tablesChecked:2}]){const d=data();d.database.schema=schema;d.summary.versionAligned=true;assert.equal(inspectHQ(d).state,'unavailable');}
+ const d=data();d.database.schema={status:'missing',missingCount:2};assert.equal(inspectHQ(d).state,'schema_missing');
+ const a=data();a.summary.automationAlerts=3;assert.equal(inspectHQ(a).state,'automation_warning');a.automationStatus='unavailable';assert.equal(inspectHQ(a).automationLabel,'미확인');
+});

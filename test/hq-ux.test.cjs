@@ -6,7 +6,7 @@ const http=require('node:http');
 const {chromium}=require('playwright');
 let browser,server,origin;
 const root=resolve(__dirname,'..');
-const allowed=new Set(['clinic-capabilities.js','guardian-studio.js','guardian-studio.css','hq.html','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
+const allowed=new Set(['deployment-status.js','clinic-capabilities.js','guardian-studio.js','guardian-studio.css','hq.html','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
 before(async()=>{
   server=http.createServer((req,res)=>{
     const file=new URL(req.url,'http://localhost').pathname.slice(1);
@@ -26,7 +26,7 @@ async function fixture(t,width=1280){
   await page.goto(origin+'/hq.html');
   await page.evaluate(()=>{
     document.getElementById('loginOverlay').classList.add('hidden');
-    window.writes=[];window.failPayment=false;window.failWrite=false;
+    window.hqOwner='synthetic-hq';hqSessionToken=()=>hqOwner;window.writes=[];window.failPayment=false;window.failWrite=false;
     window.syntheticPlans=['PILOT','BASIC','PRO','ENTERPRISE'].map((code,i)=>({planCode:code,displayName:code,monthlyPriceKrw:[0,79000,169000,329000][i],annualPriceKrw:[0,790000,1690000,3290000][i],foundingMonthlyPriceKrw:[0,59000,129000,249000][i],features:{carestepHome:true,homePush:true,homeConsultation:true},limits:{members:5,packagesMonthly:500,messageCreditKrw:0,vatExclusive:true},isActive:true}));
     window.detail=id=>({clinic:{id,name:'시험 병원 '+id,plan:'BASIC',status:'active',approvalStatus:'approved'},usage:{},subscription:{planCode:'BASIC',status:'active',billingCycle:'monthly',priceOverrideKrw:86900,messagesMonthlyOverride:-1},entitlements:{plan:syntheticPlans[1]},members:[],content:[],errors:[]});
     window.baseReq=async(path,options)=>{
@@ -425,7 +425,7 @@ test('content loading/error never reports zero data and retry restores real empt
 test('content keeps the newest load and restores category, checkbox and search through deep links',async t=>{
   const p=await contentFixture(t);await contentPage(p);
   await p.evaluate(async()=>{
-    const original=req;window.pendingContent=[];req=()=>new Promise(r=>pendingContent.push(r));
+    const original=req;window.pendingContent=[];req=(path,options)=>path==='/hq/content'?new Promise(r=>pendingContent.push(r)):original(path,options);
     const first=loadContent(),second=loadContent();
     pendingContent[1]({contents:contentReply});await second;
     pendingContent[0]({contents:[]});await first;req=original;
@@ -1175,4 +1175,56 @@ test('production and integration failures retain a persistent error and retry',a
  await p.evaluate(()=>showView('integrations'));
  await p.waitForFunction(()=>document.querySelector('#integrations .hq-load-status')?.textContent.includes('조회하지 못했습니다'));
  assert.equal(await p.locator('#integrations .hq-load-status button').innerText(),'다시 시도');
+});
+
+async function openSyntheticReview(t){
+ const p=await fixture(t);await billing(p);await p.locator('[data-billing-pane=plans]').click();
+ const card=p.locator('.plan-card[data-plan=BASIC]');await card.getByRole('button',{name:'수정',exact:true}).click();await card.locator('.monthly').fill('89000');await card.locator('.save-plan').click();await p.locator('.hq-review').waitFor();return p;
+}
+test('HQ lock cancels an open review, discards edits and cannot resume the old save after reconnect',async t=>{
+ const p=await openSyntheticReview(t);await p.evaluate(()=>{window.oldSave=document.querySelector('[data-review-save]');hqOwner='';$('loginOverlay').classList.remove('hidden');});
+ assert.equal(await p.locator('.hq-review').count(),0);assert.equal(await p.locator('.plan-card[data-plan=BASIC]').getAttribute('data-editing'),'false');
+ await p.evaluate(()=>{hqOwner='new-session';$('loginOverlay').classList.add('hidden');oldSave.click();});assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+for(const change of ['identity','detached','values','expired'])test('review rejects stale '+change+' before any write',async t=>{
+ const p=await openSyntheticReview(t);await p.evaluate(change=>{if(change==='identity')hqOwner='another-session';if(change==='expired')hqOwner='';if(change==='detached')document.querySelector('.plan-card[data-plan=BASIC]').remove();if(change==='values')document.querySelector('.plan-card[data-plan=BASIC] .monthly').value='99000';},change);
+ await p.locator('[data-review-save]').click();assert.equal(await p.locator('.hq-review').count(),0);assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+test('lock hides the workspace immediately even when server revocation is pending',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>{req=()=>new Promise(resolve=>window.finishRevoke=resolve);window.locking=$('lock').onclick();});
+ assert.equal(await p.locator('#loginOverlay').isVisible(),true);assert.equal(await p.locator('.shell').evaluate(el=>el.inert),true);await p.evaluate(async()=>{finishRevoke({ok:true});await locking;});
+});
+test('HQ deployment assesses schema independently of release strings and clears stale results on failure',async t=>{
+ const p=await fixture(t);await p.evaluate(async()=>{
+  window.deploymentData={worker:{version:'new-worker',build:'synthetic-build'},database:{version:'old-history',schema:{status:'compatible',compatible:true,missingCount:0,tablesExpected:40,tablesChecked:40}},expectedPatches:{clinic:'new-clinic',home:'new-home'},summary:{versionAligned:false,automationAlerts:0}};
+  req=async()=>deploymentData;await loadHqDeploymentStatus(true);
+ });
+ assert.equal(await p.locator('#hqDeploymentCard').getAttribute('data-state'),'ok');assert.equal(await p.locator('#hqDeployWorker').textContent(),'synthetic-build');assert.doesNotMatch(await p.locator('#hqDeploymentSummary').textContent(),/불일치/);assert.equal(await p.locator('#toast').textContent(),await p.locator('#hqDeploymentSummary').textContent());assert.match(await p.locator('#hqDeploymentCheckedAt').textContent(),/마지막 응답 확인/);
+ await p.evaluate(async()=>{req=async()=>{throw Error('synthetic outage');};await loadHqDeploymentStatus();});assert.match(await p.locator('#hqDeploymentSummary').textContent(),/조회 실패/);assert.equal(await p.locator('#hqDeployWorker').textContent(),'미확인');assert.equal(await p.locator('#hqDeploymentCheckedAt').textContent(),'');
+});
+test('deployment read ignores an older response and a response after locking',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>{window.deployReads=[];req=()=>new Promise(resolve=>deployReads.push(resolve));window.d1=loadHqDeploymentStatus();window.d2=loadHqDeploymentStatus();});
+ await p.evaluate(async()=>{deployReads[1]({worker:{build:'newest'}});await d2;deployReads[0]({worker:{build:'old'}});await d1;});assert.equal(await p.locator('#hqDeployWorker').textContent(),'newest');
+ await p.evaluate(()=>{window.d3=loadHqDeploymentStatus();$('loginOverlay').classList.remove('hidden');});await p.evaluate(async()=>{deployReads[2]({worker:{build:'late'}});await d3;});assert.equal(await p.locator('#hqDeployWorker').textContent(),'미확인');
+});
+for(const width of [390,1440])test('audit filters use inclusive Korean dates, clinic, action and actor, with return navigation '+width,async t=>{
+ const p=await fixture(t,width);await p.evaluate(()=>{
+  const original=req;req=(path,o)=>path==='/hq/audit'?Promise.resolve({events:[
+   {createdAt:'2026-11-06T15:00:00Z',actor:'홍길동',action:'clinic.update',targetType:'clinic',targetId:'A',detail:{clinicName:'시험 병원 A',status:'active'}},
+   {createdAt:'2026-11-07T14:59:59Z',actor:'HQ',action:'subscription.update',targetType:'subscription',targetId:'sub-b',detail:{clinicId:'B',clinicName:'시험 병원 B'}},
+   {createdAt:'2026-11-07T15:00:00Z',actor:'홍길동',action:'clinic.update',targetType:'clinic',targetId:'A',detail:{clinicName:'시험 병원 A'}}
+  ]}):original(path,o);showView('audit');
+ });await p.locator('.hq-audit-table').waitFor();
+ await p.locator('#hqAuditFrom').fill('2026-11-07');await p.locator('#hqAuditTo').fill('2026-11-07');assert.equal(await p.locator('.hq-audit-table tbody tr').count(),2);
+ await p.locator('#hqAuditClinic').fill('병원 A');await p.locator('#hqAuditActor').fill('홍길동');await p.locator('#hqAuditAction').selectOption('clinic.update');assert.equal(await p.locator('.hq-audit-table tbody tr').count(),1);
+ assert.match(await p.locator('#hqAuditSummary').innerText(),/최근 기록 3건 내 검색/);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+ if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,'hq-operations-audit-'+width+'.png'),fullPage:true});
+ await p.locator('[data-audit-clinic=A]').click();await p.locator('.hq-contract-summary').waitFor();await p.getByRole('button',{name:'운영 감사로그 · 돌아가기',exact:true}).click();assert.equal(await p.locator('#hqAuditClinic').inputValue(),'병원 A');assert.equal(await p.locator('.hq-audit-table tbody tr').count(),1);
+ await p.locator('#hqAuditReset').click();assert.equal(await p.locator('.hq-audit-table tbody tr').count(),3);await p.locator('#hqAuditFrom').fill('2026-11-08');await p.locator('#hqAuditTo').fill('2026-11-07');assert.match(await p.locator('#hqAuditSummary').innerText(),/시작일/);assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+
+test('subscription review cannot write to a newly selected hospital',async t=>{
+ const p=await fixture(t);await p.evaluate(async()=>{plans=syntheticPlans;selectedClinic='A';showView('clinics');await loadClinics();});
+ await p.locator('.hq-subscription-editor').getByRole('button',{name:'수정',exact:true}).click();await p.locator('#subPrice').fill('88000');await p.locator('#saveSub').click();
+ await p.evaluate(()=>selectedClinic='B');await p.locator('[data-review-save]').click();assert.deepEqual(await p.evaluate(()=>writes),[]);
 });

@@ -20,5 +20,14 @@
   const detail='화면 '+version+(clientStatus==='compatible'?' (서버 요구 버전 일치)':expected?' (요구 '+expected+')':' (요구 버전 미확인)')+' · Worker '+(worker||'미확인')+' · '+schemaLabel+' · DB 배포 이력 '+recordLabel+' · 자동화 '+(automationKnown?'경고 '+alerts+'건':'확인 불가');
   return {state,ready:state==='ok',clientStatus,schemaStatus,expected,worker,automationAlerts:automationKnown?alerts:null,title,detail,notice:state==='ok'?'화면 버전과 필수 DB 항목을 확인했습니다.':title+' · '+(state==='client_mismatch'?'화면을 새로고침해주세요.':state==='schema_missing'?'운영 진단 상세에서 누락 항목을 확인해주세요.':'잠시 후 배포 상태를 다시 확인해주세요.')};
  }
- window.CarestepDeployment={inspect};
+ function inspectOperations(data){
+  const d=data||{},worker=String(d.worker?.build||d.worker?.version||''),schema=d.database?.schema;
+  const schemaKnown=schema?.status==='compatible'&&schema.compatible===true&&schema.missingCount===0&&Number.isInteger(schema.tablesExpected)&&schema.tablesExpected>0&&schema.tablesChecked===schema.tablesExpected;
+  const missing=schema?.status==='missing'&&Number.isInteger(schema.missingCount)&&schema.missingCount>0;
+  const alerts=d.summary?.automationAlerts,automationKnown=d.automationStatus!=='unavailable'&&Number.isInteger(alerts)&&alerts>=0;
+  const schemaLabel=schemaKnown?'필수 DB 항목 확인됨':missing?'필수 DB 항목 '+schema.missingCount+'개 누락':'DB 구조 미확인';
+  const issues=[!worker&&'서버 배포 정보 미확인',!schemaKnown&&schemaLabel,!automationKnown?'자동화 상태 미확인':alerts>0?'자동화 경고 '+alerts+'건':''].filter(Boolean);
+  return {state:missing?'schema_missing':!worker||!schemaKnown||!automationKnown?'unavailable':alerts>0?'automation_warning':'ok',title:issues.length?issues.join(' · '):'서버·필수 DB 항목·자동화 확인 완료',worker:worker||'미확인',schemaLabel,automationLabel:automationKnown?alerts+'건':'미확인'};
+ }
+ window.CarestepDeployment={inspect,inspectOperations};
 })();

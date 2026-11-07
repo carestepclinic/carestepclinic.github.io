@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const {chromium}=require('playwright');
 const root=path.resolve(__dirname,'..');let browser,server,origin;
 before(async()=>{
- server=http.createServer((req,res)=>{const name=new URL(req.url,'http://localhost').pathname.slice(1);if(name.includes('/')||!/^[-\w]+\.(html|js|css|woff2)$/.test(name)||!fs.existsSync(path.join(root,name))){res.writeHead(404);res.end();return;}res.setHeader('Content-Type',({'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.woff2':'font/woff2'})[path.extname(name)]);res.end(fs.readFileSync(path.join(root,name)));});
+ server=http.createServer((req,res)=>{const name=new URL(req.url,'http://localhost').pathname.slice(1);if(name.includes('/')||!/^[-\w.]+\.(html|js|css|woff2)$/.test(name)||!fs.existsSync(path.join(root,name))){res.writeHead(404);res.end();return;}res.setHeader('Content-Type',({'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.woff2':'font/woff2'})[path.extname(name)]);res.end(fs.readFileSync(path.join(root,name)));});
  await new Promise(r=>server.listen(0,'127.0.0.1',r));origin='http://127.0.0.1:'+server.address().port;
  browser=await chromium.launch({headless:true,...(process.env.HQ_TEST_BROWSER?{executablePath:process.env.HQ_TEST_BROWSER}:{})});
 });
@@ -98,4 +98,34 @@ test('HQ training groups published and draft versions without merging unrelated 
 test('guardian category filtering keeps drafts visible and same content drafts together',async t=>{
  const p=await fixture(t);await p.evaluate(()=>{const original=req;req=(path,o)=>path.endsWith('/drafts')?Promise.resolve({drafts:[{id:'d1',contentId:'c1',title:'안과 자료',status:'draft',version:'0.1',category:'안과',updatedAt:'2026-11-01'},{id:'d2',contentId:'c1',title:'안과 자료',status:'draft',version:'0.2',category:'안과',updatedAt:'2026-11-02'},{id:'d3',contentId:'c2',title:'안과 자료',status:'draft',version:'0.1',category:'안과',updatedAt:'2026-11-01'}],limit:200}):original(path,o);showView('content');});
  await p.locator('.gs-draft-group').first().waitFor();await p.locator('#contentCategory').selectOption('안과');assert.equal(await p.locator('.gs-draft-group').count(),2);assert.equal(await p.locator('[data-gs-open=d2]').isVisible(),true);assert.equal(await p.locator('[data-gs-open=d1]').isVisible(),false);await p.locator('.gs-draft-group details summary').click();assert.equal(await p.locator('[data-gs-open=d1]').isVisible(),true);
+});
+
+function protocolOperationsData(){
+ window.owner='synthetic';hqSessionToken=()=>owner;window.operationWrites=[];
+ window.operationDocs=[{id:'dog',title:'가 강아지 자료',species:'dog',status:'published',category:'내과',sourceCurrent:true},{id:'common',title:'나 공통 자료',species:'both',status:'draft',sourceContentId:'source-common',sourceCurrent:false},{id:'cat',title:'다 고양이 자료',species:'cat',status:'draft',category:'안과',sourceCurrent:true}];
+ req=async(path,options={})=>{if(options.method&&!['GET','HEAD'].includes(options.method)){operationWrites.push(path);throw Error('unexpected write');}
+  if(path==='/hq/content')return {contents:[{contentId:'source-common',category:'내과'}]};
+  if(path.endsWith('/knowledge-protocols'))return {items:operationDocs,queue:{counts:{queued:1,running:0,failed:1},items:[{id:'failed-one',title:'라 실패 자료',status:'failed',error:'합성 근거 부족'},{id:'queued-one',title:'대기 자료',status:'queued'}]}};
+  if(path.endsWith('/preview'))return {targets:[]};return {};
+ };document.getElementById('loginOverlay').classList.add('hidden');
+}
+for(const width of [390,1440])test('common species, triage actions and reset show the intended records without writes '+width,async t=>{
+ const p=await fixture(t,width);await p.evaluate(protocolOperationsData);await p.evaluate(()=>showView('protocols'));await p.locator('.hq-protocol-card').first().waitFor();
+ await p.locator('[data-protocol-species]').selectOption('dog');assert.deepEqual(await p.locator('.hq-protocol-card h2').allTextContents(),['가 강아지 자료','나 공통 자료']);
+ await p.locator('[data-protocol-species]').selectOption('cat');assert.deepEqual(await p.locator('.hq-protocol-card h2').allTextContents(),['나 공통 자료','다 고양이 자료']);
+ await p.locator('[data-protocol-search]').fill('일치 없음');await p.locator('[data-protocol-quick=changed]').click();assert.deepEqual(await p.locator('.hq-protocol-card h2').allTextContents(),['나 공통 자료']);assert.match(await p.locator('.hq-protocol-card').innerText(),/변경된 원본/);
+ await p.locator('[data-protocol-quick=review]').click();assert.equal(await p.locator('.hq-protocol-card').count(),2);
+ await p.locator('[data-protocol-quick=failed]').click();assert.match(await p.locator('.hq-protocol-card').innerText(),/합성 근거 부족/);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+ if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:path.join(process.env.HQ_SCREENSHOTS,'hq-operations-protocols-'+width+'.png'),fullPage:true});
+ await p.getByRole('button',{name:'실패 원인·재시도 열기',exact:true}).click();await p.locator('[data-ck-job-status]').waitFor();assert.equal(await p.locator('[data-ck-job-status]').inputValue(),'failed');assert.equal(await p.locator('[data-ck-job-details]').evaluate(el=>el.open),true);assert.equal(await p.locator('[data-ck-job]').count(),1);assert.equal(await p.locator('[data-ck="retry:failed-one"]').isVisible(),true);
+ await p.locator('[data-ck-close]').click();await p.locator('[data-protocol-reset]').click();assert.equal(await p.locator('.hq-protocol-card').count(),3);assert.equal(await p.locator('[data-protocol-species]').inputValue(),'all');assert.deepEqual(await p.evaluate(()=>operationWrites),[]);
+});
+test('protocol conditions survive a real browser reload including fields resolved from the source catalog',async t=>{
+ const p=await fixture(t);await p.evaluate(protocolOperationsData);await p.evaluate(()=>showView('protocols'));await p.locator('.hq-protocol-card').first().waitFor();
+ await p.locator('[data-protocol-search]').fill('공통');await p.locator('[data-protocol-filter]').selectOption('draft');await p.locator('[data-protocol-species]').selectOption('dog');await p.locator('[data-protocol-field]').selectOption('내과');await p.locator('[data-protocol-sort]').selectOption('title');
+ await p.reload();await p.evaluate(protocolOperationsData);await p.evaluate(()=>CarestepHqUX.restoreRoute());await p.locator('.hq-protocol-card').first().waitFor();
+ assert.equal(await p.locator('[data-protocol-search]').inputValue(),'공통');assert.equal(await p.locator('[data-protocol-species]').inputValue(),'dog');assert.equal(await p.locator('[data-protocol-field]').inputValue(),'내과');assert.equal(await p.locator('[data-protocol-sort]').inputValue(),'title');assert.equal(await p.locator('[data-protocol-filter]').inputValue(),'draft');assert.deepEqual(await p.locator('.hq-protocol-card h2').allTextContents(),['나 공통 자료']);assert.deepEqual(await p.evaluate(()=>operationWrites),[]);
+});
+test('a queue opened under an old HQ identity cannot send a retry after identity replacement',async t=>{
+ const p=await fixture(t);await p.evaluate(protocolOperationsData);await p.evaluate(()=>showView('protocols'));await p.locator('.hq-protocol-card').first().waitFor();await p.locator('[data-protocol-quick=failed]').click();await p.getByRole('button',{name:'실패 원인·재시도 열기',exact:true}).click();await p.locator('[data-ck-job-status]').waitFor();await p.evaluate(()=>owner='other-session');await p.locator('[data-ck="retry:failed-one"]').click();await p.locator('[data-ck="confirm-retry:failed-one"]').click();assert.deepEqual(await p.evaluate(()=>operationWrites),[]);
 });
