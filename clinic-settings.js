@@ -13,19 +13,27 @@
   return {allowed:true,code:'allowed',label:action==='read'?'조회 가능':'작성 가능'};
  }
  const permissionGroup=key=>key.startsWith('clinical.')?(C.modules.find(x=>key.startsWith('clinical.'+x[0]+'.'))?.[1]||'진료 승인·공통 설정'):({patients:'환자·보호자',records:'진료·건강 기록',materials:'보호자 자료',followup:'후속관리·상담',messages:'문자·발송',training:'직원 교육',operations:'병원 업무',stats:'통계',settings:'병원·연동',billing:'요금제·구독',team:'직원 관리'})[key.split('.')[0]]||'기타';
+ const permissionHelp={
+ 'materials.read':'처방·처치 계산, 자료·복약 일정 조회에 사용합니다. 병원 약품·서식 저장은 진료 공통 설정 권한을 따릅니다.',
+ 'records.read':'진료·건강 기록과 방문 전 문진을 조회합니다.',
+ 'records.edit':'진료·건강 기록 작성과 방문 전 문진 확인·환자 연결에 사용합니다. 각 기록지는 해당 기록지 권한도 필요합니다.',
+ 'operations.read':'나에게 배정된 체크리스트 조회·완료·보류·인계가 가능합니다.',
+ 'operations.manage':'병원 전체 업무 조회, 업무 배정, 서식·반복 업무 설정이 가능합니다.',
+ 'clinical.settings':'병원 약품 함량·분말 조제 기준·진료 계산 서식을 저장합니다.'
+ };
  function groups(catalog){const m=new Map();for(const [k,label] of catalog.filter(x=>x[0]!=='clinical.scope')){const group=permissionGroup(k);if(!m.has(group))m.set(group,[]);m.get(group).push([k,label]);}return m;}
  function decoratePermissions(root=document){
   for(const card of root.querySelectorAll('[data-member-id]')){
    const grid=card.querySelector('.member-permission-grid');if(!grid||grid.dataset.grouped)continue;grid.dataset.grouped='true';
-   const sections=new Map();for(const input of [...grid.querySelectorAll('[data-permission-key]')]){const name=permissionGroup(input.dataset.permissionKey);if(!sections.has(name)){const section=document.createElement('fieldset'),legend=document.createElement('legend');legend.textContent=name;section.append(legend);sections.set(name,section);grid.append(section);}sections.get(name).append(input.closest('label'));}
+   const sections=new Map();for(const input of [...grid.querySelectorAll('[data-permission-key]')]){const name=permissionGroup(input.dataset.permissionKey);if(!sections.has(name)){const section=document.createElement('fieldset'),legend=document.createElement('legend');legend.textContent=name;section.append(legend);sections.set(name,section);grid.append(section);}const label=input.closest('label');if(permissionHelp[input.dataset.permissionKey]){const help=document.createElement('small');help.className='cs-permission-help';help.textContent=permissionHelp[input.dataset.permissionKey];label.append(help);}sections.get(name).append(label);}
    const preview=document.createElement('div');preview.className='cs-permission-preview';preview.setAttribute('aria-live','polite');grid.before(preview);
-   const update=()=>{const mode=card.querySelector('[data-permission-mode]')?.value,role=card.querySelector('[data-member-role]')?.value,keys=mode==='custom'?clinicExpandPermissions([...card.querySelectorAll('[data-permission-key]:checked')].map(x=>x.dataset.permissionKey)):clinicPermissionKeys({mode},role);const rows=C.modules.filter(x=>keys.includes('clinical.'+x[0]+'.read'));preview.innerHTML='<strong>저장 후 사용할 진료 화면</strong><p>'+ (rows.map(([id,label])=>esc(label)+' · '+(keys.includes('clinical.'+id+'.edit')?'작성 가능':'조회만')).join(' / ')||'진료 화면 접근 없음')+'</p><small>승인·삭제는 아래 개별 권한을 따릅니다. 저장 전까지 실제 권한은 바뀌지 않습니다.</small>';};
+   const update=()=>{const mode=card.querySelector('[data-permission-mode]')?.value,role=card.querySelector('[data-member-role]')?.value,keys=mode==='custom'?clinicExpandPermissions([...card.querySelectorAll('[data-permission-key]:checked')].map(x=>x.dataset.permissionKey)):clinicPermissionKeys({mode},role);const rows=C.modules.filter(x=>keys.includes('clinical.'+x[0]+'.read'));preview.innerHTML='<strong>저장 후 사용할 화면</strong><p>'+ (rows.map(([id,label])=>esc(label)+' · '+(keys.includes('clinical.'+id+'.edit')?'작성 가능':'조회만')).join(' / ')||'진료 화면 접근 없음')+'</p><p>'+[['materials.read','처방·처치 계산'],['records.read','방문 전 문진'],['training.read','직원 교육'],['operations.read','업무 체크리스트']].filter(([key])=>keys.includes(key)).map(([,label])=>esc(label)).join(' / ')+'</p><small>물품관리는 모든 직원이 사용할 수 있습니다. 승인·삭제는 아래 개별 권한을 따릅니다. 저장 전까지 실제 권한은 바뀌지 않습니다.</small>';};
    card.addEventListener('change',()=>{if(!grid.dataset.quick)queueMicrotask(update);});update();
   }
  }
  function guide(){
   const box=document.querySelector('.permission-guide-groups');if(!box||typeof CLINIC_PERMISSIONS==='undefined')return;
-  box.innerHTML=[...groups(CLINIC_PERMISSIONS)].map(([name,items])=>'<section class="permission-guide-group"><h4>'+esc(name)+'</h4><ul>'+items.map(x=>'<li>'+esc(x[1])+'</li>').join('')+'</ul></section>').join('');
+  box.innerHTML=[...groups(CLINIC_PERMISSIONS)].map(([name,items])=>'<section class="permission-guide-group"><h4>'+esc(name)+'</h4><ul>'+items.map(x=>'<li>'+esc(x[1])+(permissionHelp[x[0]]?'<small class="cs-permission-help">'+esc(permissionHelp[x[0]])+'</small>':'')+'</li>').join('')+'</ul></section>').join('');
   document.querySelectorAll('.permission-guide-count').forEach(x=>x.textContent=CLINIC_PERMISSIONS.filter(x=>x[0]!=='clinical.scope').length+'개');
  }
  function capabilitySummary(){

@@ -1752,3 +1752,31 @@
  .clinic-calm #practiceRoot .cs-list-actionbar>.cs-list-tools {flex-basis:100%;order:3;gap:5px}
  .clinic-calm #practiceRoot .cs-list-tools button {font-size:13px;padding:6px 8px}
 }
+/* Checklist workspace: compact controls and shared calm design. */
+.clinic-calm #practiceRoot .pt-ops-workspace{font-family:inherit;color:#153332}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-section-intro{margin:0 0 12px}
+.clinic-calm #practiceRoot .pt-ops-workspace :is(button,input){font-family:inherit;font-size:14px;min-height:42px;border-radius:9px}
+.clinic-calm #practiceRoot .pt-ops-workspace button{color:#175957;border-color:#cbdcda;font-weight:650;background:#fff}
+.clinic-calm #practiceRoot .pt-ops-workspace button:focus-visible{outline:3px solid #73b8b3;outline-offset:2px}
+.clinic-calm #practiceRoot .pt-ops-workspace button:disabled{opacity:.5}
+.clinic-calm #practiceRoot .pt-ops-workspace :is(.pt-primary,button[aria-pressed=true]){background:#176b67;color:#fff;border-color:#176b67}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-toolbar{gap:10px;margin:0 0 10px;padding:0 0 10px;align-items:end;border-color:#dae4e1}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-toolbar .pt-bar{margin:0;gap:8px}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-date{width:150px}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-status-filters{display:flex;flex-wrap:wrap;overflow:visible;gap:6px;margin:10px 0}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-status-filters button{flex:0 0 auto;flex-direction:row;align-items:center;gap:12px;padding:7px 12px}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-status-filters strong{font-size:14px;min-width:20px;text-align:center}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-search{display:block;max-width:520px;margin:10px 0 0}
+.clinic-calm #practiceRoot .pt-ops-workspace [data-ops-count]{margin:8px 0;font-size:13px;color:#58716c}
+.clinic-calm #practiceRoot .pt-ops-workspace [data-ops-list]{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:12px}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-work-card{margin:0;padding:16px;border-color:#d5e1dd;border-radius:14px;background:#fff;display:flex;flex-direction:column;gap:8px;min-width:0}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-work-card h3{font-size:17px;line-height:1.5;overflow-wrap:anywhere;margin:0}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-work-card p{margin:3px 0;font-size:14px}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-progress-row{margin:6px 0}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-card-footer{margin-top:auto;padding-top:10px;gap:8px}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-card-footer small{font-size:12px;color:#60756f}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-empty{grid-column:1/-1;background:#fff;border:1px dashed #cbdcd6;border-radius:14px;padding:24px 14px}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-work-settings{background:#f4f8f6;border-color:#d5e1dd;margin:14px 0;padding:10px 14px}
+.clinic-calm #practiceRoot .pt-ops-workspace .pt-footnote{margin:14px 0;font-size:13px;color:#62766f}
+.clinic-calm .cs-permission-help{display:block;grid-column:1/-1;font-weight:400;font-size:12px;line-height:1.55;color:#526d67;margin-top:4px}
+@media(max-width:640px){.clinic-calm #practiceRoot .pt-ops-workspace .pt-toolbar{display:flex}.clinic-calm #practiceRoot .pt-ops-workspace .pt-toolbar>.pt-bar{flex-wrap:wrap}.clinic-calm #practiceRoot .pt-ops-workspace .pt-toolbar>.pt-bar:last-child{margin-left:auto}.clinic-calm #practiceRoot .pt-ops-workspace .pt-status-filters button{min-height:44px;padding:7px 10px}.clinic-calm #practiceRoot .pt-ops-workspace input{font-size:16px}.clinic-calm #practiceRoot .pt-ops-workspace .pt-search{max-width:none}}

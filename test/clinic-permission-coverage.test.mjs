@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+const source=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const text=source.slice(source.indexOf('/* CLINIC_PERMISSION_POLICY_START'),source.indexOf('/* CLINIC_PERMISSION_POLICY_END */'));
+const ctx=vm.createContext({});vm.runInContext(text+';globalThis.api={catalog:CLINIC_PERMISSIONS,modules:CLINIC_MODULES,keys:clinicPermissionKeys,expand:clinicExpandPermissions,requires:clinicPermissionRequirements};',ctx);const p=ctx.api;
+test('all literal UI permission checks are editable through the permission catalog',()=>{const keys=new Set(p.catalog.map(x=>x[0]));for(const f of fs.readdirSync(new URL('../',import.meta.url)).filter(f=>/\.(js|html)$/.test(f))){const s=fs.readFileSync(new URL('../'+f,import.meta.url),'utf8');for(const m of s.matchAll(/(?:saasPermission|\.can)\(\s*['"]([a-z]+\.[a-z.]+)['"]/g))assert.ok(keys.has(m[1]),f+': '+m[1]);}});
+test('every record module provides read edit delete permissions with dependencies',()=>{for(const [id] of p.modules){for(const action of ['read','edit','delete'])assert.ok(p.catalog.some(x=>x[0]===`clinical.${id}.${action}`));const expanded=p.expand([`clinical.${id}.delete`]);assert.ok(expanded.includes(`clinical.${id}.edit`));assert.ok(expanded.includes(`clinical.${id}.read`));}});
+test('operations execution is independent of patient access, management implies execution',()=>{const executor=p.keys({mode:'custom',keys:['operations.read']},'staff');assert.ok(executor.includes('operations.read'));assert.ok(!executor.includes('patients.read'));assert.ok(!executor.includes('operations.manage'));assert.ok(p.expand(['operations.manage']).includes('operations.read'));});
+test('default staff retain clinical writing and supplies stay available to every employee',()=>{const staff=p.keys({mode:'default'},'staff');for(const id of ['ward','anesthesia','dental','neuro','ophthalmic','chronic'])assert.ok(staff.includes('clinical.'+id+'.edit'));assert.deepEqual(Array.from(p.requires('GET','/saas/operations/purchases',{})),[]);assert.deepEqual(Array.from(p.requires('POST','/saas/operations/purchases',{})),[]);});
