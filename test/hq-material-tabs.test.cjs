@@ -136,7 +136,7 @@ for(const width of [390,1440])test('HQ display semantics and compact protocol ra
  });await p.evaluate(()=>showView('protocols'));await p.locator('.hq-protocol-card').first().waitFor();
  assert.equal(await p.locator('.hq-protocol-card').count(),24);assert.match(await p.locator('[data-protocol-count]').innerText(),/검색 결과 30개 · 현재 1–24개/);
  assert.equal(await p.locator('#protocols .hq-secondary-filters').evaluate(e=>e.open),false);
- await p.locator('#protocols .hq-pagination').getByRole('button',{name:'다음',exact:true}).click();assert.match(await p.locator('[data-protocol-count]').innerText(),/현재 25–30개/);
+ await p.locator('#protocols .hq-pagination').first().getByRole('button',{name:'다음',exact:true}).click();assert.match(await p.locator('[data-protocol-count]').innerText(),/현재 25–30개/);
  assert.deepEqual(await p.evaluate(()=>({title:CarestepHqWorkspace.materialTitle({title:'슬개골 탈구 초안',status:'published'}),draft:CarestepHqWorkspace.materialTitle({title:'슬개골 탈구 초안',status:'draft'}),category:CarestepHqWorkspace.category({title:'슬개골 탈구',category:'예방'}),noGuess:CarestepHqWorkspace.category({title:'specific test',category:'기타'}),next:CarestepHqWorkspace.adoptionAction({nextAction:'첫 퇴원자료 생성'})})),{title:'슬개골 탈구',draft:'슬개골 탈구 초안',category:'정형외과',noGuess:'기타',next:'최근 30일 보호자 안내자료 사용 현황을 확인해주세요.'});
  assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
  if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:path.join(process.env.HQ_SCREENSHOTS,'hq-refine-'+width+'.png'),fullPage:true});

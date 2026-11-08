@@ -190,7 +190,7 @@ async function onboardingPage(p){
   window.onboardFail=false;
   window.onboardData={summary:{total:2,live:1,setting:0,attention:1},clinics:[
    {clinicId:'A',clinicName:'시험 병원 A',planCode:'BASIC',completed:4,stepCount:6,percent:67,goLiveStatus:'attention',attentionReasons:['문자 연결 확인'],steps:[{key:'profile',label:'병원 정보',detail:'등록 완료',done:true}],solapiOauth:{connected:true},sender:{source:'oauth2',status:'approved',senderNumber:'0000000000'},payment:{trialDaysLeft:12},messageTest:{done:true}},
-   {clinicId:'B',clinicName:'시험 병원 B',planCode:'PRO',completed:6,stepCount:6,percent:100,goLiveStatus:'live',attentionReasons:[],steps:[],payment:{trialDaysLeft:0}}
+   {clinicId:'B',clinicName:'시험 병원 B',planCode:'PRO',completed:6,stepCount:6,percent:100,goLiveStatus:'live',attentionReasons:[],steps:[{key:'profile',done:true},{key:'team',done:true}],payment:{trialDaysLeft:0}}
   ]};
   req=(path,o)=>{if(path==='/hq/onboarding'){if(onboardFail)return Promise.reject(Error('시험 개통 조회 실패'));return Promise.resolve(onboardData);}return baseReq(path,o);};
   showView('onboarding');
@@ -233,7 +233,7 @@ for(const width of [390,1280])test(`onboarding and subscription tables show five
  await p.locator('[data-onboarding-clinic="A"] .hq-row-toggle').press('Enter');assert.equal(await detail.isVisible(),false);
  await p.locator('#onboardingSearch').fill('병원 B');
  assert.equal(await p.locator('#onboardingRows .hq-compact-main-row').count(),1);assert.equal(await p.locator('#onboardingRows .hq-compact-main-row td').count(),5);
- assert.match(await p.locator('#onboardingRows').innerText(),/개통 완료/);
+ assert.match(await p.locator('#onboardingRows').innerText(),/준비 완료/);
  await p.locator('#onboardingSearch').fill('없음');assert.equal(await p.locator('#onboardingRows td').getAttribute('colspan'),'5');
  await p.locator('#onboardingSearch').fill('');
  await p.locator('[data-onboarding-clinic="A"] .hq-row-toggle').click();

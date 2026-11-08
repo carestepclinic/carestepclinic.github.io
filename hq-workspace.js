@@ -18,7 +18,7 @@
  }
  function documentView(root,label){if(!root)return;root.classList.add('hq-document-workspace');root.dataset.hqDocument=label;const h=root.querySelector('header');if(h&&!h.querySelector('.hq-document-label')){const p=document.createElement('span');p.className='hq-document-label';p.textContent=label;h.prepend(p);}}
  function slice(rows,state,signature,size=24){if(state.signature!==signature){state.signature=signature;state.page=0;}state.page=Math.min(state.page||0,Math.max(0,Math.ceil(rows.length/size)-1));state.size=size;return rows.slice(state.page*size,(state.page+1)*size);}
- function pager(host,state,total,render){if(total<=state.size)return;const nav=document.createElement('nav');nav.className='hq-pagination';nav.setAttribute('aria-label','목록 페이지');const previous=document.createElement('button'),next=document.createElement('button'),count=document.createElement('span');previous.type=next.type='button';previous.className=next.className='btn';previous.textContent='이전';next.textContent='다음';previous.disabled=!state.page;next.disabled=(state.page+1)*state.size>=total;count.textContent=(state.page*state.size+1)+'–'+Math.min(total,(state.page+1)*state.size)+' / '+total+'개';count.setAttribute('role','status');const turn=delta=>{state.page+=delta;render();host.scrollIntoView({block:'start'});host.querySelector('.hq-pagination button:not(:disabled)')?.focus({preventScroll:true});};previous.onclick=()=>turn(-1);next.onclick=()=>turn(1);nav.append(previous,count,next);host.append(nav);}
+ function pager(host,state,total,render,{top=false}={}){if(total<=state.size)return;const nav=document.createElement('nav');nav.className='hq-pagination';nav.setAttribute('aria-label','목록 페이지');const previous=document.createElement('button'),next=document.createElement('button'),count=document.createElement('span');previous.type=next.type='button';previous.className=next.className='btn';previous.textContent='이전';next.textContent='다음';previous.disabled=!state.page;next.disabled=(state.page+1)*state.size>=total;count.textContent=(state.page*state.size+1)+'–'+Math.min(total,(state.page+1)*state.size)+' / '+total+'개';count.setAttribute('role','status');const turn=delta=>{state.page+=delta;render();const target=host.querySelector('.hq-pagination-top')||host;target.style.scrollMarginTop=((document.querySelector('.top')?.getBoundingClientRect().height||0)+12)+'px';target.scrollIntoView({block:'start'});host.querySelector('.hq-pagination button:not(:disabled)')?.focus({preventScroll:true});};previous.onclick=()=>turn(-1);next.onclick=()=>turn(1);nav.append(previous,count,next);host.append(nav);if(top){const upper=nav.cloneNode(true);upper.classList.add('hq-pagination-top');upper.setAttribute('aria-label','목록 위 페이지');const buttons=upper.querySelectorAll('button');buttons[0].onclick=()=>turn(-1);buttons[1].onclick=()=>turn(1);host.prepend(upper);}}
  function species(value){const v=String(value||'');return /both|공통|강아지.*고양이/.test(v)?'both':/dog|강아지|반려견/.test(v)?'dog':/cat|고양이|반려묘/.test(v)?'cat':'';}
  // Display-only taxonomy suggestions; original category stays editable and is never saved here.
  function category(item={}){
@@ -31,5 +31,22 @@
  }
  function materialTitle(item){const title=String(item.title||'제목 없음');return item.status==='published'?title.replace(/\s*[·:—-]?\s*초안\s*$/,'').trim():title;}
  function adoptionAction(entry){const text=String(entry.nextAction||'');if(/첫.*(?:퇴원자료|안내자료)/.test(text))return entry.neverUsed===true?'보호자 안내자료 작성 흐름을 안내해주세요.':'최근 30일 보호자 안내자료 사용 현황을 확인해주세요.';return text.replaceAll('퇴원자료','보호자 안내자료');}
- g.CarestepHqWorkspace={confirm,prompt:message=>confirm(message,{input:true}),discard,documentView,slice,pager,species,category,materialTitle,adoptionAction,owner,ready};
+
+ // Derive a display-only base setup summary; optional adoption is never a prerequisite.
+ function onboardingEntry(entry={}){
+  const steps=Array.isArray(entry.steps)?entry.steps:[];
+  const basic=['profile','team'].map(key=>steps.find(x=>x.key===key)||{key,done:false,label:key==='profile'?'병원 정보':'직원 계정',detail:'설정 상태 확인 필요'});
+  const completed=basic.filter(x=>x.done===true).length;
+  return {...entry,steps:basic,optionalSteps:steps.filter(x=>!['profile','team'].includes(x.key)),completed,stepCount:2,percent:completed*50,goLiveStatus:completed===2?'live':completed?'setting':'attention',needsAttention:completed<2,attentionReasons:basic.filter(x=>x.done!==true).map(x=>(x.label||x.key)+' 확인 필요')};
+ }
+ function onboardingView(data={}){
+  const clinics=(data.clinics||[]).map(onboardingEntry);
+  return {...data,clinics,summary:{...data.summary,total:clinics.length,live:clinics.filter(x=>!x.needsAttention).length,setting:clinics.filter(x=>x.goLiveStatus==='setting').length,attention:clinics.filter(x=>x.needsAttention).length,avgPercent:clinics.length?Math.round(clinics.reduce((n,x)=>n+x.percent,0)/clinics.length):0}};
+ }
+ function protocolLabel(item={}){
+  const full=materialTitle(item),disease=String(item.body?.disease||item.disease||'').trim();
+  // Use an explicit disease title when supplied; otherwise retain the full title with visual clamping.
+  return {title:disease&&disease.length<=50?disease:full,description:disease&&disease!==full?full:String(item.body?.summary||item.summary||'').trim(),full};
+ }
+ g.CarestepHqWorkspace={confirm,prompt:message=>confirm(message,{input:true}),discard,documentView,slice,pager,species,category,materialTitle,adoptionAction,onboardingEntry,onboardingView,protocolLabel,owner,ready};
 })(window);

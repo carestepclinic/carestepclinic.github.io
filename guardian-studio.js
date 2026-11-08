@@ -5,7 +5,7 @@
  const e=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const identity=()=>hqSessionToken()||key()||'';
  let dialog=null,draft=null,dirty=false,busy=false,sequence=0,listSequence=0,importFile=null,importCandidates=[];
- const status={draft:'검토 대기',generating:'AI 생성 중',failed:'생성 확인 필요',published:'게시 중'};
+ const status={draft:'검토 대기',generating:'AI 생성 중',failed:'생성 확인 필요',published:'공개 중'};
  let listOwner='',listLoaded=false,listAt=0,listItems=[],listLimit=false,listPending=null,listCursor=null,listQuery='',searchTimer=null,reviewState={};
  const categories=['내과','안과','피부과','수술','치과','비뇨기','신경','종양','응급','예방','노령','기타'];
  function categoryField(key,selected='내과'){const options=categories.map(x=>[x,x]);if(selected&&!categories.includes(selected))options.push([selected,selected+' (기존 분류)']);options.push(['__custom','직접 입력']);return selectField('분류',key,options,selected)+field('직접 입력한 분류',key+'Custom');}
@@ -82,7 +82,7 @@
   if(r.training?.status==='queued')req('/hq/training/automation/process',{method:'POST',body:'{}'}).catch(()=>{});
   loadContent().catch(()=>{});
  }
- async function published(id){if(!shell('기존 보호자 안내자료'))return;const turn=sequence;await action(async()=>{const r=await api('/published/'+encodeURIComponent(id));if(turn!==sequence)return;draft={contentId:id,title:r.document.template?.title,document:r.document,status:'published',version:r.version};dialog.querySelector('#guardianStudioTitle').textContent=draft.title;preview(r.document,`버전 ${r.version} · ${r.status==='published'?'현재 게시 중':'게시 중단'}`);});}
+ async function published(id){if(!shell('기존 보호자 안내자료'))return;const turn=sequence;await action(async()=>{const r=await api('/published/'+encodeURIComponent(id));if(turn!==sequence)return;draft={contentId:id,title:r.document.template?.title,document:r.document,status:'published',version:r.version};dialog.querySelector('#guardianStudioTitle').textContent=draft.title;preview(r.document,`버전 ${r.version} · ${r.status==='published'?'현재 공개 중':'공개 중단'}`);});}
  async function revise(){const r=await api('/drafts','POST',{sourceContentId:draft.contentId});draft=r.draft;renderDraft(r.generations);message('기존 게시본을 유지한 채 수정본을 만들었습니다.');refresh();}
  async function importDraft(){
  const file=dialog.querySelector('[data-gs-import]').files[0];if(!file)throw Error('가져올 JSON 파일을 선택해주세요.');

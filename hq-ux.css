@@ -503,3 +503,26 @@ button,input,select,textarea{font-family:inherit}
  #content .hq-content-filters{gap:8px;grid-template-columns:1fr}#content .hq-content-filters>.hq-secondary-filters{margin:0}
  #protocols .card{padding:12px}#protocols .hq-protocol-quick{gap:6px;margin:6px 0}
 }
+
+/* Focused HQ review: compact lists, explicit restoration, and optional setup. */
+.hq-session-loading{display:none;text-align:center;max-width:420px}
+.hq-session-restoring #hqLoginForm{display:none}
+.hq-session-restoring .hq-session-loading{display:block}
+.hq-session-loading p::before{content:"";display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--blue);border-radius:50%;margin-right:10px;vertical-align:middle;animation:hq-session-spin 1s linear infinite}
+@keyframes hq-session-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.hq-session-loading p::before{animation:none}}
+.hq-optional-steps{display:grid;gap:5px;margin-top:10px}
+.hq-optional-steps b{font-size:13px}
+.hq-optional-steps span{font-size:12px;color:var(--muted)}
+.hq-pagination-top{grid-column:1/-1;margin:0 0 10px}
+.hq-protocol-card{display:flex;flex-direction:column;align-items:flex-start}
+.hq-protocol-card h2{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;line-height:1.5}
+.hq-protocol-description{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);margin:6px 0}
+.hq-protocol-card>.btn{margin-top:auto}
+#staffTrainingRoot .st-eyebrow{display:none}
+@media(max-width:600px){
+ #staffTrainingRoot .st-heading{align-items:center;gap:8px;margin-bottom:10px}
+ #staffTrainingRoot .st-heading h1{font-size:20px;margin:0}
+ #staffTrainingRoot .st-heading p{display:none}
+ .hq-pagination{gap:8px;flex-wrap:wrap}
+}

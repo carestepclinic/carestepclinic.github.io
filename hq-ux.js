@@ -786,7 +786,7 @@
     const shown=CarestepHqWorkspace.slice(rows,contentWindow,JSON.stringify([hqReadScope(),q,status,category,dueOnly,animal,order]));
     byId('contentResultSummary').textContent=`현재 조건 ${fmt(rows.length)}개 자료 · 공개본과 작성 이력 함께 보기`;
     const draftAction=d=>`<button type="button" class="btn small" data-guardian-draft="${esc(d.id)}">${kind(d)==='published'?'이전 공개본':'수정 초안 이어쓰기'} · ${esc(d.version||'미정')}판</button>`;
-    byId('contentTable').innerHTML=shown.length?`<div class="table-wrap" tabindex="0" aria-label="보호자 안내자료 목록"><table class="table hq-content-table"><thead><tr><th class="gs-manage-cell">선택</th><th>안내자료</th><th>상태</th><th>검토 정보</th><th>관리</th></tr></thead><tbody>${shown.map(x=>{const drafts=x.drafts.filter(d=>d.status!=='published'),latest=drafts[0];return `<tr data-content-row="${esc(x.contentId)}"><td data-label="선택" class="gs-manage-cell">${x.status==='archived'?`<label class="hq-content-check"><input type="checkbox" data-content-bulk value="${esc(x.contentId)}" aria-label="${esc(x.title)} 선택"><span>선택</span></label>`:'—'}</td><td data-label="안내자료" class="hq-content-title"><b>${esc(x.title||'제목 없음')}</b><span class="muted">${esc(hqCategoryLabel(CarestepHqWorkspace.category(x)))}${x.species?' · '+esc(x.species):''}${x.version?' · 버전 '+esc(x.version):''}</span></td><td data-label="상태">${x.status!=='unpublished'?`<span class="status ${esc(x.status)}">${esc(contentStates[x.status]||x.status)}</span>`:''}${latest?`<span class="status">${kind(latest)==='review'?'검토 대기':'작성 중·생성 확인'} · ${esc(latest.version||'초안')}판</span>`:''}</td><td data-label="검토 정보">${esc(x.reviewerName||'검토자 미등록')}<br><span class="${contentDue(x)?'hq-content-due':'muted'}">재검토 ${esc(contentDate(x.reviewDueAt))}${contentDue(x)?' · 기한 도래':''}</span>${latest?`<br><span class="muted">초안 저장 ${esc(date(latest.updatedAt))} · ${esc(String(latest.id||'').slice(-8))}</span>`:''}</td><td data-label="관리"><div class="hq-content-actions">${['published','archived'].includes(x.status)?`<button class="btn small" data-guardian-document="${esc(x.contentId)}">공개본 열기</button>`:''}${latest?draftAction(latest):''}${x.status==='published'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="archived">게시 중단</button>`:x.status==='archived'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="published">다시 게시</button><button class="btn small danger" data-content-delete="${esc(x.contentId)}">삭제</button>`:''}</div><details class="gs-list-details"><summary>버전·상세 정보</summary><div class="hq-version-history">${x.drafts.filter(d=>d!==latest).map(draftAction).join('')}</div><button type="button" class="btn small" data-guardian-history="${esc(x.contentId)}">전체 작성 이력 확인</button><p>품질 점수 ${safeNumber(x.qualityScore)?fmt(x.qualityScore)+' / 100':'미등록'}</p><p>병원별 제공: ${x.status==='published'?`허용 ${fmt(x.enabledClinics)}곳 · 숨김 ${fmt(x.disabledClinics)}곳`:'현재 제공 중 아님'}</p><p>원본 분류: ${esc(x.category||'미분류')}${CarestepHqWorkspace.category(x)!==(x.category||'미분류')?' · 목록은 검색용 분류 제안으로 표시':''}</p><p>자료 ID: ${esc(x.contentId)}</p></details></td></tr>`;}).join('')}</tbody></table></div>`:`<div class="empty">${groups.size?'선택한 조건에 해당하는 자료가 없습니다. 검색 조건을 초기화해보세요.':'등록된 보호자 안내자료가 없습니다.'}</div>`;
+    byId('contentTable').innerHTML=shown.length?`<div class="table-wrap" tabindex="0" aria-label="보호자 안내자료 목록"><table class="table hq-content-table"><thead><tr><th class="gs-manage-cell">선택</th><th>안내자료</th><th>상태</th><th>검토 정보</th><th>관리</th></tr></thead><tbody>${shown.map(x=>{const drafts=x.drafts.filter(d=>d.status!=='published'),latest=drafts[0];return `<tr data-content-row="${esc(x.contentId)}"><td data-label="선택" class="gs-manage-cell">${x.status==='archived'?`<label class="hq-content-check"><input type="checkbox" data-content-bulk value="${esc(x.contentId)}" aria-label="${esc(x.title)} 선택"><span>선택</span></label>`:'—'}</td><td data-label="안내자료" class="hq-content-title"><b>${esc(x.title||'제목 없음')}</b><span class="muted">${esc(hqCategoryLabel(CarestepHqWorkspace.category(x)))}${x.species?' · '+esc(x.species):''}${x.version?' · 버전 '+esc(x.version):''}</span></td><td data-label="상태">${x.status!=='unpublished'?`<span class="status ${esc(x.status)}">${esc(contentStates[x.status]||x.status)}</span>`:''}${latest?`<span class="status">${kind(latest)==='review'?'검토 대기':'작성 중'} · ${esc(latest.version||'초안')}판</span>`:''}</td><td data-label="검토 정보">${esc(x.reviewerName||'검토자 미등록')}<br><span class="${contentDue(x)?'hq-content-due':'muted'}">재검토 ${esc(contentDate(x.reviewDueAt))}${contentDue(x)?' · 기한 도래':''}</span>${latest?`<br><span class="muted">초안 저장 ${esc(date(latest.updatedAt))} · ${esc(String(latest.id||'').slice(-8))}</span>`:''}</td><td data-label="관리"><div class="hq-content-actions">${['published','archived'].includes(x.status)?`<button class="btn small" data-guardian-document="${esc(x.contentId)}">공개본 열기</button>`:''}${latest?draftAction(latest):''}${x.status==='published'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="archived">공개 중단</button>`:x.status==='archived'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="published">다시 공개</button><button class="btn small danger" data-content-delete="${esc(x.contentId)}">삭제</button>`:''}</div><details class="gs-list-details"><summary>버전·상세 정보</summary><div class="hq-version-history">${x.drafts.filter(d=>d!==latest).map(draftAction).join('')}</div><button type="button" class="btn small" data-guardian-history="${esc(x.contentId)}">전체 작성 이력 확인</button><p>품질 점수 ${safeNumber(x.qualityScore)?fmt(x.qualityScore)+' / 100':'미등록'}</p><p>병원별 제공: ${x.status==='published'?`허용 ${fmt(x.enabledClinics)}곳 · 숨김 ${fmt(x.disabledClinics)}곳`:'현재 제공 중 아님'}</p><p>원본 분류: ${esc(x.category||'미분류')}${CarestepHqWorkspace.category(x)!==(x.category||'미분류')?' · 목록은 검색용 분류 제안으로 표시':''}</p><p>자료 ID: ${esc(x.contentId)}</p></details></td></tr>`;}).join('')}</tbody></table></div>`:`<div class="empty">${groups.size?'선택한 조건에 해당하는 자료가 없습니다. 검색 조건을 초기화해보세요.':'등록된 보호자 안내자료가 없습니다.'}</div>`;
     CarestepHqWorkspace.pager(byId('contentTable'),contentWindow,rows.length,renderContent);
     byId('contentTable').querySelectorAll('[data-guardian-draft]').forEach(b=>b.onclick=()=>globalThis.GuardianStudio?.open(b.dataset.guardianDraft));
     byId('contentTable').querySelectorAll('[data-guardian-history]').forEach(b=>b.onclick=()=>globalThis.GuardianStudio?.history(b.dataset.guardianHistory,b));
@@ -800,7 +800,7 @@
     if(activeSave||!contentReady)return false;
     const targets=[...new Set(ids)].map(id=>contents.find(x=>x.contentId===id)).filter(x=>x&&(status==='archived'?x.status==='published':x.status==='archived'));
     if(!targets.length)return false;
-    const action=status==='archived'?'게시 중단':status==='published'?'다시 게시':'삭제';
+    const action=status==='archived'?'공개 중단':status==='published'?'다시 공개':'삭제';
     const names=targets.slice(0,5).map(x=>x.title||x.contentId).join('\n')+(targets.length>5?`\n외 ${targets.length-5}건`:'');
     const impact=status?'연결된 자동생성 회복관리 일정의 상태도 함께 변경됩니다.':'연결된 자동생성 회복관리 일정도 삭제 처리됩니다. 과거 운영 이력용 최소 정보는 보존됩니다. 화면에서 삭제를 되돌릴 수 없습니다.';
     const owner=hqReadScope(),epoch=readEpoch,states=targets.map(x=>[x.contentId,x.status]);
@@ -998,7 +998,7 @@
     originalSuccessRender();
     const table=byId('customerSuccessRows').closest('table');
     table.classList.add('hq-adoption-table');
-    compactHqTable(table,['병원','도입 상태','도입 점수','이탈 위험 점수','최근 30일 활용','개통 상태','체험·구독','최근 활동','핵심 사유','다음 작업'],[0,1,8,9],'점수·이용 상세');
+    compactHqTable(table,['병원','사용 현황','안내·후속관리 활용 점수','확인 우선순위 점수','최근 30일 활용','개통 상태','체험·구독','최근 활동','핵심 사유','다음 작업'],[0,1,8,9],'점수·이용 상세');
   };
   function compactAnalytics(id,labels,keep){
     const table=byId(id).querySelector('table');if(table)compactHqTable(table,labels,keep,'집계 상세');
@@ -1057,8 +1057,11 @@
   adoptionMetrics.append(byId('customerSuccessGenerated'));
   onboardingMetrics.append(byId('onboardingGenerated'));
   byId('csTotal').previousElementSibling.textContent='전체 병원';
-  byId('csRisk').previousElementSibling.textContent='이용 중단 위험';
+  byId('csRisk').previousElementSibling.textContent='사용 현황 확인 필요';
   byId('obTotal').previousElementSibling.textContent='전체 병원';
+  byId('obLive').previousElementSibling.textContent='기본 준비 완료';
+  byId('obAttention').previousElementSibling.textContent='기본 준비 확인 필요';
+  for(const option of byId('onboardingStatusFilter').options){if(option.value==='live')option.textContent='기본 준비 완료';if(option.value==='attention')option.textContent='기본 준비 확인 필요';if(option.value==='setting')option.textContent='기본 준비 중';}
 
   const adoptionFilters=document.createElement('details');
   adoptionFilters.id='hqAdoptionFilters';adoptionFilters.className='hq-list-filters';
@@ -1101,13 +1104,13 @@
   }
   document.querySelectorAll('[data-cs-quick]').forEach(button=>{
     if(button.dataset.csQuick==='all')button.textContent='전체 병원';
-    if(button.dataset.csQuick==='risk')button.textContent='이용 중단 위험';
+    if(button.dataset.csQuick==='risk')button.textContent='사용 현황 확인 필요';
     button.onclick=()=>{clearAdoptionFilters();customerSuccessQuick=button.dataset.csQuick||'all';renderCustomerSuccess();};
   });
   resetAdoption.onclick=()=>{clearAdoptionFilters();customerSuccessQuick='all';renderCustomerSuccess();};
   for(const id of ['customerSuccessStatus','customerSuccessPlan','customerSuccessSignal'])byId(id).onchange=()=>renderCustomerSuccess();
   byId('customerSuccessSearch').oninput=()=>renderCustomerSuccess();
-  byId('customerSuccessStatus').querySelector('[value="risk"]').textContent='이용 중단 위험';
+  byId('customerSuccessStatus').querySelector('[value="risk"]').textContent='사용 현황 확인 필요';
   byId('customerSuccessSignal').querySelector('[value="neverUsed"]').textContent='사용 기록 없음';
 
   function operationalText(value){
@@ -1126,6 +1129,7 @@
     });
   }
   const onboardingNotice=byId('onboarding').querySelector('.notice');
+  byId('onboarding').querySelector('.head p').textContent='기본 준비는 병원 정보·직원 계정으로 확인합니다. 문자 발송·안내자료·후속관리는 필요할 때 설정하는 선택 기능입니다.';
   onboardingNotice.innerHTML='<details class="hq-technical-help"><summary>문자·알림톡 연동 안내</summary><p>SOLAPI 계정을 연결하면 문자 발송과 알림톡 설정을 확인할 수 있습니다. 알림톡 채널·승인 템플릿을 조회하려면 연결 권한에 kakao:read가 필요합니다.</p></details>';
   const adoptionNote=byId('customerSuccess').querySelector('.customer-success-note');
   const coverage=document.createElement('p');coverage.className='sub';coverage.textContent='최근 활용은 보호자 안내자료·후속관리 기준입니다. 진료 기록·입원·직원교육 전체 사용량을 뜻하지 않습니다.';byId('customerSuccessRows').closest('.card')?.prepend(coverage);
@@ -1139,8 +1143,8 @@
     table.parentElement.style.removeProperty('overflow');table.parentElement.style.removeProperty('max-height');
     byId(id).innerHTML=`<tr class="hq-portfolio-loading"><td colspan="${labels.length}"><div class="hq-loading-lines" aria-hidden="true"><i></i><i></i><i></i></div><span>병원 목록을 불러오는 중입니다.</span></td></tr>`;
   }
-  preparePortfolioTable('onboardingRows',['병원','개통 상태','준비율','확인할 사항','상세']);
-  preparePortfolioTable('customerSuccessRows',['병원','도입 상태','핵심 사유','다음 작업','상세']);
+  preparePortfolioTable('onboardingRows',['병원','기본 준비','준비율','확인할 사항','선택 기능·상세']);
+  preparePortfolioTable('customerSuccessRows',['병원','사용 현황','핵심 사유','다음 작업','상세']);
   byId('customerSuccessRows').closest('table').classList.add('hq-adoption-table');
 
   const portfolioRowKey=row=>row?.querySelector('[data-open-onboarding-clinic],[data-cs-clinic]')?.getAttribute(row?.querySelector('[data-open-onboarding-clinic]')?'data-open-onboarding-clinic':'data-cs-clinic');
@@ -1173,7 +1177,7 @@
     for(const row of byId('customerSuccessRows').querySelectorAll('.hq-compact-main-row')){
       const id=row.querySelector('[data-cs-clinic]')?.dataset.csClinic,entry=customerSuccessPortfolio.clinics.find(x=>x.clinicId===id);
       if(!entry)continue;
-      const status=row.querySelector('.cs-status');if(status?.textContent==='위험')status.textContent='이용 중단 위험';
+      const status=row.querySelector('.cs-status');if(status?.textContent==='위험')status.textContent='사용 현황 확인 필요';
       const next=row.querySelector('.cs-next');next.textContent=operationalText(CarestepHqWorkspace.adoptionAction(entry));
       const subscription=['past_due','paused','canceled','trialing'].includes(entry.subscription?.status);
       const setup=entry.onboarding&&(entry.onboarding.ready===false||Number(entry.onboarding.percent)<100);
