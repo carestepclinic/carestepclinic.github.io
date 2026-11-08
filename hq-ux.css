@@ -558,3 +558,14 @@ button,input,select,textarea{font-family:inherit}
 
 #integrations .mini-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
 #integrations .mini strong,#integrations .mini span{word-break:keep-all;overflow-wrap:anywhere}
+
+/* Compact list controls without reducing card or touch target readability. */
+#training .hq-pagination-top,#protocols .hq-pagination-top{padding:4px 0;margin:0 0 8px;justify-content:flex-end;gap:10px}
+#training .st-count{margin:6px 0 8px}
+#protocols [data-protocol-count]{display:block;margin:4px 0 8px}
+#protocols [data-protocol-count]:empty{display:none}
+#protocols [data-protocol-conditions]{margin:4px 0 8px}
+#protocols .hq-secondary-filters{margin-bottom:8px}
+#training .st-toolbar{margin-bottom:8px}
+#training .hq-pagination-top~.st-count{display:none}
+@media(max-width:600px){#training .hq-pagination-top,#protocols .hq-pagination-top{justify-content:center}}

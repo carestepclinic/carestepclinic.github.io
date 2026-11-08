@@ -21,7 +21,8 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
  moreFilters.after(root.querySelector('[data-protocol-count]'),root.querySelector('[data-protocol-conditions]'));
  const animal=extra.querySelector('[data-protocol-species]'),field=extra.querySelector('[data-protocol-field]'),sort=extra.querySelector('[data-protocol-sort]');
  let sourceFields=new Map(),items=[],jobs=[],queueCounts={},triage='all',sequence=0,listOwner='',loadedAt=0,pending=null;
- const fieldOf=x=>CarestepHqWorkspace.category({...x,category:x.category||x.field||x.body?.category||sourceFields.get(x.sourceContentId)||''});
+ const normalizeField=value=>value==='신경'?'신경과':value;
+ const fieldOf=x=>normalizeField(CarestepHqWorkspace.category({...x,category:x.category||x.field||x.body?.category||sourceFields.get(x.sourceContentId)||''}));
  const updated=x=>x.updatedAt||x.updated_at||'';
  const displayDate=value=>value&&Number.isFinite(Date.parse(value))?new Date(value).toLocaleDateString('ko-KR'):'';
  const ownerKey=()=>[endpoint(),hqSessionToken()].join('|');
@@ -33,7 +34,7 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
   if(!saved||typeof saved!=='object')return;
   if(typeof saved.search==='string')search.value=saved.search.slice(0,200);
   for(const [el,value] of [[filter,saved.status],[animal,saved.species],[sort,saved.sort]])if([...el.options].some(x=>x.value===value))el.value=value;
-  if(typeof saved.field==='string'&&saved.field&&saved.field!=='all'){field.add(new Option(saved.field,saved.field));field.value=saved.field;}
+  if(typeof saved.field==='string'&&saved.field&&saved.field!=='all'){field.add(new Option(normalizeField(saved.field),normalizeField(saved.field)));field.value=normalizeField(saved.field);}
   if(['all','review','changed','failed'].includes(saved.triage))triage=saved.triage;
   if(triage==='review'||triage==='failed')filter.value='all';
  }

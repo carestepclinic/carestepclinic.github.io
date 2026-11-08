@@ -304,6 +304,14 @@
   function filterSubscriptions(){
     const q=(byId('hqSubscriptionSearch')?.value||'').trim().toLowerCase(),rows=[...document.querySelectorAll('#subscriptionTable tbody .hq-compact-main-row')];let shown=0;
     for(const row of rows){const status=byId('hqSubscriptionStatus')?.value||'all',id=row.querySelector('[data-sub-clinic]')?.dataset.subClinic;row.hidden=(!!q&&!row.cells[0]?.textContent.toLowerCase().includes(q))||(status!=='all'&&subscriptions.find(x=>x.clinicId===id)?.status!==status);row.nextElementSibling.hidden=row.hidden||row.querySelector('.hq-row-toggle').getAttribute('aria-expanded')!=='true';shown+=!row.hidden;}
+    const table=byId('subscriptionTable').querySelector('table'),body=table?.tBodies[0];
+    body?.querySelector('[data-subscription-empty]')?.remove();
+    if(body&&rows.length&&!shown){
+      const empty=document.createElement('tr');empty.dataset.subscriptionEmpty='true';
+      const cell=document.createElement('td');cell.colSpan=table.tHead?.rows[0]?.cells.length||5;
+      const message=document.createElement('div');message.className='empty';message.textContent='검색 조건에 맞는 병원이 없습니다. 검색어나 구독 상태를 변경해주세요.';
+      cell.append(message);empty.append(cell);body.append(empty);
+    }
     let result=byId('hqSubscriptionResults');if(!result){result=document.createElement('div');result.id='hqSubscriptionResults';result.className='hq-results-summary';byId('subscriptionTable').before(result);}
     result.replaceChildren();const count=document.createElement('span');count.setAttribute('role','status');count.textContent=`검색 결과 ${shown}건 · 전체 ${rows.length}건`;result.append(count);
     if(rows.length&&!shown){const reset=document.createElement('button');reset.type='button';reset.className='btn';reset.textContent='검색 조건 초기화';reset.onclick=()=>{byId('hqSubscriptionSearch').value='';if(byId('hqSubscriptionStatus'))byId('hqSubscriptionStatus').value='all';filterSubscriptions();saveState();byId('hqSubscriptionSearch').focus();};result.append(reset);}
@@ -1224,7 +1232,9 @@
     updateAdoptionResults();
   };
   async function loadPortfolio(view,path,assign,render,retry){
-    const current=latest(view+'-portfolio'),position=capturePortfolioPosition(view);
+    const refresh=byId(view==='onboarding'?'onboardingRefresh':'customerSuccessRefresh');
+    if(refresh.disabled)return;
+    const current=latest(view+'-portfolio'),position=capturePortfolioPosition(view);refresh.disabled=true;
     setRegion(view,'loading');
     try{
       const data=await req(path);if(!current())return;
@@ -1240,7 +1250,7 @@
         body.innerHTML='<tr><td colspan="5"><div class="empty">병원 목록을 조회하지 못했습니다. 다시 시도를 눌러주세요.</div></td></tr>';
         if(view==='customerSuccess')adoptionSummary.textContent='조회 실패 · 병원 수를 확인하지 못했습니다.';
       }
-    }
+    }finally{refresh.disabled=false;}
   }
   loadOnboardingPortfolio=()=>loadPortfolio('onboarding','/hq/onboarding',data=>onboardingPortfolio=data,()=>renderOnboardingPortfolio(),()=>loadOnboardingPortfolio());
   loadCustomerSuccess=()=>loadPortfolio('customerSuccess','/hq/customer-success',data=>customerSuccessPortfolio=data,()=>renderCustomerSuccess(),()=>loadCustomerSuccess());
@@ -1376,7 +1386,7 @@
   const listRequest=req;
   req=async function(url,options={}){const result=await listRequest(url,options);if(options.method&&!['GET','HEAD'].includes(options.method.toUpperCase())){listChangeSequence++;planCatalog=null;planPending=null;overviewReads.clear();for(const state of listReads.values()){state.freshAt=0;state.pending=null;}pendingViews.clear();}return result;};
   // Keep one refresh action per screen. Component buttons remain for their own panels.
-  for(const id of ['approvalRefresh','billingRefresh','usageBillingRefresh','onboardingRefresh','customerSuccessRefresh','crmHqRefresh','surveyHqRefresh','journeyRefresh','auditRefresh']){const button=byId(id);if(button)button.hidden=true;}
+  for(const id of ['approvalRefresh','billingRefresh','usageBillingRefresh','crmHqRefresh','surveyHqRefresh','journeyRefresh','auditRefresh']){const button=byId(id);if(button)button.hidden=true;}
   const loginOverlay=byId('loginOverlay'),shell=document.querySelector('.shell');
   function syncAuthenticationPresentation(){
     const locked=!loginOverlay.classList.contains('hidden');document.body.classList.toggle('hq-auth-locked',locked);shell.inert=locked;
