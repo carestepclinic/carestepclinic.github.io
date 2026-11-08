@@ -158,7 +158,7 @@
     else{host.append(make('p','',phone?.state==='missing'?'병원 전화번호가 아직 등록되지 않았어요. 받은 안내자료의 연락처를 확인해주세요.':'병원 전화번호를 확인하지 못했어요. 다시 조회해주세요.'));if(phone?.state!=='missing'){const retry=make('button','home-secondary','전화번호 다시 조회');retry.type='button';retry.onclick=async()=>{retry.disabled=true;await window.carestepRefreshHomeAccess?.(true);if(care.patientId===snapshot().care.patientId&&base.token===snapshot().base.token)showHospitalContact();};host.append(retry);}}
     if(shared?.token===base.token&&shared.followups?.some(f=>f.patientId===care.patientId&&f.status!=='canceled')){const consult=make('button','home-secondary','경과 전달·상담 열기');consult.type='button';consult.onclick=()=>window.carestepHomeContact?.(care.patientId);host.append(consult);}
     const open=make('button','home-secondary','받은 안내자료 확인');open.type='button';open.onclick=()=>go('hospital',{target:'homeHospitalMaterials'});
-    const close=make('button','home-secondary','닫기');close.type='button';close.onclick=()=>{host.hidden=true;$('homeHospitalContactButton').focus();};host.append(open,close);host.hidden=false;host.setAttribute('tabindex','-1');host.focus({preventScroll:true});
+    const close=make('button','home-secondary','닫기');close.type='button';close.onclick=()=>{host.hidden=true;$('homeHospitalContactButton').focus();};host.append(open,close);host.hidden=false;restorePosition(window.scrollY,host);
   }
   function refresh() {
     if(!mounted)return;
