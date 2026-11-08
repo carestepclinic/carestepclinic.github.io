@@ -20,5 +20,16 @@
  function slice(rows,state,signature,size=24){if(state.signature!==signature){state.signature=signature;state.page=0;}state.page=Math.min(state.page||0,Math.max(0,Math.ceil(rows.length/size)-1));state.size=size;return rows.slice(state.page*size,(state.page+1)*size);}
  function pager(host,state,total,render){if(total<=state.size)return;const nav=document.createElement('nav');nav.className='hq-pagination';nav.setAttribute('aria-label','목록 페이지');const previous=document.createElement('button'),next=document.createElement('button'),count=document.createElement('span');previous.type=next.type='button';previous.className=next.className='btn';previous.textContent='이전';next.textContent='다음';previous.disabled=!state.page;next.disabled=(state.page+1)*state.size>=total;count.textContent=(state.page*state.size+1)+'–'+Math.min(total,(state.page+1)*state.size)+' / '+total+'개';count.setAttribute('role','status');const turn=delta=>{state.page+=delta;render();host.scrollIntoView({block:'start'});host.querySelector('.hq-pagination button:not(:disabled)')?.focus({preventScroll:true});};previous.onclick=()=>turn(-1);next.onclick=()=>turn(1);nav.append(previous,count,next);host.append(nav);}
  function species(value){const v=String(value||'');return /both|공통|강아지.*고양이/.test(v)?'both':/dog|강아지|반려견/.test(v)?'dog':/cat|고양이|반려묘/.test(v)?'cat':'';}
- g.CarestepHqWorkspace={confirm,prompt:message=>confirm(message,{input:true}),discard,documentView,slice,pager,species,owner,ready};
+ // Display-only taxonomy suggestions; original category stays editable and is never saved here.
+ function category(item={}){
+  const raw=String(item.category||item.field||item.body?.category||item.brief?.category||item.document?.template?.category||'').trim();
+  const title=String(item.title||item.body?.title||'');
+  if(!raw||['기타','미분류','예방','고양이 특화','질환·수술'].includes(raw)){
+   for(const [pattern,label] of [[/슬개골.*탈구/,'정형외과'],[/아토피/,'피부과'],[/특발성.*방광염|\bFIC\b|\bFLUTD\b|요도.*폐색/i,'비뇨기'],[/전발치|전구강.*발치/,'치과'],[/인지.*기능/,'신경과']])if(pattern.test(title))return label;
+  }
+  return raw==='고양이 특화'?'분류 확인 필요':raw||'미분류';
+ }
+ function materialTitle(item){const title=String(item.title||'제목 없음');return item.status==='published'?title.replace(/\s*[·:—-]?\s*초안\s*$/,'').trim():title;}
+ function adoptionAction(entry){const text=String(entry.nextAction||'');if(/첫.*(?:퇴원자료|안내자료)/.test(text))return entry.neverUsed===true?'보호자 안내자료 작성 흐름을 안내해주세요.':'최근 30일 보호자 안내자료 사용 현황을 확인해주세요.';return text.replaceAll('퇴원자료','보호자 안내자료');}
+ g.CarestepHqWorkspace={confirm,prompt:message=>confirm(message,{input:true}),discard,documentView,slice,pager,species,category,materialTitle,adoptionAction,owner,ready};
 })(window);

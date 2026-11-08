@@ -17,10 +17,11 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
  const extra=document.createElement('div');extra.className='hq-protocol-filters';
  extra.innerHTML='<label>대상 동물<select class="input" data-protocol-species><option value="all">전체 동물</option><option value="dog">강아지 · 공통 포함</option><option value="cat">고양이 · 공통 포함</option><option value="both">강아지·고양이 공통</option></select></label><label>진료 분야<select class="input" data-protocol-field><option value="all">전체 분야</option></select></label><label>정렬<select class="input" data-protocol-sort><option value="recent">최근 검토순</option><option value="title">제목순</option><option value="review">검토 대기 우선</option></select></label><button type="button" class="btn" data-protocol-reset>조건 초기화</button><span data-protocol-count role="status"></span><p data-protocol-conditions></p>';
  const quick=document.createElement('div');quick.className='hq-protocol-quick';quick.setAttribute('aria-label','처리할 프로토콜 모아보기');
- list.before(quick,extra);
+ const moreFilters=document.createElement('details');moreFilters.className='hq-secondary-filters';moreFilters.innerHTML='<summary>상세 조건·정렬</summary>';moreFilters.append(extra);list.before(quick,moreFilters);
+ moreFilters.after(root.querySelector('[data-protocol-count]'),root.querySelector('[data-protocol-conditions]'));
  const animal=extra.querySelector('[data-protocol-species]'),field=extra.querySelector('[data-protocol-field]'),sort=extra.querySelector('[data-protocol-sort]');
  let sourceFields=new Map(),items=[],jobs=[],queueCounts={},triage='all',sequence=0,listOwner='',loadedAt=0,pending=null;
- const fieldOf=x=>x.category||x.field||x.body?.category||sourceFields.get(x.sourceContentId)||'';
+ const fieldOf=x=>CarestepHqWorkspace.category({...x,category:x.category||x.field||x.body?.category||sourceFields.get(x.sourceContentId)||''});
  const updated=x=>x.updatedAt||x.updated_at||'';
  const displayDate=value=>value&&Number.isFinite(Date.parse(value))?new Date(value).toLocaleDateString('ko-KR'):'';
  const ownerKey=()=>[endpoint(),hqSessionToken()].join('|');
@@ -46,16 +47,17 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
   const source=failed?jobs.filter(x=>x.status==='failed'):items;
   const rows=source.filter(x=>(failed||filter.value==='all'||x.status===filter.value)&&(triage!=='review'||x.status==='draft')&&(triage!=='changed'||x.sourceCurrent===false)&&(animal.value==='all'||x.species===animal.value||(['dog','cat'].includes(animal.value)&&x.species==='both'))&&(field.value==='all'||fieldOf(x)===field.value)&&(!q||[x.title,species[x.species],fieldOf(x),failed?x.error:''].join(' ').toLowerCase().includes(q)));
   rows.sort((a,b)=>(sort.value==='review'?(a.status==='draft'?0:1)-(b.status==='draft'?0:1):0)||(sort.value==='title'?String(a.title||'').localeCompare(String(b.title||''),'ko'):String(b.reviewedAt||updated(b)).localeCompare(String(a.reviewedAt||updated(a))))||String(a.title||'').localeCompare(String(b.title||''),'ko'));
-  extra.querySelector('[data-protocol-count]').textContent=`${rows.length}개 표시 · 불러온 ${failed?'실패 작업':'저장 자료'} ${source.length}개`;
+  root.querySelector('[data-protocol-count]').textContent=`검색 결과 ${rows.length}개`;
   const conditions=[triage!=='all'&&({review:'검토 대기',changed:'원본 변경',failed:'생성 실패'})[triage],q&&'검색: '+search.value,!failed&&filter.value!=='all'&&labels[filter.value],animal.value!=='all'&&animal.selectedOptions[0].textContent,field.value!=='all'&&field.value,sort.value!=='recent'&&sort.selectedOptions[0].textContent].filter(Boolean);
-  extra.querySelector('[data-protocol-conditions]').textContent=conditions.length?'적용 조건 · '+conditions.join(' · '):'전체 자료';
+  root.querySelector('[data-protocol-conditions]').textContent=conditions.length?'적용 조건 · '+conditions.join(' · '):'전체 자료';
   list.replaceChildren();
   if(!rows.length){const p=document.createElement('p');p.className='empty';p.textContent=failed?(queueCounts.failed>source.length?'실패 작업 상세를 아직 확인하지 못했습니다. 생성·진행 현황에서 확인해주세요.':'검색 조건에 맞는 생성 실패 작업이 없습니다.'):items.length?'검색 조건에 맞는 진료 프로토콜이 없습니다.':'저장된 진료 프로토콜이 없습니다. 생성·진행 현황에서 준비할 자료를 확인하세요.';list.append(p);return;}
   const shown=CarestepHqWorkspace.slice(rows,pageWindow,JSON.stringify([ownerKey(),triage,q,filter.value,animal.value,field.value,sort.value]));
+  root.querySelector('[data-protocol-count]').textContent=`검색 결과 ${rows.length}개 · 현재 ${pageWindow.page*pageWindow.size+1}–${pageWindow.page*pageWindow.size+shown.length}개`;
   for(const item of shown){
    const card=document.createElement('article');card.className='card hq-protocol-card';
-   const heading=document.createElement('h2');heading.textContent=item.title||'제목 없음';
-   const meta=document.createElement('p');meta.className='muted';meta.textContent=[failed?'생성 실패':labels[item.status]||'상태 확인 필요',species[item.species]||'',fieldOf(item),item.revision?'수정 '+item.revision+'판':'',item.sourceCurrent===false?'원본 변경 확인':''].filter(Boolean).join(' · ');
+   const heading=document.createElement('h2');heading.textContent=CarestepHqWorkspace.materialTitle(item);
+   const meta=document.createElement('p');meta.className='muted';meta.textContent=[failed?'생성 실패':labels[item.status]||'상태 확인 필요',species[item.species]||'',fieldOf(item),fieldOf(item)!==(item.category||item.field||item.body?.category||sourceFields.get(item.sourceContentId)||'미분류')?'검색용 분류 제안':'',item.revision?'수정 '+item.revision+'판':'',item.sourceCurrent===false?'원본 변경 확인':''].filter(Boolean).join(' · ');
    const dates=document.createElement('p');dates.className='hq-protocol-dates';dates.textContent=[displayDate(updated(item))&&'수정 '+displayDate(updated(item)),displayDate(item.reviewedAt||item.approvedAt)&&'검토 '+displayDate(item.reviewedAt||item.approvedAt)].filter(Boolean).join(' · ');
    const next=document.createElement('p');next.className='hq-protocol-next';next.textContent=failed?'실패 원인: '+(item.error||'생성 현황에서 원인을 확인해주세요.'):item.sourceCurrent===false?'변경된 원본과 본문·근거를 대조하고 보완해주세요.':item.status==='draft'?'본문·근거와 미해결 항목을 검토한 뒤 공개 여부를 결정하세요.':'';
    const open=document.createElement('button');open.type='button';open.className='btn';open.textContent=failed?'실패 원인·재시도 열기':'본문·검토 열기';open.onclick=()=>{if(!ready())return;const adapter=sessionAdapter();if(failed)ClinicalKnowledge.openQueue(adapter,'protocol',{status:'failed',jobId:item.id});else ClinicalKnowledge.openProtocol(adapter,encodeURIComponent(item.id),true,()=>{ClinicalKnowledge.close();load();});};
@@ -86,7 +88,7 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
  extra.querySelector('[data-protocol-reset]').onclick=()=>{resetFilters();saveFilters();draw();};
  root.querySelector('[data-protocol-refresh]').onclick=()=>load();
  root.querySelector('[data-protocol-queue]').onclick=()=>{if(ready())ClinicalKnowledge.openQueue(sessionAdapter(),'protocol');};
- new MutationObserver(()=>{if(!document.getElementById('loginOverlay').classList.contains('hidden')){sequence++;loadedAt=0;pending=null;listOwner='';items=[];jobs=[];queueCounts={};sourceFields=new Map();list.replaceChildren();quick.replaceChildren();extra.querySelector('[data-protocol-count]').textContent='';globalThis.ClinicalKnowledge?.close(true);message.textContent='HQ 연결 후 자료를 확인할 수 있습니다.';root.setAttribute('aria-busy','false');}}).observe(document.getElementById('loginOverlay'),{attributes:true,attributeFilter:['class']});
+ new MutationObserver(()=>{if(!document.getElementById('loginOverlay').classList.contains('hidden')){sequence++;loadedAt=0;pending=null;listOwner='';items=[];jobs=[];queueCounts={};sourceFields=new Map();list.replaceChildren();quick.replaceChildren();root.querySelector('[data-protocol-count]').textContent='';globalThis.ClinicalKnowledge?.close(true);message.textContent='HQ 연결 후 자료를 확인할 수 있습니다.';root.setAttribute('aria-busy','false');}}).observe(document.getElementById('loginOverlay'),{attributes:true,attributeFilter:['class']});
  window.CarestepHqProtocols={open:(options={})=>load(options)};
  if(root.classList.contains('active'))load();
 })();

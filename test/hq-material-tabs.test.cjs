@@ -86,7 +86,7 @@ test('HQ specialty labels stay distinct and material navigation works during a p
 test('protocol animal, field and sort filters use saved metadata and preserve selection on refresh',async t=>{
  const p=await fixture(t);await p.evaluate(()=>{const original=req;req=(path,o)=>path==='/hq/training/knowledge-protocols'?Promise.resolve({items:[{id:'a',title:'가 자료',status:'draft',species:'dog',category:'내과',revision:2,updatedAt:'2026-11-01',sourceCurrent:true},{id:'b',title:'나 자료',status:'published',species:'cat',sourceContentId:'source-eye',revision:3,updatedAt:'2026-11-02',sourceCurrent:false}]}):path==='/hq/content'?Promise.resolve({contents:[{contentId:'source-eye',category:'안과'}]}):original(path,o);showView('protocols');});
  await p.locator('.hq-protocol-card').first().waitFor();assert.match(await p.locator('.hq-protocol-card').first().innerText(),/나 자료/);
- await p.locator('[data-protocol-species]').selectOption('cat');await p.locator('[data-protocol-field]').selectOption('안과');assert.equal(await p.locator('.hq-protocol-card').count(),1);assert.match(await p.locator('.hq-protocol-card').innerText(),/수정 3판/);
+ await p.locator('#protocols .hq-secondary-filters').evaluate(e=>e.open=true);await p.locator('[data-protocol-species]').selectOption('cat');await p.locator('[data-protocol-field]').selectOption('안과');assert.equal(await p.locator('.hq-protocol-card').count(),1);assert.match(await p.locator('.hq-protocol-card').innerText(),/수정 3판/);
  await p.locator('[data-protocol-refresh]').click();await p.waitForFunction(()=>document.getElementById('protocols').getAttribute('aria-busy')==='false');assert.equal(await p.locator('[data-protocol-field]').inputValue(),'안과');assert.equal(await p.locator('.hq-protocol-card').count(),1);
 });
 
@@ -97,7 +97,7 @@ test('HQ training groups published and draft versions without merging unrelated 
 
 test('guardian category filtering keeps drafts visible and same content drafts together',async t=>{
  const p=await fixture(t);await p.evaluate(()=>{const original=req;req=(path,o)=>path.split('?')[0].endsWith('/drafts')?Promise.resolve({drafts:[{id:'d1',contentId:'c1',title:'안과 자료',status:'draft',version:'0.1',category:'안과',updatedAt:'2026-11-01'},{id:'d2',contentId:'c1',title:'안과 자료',status:'draft',version:'0.2',category:'안과',updatedAt:'2026-11-02'},{id:'d3',contentId:'c2',title:'안과 자료',status:'draft',version:'0.1',category:'안과',updatedAt:'2026-11-01'}],limit:200}):original(path,o);showView('content');});
- await p.locator('[data-content-row]').first().waitFor();await p.locator('#contentCategory').selectOption('안과');assert.equal(await p.locator('[data-content-row]').count(),2);assert.equal(await p.locator('[data-guardian-draft=d2]').isVisible(),true);assert.equal(await p.locator('[data-guardian-draft=d1]').isVisible(),false);await p.locator('[data-content-row=c1] details summary').click();assert.equal(await p.locator('[data-guardian-draft=d1]').isVisible(),true);
+ await p.locator('[data-content-row]').first().waitFor();await p.locator('#content .hq-secondary-filters').evaluate(e=>e.open=true);await p.locator('#contentCategory').selectOption('안과');assert.equal(await p.locator('[data-content-row]').count(),2);assert.equal(await p.locator('[data-guardian-draft=d2]').isVisible(),true);assert.equal(await p.locator('[data-guardian-draft=d1]').isVisible(),false);await p.locator('[data-content-row=c1] details summary').click();assert.equal(await p.locator('[data-guardian-draft=d1]').isVisible(),true);
 });
 
 function protocolOperationsData(){
@@ -111,8 +111,8 @@ function protocolOperationsData(){
 }
 for(const width of [390,1440])test('common species, triage actions and reset show the intended records without writes '+width,async t=>{
  const p=await fixture(t,width);await p.evaluate(protocolOperationsData);await p.evaluate(()=>showView('protocols'));await p.locator('.hq-protocol-card').first().waitFor();
- await p.locator('[data-protocol-species]').selectOption('dog');assert.deepEqual(await p.locator('.hq-protocol-card h2').allTextContents(),['가 강아지 자료','나 공통 자료']);
- await p.locator('[data-protocol-species]').selectOption('cat');assert.deepEqual(await p.locator('.hq-protocol-card h2').allTextContents(),['나 공통 자료','다 고양이 자료']);
+ await p.locator('#protocols .hq-secondary-filters').evaluate(e=>e.open=true);await p.locator('[data-protocol-species]').selectOption('dog');assert.deepEqual(await p.locator('.hq-protocol-card h2').allTextContents(),['가 강아지 자료','나 공통 자료']);
+ await p.locator('#protocols .hq-secondary-filters').evaluate(e=>e.open=true);await p.locator('[data-protocol-species]').selectOption('cat');assert.deepEqual(await p.locator('.hq-protocol-card h2').allTextContents(),['나 공통 자료','다 고양이 자료']);
  await p.locator('[data-protocol-search]').fill('일치 없음');await p.locator('[data-protocol-quick=changed]').click();assert.deepEqual(await p.locator('.hq-protocol-card h2').allTextContents(),['나 공통 자료']);assert.match(await p.locator('.hq-protocol-card').innerText(),/변경된 원본/);
  await p.locator('[data-protocol-quick=review]').click();assert.equal(await p.locator('.hq-protocol-card').count(),2);
  await p.locator('[data-protocol-quick=failed]').click();assert.match(await p.locator('.hq-protocol-card').innerText(),/합성 근거 부족/);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
@@ -122,10 +122,37 @@ for(const width of [390,1440])test('common species, triage actions and reset sho
 });
 test('protocol conditions survive a real browser reload including fields resolved from the source catalog',async t=>{
  const p=await fixture(t);await p.evaluate(protocolOperationsData);await p.evaluate(()=>showView('protocols'));await p.locator('.hq-protocol-card').first().waitFor();
- await p.locator('[data-protocol-search]').fill('공통');await p.locator('[data-protocol-filter]').selectOption('draft');await p.locator('[data-protocol-species]').selectOption('dog');await p.locator('[data-protocol-field]').selectOption('내과');await p.locator('[data-protocol-sort]').selectOption('title');
+ await p.locator('[data-protocol-search]').fill('공통');await p.locator('[data-protocol-filter]').selectOption('draft');await p.locator('#protocols .hq-secondary-filters').evaluate(e=>e.open=true);await p.locator('[data-protocol-species]').selectOption('dog');await p.locator('[data-protocol-field]').selectOption('내과');await p.locator('[data-protocol-sort]').selectOption('title');
  await p.reload();await p.evaluate(protocolOperationsData);await p.evaluate(()=>CarestepHqUX.restoreRoute());await p.locator('.hq-protocol-card').first().waitFor();
  assert.equal(await p.locator('[data-protocol-search]').inputValue(),'공통');assert.equal(await p.locator('[data-protocol-species]').inputValue(),'dog');assert.equal(await p.locator('[data-protocol-field]').inputValue(),'내과');assert.equal(await p.locator('[data-protocol-sort]').inputValue(),'title');assert.equal(await p.locator('[data-protocol-filter]').inputValue(),'draft');assert.deepEqual(await p.locator('.hq-protocol-card h2').allTextContents(),['나 공통 자료']);assert.deepEqual(await p.evaluate(()=>operationWrites),[]);
 });
 test('a queue opened under an old HQ identity cannot send a retry after identity replacement',async t=>{
  const p=await fixture(t);await p.evaluate(protocolOperationsData);await p.evaluate(()=>showView('protocols'));await p.locator('.hq-protocol-card').first().waitFor();await p.locator('[data-protocol-quick=failed]').click();await p.getByRole('button',{name:'실패 원인·재시도 열기',exact:true}).click();await p.locator('[data-ck-job-status]').waitFor();await p.evaluate(()=>owner='other-session');await p.locator('[data-ck="retry:failed-one"]').click();await p.locator('[data-ck="confirm-retry:failed-one"]').click();assert.deepEqual(await p.evaluate(()=>operationWrites),[]);
+});
+
+for(const width of [390,1440])test('HQ display semantics and compact protocol range '+width,async t=>{
+ const p=await fixture(t,width);await p.evaluate(()=>{
+ const old=req;req=async(path,o)=>path==='/hq/training/knowledge-protocols'?{items:Array.from({length:30},(_,i)=>({id:'p'+i,title:i===0?'슬개골 탈구 초안':'자료 '+i,status:'published',category:'예방',species:'dog',sourceCurrent:true})),queue:{counts:{},items:[]}}:old(path,o);
+ });await p.evaluate(()=>showView('protocols'));await p.locator('.hq-protocol-card').first().waitFor();
+ assert.equal(await p.locator('.hq-protocol-card').count(),24);assert.match(await p.locator('[data-protocol-count]').innerText(),/검색 결과 30개 · 현재 1–24개/);
+ assert.equal(await p.locator('#protocols .hq-secondary-filters').evaluate(e=>e.open),false);
+ await p.locator('#protocols .hq-pagination').getByRole('button',{name:'다음',exact:true}).click();assert.match(await p.locator('[data-protocol-count]').innerText(),/현재 25–30개/);
+ assert.deepEqual(await p.evaluate(()=>({title:CarestepHqWorkspace.materialTitle({title:'슬개골 탈구 초안',status:'published'}),draft:CarestepHqWorkspace.materialTitle({title:'슬개골 탈구 초안',status:'draft'}),category:CarestepHqWorkspace.category({title:'슬개골 탈구',category:'예방'}),noGuess:CarestepHqWorkspace.category({title:'specific test',category:'기타'}),next:CarestepHqWorkspace.adoptionAction({nextAction:'첫 퇴원자료 생성'})})),{title:'슬개골 탈구',draft:'슬개골 탈구 초안',category:'정형외과',noGuess:'기타',next:'최근 30일 보호자 안내자료 사용 현황을 확인해주세요.'});
+ assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+ if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:path.join(process.env.HQ_SCREENSHOTS,'hq-refine-'+width+'.png'),fullPage:true});
+ assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+test('integration false, unknown and failed states remain distinct',async t=>{
+ const p=await fixture(t);await p.evaluate(async()=>{req=async()=>({platform:{apiConfigured:false},privacy:{carestepStoresGuardianPhone:false,carestepStoresMessageBody:true},jobs:{failed:17,unackFailed:0}});await loadMessagingIntegration();});
+ assert.equal(await p.locator('#msgApiStatus').textContent(),'미설정');assert.equal(await p.locator('#msgSchedulingMode').textContent(),'서버 정보 없음');assert.equal(await p.locator('#msgPhoneStorage').textContent(),'저장 안 함');assert.equal(await p.locator('#msgBodyStorage').textContent(),'저장함');assert.equal(await p.locator('#msgFailed').textContent(),'17');assert.equal(await p.locator('#msgUnackFailed').textContent(),'0');
+ await p.evaluate(async()=>{req=async()=>({});await loadMessagingIntegration();});assert.equal(await p.locator('#msgApiStatus').textContent(),'상태 정보 없음');assert.equal(await p.locator('#msgPhoneStorage').textContent(),'서버 정보 없음');
+ await p.evaluate(async()=>{req=async()=>{throw Error('synthetic error')};await loadMessagingIntegration();});assert.equal(await p.locator('#msgApiStatus').textContent(),'조회 실패');assert.equal(await p.locator('#msgPhoneStorage').textContent(),'조회 실패');
+});
+
+test('training hides redundant topic for disease and preserves practice classification',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>{const old=req;req=(path,o)=>path==='/hq/training/'?Promise.resolve({actor:{common:true,capabilities:{edit:true,review:true}},courses:[{id:'a',course_id:'a',title:'질환 자료',kind:'education',category:'질환·수술',version:1,status:'published',common:true,owned:true,current_version_id:'a'},{id:'b',course_id:'b',title:'실무 자료',kind:'education',format:'practice',category:'접수·응대',version:1,status:'published',common:true,owned:true,current_version_id:'b'}],members:[],assignments:[]}):old(path,o);showView('training');});await p.locator('#training .st-card').first().waitFor();
+ assert.equal(await p.locator('#training [data-category]').isVisible(),false);
+ assert.equal(await p.locator('#training .st-filter-options').evaluate(e=>e.open),false);
+ const options=await p.locator('#training [data-course-type] option').evaluateAll(es=>es.map(e=>e.value));assert.ok(options.includes('practice'));await p.locator('#training [data-course-type]').selectOption('practice');assert.equal(await p.locator('#training [data-category]').isVisible(),true);
+ await p.locator('#training [data-course-type]').selectOption('');assert.equal(await p.locator('#training [data-category]').isVisible(),false);assert.equal(await p.locator('#training .st-card').count(),2);
 });

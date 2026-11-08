@@ -52,7 +52,7 @@
   function switchTab(value){if(value===tab)return;remember();++sequence;tab=value;const state=tabState[stateKey()]||{};query=state.query||'';category=state.category||'';courseType=state.courseType||'';sort=state.sort||'number';view=state.view||'cards';message='';render();const button=root.querySelector('[data-tab="'+tab+'"]');button?.focus({preventScroll:true});requestAnimationFrame(()=>{if(state.scroll!=null)global.scrollTo({top:state.scroll,behavior:'instant'});else global.CarestepTabPosition?.reveal(root.querySelector('.st-tabs'));});}
   const localToday=()=>new Date(Date.now()+32400000).toISOString().slice(0,10);
   function learningState(a){return a.completed_at?'done':a.status!=='published'?'unavailable':a.due_date&&a.due_date<localToday()?'overdue':a.opened_at?'learning':'new';}
-  function trainingControls(){if(adapter.common)return;const toolbar=root.querySelector('.st-toolbar');if(!toolbar)return;const details=document.createElement('details');details.className='st-filter-options';details.innerHTML='<summary>정렬·보기</summary><div></div>';for(const key of ['sort','layout']){const label=toolbar.querySelector('[data-'+key+']')?.closest('label');if(label)details.lastElementChild.append(label);}toolbar.append(details);}
+  function trainingControls(){const toolbar=root.querySelector('.st-toolbar');if(!toolbar)return;const details=document.createElement('details');details.className='st-filter-options';details.innerHTML='<summary>정렬·보기</summary><div></div>';for(const key of ['sort','layout']){const label=toolbar.querySelector('[data-'+key+']')?.closest('label');if(label)details.lastElementChild.append(label);}toolbar.append(details);}
   function tabCourses(){return filterCourses(data,tab,'','','');}
   function syncFilters(){
    const types=root.querySelector('[data-course-type]'),topics=root.querySelector('[data-category]');
@@ -64,6 +64,7 @@
     if(topics&&types.closest('label').nextElementSibling!==topics.closest('label'))topics.closest('label').before(types.closest('label'));
    }
    if(!topics){category='';return;}
+   const showCategory=tab==='sop'||(adapter.common&&courseType==='practice');topics.closest('label').hidden=!showCategory;if(!showCategory){category='';topics.value='';return;}
    const rows=all.filter(c=>!types||!courseType||courseTypeOf(c)===courseType),categories=[...new Set(rows.map(courseCategory))].sort((a,b)=>a.localeCompare(b,'ko'));
    if(category&&!categories.includes(courseCategory({category})))category='';else if(category)category=courseCategory({category});
    topics.innerHTML='<option value="">'+(tab==='sop'?'전체 업무 분야':'전체 주제')+'</option>'+categories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('');topics.value=category;

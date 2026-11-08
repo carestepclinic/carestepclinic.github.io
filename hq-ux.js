@@ -754,7 +754,7 @@
       contents=data.contents;contentReady=true;
       const category=byId('contentCategory'),selected=category.dataset.restoreValue||category.value;
       delete category.dataset.restoreValue;
-      const categories=[...new Set(contents.map(x=>x.category||'').filter(Boolean))].sort((a,b)=>hqCategoryLabel(a).localeCompare(hqCategoryLabel(b),'ko'));
+      const categories=[...new Set(contents.map(x=>CarestepHqWorkspace.category(x)).filter(Boolean))].sort((a,b)=>hqCategoryLabel(a).localeCompare(hqCategoryLabel(b),'ko'));
       category.innerHTML='<option value="all">전체 분류</option>'+categories.map(x=>`<option value="${esc(x)}">${esc(hqCategoryLabel(x))}</option>`).join('');
       globalThis.GuardianStudio?.updateCategories();category.value=[...category.options].some(x=>x.value===selected)?selected:'all';
       const counts=[contents.filter(x=>x.status!=='deleted').length,contents.filter(x=>x.status==='published').length,contents.filter(x=>x.status==='archived').length,contents.filter(contentDue).length];
@@ -780,13 +780,13 @@
     for(const d of globalThis.GuardianStudio?.items()||[]){const id=d.contentId||d.content_id||d.id;if(!groups.has(id))groups.set(id,{contentId:id,title:d.title,category:d.category||d.brief?.category||d.document?.template?.category||'',species:d.species||d.brief?.species||'',status:'unpublished',drafts:[]});groups.get(id).drafts.push(d);}
     const kind=x=>['draft','review'].includes(x.status)?'review':x.status==='published'?'published':'draft';
     const animal=byId('contentSpecies').value,order=byId('contentSort').value;
-    const rows=[...groups.values()].filter(x=>(status==='all'?x.status!=='deleted':['draft','review'].includes(status)?x.drafts.some(d=>kind(d)===status):x.status===status)&&(category==='all'||x.category===category||x.drafts.some(d=>d.category===category))&&(!dueOnly||contentDue(x))&&(animal==='all'||[animal,'both'].includes(CarestepHqWorkspace.species(x.species)))&&(!q||[x.title,hqCategoryLabel(x.category),x.contentId,x.species,...x.drafts.flatMap(d=>[d.title,d.category,d.species])].join(' ').toLowerCase().includes(q)));
+    const rows=[...groups.values()].filter(x=>(status==='all'?x.status!=='deleted':['draft','review'].includes(status)?x.drafts.some(d=>kind(d)===status):x.status===status)&&(category==='all'||CarestepHqWorkspace.category(x)===category||x.drafts.some(d=>CarestepHqWorkspace.category(d)===category))&&(!dueOnly||contentDue(x))&&(animal==='all'||[animal,'both'].includes(CarestepHqWorkspace.species(x.species)))&&(!q||[x.title,hqCategoryLabel(CarestepHqWorkspace.category(x)),x.contentId,x.species,...x.drafts.flatMap(d=>[d.title,d.category,d.species])].join(' ').toLowerCase().includes(q)));
     rows.forEach(x=>x.drafts.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||''))));
     rows.sort((a,b)=>order==='title'?String(a.title||'').localeCompare(String(b.title||''),'ko'):String(b.drafts[0]?.updatedAt||b.updatedAt||'').localeCompare(String(a.drafts[0]?.updatedAt||a.updatedAt||''))||String(a.title||'').localeCompare(String(b.title||''),'ko'));
     const shown=CarestepHqWorkspace.slice(rows,contentWindow,JSON.stringify([hqReadScope(),q,status,category,dueOnly,animal,order]));
     byId('contentResultSummary').textContent=`현재 조건 ${fmt(rows.length)}개 자료 · 공개본과 작성 이력 함께 보기`;
-    const draftAction=d=>`<button type="button" class="btn small" data-guardian-draft="${esc(d.id)}">${kind(d)==='published'?'이전 공개본':'수정본 이어쓰기'} · ${esc(d.version||'초안')}판</button>`;
-    byId('contentTable').innerHTML=shown.length?`<div class="table-wrap" tabindex="0" aria-label="보호자 안내자료 목록"><table class="table hq-content-table"><thead><tr><th class="gs-manage-cell">선택</th><th>안내자료</th><th>상태</th><th>검토 정보</th><th>관리</th></tr></thead><tbody>${shown.map(x=>{const drafts=x.drafts.filter(d=>d.status!=='published'),latest=drafts[0];return `<tr data-content-row="${esc(x.contentId)}"><td data-label="선택" class="gs-manage-cell">${x.status==='archived'?`<label class="hq-content-check"><input type="checkbox" data-content-bulk value="${esc(x.contentId)}" aria-label="${esc(x.title)} 선택"><span>선택</span></label>`:'—'}</td><td data-label="안내자료" class="hq-content-title"><b>${esc(x.title||'제목 없음')}</b><span class="muted">${esc(hqCategoryLabel(x.category))}${x.species?' · '+esc(x.species):''}${x.version?' · 버전 '+esc(x.version):''}</span></td><td data-label="상태">${x.status!=='unpublished'?`<span class="status ${esc(x.status)}">${esc(contentStates[x.status]||x.status)}</span>`:''}${latest?`<span class="status">${kind(latest)==='review'?'검토 대기':'작성 중·생성 확인'} · ${esc(latest.version||'초안')}판</span>`:''}</td><td data-label="검토 정보">${esc(x.reviewerName||'검토자 미등록')}<br><span class="${contentDue(x)?'hq-content-due':'muted'}">재검토 ${esc(contentDate(x.reviewDueAt))}${contentDue(x)?' · 기한 도래':''}</span>${latest?`<br><span class="muted">초안 저장 ${esc(contentDate(latest.updatedAt))}</span>`:''}</td><td data-label="관리"><div class="hq-content-actions">${['published','archived'].includes(x.status)?`<button class="btn small" data-guardian-document="${esc(x.contentId)}">자료 열기·수정</button>`:''}${latest?draftAction(latest):''}${x.status==='published'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="archived">게시 중단</button>`:x.status==='archived'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="published">다시 게시</button><button class="btn small danger" data-content-delete="${esc(x.contentId)}">삭제</button>`:''}</div><details class="gs-list-details"><summary>버전·상세 정보</summary><div class="hq-version-history">${x.drafts.filter(d=>d!==latest).map(draftAction).join('')}</div><button type="button" class="btn small" data-guardian-history="${esc(x.contentId)}">전체 작성 이력 확인</button><p>품질 점수 ${safeNumber(x.qualityScore)?fmt(x.qualityScore)+' / 100':'미등록'}</p><p>병원별 제공: ${x.status==='published'?`허용 ${fmt(x.enabledClinics)}곳 · 숨김 ${fmt(x.disabledClinics)}곳`:'현재 제공 중 아님'}</p><p>자료 ID: ${esc(x.contentId)}</p></details></td></tr>`;}).join('')}</tbody></table></div>`:`<div class="empty">${groups.size?'선택한 조건에 해당하는 자료가 없습니다. 검색 조건을 초기화해보세요.':'등록된 보호자 안내자료가 없습니다.'}</div>`;
+    const draftAction=d=>`<button type="button" class="btn small" data-guardian-draft="${esc(d.id)}">${kind(d)==='published'?'이전 공개본':'수정 초안 이어쓰기'} · ${esc(d.version||'미정')}판</button>`;
+    byId('contentTable').innerHTML=shown.length?`<div class="table-wrap" tabindex="0" aria-label="보호자 안내자료 목록"><table class="table hq-content-table"><thead><tr><th class="gs-manage-cell">선택</th><th>안내자료</th><th>상태</th><th>검토 정보</th><th>관리</th></tr></thead><tbody>${shown.map(x=>{const drafts=x.drafts.filter(d=>d.status!=='published'),latest=drafts[0];return `<tr data-content-row="${esc(x.contentId)}"><td data-label="선택" class="gs-manage-cell">${x.status==='archived'?`<label class="hq-content-check"><input type="checkbox" data-content-bulk value="${esc(x.contentId)}" aria-label="${esc(x.title)} 선택"><span>선택</span></label>`:'—'}</td><td data-label="안내자료" class="hq-content-title"><b>${esc(x.title||'제목 없음')}</b><span class="muted">${esc(hqCategoryLabel(CarestepHqWorkspace.category(x)))}${x.species?' · '+esc(x.species):''}${x.version?' · 버전 '+esc(x.version):''}</span></td><td data-label="상태">${x.status!=='unpublished'?`<span class="status ${esc(x.status)}">${esc(contentStates[x.status]||x.status)}</span>`:''}${latest?`<span class="status">${kind(latest)==='review'?'검토 대기':'작성 중·생성 확인'} · ${esc(latest.version||'초안')}판</span>`:''}</td><td data-label="검토 정보">${esc(x.reviewerName||'검토자 미등록')}<br><span class="${contentDue(x)?'hq-content-due':'muted'}">재검토 ${esc(contentDate(x.reviewDueAt))}${contentDue(x)?' · 기한 도래':''}</span>${latest?`<br><span class="muted">초안 저장 ${esc(date(latest.updatedAt))} · ${esc(String(latest.id||'').slice(-8))}</span>`:''}</td><td data-label="관리"><div class="hq-content-actions">${['published','archived'].includes(x.status)?`<button class="btn small" data-guardian-document="${esc(x.contentId)}">공개본 열기</button>`:''}${latest?draftAction(latest):''}${x.status==='published'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="archived">게시 중단</button>`:x.status==='archived'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="published">다시 게시</button><button class="btn small danger" data-content-delete="${esc(x.contentId)}">삭제</button>`:''}</div><details class="gs-list-details"><summary>버전·상세 정보</summary><div class="hq-version-history">${x.drafts.filter(d=>d!==latest).map(draftAction).join('')}</div><button type="button" class="btn small" data-guardian-history="${esc(x.contentId)}">전체 작성 이력 확인</button><p>품질 점수 ${safeNumber(x.qualityScore)?fmt(x.qualityScore)+' / 100':'미등록'}</p><p>병원별 제공: ${x.status==='published'?`허용 ${fmt(x.enabledClinics)}곳 · 숨김 ${fmt(x.disabledClinics)}곳`:'현재 제공 중 아님'}</p><p>원본 분류: ${esc(x.category||'미분류')}${CarestepHqWorkspace.category(x)!==(x.category||'미분류')?' · 목록은 검색용 분류 제안으로 표시':''}</p><p>자료 ID: ${esc(x.contentId)}</p></details></td></tr>`;}).join('')}</tbody></table></div>`:`<div class="empty">${groups.size?'선택한 조건에 해당하는 자료가 없습니다. 검색 조건을 초기화해보세요.':'등록된 보호자 안내자료가 없습니다.'}</div>`;
     CarestepHqWorkspace.pager(byId('contentTable'),contentWindow,rows.length,renderContent);
     byId('contentTable').querySelectorAll('[data-guardian-draft]').forEach(b=>b.onclick=()=>globalThis.GuardianStudio?.open(b.dataset.guardianDraft));
     byId('contentTable').querySelectorAll('[data-guardian-history]').forEach(b=>b.onclick=()=>globalThis.GuardianStudio?.history(b.dataset.guardianHistory,b));
@@ -831,9 +831,12 @@
   deleteContent=id=>changeContent([id],null);
   bulkDeleteArchivedContent=()=>changeContent(selectedContentBulkIds(),null);
   byId('contentManageMode').onchange=event=>{byId('content').classList.toggle('gs-managing',event.target.checked);if(!event.target.checked){byId('contentTable').querySelectorAll('[data-content-bulk]').forEach(x=>x.checked=false);updateContentBulkUi();}};
+  const contentOptions=document.createElement('details');contentOptions.className='hq-secondary-filters';contentOptions.innerHTML='<summary>상세 조건·정렬</summary><div class="hq-secondary-grid"></div>';
+  for(const id of ['contentCategory','contentSpecies','contentSort','contentDueOnly'])contentOptions.lastElementChild.append(byId(id).closest('label'));
+  byId('contentSearch').closest('.hq-content-filters').append(contentOptions);
   byId('contentRefresh').onclick=()=>loadContent();
   byId('contentSearch').oninput=()=>{renderContent();globalThis.GuardianStudio?.search();};
-  for(const id of ['contentStatus','contentCategory','contentDueOnly','contentSpecies','contentSort'])byId(id).onchange=()=>{renderContent();if(id==='contentCategory')globalThis.GuardianStudio?.search();};
+  for(const id of ['contentStatus','contentCategory','contentDueOnly','contentSpecies','contentSort'])byId(id).onchange=()=>{renderContent();};
   byId('contentReset').onclick=()=>{
     byId('contentSearch').value='';byId('contentStatus').value='all';byId('contentCategory').value='all';byId('contentDueOnly').checked=false;byId('contentSpecies').value='all';byId('contentSort').value='recent';
     renderContent();globalThis.GuardianStudio?.search();
@@ -1110,7 +1113,7 @@
   function operationalText(value){
     return String(value||'').replaceAll('온보딩','개통 준비').replaceAll('Calendar','캘린더')
       .replaceAll('실사용 이벤트','사용 기록').replaceAll('실사용 없음','사용 기록 없음')
-      .replaceAll('첫 퇴원자료 미생성','첫 퇴원자료 작성 전').replaceAll('첫 후속관리 미완료','첫 후속관리 진행 전');
+      .replaceAll('첫 퇴원자료 미생성','안내자료 사용 현황 확인').replaceAll('첫 후속관리 미완료','후속관리 진행 현황 확인').replaceAll('퇴원자료','보호자 안내자료');
   }
   function condenseReasons(root,selector){
     root.querySelectorAll(selector).forEach(box=>{
@@ -1123,8 +1126,9 @@
     });
   }
   const onboardingNotice=byId('onboarding').querySelector('.notice');
-  onboardingNotice.innerHTML='<b>개통 확인 안내</b> · 병원별 준비 항목을 확인해주세요. 알림톡은 선택 기능입니다.<details class="hq-technical-help"><summary>문자·알림톡 연동 안내</summary><p>SOLAPI 계정을 연결하면 문자 발송과 알림톡 설정을 확인할 수 있습니다. 알림톡 채널·승인 템플릿을 조회하려면 연결 권한에 kakao:read가 필요합니다.</p></details>';
+  onboardingNotice.innerHTML='<details class="hq-technical-help"><summary>문자·알림톡 연동 안내</summary><p>SOLAPI 계정을 연결하면 문자 발송과 알림톡 설정을 확인할 수 있습니다. 알림톡 채널·승인 템플릿을 조회하려면 연결 권한에 kakao:read가 필요합니다.</p></details>';
   const adoptionNote=byId('customerSuccess').querySelector('.customer-success-note');
+  const coverage=document.createElement('p');coverage.className='sub';coverage.textContent='최근 활용은 보호자 안내자료·후속관리 기준입니다. 진료 기록·입원·직원교육 전체 사용량을 뜻하지 않습니다.';byId('customerSuccessRows').closest('.card')?.prepend(coverage);
   const scoringHelp=document.createElement('details');scoringHelp.className='hq-help';scoringHelp.innerHTML='<summary>점수·정렬 기준</summary>';adoptionNote.before(scoringHelp);scoringHelp.append(adoptionNote);
 
   function preparePortfolioTable(id,labels){
@@ -1170,7 +1174,7 @@
       const id=row.querySelector('[data-cs-clinic]')?.dataset.csClinic,entry=customerSuccessPortfolio.clinics.find(x=>x.clinicId===id);
       if(!entry)continue;
       const status=row.querySelector('.cs-status');if(status?.textContent==='위험')status.textContent='이용 중단 위험';
-      const next=row.querySelector('.cs-next');next.textContent=operationalText(next.textContent);
+      const next=row.querySelector('.cs-next');next.textContent=operationalText(CarestepHqWorkspace.adoptionAction(entry));
       const subscription=['past_due','paused','canceled','trialing'].includes(entry.subscription?.status);
       const setup=entry.onboarding&&(entry.onboarding.ready===false||Number(entry.onboarding.percent)<100);
       const action=document.createElement('button');action.type='button';action.className='btn hq-next-action';

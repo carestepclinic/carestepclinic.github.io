@@ -108,9 +108,9 @@
 
  function updateCategories(){
   const select=document.getElementById('contentCategory');if(!select)return;
-  for(const item of listItems){const name=item.document?.template?.category||item.brief?.category||item.category||'';if(name&&![...select.options].some(x=>x.value===name)){const option=document.createElement('option');option.value=name;option.textContent=name;select.append(option);}}
+  for(const item of listItems){const name=CarestepHqWorkspace.category(item);if(name&&![...select.options].some(x=>x.value===name)){const option=document.createElement('option');option.value=name;option.textContent=name;select.append(option);}}
  }
- function queryKey(){return JSON.stringify([document.getElementById('contentSearch').value.trim(),document.getElementById('contentCategory').value]);}
+ function queryKey(){return JSON.stringify([document.getElementById('contentSearch').value.trim(),'all']);}
  function filterList(){
   root.hidden=false;if(!listLoaded)return;
   root.innerHTML=listCursor?'<button type="button" class="btn" data-gs-more>이전 작성 기록 더 불러오기</button>':'';
