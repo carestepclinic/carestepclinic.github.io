@@ -112,6 +112,7 @@
       text($('homeFollowupSection')?.querySelector('h2'),'병원 안내·상담');
       move($('homeCareSettings'),settings);if($('homeCareSettings'))$('homeCareSettings').open=true;
       move($('homeCareConnections'),settings);
+      move($('homeSecurityPanel'),settings);
       const connections=$('homeCareConnections');
       for(const n of [...($('dashboardView')?.children||[])])if(connections&&(n.id==='homeConnections'||n.classList.contains('home-clinic-group')||n.classList.contains('connection-ready')||n.classList.contains('stage-note')))move(n,connections);
       const accountHead=$('logoutButton')?.closest('.dashboard-head');

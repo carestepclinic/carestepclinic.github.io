@@ -169,3 +169,13 @@
 #homeCareUpcoming .home-preventive-row strong{font-size:1rem;line-height:1.6}#homeCareUpcoming .home-preventive-row :is(span,time,small),#homeCareUpcoming .home-preventive-row::after{font-size:.875rem;color:#435973;line-height:1.7}
 
 .home-visit-purpose{white-space:pre-wrap;overflow-wrap:anywhere}.home-visit-purpose>b{display:block;margin-bottom:5px;font-size:14px;color:#31547c}
+
+/* Persistent HOME login settings */
+.home-security{background:var(--home-card,#fff);border:1px solid #d5dfeb;border-radius:16px;padding:16px;margin:16px 0;}
+.home-security h2{font-size:18px;margin:0 0 8px}.home-security p{font-size:14px;line-height:1.6;color:#52657b}
+.home-security-devices{display:grid;gap:8px;margin:12px 0}.home-security-device{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid #d5dfeb;border-radius:12px;}
+.home-security-device small{display:block;margin-top:4px;color:#52657b}.home-security-actions{display:flex;flex-wrap:wrap;gap:8px}
+.home-security-dialog{width:min(440px,calc(100vw - 32px));max-height:85dvh;overflow:auto;border:0;border-radius:16px;padding:20px;color:#17324f}.home-security-dialog::backdrop{background:#14233488}
+.home-security-dialog h2{font-size:20px}.home-security-dialog label{display:grid;gap:6px;margin:12px 0}.home-security-dialog input{box-sizing:border-box;min-height:44px;width:100%;border:1px solid #bacadd;border-radius:8px;padding:10px;font:inherit}
+.home-security button,.home-security-dialog button{min-height:44px}.home-security [hidden],.home-security-dialog [hidden]{display:none!important}
+@media(max-width:420px){.home-security-device{align-items:flex-start;flex-direction:column}.home-security-device button{align-self:flex-end}}
