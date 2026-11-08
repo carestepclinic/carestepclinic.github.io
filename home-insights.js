@@ -46,7 +46,10 @@
     const followups = (shared.followups || []).filter(f => f.patientId === pid && f.status !== 'canceled').sort((a,b)=>Number(a.status==='completed')-Number(b.status==='completed') || String(b.dueDate||'').localeCompare(String(a.dueDate||'')));
     const plans = group?.medicationFailed ? [] : (group?.plans || []).filter(p => (!p.patientId || p.patientId === pid) && p.active !== false && (!p.endDate || p.endDate >= today));
     const doses = (group?.doses || []).filter(d => d.date === today && (!d.patientId || d.patientId === pid));
-    return {pid, patient, clinic:connection.clinicName, today, events:all, recent, visits, recheck:rechecks[0], materials, followups, plans, medicationReady:!!group && !group.medicationFailed && group.date === today, doses, checkedAt, failed:!!failed, loading:!!loading, materialState:shared.materialState || 'loading', followupState:shared.followupState || 'loading'};
+    return {pid, patient, clinic:connection.clinicName, today, events:all, recent, visits, recheck:rechecks[0], materials, sharedMaterialCount:(shared.materials||[]).filter(x=>x.patientId===pid&&!x.replacementId).length, followups, plans, medicationReady:!!group && !group.medicationFailed && group.date === today, doses, checkedAt, failed:!!failed, loading:!!loading, materialState:shared.materialState || 'loading', followupState:shared.followupState || 'loading'};
+  }
+  function hospitalEmpty(m) {
+    return !m.loading&&!m.failed&&m.medicationReady&&m.materialState==='ready'&&m.followupState==='ready'&&!m.visits.length&&!m.recheck&&!m.plans.length&&!m.doses.length&&!m.sharedMaterialCount&&!m.followups.length;
   }
   function recentHeadline(m) {
     const r=m.recent, prefix='최근 '+r.days+'일';
@@ -55,7 +58,7 @@
     return prefix+(r.partial?' · 조회된 기록 기준':'')+' · 홈 기록 '+r.recordedDays+'일 · 체중 측정 '+r.samples.length+'일';
   }
   // Models are exposed only to the repository's synthetic tests.
-  if (typeof document === 'undefined') { globalThis.carestepInsightModels = {validDay, publicEvents, recentRecords, insightModel, recentHeadline}; return; }
+  if (typeof document === 'undefined') { globalThis.carestepInsightModels = {validDay, publicEvents, recentRecords, insightModel, recentHeadline, hospitalEmpty}; return; }
   const $ = id => document.getElementById(id);
   const make = (tag, cls, text) => {const n=document.createElement(tag);if(cls)n.className=cls;if(text !== undefined)n.textContent=text;return n;};
   let scope='', period=7, signature='', current=null;
@@ -96,27 +99,27 @@
     if(items.length>3){const more=make('details','home-insight-more');more.dataset.insightExpand=label;more.append(make('summary','',label+' '+(items.length-3)+'건 더 보기'));items.slice(3).forEach(x=>more.append(render(x)));host.append(more);}
   }
   function renderOverview(m) {
-    const host=$('homePublicOverview');headline(host,m.patient.name+' · 공개 진료정보','병원에서 이미 공개한 진료·복약·재진 정보를 모았습니다.');
+    const host=$('homePublicOverview');
+    if(hospitalEmpty(m)){headline(host,'아직 받은 병원 안내가 없어요');note(host,'병원에서 공유하면 진료기록·안내자료·복약 일정이 여기에 표시됩니다. 방문 전 문진은 위 버튼에서 작성할 수 있습니다.');return;}
+    headline(host,m.patient.name+' · 병원 진료정보');
     if(m.loading || m.failed){note(host,m.failed?'진료정보를 확인하지 못했습니다. 다시 조회해주세요.':'진료정보를 확인하고 있습니다…',m.failed);host.append(button('건강기록 다시 조회',records(m)));}
     else {
       host.append(make('h4','','최근 진료'));
       if(!m.visits.length)note(host,'공개된 진료기록이 없습니다.');
       list(host,m.visits.slice(0,1),e=>{const card=make('article','home-insight-item');card.append(make('small','',e.eventDate+' · 병원 기록'),make('b','',e.title||'병원 진료'));readable(card,e.homeNote||'공개된 방문목적·안내가 없습니다.',e.id);card.append(button('이 진료기록 보기',records(m,'visit',e.id)));return card;},'진료기록');
-      if(m.visits.length)host.append(button('공개 진료기록 전체 보기',records(m,'visit')));
-      const due=make('div','home-insight-recheck');due.append(make('b','','등록된 다음 재진'),make('span','',m.recheck?.nextDueDate||'공개 기록에 예정일이 없습니다.'));if(m.recheck)due.append(button('재진 기록 보기',records(m,'visit',m.recheck.id)));host.append(due);
-      note(host,'최근 병원 진료일 · '+(m.visits[0]?.eventDate||'공개 기록 없음')+' / HOME 조회 · '+stamp(m.checkedAt));
+      if(m.visits.length)host.append(button('병원 진료기록 전체 보기',records(m,'visit')));
+      if(m.recheck){const due=make('div','home-insight-recheck');due.append(make('b','','다음 재진'),make('span','',m.recheck.nextDueDate),button('재진 기록 보기',records(m,'visit',m.recheck.id)));host.append(due);}
     }
-    const meds=make('div','home-insight-medication');meds.append(make('b','','병원 복약 일정'),make('span','',!m.medicationReady?'관리일정에서 조회 필요':m.plans.length?'등록 '+m.plans.length+'개 · 시간과 지시 확인':'등록된 복약 일정 없음'),button('복약 일정 보기',guard(m,()=>window.carestepHomeNavigation?.go('schedule',{target:'homeCarePatients'}))));host.append(meds);
+    if(!m.medicationReady||m.plans.length||m.doses.length){const meds=make('div','home-insight-medication');meds.append(make('b','','복약 일정'),make('span','',!m.medicationReady?'조회 상태 확인이 필요합니다':m.plans.length?'등록 '+m.plans.length+'개':'오늘 예정 '+m.doses.length+'회'),button('복약 일정 보기',guard(m,()=>window.carestepHomeNavigation?.go('schedule',{target:'homeCarePatients'}))));host.append(meds);}
   }
   function renderGuides(m) {
-    const host=$('homeLinkedGuides');headline(host,'최근 관리 안내','받은 질환·퇴원·수술 안내의 원문을 확인하세요.');
+    const host=$('homeLinkedGuides');if(hospitalEmpty(m)||(m.materialState==='ready'&&m.followupState==='ready'&&!m.materials.length&&!m.followups.length)){host.hidden=true;return;}headline(host,'최근 안내');
     if(m.materialState!=='ready')note(host,m.materialState==='failed'?'일부 자료 조회 실패 · 아래 자료함에서 다시 조회해주세요.':'안내자료 확인 중…',m.materialState==='failed');
     list(host,m.materials.slice(0,1),item=>{const row=make('article','home-insight-item');row.append(make('small','',item.kindLabel+' · '+(item.sentAt?stamp(item.sentAt):'게시일 미기록')),make('b','',item.topic||item.title||'병원 안내자료'));if(!item.topic)note(row,'질환·시술명은 자료 원문에서 확인해주세요.');row.append(button('안내자료 보기',guard(m,()=>window.carestepOpenHomeMaterial?.(m.pid,item.key))));return row;},'안내자료');
     if(m.materialState==='ready'&&!m.materials.length)note(host,'연결된 질환·퇴원·수술 안내자료가 없습니다.');
     if(m.followupState!=='ready')note(host,m.followupState==='failed'?'회복관리 안내 조회 실패 · 병원 안내·상담에서 다시 조회해주세요.':'회복관리 안내 확인 중…',m.followupState==='failed');
     if(m.followups.length){const row=make('div','home-insight-medication');row.append(make('b','','병원 안내·상담'),make('span','','받은 안내 '+m.followups.length+'건'),button('병원 안내·상담 전체 보기',guard(m,()=>{if($('homeCareAll'))$('homeCareAll').open=true;window.carestepHomeNavigation?.go('hospital',{target:'homeCareAll'});})));host.append(row);}
-    if(m.followupState==='ready'&&!m.followups.length)note(host,'받은 병원 회복관리 안내가 없습니다.');
-    host.append(button('자료함 전체 보기',guard(m,()=>window.carestepOpenHomeMaterials?.(m.pid))));
+    if(m.sharedMaterialCount)host.append(button('안내자료 전체 보기',guard(m,()=>window.carestepOpenHomeMaterials?.(m.pid))));
   }
 
   function renderRecent(m) {
@@ -158,8 +161,7 @@
     const open=new Set([...document.querySelectorAll('[data-insight-expand][open]')].map(n=>n.dataset.insightExpand));
     for(const id of ['homeInsightEntry','homePublicOverview','homeLinkedGuides']){$(id).hidden=false;$(id).replaceChildren();}
     $('homeRecentSummary').hidden=false;$('homeRecentSummary').querySelector('div').replaceChildren();
-    const entry=$('homeInsightEntry');entry.append(make('h3','','공개 정보 한눈에'));
-    const actions=make('div','home-insight-entry-actions');actions.append(button('진료정보·관리 안내',guard(m,()=>window.carestepHomeNavigation?.go('hospital',{target:'homePublicOverview'}))),button('최근 건강기록 요약',guard(m,()=>openRecent(m))));entry.append(actions);
+    const entry=$('homeInsightEntry');entry.append(make('p','home-insight-note',m.loading?'최근 기록 확인 중':m.failed?'최근 기록을 확인하지 못했어요. 건강기록에서 다시 조회해주세요.':'최근 7일 · 보호자가 기록한 날 '+m.recent.recordedDays+'일'+(m.recent.partial?' · 조회된 기록 기준':'')));
     renderOverview(m);renderGuides(m);renderRecent(m);
     for(const n of document.querySelectorAll('[data-insight-expand]'))n.open=open.has(n.dataset.insightExpand);
     if(focusHost&&focusText)[...($(focusHost.id)?.querySelectorAll('button,summary')||[])].find(n=>n.textContent===focusText)?.focus({preventScroll:true});

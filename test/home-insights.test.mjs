@@ -8,6 +8,14 @@ function models(){const c=vm.createContext({});vm.runInContext(code,c);return c.
 function fixture(){return {base:{token:'s',home:{connections:[{clinicName:'가상 병원',patients:[{id:'p',name:'가상 환자'}]}]}},care:{token:'s',patientId:'p',publicGroup:{p:{id:'p'},date:'2026-10-18',timelineLoadedAt:'2026-10-18T03:00:00Z',events:[],plans:[],doses:[]}},shared:{token:'s',materials:[],followups:[],materialState:'ready',followupState:'ready'}};}
 const model=(f,days=7)=>models().insightModel(f.base,f.care,f.shared,days,'2026-10-18');
 const event=(id,date,type='weight',more={})=>({id,eventDate:date,type,source:'home',value:4,...more});
+
+test('combined empty notice requires successful reads and never hides pending or failed information',()=>{
+ const m=model(fixture()),empty=models().hospitalEmpty;assert.equal(empty(m),true);
+ for(const change of [{loading:true},{failed:true},{medicationReady:false},{materialState:'failed'},{materialState:'loading'},{followupState:'failed'},{followupState:'loading'},{sharedMaterialCount:1},{doses:[{}]},{plans:[{}]},{visits:[{}]},{recheck:{}},{followups:[{}]}])assert.equal(empty({...m,...change}),false,JSON.stringify(change));
+});
+test('a medication PDF prevents combined empty guidance even when it is not a disease guide',()=>{
+ const f=fixture();f.shared.materials=[{patientId:'p',kind:'medication',key:'m'}];const m=model(f);assert.equal(m.materials.length,0);assert.equal(m.sharedMaterialCount,1);assert.equal(models().hospitalEmpty(m),false);
+});
 test('inclusive 7/30 day summaries exclude future and invalid dates, deduplicate IDs and separate missing days',()=>{
  const m=models(),items=[event('a','2026-10-12'),event('b','2026-10-18'),event('b','2026-10-18'),event('old','2026-10-11'),event('future','2026-10-19'),event('bad','2026-02-30'),event('c','2026-10-18','appetite')];
  const r=m.recentRecords(items,'p',7,'2026-10-18');assert.equal(r.from,'2026-10-12');assert.equal(r.items.length,3);assert.equal(r.recordedDays,2);assert.equal(r.missingDays,5);assert.equal(m.recentRecords(items,'p',30,'2026-10-18').from,'2026-09-19');

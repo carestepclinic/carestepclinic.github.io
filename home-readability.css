@@ -183,3 +183,12 @@ html[data-home-text-size=large]{font-size:112.5%}
 @media(max-width:380px){.home-display-settings{padding:12px}html[data-home-text-size=large] .home-bottom-navigation button{font-size:.875rem}html[data-home-text-size=large] #homeNavigationChrome #homeCarePatientCards .home-patient-choice{flex-basis:11rem}}
 
 .home-navigation-active #homeNavigation-settings .home-custom-device summary>span{display:inline-block;margin-left:.5em}
+
+/* Compact, shared HOME navigation and update notices. */
+.home-update-notice{margin:8px auto;padding:10px 14px;max-width:1120px;background:#eef7f5;border:1px solid #b8d6ce;border-radius:12px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+.home-update-notice[hidden]{display:none}.home-update-notice p{margin:0;line-height:1.5}.home-update-notice button{flex-shrink:0}
+.home-schedule-shortcuts,.home-hospital-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px}
+.home-schedule-shortcuts button{flex:1;white-space:normal}.home-hospital-actions{justify-content:flex-end}
+.home-material-card .home-care-next{margin-top:8px}.home-material-card .home-care-next p{margin:8px 0}
+.home-join-help>p{line-height:1.6;margin:8px 0 14px}
+@media(max-width:520px){.home-update-notice{margin:8px;align-items:stretch;flex-direction:column}.home-schedule-shortcuts{gap:6px}.home-schedule-shortcuts button{padding:8px;font-size:14px}}

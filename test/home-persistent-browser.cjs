@@ -3,7 +3,7 @@ const {chromium}=require('playwright');
 const root=path.resolve(__dirname,'..');
 (async()=>{
  let version='before',checks=0;
- const server=http.createServer((req,res)=>{const p=decodeURIComponent(new URL(req.url,'http://localhost').pathname);const file=path.join(root,p==='/'?'home.html':p);if(!file.startsWith(root+path.sep)){res.writeHead(403);res.end();return;}try{let body=fs.readFileSync(file);if(p==='/sw.js'&&version==='before')body=Buffer.from(body.toString().replace("home-persistent-20261108a","home-session-test-before"));res.setHeader('Cache-Control','no-store');res.setHeader('Content-Type',p.endsWith('.js')?'text/javascript':p.endsWith('.css')?'text/css':p.endsWith('.html')?'text/html':p.endsWith('.svg')?'image/svg+xml':p.endsWith('.json')||p.endsWith('.webmanifest')?'application/json':'application/octet-stream');res.end(body)}catch{res.writeHead(404);res.end()}});
+ const server=http.createServer((req,res)=>{const p=decodeURIComponent(new URL(req.url,'http://localhost').pathname);const file=path.join(root,p==='/'?'home.html':p);if(!file.startsWith(root+path.sep)){res.writeHead(403);res.end();return;}try{let body=fs.readFileSync(file);if(p==='/sw.js'&&version==='before')body=Buffer.from(body.toString().replace("home-usability-20261108final","home-session-test-before"));res.setHeader('Cache-Control','no-store');res.setHeader('Content-Type',p.endsWith('.js')?'text/javascript':p.endsWith('.css')?'text/css':p.endsWith('.html')?'text/html':p.endsWith('.svg')?'image/svg+xml':p.endsWith('.json')||p.endsWith('.webmanifest')?'application/json':'application/octet-stream');res.end(body)}catch{res.writeHead(404);res.end()}});
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
  const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true}).catch(error=>{server.close();throw error});
  try{
@@ -20,7 +20,8 @@ const root=path.resolve(__dirname,'..');
  await page.evaluate(()=>navigator.serviceWorker.ready);await page.waitForFunction(()=>!!navigator.serviceWorker.controller);checks++;
  // Actual service-worker update on an open app must keep login and allow new settings.
  version='after';await page.evaluate(async()=>{const r=await navigator.serviceWorker.getRegistration();await r.update()});
- await page.waitForFunction(async()=>{const cacheNames=await caches.keys();return cacheNames.includes('carestep-home-home-persistent-20261108a')});
+ await page.waitForFunction(async()=>!!(await navigator.serviceWorker.getRegistration())?.waiting);await page.locator('#homeApplyUpdate').click();await page.waitForFunction(async()=>!(await navigator.serviceWorker.getRegistration())?.waiting);
+ await page.waitForFunction(async()=>{const cacheNames=await caches.keys();return cacheNames.includes('carestep-home-home-usability-20261108final')});
  await page.waitForFunction(()=>window.carestepHomeSnapshot?.().home?.user?.id==='synthetic');assert.equal(await page.evaluate(()=>localStorage.getItem('carestep_home_session_v1')),'synthetic-token');checks++;
  await page.locator('#homeNavigationSettingsButton').click();await page.locator('#homeSecurityLoad').click();await page.locator('.home-security-device').nth(1).waitFor();assert.equal(await page.locator('.home-security-device').count(),2);checks++;
  for(const width of [1280,390,360]){await page.setViewportSize({width,height:900});const overflow=await page.locator('#homeSecurityPanel').evaluate(el=>el.scrollWidth>el.clientWidth+1);assert.equal(overflow,false);checks++;await page.locator('#homeSecurityPanel').screenshot({path:path.join(root,'..','home-security-'+width+'.png')});}

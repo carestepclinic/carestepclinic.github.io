@@ -98,3 +98,37 @@
 @media(min-width:760px){#homeNavigation-home{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:start;}#homeNavigation-home #homeCareHealth{grid-row:1/3;}#homeNavigation-home .home-navigation-daily{grid-column:2;}#homeNavigation-home .home-navigation-prevention{grid-column:2;}#homeNavigation-home #homeCareHospitalNotice,#homeNavigation-home #homeCareFollowups{grid-column:1/-1;}.home-navigation-chrome .home-patient-choice{min-width:180px;}}
 @media(max-width:480px){.home-navigation-active .home-shell{padding-top:12px;}.home-navigation-active .home-main{padding-top:4px;}.home-navigation-toolbar-actions button{padding:7px 10px;min-height:40px;font-size:12px;}.home-navigation-toolbar h1{font-size:20px;}.home-navigation-chrome .home-patient-choice{min-width:145px;padding:8px 10px;}.home-navigation-chrome .home-patient-choice strong{font-size:15px;}#homeNavigation-home{gap:12px;}#homeNavigation-home .home-health-summary{padding:14px;}.home-navigation-daily,.home-navigation-prevention{padding:13px 14px;}.home-bottom-navigation button{font-size:12px;}.home-navigation-active .home-footer{padding-bottom:12px;}}
 @media(max-width:360px){.home-navigation-toolbar{gap:6px;}.home-navigation-toolbar h1{font-size:18px;}.home-navigation-toolbar-actions{gap:4px;}.home-navigation-toolbar-actions button{padding:6px 8px;}.home-navigation-chrome .home-patient-choice{min-width:135px;}.home-navigation-daily .home-care-remaining button{font-size:12px;padding:7px 5px;}}
+
+/* The hospital shelf supplies the single visible materials heading. */
+#homeHospitalMaterials #r61-home-materials > h2 { display: none; }
+
+/* Keep refresh and recovery actions readable beside compact follow-up headings. */
+#homeFollowupRefresh{flex-shrink:0;white-space:nowrap;}
+#homeFollowupReadStatus:not([hidden]){display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:10px 0;}
+#homeNavigationRefreshStatus button{margin-inline-start:6px;margin-block:4px;white-space:normal;}
+
+/* Follow-up: one heading, readable response choices, compact clinical content. */
+#homeNavigation-hospital #homeFollowupSection .home-followup-heading h2{display:none;}
+#homeFollowupSection .home-followup-summary span,
+#homeFollowupSection .home-followup-summary small{font-size:13px;line-height:1.5;color:#52666b;}
+#homeFollowupSection .home-followup-summary b{font-size:16px;line-height:1.5;color:#20323e;white-space:normal;overflow-wrap:anywhere;}
+#homeFollowupSection .home-mobile-care-card{border-color:#d6e4e1;border-radius:12px;background:#f5f9f8;color:#20323e;}
+#homeFollowupSection .home-mobile-focus{margin:12px;padding:12px;background:#e7f3ef;gap:4px;}
+#homeFollowupSection .home-mobile-focus b{font-size:14px;letter-spacing:0;color:#17675e;}
+#homeFollowupSection .home-mobile-focus span,
+#homeFollowupSection .home-mobile-checks span{font-size:15px;line-height:1.6;color:#20323e;}
+#homeFollowupSection .home-mobile-checks{padding:12px;gap:8px;}
+#homeFollowupSection .home-mobile-focus+.home-mobile-checks{padding-top:0;}
+#homeFollowupSection .home-mobile-care-card footer{background:#e7f3ef;color:#28574f;font-size:14px;flex-wrap:wrap;}
+#homeFollowupSection .home-followup-response legend{font-size:15px;line-height:1.5;color:#20323e;}
+#homeFollowupSection .home-followup-response label span{min-height:44px;font-size:14px;line-height:1.5;padding:10px;border-color:#c7d9d5;color:#344b50;}
+#homeFollowupSection .home-followup-response label input:checked+span{border-color:#147d73;background:#e7f3ef;color:#105e56;}
+#homeFollowupSection .home-followup-response label.concern input:checked+span{border-color:#c85849;background:#fff0ed;color:#96382e;}
+#homeFollowupSection .home-followup-response label input:focus-visible+span{outline:3px solid #147d73;outline-offset:2px;}
+#homeFollowupSection .home-followup-response-status{font-size:14px;line-height:1.5;}
+#homeFollowupSection .home-followup-response.saved :is(b,p){font-size:15px;line-height:1.6;}
+#homeFollowupSection .home-followup-response.saved small{font-size:13px;line-height:1.5;}
+#homeFollowupSection .home-followup-response.saved .home-followup-delivered{margin:0 0 8px;color:#17675e;font-weight:700;}
+#homeFollowupSection .home-followup-card{border-color:#c7d9d5;}
+#homeFollowupSection .home-followup-day{background:#e7f3ef;color:#17675e;}
+#homeFollowupSection .home-mobile-checks i{border-color:#7eaaa3;}
