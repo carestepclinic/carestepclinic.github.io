@@ -38,9 +38,11 @@
     if(!summary){summary=document.createElement('div');summary.dataset.hqReadSummary='';summary.className='hq-read-summary';summary.setAttribute('role','status');(view.querySelector('.head')||view).append(summary);}
     const rows=[...regions.values()].filter(r=>r.box.isConnected&&view.contains(r.box));
     const ready=rows.filter(r=>r.box.dataset.state==='ready'),times=ready.map(r=>r.at).filter(Boolean);
-    for(const r of rows)r.box.hidden=r.box.dataset.state==='ready';
+    // One page-level loading/checked message; keep regional errors and retry actions visible.
+    for(const r of rows)r.box.hidden=r.box.dataset.state!=='error';
     const pending=rows.some(r=>r.box.dataset.state==='loading'),failed=rows.some(r=>r.box.dataset.state==='error');
-    summary.textContent=pending?'최신 정보 확인 중…':failed?'일부 정보 조회 실패':times.length?'마지막 확인 '+new Date(Math.max(...times.map(t=>+t))).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}):'';
+    const previous=rows.some(r=>r.at);
+    summary.textContent=pending?(previous?'최신 정보 확인 중 · 이전 결과 표시':'불러오는 중…'):failed?'':times.length?'마지막 확인 '+new Date(Math.max(...times.map(t=>+t))).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}):'';
     summary.hidden=!summary.textContent;
   }
   const listReads=new Map();
@@ -783,6 +785,9 @@
   };
   updateContentBulkUi=function(){
     const boxes=[...byId('contentTable').querySelectorAll('[data-content-bulk]')],selected=boxes.filter(x=>x.checked).length,all=byId('contentSelectAllArchived');
+    const manage=byId('contentManageMode');
+    manage.closest('label').hidden=!boxes.length;
+    if(!boxes.length){manage.checked=false;byId('content').classList.remove('gs-managing');}
     all.checked=boxes.length>0&&selected===boxes.length;all.indeterminate=selected>0&&selected<boxes.length;
     all.disabled=!contentReady||!!activeSave||!boxes.length;
     byId('contentBulkSummary').textContent=`선택 ${fmt(selected)}건 · 선택 가능 ${fmt(boxes.length)}건`;
@@ -1183,7 +1188,7 @@
     table.tHead.innerHTML='<tr>'+labels.map(x=>`<th scope="col">${esc(x)}</th>`).join('')+'</tr>';
     table.parentElement.classList.add('hq-compact-wrap');
     table.parentElement.style.removeProperty('overflow');table.parentElement.style.removeProperty('max-height');
-    byId(id).innerHTML=`<tr class="hq-portfolio-loading"><td colspan="${labels.length}"><div class="hq-loading-lines" aria-hidden="true"><i></i><i></i><i></i></div><span>병원 목록을 불러오는 중입니다.</span></td></tr>`;
+    byId(id).innerHTML=`<tr class="hq-portfolio-loading" aria-hidden="true"><td colspan="${labels.length}"><div class="hq-loading-lines"><i></i><i></i><i></i></div></td></tr>`;
   }
   preparePortfolioTable('onboardingRows',['병원','기본 준비','준비율','확인할 사항','선택 기능·상세']);
   preparePortfolioTable('customerSuccessRows',['병원','사용 현황','핵심 사유','다음 작업','상세']);

@@ -572,3 +572,27 @@ button,input,select,textarea{font-family:inherit}
 
 /* Short clinic lists use page scrolling, including expanded details. */
 .hq-compact-wrap.hq-short-portfolio{max-height:none;overflow-x:auto}
+
+/* Page status and actions share a predictable right-hand position. */
+.view>.head{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px}
+.view>.head>:first-child:not(button):not(.hq-read-summary):not(.hq-load-status){flex:1 1 280px;margin-right:auto}
+.view>.head>.hq-read-summary{order:1;flex:0 1 auto;margin:0;color:var(--muted)}
+.view>.head>button,.view>.head>.toolbar{order:2;flex:0 1 auto;margin:0}
+.view>.head>.hq-load-status[data-state=error]{order:3;flex:1 1 100%;max-width:none;margin:0}
+#staffTrainingRoot{font-family:inherit;--st-primary:var(--blue);--st-line:var(--line)}
+#staffTrainingRoot .st-heading{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px}
+#staffTrainingRoot .st-heading>div{flex:1 1 280px;margin-right:auto}
+#staffTrainingRoot .st-read-summary{font-size:12px;line-height:1.5;color:var(--muted)}
+#staffTrainingRoot .st-read-summary:empty{display:none}
+#staffTrainingRoot .st-heading>.st-button{margin:0;flex:none}
+#staffTrainingRoot .st-tabs{gap:6px;border:0;background:#eaf1ee;padding:6px;border-radius:10px}
+#staffTrainingRoot .st-tabs button{font-family:inherit;font-size:14px;font-weight:600;line-height:1.4;min-height:40px;padding:9px 13px;border:1px solid transparent;border-radius:8px;color:var(--ink);background:transparent}
+#staffTrainingRoot .st-tabs button[aria-current=page]{background:var(--blue);border-color:var(--blue);color:#fff}
+#content .gs-manage-toggle[hidden]{display:none!important}
+@media(max-width:650px){
+ .view>.head>:first-child:not(button):not(.hq-read-summary):not(.hq-load-status),#staffTrainingRoot .st-heading>div{flex-basis:100%}
+ .view>.head>.hq-read-summary,#staffTrainingRoot .st-read-summary{margin-left:auto}
+ .view>.head>button,.view>.head>.toolbar,#staffTrainingRoot .st-heading>.st-button{margin-left:auto}
+ .view>.head:has(>.hq-read-summary:not([hidden]))>button,.view>.head:has(>.hq-read-summary:not([hidden]))>.toolbar,#staffTrainingRoot .st-heading:has(.st-read-summary:not(:empty))>.st-button{margin-left:0}
+ #staffTrainingRoot .st-tabs button{min-height:44px;padding:8px}
+}

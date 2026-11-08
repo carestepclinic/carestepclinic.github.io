@@ -71,7 +71,7 @@
   }
   function shell(){
    root.classList.toggle('st-sop-area',tab==='sop');
-   root.innerHTML=`<header class="st-heading" ${!adapter.common&&data?'hidden':''}><div><span class="st-eyebrow">${adapter.common?'CARESTEP HQ':'CARESTEP CLINIC'}</span><h1>${adapter.common?'직원 교육자료':tab==='sop'?'업무지침(SOP)':'직원 교육'}</h1><p>${adapter.common?'승인한 공통 교육자료를 각 병원 교육센터에 제공합니다.':tab==='sop'?'업무지침을 열어 확인하고 필요한 자료를 수정하세요.':'교육자료를 찾거나 배정된 교육을 이어서 학습하세요.'}</p></div>${adapter.common||!data?btn('새로고침','refresh'):''}</header><p data-status class="st-status" role="status" aria-live="polite"></p><div data-content></div>`;
+   root.innerHTML=`<header class="st-heading" ${!adapter.common&&data?'hidden':''}><div><span class="st-eyebrow">${adapter.common?'CARESTEP HQ':'CARESTEP CLINIC'}</span><h1>${adapter.common?'직원 교육자료':tab==='sop'?'업무지침(SOP)':'직원 교육'}</h1><p>${adapter.common?'승인한 공통 교육자료를 각 병원 교육센터에 제공합니다.':tab==='sop'?'업무지침을 열어 확인하고 필요한 자료를 수정하세요.':'교육자료를 찾거나 배정된 교육을 이어서 학습하세요.'}</p></div>${adapter.common?'<span class="st-read-summary" role="status">'+(loadedAt?'마지막 확인 '+new Date(loadedAt).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}):'')+'</span>':''}${adapter.common||!data?btn('새로고침','refresh'):''}</header><p data-status class="st-status" role="status" aria-live="polite"></p><div data-content></div>`;
   }
   function render(){
    adapter.navigation?.();const expanded=[...root.querySelectorAll('.st-card-manage[open]')].map(e=>e.dataset.course);shell();notice(message);const host=root.querySelector('[data-content]');
@@ -139,9 +139,10 @@
    if(!ready()){data=null;shell();notice('병원 직원 계정으로 로그인하면 교육센터를 사용할 수 있습니다.');return;}
    if(reuse&&data&&Date.now()-loadedAt<30000){if(!dialog&&(resumeScroll!==null||root.querySelector('[data-tab][aria-current=page]')?.dataset.tab!==tab))render();resumeArea();return;}
    if(reuse&&listPending?.seq===sequence)return listPending.promise;
-   const seq=++sequence;if(!data){shell();root.querySelector('[data-content]').innerHTML='<div class="st-empty st-loading" aria-busy="true">'+(adapter.common?'교육자료를 불러오는 중입니다…':'교육자료와 내 교육을 불러오는 중입니다…')+'</div>';}else notice('목록을 업데이트하는 중입니다. 기존 자료를 계속 볼 수 있습니다.');
+   const seq=++sequence;if(!data){shell();root.querySelector('[data-content]').innerHTML='<div class="st-empty st-loading" aria-busy="true">'+(adapter.common?'교육자료를 불러오는 중입니다…':'교육자료와 내 교육을 불러오는 중입니다…')+'</div>';}else if(!adapter.common)notice('목록을 업데이트하는 중입니다. 기존 자료를 계속 볼 수 있습니다.');
+   if(adapter.common){notice('');root.querySelector('.st-read-summary').textContent=data?'최신 정보 확인 중 · 이전 결과 표시':'불러오는 중…';const placeholder=root.querySelector('.st-loading');if(placeholder){placeholder.textContent='';placeholder.setAttribute('aria-hidden','true');}}
    try{const request=adapter.request('/',{method:'GET'});listPending={seq,promise:request.catch(()=>{})};const result=await request;if(seq!==sequence||current!==(adapter.identity?.()||''))return;const y=global.scrollY,focused=root.contains(document.activeElement)?document.activeElement:null,field=focused?.matches('input,select')?Object.keys(focused.dataset)[0]:'',caret=focused?.selectionStart;data=result;loadedAt=Date.now();message='';render();resumeArea();if(field){const el=root.querySelector('[data-'+field.replace(/[A-Z]/g,c=>'-'+c.toLowerCase())+']');el?.focus({preventScroll:true});if(caret!=null)el?.setSelectionRange?.(caret,caret);global.scrollTo({top:y,behavior:'instant'});}}
-   catch(e){if(seq!==sequence)return;if(!data){shell();root.querySelector('[data-content]').innerHTML=btn('다시 불러오기','refresh');}loadedAt=0;notice((e.message||'교육자료를 불러오지 못했습니다.')+(data?' 기존 목록을 유지했습니다. 새로고침으로 다시 확인해주세요.':''),true);}finally{if(listPending?.seq===seq)listPending=null;}
+   catch(e){if(seq!==sequence)return;if(!data){shell();root.querySelector('[data-content]').innerHTML=btn('다시 불러오기','refresh');}loadedAt=0;const status=root.querySelector('.st-read-summary');if(status)status.textContent='';notice((e.message||'교육자료를 불러오지 못했습니다.')+(data?' 기존 목록을 유지했습니다. 새로고침으로 다시 확인해주세요.':''),true);}finally{if(listPending?.seq===seq)listPending=null;}
   }
   function closeDialog(){
    if(busy){notice('처리 결과를 확인하고 있습니다.');return false;}
