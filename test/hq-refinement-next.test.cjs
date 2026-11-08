@@ -66,7 +66,7 @@ test('training public and draft buttons target distinct versions with their own 
  {id:'v2',course_id:'a',title:'공통 교육 수정본',kind:'education',version:2,status:'draft',common:true,owned:true,current_version_id:'v1',updated_at:'2026-11-08'}
  ],assignments:[],members:[]}):old(path,o);showView('training');});await p.locator('.st-card').waitFor();const card=p.locator('.st-card');
  assert.equal(await card.getByRole('button',{name:'공개본 열기',exact:true}).getAttribute('data-id'),'v1');assert.equal(await card.getByRole('button',{name:'수정본 이어쓰기',exact:true}).getAttribute('data-id'),'v2');
- assert.match(await card.innerText(),/수정 2026-10-01/);assert.match(await card.innerText(),/수정본 2판 · 수정 2026-11-08/);
+ assert.match(await card.innerText(),/수정 2026-10-01/);assert.match(await card.innerText(),/수정본 저장 2026-11-08/);
  assert.equal(await p.locator('#staffTrainingRoot .st-eyebrow').isVisible(),false);assert.deepEqual(await p.evaluate(()=>writes),[]);
 });
 test('adoption labels describe coverage without asserting overall clinical churn',async t=>{

@@ -529,3 +529,32 @@ button,input,select,textarea{font-family:inherit}
 
 /* Empty status messages must not reserve another row above the results. */
 #protocols [data-protocol-status]:empty,#protocols [data-protocol-count]:empty,#protocols [data-protocol-conditions]:empty{display:none}
+
+/* Keep list controls and results close together without shrinking reading text. */
+#content .hq-content-kpis{gap:10px;margin-bottom:12px}
+#content .hq-content-kpis .kpi{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:12px 14px;min-height:0}
+#content .hq-content-kpis .kpi strong{grid-column:2;grid-row:1/3;align-self:center;font-size:24px;margin:0}
+#content .hq-content-kpis .kpi span{font-size:13px}
+#content .hq-content-kpis .kpi small{font-size:12px;line-height:1.4}
+#content>.head,#protocols>.head{margin-bottom:12px}
+#content>.head p,#protocols>.head p,#staffTrainingRoot .st-heading p{margin:4px 0 0;line-height:1.5}
+#content .hq-secondary-filters,#protocols .hq-secondary-filters{margin:2px 0 8px}
+#protocols>.card>.toolbar>.hq-protocol-search{flex:1;max-width:none}
+#protocols .hq-protocol-card{padding:14px;gap:4px}
+#protocols .hq-protocol-card h2{margin:4px 0;font-size:17px}
+#protocols .hq-protocol-description{margin:0 0 6px}
+#staffTrainingRoot .st-card h2{margin:8px 0}
+#staffTrainingRoot .st-card>p{margin:6px 0;line-height:1.5}
+#integrations .head{margin-bottom:12px}
+#integrations .notice:not(.hq-technical-help){padding:12px;line-height:1.6}
+.hq-review [data-category-value]{display:block;width:100%;margin-top:6px}
+.hq-review [data-category-message]:empty{display:none}
+@media(max-width:600px){
+ #content .hq-content-kpis{gap:6px}
+ #content .hq-content-kpis .kpi{padding:10px;gap:4px}
+ #content .hq-content-kpis .kpi strong{font-size:22px}
+ #protocols .hq-protocol-card{padding:12px}
+}
+
+#integrations .mini-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+#integrations .mini strong,#integrations .mini span{word-break:keep-all;overflow-wrap:anywhere}

@@ -17,7 +17,7 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
  const extra=document.createElement('div');extra.className='hq-protocol-filters';
  extra.innerHTML='<label>대상 동물<select class="input" data-protocol-species><option value="all">전체 동물</option><option value="dog">강아지 · 공통 포함</option><option value="cat">고양이 · 공통 포함</option><option value="both">강아지·고양이 공통</option></select></label><label>진료 분야<select class="input" data-protocol-field><option value="all">전체 분야</option></select></label><label>정렬<select class="input" data-protocol-sort><option value="recent">최근 검토순</option><option value="title">제목순</option><option value="review">검토 대기 우선</option></select></label><button type="button" class="btn" data-protocol-reset>조건 초기화</button><span data-protocol-count role="status"></span><p data-protocol-conditions></p>';
  const quick=document.createElement('div');quick.className='hq-protocol-quick';quick.setAttribute('aria-label','처리할 프로토콜 모아보기');
- const moreFilters=document.createElement('details');moreFilters.className='hq-secondary-filters';moreFilters.innerHTML='<summary>상세 조건·정렬</summary>';moreFilters.append(extra);list.before(quick,moreFilters);
+  const moreFilters=document.createElement('details');moreFilters.className='hq-secondary-filters';moreFilters.innerHTML='<summary>상세 조건·정렬</summary>';extra.prepend(filter.closest('label'));moreFilters.append(extra);list.before(quick,moreFilters);
  moreFilters.after(root.querySelector('[data-protocol-count]'),root.querySelector('[data-protocol-conditions]'));
  const animal=extra.querySelector('[data-protocol-species]'),field=extra.querySelector('[data-protocol-field]'),sort=extra.querySelector('[data-protocol-sort]');
  let sourceFields=new Map(),items=[],jobs=[],queueCounts={},triage='all',sequence=0,listOwner='',loadedAt=0,pending=null;
@@ -35,6 +35,7 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
   for(const [el,value] of [[filter,saved.status],[animal,saved.species],[sort,saved.sort]])if([...el.options].some(x=>x.value===value))el.value=value;
   if(typeof saved.field==='string'&&saved.field&&saved.field!=='all'){field.add(new Option(saved.field,saved.field));field.value=saved.field;}
   if(['all','review','changed','failed'].includes(saved.triage))triage=saved.triage;
+  if(triage==='review'||triage==='failed')filter.value='all';
  }
  function resetFilters(){search.value='';filter.value='all';animal.value='all';field.value='all';sort.value='recent';triage='all';}
  function updateFields(){const selectedField=field.value;const fields=[...new Set([...items,...jobs].map(fieldOf).filter(Boolean))];if(selectedField&&selectedField!=='all'&&!fields.includes(selectedField))fields.push(selectedField);field.replaceChildren(new Option('전체 분야','all'));for(const name of fields.sort((a,b)=>a.localeCompare(b,'ko')))field.add(new Option(name,name));field.value=selectedField||'all';}
@@ -43,7 +44,7 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
   quick.replaceChildren();for(const [value,label] of [['all','저장 자료'],['review','검토 대기'],['changed','원본 변경'],['failed','생성 실패']]){const b=document.createElement('button');b.type='button';b.className='btn'+(triage===value?' primary':'');b.dataset.protocolQuick=value;b.setAttribute('aria-pressed',String(triage===value));b.textContent=label+' '+counts[value]+'개';b.onclick=()=>{triage=value;filter.value='all';saveFilters();draw();};quick.append(b);}
  }
  function draw(){
-  quickDraw();const failed=triage==='failed',q=search.value.trim().toLowerCase();filter.disabled=failed;
+  quickDraw();const failed=triage==='failed',q=search.value.trim().toLowerCase();filter.disabled=false;filter.closest('label').hidden=failed||triage==='review';
   const source=failed?jobs.filter(x=>x.status==='failed'):items;
   const rows=source.filter(x=>(failed||filter.value==='all'||x.status===filter.value)&&(triage!=='review'||x.status==='draft')&&(triage!=='changed'||x.sourceCurrent===false)&&(animal.value==='all'||x.species===animal.value||(['dog','cat'].includes(animal.value)&&x.species==='both'))&&(field.value==='all'||fieldOf(x)===field.value)&&(!q||[x.title,species[x.species],fieldOf(x),failed?x.error:''].join(' ').toLowerCase().includes(q)));
   rows.sort((a,b)=>(sort.value==='review'?(a.status==='draft'?0:1)-(b.status==='draft'?0:1):0)||(sort.value==='title'?String(a.title||'').localeCompare(String(b.title||''),'ko'):String(b.reviewedAt||updated(b)).localeCompare(String(a.reviewedAt||updated(a))))||String(a.title||'').localeCompare(String(b.title||''),'ko'));
@@ -84,7 +85,7 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
   finally{if(pending?.token===token)pending=null;if(token===sequence)root.setAttribute('aria-busy','false');}
  }
  restoreFilters();
- for(const el of [search,filter,animal,field,sort])el.addEventListener(el===search?'input':'change',()=>{saveFilters();draw();});
+  for(const el of [search,filter,animal,field,sort])el.addEventListener(el===search?'input':'change',()=>{if(el===filter)triage='all';saveFilters();draw();});
  extra.querySelector('[data-protocol-reset]').onclick=()=>{resetFilters();saveFilters();draw();};
  root.querySelector('[data-protocol-refresh]').onclick=()=>load();
  root.querySelector('[data-protocol-queue]').onclick=()=>{if(ready())ClinicalKnowledge.openQueue(sessionAdapter(),'protocol');};

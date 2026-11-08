@@ -353,7 +353,7 @@
     document.title=`${target.querySelector('h1')?.textContent||'관리'} · CARESTEP HQ`;
     byId('hqCurrentView').textContent=target.querySelector('h1')?.textContent||'운영 관리';
     if(closeCompactMenu()){const heading=target.querySelector('h1');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}}
-    byId('refresh').title=byId('hqCurrentView').textContent+' 새로고침';byId('refresh').hidden=['content','training','protocols'].includes(view);
+    byId('refresh').title=byId('hqCurrentView').textContent+' 새로고침';byId('refresh').hidden=['content','training','protocols','integrations','onboarding','customerSuccess','senders'].includes(view);
     syncHqNavForView(view);if(view==='billing')setBillingPane(billingPane,{push:false,check:false});
     if(push)writeRoute();saveState();
     window.scrollTo({top:viewPositions.get(view)||0,behavior:'instant'});
@@ -733,25 +733,31 @@
   };
   const contentCounts=['contentTotal','contentPublished','contentArchived','contentReviewDue'];
   const contentStates={published:'공개 중',archived:'공개 중단',draft:'작성 중',review:'검토 대기',deleted:'삭제 이력'};
-  let contentReady=false;const contentWindow={};
+  let contentReady=false,contentLoading=false,contentCategoriesReady=false;const contentWindow={};
   const contentDue=x=>x.status==='published'&&!!x.reviewDueAt&&Number.isFinite(Date.parse(x.reviewDueAt))&&Date.parse(x.reviewDueAt)<=Date.now();
   const contentDate=value=>value&&Number.isFinite(Date.parse(value))?new Date(value).toLocaleDateString('ko-KR'):'미등록';
   function lockContent(locked){
-    byId('content').querySelectorAll('button:not([data-material-view]),input,select').forEach(el=>el.disabled=locked);
-    if(!locked)updateContentBulkUi();
+    // Read-only navigation remains available while the previous list is visible.
+    byId('content').querySelectorAll('[data-content-status],[data-content-delete],[data-content-bulk],[data-guardian-category]').forEach(el=>el.disabled=locked||!contentReady);
+    byId('contentRefresh').disabled=contentLoading||!!activeSave;
+    byId('content').querySelectorAll('[data-guardian-category]').forEach(el=>el.disabled=locked||!contentReady||!contentCategoriesReady);
+    updateContentBulkUi();
   }
   loadContent=async function({keepResult=false}={}){
     if(activeSave)return;
-    const {current,keep}=beginList('content');contentReady=false;if(!keep)contents=[];
+    const {current,keep}=beginList('content');contentReady=false;contentLoading=true;contentCategoriesReady=false;if(!keep)contents=[];
     globalThis.GuardianStudio?.refresh();
     setRegion('content','loading');if(!keep)clearCounts(contentCounts);lockContent(true);
     if(!keepResult)byId('contentBulkResult').textContent='';
     if(!keep){byId('contentResultSummary').textContent='';byId('contentTable').replaceChildren();}
     updateContentBulkUi();
     try{
-      const data=await req('/hq/content');if(!current())return;
+      const [listResult,categoryResult]=await Promise.allSettled([req('/hq/content'),req('/hq/category-overrides')]);if(!current())return;
+      if(listResult.status==='rejected')throw listResult.reason;const data=listResult.value;
+      contentCategoriesReady=categoryResult.status==='fulfilled'&&Array.isArray(categoryResult.value.overrides);
+      const categoryMap=new Map((contentCategoriesReady?categoryResult.value.overrides:[]).map(x=>[x.contentId,x.category]));
       if(!Array.isArray(data.contents))throw Error('보호자 안내자료 조회 결과를 확인할 수 없습니다.');
-      contents=data.contents;contentReady=true;
+      contents=data.contents.map(x=>({...x,originalCategory:x.category,category:categoryMap.get(x.contentId)||x.category}));contentReady=true;
       const category=byId('contentCategory'),selected=category.dataset.restoreValue||category.value;
       delete category.dataset.restoreValue;
       const categories=[...new Set(contents.map(x=>CarestepHqWorkspace.category(x)).filter(Boolean))].sort((a,b)=>hqCategoryLabel(a).localeCompare(hqCategoryLabel(b),'ko'));
@@ -760,11 +766,12 @@
       const counts=[contents.filter(x=>x.status!=='deleted').length,contents.filter(x=>x.status==='published').length,contents.filter(x=>x.status==='archived').length,contents.filter(contentDue).length];
       contentCounts.forEach((id,i)=>byId(id).textContent=fmt(counts[i]));
       renderContent();setRegion('content','ready');
+      if(!contentCategoriesReady)byId('contentBulkResult').textContent='분류 설정을 불러오지 못했습니다. 원본 분류로 표시합니다. 새로고침 후 다시 확인해주세요.';
     }catch(error){
       if(!current())return;
       contentReady=false;if(!keep){contents=[];clearCounts(contentCounts);byId('contentResultSummary').textContent='';byId('contentTable').replaceChildren();}
       setRegion('content','error',{error:error.message,retry:()=>loadContent({keepResult:true})});
-    }finally{if(current()){lockContent(false);saveState();}}
+    }finally{if(current()){contentLoading=false;lockContent(false);saveState();}}
   };
   updateContentBulkUi=function(){
     const boxes=[...byId('contentTable').querySelectorAll('[data-content-bulk]')],selected=boxes.filter(x=>x.checked).length,all=byId('contentSelectAllArchived');
@@ -774,7 +781,7 @@
     byId('contentBulkDelete').disabled=!contentReady||!!activeSave||!selected;
   };
   renderContent=function(){
-    if(!contentReady)return;
+    if(!contentReady&&!contents.length)return;
     const q=byId('contentSearch').value.trim().toLowerCase(),status=byId('contentStatus').value,category=byId('contentCategory').value,dueOnly=byId('contentDueOnly').checked;
     const groups=new Map(contents.map(x=>[x.contentId,{...x,drafts:[]}]));
     for(const d of globalThis.GuardianStudio?.items()||[]){const id=d.contentId||d.content_id||d.id;if(!groups.has(id))groups.set(id,{contentId:id,title:d.title,category:d.category||d.brief?.category||d.document?.template?.category||'',species:d.species||d.brief?.species||'',status:'unpublished',drafts:[]});groups.get(id).drafts.push(d);}
@@ -786,17 +793,43 @@
     const shown=CarestepHqWorkspace.slice(rows,contentWindow,JSON.stringify([hqReadScope(),q,status,category,dueOnly,animal,order]));
     byId('contentResultSummary').textContent=`검색 결과 ${fmt(rows.length)}개`;
     const draftAction=d=>`<button type="button" class="btn small" data-guardian-draft="${esc(d.id)}">${kind(d)==='published'?'이전 공개본':'수정 초안 이어쓰기'} · ${esc(d.version||'미정')}판</button>`;
-    byId('contentTable').innerHTML=shown.length?`<div class="table-wrap" tabindex="0" aria-label="보호자 안내자료 목록"><table class="table hq-content-table"><thead><tr><th class="gs-manage-cell">선택</th><th>안내자료</th><th>상태</th><th>검토 정보</th><th>관리</th></tr></thead><tbody>${shown.map(x=>{const drafts=x.drafts.filter(d=>d.status!=='published'),latest=drafts[0];return `<tr data-content-row="${esc(x.contentId)}"><td data-label="선택" class="gs-manage-cell">${x.status==='archived'?`<label class="hq-content-check"><input type="checkbox" data-content-bulk value="${esc(x.contentId)}" aria-label="${esc(x.title)} 선택"><span>선택</span></label>`:'—'}</td><td data-label="안내자료" class="hq-content-title"><b>${esc(x.title||'제목 없음')}</b><span class="muted">${esc(hqCategoryLabel(CarestepHqWorkspace.category(x)))}${x.species?' · '+esc(x.species):''}${x.version?' · 버전 '+esc(x.version):''}</span></td><td data-label="상태">${x.status!=='unpublished'?`<span class="status ${esc(x.status)}">${esc(contentStates[x.status]||x.status)}</span>`:''}${latest?`<span class="status">${kind(latest)==='review'?'검토 대기':'작성 중'} · ${esc(latest.version||'초안')}판</span>`:''}</td><td data-label="검토 정보">${esc(x.reviewerName||'검토자 미등록')}<br><span class="${contentDue(x)?'hq-content-due':'muted'}">재검토 ${esc(contentDate(x.reviewDueAt))}${contentDue(x)?' · 기한 도래':''}</span>${latest?`<br><span class="muted">초안 저장 ${esc(date(latest.updatedAt))}</span>`:''}</td><td data-label="관리"><div class="hq-content-actions">${['published','archived'].includes(x.status)?`<button class="btn small" data-guardian-document="${esc(x.contentId)}">공개본 열기</button>`:''}${latest?draftAction(latest):''}${x.status==='published'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="archived">공개 중단</button>`:x.status==='archived'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="published">다시 공개</button><button class="btn small danger" data-content-delete="${esc(x.contentId)}">삭제</button>`:''}</div><details class="gs-list-details"><summary>버전·상세 정보</summary><div class="hq-version-history">${x.drafts.filter(d=>d!==latest).map(draftAction).join('')}</div><button type="button" class="btn small" data-guardian-history="${esc(x.contentId)}">전체 작성 이력 확인</button><p>품질 점수 ${safeNumber(x.qualityScore)?fmt(x.qualityScore)+' / 100':'미등록'}</p><p>병원별 제공: ${x.status==='published'?`허용 ${fmt(x.enabledClinics)}곳 · 숨김 ${fmt(x.disabledClinics)}곳`:'현재 제공 중 아님'}</p><p>원본 분류: ${esc(x.category||'미분류')}${CarestepHqWorkspace.category(x)!==(x.category||'미분류')?' · 목록은 검색용 분류 제안으로 표시':''}</p><button type="button" class="btn small" data-guardian-category="${esc(x.contentId)}">분류 확인·수정</button><p>자료 ID: ${esc(x.contentId)}</p></details></td></tr>`;}).join('')}</tbody></table></div>`:`<div class="empty">${groups.size?'선택한 조건에 해당하는 자료가 없습니다. 검색 조건을 초기화해보세요.':'등록된 보호자 안내자료가 없습니다.'}</div>`;
+    byId('contentTable').innerHTML=shown.length?`<div class="table-wrap" tabindex="0" aria-label="보호자 안내자료 목록"><table class="table hq-content-table"><thead><tr><th class="gs-manage-cell">선택</th><th>안내자료</th><th>상태</th><th>검토 정보</th><th>관리</th></tr></thead><tbody>${shown.map(x=>{const drafts=x.drafts.filter(d=>d.status!=='published'),latest=drafts[0];return `<tr data-content-row="${esc(x.contentId)}"><td data-label="선택" class="gs-manage-cell">${x.status==='archived'?`<label class="hq-content-check"><input type="checkbox" data-content-bulk value="${esc(x.contentId)}" aria-label="${esc(x.title)} 선택"><span>선택</span></label>`:'—'}</td><td data-label="안내자료" class="hq-content-title"><b>${esc(x.title||'제목 없음')}</b><span class="muted">${esc(hqCategoryLabel(CarestepHqWorkspace.category(x)))}${x.species?' · '+esc(x.species):''}${x.version?' · 버전 '+esc(x.version):''}</span></td><td data-label="상태">${x.status!=='unpublished'?`<span class="status ${esc(x.status)}">${esc(contentStates[x.status]||x.status)}</span>`:''}${latest?`<span class="status">${kind(latest)==='review'?'검토 대기':'작성 중'} · ${esc(latest.version||'초안')}판</span>`:''}</td><td data-label="검토 정보">${esc(x.reviewerName||'검토자 미등록')}<br><span class="${contentDue(x)?'hq-content-due':'muted'}">재검토 ${esc(contentDate(x.reviewDueAt))}${contentDue(x)?' · 기한 도래':''}</span>${latest?`<br><span class="muted">초안 저장 ${esc(date(latest.updatedAt))}</span>`:''}</td><td data-label="관리"><div class="hq-content-actions">${['published','archived'].includes(x.status)?`<button class="btn small" data-guardian-document="${esc(x.contentId)}">공개본 열기</button>`:''}${latest?draftAction(latest):''}${x.status==='published'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="archived">공개 중단</button>`:x.status==='archived'?`<button class="btn small" data-content-status="${esc(x.contentId)}" data-next="published">다시 공개</button><button class="btn small danger" data-content-delete="${esc(x.contentId)}">삭제</button>`:''}</div><details class="gs-list-details"><summary>버전·상세 정보</summary><div class="hq-version-history">${x.drafts.filter(d=>d!==latest).map(draftAction).join('')}</div><button type="button" class="btn small" data-guardian-history="${esc(x.contentId)}">전체 작성 이력 확인</button><p>품질 점수 ${safeNumber(x.qualityScore)?fmt(x.qualityScore)+' / 100':'미등록'}</p><p>병원별 제공: ${x.status==='published'?`허용 ${fmt(x.enabledClinics)}곳 · 숨김 ${fmt(x.disabledClinics)}곳`:'현재 제공 중 아님'}</p><p>원본 분류: ${esc(x.originalCategory||x.category||'미분류')}${x.originalCategory&&x.category!==x.originalCategory?' · 적용 분류: '+esc(hqCategoryLabel(x.category)):''}</p><button type="button" class="btn small" data-guardian-category="${esc(x.contentId)}">분류 확인·수정</button><p>자료 ID: ${esc(x.contentId)}</p></details></td></tr>`;}).join('')}</tbody></table></div>`:`<div class="empty">${groups.size?'선택한 조건에 해당하는 자료가 없습니다. 검색 조건을 초기화해보세요.':'등록된 보호자 안내자료가 없습니다.'}</div>`;
     CarestepHqWorkspace.pager(byId('contentTable'),contentWindow,rows.length,renderContent,{top:true});
     byId('contentTable').querySelectorAll('[data-guardian-draft]').forEach(b=>b.onclick=()=>globalThis.GuardianStudio?.open(b.dataset.guardianDraft));
     byId('contentTable').querySelectorAll('[data-guardian-history]').forEach(b=>b.onclick=()=>globalThis.GuardianStudio?.history(b.dataset.guardianHistory,b));
-    byId('contentTable').querySelectorAll('[data-guardian-category]').forEach(b=>b.onclick=()=>globalThis.GuardianStudio?.published(b.dataset.guardianCategory,{categoryReview:true}));
+    byId('contentTable').querySelectorAll('[data-guardian-category]').forEach(b=>b.onclick=()=>editContentCategory(b.dataset.guardianCategory));
     byId('contentTable').querySelectorAll('[data-guardian-document]').forEach(b=>b.onclick=()=>globalThis.GuardianStudio?.published(b.dataset.guardianDocument));
     byId('contentTable').querySelectorAll('[data-content-status]').forEach(b=>b.onclick=()=>patchContent(b.dataset.contentStatus,b.dataset.next));
     byId('contentTable').querySelectorAll('[data-content-delete]').forEach(b=>b.onclick=()=>deleteContent(b.dataset.contentDelete));
     byId('contentTable').querySelectorAll('[data-content-bulk]').forEach(b=>b.onchange=updateContentBulkUi);
-    updateContentBulkUi();saveState();
+    lockContent(contentLoading||!!activeSave);saveState();
   };
+  function editContentCategory(id){
+    if(activeSave||reviewOpen||!contentReady||!contentCategoriesReady)return;
+    const item=contents.find(x=>x.contentId===id);if(!item)return;
+    const owner=hqReadScope(),epoch=readEpoch;
+    const dialog=document.createElement('dialog');dialog.className='hq-review';dialog.setAttribute('aria-labelledby','hqCategoryTitle');
+    const codes=['수술시술','입원퇴원','만성질환','예방관리','재활생활','종양중증','고양이특화','병원제작'];
+    dialog.innerHTML=`<h2 id="hqCategoryTitle">안내자료 분류 수정</h2><p><b>${esc(item.title||id)}</b></p><p>현재 분류: ${esc(hqCategoryLabel(item.category))}</p><label>변경할 분류<select class="input" data-category-value><option value="">분류 선택</option>${codes.map(x=>`<option value="${x}">${esc(hqCategoryLabel(x))}</option>`).join('')}</select></label><p class="muted">자료 검색과 연결된 회복관리 일정의 분류에 적용합니다. 본문·버전·공개 상태는 유지됩니다.</p><p role="status" data-category-message></p><div class="hq-review-actions"><button class="btn" data-category-cancel>취소</button><button class="btn primary" data-category-save>분류 저장</button></div>`;
+    const select=dialog.querySelector('[data-category-value]'),save=dialog.querySelector('[data-category-save]'),cancel=dialog.querySelector('[data-category-cancel]'),message=dialog.querySelector('[data-category-message]');
+    select.value=codes.includes(item.category)?item.category:'';let busy=false;
+    const valid=()=>owner===hqReadScope()&&epoch===readEpoch&&CarestepHqWorkspace.ready();
+    const close=()=>{if(busy)return;reviewOpen=false;closeReview=null;dialog.close();dialog.remove();};
+    const update=()=>{save.disabled=busy||!select.value||select.value===item.category;};
+    select.onchange=update;cancel.onclick=close;dialog.addEventListener('cancel',e=>{e.preventDefault();close();});reviewOpen=true;closeReview=close;
+    save.onclick=async()=>{
+      if(busy||activeSave||!valid()||!select.value||select.value===item.category)return;
+      busy=true;activeSave='content-category';update();select.disabled=true;cancel.disabled=true;lockContent(true);message.textContent='분류 저장 중…';
+      try{
+        await req('/hq/category-overrides/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({category:select.value})});
+        if(!valid())return;
+        item.category=select.value;message.textContent='분류를 저장했습니다.';
+        busy=false;activeSave=null;close();await loadContent({keepResult:true});byId('contentBulkResult').textContent='분류 저장 완료 · '+item.title+' · '+hqCategoryLabel(item.category);
+      }catch(error){if(valid())message.textContent='저장하지 못했습니다. '+(error.message||'다시 확인해주세요.');}
+      finally{busy=false;activeSave=null;select.disabled=false;cancel.disabled=false;update();lockContent(false);if(!valid())close();}
+    };
+    document.body.append(dialog);dialog.showModal();update();select.focus();
+  }
   async function changeContent(ids,status){
     if(activeSave||!contentReady)return false;
     const targets=[...new Set(ids)].map(id=>contents.find(x=>x.contentId===id)).filter(x=>x&&(status==='archived'?x.status==='published':x.status==='archived'));
