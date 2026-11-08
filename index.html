@@ -1109,7 +1109,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="clinic-record-start.css?v=20261107-unified-start">
 <link rel="stylesheet" href="practice-tools.css?v=20261101-intake-compact">
 <link rel="stylesheet" href="clinic-navigation.css?v=20261103-clinical-groups">
-<link rel="stylesheet" href="clinic-settings.css?v=20261103-settings-unified"><script src="clinic-capabilities.js?v=20261103-settings"></script>
+<link rel="stylesheet" href="clinic-settings.css?v=20261108-permissions-v2"><script src="clinic-capabilities.js?v=20261103-settings"></script>
 <style id="clinic-onboarding-start">
 #onboarding{font-size:14px;line-height:1.6}
 #onboarding :is(button,input,select){font:inherit}
@@ -3787,30 +3787,33 @@ function clinicRecommendedFeatures(code){return Object.fromEntries(CLINIC_FEATUR
 function clinicRecordModule(item){return ['dental','neuro','ophthalmic','chronic'].includes(item?.body?.category)?item.body.category:item?.kind==='surgery'?'anesthesia':'ward';}
 /* CLINIC_CAPABILITY_CATALOG_END */
 const CLINIC_PERMISSIONS = [
- ['clinical.scope','진료 세부 권한 사용'],
+ ['clinical.scope','진료 세부 권한 사용'],['permissions.v2','업무 권한 기준'],
+ ['clinical.calculate','처방·처치 계산 사용'],
  ...CLINIC_MODULES.flatMap(([id,label])=>[['clinical.'+id+'.read',label+' 조회'],['clinical.'+id+'.edit',label+' 작성·수정'],['clinical.'+id+'.delete',label+' 삭제·복원']]),
- ['clinical.approve','진료 계획·프로토콜 확정'],['clinical.settings','병원 약품·조제·진료 서식 관리'],
+ ['clinical.approve','임상 계획·프로토콜·약물 요약 검토·확정'],['clinical.settings','병원 약품·조제·진료 서식 관리'],
  ['patients.read','환자·보호자 조회'],['patients.edit','환자·보호자 수정·HOME 연결'],['patients.delete','환자·보호자 삭제·병합'],
- ['records.read','진료·건강 기록 조회'],['records.edit','진료·건강 기록 작성·수정'],['records.publish','진료·건강 기록 HOME 공개·철회'],
+ ['records.read','환자 건강기록·사전문진 조회'],['records.edit','건강기록 작성·문진 확인·연결'],['records.publish','건강기록 HOME 공개·철회'],
  ['materials.read','자료·복약 일정 조회'],['materials.edit','자료 작성·수정'],['materials.publish','자료·복약 일정 HOME 게시·철회'],
  ['followup.read','후속관리·상담 조회'],['followup.manage','상담 답변·일정 관리'],
  ['messages.read','문자 발송 결과 조회'],['messages.send','문자 발송·재시도·실패 정리'],
  ['training.read','직원 교육 열람·이수'],['training.edit','병원 SOP 작성'],['training.review','병원 SOP 검토·승인'],['training.manage','교육 배정·이수 관리'],
+ ['purchases.read','물품 주문 조회'],['purchases.request','물품 요청·입고·교환반품 접수'],['purchases.manage','주문·업체·분류·교환반품 처리'],
  ['operations.read','업무 체크리스트 조회·수행'],['operations.manage','업무 서식·배정 관리'],
  ['stats.read','운영 통계 조회'],['settings.manage','병원·연동·발송 설정'],['billing.manage','결제·구독 관리'],['team.manage','직원 초대·상태 관리']
 ];
 const CLINIC_PERMISSION_DEPENDENCIES = {
  ...Object.fromEntries(CLINIC_MODULES.flatMap(([id])=>[
- ['clinical.'+id+'.read',['patients.read','records.read','materials.read']],
+ ['clinical.'+id+'.read',['patients.read','records.read','clinical.calculate']],
  ['clinical.'+id+'.edit',['clinical.'+id+'.read','records.edit']],
  ['clinical.'+id+'.delete',['clinical.'+id+'.edit']]])),
- 'clinical.approve':['clinical.protocols.edit'],'clinical.settings':['materials.read'],
+ 'clinical.approve':['clinical.protocols.edit'],'clinical.settings':['clinical.calculate'],
  'training.edit':['training.read'],'training.review':['training.read'],'training.manage':['training.read'],
  'operations.manage':['operations.read'],
+ 'purchases.request':['purchases.read'],'purchases.manage':['purchases.request'],
  'patients.edit':['patients.read'],'patients.delete':['patients.edit'],
  'records.read':['patients.read'],'records.edit':['records.read'],'records.publish':['records.edit'],
  'materials.read':['patients.read'],'materials.edit':['materials.read'],'materials.publish':['materials.edit'],
- 'followup.read':['patients.read'],'followup.manage':['followup.read','records.edit','records.publish','materials.publish'],
+ 'followup.read':['patients.read'],'followup.manage':['followup.read','records.edit'],
  'messages.read':['patients.read'],'messages.send':['messages.read'],
  'settings.manage':[],'stats.read':[],'billing.manage':[],'team.manage':[]
 };
@@ -3828,24 +3831,39 @@ function clinicLegacyClinicalKeys(keys,role){
  if(has('materials.read')&&['owner','admin','vet'].includes(role))out.add('clinical.settings');
  return [...out];
 }
+const CLINIC_PERMISSION_INTERNAL=['clinical.scope','permissions.v2'];
+const CLINIC_PERMISSION_PRESETS={
+ reception:{label:'접수 직원',keys:['patients.edit','records.edit','materials.read','followup.read','messages.read','training.read','operations.read','purchases.request']},
+ assistant:{label:'진료 보조',keys:['patients.read','materials.read','training.read','operations.read','purchases.request',...CLINIC_MODULES.filter(x=>x[0]!=='protocols').map(x=>'clinical.'+x[0]+'.edit'),'clinical.protocols.read']},
+ vet:{label:'수의사',keys:[...CLINIC_MODULES.map(x=>'clinical.'+x[0]+'.edit'),'clinical.approve','clinical.settings','patients.edit','records.publish','materials.publish','followup.manage','training.review','training.manage','operations.read','purchases.request']},
+ manager:{label:'관리자',keys:['patients.read','materials.read','training.manage','operations.manage','purchases.manage','settings.manage','billing.manage','team.manage','stats.read','messages.read']}
+};
 function clinicDefaultPermissions(role){
- const all=CLINIC_PERMISSIONS.map(x=>x[0]);if(role==='owner')return all;
- const legacy=all.filter(k=>!k.startsWith('clinical.')).filter(k=>role!=='admin'||k!=='training.review');
- const keys=role==='admin'?legacy:legacy.filter(x=>!(x.startsWith('training.')&&!['training.read',...(role==='vet'?['training.edit','training.review','training.manage']:[])].includes(x))).filter(x=>!['settings.manage','billing.manage','team.manage','stats.read',...(role==='staff'?['patients.delete','operations.manage']:[])].includes(x));
- return clinicLegacyClinicalKeys(keys,role);
+ if(role==='owner')return CLINIC_PERMISSIONS.map(x=>x[0]);
+ const preset=CLINIC_PERMISSION_PRESETS[({admin:'manager',vet:'vet',staff:'assistant'})[role]];
+ return preset?clinicExpandPermissions([...CLINIC_PERMISSION_INTERNAL,...preset.keys]):[];
 }
 function clinicPermissionKeys(config,role){
  if(role==='owner'||config?.mode==='all')return CLINIC_PERMISSIONS.map(x=>x[0]);
  if(config?.mode!=='custom')return clinicDefaultPermissions(role);
- const keys=Array.isArray(config.keys)?config.keys:[];
- return keys.includes('clinical.scope')?keys:clinicLegacyClinicalKeys(keys,role);
+ let keys=Array.isArray(config.keys)?config.keys:[];
+ if(!keys.includes('clinical.scope'))keys=clinicLegacyClinicalKeys(keys,role);
+ // Retain the effective access of previously saved custom profiles until the owner saves a new profile.
+ if(!keys.includes('permissions.v2'))keys=[...keys,...(keys.includes('materials.read')?['clinical.calculate']:[]),'purchases.read','purchases.request','purchases.manage'];
+ return keys.filter(k=>CLINIC_PERMISSIONS.some(x=>x[0]===k));
+}
+function clinicPurchasePermission(method,body={}){
+ if(method==='GET')return 'purchases.read';
+ if(method!=='POST')return 'unclassified';
+ if(['category.save','category.delete','vendor.save','vendor.delete','item.order','item.reopen','claim.update'].includes(body.action))return 'purchases.manage';
+ return ['item.create','item.add','item.edit','item.cancel','item.receive','item.receive-part','claim.create','claim.create-stock'].includes(body.action)?'purchases.request':'unclassified';
 }
 function clinicPermissionRequirements(method,path,body={}){
  method=String(method||'GET').toUpperCase();path=String(path).split('?')[0];const get=method==='GET',one=x=>[x];
  if(/^\/saas\/training(?:\/|$)/.test(path))return one('training.read'); // Detailed training actions enforce their own separate rights.
- if(path==='/saas/operations/purchases'&&['GET','POST'].includes(method))return []; // All authenticated clinic staff may manage supplies.
+ if(path==='/saas/operations/purchases')return one(clinicPurchasePermission(method,body));
  if(/^\/saas\/operations(?:\/|$)/.test(path))return one('operations.read');
- if(/^\/saas\/practice(?:\/|$)/.test(path))return one('materials.read');
+ if(/^\/saas\/practice(?:\/|$)/.test(path))return one('clinical.calculate');
  if(/^\/saas\/intakes(?:\/|$)/.test(path))return one(get?'records.read':'records.edit');
  // A closed route list: an unclassified request cannot inherit broad access.
  if((get&&/^\/saas\/(me|entitlements|deployment-status|legal\/(docs|status)|sessions)$/.test(path))||
@@ -3895,12 +3913,14 @@ function clinicPermissionRequirements(method,path,body={}){
  if(/^\/saas\/patient-journeys(?:\/[^/]+(?:\/clone)?)?$/.test(path))return one(get?'materials.read':'materials.edit');
  if(/^\/saas\/content\/(registry|category-overrides|published)$/.test(path)&&get)return one('materials.read');
  if(/^\/saas\/recovery(?:\/scan|\/[^/]+\/(retry|ack))?$/.test(path))return one(get?'messages.read':'messages.send');
+ if(!get&&/^\/saas\/patients\/[^/]+\/home-followups(?:\/[^/]+)?$/.test(path))return ['followup.manage','materials.publish'];
+ if(!get&&/^\/saas\/followup\/cases\/[^/]+\/(change|cancel)$/.test(path)&&Array.isArray(body.homeStages)&&body.homeStages.length)return ['followup.manage','materials.publish'];
  if(/^\/saas\/(care-operations|consultations|surveys(?:\/[^/]+\/ack)?|crm\/(overview|outcomes|cases\/[^/]+\/review)|preventive-events\/[^/]+\/recall|home-followups\/[^/]+\/(action|consultation(?:\/(read|reply|visit))?)|patients\/[^/]+\/home-followups(?:\/[^/]+)?|followup\/(schedule-board|cases(?:\/[^/]+(?:\/(safety|change|cancel|required-stages))?)?|change-ops\/[^/]+\/complete))$/.test(path))return one(get?'followup.read':'followup.manage');
  return ['unclassified'];
 }
 /* CLINIC_PERMISSION_POLICY_END */
 
-function saasCustomPermissions(){return saasMode==='auth'&&saasMe?.role!=='owner'&&['all','custom'].includes(saasMe?.permissions?.mode);}
+function saasCustomPermissions(){return saasMode==='auth'&&!!saasMe&&saasMe.role!=='owner';}
 function saasPermission(key,legacy=true){if(saasMode==='demo'||!saasMe)return legacy;return key.startsWith('clinical.')||saasCustomPermissions()?clinicPermissionKeys(saasMe.permissions,saasMe.role).includes(key):legacy;}
 function saasCheckPermissionRequest(path,opt={}){
  if(!saasCustomPermissions()||opt.auth===false)return;
@@ -3919,7 +3939,7 @@ setInterval(()=>{if(document.visibilityState==='visible')saasRefreshPermissions(
 function permissionMemberEditor(x,can){
  if(x.role==='owner')return '<div class="member-permission-note">원장 계정 · 전체 권한 유지</div>';
  const editable=can&&saasMe?.role==='owner',config=x.permissions||{mode:'default',keys:[],revision:''},mode=config.mode||'default',keys=clinicPermissionKeys(config,x.role);
- return `<details class="member-permissions"><summary>업무 권한 · ${mode==='all'?'전체 업무 권한':mode==='custom'?'직접 선택 '+keys.filter(k=>k!=='clinical.scope').length+'개':'역할 기본값'}</summary><label class="member-permission-mode">권한 설정<select class="input" data-permission-mode ${editable?'':'disabled'}><option value="default" ${mode==='default'?'selected':''}>역할 기본값</option><option value="all" ${mode==='all'?'selected':''}>전체 업무 권한</option><option value="custom" ${mode==='custom'?'selected':''}>직접 선택</option></select></label><p class="member-permission-note">원장님이 직원별 권한을 설정합니다. 작성·관리 권한을 선택하면 필요한 조회 권한도 함께 선택됩니다. 후속관리에는 관련 기록·자료 게시가 포함됩니다.</p><div class="member-permission-grid">${CLINIC_PERMISSIONS.filter(([key])=>key!=='clinical.scope').map(([key,label])=>`<label><input type="checkbox" data-permission-key="${key}" ${keys.includes(key)?'checked':''} ${editable&&mode==='custom'?'':'disabled'}><span>${label}</span></label>`).join('')}</div><p class="member-permission-note">전체 업무 권한에도 병원 소유권 변경·원장 계정 수정은 포함되지 않습니다. 이용 중인 요금제의 기능 범위에서 적용됩니다.</p></details>`;
+ return `<details class="member-permissions"><summary>업무 권한 · ${mode==='all'?'전체 업무 권한':mode==='custom'?'직접 선택 '+keys.filter(k=>!CLINIC_PERMISSION_INTERNAL.includes(k)).length+'개':'역할 기본값'}</summary><label class="member-permission-mode">권한 설정<select class="input" data-permission-mode ${editable?'':'disabled'}><option value="default" ${mode==='default'?'selected':''}>역할 기본값</option><option value="all" ${mode==='all'?'selected':''}>전체 업무 권한</option><option value="custom" ${mode==='custom'?'selected':''}>직접 선택</option></select></label><p class="member-permission-note">원장님이 직원별 권한을 설정합니다. 작성·관리 권한을 선택하면 필요한 조회 권한도 함께 선택됩니다. 입력 정정·취소는 작성 권한에 포함됩니다. 기록 전체 삭제와 HOME 게시·철회는 별도로 선택합니다.</p><div class="member-permission-grid">${CLINIC_PERMISSIONS.filter(([key])=>!CLINIC_PERMISSION_INTERNAL.includes(key)).map(([key,label])=>`<label><input type="checkbox" data-permission-key="${key}" ${keys.includes(key)?'checked':''} ${editable&&mode==='custom'?'':'disabled'}><span>${label}</span></label>`).join('')}</div><p class="member-permission-note">전체 업무 권한에도 병원 소유권 변경·원장 계정 수정은 포함되지 않습니다. 이용 중인 요금제의 기능 범위에서 적용됩니다.</p></details>`;
 }
 function bindMemberPermissions(root){
  root.querySelectorAll('[data-member-id]').forEach(card=>{
@@ -3941,7 +3961,7 @@ const CARESTEP_ROLE_UI={
   staff:{label:'직원',title:'진료·원내 업무',description:'입원 처치와 진료 기록, 환자 안내와 배정된 교육을 처리합니다.',defaultView:'dashboard',views:['practice','training','dashboard','patients','library','builder','followup'],actions:[['patients','환자 검색'],['builder','자료 게시'],['followup','상담·일정']]}
 };
 function roleUiRole(){return saasMode==='demo'||!saasMe?'owner':CARESTEP_ROLE_UI[saasMe.role]?saasMe.role:'staff';}
-function roleUiProfile(){const base=CARESTEP_ROLE_UI[roleUiRole()]||CARESTEP_ROLE_UI.staff;if(!saasCustomPermissions())return base;const grants={patients:'patients.read',library:'materials.read',builder:'materials.edit',followup:'followup.read',onboarding:'settings.manage',settings:'settings.manage',pilot:'stats.read'};const views=['dashboard','account',...Object.keys(grants).filter(v=>saasPermission(grants[v])||(v==='followup'&&(saasPermission('messages.read')||saasPermission('settings.manage'))))];return {...base,title:saasMe.permissions.mode==='all'?'전체 업무 화면':'내 업무 화면',description:'원장님이 설정한 직원별 권한으로 사용합니다.',defaultView:'dashboard',views,actions:[['patients','환자 관리'],['followup','후속관리'],['pilot','운영 통계'],['account','내 계정']].filter(x=>views.includes(x[0])).slice(0,3)};}
+function roleUiProfile(){const base=CARESTEP_ROLE_UI[roleUiRole()]||CARESTEP_ROLE_UI.staff;if(!saasCustomPermissions())return base;const grants={patients:'patients.read',library:'materials.read',builder:'materials.edit',followup:'followup.read',onboarding:'settings.manage',settings:'settings.manage',pilot:'stats.read'};const views=['dashboard','account',...Object.keys(grants).filter(v=>saasPermission(grants[v])||(v==='followup'&&(saasPermission('messages.read')||saasPermission('settings.manage'))))];return {...base,title:saasMe.permissions?.mode==='all'?'전체 업무 화면':'내 업무 화면',description:'원장님이 설정한 직원별 권한으로 사용합니다.',defaultView:'dashboard',views,actions:[['patients','환자 관리'],['followup','후속관리'],['pilot','운영 통계'],['account','내 계정']].filter(x=>views.includes(x[0])).slice(0,3)};}
 function roleUiCanView(view){if(view==='practice')return (saasMode==='auth'&&!!saasMe)||saasPermission('operations.read',true)||saasPermission('records.read',true)||saasPermission('materials.read',true);if(view==='training')return saasPermission('training.read',true);if(['contentStudio','admin'].includes(view))return !!operatorUnlocked;return roleUiProfile().views.includes(String(view||''));}
 function renderRoleWorkspace(){window.CarestepPractice?.sync();const p=roleUiProfile(),role=roleUiRole();document.body.dataset.carestepRole=saasCustomPermissions()?'custom':role;if($('roleWorkspaceBadge'))$('roleWorkspaceBadge').textContent=p.label;if($('roleWorkspaceTitle'))$('roleWorkspaceTitle').textContent=p.title;if($('roleWorkspaceDescription'))$('roleWorkspaceDescription').textContent=p.description;const actions=$('roleWorkspaceActions');if(actions)actions.innerHTML=p.actions.map(([view,label],i)=>`<button class="btn ${i===0?'btn-primary':'btn-secondary'}" type="button" data-go="${escapeHtml(view)}">${escapeHtml(label)}</button>`).join('');const followLabel=document.querySelector('.nav-item[data-view="followup"] .nav-copy b');if(followLabel)followLabel.textContent='상담·후속관리';}
 function settingsCanManage(){return saasPermission('settings.manage',saasMode==='demo'||['owner','admin'].includes(saasMe?.role||''));}
@@ -4233,7 +4253,7 @@ async function saasCreateInvite(){
   }catch(e){toast(e.message||'초대코드 생성 실패');}
 }
 async function saasSaveMember(card){
-  if(!card||card.dataset.saving)return;const btn=card.querySelector('[data-member-save]'),scope=clinicReadScope(),body={role:card.querySelector('[data-member-role]')?.value,status:card.querySelector('[data-member-status]')?.value,expectedRevision:card.dataset.permissionRevision||'',...(saasMe?.role==='owner'?{permissions:{mode:card.querySelector('[data-permission-mode]')?.value||'default',keys:['clinical.scope',...[...card.querySelectorAll('[data-permission-key]:checked')].map(x=>x.dataset.permissionKey)]}}:{})};
+  if(!card||card.dataset.saving)return;const btn=card.querySelector('[data-member-save]'),scope=clinicReadScope(),body={role:card.querySelector('[data-member-role]')?.value,status:card.querySelector('[data-member-status]')?.value,expectedRevision:card.dataset.permissionRevision||'',...(saasMe?.role==='owner'?{permissions:{mode:card.querySelector('[data-permission-mode]')?.value||'default',keys:[...CLINIC_PERMISSION_INTERNAL,...[...card.querySelectorAll('[data-permission-key]:checked')].map(x=>x.dataset.permissionKey)]}}:{})};
   const fields=[...card.querySelectorAll('input,select,button')].map(el=>[el,el.disabled]);card.dataset.saving='true';fields.forEach(([el])=>el.disabled=true);
   try{await uxButtonTask(btn,'저장 중…','✓ 저장됨',async()=>{const d=await saasRequest('/saas/members/'+encodeURIComponent(card.dataset.memberId),{method:'PATCH',body:JSON.stringify(body)});if(scope!==clinicReadScope()||!card.isConnected)return;renderSaasMembers([{...card._member,role:body.role,status:body.status,permissions:d.permissions||{...body.permissions,revision:d.revision}}],card.dataset.memberId);toast('직원 권한을 저장했습니다.');},{resetText:'저장'});}catch(e){if(scope===clinicReadScope())toast(e.message||'권한 저장 실패');}finally{delete card.dataset.saving;fields.forEach(([el,disabled])=>el.disabled=disabled);}
 }
@@ -10939,7 +10959,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="practice-prescription-summary.js?v=20261027knowledge1"></script>
 <script src="practice-prescription-library.js?v=20261030-efficient1"></script>
 <script src="practice-prescription-safety.js?v=20261031-clinical-clarity"></script>
-<script src="clinic-navigation.js?v=20261106-workflow12"></script>
+<script src="clinic-navigation.js?v=20261108-permissions-v2"></script>
 
 
 
@@ -10952,11 +10972,11 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-inpatients.js?v=20261106-workflow9"></script>
 <script src="clinic-record-start.js?v=20261107-unified-start"></script>
 <script src="clinic-record-workspace.js?v=20261108-top-tabs"></script>
-<script src="clinic-purchases.js?v=20261107-refresh-toolbar"></script>
-<script src="practice-tools.js?v=20261107-interface-clarity"></script>
+<script src="clinic-purchases.js?v=20261108-permissions-v2"></script>
+<script src="practice-tools.js?v=20261108-permissions-v2"></script>
 <script src="clinic-today-ward.js?v=20261107-review4"></script>
 <script src="practice-clinic.js?v=20261103-settings"></script>
-<script src="clinic-settings.js?v=20261107-interface-cohesion"></script>
+<script src="clinic-settings.js?v=20261108-permissions-v2"></script>
 <link rel="stylesheet" href="clinic-followup-tasks.css?v=20261104-followup-controls">
 <script src="clinic-followup-tasks.js?v=20261104-followup-controls"></script>
 <link rel="stylesheet" href="builder-flow.css?v=20261105-flow3">

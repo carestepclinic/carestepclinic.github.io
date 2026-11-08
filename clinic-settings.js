@@ -6,35 +6,40 @@
  function access(tab,action='read'){
   if(typeof saasMode==='undefined'||saasMode!=='auth'||!saasMe)return {allowed:true,label:'체험 화면'};
   const id=moduleOf(tab),feature=C.features.find(x=>x.id===(id|| (tab==='calc'?'calculator':tab)));
-  const keys=clinicPermissionKeys(saasMe.permissions,saasMe.role),key=id?'clinical.'+id+'.'+action:tab==='calc'?'materials.read':tab==='trainingRead'?'training.read':tab==='trainingManage'?'training.manage':null;
+  const keys=clinicPermissionKeys(saasMe.permissions,saasMe.role),key=id?'clinical.'+id+'.'+action:tab==='calc'?'clinical.calculate':tab==='trainingRead'?'training.read':tab==='trainingManage'?'training.manage':null;
   if(key&&!keys.includes(key))return {allowed:false,code:'permission',label:'직원 권한 없음',detail:'원장에게 직원·권한 설정을 요청해주세요.'};
   const e=saasEntitlements();
   if(feature&&(e?.accessBlocked||e?.plan?.features?.[feature.key]===false))return {allowed:action==='read'&&!!id,code:'plan',label:action==='read'&&id?'기존 기록 조회 가능':'구독 기능 확인 필요',detail:'요금제·구독에서 현재 계약을 확인해주세요.'};
   return {allowed:true,code:'allowed',label:action==='read'?'조회 가능':'작성 가능'};
  }
- const permissionGroup=key=>key.startsWith('clinical.')?(C.modules.find(x=>key.startsWith('clinical.'+x[0]+'.'))?.[1]||'진료 승인·공통 설정'):({patients:'환자·보호자',records:'진료·건강 기록',materials:'보호자 자료',followup:'후속관리·상담',messages:'문자·발송',training:'직원 교육',operations:'병원 업무',stats:'통계',settings:'병원·연동',billing:'요금제·구독',team:'직원 관리'})[key.split('.')[0]]||'기타';
+ const permissionGroup=key=>key.startsWith('clinical.')?'진료':({patients:'환자·문진',records:'환자·문진',materials:'보호자 관리',followup:'보호자 관리',messages:'보호자 관리',training:'병원 운영',operations:'병원 운영',purchases:'병원 운영',stats:'병원 운영',settings:'설정·계정',billing:'설정·계정',team:'설정·계정'})[key.split('.')[0]]||'설정·계정';
  const permissionHelp={
- 'materials.read':'처방·처치 계산, 자료·복약 일정 조회에 사용합니다. 병원 약품·서식 저장은 진료 공통 설정 권한을 따릅니다.',
- 'records.read':'진료·건강 기록과 방문 전 문진을 조회합니다.',
- 'records.edit':'진료·건강 기록 작성과 방문 전 문진 확인·환자 연결에 사용합니다. 각 기록지는 해당 기록지 권한도 필요합니다.',
- 'operations.read':'나에게 배정된 체크리스트 조회·완료·보류·인계가 가능합니다.',
- 'operations.manage':'병원 전체 업무 조회, 업무 배정, 서식·반복 업무 설정이 가능합니다.',
- 'clinical.settings':'병원 약품 함량·분말 조제 기준·진료 계산 서식을 저장합니다.'
+ 'clinical.calculate':'환자 선택 없이 계산할 수 있습니다. 환자 정보와 보호자 자료 조회는 별도 권한입니다.',
+ 'records.read':'환자 건강 타임라인과 사전문진을 조회합니다. 진료 기록지는 아래 진료 권한에서 선택합니다.',
+ 'records.edit':'건강기록 작성, 문진 확인·연결에 사용합니다. 환자 연결에는 환자·보호자 수정 권한도 필요합니다.',
+ 'followup.manage':'상담 답변·일정을 관리합니다. 건강기록·자료 HOME 게시 권한은 별도로 선택합니다.',
+ 'operations.read':'배정된 체크리스트 수행·보류·인계를 처리합니다.',
+ 'operations.manage':'병원 전체 업무 조회, 서식·업무 배정·반복 설정을 관리합니다.',
+ 'training.read':'직원 교육·병원 SOP를 열람하고 교육을 이수합니다.',
+ 'purchases.request':'물품 요청·수량 추가·입고·교환반품 접수, 본인의 주문 전 요청 수정·취소가 가능합니다.',
+ 'purchases.manage':'주문 처리·되돌리기, 업체·분류 관리, 다른 직원 요청 수정·취소, 교환반품 처리가 가능합니다.',
+ 'clinical.approve':'진료 계획·프로토콜과 약물 안전성 요약을 검토·확정합니다.',
+ 'clinical.settings':'병원 약품 함량·분말 조제 기준·진료 계산 서식을 관리합니다.'
  };
- function groups(catalog){const m=new Map();for(const [k,label] of catalog.filter(x=>x[0]!=='clinical.scope')){const group=permissionGroup(k);if(!m.has(group))m.set(group,[]);m.get(group).push([k,label]);}return m;}
+ function groups(catalog){const m=new Map();for(const [k,label] of catalog.filter(x=>!['clinical.scope','permissions.v2'].includes(x[0]))){const group=permissionGroup(k);if(!m.has(group))m.set(group,[]);m.get(group).push([k,label]);}return m;}
  function decoratePermissions(root=document){
   for(const card of root.querySelectorAll('[data-member-id]')){
    const grid=card.querySelector('.member-permission-grid');if(!grid||grid.dataset.grouped)continue;grid.dataset.grouped='true';
    const sections=new Map();for(const input of [...grid.querySelectorAll('[data-permission-key]')]){const name=permissionGroup(input.dataset.permissionKey);if(!sections.has(name)){const section=document.createElement('fieldset'),legend=document.createElement('legend');legend.textContent=name;section.append(legend);sections.set(name,section);grid.append(section);}const label=input.closest('label');if(permissionHelp[input.dataset.permissionKey]){const help=document.createElement('small');help.className='cs-permission-help';help.textContent=permissionHelp[input.dataset.permissionKey];label.append(help);}sections.get(name).append(label);}
    const preview=document.createElement('div');preview.className='cs-permission-preview';preview.setAttribute('aria-live','polite');grid.before(preview);
-   const update=()=>{const mode=card.querySelector('[data-permission-mode]')?.value,role=card.querySelector('[data-member-role]')?.value,keys=mode==='custom'?clinicExpandPermissions([...card.querySelectorAll('[data-permission-key]:checked')].map(x=>x.dataset.permissionKey)):clinicPermissionKeys({mode},role);const rows=C.modules.filter(x=>keys.includes('clinical.'+x[0]+'.read'));preview.innerHTML='<strong>저장 후 사용할 화면</strong><p>'+ (rows.map(([id,label])=>esc(label)+' · '+(keys.includes('clinical.'+id+'.edit')?'작성 가능':'조회만')).join(' / ')||'진료 화면 접근 없음')+'</p><p>'+[['materials.read','처방·처치 계산'],['records.read','방문 전 문진'],['training.read','직원 교육'],['operations.read','업무 체크리스트']].filter(([key])=>keys.includes(key)).map(([,label])=>esc(label)).join(' / ')+'</p><small>물품관리는 모든 직원이 사용할 수 있습니다. 승인·삭제는 아래 개별 권한을 따릅니다. 저장 전까지 실제 권한은 바뀌지 않습니다.</small>';};
+   const update=()=>{const mode=card.querySelector('[data-permission-mode]')?.value,role=card.querySelector('[data-member-role]')?.value,keys=mode==='custom'?clinicExpandPermissions([...card.querySelectorAll('[data-permission-key]:checked')].map(x=>x.dataset.permissionKey)):clinicPermissionKeys({mode},role);const rows=C.modules.filter(x=>keys.includes('clinical.'+x[0]+'.read'));preview.innerHTML='<strong>저장 후 사용할 화면</strong><p>'+ (rows.map(([id,label])=>esc(label)+' · '+(keys.includes('clinical.'+id+'.edit')?'작성 가능':'조회만')).join(' / ')||'진료 화면 접근 없음')+'</p><p>'+[['clinical.calculate','처방·처치 계산'],['records.read','방문 전 문진'],['training.read','직원 교육'],['operations.read','업무 체크리스트']].filter(([key])=>keys.includes(key)).map(([,label])=>esc(label)).join(' / ')+'</p><small>물품 요청·주문 관리, 승인·삭제·HOME 게시는 개별 권한을 따릅니다. 저장 전까지 실제 권한은 바뀌지 않습니다.</small>';};
    card.addEventListener('change',()=>{if(!grid.dataset.quick)queueMicrotask(update);});update();
   }
  }
  function guide(){
   const box=document.querySelector('.permission-guide-groups');if(!box||typeof CLINIC_PERMISSIONS==='undefined')return;
   box.innerHTML=[...groups(CLINIC_PERMISSIONS)].map(([name,items])=>'<section class="permission-guide-group"><h4>'+esc(name)+'</h4><ul>'+items.map(x=>'<li>'+esc(x[1])+(permissionHelp[x[0]]?'<small class="cs-permission-help">'+esc(permissionHelp[x[0]])+'</small>':'')+'</li>').join('')+'</ul></section>').join('');
-  document.querySelectorAll('.permission-guide-count').forEach(x=>x.textContent=CLINIC_PERMISSIONS.filter(x=>x[0]!=='clinical.scope').length+'개');
+  document.querySelectorAll('.permission-guide-count').forEach(x=>x.textContent=CLINIC_PERMISSIONS.filter(x=>!['clinical.scope','permissions.v2'].includes(x[0])).length+'개');
  }
  function capabilitySummary(){
   const box=document.getElementById('billingContractComparison');if(!box||typeof saasMe==='undefined'||!saasMe)return;
@@ -65,7 +70,7 @@
 
  if(typeof bindMemberPermissions==='function'){const old=bindMemberPermissions;g.bindMemberPermissions=function(root){old(root);decoratePermissions(root);};}
  if(typeof renderBillingContractComparison==='function'){const old=renderBillingContractComparison;g.renderBillingContractComparison=function(){old();capabilitySummary();};}
- g.ClinicSettings={access,decoratePermissions,refresh:()=>{settings();guide();capabilitySummary();}};
+ g.ClinicSettings={access,permissionGroup,decoratePermissions,refresh:()=>{settings();guide();capabilitySummary();}};
  document.addEventListener('click',recommended);settings();guide();capabilitySummary();decoratePermissions();
 })(window);
 
@@ -165,12 +170,7 @@
   reset.addEventListener('click',()=>{before=[...protocol.querySelectorAll('[data-protocol-path]')].map(x=>[x,x.value]);scope=identity();undo.hidden=false;protocolDirty=true;queueMicrotask(()=>protocol.querySelector('[data-protocol-path]')?.dispatchEvent(new Event('input',{bubbles:true})));},true);
   g.addEventListener('carestep:clinical-protocol-updated',()=>{before=null;undo.hidden=true;});
  }
- const templates={
-  reception:{label:'접수 직원',keys:['patients.edit','materials.read','followup.read','messages.read','training.read','operations.read']},
-  assistant:{label:'진료 보조',keys:['patients.read','materials.read','training.read','operations.read',...C.modules.filter(x=>x[0]!=='protocols').map(x=>'clinical.'+x[0]+'.edit'),'clinical.protocols.read']},
-  vet:{label:'수의사',keys:[...C.modules.map(x=>'clinical.'+x[0]+'.edit'),'clinical.approve','clinical.settings','patients.edit','records.publish','materials.publish','followup.manage','training.review','training.manage','operations.read']},
-  manager:{label:'관리자',keys:['patients.read','materials.read','training.manage','operations.manage','settings.manage','billing.manage','team.manage','stats.read','messages.read']}
- };
+ const templates=typeof CLINIC_PERMISSION_PRESETS==='undefined'?{}:CLINIC_PERMISSION_PRESETS;
  function permissionStatus(keys,feature,entitlements){
   if(!keys)return '권한 없음';if(!entitlements?.plan)return '계약 조회 필요';if(entitlements.accessBlocked)return '구독 상태 확인';if(entitlements.plan.features?.[feature]===false)return '계약 미포함';return '가능';
  }
@@ -182,26 +182,38 @@
 
  function enhancePermissions(root=document){for(const card of root.querySelectorAll('[data-member-id]')){
   const grid=card.querySelector('.member-permission-grid'),mode=card.querySelector('[data-permission-mode]');if(!grid||!mode||grid.dataset.quick)continue;grid.dataset.quick='true';
-  const inputs=[...grid.querySelectorAll('[data-permission-key]')],quick=document.createElement('section');quick.className='cs-permission-quick';
-  quick.innerHTML='<label>업무별 권한 서식<select data-cs-template><option value="">서식 선택</option>'+Object.entries(templates).map(([k,v])=>'<option value="'+k+'">'+v.label+'</option>').join('')+'</select></label><button type="button" class="cs-button" data-cs-template-use>서식 불러오기</button><p class="cs-help">선택한 직원의 역할은 바꾸지 않습니다. 서식을 불러오면 선택 권한이 교체되며, 직원 저장 후 적용됩니다. 삭제 권한은 상세에서 별도로 선택하세요.</p><div class="cs-module-access"></div>';
-  grid.before(quick);const details=document.createElement('details');details.className='cs-permission-details';details.innerHTML='<summary>상세 권한 · 삭제·승인·공통 설정</summary>';grid.before(details);details.append(grid);
-  const search=document.createElement('input');search.type='search';search.placeholder='권한 검색';search.setAttribute('aria-label','상세 권한 검색');grid.before(search);search.oninput=()=>{const q=search.value.trim().toLowerCase();grid.querySelectorAll('fieldset').forEach(group=>{let count=0;group.querySelectorAll('label').forEach(l=>{l.hidden=!l.textContent.toLowerCase().includes(q);if(!l.hidden)count++;});group.hidden=!count;});};
+  const inputs=[...grid.querySelectorAll('[data-permission-key]')],quick=document.createElement('section');quick.className='cs-permission-quick';grid.before(quick);
+  const labelFor=key=>inputs.find(x=>x.dataset.permissionKey===key)?.closest('label');
   const readKeys=()=>inputs.filter(x=>x.checked).map(x=>x.dataset.permissionKey);
   const apply=keys=>{if(mode.disabled)return;mode.value='custom';mode.dispatchEvent(new Event('change',{bubbles:true}));const expanded=clinicExpandPermissions(keys);inputs.forEach(x=>x.checked=expanded.includes(x.dataset.permissionKey));card.dispatchEvent(new Event('change',{bubbles:true}));update();};
-  quick.querySelector('[data-cs-template-use]').onclick=()=>{const t=templates[quick.querySelector('select').value];if(t)apply(t.keys);};
-  for(const [id,label] of C.modules){const l=document.createElement('label');l.textContent=label;const s=document.createElement('select');s.dataset.csModule=id;s.innerHTML='<option value="none">접근 불가</option><option value="read">조회</option><option value="edit">작성·수정</option>';s.onchange=()=>{const prefix='clinical.'+id+'.';let keys=readKeys().filter(k=>!k.startsWith(prefix));if(s.value!=='none')keys.push(prefix+s.value);if(id==='protocols'&&s.value!=='edit')keys=keys.filter(k=>k!=='clinical.approve');apply(keys);};l.append(s);quick.querySelector('.cs-module-access').append(l);}
-  const preview=card.querySelector('.cs-permission-preview'),role=card.querySelector('[data-member-role]');
-  const snapshot=()=>({mode:mode.value,role:role?.value,keys:readKeys().sort()});const baseline=snapshot();let undo=null;
-  const preset=document.createElement('details');preset.className='cs-permission-presets';preset.innerHTML='<summary>업무 서식 불러오기</summary>';quick.prepend(preset);for(const el of [quick.querySelector(':scope > label'),quick.querySelector('[data-cs-template-use]'),quick.querySelector(':scope > p')])if(el)preset.append(el);
-  const undoButton=button('불러오기 취소',()=>{if(!undo)return;const prev=undo;undo=null;mode.value=prev.mode;mode.dispatchEvent(new Event('change',{bubbles:true}));inputs.forEach(x=>x.checked=prev.keys.includes(x.dataset.permissionKey));delta.textContent='불러오기 전 선택으로 돌아왔습니다.';update();});undoButton.hidden=true;preset.append(undoButton);
-  const delta=document.createElement('p');delta.className='cs-help';delta.setAttribute('aria-live','polite');preset.append(delta);
-  quick.querySelector('[data-cs-template-use]').onclick=()=>{const t=templates[quick.querySelector('select').value];if(!t||mode.disabled)return;undo=snapshot();apply(t.keys);const after=readKeys(),added=after.filter(k=>!undo.keys.includes(k)),removed=undo.keys.filter(k=>!after.includes(k)),label=k=>inputs.find(x=>x.dataset.permissionKey===k)?.closest('label')?.textContent.trim()||k;delta.textContent='추가 '+added.length+'개 · 제외 '+removed.length+'개'+(added.length?' / 추가: '+added.map(label).join(', '):'')+(removed.length?' / 제외: '+removed.map(label).join(', '):'');undoButton.hidden=false;};
-  function update(){const changed=JSON.stringify(snapshot())!==JSON.stringify(baseline);undoButton.hidden=!undo;const keys=mode.value==='custom'?clinicExpandPermissions(readKeys()):clinicPermissionKeys({mode:mode.value},card.querySelector('[data-member-role]')?.value),ent=eplan();quick.querySelectorAll('select,button').forEach(x=>x.disabled=mode.disabled);quick.querySelectorAll('[data-cs-module]').forEach(s=>{const prefix='clinical.'+s.dataset.csModule+'.';s.value=keys.includes(prefix+'edit')?'edit':keys.includes(prefix+'read')?'read':'none';const saved=baseline.mode==='custom'?clinicExpandPermissions(baseline.keys):clinicPermissionKeys({mode:baseline.mode},baseline.role);s.closest('label').classList.toggle('cs-permission-changed',s.value!==(saved.includes(prefix+'edit')?'edit':saved.includes(prefix+'read')?'read':'none'));});
-   preview.innerHTML='<strong>'+(changed?'변경 중 · 직원 저장 후 적용':'현재 저장된 권한')+'</strong><div class="cs-permission-effective">'+C.modules.map(([id,label,key])=>{const prefix='clinical.'+id+'.',has=keys.includes(prefix+'read');return '<div><b>'+label+'</b><span>'+effectiveAccess(keys,id,key,ent)+'</span></div>';}).join('')+'</div><p>진료 승인 '+(keys.includes('clinical.approve')?'가능':'불가')+' · 병원 약품·서식 설정 '+(keys.includes('clinical.settings')?'가능':'불가')+'</p><small>'+(changed?'변경사항을 적용하려면 직원 저장을 누르세요.':'')+' 계약 미포함 기능의 기존 기록 조회는 유지됩니다.</small>';
+  const role=card.querySelector('[data-member-role]'),snapshot=()=>({mode:mode.value,role:role?.value,keys:readKeys().sort()}),baseline=snapshot();let undo=null;
+  const preset=document.createElement('details');preset.className='cs-permission-presets';preset.innerHTML='<summary>업무 서식 불러오기</summary><label>업무 서식<select data-cs-template><option value="">서식 선택</option>'+Object.entries(templates).map(([k,v])=>'<option value="'+k+'">'+v.label+'</option>').join('')+'</select></label><button type="button" class="cs-button" data-cs-template-use>서식 불러오기</button><p class="cs-help">역할은 유지하고 선택 권한을 교체합니다. 관리자·수의사·진료 보조 서식은 각 역할 기본값과 같습니다. 직원 저장 후 적용됩니다.</p>';quick.append(preset);
+  const delta=document.createElement('p');delta.className='cs-help';delta.setAttribute('aria-live','polite');
+  const undoButton=button('불러오기 취소',()=>{if(!undo)return;const prev=undo;undo=null;mode.value=prev.mode;mode.dispatchEvent(new Event('change',{bubbles:true}));inputs.forEach(x=>x.checked=prev.keys.includes(x.dataset.permissionKey));delta.textContent='불러오기 전 선택으로 돌아왔습니다.';update();});undoButton.hidden=true;preset.append(undoButton,delta);
+  preset.querySelector('[data-cs-template-use]').onclick=()=>{const t=templates[preset.querySelector('select').value];if(!t||mode.disabled)return;undo=snapshot();apply(t.keys);const after=readKeys(),added=after.filter(k=>!undo.keys.includes(k)),removed=undo.keys.filter(k=>!after.includes(k)),label=k=>CLINIC_PERMISSIONS.find(x=>x[0]===k)?.[1]||k;delta.textContent='추가 '+added.length+'개 · 제외 '+removed.length+'개'+(added.length?' / 추가: '+added.map(label).join(', '):'')+(removed.length?' / 제외: '+removed.map(label).join(', '):'');undoButton.hidden=false;};
+  const search=document.createElement('input');search.type='search';search.placeholder='권한 찾기 · 기록, 문진, 주문, HOME';search.setAttribute('aria-label','업무 권한 검색');quick.append(search);
+  const sections=new Map();for(const name of ['환자·문진','진료','보호자 관리','병원 운영','설정·계정']){const field=document.createElement('fieldset');field.dataset.permissionGroup=name;field.innerHTML='<legend>'+name+'</legend><div class="cs-permission-options"></div>';sections.set(name,field);}
+  const warehouse=document.createElement('div');warehouse.hidden=true;grid.replaceChildren(...sections.values(),warehouse);
+  for(const input of inputs){const key=input.dataset.permissionKey,label=input.closest('label');if(/^clinical\.[^.]+\.(read|edit)$/.test(key))warehouse.append(label);else sections.get(S.permissionGroup(key)).querySelector('.cs-permission-options').append(label);}
+  const clinical=sections.get('진료'),options=clinical.querySelector('.cs-permission-options'),advanced=document.createElement('details');advanced.className='cs-permission-details';advanced.innerHTML='<summary>기록 전체 삭제·임상 승인·공통 설정</summary><div class="cs-permission-options"></div>';clinical.append(advanced);
+  for(const input of inputs)if(/^clinical\..+\.delete$/.test(input.dataset.permissionKey)||['clinical.approve','clinical.settings'].includes(input.dataset.permissionKey))advanced.lastElementChild.append(input.closest('label'));
+  const bulk=document.createElement('label');bulk.className='cs-permission-bulk';bulk.innerHTML='입원·기록지 공통 설정<select data-cs-records-all aria-label="입원·기록지 공통 설정"><option value="">개별 설정</option><option value="none">접근 불가</option><option value="read">조회</option><option value="edit">작성·수정·입력 취소</option></select>';clinical.append(bulk);
+  const table=document.createElement('table');table.className='cs-permission-matrix';table.innerHTML='<thead><tr><th>입원·기록지·프로토콜</th><th>이용 범위</th></tr></thead><tbody></tbody>';clinical.append(table,advanced);
+  const setModules=(ids,value)=>{let keys=readKeys().filter(k=>!ids.some(id=>k.startsWith('clinical.'+id+'.')));if(value!=='none')keys.push(...ids.map(id=>'clinical.'+id+'.'+value));if(ids.includes('protocols')&&value!=='edit')keys=keys.filter(k=>k!=='clinical.approve');apply(keys);};
+  bulk.querySelector('select').onchange=e=>{if(e.target.value)setModules(C.modules.filter(x=>x[0]!=='protocols').map(x=>x[0]),e.target.value);};
+  for(const [id,label] of C.modules){const row=document.createElement('tr');row.dataset.csModuleRow=id;row.innerHTML='<th scope="row">'+esc(label)+'</th><td><label class="cs-module-choice"><span class="sr-only">'+esc(label)+' 이용 범위</span><select data-cs-module="'+id+'" aria-label="'+esc(label)+' 이용 범위"><option value="none">접근 불가</option><option value="read">조회</option><option value="edit">작성·수정'+(id==='protocols'?'':'·입력 취소')+'</option></select></label></td>';row.querySelector('select').onchange=e=>setModules([id],e.target.value);table.tBodies[0].append(row);}
+  const preview=card.querySelector('.cs-permission-preview'),effective=document.createElement('details');effective.className='cs-effective-details';effective.innerHTML='<summary>실제 이용 범위 확인</summary>';grid.after(effective);effective.append(preview);
+  const state=document.createElement('p');state.className='cs-permission-state';quick.before(state);
+  const yes=(keys,key)=>keys.includes(key)?'가능':'불가';
+  function update(){
+   const changed=JSON.stringify(snapshot())!==JSON.stringify(baseline),keys=mode.value==='custom'?clinicExpandPermissions(readKeys()):clinicPermissionKeys({mode:mode.value},role?.value),ent=eplan();undoButton.hidden=!undo;state.textContent=changed?'변경 중 · 직원 저장 후 적용':'현재 저장된 권한';
+   quick.querySelectorAll('select,button').forEach(x=>x.disabled=mode.disabled);grid.querySelectorAll('select').forEach(x=>x.disabled=mode.disabled);
+   const values=[];grid.querySelectorAll('[data-cs-module]').forEach(select=>{const prefix='clinical.'+select.dataset.csModule+'.';select.value=keys.includes(prefix+'edit')?'edit':keys.includes(prefix+'read')?'read':'none';if(select.dataset.csModule!=='protocols')values.push(select.value);const saved=baseline.mode==='custom'?clinicExpandPermissions(baseline.keys):clinicPermissionKeys({mode:baseline.mode},baseline.role);select.closest('tr').classList.toggle('cs-permission-changed',select.value!==(saved.includes(prefix+'edit')?'edit':saved.includes(prefix+'read')?'read':'none'));});bulk.querySelector('select').value=new Set(values).size===1?values[0]:'';
+   const extra=[['환자·보호자',yes(keys,'patients.read')+' · 수정 '+yes(keys,'patients.edit')+' · 삭제·병합 '+yes(keys,'patients.delete')],['건강기록·사전문진','조회 '+yes(keys,'records.read')+' · 작성·확인 '+yes(keys,'records.edit')],['처방·처치 계산',permissionStatus(keys.includes('clinical.calculate'),'clinicalCalculator',ent)],['보호자 안내자료','조회 '+yes(keys,'materials.read')+' · 작성 '+yes(keys,'materials.edit')],['HOME 게시·철회','건강기록 '+yes(keys,'records.publish')+' · 자료·복약 '+yes(keys,'materials.publish')],['상담·후속관리','조회 '+yes(keys,'followup.read')+' · 답변·일정 '+yes(keys,'followup.manage')],['문자·알림톡','결과 조회 '+yes(keys,'messages.read')+' · 발송 '+yes(keys,'messages.send')],['직원 교육·업무지침','열람·이수 '+yes(keys,'training.read')+' · 배정 '+yes(keys,'training.manage')+' · SOP 작성 '+yes(keys,'training.edit')+' · 승인 '+yes(keys,'training.review')],['업무 체크리스트','수행 '+yes(keys,'operations.read')+' · 서식·배정 '+yes(keys,'operations.manage')],['물품 주문','조회 '+yes(keys,'purchases.read')+' · 요청·입고 '+yes(keys,'purchases.request')+' · 주문·업체 관리 '+yes(keys,'purchases.manage')],['설정·계정','병원·연동 '+yes(keys,'settings.manage')+' · 직원 '+yes(keys,'team.manage')+' · 결제 '+yes(keys,'billing.manage')+' · 통계 '+yes(keys,'stats.read')]];
+   preview.innerHTML='<strong>'+state.textContent+'</strong><div class="cs-permission-effective">'+[...C.modules.map(([id,label,key])=>[label,effectiveAccess(keys,id,key,ent)]),...extra].map(([label,value])=>'<div><b>'+esc(label)+'</b><span>'+esc(value)+'</span></div>').join('')+'</div><p>임상 승인 '+yes(keys,'clinical.approve')+' · 병원 약품·서식 설정 '+yes(keys,'clinical.settings')+'</p><small>이용 중인 요금제 범위에서 적용됩니다. 계약 미포함 기능의 기존 기록 조회는 유지됩니다.</small>';
   }
-  card.addEventListener('change',()=>queueMicrotask(update));
-  const effective=document.createElement('details');effective.className='cs-effective-details';effective.innerHTML='<summary>실제 이용 범위 확인</summary>';preview.before(effective);effective.append(preview);
-  const state=document.createElement('p');state.className='cs-permission-state';quick.before(state);card.addEventListener('change',()=>queueMicrotask(()=>state.textContent=JSON.stringify(snapshot())!==JSON.stringify(baseline)?'변경 중 · 직원 저장 후 적용':'현재 저장된 권한'));state.textContent='현재 저장된 권한';update();
+  search.oninput=()=>{const q=search.value.trim().toLowerCase();for(const [name,section] of sections){let count=0;section.querySelectorAll('.cs-permission-options>label,tbody>tr').forEach(el=>{const key=el.querySelector('[data-permission-key]')?.dataset.permissionKey,label=key?CLINIC_PERMISSIONS.find(x=>x[0]===key)?.[1]:el.querySelector('th')?.textContent;el.hidden=!!q&&!(name+' '+label+' '+el.textContent).toLowerCase().includes(q);if(!el.hidden)count++;});section.hidden=count===0;section.querySelector('.cs-permission-bulk')?.toggleAttribute('hidden',!!q);if(q&&section===clinical)advanced.open=true;}warehouse.hidden=true;};
+  card.addEventListener('change',()=>queueMicrotask(update));update();
  }}
  function comparison(current,catalog){
   const rows=C.features.map(x=>({label:x.label,a:featureState(current,x.key),b:featureState(catalog,x.key)}));
