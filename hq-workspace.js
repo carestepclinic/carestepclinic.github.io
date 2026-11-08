@@ -37,7 +37,7 @@
   const steps=Array.isArray(entry.steps)?entry.steps:[];
   const basic=['profile','team'].map(key=>steps.find(x=>x.key===key)||{key,done:false,label:key==='profile'?'병원 정보':'직원 계정',detail:'설정 상태 확인 필요'});
   const completed=basic.filter(x=>x.done===true).length;
-  return {...entry,steps:basic,optionalSteps:steps.filter(x=>!['profile','team'].includes(x.key)),completed,stepCount:2,percent:completed*50,goLiveStatus:completed===2?'live':completed?'setting':'attention',needsAttention:completed<2,attentionReasons:basic.filter(x=>x.done!==true).map(x=>(x.label||x.key)+' 확인 필요')};
+  return {...entry,steps:basic,optionalSteps:steps.filter(x=>!['profile','team'].includes(x.key)).map(x=>({...x,label:String(x.label||'').replaceAll('퇴원자료','보호자 안내자료')})),completed,stepCount:2,percent:completed*50,goLiveStatus:completed===2?'live':completed?'setting':'attention',needsAttention:completed<2,attentionReasons:basic.filter(x=>x.done!==true).map(x=>(x.label||x.key)+' 확인 필요')};
  }
  function onboardingView(data={}){
   const clinics=(data.clinics||[]).map(onboardingEntry);

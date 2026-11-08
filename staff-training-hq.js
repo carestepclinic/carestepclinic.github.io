@@ -58,12 +58,12 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
   root.querySelector('[data-protocol-count]').textContent=rows.length>pageWindow.size?'':`검색 결과 ${rows.length}개`;
   for(const item of shown){
    const card=document.createElement('article');card.className='card hq-protocol-card';
-   const heading=document.createElement('h2');const label=CarestepHqWorkspace.protocolLabel(item);heading.textContent=label.title;heading.title=label.full;const description=document.createElement('p');description.className='hq-protocol-description';description.textContent=label.description;description.title=label.description;
+   const heading=document.createElement('h2');const label=CarestepHqWorkspace.protocolLabel(item);heading.textContent=label.title;heading.title=label.full;
    const meta=document.createElement('p');meta.className='muted';meta.textContent=[failed?'생성 실패':labels[item.status]||'상태 확인 필요',species[item.species]||'',fieldOf(item),fieldOf(item)!==(item.category||item.field||item.body?.category||sourceFields.get(item.sourceContentId)||'미분류')?'검색용 분류 제안':'',item.revision?'수정 '+item.revision+'판':'',item.sourceCurrent===false?'원본 변경 확인':''].filter(Boolean).join(' · ');
    const dates=document.createElement('p');dates.className='hq-protocol-dates';dates.textContent=[displayDate(updated(item))&&'수정 '+displayDate(updated(item)),displayDate(item.reviewedAt||item.approvedAt)&&'검토 '+displayDate(item.reviewedAt||item.approvedAt)].filter(Boolean).join(' · ');
    const next=document.createElement('p');next.className='hq-protocol-next';next.textContent=failed?'실패 원인: '+(item.error||'생성 현황에서 원인을 확인해주세요.'):item.sourceCurrent===false?'변경된 원본과 본문·근거를 대조하고 보완해주세요.':item.status==='draft'?'본문·근거와 미해결 항목을 검토한 뒤 공개 여부를 결정하세요.':'';
    const open=document.createElement('button');open.type='button';open.className='btn';open.textContent=failed?'실패 원인·재시도 열기':item.status==='published'?'공개본 열기':'초안 검토';open.onclick=()=>{if(!ready())return;const adapter=sessionAdapter();if(failed)ClinicalKnowledge.openQueue(adapter,'protocol',{status:'failed',jobId:item.id});else ClinicalKnowledge.openProtocol(adapter,encodeURIComponent(item.id),true,()=>{ClinicalKnowledge.close();load();});};
-   card.append(heading);if(description.textContent)card.append(description);card.append(meta);if(dates.textContent)card.append(dates);if(next.textContent)card.append(next);card.append(open);list.append(card);
+   card.append(heading,meta);if(dates.textContent)card.append(dates);if(next.textContent)card.append(next);card.append(open);list.append(card);
   }
   CarestepHqWorkspace.pager(list,pageWindow,rows.length,draw,{top:true});
  }

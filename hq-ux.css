@@ -569,3 +569,6 @@ button,input,select,textarea{font-family:inherit}
 #training .st-toolbar{margin-bottom:8px}
 #training .hq-pagination-top~.st-count{display:none}
 @media(max-width:600px){#training .hq-pagination-top,#protocols .hq-pagination-top{justify-content:center}}
+
+/* Short clinic lists use page scrolling, including expanded details. */
+.hq-compact-wrap.hq-short-portfolio{max-height:none;overflow-x:auto}

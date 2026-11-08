@@ -327,7 +327,7 @@
     if(push){writeRoute();if(currentView==='billing'&&byId('loginOverlay').classList.contains('hidden'))void reloadView('billing');}return true;
   }
   function viewLoader(view,force=true){
-    return ({protocols:()=>window.CarestepHqProtocols?.open({reuse:!force}),training:()=>window.CarestepTraining?.open({reuse:!force}),dashboard:()=>loadOverview({reuse:!force}),approval:loadApproval,clinics:()=>loadClinics({forceCatalog:force}),onboarding:loadOnboardingPortfolio,customerSuccess:loadCustomerSuccess,billing:()=>loadBilling({forceCatalog:force}),usageBilling:loadUsageBilling,
+    return ({protocols:()=>window.CarestepHqProtocols?.open({reuse:!force}),training:()=>window.CarestepTraining?.open({reuse:!force}),dashboard:()=>loadOverview({reuse:!force}),approval:loadApproval,clinics:()=>loadClinics({forceCatalog:force}),onboarding:()=>loadOnboardingPortfolio({reuse:!force}),customerSuccess:()=>loadCustomerSuccess({reuse:!force}),billing:()=>loadBilling({forceCatalog:force}),usageBilling:loadUsageBilling,
       integrations:async()=>{if(await loadMessagingIntegration()===false)throw Error(byId('msgQueueSummary')?.textContent||'외부 연동 상태를 불러오지 못했습니다.');},senders:()=>Promise.all([loadSenderOnboarding(),loadMessagingIntegration()]),
       journeys:loadPatientJourneysHQ,surveys:()=>loadGuardianSurveyHQ({reuse:!force}),crm:()=>loadFollowupCrmHQ({reuse:!force}),content:()=>loadContent({reuse:!force}),voice:()=>loadVoice({reuse:!force}),production:loadProductionLaunch,audit:loadAudit})[view];
   }
@@ -422,7 +422,7 @@
   renderOnboardingPortfolio=function(){
     originalOnboardingRender();
     compactHqTable(document.querySelector('.onboarding-table'),
-      ['병원','준비율','개통 단계','SOLAPI 연결','시험 문자','문자 결제','알림톡','보호자 회복응답','체험 기간','최근 사용','개통 상태','확인할 사항'],[0,10,1,11],'연동·체험 상세');
+      ['병원','준비율','준비 항목','SOLAPI 연결','시험 문자','문자 결제','알림톡','보호자 회복응답','체험 기간','최근 사용','기본 준비','확인할 사항'],[0,10,1,11],'준비·연동 상세');
   };
   byId('onboardingSearch').oninput=()=>renderOnboardingPortfolio();
   byId('onboardingStatusFilter').onchange=()=>renderOnboardingPortfolio();
@@ -1040,7 +1040,7 @@
     originalSuccessRender();
     const table=byId('customerSuccessRows').closest('table');
     table.classList.add('hq-adoption-table');
-    compactHqTable(table,['병원','사용 현황','안내·후속관리 활용 점수','확인 우선순위 점수','최근 30일 활용','개통 상태','체험·구독','최근 활동','핵심 사유','다음 작업'],[0,1,8,9],'점수·이용 상세');
+    compactHqTable(table,['병원','사용 현황','안내·후속관리 활용 점수','확인 우선순위 점수','최근 30일 활용','기본 준비','체험·구독','최근 활동','핵심 사유','다음 작업'],[0,1,8,9],'점수·이용 상세');
   };
   function compactAnalytics(id,labels,keep){
     const table=byId(id).querySelector('table');if(table)compactHqTable(table,labels,keep,'집계 상세');
@@ -1205,11 +1205,16 @@
     else window.scrollTo({top:position.scroll,behavior:'instant'});
   }
   const readableOnboardingRender=renderOnboardingPortfolio;
+  function sizePortfolioTable(id){
+    const body=byId(id),wrap=body.closest('.hq-compact-wrap');
+    wrap?.classList.toggle('hq-short-portfolio',body.querySelectorAll('.hq-compact-main-row').length<=10);
+  }
   renderOnboardingPortfolio=function(){
     if(!Array.isArray(onboardingPortfolio?.clinics))return;
     readableOnboardingRender();
     condenseReasons(byId('onboardingRows'),'.onboarding-reasons');
     byId('onboardingRows').querySelectorAll('.onboarding-step-dots i').forEach(step=>step.textContent=operationalText(step.textContent));
+    sizePortfolioTable('onboardingRows');
   };
   const readableAdoptionRender=renderCustomerSuccess;
   renderCustomerSuccess=function(){
@@ -1230,30 +1235,35 @@
       next.append(action);
     }
     updateAdoptionResults();
+    sizePortfolioTable('customerSuccessRows');
   };
   async function loadPortfolio(view,path,assign,render,retry){
     const refresh=byId(view==='onboarding'?'onboardingRefresh':'customerSuccessRefresh');
     if(refresh.disabled)return;
-    const current=latest(view+'-portfolio'),position=capturePortfolioPosition(view);refresh.disabled=true;
+    const read=beginList(view),change=listChangeSequence,current=()=>read.current()&&change===listChangeSequence;
+    const position=capturePortfolioPosition(view);refresh.disabled=true;
     setRegion(view,'loading');
     try{
-      const data=await req(path);if(!current())return;
+      const data=await req(path);if(!current())return false;
       if(data?.ok===false||!Array.isArray(data?.clinics))throw Error('병원 목록의 조회 결과를 확인할 수 없습니다.');
       const keepPosition=position&&currentView===view&&Math.abs(scrollY-position.scroll)<2;
       assign(data);render();setRegion(view,'ready');
       if(keepPosition)restorePortfolioPosition(view,position);
     }catch(error){
-      if(!current())return;
+      if(!current())return false;
       setRegion(view,'error',{error:error.message,retry});
       const body=byId(view==='onboarding'?'onboardingRows':'customerSuccessRows');
       if(!body.querySelector('.hq-compact-main-row')){
         body.innerHTML='<tr><td colspan="5"><div class="empty">병원 목록을 조회하지 못했습니다. 다시 시도를 눌러주세요.</div></td></tr>';
         if(view==='customerSuccess')adoptionSummary.textContent='조회 실패 · 병원 수를 확인하지 못했습니다.';
       }
+      return false;
     }finally{refresh.disabled=false;}
   }
   loadOnboardingPortfolio=()=>loadPortfolio('onboarding','/hq/onboarding',data=>onboardingPortfolio=data,()=>renderOnboardingPortfolio(),()=>loadOnboardingPortfolio());
   loadCustomerSuccess=()=>loadPortfolio('customerSuccess','/hq/customer-success',data=>customerSuccessPortfolio=data,()=>renderCustomerSuccess(),()=>loadCustomerSuccess());
+  loadOnboardingPortfolio=wrapList('onboarding',loadOnboardingPortfolio);
+  loadCustomerSuccess=wrapList('customerSuccess',loadCustomerSuccess);
   byId('onboardingRefresh').onclick=()=>loadOnboardingPortfolio();
   byId('customerSuccessRefresh').onclick=()=>loadCustomerSuccess();
 
