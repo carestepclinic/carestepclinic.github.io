@@ -80,4 +80,6 @@
 .cs-purchases .purchase-claim-card p{margin:8px 0}.cs-purchases .purchase-claim-actions{margin-top:12px}
 
 .purchase-claim-filters[hidden]{display:none}
+.cs-purchases .purchase-claim-filters{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.cs-purchases .purchase-claim-filters>p{flex-basis:100%;margin:0 0 12px}
 [data-list]:has(>.purchase-claim-card){display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px}
