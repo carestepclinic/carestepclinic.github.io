@@ -82,7 +82,7 @@
   if(r.training?.status==='queued')req('/hq/training/automation/process',{method:'POST',body:'{}'}).catch(()=>{});
   loadContent().catch(()=>{});
  }
- async function published(id){if(!shell('기존 보호자 안내자료'))return;const turn=sequence;await action(async()=>{const r=await api('/published/'+encodeURIComponent(id));if(turn!==sequence)return;draft={contentId:id,title:r.document.template?.title,document:r.document,status:'published',version:r.version};dialog.querySelector('#guardianStudioTitle').textContent=draft.title;preview(r.document,`버전 ${r.version} · ${r.status==='published'?'현재 공개 중':'공개 중단'}`);});}
+ async function published(id,{categoryReview=false}={}){if(!shell('기존 보호자 안내자료'))return;const turn=sequence;await action(async()=>{const r=await api('/published/'+encodeURIComponent(id));if(turn!==sequence)return;draft={contentId:id,title:r.document.template?.title,document:r.document,status:'published',version:r.version};dialog.querySelector('#guardianStudioTitle').textContent=draft.title;preview(r.document,`버전 ${r.version} · ${r.status==='published'?'현재 공개 중':'공개 중단'}`);if(categoryReview){const box=document.createElement('section');box.className='gs-notice';box.innerHTML='<b>원본 분류: '+e(r.document.template?.category||'미분류')+'</b><p>분류가 다르면 수정본을 작성하여 기본 정보에서 분류를 변경한 뒤 검토·게시해주세요. 기존 공개본은 그대로 유지됩니다.</p>'+button('분류 수정본 작성','revise',true);dialog.querySelector('.gs-body').prepend(box);}});}
  async function revise(){const r=await api('/drafts','POST',{sourceContentId:draft.contentId});draft=r.draft;renderDraft(r.generations);message('기존 게시본을 유지한 채 수정본을 만들었습니다.');refresh();}
  async function importDraft(){
  const file=dialog.querySelector('[data-gs-import]').files[0];if(!file)throw Error('가져올 JSON 파일을 선택해주세요.');

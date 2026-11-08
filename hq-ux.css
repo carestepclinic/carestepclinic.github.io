@@ -526,3 +526,6 @@ button,input,select,textarea{font-family:inherit}
  #staffTrainingRoot .st-heading p{display:none}
  .hq-pagination{gap:8px;flex-wrap:wrap}
 }
+
+/* Empty status messages must not reserve another row above the results. */
+#protocols [data-protocol-status]:empty,#protocols [data-protocol-count]:empty,#protocols [data-protocol-conditions]:empty{display:none}

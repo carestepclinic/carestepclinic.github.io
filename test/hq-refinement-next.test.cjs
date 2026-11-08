@@ -65,14 +65,14 @@ test('training public and draft buttons target distinct versions with their own 
  {id:'v1',course_id:'a',title:'공통 교육',kind:'education',version:1,status:'published',common:true,owned:true,current_version_id:'v1',updated_at:'2026-10-01'},
  {id:'v2',course_id:'a',title:'공통 교육 수정본',kind:'education',version:2,status:'draft',common:true,owned:true,current_version_id:'v1',updated_at:'2026-11-08'}
  ],assignments:[],members:[]}):old(path,o);showView('training');});await p.locator('.st-card').waitFor();const card=p.locator('.st-card');
- assert.equal(await card.getByRole('button',{name:'공개본 보기',exact:true}).getAttribute('data-id'),'v1');assert.equal(await card.getByRole('button',{name:'수정본 이어쓰기',exact:true}).getAttribute('data-id'),'v2');
- assert.match(await card.innerText(),/공개 중 1판 · 수정 2026-10-01/);assert.match(await card.innerText(),/수정본 2판 · 수정 2026-11-08/);
+ assert.equal(await card.getByRole('button',{name:'공개본 열기',exact:true}).getAttribute('data-id'),'v1');assert.equal(await card.getByRole('button',{name:'수정본 이어쓰기',exact:true}).getAttribute('data-id'),'v2');
+ assert.match(await card.innerText(),/수정 2026-10-01/);assert.match(await card.innerText(),/수정본 2판 · 수정 2026-11-08/);
  assert.equal(await p.locator('#staffTrainingRoot .st-eyebrow').isVisible(),false);assert.deepEqual(await p.evaluate(()=>writes),[]);
 });
 test('adoption labels describe coverage without asserting overall clinical churn',async t=>{
  const p=await fixture(t);await p.evaluate(()=>{const old=req;req=(path,o)=>path==='/hq/customer-success'?Promise.resolve({summary:{total:1,risk:1},clinics:[{clinicId:'a',clinicName:'시험 병원',status:'risk',statusLabel:'위험',riskScore:90,reasons:['최근 30일 안내자료 0건'],nextAction:'첫 안내자료 안내',onboarding:{percent:0}}]}):old(path,o);showView('customerSuccess');});await p.locator('.cs-status').waitFor();
  assert.equal(await p.locator('.cs-status').innerText(),'사용 현황 확인 필요');assert.doesNotMatch(await p.locator('#customerSuccess').innerText(),/이용 중단 위험|이탈위험/);
- assert.match(await p.locator('#customerSuccess').innerText(),/진료 기록·입원·직원교육 전체 사용량을 뜻하지 않습니다/);
+ assert.match(await p.locator('#customerSuccess').innerText(),/병원 전체 진료 활동을 평가하는 지표는 아닙니다/);
  assert.deepEqual(await p.evaluate(()=>writes),[]);
 });
 for(const success of [true,false])test('saved-session restore hides credential form then resolves '+success,async t=>{
@@ -83,3 +83,15 @@ for(const success of [true,false])test('saved-session restore hides credential f
  if(success)await p.locator('#loginOverlay').waitFor({state:'hidden'});else{await p.locator('#hqLoginForm').waitFor();assert.match(await p.locator('#loginStatus').innerText(),/시험 인증 만료/);assert.equal(await p.locator('#connect').isEnabled(),true);}
 });
 
+
+
+test('quick protocol states preserve text and species filters and clear contradictory status',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>showView('protocols'));await p.locator('.hq-protocol-card').first().waitFor();
+ await p.locator('[data-protocol-search]').fill('시험 질환 A');await p.locator('#protocols .hq-secondary-filters summary').click();await p.locator('[data-protocol-species]').selectOption('dog');await p.locator('[data-protocol-filter]').selectOption('published');
+ await p.locator('[data-protocol-quick=review]').click();assert.equal(await p.locator('[data-protocol-search]').inputValue(),'시험 질환 A');assert.equal(await p.locator('[data-protocol-species]').inputValue(),'dog');assert.equal(await p.locator('.hq-protocol-card').count(),1);assert.equal(await p.locator('[data-protocol-filter]').inputValue(),'all');
+ assert.doesNotMatch(await p.locator('[data-protocol-status]').innerText(),/0개|저장 자료/);assert.equal(await p.locator('#refresh').isVisible(),false);assert.equal(await p.locator('[data-protocol-refresh]').isVisible(),true);
+ assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+test('protocol title and summary are not duplicated; original categories are not guessed',async t=>{
+ const p=await fixture(t);assert.deepEqual(await p.evaluate(()=>({label:CarestepHqWorkspace.protocolLabel({title:'갑상선 질환',summary:'갑상선 질환'}),category:CarestepHqWorkspace.category({title:'쿠싱증후군',category:'안과'})})),{label:{title:'갑상선 질환',description:'',full:'갑상선 질환'},category:'안과'});
+});

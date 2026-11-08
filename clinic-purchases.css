@@ -71,3 +71,13 @@
 }
 @media(max-width:800px) {.cs-purchases .purchase-group-grid .purchase-group-actions :is(button,label) {min-height:44px}}
 .cs-purchases .purchase-group-contact:empty{display:none}
+/* Exchange / return cases use the same responsive card grid as supply groups. */
+.cs-purchases .purchase-claim-filters nav{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.cs-purchases .purchase-claim-filters button[aria-pressed="true"]{background:#177970;color:#fff;border-color:#177970}
+.cs-purchases .purchase-claim-card{padding:14px;border:1px solid #d4e2df;border-radius:12px;background:#fff;min-width:0;overflow-wrap:anywhere}
+.cs-purchases .purchase-claim-card header,.cs-purchases .purchase-claim-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cs-purchases .purchase-claim-card header{justify-content:space-between}
+.cs-purchases .purchase-claim-card p{margin:8px 0}.cs-purchases .purchase-claim-actions{margin-top:12px}
+
+.purchase-claim-filters[hidden]{display:none}
+[data-list]:has(>.purchase-claim-card){display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px}

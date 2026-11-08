@@ -40,7 +40,7 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
  function updateFields(){const selectedField=field.value;const fields=[...new Set([...items,...jobs].map(fieldOf).filter(Boolean))];if(selectedField&&selectedField!=='all'&&!fields.includes(selectedField))fields.push(selectedField);field.replaceChildren(new Option('전체 분야','all'));for(const name of fields.sort((a,b)=>a.localeCompare(b,'ko')))field.add(new Option(name,name));field.value=selectedField||'all';}
  function quickDraw(){
   const counts={all:items.length,review:items.filter(x=>x.status==='draft').length,changed:items.filter(x=>x.sourceCurrent===false).length,failed:queueCounts.failed??jobs.filter(x=>x.status==='failed').length};
-  quick.replaceChildren();for(const [value,label] of [['all','저장 자료'],['review','검토 대기'],['changed','원본 변경'],['failed','생성 실패']]){const b=document.createElement('button');b.type='button';b.className='btn'+(triage===value?' primary':'');b.dataset.protocolQuick=value;b.setAttribute('aria-pressed',String(triage===value));b.textContent=label+' '+counts[value]+'개';b.onclick=()=>{resetFilters();triage=value;saveFilters();draw();};quick.append(b);}
+  quick.replaceChildren();for(const [value,label] of [['all','저장 자료'],['review','검토 대기'],['changed','원본 변경'],['failed','생성 실패']]){const b=document.createElement('button');b.type='button';b.className='btn'+(triage===value?' primary':'');b.dataset.protocolQuick=value;b.setAttribute('aria-pressed',String(triage===value));b.textContent=label+' '+counts[value]+'개';b.onclick=()=>{triage=value;filter.value='all';saveFilters();draw();};quick.append(b);}
  }
  function draw(){
   quickDraw();const failed=triage==='failed',q=search.value.trim().toLowerCase();filter.disabled=failed;
@@ -49,18 +49,18 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
   rows.sort((a,b)=>(sort.value==='review'?(a.status==='draft'?0:1)-(b.status==='draft'?0:1):0)||(sort.value==='title'?String(a.title||'').localeCompare(String(b.title||''),'ko'):String(b.reviewedAt||updated(b)).localeCompare(String(a.reviewedAt||updated(a))))||String(a.title||'').localeCompare(String(b.title||''),'ko'));
   root.querySelector('[data-protocol-count]').textContent=`검색 결과 ${rows.length}개`;
   const conditions=[triage!=='all'&&({review:'검토 대기',changed:'원본 변경',failed:'생성 실패'})[triage],q&&'검색: '+search.value,!failed&&filter.value!=='all'&&labels[filter.value],animal.value!=='all'&&animal.selectedOptions[0].textContent,field.value!=='all'&&field.value,sort.value!=='recent'&&sort.selectedOptions[0].textContent].filter(Boolean);
-  root.querySelector('[data-protocol-conditions]').textContent=conditions.length?'적용 조건 · '+conditions.join(' · '):'전체 자료';
+  root.querySelector('[data-protocol-conditions]').textContent=conditions.length?'적용 조건 · '+conditions.join(' · '):'';
   list.replaceChildren();
   if(!rows.length){const p=document.createElement('p');p.className='empty';p.textContent=failed?(queueCounts.failed>source.length?'실패 작업 상세를 아직 확인하지 못했습니다. 생성·진행 현황에서 확인해주세요.':'검색 조건에 맞는 생성 실패 작업이 없습니다.'):items.length?'검색 조건에 맞는 진료 프로토콜이 없습니다.':'저장된 진료 프로토콜이 없습니다. 생성·진행 현황에서 준비할 자료를 확인하세요.';list.append(p);return;}
   const shown=CarestepHqWorkspace.slice(rows,pageWindow,JSON.stringify([ownerKey(),triage,q,filter.value,animal.value,field.value,sort.value]));
-  root.querySelector('[data-protocol-count]').textContent=`검색 결과 ${rows.length}개 · 현재 ${pageWindow.page*pageWindow.size+1}–${pageWindow.page*pageWindow.size+shown.length}개`;
+  root.querySelector('[data-protocol-count]').textContent=rows.length>pageWindow.size?'':`검색 결과 ${rows.length}개`;
   for(const item of shown){
    const card=document.createElement('article');card.className='card hq-protocol-card';
    const heading=document.createElement('h2');const label=CarestepHqWorkspace.protocolLabel(item);heading.textContent=label.title;heading.title=label.full;const description=document.createElement('p');description.className='hq-protocol-description';description.textContent=label.description;description.title=label.description;
    const meta=document.createElement('p');meta.className='muted';meta.textContent=[failed?'생성 실패':labels[item.status]||'상태 확인 필요',species[item.species]||'',fieldOf(item),fieldOf(item)!==(item.category||item.field||item.body?.category||sourceFields.get(item.sourceContentId)||'미분류')?'검색용 분류 제안':'',item.revision?'수정 '+item.revision+'판':'',item.sourceCurrent===false?'원본 변경 확인':''].filter(Boolean).join(' · ');
    const dates=document.createElement('p');dates.className='hq-protocol-dates';dates.textContent=[displayDate(updated(item))&&'수정 '+displayDate(updated(item)),displayDate(item.reviewedAt||item.approvedAt)&&'검토 '+displayDate(item.reviewedAt||item.approvedAt)].filter(Boolean).join(' · ');
    const next=document.createElement('p');next.className='hq-protocol-next';next.textContent=failed?'실패 원인: '+(item.error||'생성 현황에서 원인을 확인해주세요.'):item.sourceCurrent===false?'변경된 원본과 본문·근거를 대조하고 보완해주세요.':item.status==='draft'?'본문·근거와 미해결 항목을 검토한 뒤 공개 여부를 결정하세요.':'';
-   const open=document.createElement('button');open.type='button';open.className='btn';open.textContent=failed?'실패 원인·재시도 열기':'본문·검토 열기';open.onclick=()=>{if(!ready())return;const adapter=sessionAdapter();if(failed)ClinicalKnowledge.openQueue(adapter,'protocol',{status:'failed',jobId:item.id});else ClinicalKnowledge.openProtocol(adapter,encodeURIComponent(item.id),true,()=>{ClinicalKnowledge.close();load();});};
+   const open=document.createElement('button');open.type='button';open.className='btn';open.textContent=failed?'실패 원인·재시도 열기':item.status==='published'?'공개본 열기':'초안 검토';open.onclick=()=>{if(!ready())return;const adapter=sessionAdapter();if(failed)ClinicalKnowledge.openQueue(adapter,'protocol',{status:'failed',jobId:item.id});else ClinicalKnowledge.openProtocol(adapter,encodeURIComponent(item.id),true,()=>{ClinicalKnowledge.close();load();});};
    card.append(heading);if(description.textContent)card.append(description);card.append(meta);if(dates.textContent)card.append(dates);if(next.textContent)card.append(next);card.append(open);list.append(card);
   }
   CarestepHqWorkspace.pager(list,pageWindow,rows.length,draw,{top:true});
@@ -77,9 +77,9 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
    const request=req('/hq/training/knowledge-protocols');pending={token,promise:request.catch(()=>{})};const catalogWork=req('/hq/content').then(d=>d.contents||[],()=>null);const data=await request;
    if(token!==sequence||owner!==ownerKey()||!ready())return;
    items=data.items||[];jobs=data.queue?.items||[];queueCounts=data.queue?.counts||{};loadedAt=Date.now();updateFields();
-   message.textContent=`저장 자료 ${items.length}개 · 생성 대기 ${queueCounts.queued||0}개 · 생성 중 ${queueCounts.running||0}개 · 생성 실패 ${queueCounts.failed||0}개`;
+   message.textContent=[['queued','생성 대기'],['running','생성 중'],['failed','생성 실패']].filter(([key])=>queueCounts[key]>0).map(([key,label])=>label+' '+queueCounts[key]+'개').join(' · ');
    draw();
-   void catalogWork.then(catalog=>{if(!catalog||token!==sequence||owner!==ownerKey()||!ready())return;sourceFields=new Map(catalog.map(x=>[x.contentId,x.category]));updateFields();draw();});
+   void catalogWork.then(catalog=>{if(!catalog||token!==sequence||owner!==ownerKey()||!ready())return;const fields=new Map(catalog.map(x=>[x.contentId,x.category]));if(JSON.stringify([...fields])===JSON.stringify([...sourceFields]))return;sourceFields=fields;updateFields();draw();});
   }catch(error){if(token===sequence&&owner===ownerKey()&&ready()){loadedAt=0;message.textContent='목록을 불러오지 못했습니다. '+error.message+(items.length?' · 이전 목록입니다.':'');const retry=document.createElement('button');retry.type='button';retry.className='btn';retry.textContent='다시 시도';retry.onclick=()=>load();if(items.length||jobs.length){draw();list.prepend(retry);}else list.replaceChildren(retry);}}
   finally{if(pending?.token===token)pending=null;if(token===sequence)root.setAttribute('aria-busy','false');}
  }

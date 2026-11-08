@@ -46,7 +46,9 @@
  function protocolLabel(item={}){
   const full=materialTitle(item),disease=String(item.body?.disease||item.disease||'').trim();
   // Use an explicit disease title when supplied; otherwise retain the full title with visual clamping.
-  return {title:disease&&disease.length<=50?disease:full,description:disease&&disease!==full?full:String(item.body?.summary||item.summary||'').trim(),full};
+  const title=disease&&disease.length<=50?disease:full,description=disease&&disease!==full?full:String(item.body?.summary||item.summary||'').trim();
+  const normalized=v=>v.replace(/\s+/g,'').toLowerCase();
+  return {title,description:normalized(title)===normalized(description)?'':description,full};
  }
  g.CarestepHqWorkspace={confirm,prompt:message=>confirm(message,{input:true}),discard,documentView,slice,pager,species,category,materialTitle,adoptionAction,onboardingEntry,onboardingView,protocolLabel,owner,ready};
 })(window);
