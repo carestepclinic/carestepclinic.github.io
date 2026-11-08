@@ -1942,3 +1942,16 @@
   .clinic-calm #practiceRoot .cs-ward-actions>.cl-board-count {flex:1 1 150px;font-size:14px}
  }
 }
+
+/* Record navigation: shared page-level tabs above the heading. */
+#appView .main > .cs-record-page-tabs{display:none}
+#appView .main:has(#practice.active-view) > .cs-record-page-tabs{display:grid;grid-template-columns:repeat(var(--cs-record-tab-count,5),minmax(0,1fr));gap:6px;padding:5px;margin:0 0 14px;background:#e9f2f0;border:1px solid #d7e5e2;border-radius:12px;min-width:0}
+#appView .main > .cs-record-page-tabs .cs-navigation-scope{display:none}
+#appView .main > .cs-record-page-tabs button{font-family:inherit;font-size:14px;font-weight:600;line-height:1.3;min-width:0;min-height:42px;margin:0;padding:9px 10px;border:1px solid #d5e1df;border-radius:8px;color:#214d55;background:#fff;box-shadow:none;white-space:nowrap;cursor:pointer}
+#appView .main > .cs-record-page-tabs button[aria-pressed=true]{background:#177b75;border-color:#177b75;color:#fff}
+#appView .main > .cs-record-page-tabs button:hover{background:#dcece8}
+#appView .main > .cs-record-page-tabs button[aria-pressed=true]:hover{background:#126961}
+#appView .main > .cs-record-page-tabs button:focus-visible{outline:3px solid #5baaa2;outline-offset:2px}
+#practiceRoot .cs-list-tools:empty{display:none}
+@media(max-width:760px){#appView .main:has(#practice.active-view) > .cs-record-page-tabs{gap:4px;padding:4px;margin-bottom:10px}#appView .main > .cs-record-page-tabs button{font-size:12px;min-height:44px;padding:8px 2px}}
+@media print{#appView .main > .cs-record-page-tabs{display:none!important}}
