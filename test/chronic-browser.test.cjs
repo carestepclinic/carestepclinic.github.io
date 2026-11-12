@@ -1,6 +1,21 @@
 const {test,before,after}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const {chromium}=require('playwright');let browser,server,url;const root=path.resolve(__dirname,'..');
 
+for(const width of [390,1440])test('MCS selection: four grades, save, reload, print and blank recheck '+width,async()=>{
+ const p=await page(width);await begin(p);const mcs=p.locator('select[data-field="examNotes.mcs"]');
+ const grades=['정상 근육량 (Normal)','가벼운 근육 소실 (Mild loss)','중등도 근육 소실 (Moderate loss)','심한 근육 소실 (Severe loss)'];
+ assert.equal(await mcs.inputValue(),'');assert.deepEqual(await mcs.locator('option').allTextContents(),['미평가',...grades]);
+ for(const grade of grades){await mcs.selectOption(grade);await save(p);assert.equal(await p.evaluate(()=>state.records[0].body.chronicChart.examNotes.mcs),grade);}
+ await p.reload();await mcs.waitFor();assert.equal(await mcs.inputValue(),grades[3]);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+ const popup=p.waitForEvent('popup');await p.locator('[data-act=print]').click();const out=await popup;await out.locator('.summary').waitFor();assert.match(await out.locator('.summary').innerText(),/심한 근육 소실 \(Severe loss\)/);await out.close();
+ await p.locator('[data-act=recheck]').click();assert.equal(await mcs.inputValue(),'');await save(p);assert.equal(await p.evaluate(()=>state.records[0].body.chronicChart.examNotes.mcs),grades[3]);await p.close();
+});
+test('MCS selection: legacy free text is preserved until explicitly replaced or cleared',async()=>{
+ const p=await page();await begin(p);const legacy='요추 근육 감소, 좌우 차이 <관찰> "메모"';await p.evaluate(value=>{state.records[0].body.chronicChart.examNotes.mcs=value;sessionStorage.setItem('mock-records',JSON.stringify(state.records));},legacy);await p.reload();const mcs=p.locator('select[data-field="examNotes.mcs"]');await mcs.waitFor();assert.equal(await mcs.inputValue(),legacy);assert.equal(await mcs.locator('option:checked').innerText(),'기존 기록 · '+legacy);
+ await p.locator('[data-field="measurements.creatinine"]').fill('2');await save(p);assert.equal(await p.evaluate(()=>state.records[0].body.chronicChart.examNotes.mcs),legacy);
+ await mcs.selectOption('가벼운 근육 소실 (Mild loss)');await save(p);await p.reload();await mcs.waitFor();assert.equal(await mcs.locator('option').count(),5);await mcs.selectOption('');await save(p);assert.equal(await p.evaluate(()=>state.records[0].body.chronicChart.examNotes.mcs),'');await p.close();
+});
+
 test('refinement: status and due filters combine, toggle independently and retain search',async()=>{
  const p=await page();await p.locator('[name=q]').fill('시험');await p.locator('[data-quick-filter=complete]').click();await p.locator('[data-quick-filter=overdue]').click();await p.waitForFunction(()=>document.querySelector('.chr-active-filters').textContent.includes('재검일 경과'));
  const request=()=>p.evaluate(()=>state.requests.filter(r=>r.p.includes('/chronic?')).at(-1).p);let u=new URL(await request(),'http://test');assert.equal(u.searchParams.get('status'),'complete');assert.equal(u.searchParams.get('due'),'overdue');assert.equal(u.searchParams.get('q'),'시험');await p.locator('[data-quick-filter=overdue]').click();await p.waitForFunction(()=>!document.querySelector('[name=due]').value);assert.equal(await p.locator('[name=status]').inputValue(),'complete');await p.locator('[data-quick-filter=all]').click();await p.waitForFunction(()=>!document.querySelector('[name=status]').value);assert.equal(await p.locator('[name=q]').inputValue(),'시험');await p.close();
