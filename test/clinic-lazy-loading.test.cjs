@@ -35,3 +35,5 @@ test('calculator optional definitions load together and are reused',async t=>{
  for(const file of ['practice-emergency.js','practice-nutrition.js','practice-calcium-transfusion.js'])assert.equal(requests.filter(x=>x==='/'+file).length,1);
  await goTab(p,'dental');await p.locator('[data-dn=new]').waitFor();await goTab(p,'calc');assert.equal(requests.filter(x=>x==='/practice-emergency.js').length,1);
 });
+
+test('chronic choices module loads in dependency order and survives navigation reuse',async t=>{const {p,requests}=await fixture(t);await goTab(p,'chronic');await p.locator('[data-act=new]').waitFor();assert.equal(await p.evaluate(()=>typeof ChronicChoices.setup),'function');assert.equal(requests.filter(x=>x==='/chronic-choices.js').length,1);assert.ok(requests.indexOf('/chronic-choices.js')<requests.indexOf('/chronic-record.js'));await goTab(p,'neuro');await p.locator('[data-nr=new]').waitFor();await goTab(p,'chronic');await p.locator('[data-act=new]').waitFor();assert.equal(requests.filter(x=>x==='/chronic-choices.js').length,1);});

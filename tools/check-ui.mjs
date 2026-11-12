@@ -14,7 +14,7 @@ export const uiFiles = new Set([
  'clinic-followup-tasks.js','clinic-followup-tasks.css',
  'clinic-settings.js','clinic-settings.css','clinic-capabilities.js',
  'clinical-assist.js','clinical-assist.css',
- 'chronic-record.js','chronic-record.css',
+ 'chronic-record.js','chronic-choices.js','chronic-record.css',
  'ophthalmic-record.js','ophthalmic-record.css',
  'neuro-record.js','neuro-record.css',
  'dental-record.js','dental-workflow.js','dental-record.css',

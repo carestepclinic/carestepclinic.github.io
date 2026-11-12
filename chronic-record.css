@@ -100,3 +100,18 @@
 
 /* Independent filters and compact plan review. */
 .chr .chr-filter-label{font-size:12px;color:#53697e;margin-left:8px}.chr .chr-detail-status{padding:10px 12px;border:1px solid #c5d3e7;background:#eef3fc;border-radius:8px;margin-bottom:8px;display:flex;gap:10px;align-items:center;justify-content:space-between}.chr .chr-compare-help{display:block;margin:0 0 6px;color:#53697e}.chr .chr-plan-results{border-bottom:1px solid #d7e2ee;padding-bottom:10px;margin-bottom:12px}.chr .chr-plan-results>small{display:block;color:#a13f25}.chr .chr-plan-result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;margin-top:6px}.chr .chr-plan-result-grid button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:8px;font:inherit;font-size:13px;min-width:0;border:1px solid #c5d3e7;border-radius:7px;background:#f7faff;color:#17334c}.chr .chr-plan-result-grid b{font-size:15px}.chr .chr-plan-result-grid small{font-size:12px;color:#53697e}.chr .chr-plan-results>details{margin-top:6px}.chr .chr-plan-results summary{cursor:pointer;font-size:13px;min-height:32px}.chr [data-source-retry]{font:inherit;font-size:13px;min-height:36px}.chr .chr-plan-result-grid button:focus-visible{outline:2px solid #2453e8;outline-offset:2px}@media(max-width:700px){.chr .chr-filter-label{flex-basis:100%;margin:4px 0 0}.chr .chr-plan-result-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.chr .chr-plan-results summary{min-height:42px}.chr .chr-detail-status{flex-wrap:wrap}}
+/* Compact structured entry shares record typography and field sizes. */
+.chr .chr-choice-panel,.chr .chr-food-choice{min-width:0;margin:0 0 8px}
+.chr .chr-choice-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;min-width:0}
+.chr .chr-choice-grid label,.chr .chr-choice-panel>label{min-width:0;display:flex;flex-direction:column;gap:4px}
+.chr .chr-choice-panel fieldset{min-width:0;margin:0;padding:4px 8px;border:1px solid #d3dfdd;border-radius:8px}
+.chr .chr-choice-checks{display:flex;flex-wrap:wrap;gap:4px 10px}
+.chr .chr-choice-checks label{display:flex;flex-direction:row;align-items:center;gap:4px;font-weight:400}
+.chr .chr-choice-checks input{width:16px;height:16px;min-height:0;margin:0}
+.chr .chr-choice-panel [data-choice-error],.chr [data-food-status]{display:block;overflow-wrap:anywhere}
+.chr .chr-choice-panel [data-choice-error]:not(:empty){color:#a32727}
+.chr .chr-food-choice summary{margin-bottom:8px;cursor:pointer}
+.chr .chr-food-choice button{margin-top:8px}
+.chr .chr-choice-panel textarea{min-height:44px}
+.chr .chr-choice-panel [hidden],.chr label[hidden]{display:none!important}
+@media(max-width:480px){.chr .chr-choice-grid{grid-template-columns:minmax(0,1fr)}.chr .chr-choice-panel select,.chr .chr-food-choice select{max-width:100%;width:100%}}
