@@ -364,3 +364,21 @@ for(const width of [320,390,768,1440])test('simple: compact numeric rows, separa
 });
 
 test('shared confirmation protects and deletes the exact chronic record',async()=>{const p=await page();await begin(p);await p.addScriptTag({url:url+'/clinic-dialog.js'});await p.addStyleTag({url:url+'/clinic-calm.css'});await p.locator('.chr-record-manage>summary').click();await p.locator('[data-act=delete]').click();await p.locator('.cs-action-dialog').waitFor();assert.match(await p.locator('.cs-action-context').innerText(),/합성/);await p.locator('[data-dialog-cancel]').click();assert.equal(await p.evaluate(()=>!!state.records[0].body.deleted),false);await p.locator('[data-act=delete]').click();await p.locator('[data-dialog-confirm]').click();await p.waitForFunction(()=>state.records[0].body.deleted===true);assert.equal(await p.locator('.cs-action-dialog').count(),0);await p.close();});
+
+for(const species of ['dog','cat'])for(const width of [390,1440])test('cardiac imaging: species fields, saved values, recheck and print '+species+' '+width,async()=>{
+ const p=await page(width);await quick(p);await p.locator('[data-species]').selectOption(species);await p.locator('[data-condition=ckd]').uncheck();await p.locator('[data-condition=cardiac]').check();await save(p);
+ const second=species==='dog'?'vlas':'ctr',absent=species==='dog'?'ctr':'vlas';
+ assert.equal(await p.locator('[data-field="measurements.'+absent+'"]').count(),0);
+ for(const k of ['vhs',second])assert.equal(await p.locator('[data-exam-group=other] [data-field="measurements.'+k+'"]').inputValue(),'');
+ await p.locator('[data-field="measurements.vhs"]').fill(species==='dog'?'10.2':'7.5');
+ if(species==='cat')await p.locator('[data-unit=ctr]').selectOption('%');
+ await p.locator('[data-field="measurements.'+second+'"]').fill(species==='dog'?'2.4':'65');await save(p);
+ assert.equal(await p.evaluate(k=>state.records[0].body.chronicChart.measurements[k],second),species==='dog'?2.4:0.65);
+ await p.reload();await p.locator('[data-field="measurements.'+second+'"]').waitFor();assert.equal(await p.locator('[data-field="measurements.'+second+'"]').inputValue(),species==='dog'?'2.4':'65');
+ if(species==='cat'){await p.locator('[data-unit=ctr]').selectOption('비율');assert.equal(await p.locator('[data-field="measurements.ctr"]').inputValue(),'0.65');await save(p);}
+ assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+ await p.locator('[data-act=recheck]').click();for(const k of ['vhs',second])assert.equal(await p.locator('[data-field="measurements.'+k+'"]').inputValue(),'');
+ await p.locator('[data-field="measurements.vhs"]').fill(species==='dog'?'10.5':'7.8');await p.locator('[data-field="measurements.'+second+'"]').fill(species==='dog'?'2.6':'0.7');await save(p);await section(p,'compare');
+ assert.match(await p.locator('[data-comparison]').innerText(),/VHS/);assert.match(await p.locator('[data-comparison]').innerText(),species==='dog'?/VLAS/:/CTR/);
+ const printed=p.waitForEvent('popup');await p.locator('[data-act=print]').click();const out=await printed;await out.waitForLoadState();assert.match(await out.locator('body').innerText(),/VHS/);assert.match(await out.locator('body').innerText(),species==='dog'?/VLAS/:/CTR/);await out.close();await p.close();
+});

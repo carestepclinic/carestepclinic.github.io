@@ -8,10 +8,14 @@ const conditionName=k=>names[k]||(k==='other'?'이전 분류 · 기타 만성질
 const endocrine=d=>d.conditions.some(k=>['cushing','addison','hypothyroid','hyperthyroid'].includes(k));
 const status=v=>({inProgress:'작성 중',complete:'작성 완료',amended:'완료 후 수정'})[v]||'작성 중';
 // Stored units are canonical; validated alternate inputs retain their original values. Ranges never assign a clinical stage.
+// VHS/VLAS use vertebral units; CTR is stored as a ratio (65% = 0.65).
+// Unit references: https://vetmed.illinois.edu/2022/07/06/evaluating-the-heart-size-on-radiographs/
+// https://pubmed.ncbi.nlm.nih.gov/33527527/
 const fields=[
  ['weight','체중','kg',.01,1000,'all',false],['bcs','체형 점수 · BCS','/9',1,9,'all',true],
  ['creatinine','크레아티닌 · Creatinine','mg/dL',0,40,'ckd,diabetes,cardiac,cushing,addison,hyperthyroid,imha,ple',false],['sdma','SDMA','µg/dL',0,300,'ckd,hyperthyroid',false],['bun','BUN','mg/dL',0,500,'ckd,diabetes,cardiac,addison,hyperthyroid,imha,ple',false],['phosphorus','인 · Phosphorus','mg/dL',0,50,'ckd',false],['sbp','수축기 혈압 · SBP','mmHg',0,400,'ckd,diabetes,cardiac,cushing,hyperthyroid',false],['potassium','칼륨 · K','mEq/L',0,20,'ckd,diabetes,cardiac,cushing,addison,hyperthyroid,ple',false],['upc','요단백/크레아티닌 · UPC','비율',0,100,'ckd,cushing,ple',false],['usg','요비중 · USG','비중',1,1.15,'ckd,diabetes,cushing,addison,hyperthyroid,imha,ple',true],['hematocrit','적혈구용적률 · HCT','%',0,100,'ckd,addison,hypothyroid,hyperthyroid,imha,ple',true],['albumin','알부민 · Albumin','g/dL',0,15,'ckd,addison,ple',true],
  ['glucose','혈당 · Glucose','mg/dL',0,2000,'diabetes,cushing,addison',false],['fructosamine','프럭토사민 · Fructosamine','µmol/L',0,2000,'diabetes',false],['bhb','혈중 케톤 · β-OHB','mmol/L',0,30,'diabetes',true],
+ ['vhs','척추 심장 크기 · VHS','v',0,30,'cardiac',false],['vlas','척추 좌심방 크기 · VLAS','v',0,15,'cardiac',false],['ctr','심흉비 · CTR','비율',0,1,'cardiac',false],
  ['ntproBNP','proBNP · NT-proBNP','pmol/L',0,1000000,'cardiac',false],['ctni','cTnI · 심장 트로포닌 I','ng/mL',0,10000,'cardiac',false],['sleepRR','수면 중 호흡수','회/분',0,200,'cardiac',false],['heartRate','심박수 · HR','회/분',0,500,'cardiac,hypothyroid,hyperthyroid,imha',false],['sodium','나트륨 · Na','mEq/L',0,250,'ckd,cardiac,cushing,addison,ple',true],['chloride','염소 · Cl','mEq/L',0,250,'ckd,cardiac,addison,ple',true],['laAo','좌심방/대동맥 · LA/Ao','비율',0,10,'cardiac',true],['lviddn','정규화 좌심실 확장기 내경 · LVIDDN','지수',0,10,'cardiac',true],
  ["tt4","총 T4 · TT4","µg/dL",0,100,"hypothyroid,hyperthyroid,cardiac",false],
  ["tsh","갑상선자극호르몬 · TSH","ng/mL",0,100,"hypothyroid,hyperthyroid",true],
@@ -58,7 +62,7 @@ const examGuide={
  hyperthyroid:'체중·심박수·TT4와 신장수치·혈압을 추적합니다. CBC·간 수치·요검사 및 필요 시 TSH·fT4를 선택합니다.'
 };
 // Conversion factors map displayed units into the canonical units used by existing records.
-const unitFactors={"creatinine":{"mg/dL":1,"µmol/L":0.011312217194570135},"glucose":{"mg/dL":1,"mmol/L":18.018},"albumin":{"g/dL":1,"g/L":0.1},"ctni":{"ng/mL":1,"pg/mL":0.001},"tt4":{"µg/dL":1,"nmol/L":0.07770007770007771},"ft4":{"pmol/L":1,"ng/dL":12.87},"cortisolBaseline":{"µg/dL":1,"nmol/L":0.03624501631025734},"cortisolACTH":{"µg/dL":1,"nmol/L":0.03624501631025734},"cortisolLddst4":{"µg/dL":1,"nmol/L":0.03624501631025734},"cortisolLddst8":{"µg/dL":1,"nmol/L":0.03624501631025734}};
+const unitFactors={"ctr":{"비율":1,"%":0.01},"creatinine":{"mg/dL":1,"µmol/L":0.011312217194570135},"glucose":{"mg/dL":1,"mmol/L":18.018},"albumin":{"g/dL":1,"g/L":0.1},"ctni":{"ng/mL":1,"pg/mL":0.001},"tt4":{"µg/dL":1,"nmol/L":0.07770007770007771},"ft4":{"pmol/L":1,"ng/dL":12.87},"cortisolBaseline":{"µg/dL":1,"nmol/L":0.03624501631025734},"cortisolACTH":{"µg/dL":1,"nmol/L":0.03624501631025734},"cortisolLddst4":{"µg/dL":1,"nmol/L":0.03624501631025734},"cortisolLddst8":{"µg/dL":1,"nmol/L":0.03624501631025734}};
 const baseKeys={
  ckd:['weight','creatinine','sdma','bun','phosphorus','sbp','potassium','upc'],
  diabetes:['weight','glucose','fructosamine'],
@@ -177,10 +181,10 @@ function mount(root,a){
  function field(k,label,type='text',extra=''){const v=k.split('.').reduce((o,x)=>o?.[x],draft);return '<label>'+label+'<input data-field="'+k+'" type="'+type+'" value="'+esc(v??'')+'" '+extra+'></label>';}
  function text(k,label){const input='<label>'+label+'<textarea data-field="'+k+'" rows="2" maxlength="'+(k==='medications'||k==='history'?4000:6000)+'">'+esc(draft[k])+'</textarea></label>';return ['medications','plan','diet'].includes(k)?'<div class="chr-plan-field">'+input+'<details data-reuse-panel="'+k+'"><summary>이전 내용 가져오기</summary><div data-plan-sources="'+k+'"></div></details></div>':input;}
 
- function relevantField(f){return chosen(draft,f[5])&&!(f[0]==='tt4'&&item.body.species!=='cat'&&!draft.conditions.some(c=>['hypothyroid','hyperthyroid','other'].includes(c)));}
+ function relevantField(f){return (f[0]!=='vlas'||item.body.species==='dog')&&(f[0]!=='ctr'||item.body.species==='cat')&&chosen(draft,f[5])&&!(f[0]==='tt4'&&item.body.species!=='cat'&&!draft.conditions.some(c=>['hypothyroid','hyperthyroid','other'].includes(c)));}
  function defaultAdvanced(f){
   if(draft.conditions.includes('other'))return f[6];
-  if(f[0]==='weight')return false;
+  if(['weight','vhs','vlas','ctr'].includes(f[0]))return false;
   if(draft.conditions.includes('diabetes')&&item.body.species==='cat'&&draft.diabetesTreatment==='sglt2'&&f[0]==='bhb')return false;
   if(draft.visitPurpose==='diagnostic'&&['cortisolBaseline','cortisolACTH','cortisolLddst4','cortisolLddst8','tt4','tsh','ft4'].includes(f[0]))return false;
   return !draft.conditions.some(c=>(baseKeys[c]||[]).includes(f[0]));
@@ -188,11 +192,11 @@ function mount(root,a){
  function isAdvanced(f){const pref=displayPrefs[prefKey()];return Array.isArray(pref)&&f[0]!=='weight'?!pref.includes(f[0]):defaultAdvanced(f);}
  function valueCard(f){
   const input=draft.measurementInputs?.[f[0]],unit=input?.unit||f[2],value=input&&present(input.value)?input.value:get(draft,f[0]),convert=unitFactors[f[0]];
-  return '<div class="chr-value-wrap"><label class="chr-value"><span>'+esc(f[1])+'</span><span class="chr-value-input"><input aria-label="'+esc(f[1])+'" data-field="'+(f[0]==='weight'?'weight':'measurements.'+f[0])+'" type="number" inputmode="decimal" step="'+(f[0]==='bcs'?'1':'any')+'" value="'+esc(value??'')+'" placeholder="입력">'+(convert?'<select data-unit="'+f[0]+'" aria-label="'+esc(f[1])+' 입력 단위">'+Object.keys(convert).map(u=>'<option '+(unit===u?'selected':'')+'>'+u+'</option>').join('')+'</select>':'<span class="chr-fixed-unit">'+f[2]+'</span>')+'</span>'+(convert?'<small data-canonical="'+f[0]+'">'+(unit!==f[2]&&present(get(draft,f[0]))?'비교 기준 '+val(get(draft,f[0]),f[2]):'')+'</small>':'')+'</label><button type="button" class="chr-trend-link" data-prev="'+f[0]+'" data-show-trend="'+f[0]+'" aria-label="'+esc(f[1])+' 추이 보기" hidden></button></div>';
+  return '<div class="chr-value-wrap"><label class="chr-value"><span>'+esc(f[1])+'</span><span class="chr-value-input"><input aria-label="'+esc(f[1])+'" data-field="'+(f[0]==='weight'?'weight':'measurements.'+f[0])+'" type="number" inputmode="decimal" step="'+(f[0]==='bcs'?'1':'any')+'" value="'+esc(value??'')+'" placeholder="'+(f[0]==='ctr'?(unit==='%'?'예: 65':'예: 0.65'):'입력')+'">'+(convert?'<select data-unit="'+f[0]+'" aria-label="'+esc(f[1])+' 입력 단위">'+Object.keys(convert).map(u=>'<option '+(unit===u?'selected':'')+'>'+u+'</option>').join('')+'</select>':'<span class="chr-fixed-unit">'+f[2]+'</span>')+'</span>'+(convert?'<small data-canonical="'+f[0]+'">'+(unit!==f[2]&&present(get(draft,f[0]))?'비교 기준 '+val(get(draft,f[0]),f[2]):'')+'</small>':'')+'</label><button type="button" class="chr-trend-link" data-prev="'+f[0]+'" data-show-trend="'+f[0]+'" aria-label="'+esc(f[1])+' 추이 보기" hidden></button></div>';
  }
  function noteCard(f){const parts=f[1].split(' · '),long=parts.length>1&&parts.slice(1).join(' · ').length>20;return '<label><span>'+esc(long?parts[0]:f[1])+'</span>'+(long?'<details class="chr-note-help"><summary>작성 안내</summary><small>'+esc(parts.slice(1).join(' · '))+'</small></details>':'')+'<textarea rows="2" maxlength="2000" data-field="examNotes.'+f[0]+'">'+esc(draft.examNotes?.[f[0]]||'')+'</textarea></label>';}
  function groupedExams(){
- const groups=[['basic','기본 측정·증상',['weight','bcs','sbp','sleepRR','heartRate','mcs']],['cbc','CBC · 혈구 검사',[...cbcKeys,'cbc','bloodSmear']],['blood','생화학 검사',chemistryKeys],['urine','요검사',['upc','usg','urinalysis','urineCulture']],['hormone','호르몬 검사',['tt4','tsh','ft4','cortisolBaseline','cortisolACTH','cortisolLddst4','cortisolLddst8']],['other','영상·기타 평가',['imaging','ecg','laAo','lviddn','glucoseCurve','immuneEvidence','secondaryCauses','fecalTesting','proteinLoss','giTests','histopathology','stoolDiet','diseaseActivity','transfusion','adverseEffects']]];
+ const groups=[['basic','기본 측정·증상',['weight','bcs','sbp','sleepRR','heartRate','mcs']],['cbc','CBC · 혈구 검사',[...cbcKeys,'cbc','bloodSmear']],['blood','생화학 검사',chemistryKeys],['urine','요검사',['upc','usg','urinalysis','urineCulture']],['hormone','호르몬 검사',['tt4','tsh','ft4','cortisolBaseline','cortisolACTH','cortisolLddst4','cortisolLddst8']],['other','영상·기타 평가',['imaging','ecg','vhs','vlas','ctr','laAo','lviddn','glucoseCurve','immuneEvidence','secondaryCauses','fecalTesting','proteinLoss','giTests','histopathology','stoolDiet','diseaseActivity','transfusion','adverseEffects']]];
  const groupOf=k=>groups.find(g=>g[2].includes(k))?.[0]||'blood';
  const match=(label,html,note=false)=>'<div class="'+(note?'chr-note-cell':'')+'" data-exam-match="'+esc(label.toLowerCase())+'">'+html+'</div>';
  return '<div class="chr-exam-tools"><label class="chr-exam-search">검사 찾기<input data-exam-search type="search" placeholder="검사명 · 영문 약어" value="'+esc(examQuery)+'"></label><button type="button" data-paste-labs '+(!canEdit()?'disabled':'')+'>검사결과 가져오기</button><small>Enter 다음 검사 · Shift+Enter 이전 검사</small></div>'+groups.map(([key,title])=>{
