@@ -16,12 +16,23 @@ function select(input,values,o={}){
 function structured(input,specs,o={}){
  if(!input||input.dataset.recordChoiceBound)return;input.dataset.recordChoiceBound='1';
  const host=document.createElement('div');host.className='ric-panel';host.dataset.recordStructured=input.dataset.field||input.dataset.note;
- input.closest('label').before(host);input.closest('label').hidden=true;input.closest('label').dataset.recordOriginal='';
- host.innerHTML='<div class="ric-grid">'+specs.map((s,i)=>'<label>'+esc(s.label)+'<select data-ric-index="'+i+'">'+option('','미입력 / 선택')+s.values.map(v=>option(v)).join('')+'</select></label>').join('')+'</div><label>'+esc(o.memoLabel||'상세 메모')+'<textarea rows="2" data-ric-memo maxlength="'+(input.maxLength>0?input.maxLength:4000)+'"></textarea></label><small role="status"></small>';
+ const original=input.closest('label')||input;original.before(host);original.hidden=true;original.dataset.recordOriginal='';
+ host.innerHTML='<div class="ric-grid">'+specs.map((s,i)=>s.multi?'<fieldset data-ric-group="'+i+'"><legend>'+esc(s.label)+'</legend><div class="ric-checks">'+s.values.map(v=>'<label><input type="checkbox" data-ric-index="'+i+'" value="'+esc(v)+'">'+esc(v)+'</label>').join('')+'</div></fieldset>':'<label>'+esc(s.label)+'<select data-ric-index="'+i+'">'+option('','미입력 / 선택')+s.values.map(v=>option(v)).join('')+'</select></label>').join('')+'</div><label>'+esc(o.memoLabel||'상세 메모')+'<textarea rows="2" data-ric-memo maxlength="'+(input.maxLength>0?input.maxLength:4000)+'"></textarea></label><small role="status"></small>';
  const memo=host.querySelector('textarea'),status=host.querySelector('small');let changing=false;
- function fill(){const seen=new Set(),rest=[];host.querySelectorAll('select').forEach(e=>e.value='');for(const line of input.value.split('\n')){const i=specs.findIndex(s=>line.startsWith(s.label+': ')&&s.values.includes(line.slice(s.label.length+2)));if(i>=0&&!seen.has(i)){host.querySelector('[data-ric-index="'+i+'"]').value=line.slice(specs[i].label.length+2);seen.add(i);}else rest.push(line);}memo.value=rest.join('\n');}
- function commit(){if(!allowed(o)){fill();return;}const lines=specs.map((s,i)=>{const v=host.querySelector('[data-ric-index="'+i+'"]').value;return v?s.label+': '+v:'';});const v=[...lines.filter(Boolean),memo.value].filter(Boolean).join('\n');if(input.maxLength>0&&v.length>input.maxLength){status.textContent='선택값과 메모가 입력 한도를 초과했습니다. 이번 변경은 반영되지 않았습니다.';fill();return;}status.textContent='';changing=true;write(input,v);changing=false;}
- host.querySelectorAll('select').forEach(el=>el.onchange=commit);memo.oninput=commit;input.addEventListener('input',()=>{if(!changing)fill();});fill();host.querySelectorAll('select,textarea').forEach(el=>el.disabled=!allowed(o));return host;
+ function fill(){const seen=new Set(),rest=[];host.querySelectorAll('[data-ric-index]').forEach(e=>e.type==='checkbox'?e.checked=false:e.value='');for(const line of input.value.split('\n')){const i=specs.findIndex(s=>line.startsWith(s.label+': ')&&line.slice(s.label.length+2).split(s.multi?' · ':'\0').every(v=>s.values.includes(v)));if(i>=0&&!seen.has(i)){const v=line.slice(specs[i].label.length+2);host.querySelectorAll('[data-ric-index="'+i+'"]').forEach(e=>e.type==='checkbox'?e.checked=v.split(' · ').includes(e.value):e.value=v);seen.add(i);}else rest.push(line);}memo.value=rest.join('\n');}
+ function commit(){if(!allowed(o)){fill();return;}const lines=specs.map((s,i)=>{const es=[...host.querySelectorAll('[data-ric-index="'+i+'"]')],v=s.multi?es.filter(e=>e.checked).map(e=>e.value).join(' · '):es[0].value;return v?s.label+': '+v:'';});const v=[...lines.filter(Boolean),memo.value].filter(Boolean).join('\n');if(input.maxLength>0&&v.length>input.maxLength){status.textContent='선택값과 메모가 입력 한도를 초과했습니다. 이번 변경은 반영되지 않았습니다.';fill();return;}status.textContent='';changing=true;write(input,v);changing=false;}
+ host.querySelectorAll('select,input').forEach(el=>el.onchange=commit);memo.oninput=commit;input.addEventListener('input',()=>{if(!changing)fill();});fill();host.querySelectorAll('select,input,textarea').forEach(el=>el.disabled=input.disabled||!allowed(o));return host;
+}
+function oxygen(input,o={}){
+ if(!input||input.dataset.recordChoiceBound)return;input.dataset.recordChoiceBound='1';
+ const host=document.createElement('div');host.className='ric-oxygen';const parent=input.closest('label');parent.before(host);parent.dataset.recordOriginal='';input.setAttribute('aria-label','산소 공급 직접 입력');
+ host.innerHTML='<label>산소 공급 단위<select data-oxygen-unit>'+option('','선택')+option('flow','유량 · L/min')+option('fio2','산소농도 · FiO₂ (%)')+option('custom','직접 입력')+'</select></label><label data-oxygen-number-label><span data-oxygen-label>설정값</span><input data-oxygen-amount type="number" min="0" step="any" inputmode="decimal"></label>';
+ const unit=host.querySelector('select'),amount=host.querySelector('input');unit.name=input.name+'UnitChoice';amount.name=input.name+'AmountChoice';let changing=false;
+ function parse(v){let m=/^(\d+(?:\.\d+)?)\s*L\s*\/\s*min$/i.exec(v.trim());if(m)return {unit:'flow',amount:m[1]};m=/^(?:FiO[₂2]\s*)?(\d+(?:\.\d+)?)\s*%$/i.exec(v.trim());if(m&&Number(m[1])<=100)return {unit:'fio2',amount:m[1]};return {unit:v?'custom':'',amount:''};}
+ function paint(){const custom=unit.value==='custom';parent.hidden=!custom;input.hidden=!custom;host.querySelector('[data-oxygen-number-label]').hidden=custom;host.querySelector('[data-oxygen-label]').textContent=unit.value==='fio2'?'설정 산소농도 · %':'설정 유량 · L/min';amount.required=!!unit.value&&!custom;unit.required=amount.value!==''&&!custom;if(unit.value==='fio2')amount.max='100';else amount.removeAttribute('max');amount.setCustomValidity('');if(!custom&&amount.value!==''&&!amount.validity.valid)amount.setCustomValidity(unit.value==='fio2'?'산소농도는 0~100%로 입력해주세요.':'유량은 0 이상의 숫자로 입력해주세요.');host.querySelectorAll('select,input').forEach(e=>e.disabled=input.disabled||!allowed(o)||(e===amount&&custom));}
+ function fill(){const p=parse(input.value);unit.value=p.unit;amount.value=p.amount;paint();}
+ function commit(){if(!allowed(o)){fill();return;}paint();if(unit.value==='custom')return;const value=unit.value&&amount.value!==''&&amount.validity.valid?(unit.value==='flow'?Number(amount.value)+' L/min':'FiO₂ '+Number(amount.value)+'%'):'';changing=true;write(input,value);changing=false;}
+ unit.onchange=()=>{if(unit.value==='custom'){paint();input.focus();return;}commit();};amount.oninput=commit;input.addEventListener('input',()=>{if(!changing&&unit.value!=='custom')fill();});fill();return host;
 }
 const etSizes=Array.from({length:13},(_,i)=>(3+i*.5).toFixed(1));
 // Manufacturer sizing guides, verified 2026-11-12. Codes are not ET diameters.
@@ -48,9 +59,18 @@ function appendChoices(input,values,o={}){
  host.innerHTML='<summary>'+esc(o.label||'자주 쓰는 항목 선택')+'</summary><div class="ric-checks">'+values.map(v=>'<label><input type="checkbox" value="'+esc(v)+'">'+esc(v)+'</label>').join('')+'</div><button type="button">선택 항목 추가</button><small role="status"></small>';
  host.querySelector('button').onclick=()=>{if(!allowed(o))return;const lines=input.value.split('\n'),selected=[...host.querySelectorAll('input:checked')].map(e=>e.value),fresh=selected.filter(s=>!lines.some(l=>l.trim()===s));const value=[input.value,...fresh].filter(Boolean).join('\n');if(input.maxLength>0&&value.length>input.maxLength){host.querySelector('small').textContent='입력 한도를 초과합니다. 메모를 정리해주세요.';return;}if(fresh.length)write(input,value);host.querySelector('small').textContent=fresh.length?'선택 항목을 추가했습니다.':selected.length?'이미 입력된 항목입니다.':'추가할 항목을 선택해주세요.';host.querySelectorAll('input').forEach(e=>e.checked=false);};host.querySelectorAll('input,button').forEach(e=>e.disabled=!allowed(o));
 }
-function neuro(root,o){structured(root.querySelector('[data-field=history]'),[{label:'증상 시작',values:['오늘','1–3일 전','4–7일 전','1–4주 전','1개월 이상','모름']},{label:'발병 양상',values:['갑작스러운 시작','점진적인 시작','판단 어려움']},{label:'증상 경과',values:['호전','변화 없음','악화','반복·간헐적','판단 어려움']}],{...o,memoLabel:'주증상·정확한 발병 시점·상세 경과'});}
+function neuro(root,o){structured(root.querySelector('[data-field=history]'),[{label:'증상 시작',values:['오늘','1–3일 전','4–7일 전','1–4주 전','1개월 이상','모름']},{label:'발병 양상',values:['갑작스러운 시작','점진적인 시작','판단 어려움']},{label:'증상 경과',values:['호전','변화 없음','악화','반복·간헐적','판단 어려움']}],{...o,memoLabel:'주증상·정확한 발병 시점·상세 경과'});
+ const input=root.querySelector('[data-field=medications]'),context=root.querySelector('[data-field=context]');
+ const host=structured(input,[{label:'검사 제한 사유',values:['통증','비협조','운동 제한','기타'],multi:true}],{...o,memoLabel:'복용약·진정약·검사 제한 상세'});
+ if(host){const toggle=()=>{host.querySelector('[data-ric-group]').hidden=context?.value!=='limited'&&!host.querySelector('input:checked');};context?.addEventListener('change',toggle);input.addEventListener('input',toggle);toggle();}
+}
 function dental(root,o){appendChoices(root.querySelector('[data-note=procedure]'),['치석 제거','치면 연마','구강 세척','치과 방사선 촬영'],{...o,label:'시행한 공통 처치 선택'});appendChoices(root.querySelector('[data-note=homecare]'),['칫솔질 방법 안내','식이·급여 방법 안내','구강 관리 제품 사용법 안내','구강 상태 관찰·연락 기준 안내'],{...o,label:'시행한 홈케어 안내 선택'});}
 function ophthalmic(root,o){
+ // Corneal findings: MSD Veterinary Manual, The Cornea in Animals. No depth is inferred from the finding.
+ for(const row of root.querySelectorAll('.er-lesion')){
+  const label=row.querySelector('b')?.textContent||'병변';
+  for(const [key,name,values] of [['type','소견',['궤양','부종','혈관 신생','색소 침착','출혈','혼탁','평가 불가']],['depth','깊이',['표층','심부','평가 불가']],['extent','범위',['국소','다발성','미만성','평가 불가']]])select(row.querySelector('[data-lesion$=".'+key+'"]'),values,{...o,label:label+' · '+name});
+ }
  for(const row of root.querySelectorAll('.er-rx')){
   select(row.querySelector('[data-rx$=".frequency"]'),['하루 1회','하루 2회','하루 3회','하루 4회','4시간마다','6시간마다','8시간마다','12시간마다'],{...o,label:'횟수·간격'});
   select(row.querySelector('[data-rx$=".duration"]'),['3일','5일','7일','14일','28일','재검일까지'],{...o,label:'기간'});
@@ -63,5 +83,5 @@ function ophthalmic(root,o){
   query.oninput=menu;pick.onchange=()=>{if(!allowed(o)||pick.value==='')return;const found=list.find(x=>x.id===pick.value);if(found){if(input.maxLength>0&&found.label.length>input.maxLength){status.textContent='제품명이 길어 자동 입력할 수 없습니다. 약물명을 직접 입력해주세요.';return;}write(input,found.label);box.open=false;}};box.querySelectorAll('input,select').forEach(el=>el.disabled=!allowed(o));
  }
 }
-g.RecordInputChoices={select,structured,airway,parseAirway,etSizes,vgel,neuro,dental,ophthalmic};
+g.RecordInputChoices={select,structured,oxygen,airway,parseAirway,etSizes,vgel,neuro,dental,ophthalmic};
 })(typeof window==='undefined'?globalThis:window);

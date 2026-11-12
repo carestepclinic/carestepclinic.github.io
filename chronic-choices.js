@@ -8,9 +8,12 @@ const option=(v,label=v)=>'<option value="'+esc(v)+'">'+esc(label)+'</option>';
 const field=(label,values,multi=false)=>({label,values,multi});
 const testStatus=['미실시','시행 예정','결과 대기','결과 확인','평가 불가'];
 const noteSpecs={
- imaging:[field('영상검사 상태',testStatus)],
+ imaging:[field('영상검사 상태',testStatus),field('영상검사 종류',['방사선','복부초음파','심장초음파','CT','MRI','기타'],true)],
  fecalTesting:[field('분변검사 상태',testStatus)],
- histopathology:[field('조직검사 상태',testStatus)],
+ histopathology:[field('조직검사 상태',testStatus),field('채취 방법',['내시경 생검','전층 생검','기타']),field('채취 부위',['위','십이지장','공장','회장','결장','기타'],true)],
+ // ACVIM IMHA diagnosis consensus, doi:10.1111/jvim.15441. Findings are observations, not an automatic diagnosis.
+ bloodSmear:[field('혈액 도말 소견',['구형적혈구','적혈구 응집','다염성 적혈구','분열적혈구','혈소판 응집','특이 소견 없음','평가 불가'],true)],
+ immuneEvidence:[field('SAT · 생리식염수 응집검사',['미검사','결과 대기','양성','음성','판정 불가']),field('DAT · 직접 항글로불린검사',['미검사','결과 대기','양성','음성','판정 불가'])],
  urinalysis:[field('요침사 소견',['적혈구','백혈구','세균','결정','원주','특이 소견 없음','평가 불가'],true)],
  ecg:[field('심전도 소견',['동성리듬','빈맥','서맥','조기수축','심방세동','전도 이상','기타','평가 불가'],true)],
  urineCulture:[field('요배양 결과',['미검사','결과 대기','균 성장 없음','균 성장 있음','판정 불가'])],
@@ -41,7 +44,7 @@ function structured(input,specs,o,memoLabel){
  function fill(){const p=parse(input.value,specs);host.querySelectorAll('[data-choice-index]').forEach(el=>{const v=p.values[specs[+el.dataset.choiceIndex].label];if(el.type==='checkbox')el.checked=Array.isArray(v)&&v.includes(el.value);else el.value=v||'';});memo.value=p.memo;}
  function commit(){if(!o.allowed())return;const values={};specs.forEach((s,i)=>{const es=[...host.querySelectorAll('[data-choice-index="'+i+'"]')];values[s.label]=s.multi?es.filter(e=>e.checked).map(e=>e.value):es[0].value;});
   // Negative sediment findings cannot coexist with positive selections.
-  if(specs[0]?.label==='요침사 소견'){const selected=values['요침사 소견'];if(selected.includes('특이 소견 없음')||selected.includes('평가 불가')){const last=host._lastChanged;values['요침사 소견']=last?.checked&&['특이 소견 없음','평가 불가'].includes(last.value)?[last.value]:selected.filter(v=>!['특이 소견 없음','평가 불가'].includes(v));host.querySelectorAll('[type=checkbox]').forEach(e=>e.checked=values['요침사 소견'].includes(e.value));}}
+  if(['요침사 소견','혈액 도말 소견'].includes(specs[0]?.label)){const key=specs[0].label,selected=values[key];if(selected.includes('특이 소견 없음')||selected.includes('평가 불가')){const last=host._lastChanged;values[key]=last?.checked&&['특이 소견 없음','평가 불가'].includes(last.value)?[last.value]:selected.filter(v=>!['특이 소견 없음','평가 불가'].includes(v));host.querySelectorAll('[type=checkbox]').forEach(e=>e.checked=values[key].includes(e.value));}}
   // Selecting no adverse effects must not retain earlier positive selections.
   if(specs[0]?.label==='부작용 평가'&&values['부작용 평가']!=='있음'){values['부작용 의심 증상']=[];host.querySelectorAll('[type=checkbox]').forEach(e=>e.checked=false);}
   const value=serialize(values,memo.value,specs);if(value.length>limit){error.textContent='선택값과 메모를 합쳐 '+limit+'자 이내로 입력해주세요. 이번 변경은 반영되지 않았습니다.';fill();return;}
@@ -54,7 +57,7 @@ function structured(input,specs,o,memoLabel){
 function setup(container,o){
  container.querySelectorAll('[data-field]').forEach(input=>{
   const key=input.dataset.field;
-  if(key.startsWith('examNotes.')&&noteSpecs[key.slice(10)])structured(input,noteSpecs[key.slice(10)],o,({urineCulture:'균명·감수성·메모',stoolDiet:'횟수·식이·반응 메모',adverseEffects:'상세 증상·감염 모니터링',imaging:'검사 종류·부위·주요 소견',fecalTesting:'검사 종류·검출 결과·메모',histopathology:'검체 부위·진단·상세 결과',urinalysis:'세포 수·단위·결정 종류·상세 소견',ecg:'리듬·심박수·상세 소견'})[key.slice(10)]||'상세 메모');
+  if(key.startsWith('examNotes.')&&noteSpecs[key.slice(10)])structured(input,noteSpecs[key.slice(10)],o,({urineCulture:'균명·감수성·메모',stoolDiet:'횟수·식이·반응 메모',adverseEffects:'상세 증상·감염 모니터링',imaging:'검사 부위·주요 소견·기타 검사',fecalTesting:'검사 종류·검출 결과·메모',histopathology:'검체 부위·채취 방법 보충·병리 결과',bloodSmear:'정도·세포 수·상세 소견',immuneEvidence:'채혈·수혈·치료 시점, 세척 여부·검사 조건',urinalysis:'세포 수·단위·결정 종류·상세 소견',ecg:'리듬·심박수·상세 소견'})[key.slice(10)]||'상세 메모');
   if(key==='stage'){const host=structured(input,stages(o.conditions(),o.species()),o,'분류 근거·기타 메모');if(host){const note=document.createElement('small');note.textContent='병기는 수의사 평가 후 선택합니다. 심장 분류는 개 MMVD·고양이 심근병증에 적용하며, 다른 심장질환은 메모에 기록합니다. 경과는 정식 병기가 아닙니다.';host.append(note);}}
   if(/^testContexts\.[^.]+\.medication$/.test(key)&&!input.dataset.choicesBound){input.dataset.choicesBound='1';medication(input,o);}
   if(key==='diet'&&!input.dataset.choicesBound){input.dataset.choicesBound='1';food(input,o);}

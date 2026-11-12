@@ -15,3 +15,5 @@
 
 .ar-simple .ad-settings .ar-tube-setting{grid-column:span 2}.ar-tube-setting .ric-airway{flex:1 1 100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}.ric-airway small{grid-column:1/-1;white-space:normal;overflow-wrap:anywhere;line-height:1.45}.ar-tube-setting .ric-airway select{width:100%;min-height:38px}.ar-tube-setting>[type=submit]{margin-top:4px}
 @media(max-width:900px){.ar-simple .ad-settings .ar-tube-setting{grid-column:1/-1}}
+
+.ric-grid fieldset{min-width:0;margin:0;border:0;padding:0}.ric-grid legend{font-weight:600}.ric-oxygen{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;min-width:0}.ric-oxygen label{display:flex;flex-direction:column;gap:4px;min-width:0}.ric-oxygen input,.ric-oxygen select{font:inherit;width:100%;min-width:0;max-width:100%;box-sizing:border-box}.ric-oxygen [hidden],.er-lesion input[hidden]{display:none!important}@media(max-width:600px){.ric-oxygen input,.ric-oxygen select{min-height:40px}}
