@@ -105,7 +105,7 @@ function mount(root,a){
   const state=item.startEntry||(item.startEntry={values:g.ClinicRecordStart.values({...item.patient,species:item.body.species},draft),touched:false});
   root.dataset.recordMode='new';
   g.ClinicRecordStart.mount(root,{kind:'neuro',state,values:state.values,patientId:item.patient_id,key:key,valid:valid,canEdit:edit,request:(...args)=>a.request(...args),pending:()=>!!pending,dirty:()=>dirty,identityLocked:!!previousId,
-   apply(v,registered,options){const p=g.ClinicRecordStart.patient(v);item.patient={...item.patient,...p};item.patient_id=registered?.id||'';item.body.species=p.species;draft.weight=p.weight;draft.patient={...draft.patient,breed:p.breed,birthDate:p.birthDate,sex:p.sex,neutered:p.neutered,guardianName:p.guardianName,chartNumber:p.chartNumber};dirty=true;version++;clearTimeout(timer);},
+   apply(v,registered,options){const p=g.ClinicRecordStart.patient(v);item.patient={...item.patient,...p};item.patient_id=registered?.id||'';item.body.species=p.species;draft.weight=p.weight;draft.patient={...draft.patient,breed:p.breed,birthDate:p.birthDate,sex:p.sex,neutered:p.neutered,guardianName:p.guardianName,chartNumber:p.chartNumber};if(registered){delete draft.patient.guardianName;delete draft.patient.chartNumber;}dirty=true;version++;clearTimeout(timer);},
    save:()=>save(),error:()=>message,back(){dirty=false;pending=null;void action('back');}
   });
  }
