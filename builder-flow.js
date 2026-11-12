@@ -19,7 +19,7 @@ function details(label,cls){const d=el('details',null,cls);d.append(el('summary'
 function text(id,value){const n=$(id);if(n&&n.textContent!==value)n.textContent=value;}
 function requestSync(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;sync();});}
 function confirmTemplateChange(){
- const fields=['caseProcedure','caseMedication','caseFeeding','caseActivity','caseProtection','caseExtra'];
+ const fields=['caseProcedure','caseMedication','caseFeeding','caseActivity','caseProtection','caseExtra','recheckNote'];
  const changed=fields.some(id=>$(id)?.value?.trim())||typeof validMedications==='function'&&validMedications().length>0||$('recheckManual')?.value||!!$('recheckMode')?.value;
  const following=typeof activePatientJourney!=='undefined'&&!!activePatientJourney;
  if(!changed&&!following)return true;

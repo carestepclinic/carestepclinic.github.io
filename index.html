@@ -1498,10 +1498,11 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
             </div>
 
             <div class="wizard-pane" data-wizard-pane="4">
-              <div class="wizard-pane-title"><div><h4>재진 일정</h4><p>관리 시작일 기준으로 재진일을 계산합니다.</p></div></div>
+              <div class="wizard-pane-title"><div><h4>재진 일정</h4><p>시점을 선택하면 날짜가 계산됩니다. 날짜를 직접 선택할 수도 있습니다.</p></div></div>
               <div class="recheck-panel">
-                <div class="recheck-big"><div><label class="field-label" for="recheckMode">재진 시점</label><select id="recheckMode" class="input"><option value="">미정 / 별도 안내</option><option value="3">D+3</option><option value="7">D+7</option><option value="14">D+14</option><option value="30">D+30</option><option value="60">D+60</option><option value="custom">직접 날짜 지정</option></select></div><div><label class="field-label" for="recheckManual">직접 날짜</label><input id="recheckManual" class="input hidden" type="date" min="1900-01-01" max="2099-12-31" autocomplete="off" /></div></div>
+                <div class="recheck-big"><div><label class="field-label" for="recheckMode">재진 시점</label><select id="recheckMode" class="input"><option value="">미정 / 별도 안내</option><option value="3">D+3</option><option value="7">D+7</option><option value="14">D+14</option><option value="30">D+30</option><option value="60">D+60</option><option value="custom">직접 날짜 지정</option></select></div><div><label class="field-label" for="recheckManual">재진 날짜</label><input id="recheckManual" class="input" type="date" min="1900-01-01" max="2099-12-31" autocomplete="off" /></div></div>
                 <div id="recheckResult" class="recheck-result">관리 시작일을 입력하면 재진 날짜를 계산합니다.</div>
+                <div class="field"><label class="field-label" for="recheckNote">예정 진료·추가 메모 · 선택</label><textarea id="recheckNote" class="input" rows="3" maxlength="500" placeholder="예: 혈액검사, 내복약 처방 · 복용 중인 약을 지참해주세요."></textarea></div>
                 <div class="calendar-action"><button id="downloadCalendarBtn" class="btn btn-secondary" type="button">재진 일정 파일(.ics) 다운로드</button><span id="calendarStatus" class="calendar-status">재진 날짜가 정해지면 활성화됩니다.</span></div>
                 <div class="recheck-help">재진 일정은 보호자 PDF·직원용 체크리스트·휴대폰용 안내 카드에 함께 반영됩니다. 개별 환자 상태에 따라 담당 수의사가 최종 확인해주세요.</div>
               </div>
@@ -4538,7 +4539,7 @@ function clinicEducationReady(){return !!clinicEducationChoice&&clinicEducationC
 function clinicConfirmEducation(){if(!clinicSetEducationChoice(currentTemplateId))return;renderSelect();renderBuilder();renderBuilderContext();renderFollowupGuide();toast('이번 자료에 사용할 보호자 안내자료를 선택했습니다.');}
 let currentOutput = 'pdf';
 let builderOutputBusy=false;
-let caseInfo = { patientName:'', guardianName:'', dischargeDate:'', includeNames:true, procedure:'', medication:'', feeding:'', activity:'', protection:'', extra:'', recheckMode:'', recheckManual:'' }; // 환자별 정보와 개별 퇴원지시는 메모리에만 유지하며 저장하지 않습니다.
+let caseInfo = { patientName:'', guardianName:'', dischargeDate:'', includeNames:true, procedure:'', medication:'', feeding:'', activity:'', protection:'', extra:'', recheckMode:'', recheckManual:'',recheckNote:'' }; // 환자별 정보와 개별 퇴원지시는 메모리에만 유지하며 저장하지 않습니다.
 let medications = []; // 복약정보도 메모리에만 유지합니다.
 let mobileDay = 1;
 let currentWizardStep = 1;
@@ -4677,8 +4678,8 @@ function criticalFallbackPatientReset(){
   [()=>resetIndividualOutputSelection(),()=>clearPreparedIndividualArtifacts(),()=>resetFollowupCaseNonce(),()=>resetMessagingCaseState(),()=>resetFollowupMessageEdits()].forEach(fn=>{try{fn();}catch(e){console.warn('[CARESTEP reset fallback]',e);}});
   activePatientJourney=null;activeJourneyStageSelection=[];patientJourneySelectedId='';patientJourneyBrowserSyncKey='';try{sessionStorage.removeItem(patientJourneySessionKey());}catch{}
   if(typeof followupGuideStep!=='undefined')followupGuideStep=1;if(typeof followupGuideMode!=='undefined')followupGuideMode='setup';
-  caseInfo={patientName:'',guardianName:'',dischargeDate:today,includeNames:true,procedure:'',medication:'',feeding:'',activity:'',protection:'',extra:'',recheckMode:'',recheckManual:''};medications=[];
-  const values={patientName:'',guardianName:'',dischargeDate:today,caseProcedure:'',caseMedication:'',caseFeeding:'',caseActivity:'',caseProtection:'',caseExtra:'',recheckManual:'',recheckMode:'',messagingRecipientPhone:''};Object.entries(values).forEach(([id,v])=>{const el=$(id);if(el)el.value=v;});
+  caseInfo={patientName:'',guardianName:'',dischargeDate:today,includeNames:true,procedure:'',medication:'',feeding:'',activity:'',protection:'',extra:'',recheckMode:'',recheckManual:'',recheckNote:''};medications=[];
+  const values={patientName:'',guardianName:'',dischargeDate:today,caseProcedure:'',caseMedication:'',caseFeeding:'',caseActivity:'',caseProtection:'',caseExtra:'',recheckManual:'',recheckNote:'',recheckMode:'',messagingRecipientPhone:''};Object.entries(values).forEach(([id,v])=>{const el=$(id);if(el)el.value=v;});
   if($('includePatientNames'))$('includePatientNames').checked=true;if($('messagingConsent'))$('messagingConsent').checked=false;currentCasePhase='editing';currentWizardStep=1;
   carestepSafeCall('reset_med_rows',()=>renderMedicationRows());carestepSafeCall('reset_med_preview',()=>updateMedicationPreview());carestepSafeCall('reset_builder',()=>renderBuilder());carestepSafeCall('reset_output',()=>renderCurrentOutput());carestepSafeCall('reset_readiness',()=>updateReadiness());carestepSafeCall('reset_case_badge',()=>renderGlobalCaseBadge());carestepSafeCall('reset_daily',()=>updateDailyWorkflowIndicators());return true;
 }
@@ -5356,6 +5357,7 @@ function readCaseInfoFromForm(){
   caseInfo.extra = $('caseExtra')?.value?.trim() || '';
   caseInfo.recheckMode = $('recheckMode')?.value || '';
   caseInfo.recheckManual = $('recheckManual')?.value || '';
+  caseInfo.recheckNote = $('recheckNote')?.value?.trim() || '';
   readMedicationRowsFromForm();
   renderBuilderContext();
 }
@@ -5703,18 +5705,19 @@ function recheckLabel(){
   if(caseInfo.recheckMode){ return date?`D+${caseInfo.recheckMode} · ${date}`:`D+${caseInfo.recheckMode}`; }
   return '별도 안내';
 }
+function recheckDetails(){return [recheckLabel(),caseInfo.recheckNote?.trim()].filter(Boolean).join(' · ');}
 function customPlanEntries(){
   const medSummary=medicationSummaryText(120);
-  const entries=[['진단/수술',caseInfo.procedure],['투약 공통지시',caseInfo.medication],['복약 안내표',medSummary],['식사',caseInfo.feeding],['활동/산책',caseInfo.activity],['상처/보호장비',caseInfo.protection],['재진',recheckLabel()],['추가 지시',caseInfo.extra]];
+  const entries=[['진단/수술',caseInfo.procedure],['투약 공통지시',caseInfo.medication],['복약 안내표',medSummary],['식사',caseInfo.feeding],['활동/산책',caseInfo.activity],['상처/보호장비',caseInfo.protection],['재진',recheckDetails()],['추가 지시',caseInfo.extra]];
   return entries.filter(([,v])=>String(v||'').trim());
 }
 function customPlanHtml(){
   const rows=customPlanEntries(); if(!rows.length) return '';
-  return `<div class="custom-plan-box"><strong>담당 수의사 개별 퇴원지시</strong><div class="custom-plan-grid">${rows.map(([a,b],i)=>`<div class="custom-plan-item ${a==='추가 지시'?'wide':''}"><b>${escapeHtml(a)}</b><span>${escapeHtml(compactText(b,a==='추가 지시'?110:78))}</span></div>`).join('')}</div></div>`;
+  return `<div class="custom-plan-box"><strong>담당 수의사 개별 퇴원지시</strong><div class="custom-plan-grid">${rows.map(([a,b],i)=>`<div class="custom-plan-item ${a==='추가 지시'?'wide':''}"><b>${escapeHtml(a)}</b><span>${escapeHtml(a==='재진'?b:compactText(b,a==='추가 지시'?110:78))}</span></div>`).join('')}</div></div>`;
 }
 function updateRecheckPreview(){
   readCaseInfoFromForm();
-  const manual=$('recheckManual'); if(manual){manual.classList.toggle('hidden',caseInfo.recheckMode!=='custom');manual.parentElement.hidden=caseInfo.recheckMode!=='custom';}
+  const manual=$('recheckManual'); if(manual){manual.classList.remove('hidden');manual.parentElement.hidden=false;if(caseInfo.recheckMode!=='custom'){manual.value=recheckIsoDate();caseInfo.recheckManual=manual.value;}}
   const el=$('recheckResult');
   const label=recheckLabel();
   if(el){
@@ -5747,7 +5750,7 @@ function clearCurrentDraftSafely(){
   clearPreparedIndividualArtifacts();clearCaseInfo();currentCasePhase='editing';setWizardStep(1);renderGlobalCaseBadge();toast('현재 작성 내용을 비웠습니다. 저장된 환자 기록·게시 자료·복약 일정은 유지됩니다.');return true;
 }
 function clearCaseInfo(){
-  caseInfo={patientName:'',guardianName:'',dischargeDate:'',includeNames:true,procedure:'',medication:'',feeding:'',activity:'',protection:'',extra:'',recheckMode:'',recheckManual:''};
+  caseInfo={patientName:'',guardianName:'',dischargeDate:'',includeNames:true,procedure:'',medication:'',feeding:'',activity:'',protection:'',extra:'',recheckMode:'',recheckManual:'',recheckNote:''};
   medications=[];
   renderMedicationRows();
   updateMedicationPreview();
@@ -5756,7 +5759,7 @@ function clearCaseInfo(){
   if($('dischargeDate')) $('dischargeDate').value=localTodayIso();
   caseInfo.dischargeDate=localTodayIso();
   if($('includePatientNames')) $('includePatientNames').checked=true;
-  ['caseProcedure','caseMedication','caseFeeding','caseActivity','caseProtection','caseExtra','recheckManual'].forEach(id=>{if($(id)) $(id).value='';});
+  ['caseProcedure','caseMedication','caseFeeding','caseActivity','caseProtection','caseExtra','recheckManual','recheckNote'].forEach(id=>{if($(id)) $(id).value='';});
   if($('recheckMode')) $('recheckMode').value='';
   updateCaseDatePreview(); updateRecheckPreview(); renderBuilder();
 }
@@ -8912,7 +8915,7 @@ function renderAdvancedPdf(){ refreshQrData();
   const pageNo={quick:pn(2+medPageCount),home:pn(3+medPageCount),red:pn(4+medPageCount+timelineGroups.length),log:pn(5+medPageCount+timelineGroups.length)};
   pages.push(`<div class="pdf-page pdf-cover"><div class="pdf-brandline"></div><div class="cover-hero"><span class="cover-label">PROTECT · RECORD · RECOVER</span><h1 class="cover-title">${escapeHtml(t.title)}</h1><p class="cover-desc">${escapeHtml(t.description)}<br>${escapeHtml(profileFor(t).label||'퇴원·가정관리')} 기준으로 보호자가 집에서 확인해야 할 내용을 단계별로 정리했습니다.</p><div class="cover-hospital"><div class="pdf-logo">${logoHtml()}</div><div><strong>${escapeHtml(hospitalName())}</strong><span>발행일 ${today}${hospital.director?` · 대표원장 ${escapeHtml(hospital.director)}`:''}</span></div></div>${patientCoverHtml()}</div><div class="cover-summary"><div class="pdf-mini"><strong>01. 오늘부터</strong><span>핵심 관리 원칙과 절대 놓치지 말아야 할 행동</span></div><div class="pdf-mini"><strong>02. 복약·D+${timelineDays[0]}~${timelineDays.at(-1)}</strong><span>${baseDateLabel()?`퇴원일 ${escapeHtml(baseDateLabel())} 기준 실제 날짜 자동 계산`:'회복 단계별 체크표와 재검 준비'}</span></div><div class="pdf-mini"><strong>03. 위험신호</strong><span>보호자가 기다리지 말고 병원에 연락해야 할 변화</span></div></div>${pdfFooter()}</div>`);
   const planRows=customPlanEntries();
-  pages.push(`<div class="pdf-page"><div class="pdf-brandline"></div>${pdfHeader('이 환자의 개별 퇴원계획','담당 수의사가 안내한 투약·식사·활동·보호장비·재진 지시를 한 페이지에 정리했습니다.','01 · INDIVIDUAL DISCHARGE PLAN')}<div class="pdf-callout"><strong>이 페이지의 개별 지시가 공통 안내보다 우선합니다.</strong><p>환자 상태와 시행한 진료에 따라 관리방법이 달라질 수 있습니다. 아래 내용은 이번 환자에게 입력된 병원 지시입니다.</p></div><section class="pdf-section"><div class="staff-plan"><table><tbody>${planRows.length?planRows.map(([a,b])=>`<tr><td>${escapeHtml(a)}</td><td>${escapeHtml(b)}</td></tr>`).join(''):`<tr><td>개별 지시</td><td>별도 입력 없음 · 담당 수의사의 퇴원 설명과 처방전을 우선해 주세요.</td></tr>`}</tbody></table></div></section><section class="pdf-section"><h2>회복 일정</h2><div class="pdf-grid">${timelineDays.map(day=>`<div class="pdf-mini"><strong>D+${day}</strong><span>${escapeHtml(actualDateFor(day)||`관리 시작 후 ${day}일`)}</span></div>`).join('')}</div></section><div class="pdf-callout warn"><strong>다음 재진</strong><p>${escapeHtml(recheckLabel())}${caseInfo.recheckMode?' · 재진 전 기록표·사진·영상·복약 여부를 준비해주세요.':' · 병원에서 별도로 안내한 일정을 확인해주세요.'}</p></div>${pdfFooter()}</div>`);
+  pages.push(`<div class="pdf-page"><div class="pdf-brandline"></div>${pdfHeader('이 환자의 개별 퇴원계획','담당 수의사가 안내한 투약·식사·활동·보호장비·재진 지시를 한 페이지에 정리했습니다.','01 · INDIVIDUAL DISCHARGE PLAN')}<div class="pdf-callout"><strong>이 페이지의 개별 지시가 공통 안내보다 우선합니다.</strong><p>환자 상태와 시행한 진료에 따라 관리방법이 달라질 수 있습니다. 아래 내용은 이번 환자에게 입력된 병원 지시입니다.</p></div><section class="pdf-section"><div class="staff-plan"><table><tbody>${planRows.length?planRows.map(([a,b])=>`<tr><td>${escapeHtml(a)}</td><td>${escapeHtml(b)}</td></tr>`).join(''):`<tr><td>개별 지시</td><td>별도 입력 없음 · 담당 수의사의 퇴원 설명과 처방전을 우선해 주세요.</td></tr>`}</tbody></table></div></section><section class="pdf-section"><h2>회복 일정</h2><div class="pdf-grid">${timelineDays.map(day=>`<div class="pdf-mini"><strong>D+${day}</strong><span>${escapeHtml(actualDateFor(day)||`관리 시작 후 ${day}일`)}</span></div>`).join('')}</div></section><div class="pdf-callout warn"><strong>다음 재진</strong><p>${escapeHtml(recheckDetails())}${(caseInfo.recheckMode||caseInfo.recheckNote)?' · 재진 전 기록표·사진·영상·복약 여부를 준비해주세요.':' · 병원에서 별도로 안내한 일정을 확인해주세요.'}</p></div>${pdfFooter()}</div>`);
   if(hasMeds) pages.push(medicationPageHtml(false));
   pages.push(`<div class="pdf-page"><div class="pdf-brandline"></div>${pdfHeader('가장 먼저 지켜야 할 5가지','집에서 확인할 핵심 관리 원칙을 한눈에 확인하세요.',`${pageNo.quick} · QUICK START`)}<div class="pdf-callout"><strong>개별 처방이 가장 우선입니다.</strong><p>아래 내용은 공통 보호자 교육을 위한 기준입니다. 환자의 식사·투약·운동·재검 일정은 담당 수의사의 퇴원 지시를 우선하세요.</p></div><div class="tracking-strip"><b>이 자료에서 집중해서 기록할 항목</b><div>${trackingChips(t)}</div></div><section class="pdf-section"><div class="numbered-list">${key5.map((x,i)=>`<div class="numbered-item"><b>${i+1}</b><div><p>${escapeHtml(x)}</p></div></div>`).join('')}</div></section><section class="pdf-section"><h2>${escapeHtml(s1[0])}</h2>${checklist(s1[1])}</section>${pdfFooter()}</div>`);
   pages.push(`<div class="pdf-page"><div class="pdf-brandline"></div>${pdfHeader('집에서 관리하는 방법','식사·투약·환경·증상 기록을 일관된 방식으로 관리하세요.',`${pageNo.home} · HOME CARE`)}<section class="pdf-section"><h2>${escapeHtml(s2[0])}</h2>${checklist(s2[1])}</section><section class="pdf-section"><h2>${escapeHtml(s3[0])}</h2>${checklist(s3[1])}</section><section class="pdf-section"><h2>보호자가 자주 하는 실수</h2><div class="mistake-grid">${mistakes.map(([a,b])=>`<div class="mistake"><strong>${escapeHtml(a)}</strong><span>${escapeHtml(b)}</span></div>`).join('')}</div></section>${pdfFooter()}</div>`);
@@ -8945,7 +8948,7 @@ function renderMobileCard(day=mobileDay){
   const items=(d.items||[]).slice(0,5).map(x=>`<div class="phone-check"><span class="box"></span><span>${escapeHtml(compactText(x,72))}</span></div>`).join('');
   const reds=(d.redFlags||t.redFlags||[]).slice(0,3).map(x=>escapeHtml(compactText(x,50))).join(' · ');
   const nameLine=mobilePatientLine();
-  $('phonePreview').innerHTML=`<div class="phone-card" id="activePhoneCard"><div class="phone-brand"><span class="phone-brand-name">CARESTEP · ${escapeHtml(hospitalName())}</span><div class="phone-logo">${logoHtml()}</div></div><div class="phone-day">D+${day}</div><div class="phone-date">${escapeHtml(actualDateFor(day)||'퇴원/관리 시작일 기준')} ${nameLine?`· ${escapeHtml(nameLine)}`:''}</div><h1>${escapeHtml(d.title)}</h1><div class="phone-sub">${escapeHtml(currentJourneyLabel())} · 오늘 보호자가 확인할 핵심 항목입니다.</div><div class="phone-focus"><b>TODAY'S FOCUS</b><span>${escapeHtml(d.focus)}</span></div><div class="phone-checks">${items}</div><div class="phone-red"><b>이런 변화는 기다리지 말고 연락하세요</b><div>${reds}</div></div>${caseInfo.recheckMode?`<div class="phone-recheck"><b>다음 재진</b> ${escapeHtml(recheckLabel())}</div>`:''}<div class="phone-footer"><div><strong>${escapeHtml(hospitalName())}</strong><span style="text-align:left">${hospital.director?`대표원장 ${escapeHtml(hospital.director)}`:'CARESTEP Veterinary Education'}</span></div><span>${escapeHtml(hospital.phone||'병원 대표전화')}<br>${escapeHtml(hospital.license)}</span></div></div>`;
+  $('phonePreview').innerHTML=`<div class="phone-card" id="activePhoneCard"><div class="phone-brand"><span class="phone-brand-name">CARESTEP · ${escapeHtml(hospitalName())}</span><div class="phone-logo">${logoHtml()}</div></div><div class="phone-day">D+${day}</div><div class="phone-date">${escapeHtml(actualDateFor(day)||'퇴원/관리 시작일 기준')} ${nameLine?`· ${escapeHtml(nameLine)}`:''}</div><h1>${escapeHtml(d.title)}</h1><div class="phone-sub">${escapeHtml(currentJourneyLabel())} · 오늘 보호자가 확인할 핵심 항목입니다.</div><div class="phone-focus"><b>TODAY'S FOCUS</b><span>${escapeHtml(d.focus)}</span></div><div class="phone-checks">${items}</div><div class="phone-red"><b>이런 변화는 기다리지 말고 연락하세요</b><div>${reds}</div></div>${(caseInfo.recheckMode||caseInfo.recheckNote)?`<div class="phone-recheck"><b>다음 재진</b> ${escapeHtml(recheckDetails())}</div>`:''}<div class="phone-footer"><div><strong>${escapeHtml(hospitalName())}</strong><span style="text-align:left">${hospital.director?`대표원장 ${escapeHtml(hospital.director)}`:'CARESTEP Veterinary Education'}</span></div><span>${escapeHtml(hospital.phone||'병원 대표전화')}<br>${escapeHtml(hospital.license)}</span></div></div>`;
   $('pdfDocument').classList.add('hidden'); $('messagePreview').classList.add('hidden'); $('phonePreview').classList.remove('hidden');
 }
 function staffScript(t){
@@ -8957,13 +8960,13 @@ function staffScript(t){
   if(core[2]) text+=core[2]+' ';
   if(plan.length) text+=`오늘 개별 지시는 ${plan.join(', ')}입니다. `;
   text+=`상태가 갑자기 악화되거나 ${compactText((t.redFlags||[])[0]||'위험신호',48)}이 보이면 기다리지 말고 병원으로 연락해주세요. `;
-  if(caseInfo.recheckMode) text+=`다음 재진은 ${recheckLabel()}입니다. `;
+  if(caseInfo.recheckMode||caseInfo.recheckNote) text+=`다음 재진은 ${recheckDetails()}입니다. `;
   text+='마지막으로 전달드린 CARESTEP 자료에서 오늘 체크할 항목을 확인해주세요.';
   return text;
 }
 function renderStaffSheet(){
   readCaseInfoFromForm(); const t=templates.find(x=>x.id===currentTemplateId)||templates[0];
-  const planRows=customPlanEntries().map(([a,b])=>`<tr><td>${escapeHtml(a)}</td><td>${escapeHtml(compactText(b,100))}</td></tr>`).join('') || `<tr><td>개별 지시</td><td>별도 입력 없음 · 담당 수의사의 진료지시 확인</td></tr>`;
+  const planRows=customPlanEntries().map(([a,b])=>`<tr><td>${escapeHtml(a)}</td><td>${escapeHtml(a==='재진'?b:compactText(b,100))}</td></tr>`).join('') || `<tr><td>개별 지시</td><td>별도 입력 없음 · 담당 수의사의 진료지시 확인</td></tr>`;
   const checks=[['환자·보호자 확인','환자명, 보호자명, 오늘 시행한 진료/수술을 확인'],['투약 설명','복약 안내표의 약 이름·1회 용량·횟수·시간·식사관계·기간을 처방 라벨과 대조'],['식사 설명','오늘 첫 식사 시점·1회량·금지 음식 또는 처방식 안내'],['활동 제한','산책·점프·계단·목욕·재활 등 제한 범위를 설명'],['상처·보호장비','상처 확인법, 넥카라/보호복 유지기간을 설명'],['위험신호','바로 병원에 연락해야 할 변화 2~3개를 소리 내어 안내'],['재진 일정','재진 날짜와 방문 목적을 보호자와 함께 확인'],['자료 전달','퇴원 1P 요약·보호자 PDF 또는 D+ 카드/모바일 이미지를 전달']];
   const cards=checks.map(([a,b])=>`<div class="staff-check"><span class="box"></span><div><strong>${escapeHtml(a)}</strong><span>${escapeHtml(b)}</span></div></div>`).join('');
   $('pdfDocument').innerHTML=`<div class="pdf-page staff-page"><div class="pdf-brandline"></div>${pdfHeader('직원용 퇴원교육 · 60초 설명','보호자에게 같은 순서와 같은 핵심으로 설명하기 위한 직원용 1페이지 가이드입니다.','REAL DISCHARGE · STAFF')}<div class="staff-script"><span class="tag">60-SECOND SCRIPT</span><p>${escapeHtml(staffScript(t))}</p></div><section class="pdf-section"><h2>퇴원 전 8가지 확인</h2><div class="staff-check-grid">${cards}</div></section><div class="staff-plan"><table><tbody>${planRows}</tbody></table></div><div class="staff-sign"><div>설명 직원 __________________</div><div>확인 시각 __________________</div></div>${pdfFooter()}</div>`;
@@ -9006,7 +9009,7 @@ function makeRecheckIcs(){
   const now=new Date();const stamp=now.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
   const patient=caseInfo.patientName?`${caseInfo.patientName} `:'';
   const summary=`${patient}${templateDisplayTitle(t)} 재진 · ${hospitalName()}`;
-  const desc=`CARESTEP 재진 일정\n자료: ${t.title}\n퇴원/관리 시작일: ${caseInfo.dischargeDate||'미입력'}\n재진: ${recheckLabel()}\n병원: ${hospitalName()} ${hospital.phone||''}`;
+  const desc=`CARESTEP 재진 일정\n자료: ${t.title}\n퇴원/관리 시작일: ${caseInfo.dischargeDate||'미입력'}\n재진: ${recheckDetails()}\n병원: ${hospitalName()} ${hospital.phone||''}`;
   return ['BEGIN:VCALENDAR','VERSION:2.0','CALSCALE:GREGORIAN','PRODID:-//CARESTEP//Clinic Follow-up//KO','BEGIN:VEVENT',`UID:${Date.now()}-${Math.random().toString(36).slice(2)}@carestep.local`,`DTSTAMP:${stamp}`,`DTSTART;VALUE=DATE:${dt}`,`DTEND;VALUE=DATE:${dtend}`,`SUMMARY:${icsEscape(summary)}`,`DESCRIPTION:${icsEscape(desc)}`,hospital.address?`LOCATION:${icsEscape(hospital.address)}`:'','END:VEVENT','END:VCALENDAR'].filter(Boolean).join('\r\n');
 }
 function downloadRecheckIcs(){
@@ -9015,12 +9018,12 @@ function downloadRecheckIcs(){
 }
 function renderDischargeSummary(){
   refreshQrData();readCaseInfoFromForm();const t=templates.find(x=>x.id===currentTemplateId)||templates[0];const meds=validMedications();
-  const plan=customPlanEntries().filter(([a])=>!['복약 안내표','추가 지시'].includes(a)).slice(0,5);
+  const plan=customPlanEntries().filter(([a])=>!['복약 안내표','추가 지시','재진'].includes(a)).slice(0,5);
   const planHtml=plan.length?plan.map(([a,b])=>`<div class="summary-box"><b>${escapeHtml(a)}</b><span>${escapeHtml(compactText(b,95))}</span></div>`).join(''):`<div class="summary-box summary-wide"><b>개별 지시</b><span>별도 입력 없음 · 담당 수의사의 퇴원 설명과 처방전을 우선해주세요.</span></div>`;
   const medsText=meds.length?meds.slice(0,5).map(m=>`${escapeHtml(m.name)} ${escapeHtml(m.dose||'')} · ${escapeHtml(m.frequency||'')}${m.times?` · ${escapeHtml(m.times)}`:''}`).join('<br>'):'복약 정보 없음 또는 처방전 별도 확인';
   const red=(t.redFlags||[]).slice(0,3).map(x=>`<li>${escapeHtml(compactText(x,80))}</li>`).join('');
   const patientBits=[];if(caseInfo.includeNames&&caseInfo.patientName)patientBits.push(caseInfo.patientName);if(caseInfo.procedure)patientBits.push(caseInfo.procedure);if(baseDateLabel())patientBits.push(`퇴원 ${baseDateLabel()}`);
-  $('pdfDocument').innerHTML=`<div class="pdf-page summary-page"><div class="pdf-brandline"></div>${pdfHeader('퇴원 당일 1페이지 요약','오늘 집에서 바로 확인해야 할 개별지시·복약·재진·위험신호만 한 장에 정리했습니다.','HANDOFF · DISCHARGE SUMMARY')}<div class="summary-hero"><strong>${escapeHtml(t.title)}</strong><p>${escapeHtml(patientBits.join(' · ')||t.description)}</p></div><div class="summary-grid">${planHtml}<div class="summary-box summary-wide"><b>복약 핵심</b><span>${medsText}</span></div><div class="summary-box"><b>다음 재진</b><span>${escapeHtml(recheckLabel())}</span></div><div class="summary-box"><b>D+1 확인</b><span>${escapeHtml(compactText(timelineProfile(t,1).focus,95))}</span></div><div class="summary-box summary-wide summary-red"><b>기다리지 말고 병원에 알려야 할 변화</b><ul>${red}</ul></div></div><div class="summary-contact"><span><b>${escapeHtml(hospitalName())}</b>${hospital.director?` · 대표원장 ${escapeHtml(hospital.director)}`:''}<br>${escapeHtml(hospital.phone||'병원 대표전화')}</span>${qrDataUrl?`<span><img src="${qrDataUrl}" alt="QR" style="width:52px;height:52px"></span>`:`<span>${escapeHtml(hospital.address||'')}</span>`}</div>${pdfFooter()}</div>`;
+  $('pdfDocument').innerHTML=`<div class="pdf-page summary-page"><div class="pdf-brandline"></div>${pdfHeader('퇴원 당일 1페이지 요약','오늘 집에서 바로 확인해야 할 개별지시·복약·재진·위험신호만 한 장에 정리했습니다.','HANDOFF · DISCHARGE SUMMARY')}<div class="summary-hero"><strong>${escapeHtml(t.title)}</strong><p>${escapeHtml(patientBits.join(' · ')||t.description)}</p></div><div class="summary-grid">${planHtml}<div class="summary-box summary-wide"><b>복약 핵심</b><span>${medsText}</span></div><div class="summary-box"><b>다음 재진</b><span>${escapeHtml(recheckDetails())}</span></div><div class="summary-box"><b>D+1 확인</b><span>${escapeHtml(compactText(timelineProfile(t,1).focus,95))}</span></div><div class="summary-box summary-wide summary-red"><b>기다리지 말고 병원에 알려야 할 변화</b><ul>${red}</ul></div></div><div class="summary-contact"><span><b>${escapeHtml(hospitalName())}</b>${hospital.director?` · 대표원장 ${escapeHtml(hospital.director)}`:''}<br>${escapeHtml(hospital.phone||'병원 대표전화')}</span>${qrDataUrl?`<span><img src="${qrDataUrl}" alt="QR" style="width:52px;height:52px"></span>`:`<span>${escapeHtml(hospital.address||'')}</span>`}</div>${pdfFooter()}</div>`;
   paginateGuardianDocument();
   $('pdfDocument').classList.remove('hidden');$('messagePreview').classList.add('hidden');$('phonePreview').classList.add('hidden');
 }
@@ -9042,7 +9045,7 @@ function renderMedicationCheckSheet(){
   const pages=meta.pages.map((blocks,pageIndex)=>{
     const startDay=blocks[0].startDay,endDay=blocks.at(-1).endDay;
     const range=caseInfo.dischargeDate?actualDateFor(startDay-1)+' ~ '+actualDateFor(endDay-1):startDay+'-'+endDay+'일차';
-    return '<div class="pdf-page med-check-page"><div class="pdf-brandline"></div><header class="med-check-heading"><h1>'+meta.prescriptionDays+'일 처방 투약 체크표</h1><span>'+escapeHtml(range)+' · '+(pageIndex+1)+' / '+meta.pageCount+'</span></header><div class="med-check-identity">'+escapeHtml(identity)+'</div><p class="med-check-note">시작 기준 '+escapeHtml(meta.start.date+' '+meta.start.time)+'. 총 투약 횟수를 유지합니다. 투약 후 □에 표시하세요.'+(hasEod?' 격일 약은 첫 복용일부터 이틀마다 복용합니다.':'')+' 처방 라벨을 따르고 놓친 약을 두 번 투여하지 마세요.</p><div class="med-check-content">'+blocks.map(medicationCheckWeekHtml).join('')+'</div><div class="med-check-recheck"><b>다음 재진</b> '+escapeHtml(recheckLabel())+'</div>'+pdfFooter()+'</div>';
+    return '<div class="pdf-page med-check-page"><div class="pdf-brandline"></div><header class="med-check-heading"><h1>'+meta.prescriptionDays+'일 처방 투약 체크표</h1><span>'+escapeHtml(range)+' · '+(pageIndex+1)+' / '+meta.pageCount+'</span></header><div class="med-check-identity">'+escapeHtml(identity)+'</div><p class="med-check-note">시작 기준 '+escapeHtml(meta.start.date+' '+meta.start.time)+'. 총 투약 횟수를 유지합니다. 투약 후 □에 표시하세요.'+(hasEod?' 격일 약은 첫 복용일부터 이틀마다 복용합니다.':'')+' 처방 라벨을 따르고 놓친 약을 두 번 투여하지 마세요.</p><div class="med-check-content">'+blocks.map(medicationCheckWeekHtml).join('')+'</div><div class="med-check-recheck"><b>다음 재진</b> '+escapeHtml(recheckDetails())+'</div>'+pdfFooter()+'</div>';
   });
   $('pdfDocument').dataset.r61Patient=window.crmCurrentPatient?.()?.patientId||'';
   $('pdfDocument').innerHTML=pages.join('');
@@ -9258,7 +9261,7 @@ async function saveServerFollowupState(extra={},silent=true,setupScope=null){if(
 async function loadServerFollowupState(silent=true){const linked=window.crmCurrentPatient?.()||{};if(!linked.patientId||saasMode!=='auth'||!saasToken){serverFollowupState=null;followupSafetyState=null;renderServerFollowupState();renderFollowupSafety();return null;}try{const d=await saasRequest(`/saas/followup/cases/${encodeURIComponent(followupCaseNonce)}`,{method:'GET'});serverFollowupState=d.case||null;if(serverFollowupState?.calendar?.provider){const cal=serverFollowupState.calendar,days=Object.keys(cal.events||{}).map(Number).filter(Boolean);writeFollowupCalendarSyncState({provider:cal.provider,calendarId:cal.calendarId||'',calendarName:cal.calendarName||'',days});if(cal.provider==='outlook'){const om=outlookFollowupEventMap();sessionStorage.setItem(om.key,JSON.stringify(cal.events||{}));}}serverFollowupStateStatus=serverFollowupState?.operation?.status==='partial'?'error':'saved';renderServerFollowupState();await loadFollowupSafety(true);return serverFollowupState;}catch(e){if(/찾지 못했습니다/.test(String(e?.message||''))){serverFollowupState=null;followupSafetyState=null;serverFollowupStateStatus='idle';renderServerFollowupState();renderFollowupSafety();return null;}serverFollowupStateStatus='error';renderServerFollowupState();if(!silent)toast(e.message||'서버 통합 상태를 불러오지 못했습니다.');return null;}}
 function queueServerFollowupState(extra={}){return false;}
 /* ================= v10.4-G · DELIVERY RECOVERY CENTER ================= */
-function unifiedHomeStagesPayload(){return followupSelectedStages().map(day=>{const d=followupStageData(day);return {day,title:d.title||`D+${day} 후속관리`,message:followupStageMessage(day,'kakao'),card:{journey:currentJourneyLabel(),focus:d.focus||'',checks:(d.items||[]).slice(0,6),redFlags:(d.redFlags||[]).slice(0,4),recheck:caseInfo.recheckMode?recheckLabel():'',hospitalPhone:hospital.phone||''}};});}
+function unifiedHomeStagesPayload(){return followupSelectedStages().map(day=>{const d=followupStageData(day);return {day,title:d.title||`D+${day} 후속관리`,message:followupStageMessage(day,'kakao'),card:{journey:currentJourneyLabel(),focus:d.focus||'',checks:(d.items||[]).slice(0,6),redFlags:(d.redFlags||[]).slice(0,4),recheck:(caseInfo.recheckMode||caseInfo.recheckNote)?recheckDetails():'',hospitalPhone:hospital.phone||''}};});}
 function unifiedFollowupHasDelivery(){const x=serverFollowupState;if(!x)return false;return Number(x.home?.total)>0||Number(x.messages?.scheduled)>0||['synced','pending','reconnect','failed'].includes(x.calendar?.status);}
 async function completeUnifiedFollowupOperation(id,payload){if(!id)return null;const d=await saasRequest(`/saas/followup/change-ops/${encodeURIComponent(id)}/complete`,{method:'POST',body:JSON.stringify(payload||{})});serverFollowupState=d.case||serverFollowupState;serverFollowupStateStatus=d.operation?.status==='partial'?'error':'saved';renderServerFollowupState();return d;}
 async function runUnifiedFollowupChange(reason='changed'){if(followupGuideMode==='setup'&&Number(followupGuideStep)===4&&!readFollowupGuideState().finished)return false;if(unifiedFollowupChangeRunning){unifiedFollowupChangePending=reason;return false;}unifiedFollowupChangeRunning=true;serverFollowupStateStatus='saving';renderServerFollowupState();try{if(!serverFollowupState)await loadServerFollowupState(true);if(!unifiedFollowupHasDelivery()){queueFollowupCalendarReconcile(reason);return true;}const affectedChannels=[Number(serverFollowupState?.home?.total)>0?'CARESTEP HOME':'',Number(serverFollowupState?.messages?.total)>0?'MMS·LMS·알림톡':''].filter(Boolean);if(!confirm(`이미 등록·발송된 항목을 수정합니다.\n\n영향받는 채널: ${affectedChannels.join(', ')||'없음'}\n각 채널의 일정은 함께 변경되며 이미 수신된 메시지는 회수되지 않습니다. 계속할까요?`))return false;readCaseInfoFromForm();const requestKey=`change:${followupCaseNonce}:${Date.now()}:${reason}`,d=await saasRequest(`/saas/followup/cases/${encodeURIComponent(followupCaseNonce)}/change`,{method:'POST',body:JSON.stringify({...serverFollowupCorePayload({status:'active'}),requestKey,reason,homeStages:unifiedHomeStagesPayload()})});serverFollowupState=d.case||serverFollowupState;let calendarStatus=d.actions?.syncCalendar?'pending':'not_required',calendarError='',messageStatus=d.actions?.rescheduleMessages?'pending_reschedule':'not_required',messageError='';if(d.actions?.syncCalendar){const provider=serverFollowupState?.calendar?.provider||readFollowupCalendarSyncState().provider;try{let ok=false;if(provider==='google'&&googleCalendarReady())ok=await syncGoogleFollowup({auto:true,advance:false,reason});else if(provider==='outlook'&&microsoftCalendarAccount)ok=await syncOutlookFollowup({auto:true,advance:false,reason});else{calendarStatus='reconnect';calendarError='캘린더 OAuth 재연결 필요';}if(ok)calendarStatus='completed';else if(calendarStatus==='pending'){calendarStatus='failed';calendarError='캘린더 자동 변경 실패';}}catch(e){calendarStatus='failed';calendarError=String(e?.message||'캘린더 자동 변경 실패');}}if(d.actions?.rescheduleMessages){try{if(d.actions.messageChannel&&$('messagingChannel'))$('messagingChannel').value=d.actions.messageChannel;window.crmSyncFollowupPhone?.({force:true});await new Promise(r=>setTimeout(r,120));const result=await scheduleFollowupMessages({automatic:true,silent:true,keepGuide:true});if(result)messageStatus='completed';else{messageStatus='needs_phone';messageError='보호자 번호 또는 예약 조건을 다시 확인해야 합니다.';}}catch(e){messageStatus='failed';messageError=String(e?.message||'외부발송 재예약 실패');}}const finished=await completeUnifiedFollowupOperation(d.operation?.id,{calendarStatus,messageStatus,calendarError,messageError});if(finished?.operation?.status==='completed')toast('후속관리 계획 변경을 반영했습니다.');else toast('일부 채널은 재연결 또는 확인이 필요합니다. 서버 통합 상태를 확인해주세요.');await Promise.allSettled([loadMessagingJobs(false),loadServerFollowupState(true)]);return finished?.operation?.status==='completed';}catch(e){serverFollowupStateStatus='error';renderServerFollowupState();toast(e?.message||'통합 후속관리 변경에 실패했습니다.');return false;}finally{unifiedFollowupChangeRunning=false;const pending=unifiedFollowupChangePending;unifiedFollowupChangePending='';if(pending)queueUnifiedFollowupChange(pending);}}
@@ -9859,7 +9862,7 @@ function scrollToFollowupExecution(){
 }
 function followupSettings(){const raw=workflowSettings.followup||defaultWorkflowSettings.followup,defaultStages=(Array.isArray(raw.stages)?raw.stages:defaultWorkflowSettings.followup.stages).map(Number).filter(d=>d>=1&&d<=365);const stages=activePatientJourney?activeJourneyStageSelection:defaultStages;return {stages:[...new Set(stages)].sort((a,b)=>a-b),time:/^\d{2}:\d{2}$/.test(String(raw.time||''))?raw.time:'10:00',alarmMinutes:Math.max(0,Number(raw.alarmMinutes)||0)};}
 function followupSelectedStages(){return followupSettings().stages;}
-async function scheduleHomeFollowups(options={}){readCaseInfoFromForm();const linked=window.crmCurrentPatient?.(),patientId=linked?.patientId;if(!patientId)return {ok:false,skipped:true,reason:'환자 CRM 미연결'};if(!caseInfo.dischargeDate)throw new Error('CARESTEP HOME 발송을 위해 관리 시작일을 입력해주세요.');const days=followupSelectedStages(),stages=days.map(day=>{const d=followupStageData(day);return {day,title:d.title||`D+${day} 후속관리`,message:followupStageMessage(day,'kakao'),card:{journey:currentJourneyLabel(),focus:d.focus||'',checks:(d.items||[]).slice(0,6),redFlags:(d.redFlags||[]).slice(0,4),recheck:caseInfo.recheckMode?recheckLabel():'',hospitalPhone:hospital.phone||''}};});if(!stages.length)return {ok:false,skipped:true,reason:'선택 단계 없음'};const result=await saasRequest(`/saas/patients/${encodeURIComponent(patientId)}/home-followups`,{method:'POST',body:JSON.stringify({startDate:caseInfo.dischargeDate,caseKey:followupCaseNonce,journeyId:activePatientJourney?.id||'',stages})});if(!options.skipStateRefresh)await loadServerFollowupState(true);return result;}
+async function scheduleHomeFollowups(options={}){readCaseInfoFromForm();const linked=window.crmCurrentPatient?.(),patientId=linked?.patientId;if(!patientId)return {ok:false,skipped:true,reason:'환자 CRM 미연결'};if(!caseInfo.dischargeDate)throw new Error('CARESTEP HOME 발송을 위해 관리 시작일을 입력해주세요.');const days=followupSelectedStages(),stages=days.map(day=>{const d=followupStageData(day);return {day,title:d.title||`D+${day} 후속관리`,message:followupStageMessage(day,'kakao'),card:{journey:currentJourneyLabel(),focus:d.focus||'',checks:(d.items||[]).slice(0,6),redFlags:(d.redFlags||[]).slice(0,4),recheck:(caseInfo.recheckMode||caseInfo.recheckNote)?recheckDetails():'',hospitalPhone:hospital.phone||''}};});if(!stages.length)return {ok:false,skipped:true,reason:'선택 단계 없음'};const result=await saasRequest(`/saas/patients/${encodeURIComponent(patientId)}/home-followups`,{method:'POST',body:JSON.stringify({startDate:caseInfo.dischargeDate,caseKey:followupCaseNonce,journeyId:activePatientJourney?.id||'',stages})});if(!options.skipStateRefresh)await loadServerFollowupState(true);return result;}
 function saveFollowupSettings(){const stages=[...document.querySelectorAll('.followup-stage-setting:checked')].map(x=>Number(x.value)).filter(d=>d>=1&&d<=365),time=$('followupTime')?.value||'10:00',alarmMinutes=Math.max(0,Number($('followupAlarm')?.value)||0);if(activePatientJourney){activeJourneyStageSelection=stages;workflowSettings.followup={...(workflowSettings.followup||{}),time,alarmMinutes};}else workflowSettings.followup={stages,time,alarmMinutes};saveWorkflowSettings();renderFollowupCenter();queueUnifiedFollowupChange('settings_changed');}
 function followupDateObject(day){const parts=String(caseInfo.dischargeDate||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!parts)return null;const [hh,mm]=(followupSettings().time||'10:00').split(':').map(Number);return new Date(Date.UTC(Number(parts[1]),Number(parts[2])-1,Number(parts[3])+Number(day||0),(Number.isFinite(hh)?hh:10)-9,Number.isFinite(mm)?mm:0));}
 function icsDateLocal(d){if(!(d instanceof Date)||Number.isNaN(d.getTime()))return '';return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}00`;}
@@ -10079,7 +10082,7 @@ async function downloadDischargePackage(){
     if(selected.mobileall){for(const day of [1,3,7,14]){const blob=await mobileCardPngBlob(day);if(blob){followFolder.file(`${base}_D+${day}_모바일카드_1080x1920.png`,blob);count++;}}}
     if(selected.calendar){followFolder.file(`${base}_재진일정.ics`,makeRecheckIcs());count++;}
     if(selected.followup){followFolder.file(`${base}_후속관리자동알림.ics`,makeFollowupIcs());followFolder.file(`${base}_D+후속관리_발송문구.txt`,makeFollowupMessagePack());count+=2;}
-    const info=`CARESTEP DISCHARGE & FOLLOW-UP 패키지\n병원: ${hospitalName()}\n자료: ${t.title}\n환자: ${caseInfo.patientName||'미표시'}\n퇴원일: ${caseInfo.dischargeDate||'미입력'}\n재진: ${recheckLabel()}\n생성 파일: ${count}개\n\n00_퇴원당일: 보호자에게 오늘 전달할 자료\n01_후속관리: D+ 카드·휴대폰용 안내 카드·재진 일정 파일·자동알림\n\n이 패키지를 내려받는 것만으로 HOME에 공개나 복약 일정 등록이 이루어지지 않습니다. HOME에 자료를 게시하거나 복약 일정을 등록한 경우 해당 정보는 서버에 보관됩니다.`;
+    const info=`CARESTEP DISCHARGE & FOLLOW-UP 패키지\n병원: ${hospitalName()}\n자료: ${t.title}\n환자: ${caseInfo.patientName||'미표시'}\n퇴원일: ${caseInfo.dischargeDate||'미입력'}\n재진: ${recheckDetails()}\n생성 파일: ${count}개\n\n00_퇴원당일: 보호자에게 오늘 전달할 자료\n01_후속관리: D+ 카드·휴대폰용 안내 카드·재진 일정 파일·자동알림\n\n이 패키지를 내려받는 것만으로 HOME에 공개나 복약 일정 등록이 이루어지지 않습니다. HOME에 자료를 게시하거나 복약 일정을 등록한 경우 해당 정보는 서버에 보관됩니다.`;
     zip.file('00_README.txt',info);
     const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${base}_퇴원_후속관리패키지_CARESTEP.zip`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
@@ -10316,9 +10319,9 @@ $('savePilotFeedback')?.addEventListener('click',savePilotFeedback);
 $('dischargeDate')?.addEventListener('change',()=>{ readCaseInfoFromForm(); currentCasePhase='editing';updateCaseDatePreview(); updateRecheckPreview(); requestBuilderPreview(); updateReadiness(); renderFollowupCenter();renderGlobalCaseBadge();queueUnifiedFollowupChange('start_date_changed'); });
 $('includePatientNames')?.addEventListener('change',()=>{ readCaseInfoFromForm(); requestBuilderPreview(); });
 $('clearCaseInfo')?.addEventListener('click',clearCurrentDraftSafely);
-['caseProcedure','caseMedication','caseFeeding','caseActivity','caseProtection','caseExtra'].forEach(id=>$(id)?.addEventListener('input',()=>{readCaseInfoFromForm();requestBuilderPreview();updateReadiness();}));
+['caseProcedure','caseMedication','caseFeeding','caseActivity','caseProtection','caseExtra','recheckNote'].forEach(id=>$(id)?.addEventListener('input',()=>{readCaseInfoFromForm();requestBuilderPreview();updateReadiness();}));
 $('recheckMode')?.addEventListener('change',()=>{readCaseInfoFromForm();updateRecheckPreview();requestBuilderPreview();updateReadiness();});
-$('recheckManual')?.addEventListener('change',()=>{readCaseInfoFromForm();updateRecheckPreview();requestBuilderPreview();updateReadiness();});
+$('recheckManual')?.addEventListener('change',()=>{$('recheckMode').value=$('recheckManual').value?'custom':'';readCaseInfoFromForm();updateRecheckPreview();requestBuilderPreview();updateReadiness();});
 $('mobileDaySelect')?.addEventListener('change',e=>{mobileDay=Number(e.target.value||1); if(currentOutput==='mobile')requestBuilderPreview();});
 $('medicationCheckStartTime')?.addEventListener('change',e=>{
   const time=e.target.value;
@@ -10882,7 +10885,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 
 /* HOTFIX 27 · clinic-scoped follow-up message presets · dynamic tokens · no patient PII */
 </script>
-<script src="clinic-reliability.js?v=20261031-practical-terms"></script>
+<script src="clinic-reliability.js?v=20261112-recheck"></script>
 <script src="patient-breeds.js?v=9.5.3"></script>
 <script src="patient-crm.js?v=20261106-interface11"></script>
 <script src="patient-timeline.js?v=20261031-state-labels"></script>
@@ -10980,7 +10983,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <link rel="stylesheet" href="clinic-followup-tasks.css?v=20261104-followup-controls">
 <script src="clinic-followup-tasks.js?v=20261104-followup-controls"></script>
 <link rel="stylesheet" href="builder-flow.css?v=20261105-flow3">
-<script src="builder-flow.js?v=20261105-flow3"></script>
+<script src="builder-flow.js?v=20261112-recheck"></script>
 <link rel="stylesheet" href="clinic-calm.css?v=20261108-top-tabs">
 <script src="clinic-update-notice.js?v=20261107-review-polish"></script>
 </body>
