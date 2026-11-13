@@ -1,0 +1,109 @@
+/* A4 report typography. Physical margins and identity come from the report snapshot. */
+.report-part{font:400 10.5pt/1.55 CarestepReport,sans-serif;color:#272e2c;margin:0 0 6mm;overflow-wrap:anywhere}
+h1,h2,h3,p,figure{margin:0}
+h1{font-size:25pt;font-weight:700;line-height:1.2;color:#174c46;margin:3mm 0 6mm}
+h2,h3{font-weight:600;color:#245e55;break-after:avoid}
+h3{font-size:11.5pt;line-height:1.4;margin:0 0 2mm}
+.part-title{font-size:15pt;line-height:1.3;border-bottom:1.5pt solid #43756b;padding:0 0 2mm;margin:0 0 4mm;break-after:avoid}
+p{white-space:pre-wrap;orphans:3;widows:3}
+a{color:inherit;text-decoration:none}
+.muted,.report-meta,.report-prior,.report-coverage,.guide-intro,.report-guide,.guide-footer{font-size:8.5pt;line-height:1.45;color:#52615b}
+.muted{margin:0 0 3mm}
+.draft{font-size:9pt;color:#75491c;border:1px solid #bba88c;padding:2mm;margin:3mm 0;break-inside:avoid}
+.hospital-cover{display:flex;align-items:center;gap:5mm;margin:0 0 7mm;break-inside:avoid}
+.hospital-cover strong{font-size:15pt;font-weight:700;color:#194d46}
+.hospital-cover img{width:28mm;height:18mm;object-fit:contain}
+.hospital-cover p{font-size:8.5pt;color:#52615b;margin-top:1mm}
+.report-kicker{font-size:8.5pt;letter-spacing:1pt;color:#52615b}
+.patient-block{border-top:1px solid #9eb8ae;border-bottom:1px solid #c9d6cf;padding:3mm 0;break-inside:avoid}
+.patient-block strong{font-size:16pt;font-weight:600;color:#273c35}
+.patient-block p{margin-top:1mm;font-size:10pt}
+.report-meta{display:flex;flex-wrap:wrap;gap:2mm 6mm;margin:3mm 0 5mm}
+.report-meta b{font-weight:500;color:#303c37}
+.cover-summary{margin:0 0 4mm}
+.cover-summary h2,.report-toc h2{font-size:12pt;margin:0 0 2mm}
+.report-highlights{padding-left:5mm;margin:0}
+.report-highlights li{padding-left:1mm;margin-bottom:2mm;white-space:pre-wrap;orphans:2;widows:2}
+.cover-actions{border-left:2pt solid #6e9487;padding-left:3mm;margin:3mm 0}
+.cover-actions .report-note{margin:0 0 2mm;break-inside:avoid}
+.cover-actions h3{font-size:9pt;margin-bottom:1mm}
+.cover-actions p{font-size:9.5pt}
+.report-coverage{margin:3mm 0 1mm}
+.report-prior{margin:0 0 2mm}
+.report-guide{border-top:1px solid #c9d6cf;margin-top:4mm;padding-top:2mm}
+.report-toc{margin-top:4mm;break-inside:avoid}
+.report-toc table{font-size:9pt;margin:0}
+.report-toc td{width:50%;padding:1.5mm 3mm 1.5mm 0;border:0}
+.toc-link{display:block;border-bottom:1px dotted #bdcbc5;position:relative;padding-right:9mm}
+.toc-page{position:absolute;right:0;font-variant-numeric:tabular-nums;min-width:7mm;text-align:right;background:white}
+.toc-label{background:white;padding-right:2mm}
+.report-part[data-report-part="1"]{break-before:page}
+.report-part[data-report-part="1"][data-compact=true]{break-before:auto}
+.report-note{margin:0 0 4mm}
+.report-problem{margin:0 0 5mm;break-inside:auto}
+.report-problem h3{padding:0 0 1.5mm;border-bottom:1px solid #d1dcd6}
+.report-problem p+p{margin-top:2.5mm}
+.plan-section-title{font-size:12pt;margin:4mm 0 3mm}
+table{border-collapse:collapse;width:100%;table-layout:fixed;font:400 9.5pt/1.4 CarestepReport,sans-serif;margin-bottom:3mm}
+thead{display:table-header-group}
+th,td{text-align:left;vertical-align:top;padding:2mm 1.6mm;border-bottom:1px solid #d8e0db;white-space:pre-wrap;overflow-wrap:anywhere}
+thead th{font-weight:600;background:#f0f4f1;border-top:1px solid #aebfb5;border-bottom:1px solid #aebfb5;color:#304c3d}
+tr{break-inside:avoid}
+td small,th small{display:block;font-size:8.5pt;line-height:1.35;color:#52615b;margin-top:1mm}
+.numeric{text-align:right;font-variant-numeric:tabular-nums}
+.lab-abnormal{color:#a32920!important;font-weight:600}
+.comparison-note{font-size:8.5pt;text-align:left}
+.lab-group{margin-bottom:3mm}
+.lab-group h3{font-size:10.5pt;margin:0 0 1.5mm;padding-top:2mm;border-top:1px solid #c3d2c8}
+.group-source{font-size:8.5pt;font-weight:400;float:right;color:#52615b}
+.lab-table th:first-child{width:24%}
+.lab-table th:nth-child(2){width:18%}
+.lab-table th:nth-child(3){width:15%}
+.lab-table th:nth-child(4){width:23%}
+.lab-table th:nth-child(5){width:20%}
+.lab-table.with-prior th:first-child{width:21%}
+.lab-table.with-prior th:nth-child(2){width:14%}
+.lab-table.with-prior th:nth-child(3){width:23%}
+.lab-table.with-prior th:nth-child(4){width:10%}
+.lab-table.with-prior th:nth-child(5){width:17%}
+.lab-table.with-prior th:nth-child(6){width:15%}
+.photo-row{display:flex;gap:4mm;margin:3mm 0;break-inside:avoid}
+.photo-row figure{width:calc(50% - 2mm);margin:0;break-inside:avoid}
+.photo-row.featured figure{width:100%}
+.photo-row img{display:block;width:100%;height:58mm;object-fit:contain;border:1px solid #c8d5cd}
+.photo-row.featured img{height:82mm}
+.photo-row figcaption{font-size:9pt;line-height:1.4;margin-top:1.5mm;white-space:pre-wrap}
+.guide-intro{margin:0 0 3mm}
+.guide-footer{border-top:1px solid #d1dcd6;margin-top:3mm;padding-top:2mm}
+.lab-guide-grid,.exam-guide-grid{display:block}
+.lab-guide,.exam-guide{border:1px solid #c7d6cc;padding:3mm;margin:0 0 3mm;break-inside:avoid;font-size:9.5pt;line-height:1.45}
+.lab-guide h3,.exam-guide h3{font-size:10.5pt}
+.lab-guide p,.exam-guide p{margin:1mm 0;white-space:normal}
+.lab-guide small,.exam-guide small{display:block;font-size:8.5pt;line-height:1.4;color:#52615b;margin-top:2mm}
+.guide-names{font-size:8.5pt;color:#52615b}
+.bcs-result{font-size:11pt;border-left:2pt solid #739284;padding:2mm 3mm;margin:3mm 0}
+.bcs-result strong{font-size:15pt}
+.bcs-grid{display:flex;gap:3mm;break-inside:avoid}
+.bcs-card{width:33.33%;border:1px solid #b9cabe;padding:2.5mm;font-size:9pt;line-height:1.4}
+.bcs-card svg{width:100%;height:35mm;display:block}
+.bcs-card h3{font-size:9.5pt}
+.bcs-current{border:2px solid #426c56}
+.bcs-marker{display:block;font-size:9pt;color:#345b46;margin-top:2mm}
+.mcs-guide{margin-top:3mm}
+
+.lab-table td,.lab-table thead{break-inside:avoid}
+
+.lab-table td{padding-top:1.5mm;padding-bottom:1.5mm}
+.lab-table td .lab-name{display:inline;margin:0 0 0 1mm}
+.comparison-note.is-comparable{display:inline;margin-left:2mm;white-space:nowrap}
+
+.report-part[data-keep-together=true]{break-inside:avoid}
+.finding-table{margin:0 0 4mm}
+.finding-row{display:block;width:100%;padding:2mm 0;margin:0!important;border-bottom:1px solid #d8e0db;font-size:10pt;line-height:1.5;break-inside:avoid}
+.finding-row strong{display:inline-block;width:29%;vertical-align:top;font-weight:500;color:#304c3d;padding-right:3mm}
+.finding-row span{display:inline-block;width:70%;vertical-align:top}
+.plan-row{display:block;width:100%;border-bottom:1px solid #dde4df;padding:2mm 0;font-size:10pt;line-height:1.5;break-inside:avoid}
+.plan-row b{display:inline-block;width:25mm;vertical-align:top;padding-right:3mm;font-size:9pt;font-weight:500;color:#355d4e}
+.plan-row span{display:inline-block;width:calc(100% - 26mm);vertical-align:top}
+.plan-long h4{font-size:9pt;font-weight:500;color:#355d4e;margin:2mm 0;break-after:avoid}
+.plan-long p{margin-bottom:2mm}

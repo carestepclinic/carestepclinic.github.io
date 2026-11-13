@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {chromium}=require('playwright');
 const api=require('../healthcheck-record.js');
-const render=(d,species='dog')=>api.reportHTML({...api.blank(),...d},{name:'가상 환자',species},[]);
+const render=(d,species='dog')=>api.reportHTML({...api.blank(),...d},{name:'가상 환자',species},[],{},{includeGuides:true});
 
 test('empty or merely selected exams have no invented education or normal findings',()=>{
  const html=render({examSelection:['skin','nutrition'],exams:{skin:' ',oral:''}});
@@ -50,11 +50,11 @@ test('imaging findings keep their section and do not get unrelated first-tab gui
 for(const species of ['dog','cat'])test('print and mobile guide layout stays inside page '+species,async()=>{
  const browser=await chromium.launch({executablePath:process.env.HQ_TEST_BROWSER,headless:true});
  try{
-  const p=await browser.newPage({viewport:{width:1100,height:1000}});
+  const p=await browser.newPage({viewport:{width:1100,height:1000}});await require('./report-assets.cjs').routeReportAssets(p.context());
   const keys=['physical','skin','ears','eyes','oral','cardiac','respiratory','abdomen','musculoskeletal','neurologic','other'];
   const d={bcs:species==='cat'?7:4,mcs:'가벼운 근육 소실 (Mild loss)',exams:Object.fromEntries(keys.map(k=>[k,'관찰 소견 · 의료진 재검 계획 확인'])),clinicalStatus:'complete'};
-  await p.setContent(render(d,species));
-  const nutrition=p.locator('.report-part').filter({has:p.locator('.bcs-grid')});
+  await p.setContent(render(d,species));await p.waitForFunction(()=>document.body.dataset.reportReady==='true');
+  const nutrition=p.locator('.report-part').filter({has:p.locator('.bcs-grid')}).first();
   await nutrition.screenshot({path:path.join(__dirname,'../../healthcheck-exam-guide-'+species+'.png')});
   await p.emulateMedia({media:'print'});
   const sizes=await p.locator('.report-part').evaluateAll(es=>es.map(e=>({h:e.getBoundingClientRect().height,w:e.scrollWidth,c:e.clientWidth})));
