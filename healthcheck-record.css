@@ -24,3 +24,6 @@
 .hc-lab-abnormal [data-lab="value"]{border-color:#d17971;background:#fff8f7}
 
 .hc-list-card{display:flex;flex-direction:column;min-width:0;border:1px solid #d5e0de;border-radius:10px;background:#fff;padding:8px;gap:6px}.hc-list-card [data-open]{border:0;flex:1;width:100%;overflow-wrap:anywhere}.hc-record .hc-delete{color:#ae3434;border-color:#e5bcbc;align-self:flex-end}.hc-list-card .hc-delete{text-align:center;display:block}.hc-record .hc-main-actions .hc-delete{align-self:auto}
+
+/* Read and review the report in its printed order. */
+.hc-summary-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:18px}.hc-summary-grid textarea{min-height:160px;line-height:1.75}.hc-summary-grid [data-prose=overview]{min-height:110px}.hc-summary-grid [data-prose-count]{display:block;text-align:right;color:#627a76;font-size:12px}.hc-report-intro{padding:14px;border:1px solid #d5e2de;border-radius:10px;background:#f5faf8;margin-bottom:14px}.hc-report-intro p{margin:6px 0 12px}.hc-report-intro [data-prior]{margin-top:10px}.hc-report-intro select{max-width:100%}

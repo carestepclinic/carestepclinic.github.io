@@ -37,7 +37,7 @@ async function setup(width=1440){
  if(url.includes('/patient-directory'))return {patients:[patient]};
  if(url.endsWith('/healthcheck-summary')&&aiHold)await new Promise(r=>releaseAI=r);
  if(url.includes('/healthcheck-images?')){const id=new URL('http://localhost'+url).searchParams.get('id');if(window.failPhoto===id){window.failPhoto='';throw Error('temporary photo failure');}return {dataUrl:photoBytes[id]};}
- if(url.endsWith('/healthcheck-summary'))return {summary:'입력 검사 기반 소견',management:'의료진 관리계획',followup:'재검 검토',questions:'확인할 사항',source:'a'.repeat(64)};
+ if(url.endsWith('/healthcheck-summary'))return {overview:'첫 장 핵심 소견',summary:'입력 검사 기반 소견',management:'의료진 관리계획',followup:'재검 검토',questions:'확인할 사항',source:'a'.repeat(64)};
  if(url.endsWith('/lab-import')&&window.importFixture)return window.importFixture;
  if(url.endsWith('/lab-import'))return {reportDate:reportDate||new Date(Date.now()+32400000).toISOString().slice(0,10),singleReport:true,warnings:[],results:[{name:'CREA',value:'2.4',unit:'mg/dL',reference:'0.5–1.8',source:'시험 검사실'}]};
  if(url.endsWith('/cases')&&b){if(b.patientId&&('guardianName' in b.healthcheckChart.patient||'chartNumber' in b.healthcheckChart.patient))throw Error('master identity leak');stored={id:'record-1',revision:1,patient_id:b.patientId||'',patient:b.patientId?patient:{...b.quickPatient,species:b.species},body:{species:b.species,healthcheckChart:b.healthcheckChart}};return {id:stored.id};}
@@ -240,4 +240,22 @@ test('healthcheck editor delete retries same request without losing draft and re
  assert.equal(await p.evaluate(()=>new Set(calls.filter(x=>x.b?.kind==='case.delete').map(x=>x.b.requestKey)).size),1);
  await p.evaluate(()=>{stored.body.deleted=null;editable=false;view.open();});await p.locator('[data-open]').waitFor();assert.equal(await p.locator('[data-delete]').count(),0);
  await p.locator('[data-open]').click();await p.locator('[data-hc-editor]').waitFor();assert.equal(await p.locator('[data-action=delete]').count(),0);assert.deepEqual(errors,[]);await p.close();
+});
+
+test('report overview and selected previous examination survive save and are included in AI and print',async()=>{
+ const {p,errors}=await setup();await start(p);await lab(p);await p.evaluate(()=>{previous=structuredClone(stored);previous.id='previous';previous.body.healthcheckChart.date='2025-01-01';previous.body.healthcheckChart.labs=[HealthcheckRecord.row({name:'CREA',value:'1.1',unit:'mg/dL',reference:'0.5–1.8',source:'시험 검사실',confirmed:true})];});
+ await p.locator('[data-step=summary]').click();await p.locator('[data-summary-previous]').click();await p.locator('[data-prior-id]').selectOption('previous');await p.waitForFunction(()=>document.querySelector('[data-prior]').textContent.includes('비교 검사일'));
+ await p.locator('[data-prose=overview]').fill('의료진 첫 장 요약');await p.locator('[data-action=save]').click();await p.waitForFunction(()=>stored.revision===2);assert.equal(await p.evaluate(()=>stored.body.healthcheckChart.comparisonRecordId),'previous');
+ await p.evaluate(()=>view.openRecord('record-1'));await p.locator('[data-step=summary]').click();assert.equal(await p.locator('[data-prose=overview]').inputValue(),'의료진 첫 장 요약');await p.locator('[data-ai-consent]').check();await p.locator('[data-action=ai]').click();await p.locator('[data-action=apply-ai]').waitFor();assert.equal(await p.evaluate(()=>calls.filter(x=>x.url.endsWith('/healthcheck-summary')).at(-1).b.chart.comparisonRecordId),'previous');assert.equal(await p.locator('[data-ai-pick=overview]').isChecked(),false);assert.equal(await p.locator('[data-prose=overview]').inputValue(),'의료진 첫 장 요약');
+ const popupPromise=p.waitForEvent('popup');await p.locator('[data-action=print]').click();const popup=await popupPromise;await popup.locator('.report-part').first().waitFor();assert.match(await popup.locator('body').innerText(),/2025-01-01/);assert.match(await popup.locator('.report-part').first().innerText(),/의료진 첫 장 요약/);await popup.close();assert.deepEqual(errors,[]);await p.close();
+});
+test('numeric comparison defers mixed units, references, laboratories, specimens and duplicates',()=>{
+ const h=require('../healthcheck-record.js'),r={name:'CREA',value:'2.4',unit:'mg/dL',source:'Lab A',reference:'0.5–1.8',confirmed:true},prev={date:'2025-01-01',labs:[{...r,value:'1.1'}]};assert.equal(h.labComparison(r,prev,[r]).note,'변화 +1.3');
+ for(const patch of [{unit:'umol/L'},{source:'Lab B'},{reference:'0.7–2.0'},{source:''},{confirmed:false}]){const result=h.labComparison(r,{...prev,labs:[{...prev.labs[0],...patch}]},[r]);assert.notEqual(result.comparable,true);assert.match(result.note,/대조 필요/);}
+ assert.match(h.labComparison(r,{...prev,labs:[prev.labs[0],prev.labs[0]]},[r]).note,/중복/);assert.match(h.labComparison(r,prev,[r,r]).note,/중복/);
+ assert.match(h.labComparison({...r,name:'GLU',group:'요검사'},{labs:[{...r,name:'GLU',group:'혈당'}]},[]).note,/없음/);
+});
+test('professional report keeps overview first, detailed plans and general guidance last without private notes',()=>{
+ const h=require('../healthcheck-record.js'),d={...h.blank(),date:'2026-11-13',overview:'첫 장만의 요약',summary:'[확인 소견]\n자세한 소견 본문',management:'[관찰]\n목표: 목표 문장\n실천 방법: 실행 문장',followup:'[추적]\n권고 시점: 수의사 확인 후 결정',questions:'PRIVATE_REVIEW_ONLY',exams:{skin:'발적'},clinicalStatus:'complete',reviewed:true,veterinarian:'가상 수의사'};
+ const html=h.reportHTML(d,{name:'가상 환자',species:'cat'},[],{name:'병원명 <script>alert(1)</script>'});const first=html.split('<section class="report-part"')[1];assert.match(first,/첫 장만의 요약/);assert.doesNotMatch(first,/자세한 소견 본문/);assert.doesNotMatch(html,/PRIVATE_REVIEW_ONLY|<script>alert/);assert.ok(html.indexOf('자세한 소견 본문')<html.indexOf('실행 문장'));assert.ok(html.indexOf('실행 문장')<html.indexOf('data-exam-guide='));assert.match(html,/counter\(page\).*counter\(pages\)/);assert.match(html,/plan-row/);
 });
