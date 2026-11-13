@@ -22,3 +22,5 @@
 /* Confirmed reference-range deviations are consistent with printed reports. */
 .hc-lab-abnormal [data-lab="value"],.hc-lab-abnormal [data-range]{color:#b42318!important;font-weight:700}
 .hc-lab-abnormal [data-lab="value"]{border-color:#d17971;background:#fff8f7}
+
+.hc-list-card{display:flex;flex-direction:column;min-width:0;border:1px solid #d5e0de;border-radius:10px;background:#fff;padding:8px;gap:6px}.hc-list-card [data-open]{border:0;flex:1;width:100%;overflow-wrap:anywhere}.hc-record .hc-delete{color:#ae3434;border-color:#e5bcbc;align-self:flex-end}.hc-list-card .hc-delete{text-align:center;display:block}.hc-record .hc-main-actions .hc-delete{align-self:auto}

@@ -41,11 +41,12 @@ async function setup(width=1440){
  if(url.endsWith('/lab-import')&&window.importFixture)return window.importFixture;
  if(url.endsWith('/lab-import'))return {reportDate:reportDate||new Date(Date.now()+32400000).toISOString().slice(0,10),singleReport:true,warnings:[],results:[{name:'CREA',value:'2.4',unit:'mg/dL',reference:'0.5–1.8',source:'시험 검사실'}]};
  if(url.endsWith('/cases')&&b){if(b.patientId&&('guardianName' in b.healthcheckChart.patient||'chartNumber' in b.healthcheckChart.patient))throw Error('master identity leak');stored={id:'record-1',revision:1,patient_id:b.patientId||'',patient:b.patientId?patient:{...b.quickPatient,species:b.species},body:{species:b.species,healthcheckChart:b.healthcheckChart}};return {id:stored.id};}
+ if(url.endsWith('/events')&&b&&b.kind==='case.delete'){if(window.deleteFail){window.deleteFail=false;throw Error('temporary delete failure');}stored.body.deleted={at:'2026-11-13'};stored.revision++;return {id:stored.id};}
  if(url.endsWith('/events')&&b){if(failAt&&stored.revision===failAt){failAt=0;throw Error('temporary connection failure');}if(photoRefs)b.data.images=b.data.images.map(im=>{if(!im.dataUrl)return im;photoBytes[im.id]=im.dataUrl;const {dataUrl,...meta}=im;return {...meta,imageRevision:stored.revision+1};});if(failure){const e=new Error('수정 필요');e.status=400;failure--;throw e;}stored.body.healthcheckChart=b.data;stored.revision++;return {id:stored.id};}
  if(url.includes('/cases/record-1?'))return {item:structuredClone(stored)};
  if(url.includes('/cases/previous?'))return {item:structuredClone(previous)};
  if(url.includes('/healthcheck?')&&url.includes('patientId=')&&previous)return {items:[{id:'previous',date:'2025-01-01',veterinarian:'가상 수의사'}]};
- return {items:stored?[{id:stored.id,patient:stored.patient,date:stored.body.healthcheckChart.date}]:[]};};
+ return {items:stored&&!stored.body.deleted?[{id:stored.id,patient:stored.patient,date:stored.body.healthcheckChart.date}]:[]};};
  window.view=HealthcheckRecord.mount(document.querySelector('#root'),{identity:()=>identity,ready:()=>true,can:()=>editable,hospital:()=>window.hospitalFixture||{},request});view.open();
  });
  return {p,errors};
@@ -222,4 +223,21 @@ test('report hospital text is escaped and unsafe logo URLs are rejected',()=>{
  const html=h.reportHTML(d,p,[],{name:'<script>oops</script>',phone:'<b>phone</b>',logo:'javascript:alert(1)'});
  assert.ok(html.includes('&lt;script&gt;oops&lt;/script&gt;'));assert.ok(!html.includes('src="javascript:'));assert.ok(html.includes('참고범위 미제공'));assert.ok(html.includes('1 ↓'));
  const adapter=fs.readFileSync(path.join(root,'practice-clinic.js'),'utf8');assert.match(adapter,/hospital:\(\)=>\(\{name:hospital.name/);assert.match(adapter,/address:hospital.address/);assert.match(adapter,/phone:hospital.phone/);
+});
+
+for(const width of [390,1440])test('healthcheck delete from list cancels safely and removes selected record '+width,async()=>{
+ const {p,errors}=await setup(width);await start(p);await p.locator('[data-action=back]').click();await p.locator('[data-delete]').waitFor();
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));p.once('dialog',d=>d.dismiss());await p.locator('[data-delete]').click();assert.equal(await p.locator('[data-open]').count(),1);
+ p.once('dialog',d=>d.accept());await p.locator('[data-delete]').click();await p.getByText('건강검진 기록이 없습니다.',{exact:true}).waitFor();
+ assert.equal(await p.evaluate(()=>calls.filter(x=>x.b?.kind==='case.delete').length),1);assert.equal(await p.locator('[data-action=resume]').count(),0);
+ assert.equal(await p.evaluate(()=>stored.body.healthcheckChart.date.length),10);assert.deepEqual(errors,[]);await p.close();
+});
+test('healthcheck editor delete retries same request without losing draft and respects read permission',async()=>{
+ const {p,errors}=await setup();await start(p);await p.locator('[data-exam=physical]').fill('저장 전 시험 소견');await p.evaluate(()=>deleteFail=true);
+ p.once('dialog',d=>d.accept());await p.locator('[data-action=delete]').click();await p.waitForFunction(()=>document.querySelector('[data-hc-status]').textContent.includes('삭제 실패'));
+ assert.equal(await p.locator('[data-exam=physical]').inputValue(),'저장 전 시험 소견');assert.equal(await p.locator('[data-action=save]').isEnabled(),true);
+ p.once('dialog',d=>d.accept());await p.locator('[data-action=delete]').click();await p.getByText('건강검진 기록이 없습니다.',{exact:true}).waitFor();
+ assert.equal(await p.evaluate(()=>new Set(calls.filter(x=>x.b?.kind==='case.delete').map(x=>x.b.requestKey)).size),1);
+ await p.evaluate(()=>{stored.body.deleted=null;editable=false;view.open();});await p.locator('[data-open]').waitFor();assert.equal(await p.locator('[data-delete]').count(),0);
+ await p.locator('[data-open]').click();await p.locator('[data-hc-editor]').waitFor();assert.equal(await p.locator('[data-action=delete]').count(),0);assert.deepEqual(errors,[]);await p.close();
 });
