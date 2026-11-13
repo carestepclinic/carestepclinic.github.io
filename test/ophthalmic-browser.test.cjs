@@ -205,3 +205,13 @@ for(const width of [390,1440])test('expanded choices ophthalmic lesions custom n
  await row.locator('select').nth(0).selectOption('__custom');await p.locator('[data-lesion="0.type"]').fill('기존 특수 소견 보존');await save(p);assert.equal(await p.evaluate(()=>state.records[0].body.ophthalmicChart.lesions[0].type),'기존 특수 소견 보존');
  const popup=p.waitForEvent('popup');await p.locator('[data-act=print]').click();const out=await popup;await out.waitForLoadState();assert.match(await out.locator('body').innerText(),/기존 특수 소견 보존/);await out.close();assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await p.close();
 });
+
+for(const width of [390,1440])test('finding select all toggles selection only and preserves existing findings '+width,async()=>{
+ const p=await page(width);await quick(p);await p.locator('[data-field="od.cornea"]').fill('기존 각막 소견');await save(p);
+ const all=p.locator('[data-exam-select-all]'),checks=p.locator('[data-exam-select]');const total=await checks.count();assert.equal(total,18);assert.equal(await all.isChecked(),false);
+ const before=await p.locator('#er-segments [data-field]').evaluateAll(es=>es.map(e=>e.value)),requests=await p.evaluate(()=>state.requests.length);
+ await all.check();assert.equal(await p.locator('[data-exam-select]:checked').count(),total);assert.deepEqual(await p.locator('#er-segments [data-field]').evaluateAll(es=>es.map(e=>e.value)),before);assert.equal(await p.evaluate(()=>state.requests.length),requests);
+ await checks.first().uncheck();assert.equal(await all.evaluate(e=>e.indeterminate),true);await all.check();assert.equal(await p.locator('[data-exam-select]:checked').count(),total);
+ await all.uncheck();assert.equal(await p.locator('[data-exam-select]:checked').count(),0);assert.deepEqual(await p.locator('#er-segments [data-field]').evaluateAll(es=>es.map(e=>e.value)),before);
+ await all.check();await p.locator('[data-normal]').click();assert.equal(await p.locator('[data-field="od.cornea"]').inputValue(),'기존 각막 소견');assert.equal(await p.locator('[data-field="os.fundus"]').inputValue(),'특이 소견 없음');await save(p);await p.reload();await all.waitFor();assert.equal(await all.isChecked(),false);assert.equal(await p.locator('[data-field="od.cornea"]').inputValue(),'기존 각막 소견');assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await p.close();
+});
