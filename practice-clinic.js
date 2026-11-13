@@ -1,4 +1,5 @@
 window.CarestepPractice=PracticeTools.mount(document.getElementById('practiceRoot'),{
+ hospital:()=>({name:hospital.name||saasMe?.clinic?.name||'',logo:hospital.logo||'',address:hospital.address||'',phone:hospital.phone||''}),
  request:(path,options)=>saasRequest('/saas'+path,options),
  ready:()=>saasMode==='auth'&&!!saasMe,
  identity:()=>[saasMe?.clinic?.id,saasMe?.user?.id,saasSessionMeta?.id,JSON.stringify(saasMe?.permissions||{}),saasMe?.role].join(':'),

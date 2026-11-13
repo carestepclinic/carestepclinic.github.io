@@ -46,7 +46,7 @@ async function setup(width=1440){
  if(url.includes('/cases/previous?'))return {item:structuredClone(previous)};
  if(url.includes('/healthcheck?')&&url.includes('patientId=')&&previous)return {items:[{id:'previous',date:'2025-01-01',veterinarian:'가상 수의사'}]};
  return {items:stored?[{id:stored.id,patient:stored.patient,date:stored.body.healthcheckChart.date}]:[]};};
- window.view=HealthcheckRecord.mount(document.querySelector('#root'),{identity:()=>identity,ready:()=>true,can:()=>editable,request});view.open();
+ window.view=HealthcheckRecord.mount(document.querySelector('#root'),{identity:()=>identity,ready:()=>true,can:()=>editable,hospital:()=>window.hospitalFixture||{},request});view.open();
  });
  return {p,errors};
 }
@@ -62,7 +62,7 @@ test('photo attachment and printable report preserve captions and long laborator
 
 test('reference inequalities, qualitative results, canonical names and duplicate modes are conservative',()=>{
  const h=require('../healthcheck-record.js'),r={value:'1.8',reference:'<1.8',confirmed:true};
- assert.equal(h.rangeStatus(r),'높음');assert.equal(h.rangeStatus({...r,reference:'≤1.8'}),'범위 내');assert.equal(h.rangeStatus({...r,reference:'>1.8'}),'낮음');assert.equal(h.rangeStatus({...r,reference:'≥1.8'}),'범위 내');assert.equal(h.rangeStatus({...r,value:'음성',reference:''}),'정성 결과');assert.equal(h.rangeStatus({...r,value:'<1.0'}),'원문 확인');assert.equal(h.rangeStatus({...r,reference:'2–1'}),'범위 확인');
+ assert.equal(h.rangeStatus(r),'높음');assert.equal(h.rangeStatus({...r,reference:'≤1.8'}),'범위 내');assert.equal(h.rangeStatus({...r,reference:'>1.8'}),'낮음');assert.equal(h.rangeStatus({...r,reference:'≥1.8'}),'범위 내');assert.equal(h.rangeStatus({...r,value:'음성',reference:''}),'정성 결과');assert.equal(h.rangeStatus({...r,value:'<1.0'}),'수치 비교 불가');assert.equal(h.rangeStatus({...r,reference:'2–1'}),'참고범위 형식 확인');
  assert.equal(h.canonicalName('CREA-IDEXX'),'CREA');assert.equal(h.canonicalName('Creatinine'),'CREA');assert.equal(h.canonicalName('NEU (%)'),'NEU (%)');
  const old=h.row({name:'CREA',value:'1',unit:'mg/dL',source:'Lab',date:'2026-11-13'}),fresh={...old,id:'new',name:'Creatinine',value:'2'};
  assert.equal(h.mergeLabs([old],[fresh],'fill',old.date)[0].value,'1');assert.equal(h.mergeLabs([old],[fresh],'replace',old.date)[0].value,'2');assert.equal(h.mergeLabs([old],[fresh],'replace',old.date)[0].id,old.id);assert.equal(h.mergeLabs([old],[fresh],'append',old.date).length,2);assert.equal(h.mergeLabs([old],[{...fresh,unit:'umol/L'}],'replace',old.date).length,2);assert.equal(h.mergeLabs([old],[{...fresh,source:'Other'}],'replace',old.date).length,2);
@@ -126,8 +126,8 @@ test('offscreen photos are deferred, individual retry and cached revisit',async(
  await p.locator('[data-step=exams]').click();await p.locator('[data-step=images]').click();await p.locator('[data-photo-card]').last().scrollIntoViewIfNeeded();await p.waitForTimeout(100);assert.equal(await p.evaluate(()=>calls.filter(x=>x.url.includes('id=photo-59')).length),1);assert.deepEqual(errors,[]);await p.close();
 });
 test('lab selection count and confirmation state stay synchronized',async()=>{
- const {p,errors}=await setup();await start(p);await lab(p);assert.match(await p.locator('[data-lab-count]').innerText(),/입력 1개 · 확인 필요 0개/);assert.equal(await p.locator('[data-confirm-picked]').isDisabled(),true);assert.equal(await p.locator('[data-first-review]').isDisabled(),true);
- await p.locator('[data-lab=value]').fill('3');await p.locator('[data-lab=value]').blur();assert.match(await p.locator('[data-lab-count]').innerText(),/확인 필요 1개/);assert.equal(await p.locator('[data-first-review]').isEnabled(),true);await p.locator('[data-lab-pick]').check();assert.match(await p.locator('[data-confirm-picked]').innerText(),/선택 1개/);await p.locator('[data-confirm-picked]').click();assert.match(await p.locator('[data-lab-count]').innerText(),/확인 필요 0개/);assert.deepEqual(errors,[]);await p.close();
+ const {p,errors}=await setup();await start(p);await lab(p);assert.match(await p.locator('[data-lab-count]').innerText(),/입력 1개 · 원본 대조 필요 0개/);assert.equal(await p.locator('[data-confirm-picked]').isDisabled(),true);assert.equal(await p.locator('[data-first-review]').isDisabled(),true);
+ await p.locator('[data-lab=value]').fill('3');await p.locator('[data-lab=value]').blur();assert.match(await p.locator('[data-lab-count]').innerText(),/원본 대조 필요 1개/);assert.equal(await p.locator('[data-first-review]').isEnabled(),true);await p.locator('[data-lab-pick]').check();assert.match(await p.locator('[data-confirm-picked]').innerText(),/선택 1개/);await p.locator('[data-confirm-picked]').click();assert.match(await p.locator('[data-lab-count]').innerText(),/원본 대조 필요 0개/);assert.deepEqual(errors,[]);await p.close();
 });
 
 test('individual removal clears bulk selection without changing other photos',async()=>{
@@ -185,4 +185,41 @@ for(const width of [1440,390])test('single mixed file distributes all eleven uri
  await p.locator('[data-import-index="1"][data-import-key=reference]').fill('원본 대조 후 수정');if(width===390)assert.ok(await p.locator('.hc-import-table').evaluate(e=>e.scrollWidth<=e.clientWidth+1));await p.screenshot({path:path.join(root,'../healthcheck-mixed-import-'+width+'.png'),fullPage:true});assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await p.locator('[data-import-checked]').check();await p.locator('[data-action=apply-import]').click();assert.equal(await p.locator('[data-row]').count(),11);await p.locator('[data-action=save]').click();await p.waitForFunction(()=>stored.revision===2);await p.evaluate(()=>view.openRecord('record-1'));await p.locator('[data-step=urine]').click();assert.equal(await p.locator('[data-row]').count(),11);
  assert.deepEqual(await p.evaluate(()=>stored.body.healthcheckChart.labs.filter(r=>r.group==='요검사').map(r=>r.name)),['요색','요잠혈','요빌리루빈','요유로빌리노겐','요케톤','요단백','요아질산염','요당','PH','USG','요백혈구 반응']);assert.equal(await p.evaluate(()=>stored.body.healthcheckChart.labs.find(r=>r.name==='요색').reference),'원본 대조 후 수정');await p.locator('[data-step=labs]').click();assert.equal(await p.locator('[data-row]').count(),2);await p.locator('[data-step=additional]').click();assert.equal(await p.locator('[data-row]').count(),1);assert.equal(await p.evaluate(()=>calls.filter(x=>x.url.endsWith('/lab-import')).length),1);
  const html=await p.evaluate(()=>HealthcheckRecord.reportHTML(stored.body.healthcheckChart,patient,[]));assert.match(html,/요백혈구 반응/);assert.match(html,/원본 대조 후 수정/);assert.match(html,/pale yellow/);assert.deepEqual(errors,[]);await p.close();
+});
+
+test('source review completion is independent of missing or nonnumeric reference ranges',()=>{
+ const h=require('../healthcheck-record.js');
+ for(const value of ['25.0','54.3','trace',0]){assert.equal(h.needsReview({value,confirmed:false}),true);assert.equal(h.needsReview({value,confirmed:true}),false);}
+ assert.equal(h.rangeStatus({value:'25.0',confirmed:true}),'참고범위 미제공');
+ assert.equal(h.rangeStatus({value:'25.0',reference:'30–10',confirmed:true}),'참고범위 형식 확인');
+ assert.equal(h.rangeStatus({value:'trace',confirmed:true}),'수치 비교 불가');
+});
+for(const width of [1440,390])test('confirmed range deviations are red and reference edits update state '+width,async()=>{
+ const {p,errors}=await setup(width);await start(p);await lab(p);
+ assert.equal(await p.locator('[data-lab=value]').evaluate(e=>getComputedStyle(e).color),'rgb(180, 35, 24)');
+ await p.locator('[data-lab=reference]').fill('');await p.locator('[data-lab=reference]').blur();
+ assert.equal(await p.locator('.hc-lab-abnormal').count(),0);await p.locator('[data-lab=confirmed]').check();
+ assert.equal(await p.locator('[data-range]').innerText(),'참고범위 미제공');assert.match(await p.locator('[data-lab-count]').innerText(),/원본 대조 필요 0개/);
+ await p.locator('[data-lab-filter]').selectOption('review');assert.equal(await p.locator('[data-row]').count(),0);await p.locator('[data-lab-filter]').selectOption('all');
+ await p.locator('[data-lab=reference]').fill('3–5');await p.locator('[data-lab=reference]').blur();await p.locator('[data-lab=confirmed]').check();assert.equal(await p.locator('[data-range]').innerText(),'낮음');assert.equal(await p.locator('.hc-lab-abnormal').count(),1);
+ await p.locator('[data-action=save]').click();await p.waitForFunction(()=>stored.revision===2);await p.evaluate(()=>view.openRecord('record-1'));await p.locator('[data-step=labs]').click();assert.equal(await p.locator('.hc-lab-abnormal').count(),1);
+ await p.locator('[data-lab=reference]').fill('2.4–5');await p.locator('[data-lab=reference]').blur();await p.locator('[data-lab=confirmed]').check();assert.equal(await p.locator('[data-range]').innerText(),'범위 내');assert.equal(await p.locator('.hc-lab-abnormal').count(),0);
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);await p.close();
+});
+test('report popup uses current hospital branding and prints red deviations without treating missing ranges as normal',async()=>{
+ const {p,errors}=await setup();await start(p);await lab(p);
+ await p.evaluate(()=>{const c=document.createElement('canvas');c.width=200;c.height=90;const x=c.getContext('2d');x.fillStyle='#177971';x.fillRect(0,0,200,90);x.fillStyle='white';x.font='24px sans-serif';x.fillText('TEST CLINIC',12,53);window.hospitalFixture={name:'가상 병원',logo:c.toDataURL(),address:'가상시 시험로 123',phone:'000-0000-0000'};});
+ await p.locator('[data-action=save]').click();await p.waitForFunction(()=>stored.revision===2);
+ await p.locator('[data-step=summary]').click();const popupReady=p.waitForEvent('popup');await p.locator('[data-action=print]').click();const report=await popupReady;await report.locator('.hospital-cover').waitFor();
+ assert.match(await report.locator('.hospital-cover').innerText(),/가상 병원[\s\S]*가상시 시험로 123[\s\S]*000-0000-0000/);
+ await report.waitForFunction(()=>document.querySelector('.hospital-cover img').naturalWidth>0);
+ assert.equal(await report.locator('td.lab-abnormal').first().innerText(),'2.4 ↑');await report.emulateMedia({media:'print'});assert.equal(await report.locator('td.lab-abnormal').first().evaluate(e=>getComputedStyle(e).color),'rgb(180, 35, 24)');
+ await report.pdf({path:path.join(root,'../healthcheck-branding-range-review.pdf'),preferCSSPageSize:true,printBackground:true});await report.screenshot({path:path.join(root,'../healthcheck-branding-range-review.png'),fullPage:true});
+ assert.deepEqual(errors,[]);await report.close();await p.close();
+});
+test('report hospital text is escaped and unsafe logo URLs are rejected',()=>{
+ const h=require('../healthcheck-record.js'),d=h.blank(),p={name:'가상',species:'cat'};d.labs=[{name:'RDW',value:'25.0',confirmed:true},{name:'LOW',value:'1',reference:'2–3',confirmed:true}];
+ const html=h.reportHTML(d,p,[],{name:'<script>oops</script>',phone:'<b>phone</b>',logo:'javascript:alert(1)'});
+ assert.ok(html.includes('&lt;script&gt;oops&lt;/script&gt;'));assert.ok(!html.includes('src="javascript:'));assert.ok(html.includes('참고범위 미제공'));assert.ok(html.includes('1 ↓'));
+ const adapter=fs.readFileSync(path.join(root,'practice-clinic.js'),'utf8');assert.match(adapter,/hospital:\(\)=>\(\{name:hospital.name/);assert.match(adapter,/address:hospital.address/);assert.match(adapter,/phone:hospital.phone/);
 });
