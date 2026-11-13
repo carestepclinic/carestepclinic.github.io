@@ -160,6 +160,53 @@ function labGuideParts(labs,species){
  return parts;
 }
 
+// General owner education is separate from the clinician's findings; never infer normality.
+const examGuideSources={
+ nutrition:['WSAVA 영양 평가','https://wsava.org/Global-Guidelines/Global-Nutrition-Guidelines/'],
+ dogBCS:['WSAVA 개 BCS','https://wsava.org/wp-content/uploads/2025/06/WSAVA_BCSCat_BCSDog_Nutrition_250612.pdf'],
+ catBCS:['WSAVA 고양이 BCS','https://wsava.org/wp-content/uploads/2020/08/Body-Condition-Score-cat-updated-August-2020.pdf'],
+ care:['MSD/Merck 예방·일상 관리','https://www.merckvetmanual.com/management-and-nutrition/preventative-health-care-and-husbandry-in-small-animals/overview-of-preventative-health-care-and-husbandry-in-small-animals'],
+ dental:['AAHA 구강검사·관리','https://www.aaha.org/resources/2019-aaha-dental-care-guidelines-for-dogs-and-cats/history-and-physical-examination/'],
+ life:['AAHA 생애주기 관리','https://www.aaha.org/resources/life-stage-canine-2019/life-stage-checklist/']
+};
+const examGuides={
+ physical:['신체검사·활력징후','전신 상태와 체중·체온·심박·호흡 등을 함께 살펴봅니다. 긴장이나 활동에 따라 측정값이 달라질 수 있습니다.','평소 식욕·활력·음수·배뇨·배변 변화를 기록해 다음 진료 때 알려주세요. 재검 시기는 의료진 계획을 따릅니다.',['care','life']],
+ skin:['피부','피부와 털의 변화는 원인이 다양하여 겉모습만으로 질환을 확정할 수 없습니다.','빗질하며 발적·탈모·가려움 변화를 관찰하고 사진으로 남겨주세요. 목욕·피부 제품은 병원에서 안내한 방법을 따릅니다.',['care']],
+ ears:['귀','귀의 분비물·냄새·가려움 등은 귀 안쪽 검사와 함께 해석합니다.','분비물과 머리 흔들기 변화를 관찰하세요. 세정이나 귀약 사용 방법은 병원에서 확인한 뒤 적용합니다.',['care']],
+ eyes:['안과','눈 표면과 주변 상태를 살피며, 필요에 따라 눈물량·안압 등 추가 검사를 합니다.','충혈·분비물·눈을 감는 행동 등 변화를 기록하고 새 증상은 병원에 알리세요. 점안은 안내받은 약과 방법을 따릅니다.',['care']],
+ oral:['구강·치과','치석·잇몸·치아 상태를 확인합니다. 겉으로 보이는 검사만으로 치아 뿌리와 잇몸 아래 상태를 모두 알 수는 없습니다.','통증이나 최근 구강 처치가 있다면 양치 재개 시점을 확인하세요. 가능한 경우 반려동물용 제품으로 규칙적으로 양치하고 구취·출혈·씹기 변화는 상담합니다.',['dental']],
+ cardiac:['심장','청진에서 들리는 소리와 맥박을 평가합니다. 심잡음이나 리듬 변화의 원인·정도는 추가 검사와 함께 판단합니다.','기침·활동 능력·휴식 중 호흡 변화를 기록해 병원에 알려주세요. 약물이나 운동 계획은 개별 지시를 따릅니다.',['life']],
+ respiratory:['호흡기','호흡의 양상과 소리를 살핍니다. 진료실의 긴장·활동 여부도 함께 고려합니다.','편안히 쉬는 상태의 호흡 변화를 관찰하고 기침·힘들어 보이는 호흡은 병원에 알리세요. 운동은 환자 상태에 맞춰 조절합니다.',['life']],
+ abdomen:['복부','복부 촉진은 통증이나 장기의 변화를 살피는 검사로, 필요하면 영상·혈액검사를 함께 확인합니다.','식사량·구토·배변·배뇨 변화를 기록하세요. 식이 변경과 약물 사용은 의료진의 개별 관리계획을 따릅니다.',['care']],
+ musculoskeletal:['근골격','보행·관절 움직임·통증 등 운동 기능을 확인합니다. 집에서의 움직임도 진료에 도움이 됩니다.','걷기·일어나기·계단 이용의 변화를 영상으로 남겨주세요. 미끄럼과 낙상을 줄이는 환경을 마련하고 운동 강도는 상담합니다.',['life']],
+ neurologic:['신경','보행·자세·반응 등 신경 기능을 평가하며, 이상 소견은 병력과 추가 검사로 확인합니다.','평소와 다른 움직임이나 반응이 있으면 안전한 환경에서 영상과 발생 시간을 기록해 병원에 전달하세요.',['care']],
+ nutrition:['체형·영양','BCS는 체지방, MCS는 근육 상태를 평가합니다. 몸무게만으로 두 상태를 대신 판단하지 않습니다.','사료·간식의 종류와 하루 급여량을 기록하고 체중 변화를 비교하세요. 식사량과 목표 체중은 의료진과 정합니다.',['nutrition']],
+ other:['기타 검사','이 항목의 의미는 의료진이 작성한 검사명과 소견을 기준으로 확인합니다.','종합소견에 적힌 관리·재검 계획을 따르고 새로운 변화는 병원에 알려주세요.',['care']]
+};
+function examSourceLinks(ids){return ids.map(id=>'<a href="'+examGuideSources[id][1]+'" target="_blank" rel="noopener">'+esc(examGuideSources[id][0])+'</a>').join(' · ');}
+function bcsDiagram(species,shape){
+ const waist=[29,40,63][shape],hip=[45,48,60][shape],cat=species==='cat';
+ const body='M 68 51 C 39 62 37 92 '+(100-waist)+' 117 C '+(100-waist)+' 138 '+(100-hip)+' 147 '+(100-hip)+' 168 Q 100 194 '+(100+hip)+' 168 C '+(100+hip)+' 147 '+(100+waist)+' 138 '+(100+waist)+' 117 C 163 92 161 62 132 51 Z';
+ return '<svg viewBox="0 0 200 215" role="img" aria-label="'+(cat?'고양이':'개')+' 위에서 본 체형 개념도 · '+['마른 쪽','적정 체형','체지방이 많은 쪽'][shape]+'"><path d="M 100 184 Q '+(cat?'160 218 164 178':'124 207 130 203')+'" fill="none" stroke="#547a76" stroke-width="6" stroke-linecap="round"/><path d="'+body+'" fill="#e6f1ed" stroke="#547a76" stroke-width="3"/><ellipse cx="100" cy="38" rx="29" ry="25" fill="#e6f1ed" stroke="#547a76" stroke-width="3"/>'+(cat?'<path d="M 73 29 L 72 6 L 90 15 M 110 15 L 128 6 L 127 29" fill="#e6f1ed" stroke="#547a76" stroke-width="3"/>':'<path d="M 76 23 Q 47 27 68 60 M 124 23 Q 153 27 132 60" fill="#bfd8d1" stroke="#547a76" stroke-width="3"/>')+'<path d="M 100 66 L 100 157" stroke="#92aaa4" stroke-dasharray="4 4" fill="none"/>'+(shape===0?'<path d="M 77 77 Q 100 89 123 77 M 75 88 Q 100 100 125 88 M 77 99 Q 100 111 123 99" fill="none" stroke="#72938b" stroke-width="2"/>':'')+'</svg>';
+}
+function nutritionGuide(d,species){
+ const score=Number(d.bcs),hasBCS=Number.isInteger(score)&&score>=1&&score<=9,hasMCS=!!String(d.mcs||'').trim();
+ if(!['dog','cat'].includes(species)||!hasBCS&&!hasMCS)return null;
+ const cat=species==='cat',low=cat?4:3,labels=[['1–'+low+'점 · 마른 쪽','갈비뼈가 쉽게 만져지며 허리가 뚜렷합니다. 낮은 점수일수록 지방 덮임이 적습니다.'],[cat?'5점 · 적정 체형':'4–5점 · 적정 체형','갈비뼈가 과한 지방 없이 만져지고 위에서 허리선이 보입니다.'],['6–9점 · 체지방이 많은 쪽','갈비뼈를 덮는 지방이 늘고 허리선이 흐려집니다.']],active=hasBCS?(score<=low?0:score<=5?1:2):-1;
+ let body='<p class="guide-intro">BCS는 체지방, MCS는 근육 상태를 나타냅니다. 서로 다른 지표로 함께 평가합니다.</p>';
+ if(hasBCS)body+='<div class="bcs-result">이번 BCS <strong>'+score+'/9</strong> · '+(cat?'고양이':'개')+'</div><div class="bcs-grid">'+labels.map(([title,desc],i)=>'<article class="bcs-card '+(active===i?'bcs-current':'')+'">'+bcsDiagram(species,i)+'<h3>'+title+'</h3><p>'+desc+'</p>'+(active===i?'<b class="bcs-marker">이번 점수가 속한 구간</b>':'')+'</article>').join('')+'</div><p class="guide-intro">그림은 체형 차이를 설명하는 CARESTEP 개념도입니다. 그림만으로 점수를 정하지 않으며, 갈비뼈 촉진·허리선·복부와 품종·나이를 함께 평가합니다. 목표 체형은 개별 환자에 맞게 정합니다.</p>';
+ if(hasMCS)body+='<article class="exam-guide mcs-guide"><h3>이번 MCS · '+esc(d.mcs)+'</h3><p>정상 근육량 → 가벼운 소실 → 중등도 소실 → 심한 소실로 기록합니다. 체지방이 많아도 근육은 줄어들 수 있습니다.</p><p>근육 변화는 체중·식사량·활동과 함께 비교하고, 소실이 있으면 원인 평가와 영양 계획을 상담합니다.</p></article>';
+ body+='<p class="guide-intro">기본 관리: 사료·간식의 하루 급여량과 체중 변화를 기록하세요. 급여량·운동량은 담당 수의사의 계획에 맞춰 조절합니다.</p><p class="guide-footer">'+examSourceLinks([cat?'catBCS':'dogBCS','nutrition'])+' · 근거 확인 2026-11-13</p>';
+ return {title:'체형·근육 상태 이해',body};
+}
+function examGuideParts(d,species){
+ if(!['dog','cat'].includes(species))return [];
+ const parts=[],nutrition=nutritionGuide(d,species);if(nutrition)parts.push(nutrition);
+ const entries=Object.entries(examGuides).filter(([key])=>String(d.exams?.[key]||'').trim()&&!(key==='nutrition'&&nutrition));
+ for(let i=0;i<entries.length;i+=6)parts.push({title:'신체검사 이해·기본 관리'+(entries.length>6?' · '+(i/6+1):''),body:'<p class="guide-intro">소견이 입력된 항목의 일반적인 검사 설명과 관리 안내입니다. 정상·이상 여부를 자동 판정한 내용이 아니며, 이번 검사 소견과 의료진의 개별 계획을 먼저 확인하세요. 평가 불가로 기록된 항목도 정상으로 간주하지 않습니다.</p><div class="exam-guide-grid">'+entries.slice(i,i+6).map(([key,[title,meaning,care,refs]])=>'<article class="exam-guide" data-exam-guide="'+key+'"><h3>'+title+'</h3><p>'+meaning+'</p><p><b>기본 관리</b> '+care+'</p><small>'+examSourceLinks(refs)+'</small></article>').join('')+'</div><p class="guide-footer">근거 확인 2026-11-13 · 처방·재검 일정은 의료진 종합소견을 따릅니다.</p>'});
+ return parts;
+}
+
 function reportHTML(d,p,images,hospital={}){
  const photos=(images||[]).filter(im=>im.includeInPrint!==false),parts=[];
  const note=(label,value)=>value?'<div class="report-note"><h3>'+esc(label)+'</h3><p>'+esc(value)+'</p></div>':'';
@@ -171,6 +218,7 @@ function reportHTML(d,p,images,hospital={}){
  parts.push({title:'검진 요약·관리계획',body:hospitalCover+'<h1>건강검진 결과서</h1>'+identity+'<div class="report-meta"><span>검사일 <b>'+esc(d.date)+'</b></span><span>담당 수의사 <b>'+esc(d.veterinarian||'미입력')+'</b></span></div>'+(d.clinicalStatus==='complete'?'':'<p class="draft">검토 중 초안 · 확정 전</p>')+(overview||'<p class="muted">종합소견·관리계획 미입력</p>')+'<p class="report-guide">입력된 검사 결과와 의료진이 작성한 소견입니다. 검사실·검사법에 따라 참고범위가 다르며 범위 이탈만으로 질환을 확정하지 않습니다.</p>'});
  const findings=(d.bcs||d.mcs?note('체형·근육 상태',[d.bcs?'BCS '+d.bcs+'/9':'',d.mcs?'MCS '+d.mcs:''].filter(Boolean).join(' · ')):'')+Object.entries(exams).filter(([k])=>!imageStep(k)).map(([k,l])=>note(l,d.exams?.[k])).join('');
  if(findings)parts.push({title:'신체검사·진료 소견',body:findings});
+ parts.push(...examGuideParts(d,p.species));
  for(const [key,title] of [['labs','혈액검사'],['urine','요검사'],['additional','추가 검사']]){const rows=(d.labs||[]).filter(r=>labTab(r)===key&&String(r.value??'').trim());const groups=key==='labs'?[{title:'혈액검사 · CBC',rows:rows.filter(r=>labGroup(r)==='CBC · 혈구검사')},{title:'혈액검사 · 생화학',rows:rows.filter(r=>labGroup(r)!=='CBC · 혈구검사')}]:[{title,rows}];for(const group of groups)if(group.rows.length)parts.push({title:group.title,body:'<p class="muted">참고범위: 검사기관 원본 기준 · 미제공 항목은 별도 확인</p>'+printLabs(group.rows)});}
  for(const kind of Object.keys(kinds)){const prose=imageStep(kind)?d.exams?.[kind]:'';if(prose||photos.some(im=>im.kind===kind))parts.push({title:imageStep(kind)?kinds[kind]+' 검사':kinds[kind],body:note('의료진 소견',prose)+gallery(kind)});}
  parts.push(...labGuideParts(d.labs,p.species));
@@ -186,6 +234,8 @@ function reportHTML(d,p,images,hospital={}){
  p,td,th,figcaption,.part-label{overflow-wrap:anywhere;white-space:pre-wrap}table{border-collapse:collapse;width:100%;font-size:10.5px;table-layout:fixed;margin-bottom:8px}th,td{padding:4px 7px;border-bottom:1px solid #dae3e0;text-align:left;vertical-align:top}th{background:#f3f7f5;font-weight:600}th:first-child{width:28%}th:nth-child(2){width:14%}th:nth-child(3){width:15%}th:nth-child(4){width:25%}th:nth-child(5){width:18%}thead{display:table-header-group}tr{break-inside:avoid}td small{font-size:9px;color:#52706a}
  .photo-row{display:flex;gap:10px;margin:10px 0;break-inside:avoid}figure{width:calc(50% - 5px);margin:0;border:1px solid #d5e2de;border-radius:6px;padding:7px;break-inside:avoid}figure img{width:100%;height:70mm;object-fit:contain;display:block;background:#f5f7f6}figcaption{font-size:10px;line-height:1.5;margin-top:6px}.group-source{float:right;font-size:10px;font-weight:400}.part-footer{margin-top:18px;padding-top:6px;border-top:1px solid #d5e2de;color:#637b76;font-size:9px}
  .guide-intro{font-size:10px;color:#52706a;margin:0 0 10px}.lab-guide-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.lab-guide{border:1px solid #d5e2de;border-radius:6px;padding:9px 10px;break-inside:avoid;font-size:10.5px;line-height:1.5;overflow-wrap:anywhere}.lab-guide h3{font-size:12px;margin:0}.guide-names{font-size:9px;color:#52706a;margin:2px 0 5px}.lab-guide p{margin:3px 0;white-space:normal}.lab-guide b{color:#176f68}.lab-guide small{display:block;font-size:8px;line-height:1.4;margin-top:6px}.lab-guide a{color:#52706a;text-decoration:none}.guide-footer{font-size:9px;color:#52706a;margin:10px 0 0}
+ .exam-guide-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.exam-guide{border:1px solid #d5e2de;border-radius:7px;padding:12px;break-inside:avoid;font-size:11px;line-height:1.6}.exam-guide p{margin:5px 0;white-space:normal}.exam-guide small{display:block;font-size:8px;margin-top:7px}.exam-guide a,.guide-footer a{color:#52706a;text-decoration:none}.bcs-result{font-size:16px;padding:10px 14px;background:#edf5f2;border-left:4px solid #177971;margin:12px 0}.bcs-result strong{font-size:22px}.bcs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;break-inside:avoid;margin-bottom:12px}.bcs-card{border:1px solid #cbdad6;border-radius:8px;padding:10px;min-width:0}.bcs-card svg{display:block;width:100%;height:46mm}.bcs-card h3{font-size:11px}.bcs-card p{font-size:10px;margin:5px 0;white-space:normal}.bcs-current{border:2px solid #177971;background:#f5faf8}.bcs-marker{display:block;font-size:10px;color:#176f68;margin-top:8px}.mcs-guide{margin:12px 0}
+ @media screen and (max-width:540px){.exam-guide-grid{grid-template-columns:1fr}.bcs-grid{gap:5px}.bcs-card{padding:6px}.bcs-card svg{height:100px}}
  @media screen and (max-width:800px){.report-part{width:100%;padding:20px;min-height:0}.photo-row img{height:45mm}.print-tools small{display:block;margin:5px 0}}
  @media screen and (max-width:540px){.lab-guide-grid{grid-template-columns:1fr}.lab-guide{font-size:12px}}
  @media print{body{background:#fff}.part-footer{display:none}.print-tools{display:none}.report-part{width:auto;min-height:0;margin:0;padding:0;break-before:page}.report-part:first-of-type{break-before:auto}.photo-row{display:flex}a{color:inherit}}
