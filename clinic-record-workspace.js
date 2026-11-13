@@ -1,7 +1,7 @@
 /* Shared record identity and patient-scoped navigation. No clinical writes. */
 (function(g){
  'use strict';
- const names={surgery:'마취',dental:'치과',neuro:'신경검사',ophthalmic:'안과',chronic:'만성질환'};
+ const names={surgery:'마취',dental:'치과',neuro:'신경검사',ophthalmic:'안과',chronic:'만성질환',healthcheck:'건강검진'};
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const validDate=v=>/^\d{4}-\d{2}-\d{2}$/.test(v||'')&&Number.isFinite(Date.parse(v))&&new Date(v).toISOString().slice(0,10)===v;
  const today=()=>new Date(Date.now()+32400000).toISOString().slice(0,10);

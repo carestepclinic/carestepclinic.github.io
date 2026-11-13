@@ -2,7 +2,7 @@
 (function(g){
  'use strict';
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const names={surgery:'마취',dental:'치과',neuro:'신경검사',ophthalmic:'안과',chronic:'만성질환'};
+ const names={surgery:'마취',dental:'치과',neuro:'신경검사',ophthalmic:'안과',chronic:'만성질환',healthcheck:'건강검진'};
  const copy=v=>JSON.parse(JSON.stringify(v));
  const fields=['name','chartNumber','species','weight','guardianName','breed','birthDate','sex'];
  function values(patient={},chart={}){const p={...patient,...chart.patient};let sex=p.sex||'unknown';if(['MN','MC','중남'].includes(sex))sex='male:yes';else if(['FS','중여'].includes(sex))sex='female:yes';else if(sex==='M'||sex==='수컷')sex='male:unknown';else if(sex==='F'||sex==='암컷')sex='female:unknown';else if(['male','female'].includes(sex))sex+=':'+(p.neutered||'unknown');return {name:patient.name||'',chartNumber:p.chartNumber||p.externalPatientId||'',species:patient.species||'',weight:chart.weight??patient.latestWeightKg??patient.weight??'',guardianName:p.guardianName||'',breed:p.breed||'',birthDate:p.birthDate||'',sex};}

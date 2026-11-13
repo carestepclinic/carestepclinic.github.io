@@ -12,6 +12,15 @@ async function fixture(t,width=1440){
  });t.after(async()=>{assert.deepEqual(errors,[]);await p.close();});return {p,requests};
 }
 async function goTab(p,key){await p.evaluate(key=>go('practice',{practiceTab:key}),key);}
+for(const width of [390,1440])test('healthcheck integrated menu, lazy loading and retained draft '+width,async t=>{
+ const {p,requests}=await fixture(t,width);await goTab(p,'healthcheck');await p.locator('[data-action=new]').waitFor();
+ await p.locator('[data-action=new]').click();await p.locator('[data-start-field=name]').fill('가상 검진 환자');
+ await goTab(p,'dental');await p.locator('[data-dn=new]').waitFor();await goTab(p,'healthcheck');
+ assert.equal(await p.locator('[data-start-field=name]').inputValue(),'가상 검진 환자');
+ assert.equal(requests.filter(x=>x==='/healthcheck-record.js').length,1);
+ assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+ await p.screenshot({path:path.join(root,'../healthcheck-integrated-'+width+'.png'),fullPage:true});
+});
 for(const width of [390,1440])test('initial load omits optional modules, first record loads once '+width,async t=>{
  const {p,requests}=await fixture(t,width);assert.equal(requests.some(x=>/\/(dental-record|chronic-record|practice-emergency)\.js/.test(x)),false);
  await goTab(p,'dental');await p.locator('[data-dn=new]').waitFor();assert.equal(requests.filter(x=>x==='/dental-record.js').length,1);assert.equal(requests.includes('/chronic-record.js'),false);
