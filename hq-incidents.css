@@ -1,0 +1,24 @@
+#productionIncidentRows{min-width:0;max-height:620px;overflow:auto;padding:2px}
+.hq-incident-summary{font-weight:650;margin:4px 0}
+.hq-incident-scope{color:#536b65;font-size:13px;margin:0 0 14px;line-height:1.5}
+.hq-incident-group{border:1px solid #d7e3de;border-radius:10px;margin:10px 0;background:#fff;min-width:0}
+.hq-incident-group>summary{cursor:pointer;padding:14px 16px;list-style:none;display:block}
+.hq-incident-group>summary::-webkit-details-marker{display:none}
+.hq-incident-group>summary:focus-visible{outline:2px solid #176f68;outline-offset:2px;border-radius:8px}
+.hq-incident-heading{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px}
+.hq-incident-heading strong{overflow-wrap:anywhere;min-width:0}
+.hq-incident-heading .status,.hq-incident-count,.hq-incident-code{white-space:nowrap;flex-shrink:0}
+.hq-incident-count{font-weight:700;color:#174f49}
+.hq-incident-expand{margin-left:auto;font-size:13px;color:#536b65}
+.hq-incident-expand:after{content:' ▾'}
+.hq-incident-group[open] .hq-incident-expand:after{content:' ▴'}
+.hq-incident-context{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;margin:10px 0 6px;color:#536b65;overflow-wrap:anywhere}
+.hq-incident-message{display:block;font-size:15px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.hq-incident-times{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:10px;font-size:12px;color:#536b65}
+.hq-incident-records{list-style:none;margin:0;padding:0 16px 8px;border-top:1px solid #e0e9e5}
+.hq-incident-records li{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #e7eeeb;padding:10px 0;font-size:13px}
+.hq-incident-records li:last-child{border-bottom:0}
+.hq-incident-records li>div{min-width:0}
+.hq-incident-records small{display:block;color:#536b65;overflow-wrap:anywhere;margin-top:3px}
+.hq-incident-records button{white-space:nowrap;flex-shrink:0}
+@media(max-width:600px){.hq-incident-group>summary{padding:12px}.hq-incident-heading{gap:6px 10px}.hq-incident-expand{margin-left:0}.hq-incident-message{font-size:14px}.hq-incident-records{padding:0 12px 6px}.hq-incident-times{display:grid}}
