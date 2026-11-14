@@ -228,3 +228,71 @@
  .hc-record .hc-lab-tools{gap:6px;margin-bottom:10px}
 }
 .hc-record .hc-steps button{position:relative}
+
+/* Healthcheck editing safeguards and task hierarchy. */
+.hc-record input:not([type=checkbox]),.hc-record select{font-size:15px}
+.hc-record [data-lab=value]{font-size:16px;font-weight:650}
+.hc-record .hc-lab-compact{padding:8px;gap:7px}
+.hc-record .hc-lab-tools [data-lab-count]{font-size:13px;font-weight:500;color:#536b65}
+.hc-record .hc-lab-more{margin:6px 0 10px}
+.hc-lab-more>summary{font-weight:600;padding:6px 0;width:fit-content}
+.hc-lab-more-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px;background:#eef5f3;border-radius:8px}
+.hc-lab-more-controls>.hc-workflow{flex-basis:100%;margin:0}
+.hc-record .hc-autosave-note{display:block;color:#536b65;font-size:12px;line-height:1.5;flex-basis:100%}
+.hc-compact-nav{display:none}
+.hc-record .hc-prose-nav{display:flex;gap:6px;position:sticky;top:var(--hc-header-height);z-index:4;background:var(--bg,#f7f8f6);padding:8px 0;flex-wrap:wrap;border-bottom:1px solid #d5e0de}
+.hc-record .hc-prose-nav button{font-size:13px;min-height:36px;padding:6px 10px}
+.hc-record .hc-summary-grid{gap:12px;margin-top:12px}
+.hc-record .hc-prose-field{padding:12px}
+.hc-record .hc-summary-grid textarea{margin-top:5px}
+.hc-record .hc-ai-start{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.hc-record .hc-ai-start .hc-check{flex:1;min-width:240px;margin:0;font-size:13px}
+.hc-record .hc-ai-start .hc-ai-hint{flex-basis:100%;margin:0}
+.hc-completion-check{display:flex;align-items:center;flex-wrap:wrap;gap:8px;background:#eef5f3;padding:12px;border-radius:8px;margin:12px 0}
+.hc-record .hc-completion-check button{font-size:13px;min-height:36px}
+.hc-record [aria-invalid=true]{outline:2px solid #b42318;outline-offset:2px}
+.hc-undo-banner,.hc-conflict-banner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px 12px;border:1px solid #b8d2cb;background:#edf5f2;border-radius:8px;margin:10px 0}
+.hc-conflict-banner{background:#fff8e8;border-color:#d8bd79}
+.hc-record.hc-conflict-dialog{width:min(960px,95vw);max-width:95vw;max-height:90dvh;padding:18px;border:1px solid #b4ccc6;border-radius:12px;color:#20323e;background:white}
+.hc-conflict-dialog::backdrop{background:#102b3180}
+.hc-conflict-dialog[open]{display:flex;flex-direction:column;gap:12px}
+.hc-conflict-dialog header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.hc-conflict-dialog h2{font-size:19px;margin:0}
+.hc-conflict-dialog p{margin:0;font-size:14px}
+.hc-conflict-items{overflow:auto;min-height:0}
+.hc-conflict-items fieldset{display:grid;grid-template-columns:1fr 1fr;gap:12px;border:1px solid #cbdad8;border-radius:8px;margin:10px 0;padding:12px;min-width:0}
+.hc-conflict-items legend{font-weight:650}
+.hc-conflict-items label{min-width:0;cursor:pointer}
+.hc-conflict-items pre{font:14px/1.6 'Carestep Pretendard',sans-serif;white-space:pre-wrap;overflow-wrap:anywhere;max-height:240px;overflow:auto;padding:8px;background:#f2f7f5;font-weight:400}
+.hc-conflict-dialog footer{display:flex;justify-content:flex-end;align-items:center;gap:12px}
+@media(max-width:800px){
+ .hc-record.hc-scrolled .hc-patient-meta,.hc-record.hc-scrolled .hc-toolbar>div:first-child>span,.hc-record.hc-scrolled .hc-steps,.hc-record.hc-scrolled [data-current-step-state]{display:none}
+ .hc-record.hc-scrolled .hc-compact-nav{display:inline-block;max-width:52%;margin:0 8px 0 0}
+ .hc-record.hc-scrolled [data-save-state]{font-size:12px;margin-right:0;vertical-align:middle;max-width:43%}
+ .hc-record.hc-scrolled .hc-sticky .hc-toolbar{margin-bottom:4px}
+ .hc-record.hc-scrolled .hc-compact-nav select{font-size:13px;padding:5px;min-height:32px}
+ .hc-record .hc-prose-field{padding:10px}
+}
+@media(max-width:650px){
+ .hc-record .hc-main-actions [data-action=save],.hc-record .hc-main-actions [data-action=print]{font-size:12px;padding:6px;white-space:nowrap;min-width:0}
+ .hc-record .hc-main-actions [data-action=save]{flex:1}
+ .hc-record .hc-main-actions [data-action=print]{flex:1}
+ .hc-record .hc-main-actions [data-action=back]{padding:6px 2px;font-size:11px;white-space:nowrap}
+ .hc-record .hc-main-actions .hc-record-menu>summary{padding:12px 3px;font-size:11px}
+ .hc-record .hc-lab-tools{margin:4px 0;justify-content:space-between}
+ .hc-record .hc-lab-tools [data-lab-count]{flex-basis:auto;margin:0}
+ .hc-record .hc-lab-tools label{min-width:0}
+ .hc-record .hc-lab-more{margin:0 0 8px}
+ .hc-record .hc-lab-more>summary{min-height:36px;line-height:24px;padding:6px 0}
+ .hc-record .hc-lab-more-controls{gap:6px}
+ .hc-record .hc-lab-compact{gap:4px 8px;padding:8px}
+ .hc-record .hc-prose-nav{flex-wrap:nowrap;gap:4px}
+ .hc-record .hc-prose-nav button{flex:1;min-width:0;font-size:12px;padding:5px 3px;white-space:nowrap}
+ .hc-record .hc-ai-start{gap:8px}
+ .hc-record .hc-ai-start .hc-check{min-width:0;flex-basis:100%}
+ .hc-conflict-items fieldset{grid-template-columns:1fr;padding:8px}
+ .hc-record.hc-conflict-dialog{padding:12px}
+ .hc-record .hc-save-feedback p{font-size:13px;min-width:150px}
+}
+.hc-record{overflow-anchor:none}
+.hc-record .hc-draft-help{font-size:13px;line-height:1.6;color:#536b65;margin:8px 0 12px}

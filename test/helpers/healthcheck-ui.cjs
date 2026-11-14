@@ -26,7 +26,7 @@ async function setup(width=1440){
  if(url.includes('/cases/previous?'))return {item:structuredClone(previous)};
  if(url.includes('/healthcheck?')&&url.includes('patientId=')&&previous)return {items:[{id:'previous',date:'2025-01-01',veterinarian:'가상 수의사'}]};
  return {items:stored&&!stored.body.deleted?[{id:stored.id,patient:stored.patient,date:stored.body.healthcheckChart.date}]:[]};};
- window.view=HealthcheckRecord.mount(document.querySelector('#root'),{identity:()=>identity,ready:()=>true,can:()=>editable,hospital:()=>window.hospitalFixture||{},request});view.open();
+ window.remountHealthcheck=()=>{window.view?.dispose();window.view=HealthcheckRecord.mount(document.querySelector('#root'),{identity:()=>identity,ready:()=>true,can:()=>editable,hospital:()=>window.hospitalFixture||{},request});};remountHealthcheck();view.open();
  });
  return {p,errors};
 }
