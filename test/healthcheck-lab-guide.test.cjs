@@ -38,13 +38,12 @@ test('report adds only relevant guides without modifying inputs, ranges or findi
  assert.equal(JSON.stringify(d),before);assert.match(html,/250/);assert.match(html,/10–100/);assert.match(html,/의료진 개별 소견/);assert.match(html,/간세포 관련 효소/);assert.doesNotMatch(html,/몸에서 사용하는 주요 에너지원/);
  assert.match(html,/이 환자의 진단을 뜻하지 않습니다/);assert.match(html,/근거 확인 2026-11-13/);
 });
-test('appendix has up to eight cards per section with valid public source links',()=>{
+test('appendix retains every guide in a continuous section with valid public source links',()=>{
  const html=api.reportHTML({...api.blank(),labs:rows},{name:'가상 환자',species:'cat'},[]);
  const sections=html.split('<section class="report-part"').filter(s=>s.includes('<div class="lab-guide-grid">'));
  const count=api.reportLabGuides(rows,'cat').length;
- assert.equal(sections.length,Math.ceil(count/8));
+ assert.equal(sections.length,1);
  assert.equal((html.match(/<article class="lab-guide">/g)||[]).length,count);
- for(const s of sections)assert.ok((s.match(/<article class="lab-guide">/g)||[]).length<=8);
  for(const [,url] of html.matchAll(/<a href="([^"]+)"/g)){assert.equal(new URL(url).protocol,'https:');assert.ok(!url.includes('undefined'));}
 });
 test('patient text is escaped and a report without tests has no empty appendix',()=>{

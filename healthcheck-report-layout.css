@@ -39,6 +39,8 @@ a{color:inherit;text-decoration:none}
 .toc-label{background:white;padding-right:2mm}
 .report-part[data-report-part="1"]{break-before:page}
 .report-part[data-report-part="1"][data-compact=true]{break-before:auto}
+.report-part[data-new-page=true]{break-before:page}
+.pagedjs_margin-content[data-continuation]::after{content:attr(data-continuation)!important}
 .report-note{margin:0 0 4mm}
 .report-problem{margin:0 0 5mm;break-inside:auto}
 .report-problem h3{padding:0 0 1.5mm;border-bottom:1px solid #d1dcd6}
@@ -95,7 +97,7 @@ td small,th small{display:block;font-size:8.5pt;line-height:1.35;color:#52615b;m
 
 .lab-table td{padding-top:1.5mm;padding-bottom:1.5mm}
 .lab-table td .lab-name{display:inline;margin:0 0 0 1mm}
-.comparison-note.is-comparable{display:inline;margin-left:2mm;white-space:nowrap}
+.comparison-note.is-comparable{display:block;margin:1mm 0 0;white-space:normal}
 
 .report-part[data-keep-together=true]{break-inside:avoid}
 .finding-table{margin:0 0 4mm}
@@ -107,3 +109,17 @@ td small,th small{display:block;font-size:8.5pt;line-height:1.35;color:#52615b;m
 .plan-row span{display:inline-block;width:calc(100% - 26mm);vertical-align:top}
 .plan-long h4{font-size:9pt;font-weight:500;color:#355d4e;margin:2mm 0;break-after:avoid}
 .plan-long p{margin-bottom:2mm}
+.plan-topic{font-size:10pt;font-weight:600;color:#355d4e;margin:0 0 1.5mm}
+.plan-row b{width:30mm;font-size:9.5pt}
+.plan-row span{width:calc(100% - 31mm)}
+.lab-source{font-size:9pt;color:#52615b;margin:0 0 2mm}
+.lab-group-row{break-after:avoid}
+.lab-group-row th{padding:2mm 1.6mm;font-weight:600;background:#f0f4f1;color:#245e55;border-top:1px solid #aebfb5}
+.lab-table td small,.lab-table th small{font-size:9pt}
+.lab-table .lab-result td:nth-child(2){font-size:10.5pt;font-weight:600}
+.lab-table.with-prior td:nth-child(3){font-size:9.5pt;color:#52615b}
+.lab-table.with-prior th:first-child{width:24%}
+.lab-table.with-prior th:nth-child(2){width:14%}
+.lab-table.with-prior th:nth-child(3){width:20%}
+.lab-guide small,.exam-guide small,.guide-names,.guide-intro,.guide-footer{font-size:9pt}
+.photo-row figcaption{font-size:9.5pt}

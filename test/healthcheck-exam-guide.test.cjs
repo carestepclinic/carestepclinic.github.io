@@ -19,7 +19,7 @@ test('all first-tab findings get sourced guidance but clinician text remains unc
  for(const key of keys)assert.equal((html.match(new RegExp('data-exam-guide="'+key+'"','g'))||[]).length,1,key);
  assert.match(html,/평가 불가로 기록된 항목도 정상으로 간주하지 않습니다/);
  assert.doesNotMatch(html,/<script>임의/);assert.match(html,/&lt;script&gt;임의/);
- assert.equal((html.match(/<div class="exam-guide-grid">/g)||[]).length,2);
+ assert.equal((html.match(/<div class="exam-guide-grid">/g)||[]).length,1);
  for(const [,url] of html.matchAll(/<a href="([^"]+)"/g))assert.equal(new URL(url).protocol,'https:');
 });
 test('BCS diagram marks every valid score in species-appropriate bands without duplicate nutrition guide',()=>{

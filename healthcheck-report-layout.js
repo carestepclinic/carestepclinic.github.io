@@ -3,11 +3,11 @@
  'use strict';
  const settings=JSON.parse(document.getElementById('report-settings').textContent),template=document.getElementById('report-source'),pages=document.getElementById('report-pages');
  const printButton=document.querySelector('[data-print]'),retry=document.querySelector('[data-rebuild]'),status=document.querySelector('.print-state'),include=document.querySelector('[data-include-guides]');
- const guideOptions=document.querySelector('[data-guide-options]'),photoOptions=document.querySelector('[data-photo-options]');
+ const guideOptions=document.querySelector('[data-guide-options]'),photoOptions=document.querySelector('[data-photo-options]'),mode=document.querySelector('[data-report-mode]');
  let engine=null,cssPromise=null,busy=false,queued=false,revision=0;
  const guideChoices=[],photoChoices=new Map();
  const setStatus=(text,error=false)=>{status.textContent=text;status.classList.toggle('print-error',error);};
- function checkbox(label,key){const wrapper=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.checked=true;input.dataset.guideChoice=key;wrapper.append(input,document.createTextNode(' '+label));guideOptions.append(wrapper);input.addEventListener('change',schedule);return input;}
+ function checkbox(label,key){const wrapper=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.checked=true;input.dataset.guideChoice=key;wrapper.append(input,document.createTextNode(' '+label));guideOptions.append(wrapper);input.addEventListener('change',()=>{mode.value='custom';schedule();});return input;}
  for(const [partIndex,part] of [...template.content.querySelectorAll('[data-report-appendix=true]')].entries()){
   const cards=part.querySelector('.bcs-grid')?[]:[...part.querySelectorAll('.lab-guide,.exam-guide')];
   for(const [i,card] of (cards.length?cards:[part]).entries()){
@@ -24,7 +24,8 @@
   select.addEventListener('change',schedule);photoOptions.append(wrapper);photoChoices.set(gallery.dataset.gallery,select);
  }
  if(!photoChoices.size)photoOptions.hidden=true;
- include.addEventListener('change',()=>{guideOptions.querySelectorAll('input').forEach(x=>x.disabled=!include.checked);schedule();});
+ include.addEventListener('change',()=>{mode.value=include.checked?'custom':'concise';guideOptions.querySelectorAll('input').forEach(x=>x.disabled=!include.checked);schedule();});
+ mode.addEventListener('change',()=>{include.checked=mode.value!=='concise'&&guideChoices.length>0;guideOptions.querySelectorAll('input').forEach(x=>{x.disabled=!include.checked;if(mode.value==='detailed')x.checked=true;});schedule();});
  guideOptions.querySelectorAll('input').forEach(x=>x.disabled=!include.checked);
  document.querySelector('[data-photo-layout]').addEventListener('change',schedule);
  retry.addEventListener('click',()=>{cssPromise=null;schedule();});
@@ -42,7 +43,8 @@
   for(const gallery of root.querySelectorAll('[data-gallery]')){
    const figures=[...gallery.querySelectorAll('figure')],featured=photoChoices.get(gallery.dataset.gallery)?.value;
    gallery.replaceChildren();
-   const addRow=(list,isFeatured=false)=>{const row=document.createElement('div');row.className='photo-row'+(isFeatured?' featured':'');row.append(...list);gallery.append(row);};
+   let photoNumber=0;
+   const addRow=(list,isFeatured=false)=>{const row=document.createElement('div');row.className='photo-row'+(isFeatured?' featured':'');for(const figure of list){const label=(figure.dataset.photoKind||'사진')+(isFeatured?' · 대표 영상':' '+(++photoNumber));figure.querySelector('figcaption b').textContent=label;figure.querySelector('img').alt=label;}row.append(...list);gallery.append(row);};
    if(document.querySelector('[data-photo-layout]').value==='featured'){
     const i=figures.findIndex(x=>x.dataset.photoId===featured);if(i>=0)addRow(figures.splice(i,1),true);
    }
@@ -82,6 +84,8 @@
    for(const page of flow.pages)page.removeListeners();
    if(queued)return;
    const rendered=[...pages.querySelectorAll('.pagedjs_page')];if(!rendered.length||flow.total!==rendered.length)throw Error('페이지 수를 확인하지 못했습니다.');
+   // Put the section name in the reserved margin, never over the report content.
+   for(const page of rendered){const part=page.querySelector('.report-part'),title=part?.dataset.reportTitle;if(part&&part.dataset.reportPart!=='0'&&!part.querySelector('.part-title')&&title){const margin=page.querySelector('.pagedjs_margin-top-left .pagedjs_margin-content');if(margin){margin.dataset.continuation=title+' · 계속';page.dataset.continuation=title;}}}
    const toc=[];
    for(const link of pages.querySelectorAll('.toc-link')){
     const id=link.getAttribute('href').slice(1),heading=pages.querySelector('[id="'+id+'"]'),page=heading?.closest('.pagedjs_page'),n=rendered.indexOf(page)+1;
