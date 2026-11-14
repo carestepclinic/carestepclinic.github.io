@@ -54,3 +54,82 @@
 .hc-import-table tr[hidden]{display:none}
 .hc-record [data-hc-status]:empty{display:none}
 @media(max-width:600px){.hc-workflow-controls{display:grid;grid-template-columns:1fr 1fr}.hc-workflow-controls input,.hc-workflow-controls select{min-width:0;width:100%}.hc-workflow-controls select{grid-column:1/-1}.hc-summary-vet{flex-wrap:wrap}.hc-photo-bulk [data-bulk-caption]{width:100%}}
+/* Healthcheck entry: compact hierarchy and result-first editing. */
+.hc-record{font-size:14px;line-height:1.5}
+.hc-record button,.hc-record input,.hc-record select,.hc-record textarea{font-family:inherit;font-size:14px;line-height:1.4}
+.hc-record button{min-height:40px;border-radius:8px;font-weight:600}
+.hc-record label,.hc-record summary,.hc-record .hc-exam-title{font-size:14px}
+.hc-record small,.hc-record .hc-lab-check .hc-check,.hc-record .hc-lab-check [data-range],.hc-record .hc-cell-label{font-size:13px}
+.hc-record .hc-section-title,.hc-vitals h3{font-size:15px;margin:10px 0 6px}
+.hc-record .hc-main-actions{gap:6px;align-items:center}
+.hc-record-menu{position:relative;margin:0!important;order:5}
+.hc-record-menu>summary{border:1px solid #cbdad8;border-radius:8px;padding:9px 12px;min-height:40px;background:white;font-weight:600;list-style:none}
+.hc-record-menu[open]>button{position:absolute;right:0;top:44px;white-space:nowrap;z-index:25;box-shadow:0 4px 16px #183b4020;background:#fff}
+.hc-record .hc-steps button{min-height:44px;padding:6px 11px}
+.hc-record .hc-steps [data-step-status]{font-size:12px}
+.hc-record .hc-sticky [data-save-state]{font-size:13px}
+.hc-input-help{color:#52706a;max-width:640px}
+.hc-input-help p{font-size:13px;margin:6px 0}
+.hc-record .hc-input-help summary{font-size:13px}
+.hc-selected-exams{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin:10px 0 4px}
+.hc-selected-exams>span:first-child{font-weight:600;margin-right:4px}
+.hc-exam-chip{background:#edf5f2;border:1px solid #d5e0de;border-radius:6px;padding:3px 8px;font-size:13px}
+.hc-record .hc-exam-selector{margin:4px 0 10px;padding:6px 10px}
+.hc-vitals{padding:10px;background:#fff;border:1px solid #d5e0de;border-radius:9px;min-width:0}
+.hc-vitals h3{margin-top:0}.hc-vital-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:8px}
+.hc-record .hc-vitals textarea{min-height:55px}
+.hc-record .hc-basics{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.hc-record .hc-lab-actions{align-items:center;margin:6px 0;gap:6px}
+.hc-record .hc-lab-actions>div{flex:1;flex-wrap:wrap}
+.hc-record .hc-lab-actions select{width:auto;max-width:260px}
+.hc-record .hc-entry-hint{color:#52706a;font-size:13px}
+.hc-record .hc-lab-tools{margin:6px 0;gap:6px;align-items:center}
+.hc-record .hc-lab-tools label{display:flex;align-items:center;gap:6px;font-size:13px}
+.hc-record .hc-lab-tools select{margin:0;width:auto}
+.hc-record .hc-labs{display:grid;columns:auto;grid-template-columns:minmax(0,1fr);gap:10px}
+.hc-record .hc-lab-group{display:block;margin:0;min-width:0;align-self:start}
+.hc-record .hc-lab-heading,.hc-record .hc-lab-compact{grid-template-columns:minmax(120px,1.4fr) minmax(75px,.8fr) minmax(65px,.7fr) minmax(95px,1fr) 100px 72px 44px;gap:6px;padding:6px 8px}
+.hc-record .hc-lab-compact [data-lab-settings]{font-size:12px;padding:4px;min-height:34px;font-weight:500}
+.hc-record .hc-lab-compact input[readonly]{border-color:transparent;background:transparent;padding-left:2px;padding-right:2px;cursor:default}
+.hc-record .hc-lab-compact input:not([readonly]):not([type=checkbox]){background:#fff;border-color:#91bcb4}
+.hc-record .hc-lab-compact details[open]{grid-column:1/-1}
+.hc-record .hc-lab-compact [data-lab=value]{font-weight:600}
+.hc-photo-navigation{display:flex;justify-content:flex-end;margin-bottom:6px}
+.hc-ai-hint{font-size:13px;color:#52706a;margin:6px 0 10px}
+.hc-record .hc-summary-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.hc-record .hc-summary-actions small{color:#52706a}
+.hc-record .hc-summary-grid textarea{min-height:100px}
+.hc-record .hc-summary-grid>label{padding:10px;background:#fff;border:1px solid #d5e0de;border-radius:9px}
+@container hc-panel (min-width:1400px){.hc-record .hc-labs:not(.hc-single-group){grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:800px){.hc-record .hc-basics{grid-template-columns:1fr}}
+@media(max-width:650px){
+ .hc-record{padding-bottom:84px}
+ .hc-record input:not([type=checkbox]),.hc-record select,.hc-record textarea{font-size:16px}
+ .hc-record .hc-main-actions{gap:5px;justify-content:space-between;padding:7px 8px calc(7px + env(safe-area-inset-bottom));flex-wrap:nowrap}
+ .hc-record .hc-main-actions>button{min-height:44px;font-size:13px;padding:6px 8px}
+ .hc-record .hc-main-actions [data-action=back]{font-size:12px;padding:6px}
+ .hc-record-menu>summary{font-size:12px;padding:12px 6px;min-height:44px}
+ .hc-record-menu[open]>button{top:auto;bottom:50px}
+ .hc-record .hc-steps{gap:4px;margin:5px 0}
+ .hc-record .hc-steps button{min-height:40px;padding:5px 9px;font-size:14px}
+ .hc-record .hc-steps button:not([aria-pressed=true]) [data-step-status]{display:none}
+ .hc-record .hc-steps [data-step-status]{font-size:12px}
+ .hc-record .hc-lab-actions>div{display:grid;grid-template-columns:1fr auto;width:100%}
+ .hc-record .hc-lab-actions select{grid-column:1/-1;max-width:none;width:100%}
+ .hc-record .hc-entry-hint{display:none}
+ .hc-record .hc-lab-tools [data-lab-count]{flex-basis:100%}
+ .hc-record .hc-lab-tools button{font-size:13px;min-height:40px}
+ .hc-record .hc-lab-heading{display:none}
+ .hc-record .hc-lab-compact{grid-template-columns:1fr 1fr;gap:6px}
+ .hc-record .hc-lab-compact>label:first-child{grid-column:1/-1}
+ .hc-record .hc-lab-compact>label:nth-child(4){grid-column:1/-1}
+ .hc-record .hc-lab-check{grid-column:1/-1}
+ .hc-record .hc-lab-compact details[open]{grid-column:1/-1}
+ .hc-record .hc-lab-compact [data-lab-settings]{font-size:13px;min-height:40px;justify-self:start;padding:5px 10px}
+ .hc-record .hc-lab-compact>details{justify-self:end}
+ .hc-record .hc-vital-fields{gap:6px}
+ .hc-record .hc-vital-fields label{font-size:12px}
+ .hc-record .hc-summary-grid>label{padding:8px}
+ .hc-record .hc-summary-grid textarea{min-height:85px}
+ .hc-record .hc-step-footer{align-items:center}
+}
