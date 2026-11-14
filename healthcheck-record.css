@@ -88,7 +88,7 @@
 .hc-record .hc-lab-tools select{margin:0;width:auto}
 .hc-record .hc-labs{display:grid;columns:auto;grid-template-columns:minmax(0,1fr);gap:10px}
 .hc-record .hc-lab-group{display:block;margin:0;min-width:0;align-self:start}
-.hc-record .hc-lab-heading,.hc-record .hc-lab-compact{grid-template-columns:minmax(120px,1.4fr) minmax(75px,.8fr) minmax(65px,.7fr) minmax(95px,1fr) 100px 72px 44px;gap:6px;padding:6px 8px}
+.hc-record .hc-lab-heading,.hc-record .hc-lab-compact{grid-template-columns:minmax(120px,1.4fr) minmax(75px,.8fr) minmax(65px,.7fr) minmax(95px,1fr) 100px 88px;gap:6px;padding:6px 8px}
 .hc-record .hc-lab-compact [data-lab-settings]{font-size:12px;padding:4px;min-height:34px;font-weight:500}
 .hc-record .hc-lab-compact input[readonly]{border-color:transparent;background:transparent;padding-left:2px;padding-right:2px;cursor:default}
 .hc-record .hc-lab-compact input:not([readonly]):not([type=checkbox]){background:#fff;border-color:#91bcb4}
@@ -133,3 +133,14 @@
  .hc-record .hc-summary-grid textarea{min-height:85px}
  .hc-record .hc-step-footer{align-items:center}
 }
+
+/* One settings disclosure and compact examination selection. */
+.hc-record .hc-exam-selector>summary{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:600}
+.hc-record .hc-exam-selector .hc-selected-exams{display:flex;flex:1;margin:0;gap:5px;flex-wrap:wrap;min-width:150px}
+.hc-record .hc-exam-selector .hc-selected-exams>span:first-child{display:none}
+.hc-record .hc-lab-compact>details>summary{white-space:nowrap;border:1px solid #cbdad8;border-radius:7px;padding:8px;font-size:13px;min-height:36px}
+.hc-record .hc-lab-compact>details[open]{justify-self:stretch}
+.hc-record .hc-lab-tools{align-items:center}
+.hc-record .hc-history [data-intake-context] .hc-check{flex-wrap:wrap;align-items:flex-start}
+.hc-record .hc-history [data-intake-context] .hc-check span{flex-basis:100%;white-space:pre-wrap}
+@media(max-width:650px){.hc-record .hc-lab-compact>details>summary{min-height:40px}.hc-record .hc-lab-compact details label{width:100%;margin:5px 0}}

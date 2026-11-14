@@ -5,6 +5,57 @@ const path=require('node:path');
 const fs=require('node:fs');
 const root=path.resolve(__dirname,'..');
 
+test('blood pressure aliases classify legacy rows and preserve source units and ranges',()=>{
+ const H=require('../healthcheck-record.js');
+ for(const [name,key] of [['SYSTOLIC BP','SBP'],['DIASTOLIC BP','DBP'],['MAP','MAP'],['수축기 혈압 · SBP','SBP'],['평균 혈압','MAP']]){
+  const r={name,group:'기타 검사',value:'94',unit:'mmH',reference:'55 - 75',confirmed:true};
+  assert.equal(H.canonicalName(name),key);assert.equal(H.labGroup(r),'혈압');assert.equal(H.labTab(r),'additional');assert.equal(H.additionalFamily(r),'pressure');
+  assert.equal(r.unit,'mmH');assert.equal(r.reference,'55 - 75');assert.equal(r.value,'94');
+ }
+ assert.equal(H.labGroup({name:'혈압 관련 메모',group:'기타 검사'}),'기타 검사');
+});
+
+for(const width of [1440,390])test('blood pressure group, save and report preserve imported results '+width,async()=>{
+ const {p,errors}=await setup(width);await start(p);
+ await p.evaluate(()=>{stored.body.healthcheckChart.labs=['SYSTOLIC BP','DIASTOLIC BP','MAP'].map((name,i)=>HealthcheckRecord.row({name,group:'기타 검사',value:['144','94','121'][i],unit:'mmH',reference:['80 - 150','55 - 75','60 - 100'][i],confirmed:true}));});
+ await p.evaluate(()=>view.openRecord('record-1'));await p.locator('[data-step=additional]').click();await p.locator('[data-additional-category]').selectOption('pressure');
+ assert.equal(await p.locator('.hc-lab-group h3').innerText(),'혈압');assert.equal(await p.locator('[data-row]').count(),3);
+ await p.locator('[data-template]').selectOption('혈압');assert.equal(await p.locator('[data-row]').count(),3);
+ await p.locator('[data-action=save]').click();await p.waitForFunction(()=>stored.revision===2);
+ assert.deepEqual(await p.evaluate(()=>stored.body.healthcheckChart.labs.map(r=>[r.value,r.unit,r.reference])),[['144','mmH','80 - 150'],['94','mmH','55 - 75'],['121','mmH','60 - 100']]);
+ const html=await p.evaluate(()=>HealthcheckRecord.reportHTML(stored.body.healthcheckChart,patient,[]));assert.match(html,/血圧|혈압/);assert.match(html,/DIASTOLIC BP/);
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ await p.screenshot({path:path.join(root,'../healthcheck-review-bp-'+width+'.png'),fullPage:true});assert.deepEqual(errors,[]);await p.close();
+});
+
+for(const width of [1440,390])test('visible bulk selection excludes blank pending and hidden results '+width,async()=>{
+ const {p,errors}=await setup(width);await start(p);
+ await p.evaluate(()=>{stored.body.healthcheckChart.labs=[['WBC','10','5-15'],['RBC','20','5-15'],['HGB','',''],['HCT','결과 대기',''],['PLT','미검사','']].map(([name,value,reference])=>HealthcheckRecord.row({name,value,reference,confirmed:name==='RBC',group:'CBC · 혈구검사'}));});
+ await p.evaluate(()=>view.openRecord('record-1'));await p.locator('[data-step=labs]').click();await p.locator('[data-select-visible]').click();assert.equal(await p.locator('[data-lab-pick]:checked').count(),2);
+ await p.locator('[data-lab-filter]').selectOption('abnormal');await p.locator('[data-confirm-picked]').click();
+ await p.locator('[data-lab-filter]').selectOption('all');assert.deepEqual(await p.locator('[data-lab=confirmed]').evaluateAll(es=>es.map(e=>e.checked)),[false,true,false,false,false]);
+ await p.locator('[data-clear-selection]').click();assert.equal(await p.locator('[data-lab-pick]:checked').count(),0);
+ assert.match(await p.locator('[data-step-status=labs]').innerText(),/결과 2개 · 대조 필요 1개 · 대기 1개 · 미검사 1개/);
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);await p.close();
+});
+
+test('save keeps lab settings, keyboard focus and viewport position',async()=>{
+ const {p,errors}=await setup(390);await start(p);await p.locator('[data-step=labs]').click();await p.locator('[data-template]').selectOption('CBC');
+ const card=p.locator('[data-row]').nth(5);await card.locator('[data-lab-settings]').click();await card.locator('[data-lab=reference]').fill('1–2');await card.locator('[data-lab=reference]').blur();await card.locator('[data-lab=value]').fill('1.5');await card.locator('[data-lab=value]').blur();await card.locator('[data-lab=value]').focus();
+ const top=await p.evaluate(()=>scrollY);await p.locator('[data-action=save]').evaluate(e=>e.click());await p.waitForFunction(()=>stored.revision===2);await p.waitForTimeout(60);
+ assert.equal(await card.locator('details').getAttribute('open'),'');assert.equal(await card.locator('[data-lab=value]').evaluate(e=>e===document.activeElement),true);assert.ok(Math.abs(await p.evaluate(()=>scrollY)-top)<5);
+ assert.equal(await card.locator('[data-lab=reference]').evaluate(e=>e.readOnly),false);assert.deepEqual(errors,[]);await p.close();
+});
+
+test('repeat context import avoids medication and history duplication after reload',async()=>{
+ const {p,errors}=await setup();await start(p);await p.evaluate(()=>{contextRows=[{id:'old',date:'2026-01-01',title:'진료',medications:'가상 약물'}];previous={id:'previous',body:{healthcheckChart:{date:'2025-01-01',history:'가상 과거력'}}};});
+ const open=p.getByRole('button',{name:'다른 기록의 과거력·약물 가져오기'});await open.click();await p.locator('[data-context-med]').check();await p.locator('[data-context-apply]').click();await open.click();assert.equal(await p.locator('[data-context-med]').isDisabled(),true);assert.match(await p.locator('[data-intake-context]').innerText(),/이미 가져옴/);
+ await p.locator('[data-context-prior]').click();await p.locator('[data-history-record]').click();await p.getByRole('button',{name:'확인한 과거력 가져오기'}).click();
+ await p.locator('[data-action=save]').click();await p.waitForFunction(()=>stored.revision===2);await p.evaluate(()=>view.openRecord('record-1'));await open.click();assert.equal(await p.locator('[data-context-med]').isDisabled(),true);
+ await p.locator('[data-context-prior]').click();await p.locator('[data-history-record]').click();assert.equal(await p.getByRole('button',{name:'이미 가져온 과거력'}).isDisabled(),true);
+ assert.equal((await p.locator('[data-field=medications]').inputValue()).split('가상 약물').length,2);assert.equal((await p.locator('[data-field=history]').inputValue()).split('가상 과거력').length,2);assert.deepEqual(errors,[]);await p.close();
+});
+
 for(const width of [1440,1024,390,320])test('editor streamlined actions, vitals and legacy notes persist '+width,async()=>{
  const {p,errors}=await setup(width);await start(p);
  assert.equal(await p.locator('[data-step=images]').count(),0);
@@ -43,8 +94,8 @@ test('workflow statuses never turn blank or pending results into normal',()=>{
  const H=require('../healthcheck-record.js'),d=H.blank();
  assert.equal(H.workflowState(d,'exams'),'미입력');
  d.labs=[H.row({name:'CREA',value:'결과 대기'})];d.reviewed=true;
- assert.equal(H.workflowState(d,'labs'),'결과 대기');assert.equal(H.rangeStatus(d.labs[0]),'결과 대기');assert.equal(H.needsReview(d.labs[0]),false);
- d.labs[0].value='1.2';assert.equal(H.workflowState(d,'labs'),'원본 대조 필요');d.labs[0].confirmed=true;assert.equal(H.workflowState(d,'labs'),'검토 완료');
+ assert.equal(H.workflowState(d,'labs'),'대기 1개');assert.equal(H.rangeStatus(d.labs[0]),'결과 대기');assert.equal(H.needsReview(d.labs[0]),false);
+ d.labs[0].value='1.2';assert.equal(H.workflowState(d,'labs'),'결과 1개 · 대조 필요 1개');d.labs[0].confirmed=true;assert.equal(H.workflowState(d,'labs'),'결과 1개');
  assert.equal(H.additionalFamily({name:'분변 기생충 검사'}),'stool');assert.equal(H.additionalFamily({name:'조직 병리검사'}),'cytology');
  assert.equal(H.additionalFamily({name:'cTnI'}),'cardiac');assert.equal(H.additionalFamily({name:'ACTH 후 Cortisol'}),'endocrine');
 });
@@ -236,8 +287,8 @@ test('offscreen photos are deferred, individual retry and cached revisit',async(
  await p.locator('[data-step=exams]').click();await openPhotos(p);await p.locator('[data-photo-card]').last().scrollIntoViewIfNeeded();await p.waitForTimeout(100);assert.equal(await p.evaluate(()=>calls.filter(x=>x.url.includes('id=photo-59')).length),1);assert.deepEqual(errors,[]);await p.close();
 });
 test('lab selection count and confirmation state stay synchronized',async()=>{
- const {p,errors}=await setup();await start(p);await lab(p);assert.match(await p.locator('[data-lab-count]').innerText(),/입력 1개 · 원본 대조 필요 0개/);assert.equal(await p.locator('[data-confirm-picked]').isDisabled(),true);assert.equal(await p.locator('[data-first-review]').isDisabled(),true);
- await p.locator('[data-lab=value]').fill('3');await p.locator('[data-lab=value]').blur();assert.match(await p.locator('[data-lab-count]').innerText(),/원본 대조 필요 1개/);assert.equal(await p.locator('[data-first-review]').isEnabled(),true);await p.locator('[data-lab-pick]').check();assert.match(await p.locator('[data-confirm-picked]').innerText(),/선택 1개/);await p.locator('[data-confirm-picked]').click();assert.match(await p.locator('[data-lab-count]').innerText(),/원본 대조 필요 0개/);assert.deepEqual(errors,[]);await p.close();
+ const {p,errors}=await setup();await start(p);await lab(p);assert.match(await p.locator('[data-lab-count]').innerText(),/결과 1개/);assert.equal(await p.locator('[data-confirm-picked]').isDisabled(),true);assert.equal(await p.locator('[data-first-review]').isDisabled(),true);
+ await p.locator('[data-lab=value]').fill('3');await p.locator('[data-lab=value]').blur();assert.match(await p.locator('[data-lab-count]').innerText(),/대조 필요 1개/);assert.equal(await p.locator('[data-first-review]').isEnabled(),true);await p.locator('[data-lab-pick]').check();assert.match(await p.locator('[data-confirm-picked]').innerText(),/선택 1개/);await p.locator('[data-confirm-picked]').click();assert.match(await p.locator('[data-lab-count]').innerText(),/결과 1개/);assert.deepEqual(errors,[]);await p.close();
 });
 
 test('individual removal clears bulk selection without changing other photos',async()=>{
@@ -259,10 +310,10 @@ for(const width of [1440,768,390])test('dedicated blood urine additional and ima
  const html=await p.evaluate(()=>HealthcheckRecord.reportHTML(stored.body.healthcheckChart,patient,stored.body.healthcheckChart.images));assert.match(html,/심장사상충 항원/);assert.match(html,/1.030/);assert.match(html,/가상 ultrasound 소견/);assert.equal((html.match(/<figure\b/g)||[]).length,2);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);await p.close();
 });
 test('lab selection survives filtering and navigation without confirming other tab',async()=>{
- const {p,errors}=await setup();await start(p);await lab(p);await p.locator('[data-lab=confirmed]').uncheck();await p.locator('[data-lab-pick]').check();await p.locator('[data-lab-filter]').selectOption('abnormal');assert.equal(await p.locator('[data-row]').count(),0);assert.match(await p.locator('[data-confirm-picked]').innerText(),/숨김 1개/);assert.equal(await p.locator('[data-confirm-picked]').isEnabled(),true);await p.locator('[data-step=urine]').click();assert.equal(await p.locator('[data-confirm-picked]').isEnabled(),false);await p.locator('[data-step=labs]').click();await p.locator('[data-lab-filter]').selectOption('all');assert.equal(await p.locator('[data-lab-pick]').isChecked(),true);await p.locator('[data-confirm-picked]').click();assert.equal(await p.locator('[data-lab=confirmed]').isChecked(),true);assert.equal(await p.locator('[data-lab-pick]').isChecked(),false);assert.deepEqual(errors,[]);await p.close();
+ const {p,errors}=await setup();await start(p);await lab(p);await p.locator('[data-lab=confirmed]').uncheck();await p.locator('[data-lab-pick]').check();await p.locator('[data-lab-filter]').selectOption('abnormal');assert.equal(await p.locator('[data-row]').count(),0);assert.equal(await p.locator('[data-confirm-picked]').isEnabled(),false);await p.locator('[data-step=urine]').click();assert.equal(await p.locator('[data-confirm-picked]').isEnabled(),false);await p.locator('[data-step=labs]').click();await p.locator('[data-lab-filter]').selectOption('all');assert.equal(await p.locator('[data-lab-pick]').isChecked(),true);await p.locator('[data-confirm-picked]').click();assert.equal(await p.locator('[data-lab=confirmed]').isChecked(),true);assert.equal(await p.locator('[data-lab-pick]').isChecked(),false);assert.deepEqual(errors,[]);await p.close();
 });
 test('review changes accurately mark unsaved and internal notes stay folded out of report',async()=>{
- const {p,errors}=await setup();await start(p);await p.locator('[data-step=summary]').click();assert.match(await p.locator('[data-save-state]').innerText(),/저장 완료/);await p.locator('[data-review]').check();assert.match(await p.locator('[data-save-state]').innerText(),/저장 전 변경/);await p.locator('[data-action=save]').click();await p.waitForFunction(()=>stored.revision===2);await p.locator('[data-review]').uncheck();assert.match(await p.locator('[data-save-state]').innerText(),/저장 전 변경/);assert.equal(await p.locator('[data-prose=questions]').isVisible(),false);await p.locator('.hc-review-notes summary').click();await p.locator('[data-prose=questions]').fill('내부 검토 가상 메모');await p.locator('[data-action=save]').click();await p.waitForFunction(()=>stored.revision===3);assert.equal(await p.locator('[data-prose=questions]').isVisible(),false);assert.match(await p.locator('.hc-review-notes summary').innerText(),/내용 있음/);assert.doesNotMatch(await p.evaluate(()=>HealthcheckRecord.reportHTML(stored.body.healthcheckChart,patient,[])),/내부 검토 가상 메모/);await p.screenshot({path:path.join(root,'../healthcheck-tabs-summary.png'),fullPage:true});assert.deepEqual(errors,[]);await p.close();
+ const {p,errors}=await setup();await start(p);await p.locator('[data-step=summary]').click();assert.match(await p.locator('[data-save-state]').innerText(),/저장 완료/);await p.locator('[data-review]').check();assert.match(await p.locator('[data-save-state]').innerText(),/저장 전 변경/);await p.locator('[data-action=save]').click();await p.waitForFunction(()=>stored.revision===2);await p.locator('[data-review]').uncheck();assert.match(await p.locator('[data-save-state]').innerText(),/저장 전 변경/);assert.equal(await p.locator('[data-prose=questions]').isVisible(),false);await p.locator('.hc-review-notes summary').click();await p.locator('[data-prose=questions]').fill('내부 검토 가상 메모');await p.locator('[data-action=save]').click();await p.waitForFunction(()=>stored.revision===3);assert.equal(await p.locator('[data-prose=questions]').isVisible(),true);assert.match(await p.locator('.hc-review-notes summary').innerText(),/내용 있음/);assert.doesNotMatch(await p.evaluate(()=>HealthcheckRecord.reportHTML(stored.body.healthcheckChart,patient,[])),/내부 검토 가상 메모/);await p.screenshot({path:path.join(root,'../healthcheck-tabs-summary.png'),fullPage:true});assert.deepEqual(errors,[]);await p.close();
 });
 test('import selection previews existing replacement and routes multiple test types',async()=>{
  const {p,errors}=await setup();await start(p);await lab(p);await p.evaluate(()=>{importFixture={reportDate:stored.body.healthcheckChart.date,results:[{name:'CREA',value:'3.1',unit:'mg/dL',reference:'0.5–1.8'},{name:'USG',value:'1.025',unit:'',reference:''},{name:'NT-proBNP',value:'200',unit:'pmol/L',reference:'<900'}]};});await p.locator('[data-action=import]').click();await p.locator('[data-lab-file]').setInputFiles({name:'synthetic.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.7 synthetic')});await p.locator('[data-file-consent]').check();await p.waitForTimeout(40);await p.locator('[data-action=read-file]').click();await p.locator('[data-import-all]').waitFor();assert.match(await p.locator('[data-import-preview]').innerText(),/새로 추가 2개.*기존 값 유지 1개/);await p.locator('[data-import-all]').uncheck();assert.match(await p.locator('[data-import-preview]').innerText(),/선택 0개/);await p.locator('[data-import-all]').check();await p.locator('[data-import-mode]').selectOption('replace');assert.match(await p.locator('[data-import-preview]').innerText(),/기존 결과 반영 1개/);await p.locator('[data-import-checked]').check();await p.locator('[data-import-pick="0"]').uncheck();assert.equal(await p.locator('[data-import-checked]').isChecked(),false);await p.locator('[data-import-checked]').check();await p.locator('[data-action=apply-import]').click();assert.equal(await p.locator('[data-lab=value]').inputValue(),'2.4');await p.locator('[data-step=urine]').click();assert.equal(await p.locator('[data-lab=value]').inputValue(),'1.025');await p.locator('[data-step=additional]').click();assert.equal(await p.locator('[data-lab=value]').inputValue(),'200');assert.deepEqual(errors,[]);await p.close();
@@ -271,7 +322,7 @@ test('photo bulk controls hidden until selection and preserve selection between 
  const {p,errors}=await setup();await start(p);await photoFixture(p,4);assert.equal(await p.locator('[data-photo-bulk=delete]').isVisible(),false);await p.locator('[data-photo-pick]').first().check();assert.equal(await p.locator('[data-photo-bulk=delete]').isVisible(),true);await p.locator('[data-step=radiograph]').click();assert.equal(await p.locator('[data-photo-card]').count(),2);assert.match(await p.locator('[data-photo-count]').innerText(),/선택 1장.*숨김 1장 포함/);await openPhotos(p);await p.locator('[data-photo-pick]').first().uncheck();assert.equal(await p.locator('[data-photo-bulk=delete]').isVisible(),false);assert.deepEqual(errors,[]);await p.close();
 });
 for(const omit of [false,true])test('print photo failure offers targeted retry or explicit annotated omission '+omit,async()=>{
- const {p,errors}=await setup();await start(p);await p.evaluate(()=>{const c=document.createElement('canvas');c.width=100;c.height=80;for(let i=0;i<4;i++)photoBytes['print-'+i]=c.toDataURL('image/png');stored.body.healthcheckChart.images=Array.from({length:4},(_,i)=>({id:'print-'+i,kind:'ultrasound',caption:'가상 사진 '+i,imageRevision:1}));failPhoto='print-2';});await p.evaluate(()=>view.openRecord('record-1'));await p.locator('[data-step=summary]').click();const next=p.waitForEvent('popup');await p.locator('[data-action=print]').click();const popup=await next;await popup.locator('[data-retry]').waitFor();assert.match(await popup.locator('[role=status]').innerText(),/3 \/ 4/);assert.equal(await p.evaluate(()=>calls.filter(x=>x.url.includes('healthcheck-images?')).length),4);await popup.locator(omit?'[data-omit]':'[data-retry]').click();await popup.locator('h1').filter({hasText:'건강검진 결과서'}).waitFor();assert.equal(await popup.locator('figure').count(),omit?3:4);assert.equal(await p.evaluate(()=>calls.filter(x=>x.url.includes('healthcheck-images?')).length),omit?4:5);assert.equal(await p.evaluate(()=>stored.body.healthcheckChart.images.length),4);if(omit)assert.match(await popup.locator('body').innerText(),/사진 1장 불러오기 실패로 제외/);else assert.doesNotMatch(await popup.locator('body').innerText(),/실패로 제외/);assert.deepEqual(errors,[]);await popup.close();await p.close();
+ const {p,errors}=await setup();await start(p);await p.evaluate(()=>{const c=document.createElement('canvas');c.width=100;c.height=80;for(let i=0;i<4;i++)photoBytes['print-'+i]=c.toDataURL('image/png');stored.body.healthcheckChart.images=Array.from({length:4},(_,i)=>({id:'print-'+i,kind:'ultrasound',caption:'가상 사진 '+i,imageRevision:1}));failPhoto='print-2';});await p.evaluate(()=>view.openRecord('record-1'));await p.locator('[data-step=summary]').click();const next=p.waitForEvent('popup');await p.locator('[data-action=print]').click();const popup=await next;await popup.locator('[data-retry]').waitFor();assert.match(await popup.locator('[role=status]').innerText(),/3 \/ 4/);assert.equal(await p.evaluate(()=>calls.filter(x=>x.url.includes('healthcheck-images?')).length),4);await popup.locator(omit?'[data-omit]':'[data-retry]').click();await popup.locator('h1').filter({hasText:'건강검진 보고서'}).waitFor();assert.equal(await popup.locator('figure').count(),omit?3:4);assert.equal(await p.evaluate(()=>calls.filter(x=>x.url.includes('healthcheck-images?')).length),omit?4:5);assert.equal(await p.evaluate(()=>stored.body.healthcheckChart.images.length),4);if(omit)assert.match(await popup.locator('body').innerText(),/사진 1장 불러오기 실패로 제외/);else assert.doesNotMatch(await popup.locator('body').innerText(),/실패로 제외/);assert.deepEqual(errors,[]);await popup.close();await p.close();
 });
 
 test('completed review can be unchecked and saved as amended',async()=>{
@@ -309,7 +360,7 @@ for(const width of [1440,390])test('confirmed range deviations are red and refer
  assert.equal(await p.locator('[data-lab=value]').evaluate(e=>getComputedStyle(e).color),'rgb(180, 35, 24)');
  await editReference(p,'');await p.locator('[data-lab=reference]').blur();
  assert.equal(await p.locator('.hc-lab-abnormal').count(),0);await p.locator('[data-lab=confirmed]').check();
- assert.equal(await p.locator('[data-range]').innerText(),'참고범위 미제공');assert.match(await p.locator('[data-lab-count]').innerText(),/원본 대조 필요 0개/);
+ assert.equal(await p.locator('[data-range]').innerText(),'참고범위 미제공');assert.match(await p.locator('[data-lab-count]').innerText(),/결과 1개/);
  await p.locator('[data-lab-filter]').selectOption('review');assert.equal(await p.locator('[data-row]').count(),0);await p.locator('[data-lab-filter]').selectOption('all');
  await editReference(p,'3–5');await p.locator('[data-lab=reference]').blur();await p.locator('[data-lab=confirmed]').check();assert.equal(await p.locator('[data-range]').innerText(),'낮음');assert.equal(await p.locator('.hc-lab-abnormal').count(),1);
  await p.locator('[data-action=save]').click();await p.waitForFunction(()=>stored.revision===2);await p.evaluate(()=>view.openRecord('record-1'));await p.locator('[data-step=labs]').click();assert.equal(await p.locator('.hc-lab-abnormal').count(),1);

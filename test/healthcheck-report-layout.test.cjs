@@ -63,7 +63,7 @@ test('cover, one-column contents and summary occupy separate pages',async()=>{
  const {p,errors}=await open(fixture());
  const first=p.locator('.pagedjs_page').first();
  const text=await first.innerText();
- for(const expected of ['건강검진 결과서',brand.name,brand.address,brand.phone,patient.name,patient.guardianName,patient.chartNumber,'건강검진일','2026-11-13'])assert.ok(text.includes(expected),expected);
+ for(const expected of ['건강검진 보고서',brand.name,brand.address,brand.phone,patient.name,patient.guardianName,patient.chartNumber,'건강검진일','2026-11-13'])assert.ok(text.includes(expected),expected);
  assert.equal(await first.locator('.report-toc,.cover-summary,.part-title').count(),0);
  assert.equal(await p.locator('.report-cover-page').count(),1);
  assert.equal(await p.locator('[data-report-title="검진 결과 요약"]').first().evaluate(e=>e.closest('.pagedjs_page').dataset.pageNumber),'3');
