@@ -46,3 +46,12 @@ test('calculator optional definitions load together and are reused',async t=>{
 });
 
 test('chronic choices module loads in dependency order and survives navigation reuse',async t=>{const {p,requests}=await fixture(t);await goTab(p,'chronic');await p.locator('[data-act=new]').waitFor();assert.equal(await p.evaluate(()=>typeof ChronicChoices.setup),'function');assert.equal(requests.filter(x=>x==='/chronic-choices.js').length,1);assert.ok(requests.indexOf('/chronic-choices.js')<requests.indexOf('/chronic-record.js'));await goTab(p,'neuro');await p.locator('[data-nr=new]').waitFor();await goTab(p,'chronic');await p.locator('[data-act=new]').waitFor();assert.equal(requests.filter(x=>x==='/chronic-choices.js').length,1);});
+
+test('healthcheck refresh loads the current versioned script and stylesheet again',async t=>{
+ const {p}=await fixture(t),seen=[];p.on('request',r=>{if(/healthcheck-record\.(js|css)/.test(r.url()))seen.push(new URL(r.url()).pathname+new URL(r.url()).search);});
+ const html=fs.readFileSync(path.join(root,'index.html'),'utf8'),manifest=JSON.parse(html.match(/<script id="clinic-module-manifest"[^>]*>([^<]+)<\/script>/)[1]);
+ const script='/'+manifest.healthcheck[0],style='/'+html.match(/href="(healthcheck-record\.css\?[^"]+)"/)[1];
+ await goTab(p,'healthcheck');await p.locator('[data-action=new]').waitFor();assert.ok(seen.includes(script));
+ await p.reload();await p.evaluate(()=>{saasMode='auth';saasToken='synthetic';saasSessionMeta={id:'local'};saasMe={role:'owner',clinic:{id:'local'},user:{id:'owner'}};saasRequest=async()=>({ok:true,items:[],members:[],courses:[],runs:[],templates:[],patients:[],canManage:true,canRecord:true,userId:'owner',manager:true,next:null});showApp({deferFullRender:true});});
+ await goTab(p,'healthcheck');await p.locator('[data-action=new]').waitFor();assert.equal(seen.filter(x=>x===script).length,2);assert.ok(seen.includes(style));assert.equal(await p.evaluate(()=>typeof HealthcheckRecord.nextWorkStep),'function');
+});
