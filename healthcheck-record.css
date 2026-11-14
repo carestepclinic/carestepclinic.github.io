@@ -33,3 +33,24 @@
 @media(max-width:650px){.hc-basics{grid-template-columns:1fr}.hc-record .hc-history-fields{grid-template-columns:1fr}.hc-record .hc-main-actions{flex-wrap:nowrap;gap:5px;padding-left:6px;padding-right:6px}.hc-main-actions button{font-size:12px;padding:6px}.hc-main-actions .hc-attachments{position:fixed;right:10px;bottom:65px;background:#fff;box-shadow:0 1px 5px #183b401a}.hc-review-grid{grid-template-columns:1fr 1fr}.hc-summary-grid{grid-template-columns:minmax(0,1fr)!important}.hc-summary-grid>label{grid-column:auto}.hc-record .hc-followup .hc-fields{grid-template-columns:1fr}.hc-step-footer{align-items:flex-start}.hc-step-footer small{max-width:55%}.hc-steps button{min-height:52px}.hc-record{padding-bottom:110px}}
 
 .hc-record .hc-step-footer [data-next-step][hidden]{display:none}
+/* Intake and review workflow: compact controls, one editor for each fact. */
+.hc-workflow{margin:0 0 10px;padding:8px 10px;border:1px solid #d8e4e1;border-radius:8px;background:#f6faf9}
+.hc-workflow summary,.hc-output-review summary,.hc-report-intro summary{cursor:pointer;font-weight:650}
+.hc-workflow-controls,.hc-followup-shortcuts{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:8px 0}
+.hc-workflow-controls input,.hc-workflow-controls select{width:auto;min-width:160px;flex:1}
+.hc-workflow-controls button{white-space:nowrap}
+.hc-history>button{margin:6px 0}
+[data-intake-context]{border-top:1px solid #d8e4e1;padding-top:8px}
+[data-intake-context] .hc-check{align-items:flex-start;flex-wrap:wrap}
+[data-intake-context] .hc-check span{white-space:pre-wrap;flex-basis:100%;font-size:13px}
+.hc-followup-shortcuts select{width:auto;max-width:100%}
+.hc-photo-bulk [data-bulk-caption]{width:190px;max-width:100%}
+.hc-summary-vet{font-size:14px;display:flex;align-items:center;gap:8px}
+.hc-output-review,.hc-report-intro{padding:10px;margin-bottom:10px}
+.hc-import [data-file-queue]{display:grid;gap:4px;font-size:13px}
+.hc-import [data-file-queue] button{max-width:100%;overflow-wrap:anywhere;text-align:left}
+.hc-import-table td{padding:5px}
+.hc-import-table input,.hc-import-table select{min-height:34px;padding:5px}
+.hc-import-table tr[hidden]{display:none}
+.hc-record [data-hc-status]:empty{display:none}
+@media(max-width:600px){.hc-workflow-controls{display:grid;grid-template-columns:1fr 1fr}.hc-workflow-controls input,.hc-workflow-controls select{min-width:0;width:100%}.hc-workflow-controls select{grid-column:1/-1}.hc-summary-vet{flex-wrap:wrap}.hc-photo-bulk [data-bulk-caption]{width:100%}}
