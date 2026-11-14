@@ -51,6 +51,7 @@
    for(let i=0;i<figures.length;i+=2)addRow(figures.slice(i,i+2));
   }
   const rows=root.querySelector('[data-toc-rows]'),headings=[...root.querySelectorAll('.part-title')];
+  headings.forEach((heading,i)=>{heading.dataset.sectionNumber=String(i+1).padStart(2,'0');});
   for(let i=0;i<headings.length;i+=2){const tr=document.createElement('tr');for(const heading of headings.slice(i,i+2)){const td=document.createElement('td'),a=document.createElement('a'),label=document.createElement('span'),number=document.createElement('span');a.className='toc-link';a.setAttribute('href','#'+heading.id);label.className='toc-label';label.textContent=heading.textContent;number.className='toc-page';number.textContent='—';a.append(label,number);td.append(a);tr.append(td);}rows.append(tr);}
   if(!headings.length)root.querySelector('.report-toc').remove();
   return root;

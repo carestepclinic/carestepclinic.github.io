@@ -123,3 +123,41 @@ td small,th small{display:block;font-size:8.5pt;line-height:1.35;color:#52615b;m
 .lab-table.with-prior th:nth-child(3){width:20%}
 .lab-guide small,.exam-guide small,.guide-names,.guide-intro,.guide-footer{font-size:9pt}
 .photo-row figcaption{font-size:9.5pt}
+
+/* Keep the contents and its reading note in one measured pagination block.
+   No fixed cover height: longer summaries continue without clipping. */
+.cover-navigation{break-inside:avoid;margin:5mm 0 0;padding:3mm 0 0;border-top:1px solid #b7ceca}
+.cover-navigation .report-toc{margin:0}
+.cover-navigation .report-guide{border:0;margin:3mm 0 0;padding:0;font-size:8.5pt;line-height:1.5}
+
+/* Shared report hierarchy, readable in colour and monochrome. */
+.report-part{color:#233b42}
+.hospital-cover{padding-bottom:4mm;border-bottom:1px solid #b7ceca;margin-bottom:6mm}
+.hospital-cover strong{color:#174f50;font-size:14pt}
+.report-kicker{color:#527578;font-size:8pt;letter-spacing:1.5pt;font-weight:600}
+h1{color:#183b44;font-size:28pt;letter-spacing:-.7pt;margin:2mm 0 6mm}
+.patient-block{border:1px solid #c8d9d6;border-left:3pt solid #19766f;padding:3.5mm 4mm;background:#f5f9f8}
+.patient-block strong{font-size:18pt;color:#183b44}
+.patient-block p{color:#435c63;font-size:9.5pt}
+.report-meta{gap:2mm 5mm;margin:3mm 0 5mm;padding-bottom:3mm;border-bottom:1px solid #dbe4e2}
+.report-meta b{color:#233b42;font-weight:600;margin-left:1mm}
+.cover-summary h2,.report-toc h2{font-size:11pt;color:#165e59;font-weight:700}
+.cover-summary{margin-bottom:3mm}
+.report-highlights li{margin-bottom:1.5mm}
+.cover-actions{border-left:2pt solid #19766f;background:#f5f9f8;padding:2.5mm 3mm;margin:3mm 0}
+.cover-actions .report-note:last-child{margin-bottom:0}
+.cover-actions h3{color:#165e59;font-weight:700}
+.report-coverage{color:#435c63}
+.report-toc td{padding:1.5mm 3mm 1.5mm 0}
+.toc-link{padding-bottom:1mm;border-bottom:1px solid #dbe4e2}
+.toc-page{color:#165e59;font-weight:700}
+.part-title{color:#183b44;font-size:16pt;font-weight:700;border-bottom:1.5pt solid #19766f;padding-bottom:3mm;margin-bottom:4mm}
+.part-title[data-section-number]::before{content:attr(data-section-number);display:inline-block;color:#19766f;font-size:11pt;margin-right:3mm;vertical-align:middle;font-variant-numeric:tabular-nums}
+.report-problem h3{color:#165e59;font-weight:600;border-color:#c8d9d6}
+thead th,.lab-group-row th{background:#edf5f3;color:#174f50;border-color:#b7ceca}
+.lab-group-row th{border-left:2pt solid #19766f}
+.lab-table .lab-result:nth-child(even) td{background:#f8faf9}
+.lab-table .lab-result td:nth-child(2){font-variant-numeric:tabular-nums}
+.photo-row img{border-color:#c8d9d6;background:#f8faf9}
+.photo-row figcaption b{color:#165e59}
+.lab-guide,.exam-guide{border-color:#c8d9d6;border-left:2pt solid #19766f}
