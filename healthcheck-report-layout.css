@@ -33,12 +33,10 @@ a{color:inherit;text-decoration:none}
 .report-guide{border-top:1px solid #c9d6cf;margin-top:4mm;padding-top:2mm}
 .report-toc{margin-top:4mm;break-inside:avoid}
 .report-toc table{font-size:9pt;margin:0}
-.report-toc td{width:50%;padding:1.5mm 3mm 1.5mm 0;border:0}
+.report-toc td{width:100%;padding:1.5mm 0;border:0}
 .toc-link{display:block;border-bottom:1px dotted #bdcbc5;position:relative;padding-right:9mm}
 .toc-page{position:absolute;right:0;font-variant-numeric:tabular-nums;min-width:7mm;text-align:right;background:white}
 .toc-label{background:white;padding-right:2mm}
-.report-part[data-report-part="1"]{break-before:page}
-.report-part[data-report-part="1"][data-compact=true]{break-before:page}
 .report-part[data-new-page=true]{break-before:page}
 .pagedjs_margin-content[data-continuation]::after{content:attr(data-continuation)!important}
 .report-note{margin:0 0 4mm}
@@ -174,3 +172,10 @@ thead th,.lab-group-row th{background:#edf5f3;color:#174f50;border-color:#b7ceca
 .cover-meta{display:block;margin:8mm 0 0;padding:0;border:0}
 .cover-meta span{display:block;padding:3mm 0;border-bottom:1px solid #dbe4e2;font-size:11pt}
 .cover-meta b{display:inline-block;margin-left:5mm}
+
+/* Contents own one page; subsequent sections always start afresh. */
+.report-contents-page .cover-navigation{border:0;margin:0;padding:0}
+.report-contents-page .report-toc h2{font-size:20pt;margin:0 0 8mm;padding-bottom:3mm;border-bottom:1.5pt solid #19766f}
+.report-contents-page .report-toc td{width:100%;padding:2mm 0;font-size:10.5pt}
+.report-contents-page .toc-link{padding-bottom:1mm}
+.report-contents-page .report-guide{margin-top:8mm}

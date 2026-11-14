@@ -52,7 +52,7 @@
   }
   const rows=root.querySelector('[data-toc-rows]'),headings=[...root.querySelectorAll('.part-title')];
   headings.forEach((heading,i)=>{heading.dataset.sectionNumber=String(i+1).padStart(2,'0');});
-  for(let i=0;i<headings.length;i+=2){const tr=document.createElement('tr');for(const heading of headings.slice(i,i+2)){const td=document.createElement('td'),a=document.createElement('a'),label=document.createElement('span'),number=document.createElement('span');a.className='toc-link';a.setAttribute('href','#'+heading.id);label.className='toc-label';label.textContent=heading.textContent;number.className='toc-page';number.textContent='—';a.append(label,number);td.append(a);tr.append(td);}rows.append(tr);}
+  for(const heading of headings){const tr=document.createElement('tr');{const td=document.createElement('td'),a=document.createElement('a'),label=document.createElement('span'),number=document.createElement('span');a.className='toc-link';a.setAttribute('href','#'+heading.id);label.className='toc-label';label.textContent=heading.textContent;number.className='toc-page';number.textContent='—';a.append(label,number);td.append(a);tr.append(td);}rows.append(tr);}
   if(!headings.length)root.querySelector('.report-toc').remove();
   return root;
  }
@@ -86,7 +86,7 @@
    if(queued)return;
    const rendered=[...pages.querySelectorAll('.pagedjs_page')];if(!rendered.length||flow.total!==rendered.length)throw Error('페이지 수를 확인하지 못했습니다.');
    // Put the section name in the reserved margin, never over the report content.
-   for(const page of rendered){const part=page.querySelector('.report-part'),title=part?.dataset.reportTitle;if(part&&part.dataset.reportPart!=='0'&&!part.querySelector('.part-title')&&title){const margin=page.querySelector('.pagedjs_margin-top-left .pagedjs_margin-content');if(margin){margin.dataset.continuation=title+' · 계속';page.dataset.continuation=title;}}}
+   for(const page of rendered){const part=page.querySelector('.report-part'),title=part?.dataset.reportTitle;if(part&&part.dataset.reportPart!=='0'&&!part.querySelector('.part-title,.report-toc')&&title){const margin=page.querySelector('.pagedjs_margin-top-left .pagedjs_margin-content');if(margin){margin.dataset.continuation=title+' · 계속';page.dataset.continuation=title;}}}
    const toc=[];
    for(const link of pages.querySelectorAll('.toc-link')){
     const id=link.getAttribute('href').slice(1),heading=pages.querySelector('[id="'+id+'"]'),page=heading?.closest('.pagedjs_page'),n=rendered.indexOf(page)+1;
