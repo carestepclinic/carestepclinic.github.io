@@ -1,0 +1,25 @@
+const {test,before,after}=require('node:test');
+const assert=require('node:assert/strict');
+const {chromium}=require('playwright');
+const path=require('node:path');
+let browser;before(async()=>{browser=await chromium.launch({executablePath:process.env.HQ_TEST_BROWSER,headless:true});});after(async()=>browser?.close());
+test('photo queue bounds parallelism, preserves order and recovers from errors',async()=>{
+ const {mediaQueue}=require('../healthcheck-record.js'),queue=mediaQueue(4);let active=0,peak=0;
+ const result=await Promise.allSettled(Array.from({length:60},(_,i)=>queue(async()=>{active++;peak=Math.max(peak,active);await new Promise(r=>setTimeout(r,2));active--;if(i===7)throw Error('synthetic');return i;})));
+ assert.equal(peak,4);assert.equal(result[7].status,'rejected');assert.equal(result[59].value,59);assert.equal(await queue(()=>42),42);
+});
+for(const width of [1440,390])test('HQ storage is explicit, bounded, searchable and preserves results on failure '+width,async()=>{
+ const p=await browser.newPage({viewport:{width,height:900}});await p.setContent('<div id="root"></div>');await p.addStyleTag({content:'*{box-sizing:border-box}body{font:14px Arial;margin:12px}.table-wrap{overflow:auto}.table{min-width:760px}.head{display:flex;flex-wrap:wrap;gap:8px}'});await p.addScriptTag({path:path.resolve(__dirname,'../hq-clinical-storage.js')});
+ await p.evaluate(()=>{window.calls=[];window.fail=false;window.hold=false;window.view=HqClinicalStorage.mount(document.querySelector('#root'),async(url,options)=>{calls.push({url,options});if(hold)await new Promise(r=>window.release=r);if(fail)throw Error('synthetic');return {measuredAt:'2026-11-14T00:00:00Z',baselineAt:'2026-11-01T00:00:00Z',photosComplete:false,clinicsComplete:true,clinicalDbBytes:1200000,photoBytes:2000000,photos:4,note:'진료 본문만 집계',clinics:[{clinicName:'가상 A 병원',records:2,events:3,recordBytes:1000,eventBytes:2000,photoBytes:1000000,changeBytes:null,photoStorageEstimateUsd:null},{clinicName:'가상 B 병원',records:1,events:2,recordBytes:1000,eventBytes:2000,photoBytes:1000000,changeBytes:3000,photoStorageEstimateUsd:.015}]};});});
+ assert.equal(await p.evaluate(()=>calls.length),0);await p.evaluate(()=>view.load());assert.match(await p.locator('#root').innerText(),/일부 집계/);await p.locator('[data-storage-search]').fill('A');assert.equal(await p.locator('tbody tr').count(),1);
+ await p.locator('[data-storage-refresh]').click();assert.equal(await p.evaluate(()=>calls.at(-1).options.method),'POST');await p.evaluate(()=>fail=true);await p.locator('[data-storage-refresh]').click();assert.match(await p.locator('#root').innerText(),/조회 실패/);assert.equal(await p.locator('tbody tr').count(),1);
+ await p.evaluate(()=>{fail=false;hold=true;view.load();});await p.waitForFunction(()=>!!window.release);await p.evaluate(()=>{view.clear();release();});await p.waitForTimeout(30);assert.equal(await p.locator('tbody tr').count(),0);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await p.close();
+});
+for(const width of [1440,390])test('full HQ storage panel loads only while authenticated and clears on lock '+width,async()=>{
+ const fs=require('node:fs'),root=path.resolve(__dirname,'..'),p=await browser.newPage({viewport:{width,height:900}}),errors=[];p.on('pageerror',e=>errors.push(e.message));
+ await p.route('**/*',r=>{const u=new URL(r.request().url()),file=path.resolve(root,'.'+u.pathname);if(u.hostname==='localhost'&&file.startsWith(root+path.sep)&&fs.existsSync(file)&&fs.statSync(file).isFile())return r.fulfill({body:fs.readFileSync(file),contentType:file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'text/html'});return r.abort();});
+ await p.goto('http://localhost/hq.html');await p.waitForTimeout(50);assert.equal(await p.locator('#hqClinicalStorage tbody tr').count(),0);
+ await p.evaluate(()=>{window.storageCalls=[];req=async(url,opt)=>{storageCalls.push(url);return {measuredAt:'2026-11-14T00:00:00Z',clinicsComplete:true,photosComplete:true,clinicalDbBytes:1000,photoBytes:2000,photos:1,clinics:[{clinicName:'가상 병원',records:1,events:2,recordBytes:100,eventBytes:900,photoBytes:2000,changeBytes:0,photoStorageEstimateUsd:.00003}],note:'가상 집계'};};document.querySelectorAll('.view.active').forEach(x=>x.classList.remove('active'));document.querySelector('#production').classList.add('active');document.querySelector('#loginOverlay').classList.add('hidden');});
+ await p.locator('#hqClinicalStorage tbody tr').waitFor();assert.equal(await p.evaluate(()=>storageCalls.filter(x=>x==='/hq/clinical-storage').length),1);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await p.screenshot({path:path.resolve(root,'../storage-hq-'+width+'.png'),fullPage:true});
+ await p.evaluate(()=>document.querySelector('#loginOverlay').classList.remove('hidden'));await p.waitForTimeout(30);assert.equal(await p.locator('#hqClinicalStorage tbody tr').count(),0);assert.deepEqual(errors,[]);await p.close();
+});

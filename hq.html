@@ -208,6 +208,7 @@
   </div>
 </section>
 <section id="production" class="view">
+<div class="card" id="hqClinicalStorage"></div>
   <div class="head"><div><h1>운영 준비 점검</h1><p>약관·개인정보, 데이터 삭제, 백업·복구, 장애로그, 운영자 감사로그, 보안점검과 Toss Live 전환을 한 화면에서 최종 확인합니다.</p></div><div class="toolbar"><button id="productionRefresh" class="btn">새로고침</button><button id="openAuditFromProduction" class="btn">감사로그 열기</button></div></div>
   <div class="launch-kpis">
     <div class="launch-kpi" id="plReadyCard"><span>상용 출시 상태</span><b id="plReady">--</b><small>자동+수동 점검 종합</small></div>
@@ -669,6 +670,11 @@ if($('onboardingRefresh'))$('onboardingRefresh').onclick=()=>loadOnboardingPortf
 <script src="hq-healthcheck-usage.js?v=20261113-cost"></script>
 <script>
 (()=>{const root=document.getElementById('hqHealthcheckUsage'),section=document.getElementById('usageBilling'),overlay=document.getElementById('loginOverlay');if(!root)return;const view=HqHealthcheckUsage.mount(root,p=>req(p));let active=false;const update=()=>{const next=section.classList.contains('active')&&overlay.classList.contains('hidden');if(next&&!active)view.load();if(!overlay.classList.contains('hidden'))view.clear();active=next;};new MutationObserver(update).observe(section,{attributes:true,attributeFilter:['class']});new MutationObserver(update).observe(overlay,{attributes:true,attributeFilter:['class']});update();})();
+</script>
+<style>#hqClinicalStorage h2{margin:0}#hqClinicalStorage h2 small{font-size:12px;color:#47746d}.storage-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}.storage-kpis>div{padding:12px;border:1px solid #d9e4e0;border-radius:10px;display:grid;gap:5px}.storage-kpis strong{font-size:21px}#hqClinicalStorage .table{min-width:760px}#hqClinicalStorage .table-wrap{overflow:auto}#hqClinicalStorage label{display:grid;gap:5px;max-width:360px;margin:12px 0}.storage-guide{margin-top:14px}.storage-guide li{margin:8px 0}#hqClinicalStorage{min-width:0}#hqClinicalStorage td{overflow-wrap:anywhere}</style>
+<script src="hq-clinical-storage.js?v=20261114-storage"></script>
+<script>
+(()=>{const root=document.getElementById('hqClinicalStorage'),section=document.getElementById('production'),overlay=document.getElementById('loginOverlay');const view=HqClinicalStorage.mount(root,(p,o)=>req(p,o));let active=false;const update=()=>{const next=section.classList.contains('active')&&overlay.classList.contains('hidden');if(next&&!active)view.load();if(!overlay.classList.contains('hidden'))view.clear();active=next;};new MutationObserver(update).observe(section,{attributes:true,attributeFilter:['class']});new MutationObserver(update).observe(overlay,{attributes:true,attributeFilter:['class']});update();})();
 </script>
 </body>
 </html>
