@@ -26,3 +26,13 @@ test('health report summary is explicit and private review notes remain excluded
  const d=H.blank({name:'합성 환자',species:'cat'});d.overview='첫 장 핵심';d.summary='종합 소견';d.management='관리 계획';d.questions='PRIVATE_REVIEW';const html=H.reportHTML(d,{name:'합성 환자',species:'cat'},[]);
  assert.ok(html.includes('value="summary"'));assert.ok(html.includes('data-report-summary="true"'));assert.ok(!html.includes('PRIVATE_REVIEW'));assert.ok(!html.includes('의료진 검토 완료'));
 });
+
+test('technician and veterinarian remain distinct and safely escaped in print identity',()=>{
+ const html=P.identity({veterinarian:'수의사',technician:'<검증>',patient:{name:'가상 환자'}});assert.ok(html.includes('수의사 · 테크니션 &lt;검증&gt;'));assert.ok(!html.includes('<검증>'));
+});
+test('short health report flows summary and management while retaining examination boundaries',()=>{
+ const d=H.blank({name:'가상 환자'});Object.assign(d,{summary:'짧은 소견',management:'집에서 관리',followup:'재검 일정',exams:{physical:'신체 소견'}});const html=H.reportHTML(d,{name:'가상 환자'},[]);for(const title of ['종합소견','관리·재검 계획'])assert.ok(html.includes('data-report-title="'+title+'" data-new-page="false" data-compact="true" data-keep-together="true"'));assert.ok(html.includes('data-report-title="신체검사·진료 소견" data-new-page="true"'));
+});
+test('ward planned date stays in column while next-day actual timestamp remains explicit',()=>{
+ const html=P.wardHTML([{at:'2026-11-15T23:50:00+09:00',actualAt:'2026-11-16T00:10:00+09:00',title:'자정 처치',dose:'0.25 mL',state:'완료',recorder:'담당자'}],['2026-11-15']);assert.ok(html.includes('예정 23:50'));assert.ok(html.includes('실시 2026-11-16 00:10'));assert.ok(html.includes('지시량 0.25 mL'));assert.ok(html.includes('수행 담당자'));
+});

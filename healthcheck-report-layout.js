@@ -35,7 +35,7 @@
  function fitScreen(){document.documentElement.style.setProperty('--report-zoom',String(Math.min(1,document.documentElement.clientWidth/(210*96/25.4))));}
  function source(){
   const root=document.createElement('div');root.append(template.content.cloneNode(true));
-  if(mode.value==='summary')root.querySelectorAll('.report-part:not([data-report-summary=true])').forEach(x=>x.remove());
+  if(mode.value==='summary'){root.querySelectorAll('.report-part:not([data-report-summary=true])').forEach(x=>x.remove());root.querySelectorAll('.report-part').forEach(x=>x.dataset.compact='true');}
   if(!include.checked)root.querySelectorAll('[data-report-appendix=true]').forEach(x=>x.remove());
   else{
    for(const choice of guideChoices)if(!choice.input.checked)root.querySelector('[data-guide-key="'+choice.key+'"]')?.remove();
