@@ -296,3 +296,7 @@
 }
 .hc-record{overflow-anchor:none}
 .hc-record .hc-draft-help{font-size:13px;line-height:1.6;color:#536b65;margin:8px 0 12px}
+
+/* Healthcheck has its own save state and responsive section navigation. */
+.clinic-calm #practiceRoot .cs-patient-header.cs-healthcheck-header .cs-patient-actions{display:none!important}
+.hc-record [data-read-retry]{margin:0 0 10px}
