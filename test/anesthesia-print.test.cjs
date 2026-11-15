@@ -1,5 +1,8 @@
 const {test,before,after}=require('node:test'),assert=require('node:assert/strict'),path=require('node:path'),{chromium}=require('playwright');
 const {printDocument,printRanges}=require('../anesthesia-record.js');let browser;
+test('paper preview keeps the anesthesia landscape width and interval boundaries',async()=>{
+ const p=await browser.newPage();try{await p.setContent(printDocument(fixture(true)));await require('./record-print-layout.cjs').checkPrintLayout(p,{name:'anesthesia-long',sheet:'.print-page',toolbar:'.ap-controls',landscape:true});const pages=await p.locator('.print-page').all();assert.equal(pages.length,2);const first=await pages[0].boundingBox(),second=await pages[1].boundingBox();assert.ok(second.y>=first.y+first.height+20);await p.emulateMedia({media:'print'});assert.equal(await pages[1].evaluate(e=>getComputedStyle(e).breakBefore),'page');}finally{await p.close();}
+});
 before(async()=>{browser=await chromium.launch({headless:true,executablePath:process.env.HQ_TEST_BROWSER});});after(async()=>browser?.close());
 function fixture(long=false){const base=Date.parse('2026-10-20T03:25:00Z'),at=m=>new Date(base+m*60000).toISOString(),marker=(id,m,key,extra={})=>({recordId:id,type:'marker',marker:key,observedAt:at(m),recorder:{name:'기록자A'},...extra});
  const rows=[marker('prior',-4,'medication',{note:'전처치 기록',administration:{name:'합성 약물A',amount:.5,unit:'mL',route:'IV'}}),marker('start',0,'anesthesiaStart'),marker('op',15,'surgeryStart')];
