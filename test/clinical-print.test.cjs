@@ -19,8 +19,11 @@ test('anesthesia print retains all measurements and intubation while limiting ma
  const html=A.printDocument({rows,ranges:A.printRanges(rows),item:{patient:{name:'합성 환자'},body:{species:'cat',weight:4}}});
  const tables=[...html.matchAll(/<table class="ap-matrix">([\s\S]*?)<\/table>/g)];assert.equal(tables.length,3);for(const [,table]of tables)assert.ok((table.match(/<thead>[\s\S]*?<\/thead>/)[0].match(/<th>/g)||[]).length<=13);assert.equal((html.match(/<b>2026-11-15 10:01<\/b>/g)||[]).length,1);assert.ok(html.includes('삽관'));for(let i=0;i<31;i++)assert.ok(html.includes('<td>'+i+'</td>'));
 });
-test('trend does not invent missing measurements and preserves actual dates and values',()=>{
- assert.equal(P.trend('체중','kg',[{date:'2026-01-01',value:''},{date:'2026-02-01',value:5}]),'');const html=P.trend('체중','kg',[{date:'2026-01-01',value:0},{date:'2026-02-01',value:5}]);assert.ok(html.includes('2026-01-01'));assert.ok(html.includes('>0</text>'));assert.ok(html.includes('>5</text>'));
+test('trends require three dates and use elapsed time without losing any values',()=>{
+ assert.equal(P.trend('체중','kg',[{date:'2026-01-01',value:0},{date:'2026-02-01',value:5}]),'');
+ const html=P.trend('체중','kg',[{date:'2026-01-01',value:0},{date:'2026-01-02',value:2},{date:'2026-02-01',value:5}]);
+ for(const text of ['2026-01-01 · 0 kg','2026-01-02 · 2 kg','2026-02-01 · 5 kg'])assert.ok(html.includes(text));
+ const x=[...html.matchAll(/<circle cx="([\d.]+)"/g)].map(m=>Number(m[1]));assert.equal(x.length,3);assert.ok(x[1]-x[0]<10);assert.ok(x[2]-x[1]>200);
 });
 test('health report summary is explicit and private review notes remain excluded',()=>{
  const d=H.blank({name:'합성 환자',species:'cat'});d.overview='첫 장 핵심';d.summary='종합 소견';d.management='관리 계획';d.questions='PRIVATE_REVIEW';const html=H.reportHTML(d,{name:'합성 환자',species:'cat'},[]);
@@ -35,4 +38,31 @@ test('short health report flows summary and management while retaining examinati
 });
 test('ward planned date stays in column while next-day actual timestamp remains explicit',()=>{
  const html=P.wardHTML([{at:'2026-11-15T23:50:00+09:00',actualAt:'2026-11-16T00:10:00+09:00',title:'자정 처치',dose:'0.25 mL',state:'완료',recorder:'담당자'}],['2026-11-15']);assert.ok(html.includes('예정 23:50'));assert.ok(html.includes('실시 2026-11-16 00:10'));assert.ok(html.includes('지시량 0.25 mL'));assert.ok(html.includes('수행 담당자'));
+});
+
+test('patient ward archive retains timing, instructions and staff without repeating patient labels',()=>{
+ const entries=[{patient:'중복하면안됨',chart:'P-1',at:'2026-11-15T23:50:00+09:00',actualAt:'2026-11-16T00:10:00+09:00',title:'처치 A',dose:'0.25 mL · IV',state:'완료',assignee:'담당 A',recorder:'수행 B',note:'주의 메모'},{at:'2026-11-14T09:00:00+09:00',title:'미완료 C',state:'지연'},{title:'필요 시 B',prn:true,state:'예정'}];
+ const before=JSON.stringify(entries),html=P.wardHTML(entries,['2026-11-15'],{patient:true});
+ for(const value of ['예정 시각','처치 A','0.25 mL · IV','완료','2026-11-16 00:10','담당 A','수행 B','주의 메모','미완료 C','필요 시 B'])assert.ok(html.includes(value));
+ assert.ok(!html.includes('중복하면안됨'));assert.equal((html.match(/처치 A/g)||[]).length,1);assert.equal(JSON.stringify(entries),before);
+});
+test('anesthesia interval events precede their graphs and all boundary measurements stay in appendix',()=>{
+ const base=Date.parse('2026-11-15T00:00:00Z'),at=m=>new Date(base+m*60000).toISOString();
+ const rows=[{type:'measurement',observedAt:at(-5),values:{heartRate:111},note:'BEFORE_NOTE'},{type:'marker',marker:'anesthesiaStart',observedAt:at(0)},{type:'marker',marker:'intubation',observedAt:at(3)},{type:'marker',marker:'medication',observedAt:at(120),note:'BOUNDARY_DRUG'},{type:'measurement',observedAt:at(120),values:{heartRate:123},recorder:{name:'STAFF_BOUNDARY'}},{type:'measurement',observedAt:at(240),values:{heartRate:124},note:'LAST_NOTE'},{type:'marker',marker:'extubation',observedAt:at(240)}];
+ const options={rows,ranges:A.printRanges(rows),item:{patient:{name:'합성 환자'},body:{species:'cat'}},plan:'PREPARED_ONLY'},html=A.printDocument(options),appendix=html.indexOf('class="ap-data-appendix"');
+ assert.equal((html.match(/BOUNDARY_DRUG/g)||[]).length,1);assert.ok(html.indexOf('BOUNDARY_DRUG')<appendix);assert.ok(html.indexOf('<td>123</td>')>appendix);assert.ok(html.indexOf('BEFORE_NOTE')>appendix);assert.ok(html.includes('class="ap-phase"'));assert.ok(html.includes('STAFF_BOUNDARY'));assert.ok(html.indexOf('PREPARED_ONLY')>appendix);
+ const summary=A.printDocument({...options,detailed:false,bodyOnly:true});assert.ok(summary.includes('BOUNDARY_DRUG'));assert.ok(summary.includes('LAST_NOTE'));assert.ok(!summary.includes('PREPARED_ONLY'));assert.ok(!summary.includes('class="ap-matrix"'));
+ const selected=A.printDocument({...options,ranges:[{start:base+120*60000,minutes:120}],complete:false});assert.ok(!selected.includes('BEFORE_NOTE'));assert.ok(selected.includes('LAST_NOTE'));
+});
+test('health problems group only unique exact headings and retain unmatched and ambiguous originals',()=>{
+ const d=H.blank({name:'합성 환자'});Object.assign(d,{summary:'일반 소견 ROOT\n[항목 A]\n소견 A_FIND\n[항목 B]\n소견 B_FIND',management:'[항목 A]\n실천 방법: A_MANAGE\n[다른 항목]\n실천 방법: UNMATCHED',followup:'[항목 A]\n권고 시점: A_RECHECK\n[항목 B]\n권고 시점: B_RECHECK'});
+ const before=JSON.stringify(d),html=H.reportHTML(d,{name:'합성 환자'},[]),part=html.match(/<section[^>]*data-report-title="소견·계획 · 항목 A"[\s\S]*?<\/section>/)[0];
+ for(const value of ['A_FIND','A_MANAGE','A_RECHECK'])assert.ok(part.includes(value));assert.ok(part.includes('data-report-summary="true"'));
+ for(const value of ['ROOT','B_FIND','B_RECHECK','UNMATCHED'])assert.ok(html.includes(value));assert.equal(JSON.stringify(d),before);
+ d.management='[항목 A]\nFIRST\n[항목 A]\nSECOND';d.followup='';const ambiguous=H.reportHTML(d,{name:'합성 환자'},[]);assert.ok(!ambiguous.includes('data-report-title="소견·계획'));assert.ok(ambiguous.includes('FIRST'));assert.ok(ambiguous.includes('SECOND'));
+ d.management='[항목 A와 유사]\nDO_NOT_INFER';const unpaired=H.reportHTML(d,{name:'합성 환자'},[]);assert.ok(!unpaired.includes('data-report-title="소견·계획'));
+});
+
+test('anesthesia event-only records do not add an empty numeric appendix',()=>{
+ const rows=[{type:'marker',marker:'anesthesiaStart',observedAt:'2026-11-15T00:00:00Z',note:'사건 원문'}];const html=A.printDocument({rows,ranges:A.printRanges(rows),item:{patient:{name:'합성 환자'},body:{}},plan:'준비량'});assert.ok(!html.includes('class="ap-data-appendix"'));assert.ok(!html.includes('class="ap-interval-pair"'));assert.ok(html.includes('사건 원문'));assert.ok(html.includes('준비량'));
 });

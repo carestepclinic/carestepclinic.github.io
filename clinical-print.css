@@ -86,3 +86,57 @@ html,body{background:white;color:#25342f}
 .cp-record .dn-print-summary p{margin:.7mm 0}
 .cp-record .dn-type-legend{margin:2mm 0}
 .cp-record .dn-print-page>p:last-child{font-size:9pt;margin:2mm 0}
+
+/* Record-specific reading order and comparison layouts. */
+.cp-record .ap-data-appendix{break-before:page}
+.cp-record .ap-event-table th:nth-child(1){width:15%}
+.cp-record .ap-event-table th:nth-child(2){width:22%}
+.cp-record .ap-event-table th:nth-child(4){width:15%}
+.cp-record .ap-event-table{font-size:9pt;margin:1mm 0 2mm}
+.cp-record .ap-event-table th,.cp-record .ap-event-table td{padding:1mm 1.5mm}
+.cp-record .ap-phase-key{display:inline-block;border:1px solid #7c9487;min-width:4mm;text-align:center;font-size:8pt}
+.cp-record .cp-chart-row svg{height:36mm}
+.cp-record .ap-phase text{font-weight:700}
+.cp-record .cp-prescriptions th:nth-child(1){width:14%}
+.cp-record .cp-prescriptions th:nth-child(2){width:24%}
+.cp-record .cp-prescriptions th:nth-child(3){width:13%}
+.cp-record .cp-prescriptions th:nth-child(4){width:15%}
+.cp-record .cp-prescriptions th:nth-child(5){width:13%}
+.cp-record .cp-treatment-changes th:first-child{width:19%}
+.cp-record [data-cp-chart-id]{display:inline-block;width:48%;margin:1mm 1%;vertical-align:top}
+.cp-record [data-cp-chart-id] .cp-trend{display:block;width:100%;margin:0;break-inside:auto}
+.cp-record .cp-trend-values{font-size:8.5pt;line-height:1.5;margin:1mm 0}
+.cp-record .cp-trend svg{height:32mm;break-inside:avoid}
+.cp-record .cp-trend-section>p{font-size:9pt}
+.cp-record .cp-patient-tasks th:nth-child(1){width:12%}
+.cp-record .cp-patient-tasks th:nth-child(2){width:29%}
+.cp-record .cp-patient-tasks th:nth-child(3){width:17%}
+.cp-record .cp-patient-tasks th:nth-child(4){width:11%}
+.cp-record .cp-patient-tasks th:nth-child(5){width:14%}
+.cp-record .cp-patient-tasks .cp-task-note{font-size:9pt}
+.cp-record .cp-dental-detail{border-left:2pt solid #b3c8bd;padding-left:3mm;margin:3mm 0}
+
+.cp-record .cp-neuro-context{margin:2mm 0 3mm;border-bottom:1px solid #c8d9ce;padding-bottom:2mm}
+.cp-record .cp-neuro-context h2{font-size:10.5pt;margin:1.5mm 0 1mm;border:0;padding:0}
+.cp-record .cp-neuro-context .cp-brief{display:table;table-layout:fixed;width:100%;margin:1mm 0;break-inside:avoid}
+.cp-record .cp-neuro-context .cp-brief h2{display:table-cell;width:45mm;padding-right:3mm}
+.cp-record .cp-neuro-context .cp-brief p{display:table-cell}
+
+.cp-anesthesia .cp-heading{margin-bottom:2mm}
+.cp-anesthesia .cp-heading .cp-clinic,.cp-anesthesia .cp-heading h1,.cp-anesthesia .cp-heading .cp-document-mode{display:inline-block;margin:0 4mm 2mm 0;vertical-align:baseline}
+.cp-anesthesia .cp-identity{grid-template-columns:repeat(8,minmax(0,1fr));gap:2mm;padding:2mm 0}
+.cp-anesthesia .cp-identity dd{font-size:9.5pt}
+
+.cp-record [data-cp-chart-id].cp-trend-long{display:block;width:100%;margin:2mm 0}
+
+.cp-record .ap-interval-pair{display:table;table-layout:fixed;width:100%;break-inside:avoid}
+.cp-record .ap-interval-pair>.ap-interval-events{display:table-cell;width:34%;padding-right:3mm;vertical-align:top}
+.cp-record .ap-interval-pair>.ap-interval-charts{display:table-cell;width:66%;vertical-align:top}
+.cp-record .ap-event-compact th:first-child{width:23%}
+.cp-record .ap-event-compact th:nth-child(2){width:auto}
+.cp-record .ap-event-compact p{font-size:9pt;margin:.5mm 0}
+.cp-record .ap-event-compact small{display:block;font-size:8.5pt;margin-top:.5mm}
+.cp-record .ap-interval-pair .cp-chart-row{margin-bottom:1mm}
+.cp-record .ap-interval-pair h2{font-size:10.5pt}
+.cp-record .ap-interval-pair .ap-chart svg text{font-size:13px}
+.cp-record .ap-interval-pair .cp-chart-row svg{height:31mm}
