@@ -26,6 +26,8 @@ for(const [kind,globalName] of [['dental','DentalRecord'],['chronic','ChronicRec
    const request=async(url,options={})=>{
     const body=options.body?JSON.parse(options.body):null;requests.push({url,body});
     if(url.includes('/patient-directory'))return {items:[synthetic],patients:[synthetic]};
+    if(url.includes('/clinical/dental?')&&url.includes('patientId='))return {items:[{id:'old-dental',patientId:synthetic.id,species:'dog'}]};
+    if(url.includes('/cases/old-dental?'))return {item:{id:'old-dental',patient_id:synthetic.id,body:{category:'dental',species:'dog',dentalChart:{date:'2026-01-01',teeth:{108:{extracted:true,gi:3},109:{missing:true},104:{extractionPlan:true}}}}}};
     if(url.includes('/patient-summary?'))return {patient:synthetic,items:[{id:'prior-case',category:'chronic',date:'2026-01-02',title:'이전 기록'}]};
     if(url.includes('/cases/prior-case?'))return {item:{id:'prior-case',patient_id:synthetic.id,body:{category:'chronic',species:'dog',chronicChart:{date:'2026-01-02',history:'이전 과거력',medications:'이전 약물',measurements:{creatinine:1.2}}}}};
     if(url==='/practice/clinical/cases'&&body){
@@ -62,6 +64,7 @@ for(const [kind,globalName] of [['dental','DentalRecord'],['chronic','ChronicRec
   if(registered){
    assert.equal(payload.patientId,'synthetic-patient');
    assert.match(payload[kind+'Chart'][kind==='dental'?'diagnosis':'history'],/2026-01-02.*만성질환.*prior-case/);assert.match(payload[kind+'Chart'].medications,/현재 복용 여부 확인[\s\S]*이전 약물/);assert.equal(payload[kind+'Chart'].measurements?.creatinine,undefined);
+   if(kind==='dental'){assert.deepEqual(Object.keys(payload.dentalChart.teeth),['108','109']);assert.equal(payload.dentalChart.teeth['108'].missing,true);assert.equal(payload.dentalChart.teeth['108'].extracted,undefined);assert.equal(payload.dentalChart.teeth['108'].gi,undefined);assert.match(payload.dentalChart.teeth['108'].note,/2026-01-01.*old-dental/);}
    assert.equal(Object.hasOwn(patient,'guardianName'),false);
    assert.equal(Object.hasOwn(patient,'chartNumber'),false);
    assert.equal(patient.breed,'시험 품종');
@@ -74,6 +77,7 @@ for(const [kind,globalName] of [['dental','DentalRecord'],['chronic','ChronicRec
   }
   await p.waitForFunction(()=>!document.querySelector('[data-start-submit]'),{},{timeout:5000});
   assert.equal(await p.evaluate(()=>requests.filter(r=>r.url==='/practice/clinical/cases'&&r.body).length),1);
+  if(kind==='dental'&&registered)assert.match(await p.locator('[data-undo-batch]').innerText(),/이전 치아 자동 반영/);
   await p.evaluate(()=>controller.openRecord('synthetic-record'));
   assert.equal(await p.locator('[data-start-submit]').count(),0);
   assert.match(await p.locator('#root').innerText(),/시험 환자|직접 입력 환자/);

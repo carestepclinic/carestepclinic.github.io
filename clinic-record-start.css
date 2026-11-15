@@ -42,3 +42,16 @@
 .cs-record-start .cs-prior-pick input{width:18px;height:18px;min-height:18px;padding:0;margin:0;flex:none}
 .cs-record-start .cs-start-prior pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;max-height:220px;overflow:auto;background:#fff;padding:10px;border-radius:6px}
 .cs-record-start .cs-prior-help{font-size:13px;color:#526d68;margin:8px 0}
+
+.cs-record-start .cs-start-prior textarea{width:100%;min-width:0;box-sizing:border-box;font:inherit;line-height:1.5;resize:vertical;border:1px solid #bdcfcb;border-radius:8px;padding:10px;color:inherit;background:#fff}
+.cs-record-start [data-prior-basket]:not(:empty){padding:12px;margin:12px 0;background:#fff;border:1px solid #cbdedb;border-radius:8px}
+.cs-record-start [data-prior-basket] ul{list-style:none;margin:8px 0;padding:0}
+.cs-record-start [data-prior-basket] li{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid #e0e9e7;padding:6px 0}
+.cs-record-start [data-prior-basket] li span{min-width:0}.cs-record-start [data-prior-basket] button{flex:none}
+.cs-record-start .cs-prior-teeth{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;margin:10px 0}
+.cs-record-start .cs-prior-teeth small{display:block;color:#8b491c}
+.cs-record-start [data-dental-prior]:not(:empty){border-bottom:1px solid #cbdedb;padding:8px 0 12px;margin-bottom:12px}
+.cs-record-start .cs-start-prior details{margin:8px 0;padding:8px;border:1px solid #d9e3e1;border-radius:8px;background:#fff}
+.cs-record-start .cs-start-prior details>summary{cursor:pointer;font-weight:600}
+.cs-record-start [data-prior-edit-status]{margin:4px 0;font-size:13px;color:#526d68}
+@media(max-width:600px){.cs-record-start [data-prior-basket] li{align-items:start;flex-wrap:wrap}.cs-record-start .cs-prior-teeth{grid-template-columns:1fr}}

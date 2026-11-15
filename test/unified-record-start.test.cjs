@@ -14,7 +14,7 @@ async function page(width=1440){const p=await browser.newPage({viewport:{width,h
   const id=p.split('/cases/')[1]?.split(/[/?]/)[0],r=records.find(r=>r.id===id);
   if(r){if(o.method==='POST'){if(failDemographics&&b.kind==='anesthesia.sheet')throw Error('합성 기본정보 실패');if(saveFail)throw Error('합성 저장 실패');if(b.revision!==r.revision)throw Object.assign(Error('합성 충돌'),{status:409});const category=r.body.category;if(b.kind==='anesthesia.sheet')r.body.anesthesiaSheet=structuredClone(b.data);else r.body[category+'Chart']=structuredClone(b.data);r.revision++;return {id:r.id,revision:r.revision,[category+'Chart']:structuredClone(b.data)};}return {...fallback,item:structuredClone(r),events:[],revision:r.revision};}
   if(p.includes('/cases?')||p.endsWith('/cases'))return {...fallback,items:structuredClone(records)};
-  for(const category of Object.keys(charts))if(p.includes('/'+category+'?'))return {...fallback,items:records.filter(r=>r.body.category===category).map(r=>({...r,date:r.body[category+'Chart'].date,clinicalStatus:'inProgress',conditions:category==='chronic'?['ckd']:[],diagnosis:''}))};
+  for(const category of Object.keys(charts))if(p.includes('/'+category+'?'))return {...fallback,items:records.filter(r=>r.body.category===category&&(!new URL(p,'http://local').searchParams.get('patientId')||r.patient_id===new URL(p,'http://local').searchParams.get('patientId'))).map(r=>({...r,patientId:r.patient_id,species:r.body.species,date:r.body[category+'Chart'].date,clinicalStatus:'inProgress',conditions:category==='chronic'?['ckd']:[],diagnosis:''}))};
   return fallback;
  };showApp({deferFullRender:true});go('practice');
  });return {p,errors};}
@@ -75,4 +75,11 @@ for(const width of [390,1440])test('surgery entry imports only selected dated re
  if(process.env.RECORD_HISTORY_SCREENSHOTS){await p.locator('[data-prior-detail] details').first().evaluate(e=>e.open=true);await p.screenshot({path:path.join(process.env.RECORD_HISTORY_SCREENSHOTS,'prior-record-'+width+'.png'),fullPage:true});}
  await p.locator('[data-start-submit]').click();await p.locator('[data-record-start]').waitFor({state:'detached'});
  const sent=await writes(p),note=sent.find(x=>x.body.kind==='anesthesia.sheet').body.data.note;assert.match(note,/2026-01-02.*만성질환.*prior-case/);assert.match(note,/과거 경과/);assert.match(note,/현재 복용 여부 확인/);assert.doesNotMatch(note,/1\.2/);assert.equal(sent.filter(x=>x.body.kind==='anesthesia.sheet').length,1);assert.deepEqual(errors,[]);
+});
+test('dental automatic absences persist and can be undone after initial save',async t=>{
+ const {p,errors}=await page();t.after(()=>p.close());await p.evaluate(()=>{records.push({id:'dental_previous',kind:'consult',revision:1,patient_id:'p_registered',patient:directory[0],body:{category:'dental',species:'cat',dentalChart:{...DentalRecord.empty(),date:'2026-01-01',teeth:{108:{extracted:true},109:{missing:true},204:{extractionPlan:true}}}}});});
+ await begin(p,'dental');await p.locator('[data-start-mode=registered]').click();await p.locator('[data-start-search-form] input').fill('합성');await p.locator('[data-start-search-form] button').click();await p.locator('[data-start-pick="0"]').click();await p.locator('[data-dental-prior-tooth="108"]').waitFor();await p.locator('[data-start-submit]').click();await p.locator('[data-record-start]').waitFor({state:'detached'});
+ assert.equal(await p.evaluate(()=>records.find(r=>r.id==='new_dental').body.dentalChart.teeth['108'].missing),true);assert.match(await p.locator('[data-undo-batch]').innerText(),/이전 치아 자동 반영/);
+ await p.locator('[data-undo-batch]').click();await p.waitForFunction(()=>testRequests.some(r=>r.p.includes('/cases/new_dental/events')&&r.o.method==='POST'));
+ const teeth=await p.evaluate(()=>records.find(r=>r.id==='new_dental').body.dentalChart.teeth);assert.deepEqual(teeth,{});assert.equal(await p.locator('[data-undo-batch]').count(),0);assert.deepEqual(errors,[]);
 });
