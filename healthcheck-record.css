@@ -300,3 +300,20 @@
 /* Healthcheck has its own save state and responsive section navigation. */
 .clinic-calm #practiceRoot .cs-patient-header.cs-healthcheck-header .cs-patient-actions{display:none!important}
 .hc-record [data-read-retry]{margin:0 0 10px}
+
+/* Keep a single patient summary and compact the frequently used lab controls. */
+.clinic-calm #practiceRoot .cs-patient-header.cs-healthcheck-header{display:none!important}
+.hc-record .hc-patient-identity{display:block;color:var(--muted,#52706a);overflow-wrap:anywhere}
+.hc-record .hc-patient-identity:empty{display:none}
+.hc-record .hc-steps [aria-pressed=true] [data-step-badge],.clinic-calm #practiceRoot .hc-record .hc-steps [aria-pressed=true] [data-step-badge]{color:#fff}
+.hc-record .hc-lab-actions{justify-content:flex-start;gap:8px;margin:6px 0 10px}
+.hc-record .hc-lab-actions .hc-lab-tools{flex:1;margin:0;justify-content:flex-end}
+.hc-record .hc-lab-actions .hc-lab-more{flex-basis:100%;margin:0}
+.hc-record .hc-lab-actions .hc-entry-hint{flex-basis:100%}
+@media(max-width:650px){.hc-record .hc-lab-actions .hc-lab-tools{flex-basis:100%;justify-content:flex-start}.hc-record .hc-lab-tools [data-lab-count]{flex-basis:auto;margin-right:auto}.hc-record .hc-lab-actions>div{min-width:0;max-width:100%}}
+
+.hc-record .hc-lab-actions .hc-lab-tools>label{flex-shrink:0;white-space:nowrap}
+.hc-record .hc-step-footer{flex-wrap:wrap}
+.hc-record .hc-step-footer .hc-input-help{flex-shrink:0;white-space:nowrap}
+.hc-record .hc-step-footer [data-next-step]{flex-shrink:0}
+@media(max-width:650px){.hc-record .hc-step-footer .hc-autosave-note{flex-basis:100%}.hc-record .hc-step-footer .hc-input-help{margin-right:auto}.hc-record .hc-step-footer [data-next-step]{max-width:70%}}

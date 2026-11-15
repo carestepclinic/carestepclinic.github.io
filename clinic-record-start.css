@@ -33,3 +33,12 @@
 #appView #practiceRoot .cs-record-start :is(input,select){font-size:16px;font-weight:400}
 #appView #practiceRoot .cs-record-start .cs-start-options input{min-height:0;width:18px;height:18px;padding:0}
 #appView #practiceRoot .cs-record-start .cs-start-extra>summary{font-weight:600}
+
+.cs-record-start .cs-start-prior{margin:12px 0;padding:12px;border:1px solid #cbdedb;border-radius:10px;background:#f1f7f5;overflow-wrap:anywhere}
+.cs-record-start .cs-prior-heading{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.cs-record-start .cs-start-prior label{display:block;margin:8px 0}
+.cs-record-start .cs-start-prior select{width:100%;max-width:100%;min-width:0;white-space:normal}
+.cs-record-start .cs-start-prior .cs-prior-pick{display:flex;flex-direction:row;align-items:center;gap:8px;min-height:36px}
+.cs-record-start .cs-prior-pick input{width:18px;height:18px;min-height:18px;padding:0;margin:0;flex:none}
+.cs-record-start .cs-start-prior pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;max-height:220px;overflow:auto;background:#fff;padding:10px;border-radius:6px}
+.cs-record-start .cs-prior-help{font-size:13px;color:#526d68;margin:8px 0}

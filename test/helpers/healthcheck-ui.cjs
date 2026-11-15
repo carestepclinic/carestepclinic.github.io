@@ -13,6 +13,8 @@ async function setup(width=1440){
  const request=async(url,o={})=>{const b=o.body?JSON.parse(o.body):null;calls.push({url,b});
  if(url.endsWith('/members'))return {members:[{display_name:'시험 수의사'}]};if(url.includes('/chronic-context?'))return {items:contextRows};if(url.endsWith('/workflows')){if(b){workflows.push({id:'wf-'+(workflows.length+1),revision:1,body:structuredClone(b.body)});return {ok:true};}return {items:structuredClone(workflows)};}
  if(url.includes('/patient-directory'))return {patients:[patient]};
+ if(url.includes('/patient-summary?'))return {patient,items:window.priorSource?[{id:priorSource.id,category:priorSource.body.category,date:'2026-01-02'}]:[]};
+ if(url.includes('/cases/prior-case?'))return {item:structuredClone(priorSource)};
  if(url.endsWith('/healthcheck-summary')&&aiHold)await new Promise(r=>releaseAI=r);
  if(url.includes('/healthcheck-images?')){const id=new URL('http://localhost'+url).searchParams.get('id');if(window.failPhoto===id){window.failPhoto='';throw Error('temporary photo failure');}return {dataUrl:photoBytes[id]};}
  if(url.endsWith('/healthcheck-summary'))return window.aiFixture||{overview:'첫 장 핵심 소견',summary:'입력 검사 기반 소견',management:'의료진 관리계획',followup:'재검 검토',questions:'확인할 사항',source:'a'.repeat(64)};

@@ -26,6 +26,8 @@ for(const [kind,globalName] of [['dental','DentalRecord'],['chronic','ChronicRec
    const request=async(url,options={})=>{
     const body=options.body?JSON.parse(options.body):null;requests.push({url,body});
     if(url.includes('/patient-directory'))return {items:[synthetic],patients:[synthetic]};
+    if(url.includes('/patient-summary?'))return {patient:synthetic,items:[{id:'prior-case',category:'chronic',date:'2026-01-02',title:'이전 기록'}]};
+    if(url.includes('/cases/prior-case?'))return {item:{id:'prior-case',patient_id:synthetic.id,body:{category:'chronic',species:'dog',chronicChart:{date:'2026-01-02',history:'이전 과거력',medications:'이전 약물',measurements:{creatinine:1.2}}}}};
     if(url==='/practice/clinical/cases'&&body){
      const chart=body[kind+'Chart'];
      if(body.patientId&&['guardianName','chartNumber'].some(k=>Object.hasOwn(chart.patient,k)))throw Error('Registered identity must not be overwritten');
@@ -51,6 +53,7 @@ for(const [kind,globalName] of [['dental','DentalRecord'],['chronic','ChronicRec
    await p.locator('[data-start-pick="0"]').click();
    assert.equal(await p.locator('[data-start-field="guardianName"]').inputValue(),'시험 보호자');
    assert.equal(await p.locator('[data-start-field="chartNumber"]').inputValue(),'TEST-42');
+   await p.locator('[data-prior-record]').selectOption('prior-case');await p.locator('[data-prior-pick=history]').check();await p.locator('[data-prior-pick=medications]').check();
   }
   if(kind==='chronic'){await p.locator('[data-start-option="cardiac"]').check();await p.locator('[data-start-option="cushing"]').check();}
   await p.locator('[data-start-submit]').click();
@@ -58,6 +61,7 @@ for(const [kind,globalName] of [['dental','DentalRecord'],['chronic','ChronicRec
   const payload=await p.evaluate(()=>saved),patient=payload[kind+'Chart'].patient;
   if(registered){
    assert.equal(payload.patientId,'synthetic-patient');
+   assert.match(payload[kind+'Chart'][kind==='dental'?'diagnosis':'history'],/2026-01-02.*만성질환.*prior-case/);assert.match(payload[kind+'Chart'].medications,/현재 복용 여부 확인[\s\S]*이전 약물/);assert.equal(payload[kind+'Chart'].measurements?.creatinine,undefined);
    assert.equal(Object.hasOwn(patient,'guardianName'),false);
    assert.equal(Object.hasOwn(patient,'chartNumber'),false);
    assert.equal(patient.breed,'시험 품종');

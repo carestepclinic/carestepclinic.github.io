@@ -806,7 +806,7 @@
    const state={values:g.ClinicRecordStart.values(source),picked:source.id?source:null,mode:source.id?'registered':'quick',touched:!!inpatient,requestKey:crypto.randomUUID()};
    createReturnTop=scrollY;dialog=createPage=document.createElement('section');root.dataset.creatingRecord='true';root.replaceChildren(createPage);const page=createPage;
    g.ClinicRecordStart.mount(page,{kind:'surgery',state,values:state.values,patientId:source.id||'',allowChartOnly:true,key:()=>createScope,valid:k=>current(k)&&createPage===page,canEdit:medical,request:(...args)=>a.request(...args),pending:()=>!!state.body,dirty:()=>dirty,
-    apply(){dirty=true;},back(){dirty=false;close(true);},
+    apply(v,p,options,prior){state.priorNote||={};g.ClinicRecordStart.syncPrior(state.priorNote,prior,'surgery');dirty=true;},back(){dirty=false;close(true);},
     async save(){
      if(mutating||!current(createScope)||!medical()||createPage!==page)return false;mutating=true;
      try{
@@ -814,7 +814,7 @@
       state.body||={kind:'surgery',species:p.species,weight:p.weight,title:'',location:'',note:'',chiefComplaint:'',veterinarianId:'',technicianId:'',requestKey:state.requestKey,...(registered?{patientId:registered.id}:{quickPatient:{name:p.name,chartNumber:p.chartNumber,...(p.guardianName?{guardianName:p.guardianName}:{})}})};
       const r=state.created||await api('/cases','POST',state.body);state.created=r;page.querySelector('[data-start-form]').dataset.createdId=r.id;
       if(!current(createScope)||createPage!==page)throw Error('연결이 변경됐습니다. 기록 목록에서 저장 결과를 확인해주세요.');
-      if(p.breed||p.birthDate||p.sex!=='unknown')await api('/cases/'+r.id+'/events','POST',{revision:r.revision||1,requestKey:state.requestKey+'-demographics',kind:'anesthesia.sheet',data:{breed:p.breed,birthDate:p.birthDate,sex:g.AnesthesiaRecord?.sexLabel(p)||''}});
+      if(p.breed||p.birthDate||p.sex!=='unknown'||state.priorNote?.note)await api('/cases/'+r.id+'/events','POST',{revision:r.revision||1,requestKey:state.requestKey+'-demographics',kind:'anesthesia.sheet',data:{breed:p.breed,birthDate:p.birthDate,sex:g.AnesthesiaRecord?.sexLabel(p)||'',...(state.priorNote?.note?{note:state.priorNote.note}:{})}});
       if(!current(createScope)||createPage!==page)throw Error('연결이 변경됐습니다. 기록 목록에서 저장 결과를 확인해주세요.');
       selected=r.id;selectedRoom='';deleted=false;closed=false;carry=null;a.consume?.();dirty=false;close(true);saveNotice='기본정보 저장 완료';saveNoticeCase=r.id;await load();return true;
      }finally{mutating=false;}
