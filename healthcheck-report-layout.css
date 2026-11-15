@@ -179,3 +179,15 @@ thead th,.lab-group-row th{background:#edf5f3;color:#174f50;border-color:#b7ceca
 .report-contents-page .report-toc td{width:100%;padding:2mm 0;font-size:10.5pt}
 .report-contents-page .toc-link{padding-bottom:1mm}
 .report-contents-page .report-guide{margin-top:8mm}
+
+/* Clinical summary starts on the first sheet without a decorative empty cover. */
+.report-cover-page .hospital-cover{padding-bottom:3mm;margin-bottom:3mm}
+.cover-heading{padding:4mm 0 5mm;margin-bottom:5mm}
+.cover-heading h1{font-size:25pt;margin:2mm 0}
+.report-cover-page .patient-block{padding:3mm 4mm;background:white}
+.report-cover-page .patient-block strong{font-size:18pt}
+.report-cover-page .patient-block p{font-size:10pt;margin-top:1mm}
+.cover-meta{display:flex;flex-wrap:wrap;gap:2mm 5mm;margin:3mm 0 5mm}
+.cover-meta span{display:block;padding:1mm 0;font-size:9pt;border:0}
+.cover-meta b{margin-left:1mm}
+.cover-actions{background:white}

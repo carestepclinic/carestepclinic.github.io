@@ -25,15 +25,17 @@
  }
  if(!photoChoices.size)photoOptions.hidden=true;
  include.addEventListener('change',()=>{mode.value=include.checked?'custom':'concise';guideOptions.querySelectorAll('input').forEach(x=>x.disabled=!include.checked);schedule();});
- mode.addEventListener('change',()=>{include.checked=mode.value!=='concise'&&guideChoices.length>0;guideOptions.querySelectorAll('input').forEach(x=>{x.disabled=!include.checked;if(mode.value==='detailed')x.checked=true;});schedule();});
+ mode.addEventListener('change',()=>{include.checked=!['concise','summary'].includes(mode.value)&&guideChoices.length>0;guideOptions.querySelectorAll('input').forEach(x=>{x.disabled=!include.checked;if(mode.value==='detailed')x.checked=true;});schedule();});
  guideOptions.querySelectorAll('input').forEach(x=>x.disabled=!include.checked);
  document.querySelector('[data-photo-layout]').addEventListener('change',schedule);
+ document.querySelector('[data-report-mono]')?.addEventListener('change',e=>{pages.style.filter=e.target.checked?'grayscale(1)':'';});
  retry.addEventListener('click',()=>{cssPromise=null;schedule();});
  printButton.addEventListener('click',()=>{if(document.body.dataset.reportReady==='true')window.print();});
  window.addEventListener('resize',fitScreen);
  function fitScreen(){document.documentElement.style.setProperty('--report-zoom',String(Math.min(1,document.documentElement.clientWidth/(210*96/25.4))));}
  function source(){
   const root=document.createElement('div');root.append(template.content.cloneNode(true));
+  if(mode.value==='summary')root.querySelectorAll('.report-part:not([data-report-summary=true])').forEach(x=>x.remove());
   if(!include.checked)root.querySelectorAll('[data-report-appendix=true]').forEach(x=>x.remove());
   else{
    for(const choice of guideChoices)if(!choice.input.checked)root.querySelector('[data-guide-key="'+choice.key+'"]')?.remove();
@@ -52,8 +54,8 @@
   }
   const rows=root.querySelector('[data-toc-rows]'),headings=[...root.querySelectorAll('.part-title')];
   headings.forEach((heading,i)=>{heading.dataset.sectionNumber=String(i+1).padStart(2,'0');});
-  for(const heading of headings){const tr=document.createElement('tr');{const td=document.createElement('td'),a=document.createElement('a'),label=document.createElement('span'),number=document.createElement('span');a.className='toc-link';a.setAttribute('href','#'+heading.id);label.className='toc-label';label.textContent=heading.textContent;number.className='toc-page';number.textContent='—';a.append(label,number);td.append(a);tr.append(td);}rows.append(tr);}
-  if(!headings.length)root.querySelector('.report-toc').remove();
+  for(const heading of headings){const tr=document.createElement('tr');{const td=document.createElement('td'),a=document.createElement('a'),label=document.createElement('span'),number=document.createElement('span');a.className='toc-link';a.setAttribute('href','#'+heading.id);label.className='toc-label';label.textContent=heading.textContent;number.className='toc-page';number.textContent='—';a.append(label,number);td.append(a);tr.append(td);}if(rows)rows.append(tr);}
+  if(!headings.length)root.querySelector('.report-toc')?.remove();
   return root;
  }
  async function assets(root){

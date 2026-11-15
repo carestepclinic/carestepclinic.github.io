@@ -1,0 +1,41 @@
+/* Physical typography shared by all clinical print snapshots. */
+html,body{background:white;color:#25342f}
+.cp-record{font:400 10.5pt/1.5 CarestepPrint,sans-serif;color:#25342f;overflow-wrap:anywhere}
+.cp-record *{box-sizing:border-box}
+.cp-record h1,.cp-record h2,.cp-record h3,.cp-record h4{font-family:CarestepPrint,sans-serif;color:#205d51;line-height:1.35;break-after:avoid}
+.cp-record h1{font-size:20pt;margin:0 0 3mm}
+.cp-record h2{font-size:12pt;margin:5mm 0 2mm;padding-bottom:1.5mm;border-bottom:1px solid #b8cbc2}
+.cp-record h3,.cp-record h4{font-size:10.5pt;margin:3mm 0 1.5mm}
+.cp-record p,.cp-record pre{font:inherit;white-space:pre-wrap;margin:1.5mm 0;orphans:3;widows:3;overflow-wrap:anywhere}
+.cp-record small{font-size:9pt;line-height:1.4;color:#51675c}
+.cp-record section,.cp-record article{break-inside:auto}
+.cp-record .cp-heading{display:block;border:0;padding:0;margin:0 0 5mm;break-inside:avoid}
+.cp-record .cp-clinic{font-size:11pt;font-weight:600;color:#205d51;margin:0 0 1.5mm}
+.cp-record .cp-document-mode{font-size:9pt;color:#53665d;margin:0 0 3mm}
+.cp-identity{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2.5mm 4mm;margin:0;padding:3mm 0;border-block:1px solid #b3c8bd}
+.cp-identity div{min-width:0}.cp-identity dt{font-size:8.5pt;color:#53665d}.cp-identity dd{margin:0;font-size:10pt;font-weight:600;overflow-wrap:anywhere}
+.cp-record .cp-endnote{font-size:8.5pt;color:#53665d;border-top:1px solid #c9d7cf;padding-top:2mm;margin-top:5mm}
+.cp-record table{width:100%;table-layout:fixed;border-collapse:collapse;font:400 9.5pt/1.4 CarestepPrint,sans-serif;margin:2mm 0 4mm;break-inside:auto}
+.cp-record th,.cp-record td{font-size:inherit;border:0;border-bottom:1px solid #cedbd3;padding:2mm 1.6mm;text-align:left;vertical-align:top;white-space:pre-wrap;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.cp-record th{font-weight:600}.cp-record thead{display:table-header-group}.cp-record thead th{background:#f1f5f2;border-top:1px solid #9db9a9;border-bottom:1px solid #9db9a9;color:#2b5041}.cp-record tr{break-inside:avoid}
+.cp-record tr td:not(:first-child){font-variant-numeric:tabular-nums}
+.cp-record figure{margin:3mm 0;break-inside:avoid}.cp-record figcaption{font-size:9.5pt;line-height:1.45;white-space:pre-wrap;margin-top:1.5mm}
+.cp-record img{display:block;max-width:100%;width:100%;height:65mm;max-height:none;object-fit:contain}
+.cp-record .dn-print-page,.cp-record .record-print-page,.cp-record .print-page,.cp-record .summary,.cp-record .detail,.cp-record .photos{width:auto;max-width:none;min-height:0;height:auto;margin:0;padding:0;box-shadow:none;border:0;overflow:visible;background:white}
+.cp-record .detail{display:block;break-before:page}.cp-record .detail>h1{font-size:14pt}
+.cp-record .summary-grid,.cp-record .dn-print-notes,.cp-record .dn-findings-grid,.cp-record .nr-print-matrices{display:block}
+.cp-record .nr-print-matrices section{break-inside:auto}.cp-record .nr-print-matrices h3{font-size:11pt}.cp-record .nr-print-matrices th,.cp-record .nr-print-matrices td{padding:2mm 1.6mm}
+.cp-record .summary-values{display:block}.cp-record .summary-values>span{display:block;background:white;padding:2mm 0;border-bottom:1px solid #d4dfd8}.cp-record .summary-values small{display:block}
+.cp-record .photos,.cp-record .dn-print-images{display:block;break-before:page}.cp-record .photos figure,.cp-record .dn-print-images figure{display:inline-block;width:48%;margin:3mm 1%;vertical-align:top}
+.cp-record .eyes{display:grid;grid-template-columns:1fr 1fr;gap:5mm;break-inside:avoid}.cp-record .eyes svg{height:55mm;width:100%;max-height:none}
+.cp-record .dn-chart{display:grid;grid-template-columns:1fr 1fr;gap:3mm;break-inside:avoid}.cp-record .dn-tooth svg{height:15mm}.cp-record .dn-tooth small,.cp-record .dn-tooth-type{font-size:8pt}.cp-record .dn-type-legend{font-size:9pt;margin:3mm 0;gap:3mm;flex-wrap:wrap}
+.cp-record .dn-print-summary{border:0;border-left:2pt solid #668f7b;padding:1mm 0 1mm 3mm;margin:4mm 0}.cp-record .dn-findings-grid table{font-size:9.5pt;line-height:1.4;margin-top:3mm}.cp-record .dn-findings-grid th:first-child{width:19%}.cp-record .dn-findings-grid th,.cp-record .dn-findings-grid td{padding:2mm 1.6mm}.cp-record .dn-image-appendix{break-before:page}
+.cp-record .cp-interval{display:block;border:0;margin:0 0 3mm;padding:0}.cp-record .cp-interval p{font-size:9pt}
+.cp-record .ap-timing{padding:2mm 0;border-block:1px solid #adc5b7;background:white;break-inside:avoid}.cp-record .ap-timing>div{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3mm}.cp-record .ap-timing small{font-size:8.5pt}.cp-record .ap-timing b{font-size:9pt}.cp-record .ar-duration-summary{display:flex;gap:7mm;padding-top:2mm;margin-top:2mm}.cp-record .ar-duration-summary strong{font-size:10pt}
+.cp-record .ap-meta{font-size:9.5pt;gap:2mm 5mm}.cp-record .ap-charts{display:block;margin:3mm 0}.cp-record .ap-chart{display:inline-block;width:48%;margin:1mm 1%;padding:2mm;vertical-align:top;break-inside:avoid;border:1px solid #cfdbd3;border-radius:0}.cp-record .ap-chart h3{font-size:10pt;margin:0}.cp-record .ap-chart svg{width:100%;height:auto}.cp-record .ap-chart svg text{font:11px CarestepPrint,sans-serif}
+.cp-record .ap-matrix{font-size:9pt;break-inside:auto}.cp-record .ap-matrix th,.cp-record .ap-matrix td{text-align:center;padding:1.5mm 1mm;border:1px solid #c4d3c9}.cp-record .ap-matrix th:first-child{width:29mm;text-align:left}.cp-record .ap-matrix small{font-size:8pt}.cp-record .ap-events{columns:auto}.cp-record .ap-events p,.cp-record .ap-notes p,.cp-record .ap-plan pre{font-size:10pt;break-inside:auto}.cp-record .ap-carry,.cp-record .ar-legacy-settings{font-size:9.5pt}.cp-record .print-page+.print-page{break-before:page}
+.cp-record .cp-trends{display:block}.cp-record .cp-trend{display:inline-block;width:48%;vertical-align:top;margin:2mm 1%;border:1px solid #c8d9ce;padding:2mm}.cp-record .cp-trend svg{display:block;width:100%;height:28mm;color:#253e31}.cp-record .cp-trend svg text{font:10px CarestepPrint,sans-serif;fill:currentColor}
+.cp-record .cp-ward-period+.cp-ward-period{break-before:page}.cp-record .cp-ward-table{font-size:9pt}.cp-record .cp-task{padding:1mm 0;break-inside:auto}.cp-record .cp-task b{font-size:10pt}.cp-record .cp-task p{font-size:9pt;margin:1mm 0}.cp-record .cp-task small{display:block;font-size:8.5pt}.cp-record .cp-task-state{font-weight:600}.cp-record .cp-empty{color:#596d62;font-size:8.5pt}.cp-record .cp-ward-exceptions{break-before:page}
+.cp-record .cp-long-notes{break-before:page}.cp-record .cp-original-note{white-space:pre-wrap;overflow-wrap:anywhere;orphans:3;widows:3}.cp-record .cp-note-reference{font-size:9pt;color:#53665d}
+
+.cp-ward .cp-identity{grid-template-columns:repeat(4,minmax(0,1fr))}.cp-ward .cp-heading{margin-bottom:3mm}.cp-ward .cp-empty-period th,.cp-ward .cp-empty-period td{padding:1.2mm 1.6mm}.cp-ward .cp-empty-period th{font-size:8pt;white-space:nowrap}

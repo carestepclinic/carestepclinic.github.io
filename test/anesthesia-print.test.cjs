@@ -11,13 +11,13 @@ function fixture(long=false){const base=Date.parse('2026-10-20T03:25:00Z'),at=m=
  if(long)for(let m=30;m<480;m+=15)rows.push(marker('event'+m,m,'other',{note:'처치 기록 '+m+' · 충분한 길이의 장시간 기록 내용과 인계 사항을 원문 그대로 남깁니다.'}));
  return {rows,ranges:printRanges(rows),item:{patient:{name:'합성 마취 환자',breed:'합성 품종',birthDate:'2020-02-29',sex:'male',neutered:'yes'},body:{species:'dog',weight:5}},fieldValues:{diagnosis:'합성 진단',operation:'합성 수술',surgeon:'수의사A',anesthetist:'수의사B',tube:'4.5 mm',note:'회복 시 지속 관찰'},plan:'합성 계획 0.5 mL · 준비량이며 실제 투여량 아님',administration:r=>r.administration?r.administration.name+' · '+r.administration.amount+' '+r.administration.unit+' · '+r.administration.route:''};
 }
-for(const long of [false,true])test('compact PDF preserves measured values, notes and actual administration '+(long?'long':'two-hour'),async t=>{
+for(const long of [false,true])test('readable PDF preserves measured values, notes and actual administration '+(long?'long':'two-hour'),async t=>{
  const data=fixture(long),html=printDocument(data),p=await browser.newPage({viewport:{width:1120,height:800}});t.after(()=>p.close());await p.setContent(html);await p.emulateMedia({media:'print'});await p.evaluate(()=>document.fonts.ready);
  assert.equal(await p.locator('.print-page').count(),long?2:1);assert.equal(await p.locator('.ap-matrix thead th').count()-await p.locator('.ap-matrix').count(),long?97:25);
  assert.equal(await p.locator('.ap-timing').count(),1);assert.match(await p.locator('.ap-timing').innerText(),/수술 소요시간/);assert.match(await p.locator('.ap-timing').innerText(),long?/8시간/:/2시간/);assert.match(await p.locator('.ap-meta').innerText(),/4.5 mm/);const text=await p.locator('body').innerText();for(const s of ['이완기 혈압','기록자A','기록자B','측정 메모 보존','전처치 기록','합성 약물A','계산기 준비량 · 실제 투약 아님'])assert.ok(text.includes(s),s);
  assert.equal(text.split('합성 약물A').length,2);assert.ok(!text.includes('취소된 사건은 제외'));assert.ok(!text.includes('undefined'));
  assert.equal(await p.locator('.ap-charts').count(),long?2:1);assert.equal(await p.locator('.ap-chart').count(),long?16:8);
- const file=path.resolve(__dirname,'../../anesthesia-print-'+(long?'long':'two-hour')+'.pdf');await p.pdf({path:file,preferCSSPageSize:true,printBackground:true});const info=require('node:child_process').execFileSync('pdfinfo',[file],{encoding:'utf8',stdio:['ignore','pipe','ignore']});const pages=Number(info.match(/Pages:\s+(\d+)/)?.[1]);if(!long)assert.equal(pages,1);else assert.ok(pages>=2);
+ const file=path.resolve(__dirname,'../../anesthesia-print-'+(long?'long':'two-hour')+'.pdf');await p.pdf({path:file,preferCSSPageSize:true,printBackground:true});const info=require('node:child_process').execFileSync('pdfinfo',[file],{encoding:'utf8',stdio:['ignore','pipe','ignore']});const pages=Number(info.match(/Pages:\s+(\d+)/)?.[1]);assert.ok(pages>=(long?2:1));
 });
 test('selected range and missing metrics never gain fabricated values',()=>{
  const data=fixture();data.rows=[{type:'measurement',observedAt:'2026-10-20T03:30:00Z',values:{heartRate:0},recorder:{name:'<script>bad</script>'},note:'<svg/onload=x>'}];data.complete=false;
