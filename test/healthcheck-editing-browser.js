@@ -16,6 +16,7 @@
   state.request=async(url,options={})=>{
    const body=options.body?JSON.parse(options.body):null;state.calls.push({url,body});
    if(url.endsWith('/healthcheck-summary'))return {overview:'가상 핵심 요약',summary:'검사 기반 가상 AI 소견',management:'가상 관리계획',followup:'가상 재검 안내',questions:'가상 내부 검토',source:'a'.repeat(64)};
+   if(url.endsWith('/lab-import')&&state.importResponses?.length){const r=state.importResponses.shift();if(r.error)throw Error(r.error);return r;}
    if(url.endsWith('/lab-import'))return {reportDate:state.records['record-1'].body.healthcheckChart.date,singleReport:true,results:[{name:'CREA',value:'2.4',unit:'mg/dL',source:'가상 검사실',reference:'0.5–1.8'}]};
    if(url.endsWith('/members'))return {members:[]};
    if(url.includes('/healthcheck-images?'))return {dataUrl:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="100"><rect width="120" height="100" fill="%23e1efea"/></svg>'};
@@ -102,5 +103,44 @@
   check(f.records['record-1'].body.healthcheckChart.questions==='내부 검토 메모','internal notes saved');check(!HealthcheckRecord.reportHTML(f.records['record-1'].body.healthcheckChart,f.records['record-1'].patient,[]).includes('내부 검토 메모'),'internal notes excluded from report');
  }]
  ];
+ scenarios.push(
+ ['expanded validation retains subsequent text and explicitly locates the error',async()=>{
+  const f=await fixture();await click('[data-step=labs]');await click('[data-action=addrow]');await click('[data-step=summary]');await click('[data-expand-prose=summary]');
+  await input('.hc-prose-dialog textarea','저장 전 소견');await click('[data-prose-save]');check($('.hc-prose-dialog[open]'),'dialog retained on validation');check($('.hc-steps [aria-pressed=true]').dataset.step==='summary','no hidden navigation');check(!$('[data-prose-target]').hidden,'error navigation offered');
+  await input('.hc-prose-dialog textarea','검증 실패 후 추가한 소견');await click('[data-prose-target]');check(!$('.hc-prose-dialog'),'explicit navigation closes dialog');check($('.hc-steps [aria-pressed=true]').dataset.step==='labs','error step opened');await input('[data-lab=name]','가상 검사');$('[data-lab=name]').dispatchEvent(new Event('change',{bubbles:true}));await flush();await click('[data-step=summary]');check($('[data-prose=summary]').value==='검증 실패 후 추가한 소견','later text retained');await click('[data-action=save]');check(f.records['record-1'].body.healthcheckChart.summary==='검증 실패 후 추가한 소견','later text persisted');
+ }],
+ ['AI partial application keeps remaining proposals across save and navigation with undo',async()=>{
+  const f=await fixture();await generate();document.querySelectorAll('[data-ai-pick]').forEach(e=>e.checked=e.dataset.aiPick==='summary');await click('[data-action=apply-ai]');
+  check($('[data-prose=summary]').value.includes('가상 AI'),'one section applied');check(!$('[data-ai-pick=summary]')&&$('[data-ai-pick=management]'),'unapplied retained');check($('.hc-ai-applied').textContent.includes('종합소견'),'applied status visible');await click('[data-action=save]');await click('[data-step=exams]');await click('[data-step=summary]');check($('[data-ai-pick=management]'),'remaining after rerender');
+  $('[data-ai-pick=management]').checked=true;await click('[data-action=apply-ai]');check($('[data-prose=management]').value==='가상 관리계획','second applied');await click('[data-action=undo-ai]');check($('[data-prose=management]').value==='','undo restores previous text');check($('[data-ai-pick=management]'),'undo restores proposal');
+  document.querySelectorAll('[data-ai-pick]').forEach(e=>e.checked=true);await click('[data-action=apply-ai]');check(!$('.hc-proposal'),'all remaining applied');await click('[data-action=undo-ai]');check($('[data-ai-pick=management]'),'undo works after final apply');check($('[data-prose=summary]').value.includes('가상 AI'),'earlier applied text untouched');
+ }],
+ ['partial AI remaining items follow only the matching record',async()=>{
+  const f=await fixture();await generate();document.querySelectorAll('[data-ai-pick]').forEach(e=>e.checked=e.dataset.aiPick==='summary');await click('[data-action=apply-ai]');const moving=f.view.openRecord('record-2');await flush();await click('[data-move=save]');await moving;await click('[data-step=summary]');check(!$('.hc-proposal'),'no proposal leaked to other record');await f.view.openRecord('record-1');await click('[data-step=summary]');check($('[data-ai-pick=management]')&&!$('[data-ai-pick=summary]'),'remaining restored by record');
+ }],
+ ['followup metadata cannot silently exceed the server text limit',async()=>{
+  const f=await fixture();await click('[data-step=summary]');await input('[data-prose=followup]','가'.repeat(8000));await input('[data-followup-date]','2026-12-01');await input('[data-followup-tests]','혈액검사');
+  check($('[data-prose=followup]').value.length===8000,'does not silently truncate');check($('[data-prose-count=followup]').textContent.includes('30자 초과'),'combined overrun explicit');await click('[data-action=save]');check(f.records['record-1'].revision===1,'invalid total not sent');
+  await click('[data-expand-prose=followup]');const max=$('.hc-prose-dialog textarea').maxLength;check(max===7970,'expanded limit reserves metadata');await input('.hc-prose-dialog textarea','가'.repeat(max));await click('[data-prose-save]');check(f.records['record-1'].body.healthcheckChart.followup.length===8000,'exact total accepted');check($('[data-prose-dialog-count]').textContent.includes('0자 남음'),'modal remaining count');await click('[data-prose-close]');
+ }],
+ ['multiple examination findings are visible and individually removable without losing notes',async()=>{
+  const f=await fixture();f.records['record-1'].body.healthcheckChart.examSelection.push('oral');await f.view.openRecord('record-1');const choose=async value=>{const e=$('[data-exam-choice=oral]');e.value=value;e.dispatchEvent(new Event('change',{bubbles:true}));await flush();};
+  await choose('치석');await choose('치은염');check($('[data-exam-choice=oral]').value==='','add control resets');check(document.querySelectorAll('[data-exam-selected=oral] button').length===2,'both selections visible');
+  await input('[data-exam=oral]','치석\n치은염\n가상 자유 소견');await click('[data-exam-selected=oral] [data-remove-finding="0"]');check($('[data-exam=oral]').value==='치은염\n가상 자유 소견','remove selected only');await choose('특이 소견 없음');check(!$('[data-exam=oral]').value.includes('치은염'),'normal replaces named findings');check($('[data-exam=oral]').value.includes('가상 자유 소견'),'free text preserved');await click('[data-action=save]');check(f.records['record-1'].body.healthcheckChart.exams.oral.includes('가상 자유 소견'),'selection saved');
+ }],
+ ['multi-file review opens the matching original and preserves mapping after retry',async()=>{
+  const f=await fixture();await click('[data-step=labs]');await click('[data-action=import]');const files=new DataTransfer();for(const name of ['synthetic-a.pdf','synthetic-b.pdf'])files.items.add(new File(['%PDF-1.7 synthetic'],name,{type:'application/pdf'}));$('[data-lab-file]').files=files.files;$('[data-lab-file]').dispatchEvent(new Event('change',{bubbles:true}));await flush();
+  f.importResponses=[{results:[{name:'BUN',value:'20',unit:'mg/dL',reference:'10-30'}]},{error:'가상 파일 읽기 실패'},{results:[{name:'ALT',value:'40',unit:'U/L',reference:'10-100'}]}];$('[data-file-consent]').checked=true;await click('[data-action=read-file]');check(document.querySelectorAll('[data-import-row]').length===1,'first success retained');await click('[data-action=read-file]');check(document.querySelectorAll('[data-import-row]').length===2,'retry adds failed file only');
+  check($('[data-import-source="0"]').textContent.includes('synthetic-a.pdf'),'first provenance');check($('[data-import-source="1"]').textContent.includes('synthetic-b.pdf'),'second provenance');await click('[data-import-source="1"]');check($('[data-file-preview] iframe').title.includes('synthetic-b.pdf'),'matching original opened');check($('.hc-import-workspace').dataset.importPane==='source','mobile source selected');await click('[data-import-return]');check($('.hc-import-workspace').dataset.importPane==='results','return to results');
+  $('[data-import-checked]').checked=true;await click('[data-action=apply-import]');await click('[data-action=save]');const labs=f.records['record-1'].body.healthcheckChart.labs;check(labs.length===2,'both results saved');check(labs.every(r=>!Object.keys(r).some(k=>/file|originIndex/i.test(k))),'local file identity never persisted');check(labs[0].value==='20'&&labs[1].value==='40','results remain with original files');
+ }],
+ ['followup shortcuts show their basis and warn for past dates',async()=>{
+  const f=await fixture();f.records['record-1'].body.healthcheckChart.date='2020-01-31';await f.view.openRecord('record-1');await click('[data-step=summary]');check($('[data-followup-offset="7"]').textContent.includes('검사일'),'explicit basis');await click('[data-followup-offset=month]');check($('[data-followup-date]').value==='2020-02-29','month-end clamped');check(!$('[data-followup-hint]').hidden,'past date noted');
+  $('[data-followup-base]').value='today';$('[data-followup-base]').dispatchEvent(new Event('change',{bubbles:true}));await click('[data-followup-offset="7"]');const today=new Date(Date.now()+32400000).toISOString().slice(0,10);check($('[data-followup-date]').value===HealthcheckRecord.followupDate(today,'7'),'today basis used');check($('[data-followup-hint]').hidden,'future date no warning');
+ }],
+ ['writing view keeps AI consent available and uses a readable text width',async()=>{
+  await fixture();await click('[data-step=summary]');check($('.hc-summary-tools'),'compact tools');check($('.hc-ai-tools').contains($('[data-ai-consent]')),'AI consent retained');check(getComputedStyle($('[data-prose=summary]')).fontSize==='16px','prose remains legible');check($('.hc-summary-panel').getBoundingClientRect().width<=980,'reading width bounded');check($('[data-prose=overview]').getBoundingClientRect().top<600,'writing starts without stacked help');
+ }]
+ );
  g.HealthcheckEditingChecks={fixture,scenarios,async run(report){const errors=[];const errorHandler=e=>errors.push(e.message);g.addEventListener('error',errorHandler);try{for(const[name,fn]of scenarios){try{await fn();report({name,ok:true});}catch(e){report({name,ok:false,error:e.stack||String(e)});}finally{g.hcFixture?.view.dispose();}}if(errors.length)report({name:'browser errors',ok:false,error:errors.join('\n')});}finally{g.removeEventListener('error',errorHandler);}}};
 })(window);

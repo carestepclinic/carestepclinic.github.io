@@ -343,6 +343,7 @@
 .hc-record .hc-ai-stale .hc-check{margin-bottom:0}
 .hc-record.hc-prose-dialog footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .hc-record.hc-prose-dialog [data-prose-status]{font-size:13px;line-height:1.6;flex:1;min-width:150px}
+.hc-record.hc-prose-dialog [data-prose-dialog-count]{display:block;text-align:right;color:#607771;margin:6px 0}
 .hc-record.hc-move-dialog{box-sizing:border-box;width:min(560px,94vw);max-height:90dvh;border:1px solid #b4ccc6;border-radius:12px;padding:24px;color:#20323e;background:#fff}
 .hc-move-dialog::backdrop{background:#102b3180}
 .hc-record.hc-move-dialog h2{font-size:20px;margin:0 0 12px}
@@ -356,4 +357,55 @@
  .hc-record .hc-prose-heading label{font-size:16px}
  .hc-record.hc-move-dialog{padding:16px}
  .hc-record .hc-move-actions button{flex:1 1 130px}
+}
+
+/* Focus the writing view and make repeated findings/source review explicit. */
+.hc-record .hc-summary-panel{max-width:980px;margin-inline:auto;min-width:0}
+.hc-record .hc-summary-tools{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;margin:10px 0}
+.hc-record .hc-summary-tools>details{flex:1 1 230px;min-width:0;margin:0;padding:10px 12px;border:1px solid #d5e0de;border-radius:8px;background:#f3f8f6}
+.hc-record .hc-summary-tools>details[open]{flex-basis:100%}
+.hc-record .hc-summary-tools summary{font-size:13px;font-weight:600;line-height:1.6}
+.hc-record .hc-summary-tools .hc-review-grid{margin-top:12px}
+.hc-record .hc-summary-tools .hc-ai-start{margin:12px 0 0}
+.hc-record .hc-summary-tools .hc-ai-start .hc-check{flex-basis:100%}
+.hc-record .hc-summary-tools .hc-ai-hint{display:none}
+.hc-record .hc-ai-applied{font-size:13px;color:#23715a;margin:8px 0}
+.hc-record .hc-finding-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.hc-record .hc-finding-chips[hidden]{display:none}
+.hc-record .hc-finding-chips button{min-height:34px;padding:5px 9px;background:#eaf4f0;border-color:#bdd9ce;font-size:13px;text-align:left;white-space:normal;overflow-wrap:anywhere}
+.hc-record .hc-finding-chips button span{font-size:16px;margin-left:5px}
+.hc-record .hc-followup-shortcuts{align-items:end}
+.hc-record .hc-followup-shortcuts>label{flex:1 1 190px;max-width:280px}
+.hc-record .hc-followup-shortcuts [data-followup-choice]{flex:1 1 180px;max-width:260px}
+.hc-record [data-followup-hint]{font-size:13px;line-height:1.6;color:#924512;margin:8px 0}
+.hc-record [data-followup-hint][hidden]{display:none}
+.hc-record .hc-import-workspace{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
+.hc-record .hc-import-workspace>*{min-width:0}
+.hc-record .hc-import-original{padding:12px;border:1px solid #cbdad8;border-radius:8px;background:#f5f9f7}
+.hc-record .hc-import-original summary{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.hc-record .hc-import-original [data-file-preview]{margin-top:10px}
+.hc-record .hc-import-original [data-file-preview]>*{height:58dvh;min-height:220px;max-height:650px;background:white}
+.hc-record .hc-import-source{display:block;min-width:96px;width:100%;text-align:left;font-size:12px;margin-top:4px}
+.hc-record .hc-import-source small{display:block;font-weight:400;overflow-wrap:anywhere;line-height:1.4;margin-top:4px}
+.hc-record .hc-source-active{background:#eaf4f0}
+.hc-record [data-file-preview-index][aria-pressed=true]{border-color:#177971;background:#edf6f2}
+.hc-record .hc-import-view-switch{display:flex;gap:8px;margin:12px 0}
+.hc-record .hc-import-view-switch [aria-pressed=true]{background:#177971;color:white}
+.hc-record .hc-import-workspace[data-import-pane=results]>.hc-import-original{display:none}
+.hc-record .hc-import-workspace[data-import-pane=source]>[data-import-results]{display:none}
+@media(min-width:1100px){
+ .hc-record .hc-import-workspace{grid-template-columns:minmax(280px,.85fr) minmax(0,1.15fr)}
+ .hc-record .hc-import-workspace>.hc-import-original,.hc-record .hc-import-workspace>[data-import-results]{display:block!important}
+ .hc-record .hc-import-original{position:sticky;top:calc(var(--hc-header-height,160px) + 12px)}
+ .hc-record .hc-import-view-switch,.hc-record [data-import-return]{display:none}
+ .hc-record .hc-import-table table{min-width:0;table-layout:fixed}
+ .hc-record .hc-import-table th,.hc-record .hc-import-table td{overflow-wrap:anywhere}
+}
+@media(max-width:650px){
+ .hc-record .hc-summary-tools{gap:6px;margin:8px 0}
+ .hc-record .hc-summary-tools>details{flex-basis:100%;padding:8px 10px}
+ .hc-record .hc-summary-grid{gap:20px}
+ .hc-record .hc-import-table td[data-label="반영"]{flex-wrap:wrap}
+ .hc-record .hc-import-source{width:auto;flex:1}
+ .hc-record .hc-followup-shortcuts>label{flex-basis:100%;max-width:none}
 }
