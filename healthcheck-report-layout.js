@@ -87,6 +87,8 @@
    for(const page of flow.pages)page.removeListeners();
    if(queued)return;
    const rendered=[...pages.querySelectorAll('.pagedjs_page')];if(!rendered.length||flow.total!==rendered.length)throw Error('페이지 수를 확인하지 못했습니다.');
+   // A new section must never share the preceding section's final sheet.
+   const started=new Set();for(const part of pages.querySelectorAll('.report-part')){const key=part.dataset.reportPart;if(started.has(key))continue;started.add(key);if(part.dataset.newPage==='true'&&part.closest('.pagedjs_page').querySelector('.report-part')!==part)throw Error('목차·항목의 새 페이지 구분을 확인하지 못해 출력을 중단했습니다.');}
    // Put the section name in the reserved margin, never over the report content.
    for(const page of rendered){const part=page.querySelector('.report-part'),title=part?.dataset.reportTitle;if(part&&part.dataset.reportPart!=='0'&&!part.querySelector('.part-title,.report-toc')&&title){const margin=page.querySelector('.pagedjs_margin-top-left .pagedjs_margin-content');if(margin){margin.dataset.continuation=title+' · 계속';page.dataset.continuation=title;}}}
    const toc=[];

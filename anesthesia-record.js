@@ -85,15 +85,17 @@
  }
  function printGraph(k,rs,range){
   const [label,unit,min,max]=metrics[k],points=rs.filter(r=>r.type==='measurement'&&r.values?.[k]!=null),lo=Math.min(min,...points.map(r=>r.values[k])),hi=Math.max(max,...points.map(r=>r.values[k]));
-  const x=t=>32+(Date.parse(t)-range.start)/(range.minutes*60000)*272,y=v=>80-(v-lo)/(hi-lo)*64;let s='';
-  for(let i=0;i<=2;i++){const v=lo+(hi-lo)*i/2,yy=y(v);s+='<line x1="32" x2="304" y1="'+yy+'" y2="'+yy+'"/><text x="28" y="'+(yy+3)+'" text-anchor="end">'+Number(v.toFixed(1))+'</text>';}
-  for(let i=0;i<=3;i++){const t=range.start+range.minutes*60000*i/3,xx=32+i*272/3;s+='<line x1="'+xx+'" x2="'+xx+'" y1="16" y2="80"/><text x="'+xx+'" y="95" text-anchor="'+(i===0?'start':i===3?'end':'middle')+'">'+clock(t)+'</text>';}
-  for(let i=1;i<points.length;i++)if(Date.parse(points[i].observedAt)-Date.parse(points[i-1].observedAt)<=600000)s+='<path d="M'+x(points[i-1].observedAt)+' '+y(points[i-1].values[k])+' L'+x(points[i].observedAt)+' '+y(points[i].values[k])+'"/>';
   const phases=rs.filter(r=>['anesthesiaStart','intubation','surgeryStart','surgeryEnd','anesthesiaEnd','extubation'].includes(r.marker));
-  const lanes=[];const positions=phases.map(r=>{const xx=x(r.observedAt),found=lanes.findIndex(end=>end+18<xx),lane=found<0?lanes.length:found;lanes[lane]=xx;return lane;});const top=-Math.max(1,lanes.length)*13-6;
-  s+=phases.map((r,i)=>'<g class="ap-phase"><line x1="'+x(r.observedAt)+'" x2="'+x(r.observedAt)+'" y1="16" y2="80" style="stroke:#667d70;stroke-dasharray:3 3"/><text x="'+x(r.observedAt)+'" y="'+(top+12+positions[i]*13)+'" text-anchor="middle">'+(i+1)+'</text><title>'+esc(markers[r.marker]+' '+when(r.observedAt))+'</title></g>').join('');
+  const x=t=>32+(Date.parse(t)-range.start)/(range.minutes*60000)*272;
+  // Keep ordinary phase numbers on one baseline. Move only badges, never event times.
+  const badges=[];for(let offset=0;offset<phases.length;offset+=16){const batch=phases.slice(offset,offset+16),xs=batch.map(r=>x(r.observedAt));for(let i=1;i<xs.length;i++)xs[i]=Math.max(xs[i],xs[i-1]+18);if(xs.at(-1)>304){xs[xs.length-1]=304;for(let i=xs.length-2;i>=0;i--)xs[i]=Math.min(xs[i],xs[i+1]-18);}batch.forEach((r,i)=>badges.push({r,n:offset+i+1,x:xs[i],y:2+Math.floor(offset/16)*19}));}
+  const plotTop=phases.length?28+(Math.ceil(phases.length/16)-1)*19:16,plotBottom=plotTop+64,y=v=>plotBottom-(v-lo)/(hi-lo)*64;let s='';
+  for(let i=0;i<=2;i++){const v=lo+(hi-lo)*i/2,yy=y(v);s+='<line x1="32" x2="304" y1="'+yy+'" y2="'+yy+'"/><text x="28" y="'+(yy+3)+'" text-anchor="end">'+Number(v.toFixed(1))+'</text>';}
+  for(let i=0;i<=3;i++){const t=range.start+range.minutes*60000*i/3,xx=32+i*272/3;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+plotTop+'" y2="'+plotBottom+'"/><text x="'+xx+'" y="'+(plotBottom+15)+'" text-anchor="'+(i===0?'start':i===3?'end':'middle')+'">'+clock(t)+'</text>';}
+  for(let i=1;i<points.length;i++)if(Date.parse(points[i].observedAt)-Date.parse(points[i-1].observedAt)<=600000)s+='<path d="M'+x(points[i-1].observedAt)+' '+y(points[i-1].values[k])+' L'+x(points[i].observedAt)+' '+y(points[i].values[k])+'"/>';
+  s+=badges.map(b=>'<g class="ap-phase" data-phase-number="'+b.n+'"><line class="ap-phase-line" x1="'+x(b.r.observedAt)+'" x2="'+x(b.r.observedAt)+'" y1="'+plotTop+'" y2="'+plotBottom+'" style="stroke:#667d70;stroke-dasharray:3 3"/><line class="ap-phase-leader" x1="'+b.x+'" y1="'+(b.y+15)+'" x2="'+x(b.r.observedAt)+'" y2="'+plotTop+'" style="stroke:#667d70;stroke-width:.8"/><rect class="ap-phase-badge" x="'+(b.x-7)+'" y="'+b.y+'" width="14" height="15" rx="3" style="fill:#f0f5f2;stroke:#667d70;stroke-width:.8"/><text class="ap-phase-number" x="'+b.x+'" y="'+(b.y+11)+'" text-anchor="middle" style="font-size:11px;font-weight:600">'+b.n+'</text><title>'+esc(markers[b.r.marker]+' '+when(b.r.observedAt))+'</title></g>').join('');
   s+=points.map(r=>'<circle cx="'+x(r.observedAt)+'" cy="'+y(r.values[k])+'" r="2"/>').join('');
-  return '<section class="ap-chart"><h3>'+label+' <small>'+unit+'</small></h3><svg viewBox="0 '+top+' 320 '+(102-top)+'" role="img" aria-label="'+label+' 시간별 기록">'+s+'</svg></section>';
+  return '<section class="ap-chart"><h3>'+label+' <small>'+unit+'</small></h3><svg viewBox="0 0 320 '+(plotBottom+22)+'" role="img" aria-label="'+label+' 시간별 기록 · 번호는 진행·처치 표의 사건 번호">'+s+'</svg></section>';
  }
 
  function elapsedText(milliseconds){const seconds=Math.floor(milliseconds/1000);if(!Number.isFinite(seconds)||seconds<0)return '시각 확인 필요';const h=Math.floor(seconds/3600),m=Math.floor(seconds%3600/60),s=seconds%60;return [h?h+'시간':'',m?m+'분':'',s?s+'초':''].filter(Boolean).join(' ')||'0분';}

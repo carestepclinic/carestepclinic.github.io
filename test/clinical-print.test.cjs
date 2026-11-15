@@ -33,8 +33,8 @@ test('health report summary is explicit and private review notes remain excluded
 test('technician and veterinarian remain distinct and safely escaped in print identity',()=>{
  const html=P.identity({veterinarian:'수의사',technician:'<검증>',patient:{name:'가상 환자'}});assert.ok(html.includes('수의사 · 테크니션 &lt;검증&gt;'));assert.ok(!html.includes('<검증>'));
 });
-test('short health report flows summary and management while retaining examination boundaries',()=>{
- const d=H.blank({name:'가상 환자'});Object.assign(d,{summary:'짧은 소견',management:'집에서 관리',followup:'재검 일정',exams:{physical:'신체 소견'}});const html=H.reportHTML(d,{name:'가상 환자'},[]);for(const title of ['종합소견','관리·재검 계획'])assert.ok(html.includes('data-report-title="'+title+'" data-new-page="false" data-compact="true" data-keep-together="true"'));assert.ok(html.includes('data-report-title="신체검사·진료 소견" data-new-page="true"'));
+test('health contents and every section start on a new page even for short reports',()=>{
+ const d=H.blank({name:'가상 환자'});Object.assign(d,{summary:'짧은 소견',management:'집에서 관리',followup:'재검 일정',exams:{physical:'신체 소견'}});const html=H.reportHTML(d,{name:'가상 환자'},[]);for(const title of ['종합소견','관리·재검 계획'])assert.ok(html.includes('data-report-title="'+title+'" data-new-page="true" data-compact="true" data-keep-together="true"'));assert.ok(html.includes('data-report-title="신체검사·진료 소견" data-new-page="true"'));
 });
 test('ward planned date stays in column while next-day actual timestamp remains explicit',()=>{
  const html=P.wardHTML([{at:'2026-11-15T23:50:00+09:00',actualAt:'2026-11-16T00:10:00+09:00',title:'자정 처치',dose:'0.25 mL',state:'완료',recorder:'담당자'}],['2026-11-15']);assert.ok(html.includes('예정 23:50'));assert.ok(html.includes('실시 2026-11-16 00:10'));assert.ok(html.includes('지시량 0.25 mL'));assert.ok(html.includes('수행 담당자'));
@@ -65,4 +65,16 @@ test('health problems group only unique exact headings and retain unmatched and 
 
 test('anesthesia event-only records do not add an empty numeric appendix',()=>{
  const rows=[{type:'marker',marker:'anesthesiaStart',observedAt:'2026-11-15T00:00:00Z',note:'사건 원문'}];const html=A.printDocument({rows,ranges:A.printRanges(rows),item:{patient:{name:'합성 환자'},body:{}},plan:'준비량'});assert.ok(!html.includes('class="ap-data-appendix"'));assert.ok(!html.includes('class="ap-interval-pair"'));assert.ok(html.includes('사건 원문'));assert.ok(html.includes('준비량'));
+});
+
+test('anesthesia event badges share a baseline and connect to exact times at both edges',()=>{
+ const start=Date.parse('2026-11-15T03:36:00Z'),names=['anesthesiaStart','intubation','surgeryStart','surgeryEnd','anesthesiaEnd','extubation'];
+ for(const minutes of [[0,1,10,31,52,53],[0,0,0,0,0,0],[59,59,59,60,60,60]]){
+  const rows=names.map((marker,i)=>({type:'marker',marker,observedAt:new Date(start+minutes[i]*60000).toISOString()}));rows.push({type:'measurement',observedAt:new Date(start+12*60000).toISOString(),values:{heartRate:100}});
+  const html=A.printDocument({rows,ranges:[{start,minutes:60}],item:{patient:{name:'합성 환자'},body:{}},complete:false});const graph=html.match(/<section class="ap-chart">[\s\S]*?<\/svg>/)[0];
+  const labels=[...graph.matchAll(/class="ap-phase-number" x="([\d.]+)" y="([\d.]+)"[^>]*>(\d+)</g)];assert.equal(labels.length,6);assert.equal(new Set(labels.map(m=>m[2])).size,1);assert.deepEqual(labels.map(m=>+m[3]),[1,2,3,4,5,6]);
+  labels.forEach((m,i)=>{assert.ok(+m[1]>=32&&+m[1]<=304);if(i)assert.ok(+m[1]-Number(labels[i-1][1])>=17.99);});
+  const leaders=[...graph.matchAll(/class="ap-phase-leader" x1="([\d.]+)" y1="([\d.]+)" x2="([\d.]+)" y2="([\d.]+)"/g)];assert.equal(leaders.length,6);leaders.forEach((m,i)=>assert.ok(Math.abs(+m[3]-(32+minutes[i]/60*272))<0.00001));
+  assert.ok(graph.includes('viewBox="0 0 320 114"'));assert.ok(!graph.includes('viewBox="0 -'));
+ }
 });
