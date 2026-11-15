@@ -2,7 +2,7 @@
  'use strict';
  const metrics={heartRate:['심박수','회/분',0,300],respiratoryRate:['호흡수','회/분',0,100],etco2:['EtCO₂','mmHg',0,100],spo2:['SpO₂','%',50,100],temperature:['체온','°C',30,42],systolic:['수축기 혈압','mmHg',0,250],diastolic:['이완기 혈압','mmHg',0,150],meanPressure:['평균 혈압','mmHg',0,180]};
  const markers={anesthesiaStart:'마취 시작',anesthesiaEnd:'마취 종료',surgeryStart:'수술 시작',surgeryEnd:'수술 종료',intubation:'삽관',extubation:'발관',medication:'투약',infusion:'수액·CRI 설정',settings:'마취·환기 설정 변경',team:'수술 담당자 변경',other:'기타 사건'};
- const fields={diagnosis:'진단',operation:'수술명',surgeon:'집도의',assistant1:'제1 보조자',assistant2:'제2 보조자',anesthetist:'마취 담당자',breed:'품종',birthDate:'생년월일',age:'나이',sex:'성별·중성화',tube:'기도 기구·규격',device:'장비명·규격',reviewMinutes:'측정 재확인 표시 주기 · 분 · 병원에서 지정',note:'비고'};
+ const fields={diagnosis:'진단',operation:'수술명',surgeon:'집도의',assistant1:'제1 보조자',assistant2:'제2 보조자',anesthetist:'마취 담당자',breed:'품종',birthDate:'생년월일',age:'나이',sex:'성별·중성화',tube:'기도 기구·규격',reviewMinutes:'측정 재확인 표시 주기 · 분 · 병원에서 지정',note:'비고'};
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const displayAmount=n=>Number.isFinite(Number(n))?String(Number(Number(n).toPrecision(12))):String(n??'');
  const medicationNote=s=>String(s??'').replace(/\b\d+\.\d{12,}\b/g,n=>displayAmount(n));
@@ -348,13 +348,13 @@
     if(k==='sex')return '<label>'+l+'<select name="sex">'+options.map(v=>'<option '+(v===sex?'selected':'')+' value="'+esc(v)+'">'+esc(v)+'</option>').join('')+'</select></label>';
     return input(k,k==='age'?'나이 · 생년월일 입력 시 자동 계산':l,['breed','birthDate','age'].includes(k)?demographics[k]:item.body.anesthesiaSheet?.[k]||'',k==='birthDate'?'date':'text');
    }).join('');
-   const d=a.modal('마취기록 기본정보','<p>'+esc(item.patient.name)+' · '+esc(item.body.species==='cat'?'고양이':'개')+'</p><small>이 기록지에 저장됩니다. 나이 기준일 '+demographics.date+'</small><div class="cl-form-grid">'+content+'</div><button type="button" data-ar-apply-equipment>선택한 장비 서식 적용</button><p>장비 서식: '+esc(view.device||'미선택')+'</p>',f=>{
+   const d=a.modal('마취기록 기본정보','<p>'+esc(item.patient.name)+' · '+esc(item.body.species==='cat'?'고양이':'개')+'</p><small>이 기록지에 저장됩니다. 나이 기준일 '+demographics.date+'</small><div class="cl-form-grid">'+content+'</div><button type="button" data-ar-apply-reminder>서식의 재확인 주기 적용</button><p>서식 재확인 주기: '+esc(view.reviewMinutes?view.reviewMinutes+'분':'미지정')+'</p>',f=>{
     const birthDate=f.elements.birthDate.value;if(birthDate&&(!validBirthDate(birthDate)||birthDate>demographics.date))throw Error('생년월일은 나이 기준일 이전의 실제 날짜로 입력해주세요.');
     const data={...item.body.anesthesiaSheet,...Object.fromEntries(Object.keys(fields).filter(k=>!teamKeys.includes(k)).map(k=>[k,f.elements[k].value]))};if(birthDate)data.age=ageAt(birthDate,demographics.date);return a.save('anesthesia.sheet',data,editRevision);
    });
    if(!d)return;const f=d.querySelector('form'),birth=f.elements.birthDate,age=f.elements.age;birth.max=demographics.date;g.RecordInputChoices?.airway(f.elements.tube,{species:item.body.species,allowed:()=>writable()});
    const updateAge=()=>{age.readOnly=!!birth.value;if(birth.value)age.value=ageAt(birth.value,demographics.date);};updateAge();birth.addEventListener('input',updateAge);birth.addEventListener('change',updateAge);
-   d.querySelector('[data-ar-apply-equipment]').addEventListener('click',()=>{if(view.device!==undefined)f.elements.device.value=view.device;if(view.reviewMinutes!==undefined)f.elements.reviewMinutes.value=view.reviewMinutes;f.dispatchEvent(new Event('input',{bubbles:true}));});
+   d.querySelector('[data-ar-apply-reminder]').addEventListener('click',()=>{if(view.reviewMinutes!==undefined)f.elements.reviewMinutes.value=view.reviewMinutes;f.dispatchEvent(new Event('input',{bubbles:true}));});
   }
 
   function print(complete=false){
