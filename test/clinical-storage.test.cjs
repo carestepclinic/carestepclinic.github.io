@@ -2,6 +2,13 @@ const {test,before,after}=require('node:test');
 const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
 const path=require('node:path');
+for(const width of [1440,390])test('initial state, retry schedule, partial capacity and observer are explicit '+width,async()=>{
+ const p=await browser.newPage({viewport:{width,height:900}});await p.setContent('<div id="root"></div>');await p.addScriptTag({path:path.resolve(__dirname,'../hq-clinical-storage.js')});
+ await p.evaluate(()=>{window.view=HqClinicalStorage.mount(document.querySelector('#root'),async()=>({configured:true,databaseEnabled:true,databaseConfigured:true,databaseHour:'3',databaseSchedule:{nextAt:'2026-11-15T18:00:00Z',attempts:2},database:{status:'failed'},jobFailures:{database:{code:'export_timeout',retryAt:'2026-11-15T18:05:00Z'}},inventory:{status:'complete',bytes:1000,databaseUnavailable:true,olderThan30DaysBytes:500,groups:{externalFiles:800}},observer:{healthy:true,checkedAt:'2026-11-15T01:00:00Z',notificationConfigured:false}}));});
+ assert.match(await p.locator('[data-storage-jobs]').innerText(),/조회 전/);assert.doesNotMatch(await p.locator('[data-storage-jobs]').innerText(),/0개|0.00 MB/);
+ await p.locator('[data-job="status"]').click();const text=await p.locator('[data-storage-jobs]').innerText();assert.match(text,/다음 예약/);assert.match(text,/오늘 2회 시도/);assert.match(text,/일부 집계/);assert.match(text,/이메일 발신 연결 전/);assert.match(text,/내보내기 응답 지연/);
+ await p.getByText('작업별 진행·저장량 구분',{exact:true}).click();assert.match(await p.locator('[data-storage-jobs]').innerText(),/삭제 가능량이 아닙니다/);await p.close();
+});
 let browser;before(async()=>{browser=await chromium.launch({executablePath:process.env.HQ_TEST_BROWSER,headless:true});});after(async()=>browser?.close());
 test('recovery bundle encrypts locally and submits public key only',async()=>{
  const p=await browser.newPage();await p.route('http://localhost/recovery',r=>r.fulfill({body:'<div id="root"></div>',contentType:'text/html'}));await p.goto('http://localhost/recovery');await p.addScriptTag({path:path.resolve(__dirname,'../hq-clinical-storage.js')});
