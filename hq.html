@@ -625,7 +625,7 @@ async function loadHqDeploymentStatus(showToast=false){
 }
 async function runHqAutomation(job,button){if(!job||!await CarestepHqWorkspace.confirm('이 자동화 작업을 지금 한 번 실행할까요?\n중복 방지 규칙은 그대로 적용됩니다.'))return;const old=button?.textContent;if(button){button.disabled=true;button.textContent='실행 중…';}try{await req('/hq/automation/'+encodeURIComponent(job)+'/run',{method:'POST',body:'{}'});toast('자동화를 실행했습니다.');await loadHqDeploymentStatus(false);}catch(e){toast(e.message||'자동화 실행 실패');}finally{if(button){button.disabled=false;if(old&&!hqDeploymentState)button.textContent=old;}}}
 ensureHqDeploymentCard();
-document.querySelector('#loginOverlay .warn b').textContent='연결 정보 보호';
+if(document.querySelector('#loginOverlay .warn b'))document.querySelector('#loginOverlay .warn b').textContent='연결 정보 보호';
 const loadOverviewBase=loadOverview;loadOverview=async function(...args){const result=await loadOverviewBase(...args);const warning=document.querySelector('#loginOverlay .warn b');if(warning)warning.textContent='연결 정보 보호';const connection=$('conn');if(connection&&!String(connection.textContent).includes('오류'))connection.textContent='HQ 연결됨';return result;};
 
 $('hqLoginForm').addEventListener('submit',e=>{e.preventDefault();connect();});

@@ -5,6 +5,11 @@ const {resolve}=require('node:path');
 const {chromium}=require('playwright');
 const source=readFileSync(resolve(__dirname,'../subscription-resources.js'),'utf8'),css=readFileSync(resolve(__dirname,'../subscription-resources.css'),'utf8');
 let browser;
+test('full HQ markup initializes navigation even without the legacy login warning',async t=>{
+ const context=await browser.newContext();t.after(()=>context.close());const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.origin!=='https://synthetic.invalid')return route.abort();try{const name=u.pathname==='/'?'hq.html':u.pathname.slice(1);if(name.includes('..'))return route.abort();const body=readFileSync(resolve(__dirname,'..',name));return route.fulfill({body,contentType:name.endsWith('.js')?'application/javascript':name.endsWith('.css')?'text/css':'text/html'});}catch{return route.abort();}});
+ await page.goto('https://synthetic.invalid/');assert.equal(await page.locator('#nav [data-view=billing]').evaluate(e=>typeof e.onclick),'function');assert.deepEqual(errors,[]);
+});
 before(async()=>{browser=await chromium.launch({headless:true,executablePath:process.env.HQ_TEST_BROWSER});});after(()=>browser?.close());
 const policy={aiMode:'limited',aiCasesMonthly:5,storageMode:'limited',storageGb:10,importsPerRecord:5,summariesPerRecord:3};
 const sample={month:'2026-11',planCode:'BASIC',legacy:false,policy,ai:{used:4,reserved:0,limit:5,remaining:1},storage:{bytes:1000000,pendingBytes:0,objects:2,limitGb:10,legacyUnmetered:false},requests:[],staff:[{displayName:'합성 직원',calls:2}],revision:0,adjustment:{}};
