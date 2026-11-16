@@ -1,7 +1,7 @@
 /* Print snapshots only. No patient writes, external services, or inferred clinical findings. */
 (function(g){
  'use strict';
- const version='20261116-print-flow',esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const version='20261116-print-polish',esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const cssText=v=>JSON.stringify(String(v??'')).replace(/</g,'\\3c ').replace(/[\r\n\f]/g,' ');
  const base=()=>new URL('.',document.baseURI).href;
  function age(birth,date){if(!/^\d{4}-\d{2}-\d{2}$/.test(birth||'')||!/^\d{4}-\d{2}-\d{2}$/.test(date||''))return '';const [y,m,d]=date.split('-').map(Number),[by,bm,bd]=birth.split('-').map(Number),n=(y-by)*12+m-bm-(d<bd?1:0);return n<0?'':n<1?'1개월 미만':[n>=12?Math.floor(n/12)+'세':'',n%12?n%12+'개월':''].filter(Boolean).join(' ');}
@@ -61,6 +61,19 @@
    figures.forEach((figure,i)=>{let caption=figure.querySelector('figcaption');if(!caption){caption=root.ownerDocument.createElement('figcaption');figure.append(caption);}const label=root.ownerDocument.createElement('b');label.textContent='사진 '+(i+1)+' · ';caption.prepend(label);const img=figure.querySelector('img');if(img&&!img.alt)img.alt='사진 '+(i+1);});
   }
  }
+ // Enlarge a standalone photo only within its existing page and source resolution.
+ function fitStandalonePhotos(root){
+  for(const gallery of root.querySelectorAll('.cp-ophthalmic .cp-gallery-single')){
+   const area=gallery.closest('.pagedjs_page_content'),img=gallery.querySelector('img'),title=gallery.previousElementSibling;
+   if(!area||!img||!img.naturalWidth||!img.naturalHeight)continue;
+   if([...area.querySelectorAll('h1,h2,h3,h4,p,table,dl')].some(el=>!gallery.contains(el)&&el!==title&&!el.matches('.cp-endnote')))continue;
+   const box=area.getBoundingClientRect(),scale=box.width/area.offsetWidth||1,currentHeight=img.offsetHeight,leaves=[...area.querySelectorAll('*')].filter(el=>el.childElementCount===0&&(el.textContent.trim()||el.tagName==='IMG'));
+   const bottom=Math.max(...leaves.map(el=>el.getBoundingClientRect().bottom)),ratio=img.naturalWidth/img.naturalHeight,vector=/^data:image\/svg|\.svg(?:[?#]|$)/i.test(img.src);
+   const limit=vector?Infinity:img.naturalHeight*96/150;
+   const height=Math.min(currentHeight+Math.max(0,(box.bottom-bottom)/scale-12),140*96/25.4,gallery.clientWidth/ratio,limit);
+   if(height>currentHeight+8){img.style.height=height+'px';img.style.maxWidth='100%';gallery.dataset.cpExpanded='true';}
+  }
+ }
  function lowResolution(root){const seen=new Set();for(const img of root.querySelectorAll('img')){if(/^data:image\/svg|\.svg(?:[?#]|$)/i.test(img.src))continue;const width=img.offsetWidth,height=img.offsetHeight;if(!width||!height)continue;const scale=Math.min(width/img.naturalWidth,height/img.naturalHeight);if(Number.isFinite(scale)&&96/scale<150)seen.add(img.src);}return seen.size;}
  async function prepare(win,o={}){
   if(!win||win.closed)return;const d=win.document,asset=n=>new URL(n,base()).href;
@@ -109,13 +122,15 @@
     if(o.kind!=='dental'||mode.value!=='full')content.insertAdjacentHTML('beforeend','<p class="cp-endnote">'+(mode.value==='guardian'?'저장된 진료 안내 내용입니다.':o.kind==='ward'?'예정은 실제 시행을 뜻하지 않습니다.':'미기록·미검사·평가 불가는 정상 판정을 뜻하지 않습니다.')+'</p>');
     let section=o.title;for(const el of content.querySelectorAll('h2,h3,p,table,figure')){if(el.closest('.cp-heading'))continue;if(el.matches('h2,h3'))section=el.textContent;el.dataset.cpSection=section;}
     content.querySelectorAll('.cp-note').forEach(el=>{if(el.textContent.length<350)el.classList.add('cp-keep');});
-    content.querySelectorAll('table').forEach((table,i)=>table.dataset.cpTable=String(i));
+    content.querySelectorAll('table').forEach((table,i)=>{table.dataset.cpTable=String(i);if(table.matches('.ap-matrix')){const count=table.querySelector('thead tr')?.children.length-1;if(count>0&&count<=5){table.classList.add('cp-matrix-short');table.style.width=(29+count*24)+'mm';}}});
     const expected=new Map();content.querySelectorAll('h1,h2,h3,h4,p,li,th,td,dt,dd,figcaption').forEach((n,i)=>{n.dataset.cpCheck=String(i);expected.set(String(i),n.textContent.replace(/\s+/g,''));});
     clean();engine=new win.PagedModule.Previewer({maxChars:Number.MAX_SAFE_INTEGER});
     engine.chunker.hooks.layout.register(rendered=>{for(const table of rendered.querySelectorAll('table[data-split-from][data-cp-table]'))if(!table.querySelector('thead')){const head=engine.chunker.source.querySelector('table[data-cp-table="'+table.dataset.cpTable+'"] thead');if(head)table.prepend(head.cloneNode(true));}});
     const pageCSS='@page{size:A4 '+(landscape?'landscape':'portrait')+';margin:'+(landscape?'13mm 12mm 14mm':'15mm 14mm 15mm')+';@top-left{content:'+cssText(o.clinic||o.title)+';font:8pt CarestepPrint;color:#52645b}@top-right{content:'+cssText([o.patient?.name,o.patient?.chartNumber||o.patient?.externalPatientId,o.date].filter(Boolean).join(' · '))+';font:8pt CarestepPrint;color:#52645b}@bottom-left{content:'+cssText(o.title+' · '+mode.options[mode.selectedIndex].text)+';font:8pt CarestepPrint;color:#52645b}@bottom-right{content:counter(page) " / " counter(pages);font:8pt CarestepPrint}}';
     const styles={};styles[asset('clinical-print.css')]=legacy+'\n'+font+'\n'+css+'\n'+pageCSS;
     const wrapper=d.createElement('div');wrapper.append(content);const flow=await engine.preview(wrapper,[styles],pages);flow.pages.forEach(p=>p.removeListeners());if(queued)return;
+    await Promise.all([...pages.querySelectorAll('img')].map(img=>img.decode()));if(queued)return;
+    fitStandalonePhotos(pages);
     const rendered=pages.querySelectorAll('.pagedjs_page');if(!rendered.length)throw Error('인쇄 페이지를 구성하지 못했습니다.');
     const actual=new Map();for(const n of pages.querySelectorAll('[data-cp-check]'))actual.set(n.dataset.cpCheck,(actual.get(n.dataset.cpCheck)||'')+n.textContent.replace(/\s+/g,''));for(const [k,v]of expected)if(v&&!(actual.get(k)||'').includes(v))throw Error('페이지 구성 중 내용 누락이 확인되어 출력을 중단했습니다.');
     for(const ref of pages.querySelectorAll('[data-cp-ref]')){const target=pages.querySelector('[data-cp-note="'+ref.dataset.cpRef+'"]'),page=target?.closest('.pagedjs_page');if(!page)throw Error('별첨 페이지를 확인하지 못했습니다.');ref.querySelector('.cp-note-page').textContent=String([...rendered].indexOf(page)+1);}

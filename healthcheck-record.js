@@ -291,7 +291,7 @@ function reportHTML(d,p,images,hospital={},options={}){
  const photos=(images||[]).filter(im=>im.includeInPrint!==false),parts=[],previous=options.previous||null;
  const reviewed=d.clinicalStatus==='complete'&&d.reviewed&&d.veterinarian;
  const assetBase=typeof location==='object'&&/^https?:$/.test(location.protocol)?new URL('.',location.href).href:'https://carestepclinic.github.io/';
- const asset=name=>new URL(name,assetBase).href,version='20261116-print-correction';
+ const asset=name=>new URL(name,assetBase).href,version='20261116-print-polish';
  const note=(label,value)=>value?'<article class="report-note"><h3>'+esc(label)+'</h3><p>'+esc(value)+'</p></article>':'';
  const logo=String(hospital.logo||'').trim(),safeLogo=/^(?:data:image\/(?:png|jpeg|webp|gif);base64,|https?:\/\/)/i.test(logo);
  const hospitalCover='<div class="hospital-cover">'+(safeLogo?'<img src="'+esc(logo)+'" alt="병원 로고" onerror="this.hidden=true">':'')+'<div><strong>'+esc(hospital.name||'')+'</strong>'+(hospital.address?'<p>'+esc(hospital.address)+'</p>':'')+(hospital.phone?'<p>전화 '+esc(hospital.phone)+'</p>':'')+'</div></div>';

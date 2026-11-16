@@ -1,3 +1,4 @@
+/* Standard numerals preserve searchable digits in generated PDFs. */
 /* A4 report typography. Physical margins and identity come from the report snapshot. */
 .report-part{font:400 10.5pt/1.55 CarestepReport,sans-serif;color:#272e2c;margin:0 0 6mm;overflow-wrap:anywhere}
 h1,h2,h3,p,figure{margin:0}
@@ -35,7 +36,7 @@ a{color:inherit;text-decoration:none}
 .report-toc table{font-size:9pt;margin:0}
 .report-toc td{width:100%;padding:1.5mm 0;border:0}
 .toc-link{display:block;border-bottom:1px dotted #bdcbc5;position:relative;padding-right:9mm}
-.toc-page{position:absolute;right:0;font-variant-numeric:tabular-nums;min-width:7mm;text-align:right;background:white}
+.toc-page{position:absolute;right:0;font-variant-numeric:normal;min-width:7mm;text-align:right;background:white}
 .toc-label{background:white;padding-right:2mm}
 .report-part[data-new-page=true]{break-before:page}
 .pagedjs_margin-content[data-continuation]::after{content:attr(data-continuation)!important}
@@ -50,7 +51,7 @@ th,td{text-align:left;vertical-align:top;padding:2mm 1.6mm;border-bottom:1px sol
 thead th{font-weight:600;background:#f0f4f1;border-top:1px solid #aebfb5;border-bottom:1px solid #aebfb5;color:#304c3d}
 tr{break-inside:avoid}
 td small,th small{display:block;font-size:8.5pt;line-height:1.35;color:#52615b;margin-top:1mm}
-.numeric{text-align:right;font-variant-numeric:tabular-nums}
+.numeric{text-align:right;font-variant-numeric:normal}
 .lab-abnormal{color:#a32920!important;font-weight:600}
 .comparison-note{font-size:8.5pt;text-align:left}
 .lab-group{margin-bottom:3mm}
@@ -150,12 +151,12 @@ h1{color:#183b44;font-size:28pt;letter-spacing:-.7pt;margin:2mm 0 6mm}
 .toc-link{padding-bottom:1mm;border-bottom:1px solid #dbe4e2}
 .toc-page{color:#165e59;font-weight:700}
 .part-title{color:#183b44;font-size:16pt;font-weight:700;border-bottom:1.5pt solid #19766f;padding-bottom:3mm;margin-bottom:4mm}
-.part-title[data-section-number]::before{content:attr(data-section-number);display:inline-block;color:#19766f;font-size:11pt;margin-right:3mm;vertical-align:middle;font-variant-numeric:tabular-nums}
+.part-title[data-section-number]::before{content:attr(data-section-number);display:inline-block;color:#19766f;font-size:11pt;margin-right:3mm;vertical-align:middle;font-variant-numeric:normal}
 .report-problem h3{color:#165e59;font-weight:600;border-color:#c8d9d6}
 thead th,.lab-group-row th{background:#edf5f3;color:#174f50;border-color:#b7ceca}
 .lab-group-row th{border-left:2pt solid #19766f}
 .lab-table .lab-result:nth-child(even) td{background:#f8faf9}
-.lab-table .lab-result td:nth-child(2){font-variant-numeric:tabular-nums}
+.lab-table .lab-result td:nth-child(2){font-variant-numeric:normal}
 .photo-row img{border-color:#c8d9d6;background:#f8faf9}
 .photo-row figcaption b{color:#165e59}
 .lab-guide,.exam-guide{border-color:#c8d9d6;border-left:2pt solid #19766f}

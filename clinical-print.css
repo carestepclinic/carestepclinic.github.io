@@ -1,3 +1,4 @@
+/* Standard numerals preserve searchable digits in generated PDFs. */
 /* Physical typography shared by all clinical print snapshots. */
 html,body{background:white;color:#25342f}
 .cp-record{font:400 10.5pt/1.5 CarestepPrint,sans-serif;color:#25342f;overflow-wrap:anywhere}
@@ -16,9 +17,9 @@ html,body{background:white;color:#25342f}
 .cp-identity div{min-width:0}.cp-identity dt{font-size:8.5pt;color:#53665d}.cp-identity dd{margin:0;font-size:10pt;font-weight:600;overflow-wrap:anywhere}
 .cp-record .cp-endnote{font-size:8.5pt;color:#53665d;border-top:1px solid #c9d7cf;padding-top:2mm;margin-top:5mm}
 .cp-record table{width:100%;table-layout:fixed;border-collapse:collapse;font:400 9.5pt/1.4 CarestepPrint,sans-serif;margin:2mm 0 4mm;break-inside:auto}
-.cp-record th,.cp-record td{font-size:inherit;border:0;border-bottom:1px solid #cedbd3;padding:2mm 1.6mm;text-align:left;vertical-align:top;white-space:pre-wrap;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.cp-record th,.cp-record td{font-size:inherit;border:0;border-bottom:1px solid #cedbd3;padding:2mm 1.6mm;text-align:left;vertical-align:top;white-space:pre-wrap;overflow-wrap:anywhere;font-variant-numeric:normal}
 .cp-record th{font-weight:600}.cp-record thead{display:table-header-group}.cp-record thead th{background:#f1f5f2;border-top:1px solid #9db9a9;border-bottom:1px solid #9db9a9;color:#2b5041}.cp-record tr{break-inside:avoid}
-.cp-record tr td:not(:first-child){font-variant-numeric:tabular-nums}
+.cp-record tr td:not(:first-child){font-variant-numeric:normal}
 .cp-record figure{margin:3mm 0;break-inside:avoid}.cp-record figcaption{font-size:9.5pt;line-height:1.45;white-space:pre-wrap;margin-top:1.5mm}
 .cp-record img{display:block;max-width:100%;width:100%;height:65mm;max-height:none;object-fit:contain}
 .cp-record .dn-print-page,.cp-record .record-print-page,.cp-record .print-page,.cp-record .summary,.cp-record .detail,.cp-record .photos{width:auto;max-width:none;min-height:0;height:auto;margin:0;padding:0;box-shadow:none;border:0;overflow:visible;background:white}
@@ -78,7 +79,7 @@ html,body{background:white;color:#25342f}
 .cp-record .cp-task-patient span{font-size:8.5pt;font-weight:400}
 .cp-record .cp-ward-table th,.cp-record .cp-ward-table td{padding:1.2mm 1.5mm}
 .cp-record .cp-note-link{color:inherit;text-decoration:underline;text-underline-offset:2px;font-size:9pt;white-space:nowrap}
-.cp-record .cp-note-page{display:inline-block;min-width:2ch;text-align:right;font-variant-numeric:tabular-nums}
+.cp-record .cp-note-page{display:inline-block;min-width:2ch;text-align:right;font-variant-numeric:normal}
 .pagedjs_margin-content[data-continuation]::after{content:attr(data-continuation)!important}
 
 .cp-record thead{break-after:avoid}
