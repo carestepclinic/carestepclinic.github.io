@@ -58,3 +58,11 @@ for(const width of [1440,390])test('full HQ storage panel loads only while authe
  await p.locator('#hqClinicalStorage tbody tr').waitFor();assert.equal(await p.evaluate(()=>storageCalls.filter(x=>x==='/hq/clinical-storage').length),1);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await p.screenshot({path:path.resolve(root,'../storage-hq-'+width+'.png'),fullPage:true});
  await p.evaluate(()=>document.querySelector('#loginOverlay').classList.remove('hidden'));await p.waitForTimeout(30);assert.equal(await p.locator('#hqClinicalStorage tbody tr').count(),0);assert.deepEqual(errors,[]);await p.close();
 });
+for(const width of [1440,390])test('DB export request queues once and leaves controls usable '+width,async()=>{
+ const p=await browser.newPage({viewport:{width,height:900}});await p.setContent('<div id="root"></div>');await p.addScriptTag({path:path.resolve(__dirname,'../hq-clinical-storage.js')});
+ await p.evaluate(()=>{window.calls=[];window.state={configured:true,databaseConfigured:true,externalConfigured:true};HqClinicalStorage.mount(document.querySelector('#root'),async(url,o)=>{const action=o?JSON.parse(o.body).action:'status';calls.push(action);if(action==='start-database')state.database={status:'running',phase:'export',bytes:0};return state;});});
+ await p.locator('[data-job="status"]').click();await p.locator('[data-job="start-database"]').click();await p.waitForTimeout(650);
+ assert.deepEqual(await p.evaluate(()=>calls),['status','start-database']);assert.equal(await p.locator('[data-job="status"]').isEnabled(),true);assert.equal(await p.locator('[data-job="start-database"]').isEnabled(),false);
+ assert.match(await p.locator('[data-storage-jobs]').innerText(),/내보내기 대기/);assert.match(await p.locator('[data-storage-jobs]').innerText(),/화면을 닫아도 계속됩니다/);
+ await p.evaluate(()=>state.database={status:'complete',phase:'complete',bytes:500000000});await p.locator('[data-job="status"]').click();assert.match(await p.locator('[data-storage-jobs]').innerText(),/500.00 MB/);assert.doesNotMatch(await p.locator('[data-storage-jobs]').innerText(),/내보내기 대기/);await p.close();
+});
