@@ -1110,7 +1110,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="clinic-record-start.css?v=20261115-prior-refinements">
 <link rel="stylesheet" href="practice-tools.css?v=20261101-intake-compact">
 <link rel="stylesheet" href="clinic-navigation.css?v=20261103-clinical-groups">
-<link rel="stylesheet" href="clinic-settings.css?v=20261108-permissions-wide"><script src="clinic-capabilities.js?v=20261113-healthcheck"></script>
+<link rel="stylesheet" href="clinic-settings.css?v=20261108-permissions-wide"><script src="clinic-capabilities.js?v=20261116-resources"></script>
 <style id="clinic-onboarding-start">
 #onboarding{font-size:14px;line-height:1.6}
 #onboarding :is(button,input,select){font:inherit}
@@ -1149,6 +1149,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="hospital-operations.css">
 <link rel="stylesheet" href="practice-intake.css?v=20261105-selection"><link rel="stylesheet" href="clinic-purchases.css?v=20261107-toolbar-vendors">
 <link rel="stylesheet" href="healthcheck-record.css?v=20261115-prior-records">
+<link rel="stylesheet" href="subscription-resources.css?v=20261116"><script src="subscription-resources.js?v=20261116"></script>
 </head>
 <body class="clinic-calm">
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -1813,12 +1814,12 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 
         <div class="account-tab-pane" data-account-pane="billing">
           <div class="account-pane-head"><div><h3>요금제 · 결제</h3><p>현재 계약과 HQ 공통 요금제, 결제내역을 확인합니다.</p></div><button id="billingRefresh" class="btn btn-secondary" type="button">새로고침</button></div><p id="billingReadStatus" class="billing-note" role="status" aria-live="polite"></p>
-          <div class="panel billing-subscription-panel account-ux-card" id="subscriptionBillingPanel">
+          <div id="clinicResourceUsage"></div><div class="panel billing-subscription-panel account-ux-card" id="subscriptionBillingPanel">
             <div class="billing-head">
               <div><h3 style="font-size:15px;margin:2px 0 0">결제 · 구독 관리</h3><p class="muted" style="margin-top:5px">BASIC은 보호자 관리, PRO는 회복관리·예방 안내 자동화를 제공합니다. ENTERPRISE와 EMR 연동은 별도 계약합니다. 기존 계약 가격과 제공량은 유지되며, 요금제 변경 시 적용 금액을 확인해주세요.</p></div>
               <span id="billingProviderBadge" class="billing-provider">설정 확인 중</span>
             </div>
-            <div id="billingManageLock" class="billing-blocked hidden">원장·관리자 계정에서 결제수단과 구독을 변경할 수 있습니다.</div>
+            <div id="billingManageLock" class="billing-blocked hidden">원장 또는 결제·구독 권한을 위임받은 직원이 변경할 수 있습니다.</div>
             <div class="billing-grid">
               <div class="billing-box">
                 <h4>구독 요금제</h4><p id="billingSubscriptionSummary">구독 상태를 불러오는 중입니다.</p>
@@ -3787,11 +3788,12 @@ const CLINIC_FEATURES = [...CLINIC_MODULES.map(([id,label,key])=>({id,label,key,
  {id:'labImport',label:'검사결과 파일 인식',key:'clinicalLabImport',pro:true}];
 function clinicClinicalFeatures(features={}){return {...Object.fromEntries(CLINIC_FEATURES.map(x=>[x.key,true])),...features};}
 function clinicContractFeatures(catalog={},stored){return {...catalog,...Object.fromEntries(CLINIC_FEATURES.map(x=>[x.key,stored?.[x.key]!==false]))};}
-function clinicRecommendedFeatures(code){return Object.fromEntries(CLINIC_FEATURES.map(x=>[x.key,code!=='BASIC'||!x.pro]));}
+function clinicRecommendedFeatures(code){return Object.fromEntries(CLINIC_FEATURES.map(x=>[x.key,true]));}
 function clinicRecordModule(item){return ['dental','neuro','ophthalmic','chronic','healthcheck'].includes(item?.body?.category)?item.body.category:item?.kind==='surgery'?'anesthesia':'ward';}
 /* CLINIC_CAPABILITY_CATALOG_END */
 const CLINIC_PERMISSIONS = [
- ['clinical.scope','진료 세부 권한 사용'],['permissions.v2','업무 권한 기준'],
+ ['clinical.scope','진료 세부 권한 사용'],['permissions.v2','업무 권한 기준'],['permissions.v3','AI·추가 업무 권한 기준'],
+ ['clinical.ai','AI 파일 읽기·초안 생성'],['records.export','자료 일괄 내보내기'],['purchases.claim.create','교환·반품 접수'],['purchases.claim.manage','교환·반품 발송·완료 처리'],
  ['clinical.calculate','처방·처치 계산 사용'],
  ...CLINIC_MODULES.flatMap(([id,label])=>[['clinical.'+id+'.read',label+' 조회'],['clinical.'+id+'.edit',label+' 작성·수정'],['clinical.'+id+'.delete',label+' 삭제·복원']]),
  ['clinical.approve','임상 계획·프로토콜·약물 요약 검토·확정'],['clinical.settings','병원 약품·조제·진료 서식 관리'],
@@ -3810,7 +3812,7 @@ const CLINIC_PERMISSION_DEPENDENCIES = {
  ['clinical.'+id+'.read',['patients.read','records.read','clinical.calculate']],
  ['clinical.'+id+'.edit',['clinical.'+id+'.read','records.edit']],
  ['clinical.'+id+'.delete',['clinical.'+id+'.edit']]])),
- 'clinical.approve':['clinical.protocols.edit'],'clinical.settings':['clinical.calculate'],
+ 'clinical.ai':['patients.read','records.read'],'records.export':['records.read'],'purchases.claim.create':['purchases.read'],'purchases.claim.manage':['purchases.claim.create'],'clinical.approve':[],'clinical.settings':['clinical.calculate'],
  'training.edit':['training.read'],'training.review':['training.read'],'training.manage':['training.read'],
  'operations.manage':['operations.read'],
  'purchases.request':['purchases.read'],'purchases.manage':['purchases.request'],
@@ -3835,12 +3837,12 @@ function clinicLegacyClinicalKeys(keys,role){
  if(has('materials.read')&&['owner','admin','vet'].includes(role))out.add('clinical.settings');
  return [...out];
 }
-const CLINIC_PERMISSION_INTERNAL=['clinical.scope','permissions.v2'];
+const CLINIC_PERMISSION_INTERNAL=['clinical.scope','permissions.v2','permissions.v3'];
 const CLINIC_PERMISSION_PRESETS={
- reception:{label:'접수 직원',keys:['patients.edit','records.edit','materials.read','followup.read','messages.read','training.read','operations.read','purchases.request']},
- assistant:{label:'진료 보조',keys:['patients.read','materials.read','training.read','operations.read','purchases.request',...CLINIC_MODULES.filter(x=>x[0]!=='protocols').map(x=>'clinical.'+x[0]+'.edit'),'clinical.protocols.read']},
- vet:{label:'수의사',keys:[...CLINIC_MODULES.map(x=>'clinical.'+x[0]+'.edit'),'clinical.approve','clinical.settings','patients.edit','records.publish','materials.publish','followup.manage','training.review','training.manage','operations.read','purchases.request']},
- manager:{label:'관리자',keys:['patients.read','materials.read','training.manage','operations.manage','purchases.manage','settings.manage','billing.manage','team.manage','stats.read','messages.read']}
+ reception:{label:'접수 직원',keys:['patients.edit','records.edit','materials.read','followup.read','messages.read','training.read','operations.read','purchases.request','purchases.claim.create']},
+ assistant:{label:'진료 보조',keys:['patients.read','materials.read','training.read','operations.read','purchases.request','purchases.claim.create',...CLINIC_MODULES.filter(x=>x[0]!=='protocols').map(x=>'clinical.'+x[0]+'.edit'),'clinical.protocols.read']},
+ vet:{label:'수의사',keys:[...CLINIC_MODULES.map(x=>'clinical.'+x[0]+'.edit'),'clinical.approve','clinical.ai','records.export','clinical.settings','patients.edit','records.publish','materials.publish','followup.manage','training.review','training.manage','operations.read','purchases.request','purchases.claim.create']},
+ manager:{label:'관리자',keys:['patients.read','materials.read','training.manage','operations.manage','purchases.manage','settings.manage','team.manage','stats.read','messages.read','purchases.claim.create','purchases.claim.manage']}
 };
 function clinicDefaultPermissions(role){
  if(role==='owner')return CLINIC_PERMISSIONS.map(x=>x[0]);
@@ -3854,16 +3856,20 @@ function clinicPermissionKeys(config,role){
  if(!keys.includes('clinical.scope'))keys=clinicLegacyClinicalKeys(keys,role);
  // Retain the effective access of previously saved custom profiles until the owner saves a new profile.
  if(!keys.includes('permissions.v2'))keys=[...keys,...(keys.includes('materials.read')?['clinical.calculate']:[]),'purchases.read','purchases.request','purchases.manage'];
+ if(!keys.includes('permissions.v3')){if(keys.some(k=>/^clinical\..+\.edit$/.test(k)))keys=[...keys,'clinical.ai'];if(keys.includes('records.read'))keys=[...keys,'records.export'];if(keys.includes('purchases.request'))keys=[...keys,'purchases.claim.create'];if(keys.includes('purchases.manage'))keys=[...keys,'purchases.claim.manage'];}
  return keys.filter(k=>CLINIC_PERMISSIONS.some(x=>x[0]===k));
 }
 function clinicPurchasePermission(method,body={}){
  if(method==='GET')return 'purchases.read';
  if(method!=='POST')return 'unclassified';
+ if(['claim.create','claim.create-stock'].includes(body.action))return 'purchases.claim.create';
+ if(body.action==='claim.update')return 'purchases.claim.manage';
  if(['category.save','category.delete','vendor.save','vendor.delete','item.order','item.reopen','claim.update'].includes(body.action))return 'purchases.manage';
  return ['item.create','item.add','item.edit','item.cancel','item.receive','item.receive-part','claim.create','claim.create-stock'].includes(body.action)?'purchases.request':'unclassified';
 }
 function clinicPermissionRequirements(method,path,body={}){
  method=String(method||'GET').toUpperCase();path=String(path).split('?')[0];const get=method==='GET',one=x=>[x];
+ if(path==='/saas/resources')return get?[]:one('billing.manage');
  if(/^\/saas\/training(?:\/|$)/.test(path))return one('training.read'); // Detailed training actions enforce their own separate rights.
  if(path==='/saas/operations/purchases')return one(clinicPurchasePermission(method,body));
  if(/^\/saas\/operations(?:\/|$)/.test(path))return one('operations.read');
@@ -4323,7 +4329,7 @@ function renderBillingContractComparison(){
 function renderBillingOverview(){
   const d=billingOverviewState,auth=saasMode==='auth'&&saasMe,provider=d?.provider||{},sub=d?.subscription||{},method=d?.paymentMethod,channel=d?.channel||saasMe?.clinic?.subscriptionChannel||{channel:'direct',billingOwner:'carestep'};
   const badge=$('billingProviderBadge');if(badge){badge.className='billing-provider '+(provider.configured?'on':'warn');badge.textContent=!d?(billingOverviewLoading?'결제 정보 확인 중':'결제 정보 확인 필요'):provider.configured?'Toss Payments · 연결됨':'Toss Payments · 설정 필요';}
-  if($('billingManageLock')){const lock=$('billingManageLock');lock.classList.toggle('hidden',!auth||!d||!!d.canManage);lock.textContent=channel.channel==='partner'&&channel.billingOwner==='partner'?`${channel.partnerName||'제휴사'}를 통해 구독 중입니다. 요금제·구독 변경은 제휴사 또는 CARESTEP HQ에 문의해주세요.`:'원장·관리자 계정에서 결제수단과 구독을 변경할 수 있습니다.';}
+  if($('billingManageLock')){const lock=$('billingManageLock');lock.classList.toggle('hidden',!auth||!d||!!d.canManage);lock.textContent=channel.channel==='partner'&&channel.billingOwner==='partner'?`${channel.partnerName||'제휴사'}를 통해 구독 중입니다. 요금제·구독 변경은 제휴사 또는 CARESTEP HQ에 문의해주세요.`:'원장 또는 결제·구독 권한을 위임받은 직원이 변경할 수 있습니다.';}
   renderBillingContractComparison();
   const controls=['billingPlanSelect','billingCycleSelect','billingSchedulePlan','billingRegisterCard','billingCancelSubscription','billingUndoCancel','billingRetryPayment'];controls.forEach(id=>{if($(id))$(id).disabled=!auth||!d?.canManage||billingOverviewLoading||!!d?.stale;});
   if(!auth||!d){const message=!auth?'로그인 후 결제·구독 정보를 확인합니다.':billingOverviewLoading?'결제·구독 정보를 불러오는 중…':'결제·구독 정보를 확인하지 못했습니다. 새로고침해주세요.';if($('billingSubscriptionSummary'))$('billingSubscriptionSummary').textContent=message;if($('billingCardBox'))$('billingCardBox').textContent=message;if($('accountUxNextPayment'))$('accountUxNextPayment').textContent='--';return;}
@@ -4385,6 +4391,7 @@ async function loadBillingOverview(showToast=false){
   billingOverviewState={...billing.value,accountVerified:true,messageBillingMode:onboarding.status==='fulfilled'?billingMessageMode(onboarding.value?.onboarding):'unknown'};
   billingOverviewLoading=false;applySaasPermissions();renderSaasAccount();
   setBillingReadStatus('ready','최신 설정 확인 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}));
+  globalThis.resourceClinicUI?.load();
   if(showToast)toast('구독·기능·공통 요금제를 새로고침했습니다.');
  }catch(error){
   if(sequence!==billingOverviewSequence||scope!==clinicReadScope())return;
@@ -5778,7 +5785,7 @@ function showApp({deferFullRender=false}={}){
   if(!deferFullRender)renderAll();carestepSafeCall('permissions',()=>applySaasPermissions());carestepSafeCall('account_render',()=>renderSaasAccount());carestepSafeCall('history_init',()=>carestepInitHistory(carestepActiveView()));
   setTimeout(()=>{try{refreshDailyWorkflowIndicators(false);}catch(e){console.error('[CARESTEP RECOVERY] daily_indicators',e);}},0);
 }
-function showLogin(){resetClinicalLoad();window.CarestepTodayWard?.clear();document.getElementById('practiceTodayRoot')?.replaceChildren();window.CarestepPractice?.clear();globalThis.CarestepTraining?.clear();window.ClinicReliability?.clearPrivate();r19GoogleStatusScope=''; clearFollowupScopedDetails();carestepResetHistoryForLogin(); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
+function showLogin(){globalThis.resourceClinicUI?.clear();resetClinicalLoad();window.CarestepTodayWard?.clear();document.getElementById('practiceTodayRoot')?.replaceChildren();window.CarestepPractice?.clear();globalThis.CarestepTraining?.clear();window.ClinicReliability?.clearPrivate();r19GoogleStatusScope=''; clearFollowupScopedDetails();carestepResetHistoryForLogin(); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
 
 /* v9.0.2 HOTFIX 25 · IN-APP BROWSER BACK NAVIGATION
    CARESTEP behaves like a single-page app, so browser Back should move through CARESTEP views
@@ -10977,16 +10984,16 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinical-assist.js?v=20261103-clinical-assist"></script>
 
 
-<script id="clinic-module-manifest" type="application/json">{"dental":["dental-record.js?v=20261115-portrait-print","dental-workflow.js?v=20261115-print-refinement"],"neuro":["neuro-record.js?v=20261115-content-optimized"],"ophthalmic":["ophthalmic-record.js?v=20261115-content-optimized"],"chronic":["ophthalmic-record.js?v=20261115-content-optimized","chronic-choices.js?v=20261112-record-choices-2","chronic-record.js?v=20261116-print-flow"],"calc":["practice-acid-base.js?v=20261026tb1","practice-calcium-transfusion.js?v=20261031-calc-cleanup-2","practice-emergency.js?v=20261031-calc-cleanup-2","practice-potassium-mix.js?v=20261031-calc-cleanup-2","practice-cri-presets.js?v=20261031-calc-clarity-1","practice-nutrition-foods.js?v=20261031-prunus","practice-nutrition.js?v=20261031-food1","practice-calculator-workspace.js?v=20261031-calc-cleanup-2","practice-calcium-guided.js?v=20261026ca1","practice-fluid-plan.js?v=20261031-calc-cleanup-2"],"healthcheck":["healthcheck-record.js?v=20261116-privacy-review"]}</script>
+<script id="clinic-module-manifest" type="application/json">{"dental":["dental-record.js?v=20261115-portrait-print","dental-workflow.js?v=20261115-print-refinement"],"neuro":["neuro-record.js?v=20261115-content-optimized"],"ophthalmic":["ophthalmic-record.js?v=20261115-content-optimized"],"chronic":["ophthalmic-record.js?v=20261115-content-optimized","chronic-choices.js?v=20261112-record-choices-2","chronic-record.js?v=20261116-print-flow"],"calc":["practice-acid-base.js?v=20261026tb1","practice-calcium-transfusion.js?v=20261031-calc-cleanup-2","practice-emergency.js?v=20261031-calc-cleanup-2","practice-potassium-mix.js?v=20261031-calc-cleanup-2","practice-cri-presets.js?v=20261031-calc-clarity-1","practice-nutrition-foods.js?v=20261031-prunus","practice-nutrition.js?v=20261031-food1","practice-calculator-workspace.js?v=20261031-calc-cleanup-2","practice-calcium-guided.js?v=20261026ca1","practice-fluid-plan.js?v=20261031-calc-cleanup-2"],"healthcheck":["healthcheck-record.js?v=20261116-resource-permissions"]}</script>
 <script src="clinic-lazy-modules.js?v=20261105-flow"></script>
 <script src="clinic-inpatients.js?v=20261106-workflow9"></script>
 <script src="clinic-record-start.js?v=20261115-prior-refinements"></script>
 <script src="clinic-record-workspace.js?v=20261115-healthcheck-flow"></script>
-<script src="clinic-purchases.js?v=20261108-permissions-v2"></script>
+<script src="clinic-purchases.js?v=20261116-claim-rights"></script>
 <script src="practice-tools.js?v=20261113-intake-review"></script>
 <script src="clinic-today-ward.js?v=20261107-review4"></script>
 <script src="practice-clinic.js?v=20261113-report-branding"></script>
-<script src="clinic-settings.js?v=20261108-permissions-v2"></script>
+<script src="clinic-settings.js?v=20261116-permissions-v3"></script>
 <link rel="stylesheet" href="clinic-followup-tasks.css?v=20261104-followup-controls">
 <script src="clinic-followup-tasks.js?v=20261115-assignee-fix"></script>
 <link rel="stylesheet" href="builder-flow.css?v=20261105-flow3">
@@ -10994,5 +11001,10 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <link rel="stylesheet" href="clinic-calm.css?v=20261108-top-tabs">
 <script src="carestep-privacy.js?v=20261116-review"></script>
 <script src="clinic-update-notice.js?v=20261107-review-polish"></script>
+<script>
+window.CarestepClinicalRights={ai:()=>!!saasMe&&clinicPermissionKeys(saasMe.permissions,saasMe.role).includes('clinical.ai'),approve:()=>!!saasMe&&clinicPermissionKeys(saasMe.permissions,saasMe.role).includes('clinical.approve')};
+window.resourceClinicUI=CarestepResources.mountClinic(document.getElementById('clinicResourceUsage'),(p,o)=>saasRequest(p,o),()=>({scope:saasMode==='auth'&&saasMe?clinicReadScope():'',canManage:!!saasMe&&clinicPermissionKeys(saasMe.permissions,saasMe.role).includes('billing.manage')}));
+(()=>{const box=document.getElementById('clinicResourceUsage'),pane=box.closest('[data-account-pane]');let shown=false;new MutationObserver(()=>{const next=pane.classList.contains('active');if(next&&!shown)resourceClinicUI.load();shown=next;}).observe(pane,{attributes:true,attributeFilter:['class']});})();
+</script>
 </body>
 </html>

@@ -13,7 +13,7 @@ const CLINIC_FEATURES = [...CLINIC_MODULES.map(([id,label,key])=>({id,label,key,
  {id:'labImport',label:'검사결과 파일 인식',key:'clinicalLabImport',pro:true}];
 function clinicClinicalFeatures(features={}){return {...Object.fromEntries(CLINIC_FEATURES.map(x=>[x.key,true])),...features};}
 function clinicContractFeatures(catalog={},stored){return {...catalog,...Object.fromEntries(CLINIC_FEATURES.map(x=>[x.key,stored?.[x.key]!==false]))};}
-function clinicRecommendedFeatures(code){return Object.fromEntries(CLINIC_FEATURES.map(x=>[x.key,code!=='BASIC'||!x.pro]));}
+function clinicRecommendedFeatures(code){return Object.fromEntries(CLINIC_FEATURES.map(x=>[x.key,true]));}
 function clinicRecordModule(item){return ['dental','neuro','ophthalmic','chronic','healthcheck'].includes(item?.body?.category)?item.body.category:item?.kind==='surgery'?'anesthesia':'ward';}
 /* CLINIC_CAPABILITY_CATALOG_END */
 g.ClinicCapabilities={modules:CLINIC_MODULES,features:CLINIC_FEATURES,featuresFor:clinicClinicalFeatures,contractFeatures:clinicContractFeatures,recommended:clinicRecommendedFeatures};})(typeof window==='undefined'?globalThis:window);

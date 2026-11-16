@@ -26,7 +26,7 @@
  'clinical.approve':'진료 계획·프로토콜과 약물 안전성 요약을 검토·확정합니다.',
  'clinical.settings':'병원 약품 함량·분말 조제 기준·진료 계산 서식을 관리합니다.'
  };
- function groups(catalog){const m=new Map();for(const [k,label] of catalog.filter(x=>!['clinical.scope','permissions.v2'].includes(x[0]))){const group=permissionGroup(k);if(!m.has(group))m.set(group,[]);m.get(group).push([k,label]);}return m;}
+ function groups(catalog){const m=new Map();for(const [k,label] of catalog.filter(x=>!['clinical.scope','permissions.v2','permissions.v3'].includes(x[0]))){const group=permissionGroup(k);if(!m.has(group))m.set(group,[]);m.get(group).push([k,label]);}return m;}
  function decoratePermissions(root=document){
   for(const card of root.querySelectorAll('[data-member-id]')){
    const grid=card.querySelector('.member-permission-grid');if(!grid||grid.dataset.grouped)continue;grid.dataset.grouped='true';
@@ -39,7 +39,7 @@
  function guide(){
   const box=document.querySelector('.permission-guide-groups');if(!box||typeof CLINIC_PERMISSIONS==='undefined')return;
   box.innerHTML=[...groups(CLINIC_PERMISSIONS)].map(([name,items])=>'<section class="permission-guide-group"><h4>'+esc(name)+'</h4><ul>'+items.map(x=>'<li>'+esc(x[1])+(permissionHelp[x[0]]?'<small class="cs-permission-help">'+esc(permissionHelp[x[0]])+'</small>':'')+'</li>').join('')+'</ul></section>').join('');
-  document.querySelectorAll('.permission-guide-count').forEach(x=>x.textContent=CLINIC_PERMISSIONS.filter(x=>!['clinical.scope','permissions.v2'].includes(x[0])).length+'개');
+  document.querySelectorAll('.permission-guide-count').forEach(x=>x.textContent=CLINIC_PERMISSIONS.filter(x=>!['clinical.scope','permissions.v2','permissions.v3'].includes(x[0])).length+'개');
  }
  function capabilitySummary(){
   const box=document.getElementById('billingContractComparison');if(!box||typeof saasMe==='undefined'||!saasMe)return;

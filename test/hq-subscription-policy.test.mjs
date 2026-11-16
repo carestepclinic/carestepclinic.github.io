@@ -20,7 +20,7 @@ test('integrated HQ uses its own endpoint and authentication, with working navig
 });
 function fixture(){
  const nodes=new Map(),get=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',value:'',textContent:''});return nodes.get(id);};
- const requests=[],notices=[],ctx=vm.createContext({$:get,document:{querySelectorAll:()=>[]},esc:s=>String(s??''),fmt:n=>String(n||0),money:n=>Number(n||0).toLocaleString('ko-KR')+'원',date:x=>x,hqButtonTask:async(_b,_l,_s,fn)=>fn(),req:async(path,o)=>requests.push({path,body:JSON.parse(o.body)}),loadBilling:async()=>{},toast:x=>notices.push(x),plans:[{planCode:'BASIC',displayName:'BASIC',monthlyPriceKrw:79000,annualPriceKrw:790000,features:{carestepHome:true,homePush:true,homeConsultation:true},limits:{members:5,packagesMonthly:500,messageCreditKrw:0},isActive:true}],featureNames:{homePush:'HOME 앱 푸시',homeConsultation:'HOME 병원 상담',carestepHome:'CARESTEP HOME 연결'}});
+ const requests=[],notices=[],ctx=vm.createContext({ClinicCapabilities:{features:[]},$:get,document:{querySelectorAll:()=>[]},esc:s=>String(s??''),fmt:n=>String(n||0),money:n=>Number(n||0).toLocaleString('ko-KR')+'원',date:x=>x,hqButtonTask:async(_b,_l,_s,fn)=>fn(),req:async(path,o)=>requests.push({path,body:JSON.parse(o.body)}),loadBilling:async()=>{},toast:x=>notices.push(x),plans:[{planCode:'BASIC',displayName:'BASIC',monthlyPriceKrw:79000,annualPriceKrw:790000,features:{carestepHome:true,homePush:true,homeConsultation:true},limits:{members:5,packagesMonthly:500,messageCreditKrw:0},isActive:true}],featureNames:{homePush:'HOME 앱 푸시',homeConsultation:'HOME 병원 상담',carestepHome:'CARESTEP HOME 연결'}});
  vm.runInContext(between('function planHint(','function renderSubscriptions('),ctx);
  return {ctx,get,requests,notices};
 }

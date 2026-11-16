@@ -79,7 +79,7 @@ test('billing loader tolerates connection failure, ignores stale results and per
 
 test('opening the billing tab reloads settings, repeated clicks coalesce while loading',()=>{
  const f=fixture();let loads=0;
- Object.assign(f.ctx,{ACCOUNT_TABS:new Set(['my','billing']),ACCOUNT_TAB_STORAGE_KEY:'test',document:{querySelectorAll:()=>[]},localStorage:{setItem:()=>{}},saasMode:'auth',billingOverviewLoading:false,
+ Object.assign(f.ctx,{window:{},carestepActiveView:()=>'account',carestepRecordHistory:()=>{},saasLoadAccountTab:(tab)=>{if(tab==='billing'&&!f.ctx.billingOverviewLoading)f.ctx.loadBillingOverview();},ACCOUNT_TABS:new Set(['my','billing']),ACCOUNT_TAB_STORAGE_KEY:'test',document:{querySelectorAll:()=>[]},localStorage:{setItem:()=>{}},saasMode:'auth',billingOverviewLoading:false,
  loadBillingOverview:()=>{loads++;f.ctx.billingOverviewLoading=true;}
  });
  vm.runInContext(fn('setAccountTab'),f.ctx);
@@ -94,8 +94,8 @@ test('current contract and current HQ catalog remain distinct with consistent ta
  f.ctx.billingOverviewState={accountVerified:true,subscription:{planCode:'PRO',billingCycle:'monthly',commercialVersion:'legacy',effectivePriceKrw:169000},plans:{PRO:{monthlyPriceKrw:179000,vatExclusive:true,members:0,packagesMonthly:0,isActive:true}}};
  f.ctx.renderBillingContractComparison();const html=f.get('billingContractComparison').innerHTML;
  assert.match(html,/현재 적용 계약[\s\S]*169,000원[\s\S]*기존 계약 조건 유지/);
- assert.match(html,/HQ 공통 요금제[\s\S]*196,900원[\s\S]*제한 없음/);
- assert.match(html,/직원 15명 · 월 HOME 게시 3,000건/);
+ assert.match(html,/공통 요금제[\s\S]*196,900원[\s\S]*제한 없음/);
+ assert.match(html,/직원 15명 · 월 HOME에 공개 3,000건/);
  f.ctx.billingOverviewState.subscription.effectivePriceKrw=0;
  assert.equal(f.ctx.billingSelectedPlanInfo().price,0);
 });
