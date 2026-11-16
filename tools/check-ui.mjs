@@ -5,6 +5,7 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
 export const uiFiles = new Set([
+ 'carestep-privacy.js','hq-individual-auth.js',
  'clinical-print.js','clinical-print.css',
  'hq-incidents.js','hq-incidents.css',
  'healthcheck-report-layout.js','healthcheck-report-layout.css','paged-0.4.3.min.js','paged-0.4.3.LICENSE.md',

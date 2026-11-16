@@ -65,7 +65,7 @@
             <summary>이용약관 및 개인정보 처리 안내 보기</summary>
             <div><b>서비스 이용 안내</b><p>Carestep Home은 동물병원과 보호자를 연결해 반려동물 건강관리를 돕는 서비스이며, 진단·처방 또는 응급진료를 대신하지 않습니다.</p><b>개인정보 처리 안내</b><p>계정 생성, 본인 확인, 병원·환자 연결, 병원이 공개한 건강기록과 회복관리 안내 제공, 보호자가 입력한 홈 기록·상담 메시지의 병원 전달과 병원 답변 제공을 위해 휴대전화 번호, 보호자명, 환자 기본정보, 건강기록·응답·상담 및 연결 이력을 암호화하여 처리합니다. 병원 내부 메모는 Carestep Home으로 제공되지 않습니다.</p></div>
           </details>
-          <label class="home-check"><input id="inviteTerms" type="checkbox" required><span>Carestep Home 이용약관에 동의합니다.</span></label>
+          <label class="home-check"><input id="inviteAge14" type="checkbox" required>만 14세 이상입니다.</label><label class="home-check"><input id="inviteTerms" type="checkbox" required><span>Carestep Home 이용약관에 동의합니다.</span></label>
           <label class="home-check"><input id="invitePrivacy" type="checkbox" required><span>개인정보 수집·이용, 병원 환자 연결, 건강기록·회복관리 안내 제공 및 보호자 홈 기록·응답의 연결 병원 전달에 동의합니다.</span></label>
           <div id="inviteStatus" class="home-status" role="status"></div>
           <button id="inviteSubmit" class="home-primary" type="submit">계정 만들고 환자 연결</button>
@@ -179,12 +179,13 @@
       </section>
     </main>
 
-    <footer class="home-footer"><b>Carestep Home</b><span>응급상황이 의심되면 앱 기록보다 가까운 동물병원 진료를 우선하세요.</span><details class="home-app-info"><summary>앱 정보·업데이트 상태</summary><small id="homeBuildStatus">운영 상태 확인 중</small></details><button id="homeApplyUpdate" class="home-secondary" type="button" hidden>새 버전 적용</button></footer>
+    <footer class="home-footer"><button id="homePrivacyNotice" class="home-secondary" type="button">개인정보 처리 안내</button><span id="homePrivacyNoticeStatus" role="status"></span><b>Carestep Home</b><span>응급상황이 의심되면 앱 기록보다 가까운 동물병원 진료를 우선하세요.</span><details class="home-app-info"><summary>앱 정보·업데이트 상태</summary><small id="homeBuildStatus">운영 상태 확인 중</small></details><button id="homeApplyUpdate" class="home-secondary" type="button" hidden>새 버전 적용</button></footer>
   </div>
   <div id="offlineBar" class="offline-bar" hidden>오프라인 상태입니다. 연결되면 다시 시도해주세요.</div>
   <script src="date-input-guard.js?v=10.1-B"></script>
   <script src="home-runtime.js?v=home-usability-20261108final"></script>
-  <script src="carestep-home.js?v=home-usability-20261108final"></script>
+  <script src="carestep-privacy.js?v=20261116-review"></script>
+  <script src="carestep-home.js?v=20261116-privacy-notice"></script>
   <script src="home-care.js?v=home-usability-20261108final"></script>
   <script src="home-reminders.js?v=home-usability-20261108final"></script>
   <script src="home-navigation.js?v=home-contact-scroll-20261108"></script>

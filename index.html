@@ -1211,7 +1211,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
         <label class="field-label" for="saasRegisterPassword">비밀번호</label>
         <input id="saasRegisterPassword" class="input" type="password" autocomplete="new-password" placeholder="10자 이상" />
         <label class="legal-consent-row"><input id="saasRegisterTerms" type="checkbox" /> <span><button class="legal-link" type="button" data-legal-doc="terms">이용약관</button>에 동의합니다. (필수)</span></label>
-        <label class="legal-consent-row"><input id="saasRegisterPrivacy" type="checkbox" /> <span><button class="legal-link" type="button" data-legal-doc="privacy">개인정보 처리방침</button>에 동의합니다. (필수)</span></label>
+        <label class="legal-consent-row"><input id="saasRegisterPrivacy" type="checkbox" /> <span><button class="legal-link" type="button" data-legal-doc="privacy">개인정보 처리방침</button>을 확인했습니다. (필수)</span></label>
         <button id="saasRegisterBtn" class="btn btn-primary btn-block" type="button">가입 승인 신청</button>
       </div>
 
@@ -1225,7 +1225,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
         <label class="field-label" for="saasInvitePassword">비밀번호</label>
         <input id="saasInvitePassword" class="input" type="password" autocomplete="current-password" placeholder="기존 계정이면 기존 비밀번호" />
         <label class="legal-consent-row"><input id="saasInviteTerms" type="checkbox" /> <span><button class="legal-link" type="button" data-legal-doc="terms">이용약관</button>에 동의합니다. (필수)</span></label>
-        <label class="legal-consent-row"><input id="saasInvitePrivacy" type="checkbox" /> <span><button class="legal-link" type="button" data-legal-doc="privacy">개인정보 처리방침</button>에 동의합니다. (필수)</span></label>
+        <label class="legal-consent-row"><input id="saasInvitePrivacy" type="checkbox" /> <span><button class="legal-link" type="button" data-legal-doc="privacy">개인정보 처리방침</button>을 확인했습니다. (필수)</span></label>
         <button id="saasInviteAcceptBtn" class="btn btn-primary btn-block" type="button">초대코드로 가입</button>
       </div>
 
@@ -1905,8 +1905,8 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
               <div class="governance-box">
                 <h4>이용약관 · 개인정보 처리방침</h4>
                 <p id="legalStatusText">최신 동의 상태를 불러오는 중입니다.</p>
-                <div class="governance-actions"><button class="btn btn-ghost" type="button" data-legal-doc="terms">이용약관 보기</button><button class="btn btn-ghost" type="button" data-legal-doc="privacy">개인정보 처리방침 보기</button></div>
-                <div id="legalAcceptanceControls" class="legal-account-controls"><label><input id="accountTermsAgree" type="checkbox"> 이용약관 동의</label><label><input id="accountPrivacyAgree" type="checkbox"> 개인정보 처리방침 동의</label><button id="acceptLegalBtn" class="btn btn-primary" type="button">최신 약관 동의</button></div>
+                <div class="governance-actions"><button class="btn btn-ghost" type="button" id="privacyCenterBtn">개인정보 처리·위탁 안내</button><button class="btn btn-ghost" type="button" data-legal-doc="terms">이용약관 보기</button><button class="btn btn-ghost" type="button" data-legal-doc="privacy">개인정보 처리방침 보기</button></div>
+                <div id="legalAcceptanceControls" class="legal-account-controls"><label><input id="accountTermsAgree" type="checkbox"> 이용약관 동의</label><label><input id="accountPrivacyAgree" type="checkbox"> 개인정보 처리방침 확인</label><button id="acceptLegalBtn" class="btn btn-primary" type="button">최신 약관 동의</button></div>
 
               </div>
               <div class="governance-box legal-safety-note">
@@ -1915,7 +1915,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
                 <button class="btn btn-secondary" type="button" data-account-open-tab="security" onclick="setAccountTab('security')">병원 설정 복원</button>
               </div>
               <div id="clinicDeletionBox" class="governance-box danger-zone">
-                <h4>병원 데이터 삭제 요청</h4><p>원장만 요청할 수 있습니다. 요청 후 7일 유예기간이 있으며, HQ는 구독 종료·미정산 금액 확인 후 실행합니다.</p>
+                <h4>병원 데이터 삭제 요청</h4><p>원장만 요청할 수 있습니다. 요청 후 30일간 자료를 반환받을 수 있습니다. 이후 운영본은 7일 이내, 해당 자료의 백업은 운영본 파기 후 90일 이내 정리합니다. 법정 보존 대상은 별도로 관리합니다.</p>
                 <div id="clinicDeletionStatus" class="governance-note">삭제 요청 없음</div>
                 <input id="clinicDeletionConfirm" class="input" placeholder="삭제 요청 시 병원명을 정확히 입력" />
                 <div class="governance-actions"><button id="requestClinicDeletionBtn" class="btn btn-ghost billing-danger" type="button">병원 데이터 삭제 요청</button><button id="cancelClinicDeletionBtn" class="btn btn-ghost hidden" type="button">삭제 요청 취소</button></div>
@@ -4005,7 +4005,7 @@ window.addEventListener('r61-auth-ready',()=>{clinicReadCoordinator?.invalidate(
 function clinicReadScope(){return JSON.stringify([saasToken,saasMe?.clinic?.id,saasMe?.user?.id]);}
 function clinicReadAllowed(path){return ['/saas/patient-journeys','/saas/messaging/settings','/saas/followup/messages?limit=50'].includes(path);}
 function clinicFollowupReadNotice(at,reused){const host=$('followup');if(!host)return;let notice=$('clinicReadNotice');if(!notice){notice=document.createElement('div');notice.id='clinicReadNotice';notice.className='care-read-notice';notice.setAttribute('role','status');notice.style.cssText='font-size:12px;color:#60738f;margin:4px 0';host.prepend(notice);}const latest=Math.max(Number(notice.dataset.checked)||0,Number(at)||0);notice.dataset.checked=String(latest);notice.textContent='마지막 확인 '+new Date(latest).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});}
-async function saasRequest(path,opt={}){saasCheckPermissionRequest(path,opt);const {reuseNavigation=false,...requestOptions}=opt;const read=(opt.method||'GET').toUpperCase()==='GET';if(!window.CarestepClinicReadFactory){if(!read){clinicalLoadRevision++;clinicLoadInvalidatePending();}return saasRawRequest(path,requestOptions);}if(!clinicReadCoordinator)clinicReadCoordinator=window.CarestepClinicReadFactory({scope:clinicReadScope});if(!read){clinicalLoadRevision++;clinicLoadInvalidatePending();clinicReadCoordinator.invalidate();try{return await saasRawRequest(path,requestOptions);}finally{clinicReadCoordinator.invalidate();}}if(!clinicReadAllowed(path))return saasRawRequest(path,requestOptions);const result=await clinicReadCoordinator.read(saasEndpoint()+path,()=>saasRawRequest(path,requestOptions),{reuse:reuseNavigation});if(document.querySelector('.view.active-view')?.id==='followup')clinicFollowupReadNotice(result.checkedAt,result.reused);return result.value;}
+async function saasRequest(path,opt={}){saasCheckPermissionRequest(path,opt);if(window.CarestepPrivacy)opt=await window.CarestepPrivacy.prepare(path,opt,{request:saasRawRequest,scope:clinicReadScope});else if(path==='/saas/register'||/(?:lab-import|prescription-image|healthcheck-summary)$/.test(path))throw Error('개인정보 확인 화면을 불러오지 못했습니다. 새로고침해주세요.');const {reuseNavigation=false,...requestOptions}=opt;const read=(opt.method||'GET').toUpperCase()==='GET';if(!window.CarestepClinicReadFactory){if(!read){clinicalLoadRevision++;clinicLoadInvalidatePending();}return saasRawRequest(path,requestOptions);}if(!clinicReadCoordinator)clinicReadCoordinator=window.CarestepClinicReadFactory({scope:clinicReadScope});if(!read){clinicalLoadRevision++;clinicLoadInvalidatePending();clinicReadCoordinator.invalidate();try{return await saasRawRequest(path,requestOptions);}finally{clinicReadCoordinator.invalidate();}}if(!clinicReadAllowed(path))return saasRawRequest(path,requestOptions);const result=await clinicReadCoordinator.read(saasEndpoint()+path,()=>saasRawRequest(path,requestOptions),{reuse:reuseNavigation});if(document.querySelector('.view.active-view')?.id==='followup')clinicFollowupReadNotice(result.checkedAt,result.reused);return result.value;}
 
 const multiStaffLocks=new Map();
 let multiStaffHeartbeatTimer=null,followupSafetyState=null;
@@ -4435,7 +4435,7 @@ async function retryBillingPayment(){
 }
 
 async function loadLegalDocs(){if(legalDocsState)return legalDocsState;try{legalDocsState=await saasRequest('/saas/legal/docs',{method:'GET',auth:false});return legalDocsState;}catch(e){toast(e.message||'법적 문서를 불러오지 못했습니다.');return null;}}
-async function openLegalDocument(kind){const d=await loadLegalDocs(),doc=d?.[kind];if(!doc)return;const modal=$('legalModal');$('legalModalTitle').textContent=doc.title||'법적 문서';$('legalModalMeta').textContent=`버전 ${doc.version||'-'} · 시행일 ${doc.effectiveDate||'-'}`;$('legalModalBody').innerHTML=(doc.sections||[]).map(([h,p])=>`<section class="legal-doc-section"><h4>${escapeHtml(h)}</h4><p>${escapeHtml(p)}</p></section>`).join('');$('legalModalReview').textContent=doc.reviewNotice||'';modal?.classList.remove('hidden');}
+async function openLegalDocument(kind){if(kind==='privacy'&&window.CarestepPrivacy)return window.CarestepPrivacy.openNotice({request:saasRawRequest,scope:clinicReadScope},saasMode==='auth'&&!!saasToken);const d=await loadLegalDocs(),doc=d?.[kind];if(!doc)return;const modal=$('legalModal');$('legalModalTitle').textContent=doc.title||'법적 문서';$('legalModalMeta').textContent=`버전 ${doc.version||'-'} · 시행일 ${doc.effectiveDate||'-'}`;$('legalModalBody').innerHTML=(doc.sections||[]).map(([h,p])=>`<section class="legal-doc-section"><h4>${escapeHtml(h)}</h4><p>${escapeHtml(p)}</p></section>`).join('');$('legalModalReview').textContent=doc.reviewNotice||'';modal?.classList.remove('hidden');}
 function closeLegalModal(){$('legalModal')?.classList.add('hidden');}
 function renderProductionGovernance(){
   const auth=saasMode==='auth'&&saasMe,role=auth?saasMe.role:'',legal=legalStatusState||{},badge=$('legalStatusBadge');if(badge){badge.className='ai-conn-badge '+(legal.accepted?'on':'off');badge.textContent=!auth?'로그인 필요':legal.accepted?'최신 동의 완료':'동의 필요';}
@@ -4448,7 +4448,7 @@ async function loadProductionGovernance(showToast=false){if(saasMode!=='auth'||!
 async function acceptCurrentLegal(){if(!$('accountTermsAgree')?.checked||!$('accountPrivacyAgree')?.checked){toast('이용약관과 개인정보 처리방침을 모두 확인하고 동의해주세요.');return;}try{legalStatusState=await saasRequest('/saas/legal/accept',{method:'POST',body:JSON.stringify({termsAccepted:true,privacyAccepted:true})});renderProductionGovernance();toast('최신 약관 동의가 기록되었습니다.');}catch(e){toast(e.message||'약관 동의 처리 실패');}}
 async function createConfigBackup(){if(!confirm('현재 병원 설정의 병원 설정 백업을 생성할까요?\n\n환자 케이스·결제키는 백업에 포함하지 않습니다.'))return;const btn=$('createConfigBackupBtn');try{await uxButtonTask(btn,'백업 중…','✓ 백업 완료',async()=>{const d=await saasRequest('/saas/backups',{method:'POST',body:JSON.stringify({reason:'manual_account'})});configBackupsState=d.backups||[];renderProductionGovernance();toast('병원 설정 백업을 생성했습니다.');},{resetText:'현재 설정 백업'});}catch(e){toast(e.message||'백업 생성 실패');}}
 async function restoreConfigBackup(id){if(!confirm('선택한 병원 설정 백업으로 병원 설정을 복구할까요?\n\n복구 직전 상태도 자동으로 백업합니다. 결제·구독 정보는 변경하지 않습니다.'))return;try{const d=await saasRequest('/saas/backups/'+encodeURIComponent(id)+'/restore',{method:'POST'});configBackupsState=d.backups||configBackupsState;await saasRefreshAccount(false);toast('병원 설정 백업 복구가 완료되었습니다.');}catch(e){toast(e.message||'백업 복구 실패');}}
-async function requestClinicDeletion(){const name=$('clinicDeletionConfirm')?.value.trim()||'';if(!name){toast('병원명을 정확히 입력해주세요.');return;}if(!confirm('병원 데이터 삭제 요청을 접수할까요?\n\n7일 유예 후 HQ가 구독·미정산 금액을 확인하고 실행합니다. 실행 후 운영 데이터는 복구가 제한됩니다.'))return;try{clinicDeletionState=await saasRequest('/saas/clinic/deletion-request',{method:'POST',body:JSON.stringify({confirmClinicName:name})});if($('clinicDeletionConfirm'))$('clinicDeletionConfirm').value='';renderProductionGovernance();toast('병원 데이터 삭제 요청이 접수되었습니다.');}catch(e){toast(e.message||'삭제 요청 실패');}}
+async function requestClinicDeletion(){const name=$('clinicDeletionConfirm')?.value.trim()||'';if(!name){toast('병원명을 정확히 입력해주세요.');return;}if(!confirm('병원 데이터 삭제 요청을 접수할까요?\n\n30일 반환 유예 후 HQ가 구독·미정산 금액을 확인하고 통합 파기를 시작합니다. 실행 후 운영 데이터는 복구가 제한됩니다.'))return;try{clinicDeletionState=await saasRequest('/saas/clinic/deletion-request',{method:'POST',body:JSON.stringify({confirmClinicName:name})});if($('clinicDeletionConfirm'))$('clinicDeletionConfirm').value='';renderProductionGovernance();toast('병원 데이터 삭제 요청이 접수되었습니다.');}catch(e){toast(e.message||'삭제 요청 실패');}}
 async function cancelClinicDeletion(){if(!confirm('병원 데이터 삭제 요청을 취소할까요?'))return;try{clinicDeletionState=await saasRequest('/saas/clinic/deletion-request/cancel',{method:'POST'});renderProductionGovernance();toast('삭제 요청을 취소했습니다.');}catch(e){toast(e.message||'삭제 요청 취소 실패');}}
 async function withdrawAccount(){const password=$('withdrawPassword')?.value||'',confirmText=$('withdrawConfirm')?.value.trim()||'';if(confirmText!=='탈퇴'){toast('확인란에 “탈퇴”를 입력해주세요.');return;}if(!confirm('개인 계정을 탈퇴할까요?\n\n모든 기기에서 로그아웃되며 이메일·표시이름은 비식별화됩니다. 이 작업은 되돌릴 수 없습니다.'))return;try{await saasRequest('/saas/account/withdraw',{method:'POST',body:JSON.stringify({password,confirm:'탈퇴'})});saasToken='';saasMe=null;persistSaasSessionToken('');showLogin();saasSetAuthStatus('계정 탈퇴가 완료되었습니다.','ok');}catch(e){toast(e.message||'계정 탈퇴 실패');}}
 const ACCOUNT_TAB_STORAGE_KEY='carestep_account_tab_v902_hotfix';
@@ -10183,6 +10183,7 @@ $('saasLoginForm')?.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.isComp
 $('saasRegisterBtn')?.addEventListener('click',saasRegister);
 document.querySelectorAll('[data-legal-doc]').forEach(b=>b.addEventListener('click',()=>openLegalDocument(b.dataset.legalDoc)));
 $('legalModalClose')?.addEventListener('click',closeLegalModal);$('legalModal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeLegalModal();});
+$('privacyCenterBtn')?.addEventListener('click',()=>window.CarestepPrivacy?.openNotice({request:saasRawRequest,scope:clinicReadScope},true).catch(e=>toast(e.message)));
 $('acceptLegalBtn')?.addEventListener('click',acceptCurrentLegal);
 $('createConfigBackupBtn')?.addEventListener('click',createConfigBackup);
 $('requestClinicDeletionBtn')?.addEventListener('click',requestClinicDeletion);
@@ -10976,7 +10977,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinical-assist.js?v=20261103-clinical-assist"></script>
 
 
-<script id="clinic-module-manifest" type="application/json">{"dental":["dental-record.js?v=20261115-portrait-print","dental-workflow.js?v=20261115-print-refinement"],"neuro":["neuro-record.js?v=20261115-content-optimized"],"ophthalmic":["ophthalmic-record.js?v=20261115-content-optimized"],"chronic":["ophthalmic-record.js?v=20261115-content-optimized","chronic-choices.js?v=20261112-record-choices-2","chronic-record.js?v=20261116-print-flow"],"calc":["practice-acid-base.js?v=20261026tb1","practice-calcium-transfusion.js?v=20261031-calc-cleanup-2","practice-emergency.js?v=20261031-calc-cleanup-2","practice-potassium-mix.js?v=20261031-calc-cleanup-2","practice-cri-presets.js?v=20261031-calc-clarity-1","practice-nutrition-foods.js?v=20261031-prunus","practice-nutrition.js?v=20261031-food1","practice-calculator-workspace.js?v=20261031-calc-cleanup-2","practice-calcium-guided.js?v=20261026ca1","practice-fluid-plan.js?v=20261031-calc-cleanup-2"],"healthcheck":["healthcheck-record.js?v=20261116-print-polish"]}</script>
+<script id="clinic-module-manifest" type="application/json">{"dental":["dental-record.js?v=20261115-portrait-print","dental-workflow.js?v=20261115-print-refinement"],"neuro":["neuro-record.js?v=20261115-content-optimized"],"ophthalmic":["ophthalmic-record.js?v=20261115-content-optimized"],"chronic":["ophthalmic-record.js?v=20261115-content-optimized","chronic-choices.js?v=20261112-record-choices-2","chronic-record.js?v=20261116-print-flow"],"calc":["practice-acid-base.js?v=20261026tb1","practice-calcium-transfusion.js?v=20261031-calc-cleanup-2","practice-emergency.js?v=20261031-calc-cleanup-2","practice-potassium-mix.js?v=20261031-calc-cleanup-2","practice-cri-presets.js?v=20261031-calc-clarity-1","practice-nutrition-foods.js?v=20261031-prunus","practice-nutrition.js?v=20261031-food1","practice-calculator-workspace.js?v=20261031-calc-cleanup-2","practice-calcium-guided.js?v=20261026ca1","practice-fluid-plan.js?v=20261031-calc-cleanup-2"],"healthcheck":["healthcheck-record.js?v=20261116-privacy-review"]}</script>
 <script src="clinic-lazy-modules.js?v=20261105-flow"></script>
 <script src="clinic-inpatients.js?v=20261106-workflow9"></script>
 <script src="clinic-record-start.js?v=20261115-prior-refinements"></script>
@@ -10991,6 +10992,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <link rel="stylesheet" href="builder-flow.css?v=20261105-flow3">
 <script src="builder-flow.js?v=20261112-recheck"></script>
 <link rel="stylesheet" href="clinic-calm.css?v=20261108-top-tabs">
+<script src="carestep-privacy.js?v=20261116-review"></script>
 <script src="clinic-update-notice.js?v=20261107-review-polish"></script>
 </body>
 </html>
