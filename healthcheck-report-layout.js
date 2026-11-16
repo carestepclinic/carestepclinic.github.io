@@ -74,7 +74,7 @@
    const root=source(),css=await assets(root);clean();// Measure complete containers so incremental layout cannot skip later rows.
    engine=new window.PagedModule.Previewer({maxChars:Number.MAX_SAFE_INTEGER});
    root.querySelectorAll('table').forEach((table,i)=>table.dataset.printTable=String(i));
-   const expected=new Map();root.querySelectorAll('h1,h2,h3,h4,p,li,th,td,dt,dd,figcaption,.patient-block>strong,.report-meta>span').forEach((node,i)=>{if(node.closest('.report-toc'))return;node.dataset.printCheck=String(i);expected.set(String(i),node.textContent.replace(/\s+/g,''));});
+   const expected=new Map();root.querySelectorAll('h1,h2,h3,h4,p,li,th,td,dt,dd,figcaption,.patient-block>strong,.report-meta>span').forEach((node,i)=>{if(node.closest('.report-toc')||node.querySelector('[data-management-page]'))return;node.dataset.printCheck=String(i);expected.set(String(i),node.textContent.replace(/\s+/g,''));});
    // Restore a continuation table's header before measuring the next overflow.
    engine.chunker.hooks.layout.register(rendered=>{
     for(const table of rendered.querySelectorAll('table[data-split-from][data-print-table]'))if(!table.querySelector('thead')){
@@ -96,6 +96,7 @@
     const id=link.getAttribute('href').slice(1),heading=pages.querySelector('[id="'+id+'"]'),page=heading?.closest('.pagedjs_page'),n=rendered.indexOf(page)+1;
     if(!n)throw Error('목차의 페이지를 확인하지 못했습니다.');link.querySelector('.toc-page').textContent=String(n);toc.push({title:heading.textContent,page:n,id});
    }
+   for(const link of pages.querySelectorAll('.management-page-link')){const id=link.getAttribute('href').slice(1),target=pages.querySelector('[id="'+CSS.escape(id)+'"]');const n=rendered.indexOf(target?.closest('.pagedjs_page'))+1;if(!n)throw Error('관리 항목의 상세 페이지를 확인하지 못했습니다.');link.querySelector('[data-management-page]').textContent=String(n);}
    const actual=new Map();for(const node of pages.querySelectorAll('[data-print-check]'))actual.set(node.dataset.printCheck,(actual.get(node.dataset.printCheck)||'')+node.textContent.replace(/\s+/g,''));
    for(const [key,value] of expected)if(value&&!(actual.get(key)||'').includes(value)){throw Error('내용 누락이 확인되어 출력을 중단했습니다. 다시 준비를 눌러주세요.');}
    for(const area of pages.querySelectorAll('.pagedjs_page_content')){

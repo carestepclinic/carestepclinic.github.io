@@ -202,3 +202,18 @@ thead th,.lab-group-row th{background:#edf5f3;color:#174f50;border-color:#b7ceca
 .report-cover-page[data-compact=true] .cover-heading{padding:2mm 0;margin-bottom:3mm}
 .report-cover-page[data-compact=true] .cover-meta{margin-bottom:3mm}
 thead{break-after:avoid}
+
+
+/* Clinical management status is independent of high/low numeric results. */
+.management-badge{display:inline-block;font-size:8.5pt;line-height:1.45;font-weight:650;border:0.7pt solid currentColor;border-radius:1mm;padding:.5mm 1.5mm;color:#52625d;background:#f0f3f2;white-space:normal}
+.management-priority{color:#9f302c;background:#fff0ee}.management-followup{color:#8a5412;background:#fff7e5}.management-care{color:#12695e;background:#e9f5f1}.management-clear{color:#39694c;background:#eff7ee}
+.management-intro{font-size:9pt;color:#52625d;margin-bottom:4mm}
+.management-counts{margin:0 0 5mm;line-height:2.4}.management-counts>span{display:inline-block;margin-right:3mm}.management-counts b{font-size:10pt;margin-left:1mm}
+.management-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:9pt;line-height:1.5}
+.management-table th{background:#e8f2ef;text-align:left;padding:2.5mm 2mm;border-bottom:1pt solid #a9c6bd}
+.management-table td{vertical-align:top;padding:3mm 2mm;border-bottom:.6pt solid #d6e1dc;white-space:pre-wrap;overflow-wrap:anywhere}
+.management-table th:nth-child(1){width:24%}.management-table th:nth-child(2){width:23%}.management-table th:nth-child(3){width:23%}.management-table th:nth-child(4){width:23%}.management-table th:last-child{width:7%}
+.management-table td>strong,.management-table td>.management-badge{display:block;margin-bottom:1.5mm}.management-table tr{break-inside:avoid}.management-table thead{display:table-header-group}
+.management-page-link{font-variant-numeric:tabular-nums;white-space:nowrap;font-size:8.5pt}
+.management-issue-heading{margin:0 0 5mm;break-after:avoid}.management-detail{margin:0 0 5mm}.management-detail h3{font-size:11pt;border-left:2pt solid #4b8176;padding-left:2.5mm;margin-bottom:2mm}.management-detail p{font-size:10.5pt;line-height:1.6;orphans:3;widows:3}
+.management-evidence{display:block;margin-top:1.5mm;font-size:8pt;font-weight:400;line-height:1.45}.management-evidence .management-badge{font-size:8pt}

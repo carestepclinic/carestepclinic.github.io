@@ -409,3 +409,20 @@
  .hc-record .hc-import-source{width:auto;flex:1}
  .hc-record .hc-followup-shortcuts>label{flex-basis:100%;max-width:none}
 }
+
+
+/* A single clinician-confirmed management list drives the report. */
+.hc-management{margin:16px 0;padding:18px;border:1px solid #c7dad5;border-radius:12px;background:#f5faf8}
+.hc-management-heading{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.hc-management-heading>div{flex:1 1 360px}.hc-management-heading p,.hc-management [role=status]{font-size:13px;color:#526862;margin:6px 0}
+.hc-management-card{margin-top:10px;border:1px solid #d6e2de;border-radius:8px;background:#fff;padding:12px}
+.hc-management-card>summary{cursor:pointer;display:list-item;font-size:15px;line-height:1.6}
+.hc-management-card>summary strong{margin-right:10px}.hc-management-card[open]>.hc-fields{margin-top:14px}
+.hc-management-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.hc-management-fields>label:first-child{grid-column:1/-1}.hc-management-fields label{min-width:0}
+.hc-management-fields textarea{width:100%;min-height:76px;resize:vertical;font:inherit;line-height:1.5}
+.hc-management-links>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-height:260px;overflow:auto;gap:7px;padding:8px 0}
+.hc-management-card footer{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}.hc-management-card footer small{flex-basis:100%;color:#8d481b}
+.management-badge{display:inline-block;font-size:12px;font-weight:700;border:1px solid currentColor;border-radius:5px;padding:2px 7px;line-height:1.5;color:#52625d;background:#f0f3f2}
+.management-priority{color:#9f302c;background:#fff0ee}.management-followup{color:#8a5412;background:#fff7e5}.management-care{color:#12695e;background:#e9f5f1}.management-clear{color:#39694c;background:#eff7ee}
+@media(max-width:650px){.hc-management{padding:12px}.hc-management-fields,.hc-management-links>div{grid-template-columns:1fr}.hc-management-card{padding:10px}.hc-management-card footer{align-items:flex-start}}

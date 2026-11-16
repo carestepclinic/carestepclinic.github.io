@@ -69,7 +69,7 @@ test('first page includes core findings and contents remain separate',async()=>{
  assert.equal(await p.locator('[data-report-title="검진 결과 요약"]').count(),0);
  const contents=p.locator('.pagedjs_page').nth(1);
  assert.equal(await contents.locator('.report-toc').count(),1);
- assert.equal(await contents.locator('.cover-summary').count(),0);assert.ok(await contents.locator('.part-title').count()>0,'short prose follows the contents on the same sheet');
+ assert.equal(await contents.locator('.cover-summary').count(),0);assert.equal(await contents.locator('.part-title').count(),0,'contents remain on an independent sheet');
  assert.equal(await p.locator('.report-contents-page').count(),1);
  assert.ok(await contents.locator('.report-toc tr').evaluateAll(rows=>rows.length>0&&rows.every(r=>r.children.length===1)));
  await assertToc(p);assert.deepEqual(errors,[]);
