@@ -7,3 +7,16 @@ for(const width of [1280,390])test('HOME age check precedes verification SMS at 
 });
 test('invite signup has a separate required age confirmation',async()=>{const page=await browser.newPage();await page.route('**/*',r=>{if(r.request().url().startsWith(base))return r.continue();return r.fulfill({contentType:'application/json',body:JSON.stringify({ok:true,clinicName:'합성 병원',guardianName:'합성 보호자',patientNames:['합성 환자'],phoneLast4:'0000'})});});await page.goto(base+'/home.html?invite=synthetic');assert.equal(await page.locator('#inviteAge14').getAttribute('required'),'');assert.equal(await page.locator('#inviteAge14').isChecked(),false);await page.close();});
 test('HQ authentication reports pending configuration and never saves a credential',async()=>{const page=await browser.newPage();await page.route('http://localhost/',r=>r.fulfill({body:'<button id="hqIndividualConnect">인증</button><p id="hqIndividualStatus"></p><input id="endpoint" value="https://synthetic.invalid">',contentType:'text/html'}));await page.route('https://synthetic.invalid/**',r=>r.fulfill({contentType:'application/json',body:'{"ok":true,"mode":"legacy","ready":false}'}));await page.goto('http://localhost/');await page.addScriptTag({path:path.resolve(__dirname,'../hq-individual-auth.js')});await page.click('#hqIndividualConnect');await page.waitForFunction(()=>document.querySelector('#hqIndividualStatus').textContent.includes('아직 준비'));assert.equal(await page.evaluate(()=>localStorage.length),0);assert.equal(await page.locator('#hqIndividualConnect').isDisabled(),false);await page.close();});
+for(const width of [1280,390])for(const mode of ['access','legacy','unavailable'])test('HQ login matches actual authentication mode '+mode+' at '+width,async()=>{
+ const context=await browser.newContext({viewport:{width,height:900},serviceWorkers:'block'}),page=await context.newPage();
+ await page.route('https://carestep-ai-api.kk04sdw.workers.dev/**',route=>route.fulfill({status:mode==='unavailable'?503:200,contentType:'application/json',body:JSON.stringify({ok:mode!=='unavailable',mode,ready:mode==='access'})}));
+ await page.goto(base+'/hq.html');
+ await page.waitForFunction(()=>!document.querySelector('#hqLoginDescription').textContent.includes('확인하고 있습니다'));
+ const description=await page.locator('#hqLoginDescription').innerText();
+ assert.equal(await page.locator('#hqLegacyKeyField').isVisible(),mode==='legacy');
+ assert.equal(await page.locator('#connect').isVisible(),mode==='legacy');
+ if(mode==='access'){assert.match(description,/8시간/);assert.doesNotMatch(await page.locator('#hqLoginForm').innerText(),/7일|마스터/);assert.equal(await page.locator('#hqIndividualConnect').isVisible(),true);}
+ if(mode==='unavailable')assert.match(description,/확인하지 못/);
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+ await context.close();
+});
