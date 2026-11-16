@@ -140,3 +140,15 @@ html,body{background:white;color:#25342f}
 .cp-record .ap-interval-pair h2{font-size:10.5pt}
 .cp-record .ap-interval-pair .ap-chart svg text{font-size:13px}
 .cp-record .ap-interval-pair .cp-chart-row svg{height:31mm}
+
+/* Keep the identity readable without compressing clinical text. */
+.cp-record .cp-identity{grid-template-columns:1fr 1fr 1.1fr 1.6fr}
+.cp-record .cp-identity dd{word-break:keep-all;overflow-wrap:break-word}
+.cp-anesthesia .cp-identity{grid-template-columns:1fr 1fr 1fr 1.5fr 1.5fr .65fr 1.2fr 1.5fr}
+/* Each 12-timepoint matrix includes its recorder row on the same page. */
+.cp-record .ap-matrix{break-inside:avoid}
+.cp-record .ap-chart svg text{font-size:12px}
+.cp-record .ap-interval-pair .ap-phase-number{font-size:13px!important}
+.cp-record .ap-matrix{margin:2mm 0 3mm}
+.cp-record .ap-matrix th,.cp-record .ap-matrix td{padding:1.1mm 1mm}
+.cp-record .ap-chart h3 small{font-size:8.5pt}

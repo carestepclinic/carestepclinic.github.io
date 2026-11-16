@@ -1,7 +1,7 @@
 /* Print snapshots only. No patient writes, external services, or inferred clinical findings. */
 (function(g){
  'use strict';
- const version='20261115-content-optimized',esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const version='20261116-print-flow',esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const cssText=v=>JSON.stringify(String(v??'')).replace(/</g,'\\3c ').replace(/[\r\n\f]/g,' ');
  const base=()=>new URL('.',document.baseURI).href;
  function age(birth,date){if(!/^\d{4}-\d{2}-\d{2}$/.test(birth||'')||!/^\d{4}-\d{2}-\d{2}$/.test(date||''))return '';const [y,m,d]=date.split('-').map(Number),[by,bm,bd]=birth.split('-').map(Number),n=(y-by)*12+m-bm-(d<bd?1:0);return n<0?'':n<1?'1개월 미만':[n>=12?Math.floor(n/12)+'세':'',n%12?n%12+'개월':''].filter(Boolean).join(' ');}
@@ -38,7 +38,7 @@
    const main=root.querySelector('main');if(!main)return;const anchor=[...main.querySelectorAll('h2')].find(n=>n.textContent==='검사 결과'),assessment=root.ownerDocument.createElement('div');assessment.className='cp-assessment';if(!anchor)return;
    const context=root.ownerDocument.createElement('section');context.className='cp-neuro-context';
    for(const h of [...main.querySelectorAll('h2')])if(['주증상·발병·경과','복용약·진정·검사 제한','검사 메모'].includes(h.textContent)){const part=root.ownerDocument.createElement('section'),p=h.nextElementSibling;part.className='cp-note'+(p?.textContent.length<180?' cp-brief':'');part.append(h);if(p?.tagName==='P')part.append(p);context.append(part);}if(context.childElementCount)main.prepend(context);
-   for(const h of [...main.querySelectorAll('h2')])if(['병변 위치','판단·감별진단','검사·치료·재검 계획'].includes(h.textContent)){const block=root.ownerDocument.createElement('section'),p=h.nextElementSibling;block.className='cp-note';block.append(h);if(p?.tagName==='P')block.append(p);assessment.append(block);}if(anchor&&assessment.childElementCount)anchor.before(assessment);
+   for(const h of [...main.querySelectorAll('h2')])if(['병변 위치','판단·감별진단','검사·치료·재검 계획'].includes(h.textContent)){const block=root.ownerDocument.createElement('section'),p=h.nextElementSibling;block.className='cp-note';block.append(h);if(p?.tagName==='P')block.append(p);assessment.append(block);}if(assessment.childElementCount)main.append(assessment);
   }
   if(kind==='dental'){
    const main=root.querySelector('.dn-print-page'),summary=main?.querySelector('.dn-print-summary'),chart=main?.querySelector('.dn-chart');
@@ -97,7 +97,7 @@
     if(mode.value!=='full'){if(o.kind==='anesthesia')for(const h of content.querySelectorAll('[data-print-range]')){const p=d.createElement('p');p.className='cp-interval';p.textContent=h.dataset.printRange;h.replaceWith(p);}organize(content,o.kind);}
     content.querySelectorAll('.cp-trend-section').forEach(el=>{if(!el.querySelector('.cp-trend'))el.remove();});
     galleries(content);
-    if(o.kind==='ophthalmic'&&mode.value==='full'){const main=content.querySelector('main'),gallery=main?.querySelector('.cp-gallery'),anchor=[...main?.querySelectorAll('h2')||[]].find(h=>h.textContent==='진단·치료 계획');if(gallery&&anchor){const title=gallery.previousElementSibling;if(title?.tagName==='H2')anchor.before(title);anchor.before(gallery);}}
+    if(o.kind==='ophthalmic'&&mode.value==='full'){const main=content.querySelector('main'),gallery=main?.querySelector('.cp-gallery'),anchor=[...main?.querySelectorAll('h2')||[]].find(h=>h.textContent==='진단·치료 계획');if(gallery&&anchor){const title=gallery.previousElementSibling;if(title?.tagName==='H2')main.append(title);main.append(gallery);}}
 
     await Promise.all([...content.querySelectorAll('img')].map(async im=>{try{await im.decode();}catch{throw Error('사진을 불러오지 못했습니다. 다시 준비하거나 사진 포함을 해제해주세요.');}}));
     // A very long narrative must not turn one table row into an unprintable page.

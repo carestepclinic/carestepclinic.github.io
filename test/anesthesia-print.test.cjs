@@ -1,7 +1,7 @@
 const {test,before,after}=require('node:test'),assert=require('node:assert/strict'),path=require('node:path'),{chromium}=require('playwright');
 const {printDocument,printRanges}=require('../anesthesia-record.js');let browser;
 test('paper preview keeps the anesthesia landscape width and interval boundaries',async()=>{
- const p=await browser.newPage();try{await p.setContent(printDocument(fixture(true)));await require('./record-print-layout.cjs').checkPrintLayout(p,{name:'anesthesia-long',sheet:'.print-page',toolbar:'.ap-controls',landscape:true});const pages=await p.locator('.print-page').all();assert.equal(pages.length,2);const first=await pages[0].boundingBox(),second=await pages[1].boundingBox();assert.ok(second.y>=first.y+first.height+20);await p.emulateMedia({media:'print'});assert.equal(await pages[1].evaluate(e=>getComputedStyle(e).breakBefore),'page');}finally{await p.close();}
+ const p=await browser.newPage();try{await p.setContent(printDocument(fixture(true)));await require('./record-print-layout.cjs').checkPrintLayout(p,{name:'anesthesia-long',sheet:'.print-page',toolbar:'.ap-controls',landscape:true});const pages=await p.locator('.print-page').all();assert.equal(pages.length,4);const first=await pages[0].boundingBox(),second=await pages[1].boundingBox();assert.ok(second.y>=first.y+first.height+20);await p.emulateMedia({media:'print'});assert.equal(await pages[1].evaluate(e=>getComputedStyle(e).breakBefore),'page');}finally{await p.close();}
 });
 before(async()=>{browser=await chromium.launch({headless:true,executablePath:process.env.HQ_TEST_BROWSER});});after(async()=>browser?.close());
 function fixture(long=false){const base=Date.parse('2026-10-20T03:25:00Z'),at=m=>new Date(base+m*60000).toISOString(),marker=(id,m,key,extra={})=>({recordId:id,type:'marker',marker:key,observedAt:at(m),recorder:{name:'기록자A'},...extra});
@@ -13,13 +13,13 @@ function fixture(long=false){const base=Date.parse('2026-10-20T03:25:00Z'),at=m=
 }
 for(const long of [false,true])test('readable PDF preserves measured values, notes and actual administration '+(long?'long':'two-hour'),async t=>{
  const data=fixture(long),html=printDocument(data),p=await browser.newPage({viewport:{width:1120,height:800}});t.after(()=>p.close());await p.setContent(html);await p.emulateMedia({media:'print'});await p.evaluate(()=>document.fonts.ready);
- assert.equal(await p.locator('.print-page').count(),long?2:1);assert.equal(await p.locator('.ap-matrix thead th').count()-await p.locator('.ap-matrix').count(),long?97:25);
+ assert.equal(await p.locator('.print-page').count(),long?4:1);assert.equal(await p.locator('.ap-matrix thead th').count()-await p.locator('.ap-matrix').count(),long?97:25);
  assert.equal(await p.locator('.ap-timing').count(),1);assert.match(await p.locator('.ap-timing').innerText(),/수술 소요시간/);assert.match(await p.locator('.ap-timing').innerText(),long?/8시간/:/2시간/);assert.match(await p.locator('.ap-meta').innerText(),/4.5 mm/);const text=await p.locator('body').innerText();for(const s of ['이완기 혈압','기록자A','기록자B','측정 메모 보존','전처치 기록','합성 약물A','계산기 준비량 · 실제 투약 아님'])assert.ok(text.includes(s),s);
  assert.equal(text.split('합성 약물A').length,2);assert.ok(!text.includes('취소된 사건은 제외'));assert.ok(!text.includes('undefined'));
- assert.equal(await p.locator('.ap-charts').count(),long?2:1);assert.equal(await p.locator('.ap-chart').count(),long?16:8);
- const file=path.resolve(__dirname,'../../anesthesia-print-'+(long?'long':'two-hour')+'.pdf');await p.pdf({path:file,preferCSSPageSize:true,printBackground:true});const info=require('node:child_process').execFileSync('pdfinfo',[file],{encoding:'utf8',stdio:['ignore','pipe','ignore']});const pages=Number(info.match(/Pages:\s+(\d+)/)?.[1]);assert.ok(pages>=(long?2:1));
+ assert.equal(await p.locator('.ap-charts').count(),long?4:1);assert.equal(await p.locator('.ap-chart').count(),long?32:8);
+ const file=path.resolve(__dirname,'../../anesthesia-print-'+(long?'long':'two-hour')+'.pdf');await p.pdf({path:file,preferCSSPageSize:true,printBackground:true});const info=require('node:child_process').execFileSync('pdfinfo',[file],{encoding:'utf8',stdio:['ignore','pipe','ignore']});const pages=Number(info.match(/Pages:\s+(\d+)/)?.[1]);assert.ok(pages>=(long?4:1));
 });
 test('selected range and missing metrics never gain fabricated values',()=>{
  const data=fixture();data.rows=[{type:'measurement',observedAt:'2026-10-20T03:30:00Z',values:{heartRate:0},recorder:{name:'<script>bad</script>'},note:'<svg/onload=x>'}];data.complete=false;
- const html=printDocument(data);assert.ok(html.includes('<td>0</td>'));assert.ok(html.includes('<td>—</td>'));assert.ok(html.includes('&lt;script&gt;bad'));assert.ok(!html.includes('<svg/onload=x>'));assert.ok(!html.includes('마취 시작 전 기록'));
+ const html=printDocument(data);assert.ok(html.includes('<td>0</td>'));assert.ok(html.includes('미측정: 호흡수'));assert.ok(!html.includes('<th>호흡수 <small>'));assert.ok(html.includes('&lt;script&gt;bad'));assert.ok(!html.includes('<svg/onload=x>'));assert.ok(!html.includes('마취 시작 전 기록'));
 });
