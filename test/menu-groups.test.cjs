@@ -62,7 +62,7 @@ for(const width of [820,1440])test('collapsed Clinic exposes saved favorites and
 });
 for(const hq of [false,true])test('category attention reflects permitted notices without adding counts '+hq,async t=>{
  const p=await setup(t,1440,hq),group=hq?'[data-hq-nav-group=clinic]':'[data-nav-group=guardians]',source=hq?'#navApprovalCount':'#navFollowupBadge';
- await p.evaluate(s=>{const e=document.querySelector(s);e.textContent='3';e.hidden=false;e.classList.remove('hidden');},source);
+ await p.evaluate(s=>{const e=document.querySelector(s);e.textContent='3';e.hidden=false;e.classList.remove('hidden');if(e.parentElement.classList.contains('nav-followup-status'))e.parentElement.hidden=false;},source);
  await p.waitForFunction(g=>document.querySelector(g+' .nav-group-attention')?.hidden===false,group);assert.equal(await p.locator(group+' .nav-group-attention').isVisible(),true);
  await p.locator(group+(hq?' [data-hq-nav-toggle]':'>summary')).click();assert.equal(await p.locator(group+' .nav-group-attention').isVisible(),false);
  await p.locator(group+(hq?' [data-hq-nav-toggle]':'>summary')).click();

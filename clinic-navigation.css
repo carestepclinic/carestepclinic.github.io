@@ -34,3 +34,5 @@
 @media(min-width:761px){.clinic-calm.cs-menu-collapsed #appView .cs-nav-rail{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}.cs-rail-favorites{display:grid;gap:3px;border-block:1px solid #d9e4e0;padding:6px 0}.cs-rail-favorites[hidden]{display:none}.cs-rail-favorites>small{text-align:center;font-size:10px;color:#526b70}.clinic-calm #appView .cs-rail-favorites button{width:100%;overflow-wrap:anywhere;line-height:1.35}}
 
 .clinic-navigation .nav-group-attention{margin-left:auto;flex-shrink:0;padding:2px 6px;border-radius:12px;background:#fff0ef;color:#a82720;font-size:11px;font-weight:700;line-height:1.4}.clinic-navigation [open]>summary>.nav-group-attention{display:none}
+
+.clinic-navigation [data-view=followup]{flex-wrap:wrap}.clinic-navigation .nav-followup-status{display:flex;flex-wrap:wrap;gap:4px;width:100%}.clinic-navigation .nav-followup-status .nav-task-badge{margin:0}.clinic-navigation .nav-scheduled-badge{display:inline-flex;align-items:center;border-radius:12px;padding:2px 6px;background:#e7f2ef;color:#21635b;font-size:11px;font-weight:650;line-height:1.4}
