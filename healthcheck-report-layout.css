@@ -263,3 +263,11 @@ thead{break-after:avoid}
 .report-contents-page .report-toc .toc-group td{padding:5mm 0 2mm;font-size:11pt;font-weight:700;color:#165e59;border-bottom:0}
 .report-contents-page .report-guide{margin-top:6mm;font-size:9.5pt}
 .hospital-cover p,.report-kicker,.report-coverage,.report-prior,.muted,.lab-source{font-size:9.5pt}
+
+/* Keep subheadings with the first lines; never join different report sections. */
+.plan-topic{break-after:avoid}
+.plan-section-title + .report-problem,.plan-topic + .plan-long{break-before:avoid}
+.cover-overview-reference{font-size:10pt;line-height:1.6;margin-top:6mm;color:#435c63}
+.lab-table tr.report-balance-start{break-before:page}
+
+.report-heading-start{break-before:page}
