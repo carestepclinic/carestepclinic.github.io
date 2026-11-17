@@ -271,3 +271,14 @@ thead{break-after:avoid}
 .lab-table tr.report-balance-start{break-before:page}
 
 .report-heading-start{break-before:page}
+
+/* The first sheet is always identity-only, including short and summary reports. */
+.report-cover-page .hospital-cover{padding-bottom:6mm;margin-bottom:0}
+.report-cover-page .cover-heading,.report-cover-page[data-compact=true] .cover-heading{padding:22mm 0 12mm;margin:0 0 10mm}
+.report-cover-page .cover-heading h1{font-size:32pt;line-height:1.25;margin:4mm 0}
+.report-cover-page .patient-block{padding:7mm 6mm;background:#f5f9f8}
+.report-cover-page .patient-block strong{font-size:23pt}
+.report-cover-page .patient-block p{font-size:11pt;margin-top:2mm}
+.report-cover-page .cover-meta,.report-cover-page[data-compact=true] .cover-meta{display:block;margin:8mm 0 0;padding:0;border:0}
+.report-cover-page .cover-meta span{display:block;padding:3mm 0;border-bottom:1px solid #dbe4e2;font-size:11pt}
+.report-cover-page .cover-meta b{margin-left:5mm}

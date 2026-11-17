@@ -54,7 +54,7 @@
  if(!duplicateChoices.length&&duplicateBox)duplicateBox.textContent='상세 관리 내용과 일치하는 중복 문단이 없습니다.';
  if(reviewToggle)reviewToggle.textContent='출력 전 확인 · 요약 문구'+(duplicateChoices.length?' · 중복 후보 '+duplicateChoices.length+'개':'')+(settings.missing?.length?' · 정보 확인 '+settings.missing.length+'개':'');
 
- function source(promoteCover=false,balanceStarts=new Set(),headingStarts=new Set()){
+ function source(balanceStarts=new Set(),headingStarts=new Set()){
   const root=document.createElement('div');root.append(template.content.cloneNode(true));
   for(const cell of root.querySelectorAll('[data-management-summary]')){const input=summaryEdits.get(cell.dataset.managementSummary);if(input)cell.textContent=input.value.trim()||'상세 페이지에서 확인';}
   for(const choice of duplicateChoices)if(choice.input.checked)root.querySelector('[data-duplicate-key="'+choice.key+'"]')?.remove();
@@ -78,15 +78,6 @@
     const i=figures.findIndex(x=>x.dataset.photoId===featured);if(i>=0)addRow(figures.splice(i,1),true);
    }
    for(let i=0;i<figures.length;i+=2)addRow(figures.slice(i,i+2));
-  }
-  // Move the complete cover narrative, never truncate it or shrink the type.
-  if(promoteCover){
-   const cover=root.querySelector('.report-cover-page'),summary=cover.querySelector('.cover-summary'),actions=cover.querySelector('.cover-actions');
-   const part=document.createElement('section');part.className='report-part';Object.assign(part.dataset,{reportPart:'cover-summary',reportTitle:'검진 결과 요약',newPage:'true',reportSummary:'true',reportGroup:'plan'});
-   const heading=document.createElement('h2');heading.className='part-title';heading.id='report-cover-overview';heading.textContent='검진 결과 요약';part.append(heading);
-   if(summary)part.append(summary);if(actions)part.append(actions);
-   const note=document.createElement('p');note.className='cover-overview-reference';note.textContent='핵심 소견과 관리 안내는 「검진 결과 요약」에서 확인해 주세요.';cover.append(note);
-   root.querySelector('.report-contents-page').after(part);
   }
   root.querySelectorAll('table').forEach((table,i)=>{table.dataset.printTable=String(i);table.querySelectorAll('tbody tr').forEach((row,j)=>{row.dataset.printRow=i+'-'+j;if(balanceStarts.has(row.dataset.printRow))row.classList.add('report-balance-start');});});
   for(const part of root.querySelectorAll('.report-part:not(.report-cover-page):not(.report-contents-page)')){
@@ -117,9 +108,9 @@
   if(busy){queued=true;return;}busy=true;queued=false;const token=++revision;
   document.body.dataset.reportReady='false';pages.setAttribute('aria-busy','true');printButton.disabled=true;retry.hidden=true;setStatus('글꼴·사진·목차를 준비하고 있습니다.');
   try{
-   let promoteCover=false,flow,rendered,expected;const balanceStarts=new Set(),headingStarts=new Set();
+   let flow,rendered,expected;const balanceStarts=new Set(),headingStarts=new Set();
    for(let pass=0;pass<3;pass++){
-   const root=source(promoteCover,balanceStarts,headingStarts),css=await assets(root);clean();// Measure complete containers so incremental layout cannot skip later rows.
+   const root=source(balanceStarts,headingStarts),css=await assets(root);clean();// Measure complete containers so incremental layout cannot skip later rows.
    engine=new window.PagedModule.Previewer({maxChars:Number.MAX_SAFE_INTEGER});
    expected=new Map();root.querySelectorAll('h1,h2,h3,h4,p,li,th,td,dt,dd,figcaption,.patient-block>strong,.report-meta>span').forEach((node,i)=>{if(node.closest('.report-toc')||node.querySelector('[data-management-page]'))return;node.dataset.printCheck=String(i);expected.set(String(i),node.textContent.replace(/\s+/g,''));});
    // Restore a continuation table's header before measuring the next overflow.
@@ -135,7 +126,6 @@
    if(queued)return;
    rendered=[...pages.querySelectorAll('.pagedjs_page')];if(!rendered.length||flow.total!==rendered.length)throw Error('페이지 수를 확인하지 못했습니다.');
    let relayout=false;
-   if(!promoteCover&&pages.querySelectorAll('.report-cover-page').length>1){promoteCover=true;relayout=true;}
    // A sparse final table fragment borrows rows only from the same table.
    // Pick a balanced height from the preceding fragment; keep row values and order intact.
    const tables=new Map();for(const table of pages.querySelectorAll('.lab-table')){const key=table.dataset.printTable;if(!tables.has(key))tables.set(key,[]);tables.get(key).push(table);}
