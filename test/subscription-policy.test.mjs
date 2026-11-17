@@ -90,6 +90,8 @@ test('opening the billing tab reloads settings, repeated clicks coalesce while l
 
 test('current contract and current HQ catalog remain distinct with consistent tax and zero limits',()=>{
  const f=fixture();f.ctx.saasMode='auth';f.ctx.escapeHtml=String;f.ctx.saasMe={entitlements:{plan:{limits:{members:15,packagesMonthly:3000}}}};
+ vm.runInContext(readFileSync(new URL('../billing-flow.js',import.meta.url),'utf8'),f.ctx);
+ f.ctx.resourceClinicUI={data:()=>({allowances:{members:{base:15,extra:0,limit:15}}})};
  vm.runInContext(fn('renderBillingContractComparison'),f.ctx);
  f.ctx.billingOverviewState={accountVerified:true,subscription:{planCode:'PRO',billingCycle:'monthly',commercialVersion:'legacy',effectivePriceKrw:169000},plans:{PRO:{monthlyPriceKrw:179000,vatExclusive:true,members:0,packagesMonthly:0,isActive:true}}};
  f.ctx.renderBillingContractComparison();const html=f.get('billingContractComparison').innerHTML;
