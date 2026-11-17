@@ -81,12 +81,12 @@
       value:el.type==='checkbox'?!!el.checked:el.value}));
   }
   function dirty(editor){return editor.editing&&changes(editor.baseline,snapshot(editor)).length>0;}
-  function hasDirty(){return [...editors.values()].some(dirty);}
+  function hasDirty(){return [...editors.values()].some(dirty)||!!globalThis.CarestepResourceDrafts?.hasDirty();}
   function allowLeave(resume){
-    if(activeSave){toast('저장 결과를 확인하고 있습니다. 잠시 기다려주세요.');return false;}
+    if(activeSave||globalThis.CarestepResourceDrafts?.isSaving()){toast('저장 결과를 확인하고 있습니다. 잠시 기다려주세요.');return false;}
     if(reviewOpen)return false;
     if(!hasDirty())return true;
-    const owner=hqReadScope();void CarestepHqWorkspace.confirm('저장하지 않은 변경사항이 있습니다. 변경사항을 취소하고 이동할까요?',{confirmLabel:'변경 취소하고 이동',valid:()=>owner===hqReadScope()}).then(ok=>{if(ok){for(const e of editors.values())if(e.editing)cancelEdit(e);resume?.();}});return false;
+    const owner=hqReadScope();void CarestepHqWorkspace.confirm('저장하지 않은 변경사항이 있습니다. 변경사항을 취소하고 이동할까요?',{confirmLabel:'변경 취소하고 이동',valid:()=>owner===hqReadScope()}).then(ok=>{if(ok){globalThis.CarestepResourceDrafts?.discard();for(const e of editors.values())if(e.editing)cancelEdit(e);resume?.();}});return false;
   }
   function formatted(value,field) {
     if(typeof value==='boolean')return value?'사용':'사용 안 함';
@@ -686,7 +686,7 @@
   for(const [id,view] of [['integrationRefresh','integrations'],['refreshMessagingIntegration','integrations'],['productionRefresh','production']])if(byId(id))byId(id).onclick=()=>reloadView(view);
   byId('billingRefresh').onclick=()=>{if(allowLeave(()=>loadBilling()))loadBilling();};
   byId('hqPaymentRefresh').onclick=()=>{if(allowLeave(()=>loadPaymentAutomation()))loadPaymentAutomation();};
-  window.addEventListener('beforeunload',event=>{if(hasDirty()||activeSave||voiceDrafts.size){event.preventDefault();event.returnValue='';}});
+  window.addEventListener('beforeunload',event=>{if(hasDirty()||activeSave||globalThis.CarestepResourceDrafts?.isSaving()||voiceDrafts.size){event.preventDefault();event.returnValue='';}});
   window.addEventListener('popstate',()=>{
     if(restoring)return;
     const next=route(location.hash);

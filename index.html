@@ -1149,7 +1149,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="hospital-operations.css">
 <link rel="stylesheet" href="practice-intake.css?v=20261105-selection"><link rel="stylesheet" href="clinic-purchases.css?v=20261107-toolbar-vendors">
 <link rel="stylesheet" href="healthcheck-record.css?v=20261117-editor-flow">
-<link rel="stylesheet" href="subscription-resources.css?v=20261117-unified-plans"><script src="subscription-resources.js?v=20261117-unified-plans"></script>
+<link rel="stylesheet" href="subscription-resources.css?v=20261117-billing-flow"><script src="subscription-resources.js?v=20261117-billing-flow"></script><script src="billing-flow.js?v=20261117-billing-flow"></script>
 </head>
 <body class="clinic-calm">
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -1828,12 +1828,12 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
                   <div class="billing-mini"><span>다음 결제</span><b id="billingNextDate">--</b></div>
                   <div class="billing-mini"><span>결제 상태</span><b id="billingPaymentState">--</b></div>
                 </div>
-                <div id="clinicResourceUsage"></div><div id="billingContractComparison" class="billing-contract-comparison"></div><details id="billingChangePlan"><summary>요금제 변경</summary><div class="billing-plan-row">
+                <div id="clinicResourceUsage"></div><div id="billingContractComparison" class="billing-contract-comparison"></div><div id="billingReservations" aria-live="polite"></div><details id="billingChangePlan"><summary>요금제 변경</summary><div class="billing-plan-row">
                   <div><label class="field-label" for="billingPlanSelect">변경할 요금제</label><select id="billingPlanSelect" class="input"><option value="BASIC">BASIC</option><option value="PRO">PRO</option><option value="ENTERPRISE">ENTERPRISE</option></select></div>
                   <div><label class="field-label" for="billingCycleSelect">결제주기</label><select id="billingCycleSelect" class="input"><option value="monthly">월 결제</option><option value="annual">연 결제</option></select></div>
                   <button id="billingSchedulePlan" class="btn btn-secondary" type="button">다음 결제일부터 변경</button>
                 </div>
-                <div id="billingPlanPrice" class="billing-note"></div></details><details id="billingEndPlan"><summary>구독 해지·이용 조건</summary>
+                <div id="billingPlanPrice" class="billing-note"></div><div id="billingChangeComparison"></div></details><details id="billingEndPlan"><summary>구독 해지·이용 조건</summary>
                 <div class="billing-actions"><button id="billingCancelSubscription" class="btn btn-ghost billing-danger" type="button">구독 해지 예약</button><button id="billingUndoCancel" class="btn btn-ghost hidden" type="button">해지 예약 취소</button></div>
                 <div class="billing-note">신규 무료체험은 30일입니다. 유료 요금제와 결제금액을 확인하고 전환을 신청한 경우에만 체험 종료 후 결제합니다. 유료 구독 중 요금제 변경은 다음 결제일부터 적용되며 중도 일할계산은 하지 않습니다.</div></details>
               </div>
@@ -4328,11 +4328,11 @@ function renderBillingContractComparison(){
 
 function renderBillingOverview(){
   const d=billingOverviewState,auth=saasMode==='auth'&&saasMe,provider=d?.provider||{},sub=d?.subscription||{},method=d?.paymentMethod,channel=d?.channel||saasMe?.clinic?.subscriptionChannel||{channel:'direct',billingOwner:'carestep'};
-  const badge=$('billingProviderBadge');if(badge){badge.className='billing-provider '+(provider.configured?'on':'warn');badge.textContent=!d?(billingOverviewLoading?'결제 정보 확인 중':'결제 정보 확인 필요'):provider.configured?'Toss Payments · 연결됨':'Toss Payments · 설정 필요';}
+  const badge=$('billingProviderBadge');if(badge){badge.className='billing-provider '+(provider.configured?'on':'warn');badge.textContent=!d?(billingOverviewLoading?'결제 정보 확인 중':'결제 정보 확인 필요'):provider.configured?'Toss Payments · 연결됨':'온라인 결제 준비 중';}
   if($('billingManageLock')){const lock=$('billingManageLock');lock.classList.toggle('hidden',!auth||!d||!!d.canManage);lock.textContent=channel.channel==='partner'&&channel.billingOwner==='partner'?`${channel.partnerName||'제휴사'}를 통해 구독 중입니다. 요금제·구독 변경은 제휴사 또는 CARESTEP HQ에 문의해주세요.`:'원장 또는 결제·구독 권한을 위임받은 직원이 변경할 수 있습니다.';}
   renderBillingContractComparison();
   const controls=['billingPlanSelect','billingCycleSelect','billingSchedulePlan','billingRegisterCard','billingCancelSubscription','billingUndoCancel','billingRetryPayment'];controls.forEach(id=>{if($(id))$(id).disabled=!auth||!d?.canManage||billingOverviewLoading||!!d?.stale;});
-  if(!auth||!d){const message=!auth?'로그인 후 결제·구독 정보를 확인합니다.':billingOverviewLoading?'결제·구독 정보를 불러오는 중…':'결제·구독 정보를 확인하지 못했습니다. 새로고침해주세요.';if($('billingSubscriptionSummary'))$('billingSubscriptionSummary').textContent=message;if($('billingCardBox'))$('billingCardBox').textContent=message;if($('accountUxNextPayment'))$('accountUxNextPayment').textContent='--';return;}
+  if(!auth||!d){$('billingReservations')?.replaceChildren();$('billingChangeComparison')?.replaceChildren();const message=!auth?'로그인 후 결제·구독 정보를 확인합니다.':billingOverviewLoading?'결제·구독 정보를 불러오는 중…':'결제·구독 정보를 확인하지 못했습니다. 새로고침해주세요.';if($('billingSubscriptionSummary'))$('billingSubscriptionSummary').textContent=message;if($('billingCardBox'))$('billingCardBox').textContent=message;if($('accountUxNextPayment'))$('accountUxNextPayment').textContent='--';return;}
   if($('billingCurrentPlan'))$('billingCurrentPlan').textContent=`${sub.planCode||saasMe?.clinic?.plan||'-'} · ${sub.billingCycle==='annual'?'연':'월'}`;
   const next=sub.status==='trialing'?(sub.trialEndsAt||sub.currentPeriodEnd):(sub.nextPaymentAt||sub.currentPeriodEnd),nextLabel=next?billingDate(next):'-';if($('billingNextDate'))$('billingNextDate').textContent=nextLabel;if($('accountUxNextPayment'))$('accountUxNextPayment').textContent=nextLabel;
   if($('billingPaymentState'))$('billingPaymentState').textContent=billingStatusLabel(sub.status)+(sub.paymentGraceActive?' · 유예기간':'')+(sub.cancelAtPeriodEnd?' · 해지 예정':'');
@@ -4343,7 +4343,7 @@ function renderBillingOverview(){
   const retry=['past_due','paused'].includes(sub.status)||!!sub.trialExpired;if($('billingRetryPayment'))$('billingRetryPayment').classList.toggle('hidden',!retry);
   if($('billingCancelSubscription'))$('billingCancelSubscription').classList.toggle('hidden',!!sub.cancelAtPeriodEnd||['canceled'].includes(sub.status));
   if($('billingUndoCancel'))$('billingUndoCancel').classList.toggle('hidden',!sub.cancelAtPeriodEnd);
-  const fail=$('billingFailureNote');if(fail){fail.textContent=sub.status==='past_due'?`결제 실패 ${Number(sub.paymentFailureCount)||0}회 · ${sub.paymentGraceActive?'유예기간 중 · ':''}${sub.paymentGraceEndsAt?billingDate(sub.paymentGraceEndsAt)+'까지 결제수단을 확인해주세요.':'카드를 확인한 뒤 다시 시도해주세요.'}`:!provider.configured?'Worker에 토스페이먼츠 키와 결제 암호화 Secret을 설정해야 실제 카드 등록이 열립니다.':'';}
+  const fail=$('billingFailureNote');if(fail){fail.textContent=sub.status==='past_due'?`결제 실패 ${Number(sub.paymentFailureCount)||0}회 · ${sub.paymentGraceActive?'유예기간 중 · ':''}${sub.paymentGraceEndsAt?billingDate(sub.paymentGraceEndsAt)+'까지 결제수단을 확인해주세요.':'카드를 확인한 뒤 다시 시도해주세요.'}`:!provider.configured?'온라인 결제 준비 중입니다. 결제수단 등록이 필요하면 CARESTEP 운영자에게 문의해주세요.':'';}
   const op=$('billingOverageSummary'),oh=$('billingOverageHistory'),cp=d.plans?.[sub.planCode]||{},included=Number(d.messaging?.included)||0,unit=Number(d.messaging?.overageUnitKrw)||0,settlements=Array.isArray(d.overageSettlements)?d.overageSettlements:[],pendingKrw=settlements.filter(x=>['pending','attached'].includes(x.status)).reduce((n,x)=>n+Number(x.amountKrw||0),0),startMonth=d.overageAutobill?.startMonth||'';
   if(op){op.innerHTML=!sub.messagingOverageEnabled?`<b>초과발송 차단</b> · 월 포함량 ${included?included.toLocaleString('ko-KR')+'건':'무제한'}을 넘으면 신규 자동발송이 제한됩니다.`:unit<=0?`<b>초과발송 허용</b> · 현재 건당 초과요금은 0원이라 추가 카드청구가 발생하지 않습니다.`:`<b>자동정산 ON</b> · 월 ${included?included.toLocaleString('ko-KR')+'건 포함':'무제한'} · 초과 ${billingMoney(unit)}/건 · ${startMonth?startMonth+' 사용분부터 ':''}확정 초과사용료를 다음 ${sub.billingCycle==='annual'?'연간 ':''}정기결제에 합산합니다.${pendingKrw?`<br><b>현재 정산 대기 ${billingMoney(pendingKrw)}</b>`:''}<br><span>구독 해지 시 미정산 초과사용료가 있으면 최종 정산 후 카드가 해제됩니다.</span>`;}
   if(oh){const labels={pending:'청구 대기',attached:'결제 처리중',paid:'정산 완료',no_charge:'추가 청구 없음'};oh.innerHTML=settlements.length?settlements.slice(0,6).map(x=>`<div class="invoice-row"><div><b>${escapeHtml(x.month)} ${x.mode==='credit'?'문자 크레딧 추가 사용':`문자 ${Number(x.used||0).toLocaleString('ko-KR')}건 · 초과 ${Number(x.overageCount||0).toLocaleString('ko-KR')}건`}</b><span>${Number(x.overageCount||0)>0?`${billingMoney(x.unitPriceKrw)}/건 · `:''}${billingMoney(x.amountKrw)}</span></div><span class="invoice-status ${x.status==='paid'?'paid':''}">${escapeHtml(labels[x.status]||x.status)}</span><span></span></div>`).join(''):'<div class="voice-empty">아직 확정된 월 초과정산 내역이 없습니다.</div>';}
@@ -4362,7 +4362,7 @@ function renderMessageCreditBudget(d){
  $('billingSaveMessageBudget').onclick=async()=>{const el=$('billingMessageBudget'),v=Number(el.value),btn=$('billingSaveMessageBudget');if(!el.value||!Number.isSafeInteger(v)||v<0||v>1000000){toast('추가 예산을 0~1,000,000원으로 입력해주세요.');return;}if(!confirm(`월 추가 문자 예산을 ${billingMoney(v)}으로 설정합니다. 실제 사용한 비용에 부가세가 더해져 정산됩니다. 저장할까요?`))return;btn.disabled=true;try{await saasRequest('/saas/billing/message-budget',{method:'PATCH',body:JSON.stringify({extraBudgetKrw:v,confirmed:true})});await loadBillingOverview();toast('문자 예산을 저장했습니다.');}catch(e){toast(e.message||'예산 저장 실패');btn.disabled=false;}};
 }
 
-function updateBillingPlanPrice(){const el=$('billingPlanPrice');if(!el||!billingOverviewState)return;const x=billingSelectedPlanInfo(),p=billingOverviewState.plans?.[x.code]||{},sub=billingOverviewState.subscription||{};el.textContent=p.quoteRequired&&sub.planCode!==x.code?'ENTERPRISE는 제공 범위·금액 협의 후 계약합니다.':`결제 총액 ${billingMoney(x.price)} · 부가세 포함${sub.commercialVersion==='legacy'&&x.code===sub.planCode?' · 기존 계약 조건 유지':''}${sub.foundingActive?' · Founding 가격보장 적용':''}${x.cycle==='annual'?' · 연간 선결제':''} · 문자·알림톡 비용 별도 · HOME 푸시 포함`;}
+function updateBillingPlanPrice(){const el=$('billingPlanPrice');if(!el||!billingOverviewState)return;const x=billingSelectedPlanInfo(),p=billingOverviewState.plans?.[x.code]||{},sub=billingOverviewState.subscription||{};el.textContent=p.quoteRequired&&sub.planCode!==x.code?'ENTERPRISE는 제공 범위·금액 협의 후 계약합니다.':`결제 총액 ${billingMoney(x.price)} · 부가세 포함${sub.commercialVersion==='legacy'&&x.code===sub.planCode?' · 기존 계약 조건 유지':''}${sub.foundingActive?' · Founding 가격보장 적용':''}${x.cycle==='annual'?' · 연간 선결제':''} · 문자·알림톡 비용 별도 · HOME 푸시 포함`;globalThis.CarestepBillingFlow?.render({overview:billingOverviewState,selected:x,plan:globalThis.carestepBillingPlan?.(),resources:globalThis.resourceClinicUI?.data?.(),loading:billingOverviewLoading,undoCancel:()=>setBillingCancel(false),cancelPlan:async body=>{await saasRequest('/saas/payments/subscription/plan',{method:'POST',body:JSON.stringify(body)});await loadBillingOverview(false);toast('요금제 변경 예약을 취소했습니다.');},notify:toast});}
 function billingMessageMode(onboarding){
   if(onboarding?.solapiOauth?.connected===true)return 'direct';
   if(onboarding?.solapiOauth?.status==='error')return 'unknown';
@@ -4402,6 +4402,7 @@ async function loadBillingOverview(showToast=false){
   if(showToast)toast(error.message||'결제정보 조회 실패');
  }finally{if(sequence===billingOverviewSequence)billingOverviewLoading=false;}
 }
+globalThis.CarestepOpenBillingCard=()=>{const previous=carestepActiveView();go('account');setAccountTab('billing','billingRegisterCard');loadBillingOverview(false);let back=$('billingPurchaseBack');if(!back){back=document.createElement('button');back.id='billingPurchaseBack';back.type='button';back.className='btn btn-secondary';$('billingRegisterCard').after(back);}back.textContent=previous&&previous!=='account'?'작성하던 화면으로 돌아가기':'추가 구매로 돌아가기';back.onclick=()=>{if(previous&&previous!=='account')go(previous);else{const panel=$('clinicResourceUsage')?.querySelector('[data-r-buy-panel]');if(panel){panel.open=true;panel.scrollIntoView({block:'center'});}}};};
 function cleanBillingReturnUrl(){
   const u=new URL(location.href);['carestepBilling','intentId','authKey','customerKey','code','message','orderId'].forEach(k=>u.searchParams.delete(k));return u.toString();
 }
@@ -4421,7 +4422,7 @@ async function startBillingCardRegistration(){
   }catch(e){toast(e.message||'카드 등록을 시작하지 못했습니다.');if(btn){btn.disabled=false;btn.textContent=old||'카드 등록 / 변경';}}
 }
 async function handleBillingRedirect(){
-  if(billingRedirectHandled||saasMode!=='auth'||!saasMe)return;const u=new URL(location.href),mode=u.searchParams.get('carestepBilling');if(!mode)return;billingRedirectHandled=true;go('account');
+  if(billingRedirectHandled||saasMode!=='auth'||!saasMe)return;const u=new URL(location.href),mode=u.searchParams.get('carestepBilling');if(!mode)return;billingRedirectHandled=true;go('account');setAccountTab('billing');
   try{
     if(mode==='success'){const intentId=u.searchParams.get('intentId')||'',authKey=u.searchParams.get('authKey')||'',customerKey=u.searchParams.get('customerKey')||'';if(!authKey||!customerKey)throw new Error('카드 인증 결과를 확인하지 못했습니다.');const d=await saasRequest('/saas/payments/setup-complete',{method:'POST',body:JSON.stringify({intentId,authKey,customerKey})});billingOverviewState=d.overview||null;renderBillingOverview();toast(d.chargeResult?.paid?'카드 등록과 구독 결제가 완료되었습니다.':'정기결제 카드 등록이 완료되었습니다.');}
     else{toast(`카드 등록이 완료되지 않았습니다.${u.searchParams.get('message')?' '+u.searchParams.get('message'):''}`);}
@@ -4429,7 +4430,7 @@ async function handleBillingRedirect(){
   finally{history.replaceState(history.state&&typeof history.state==='object'?{...history.state}:{},document.title,cleanBillingReturnUrl());await saasRefreshAccount(false);await loadBillingOverview(false);}
 }
 async function scheduleBillingPlan(){
-  const {code,cycle,price}=billingSelectedPlanInfo();if(!confirm(`${code} · ${cycle==='annual'?'연 결제':'월 결제'}로 변경 예약할까요?\n결제 총액: ${billingMoney(price)} · 부가세 포함 · 문자·알림톡 비용 별도 · HOME 푸시 포함\n\n무료체험 중이면 체험 종료일, 유료 구독 중이면 다음 결제일부터 적용됩니다.`))return;const btn=$('billingSchedulePlan');
+  const {code,cycle,price}=billingSelectedPlanInfo();if(!confirm(`${code} · ${cycle==='annual'?'연 결제':'월 결제'}로 변경 예약할까요?\n결제 총액: ${billingMoney(price)} · 부가세 포함 · 문자·알림톡 비용 별도 · HOME 푸시 포함\n\n적용 예정일: ${globalThis.CarestepBillingFlow?.effectiveDate(billingOverviewState.subscription)||'다음 결제일'}\n선택한 조건과 제공량 비교를 확인해주세요. 적용 전까지 현재 계약을 유지합니다.`))return;const btn=$('billingSchedulePlan');
   try{await uxButtonTask(btn,'예약 중…','✓ 변경 예약됨',async()=>{billingOverviewState=await saasRequest('/saas/payments/subscription/plan',{method:'POST',body:JSON.stringify({planCode:code,billingCycle:cycle})});await loadBillingOverview(false);toast('요금제 변경을 예약했습니다.');},{resetText:'다음 결제일부터 변경'});}catch(e){toast(e.message||'요금제 변경 예약 실패');}
 }
 async function setBillingCancel(flag){
@@ -11003,7 +11004,8 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-update-notice.js?v=20261107-review-polish"></script>
 <script>
 window.CarestepClinicalRights={ai:()=>!!saasMe&&clinicPermissionKeys(saasMe.permissions,saasMe.role).includes('clinical.ai'),approve:()=>!!saasMe&&clinicPermissionKeys(saasMe.permissions,saasMe.role).includes('clinical.approve')};
-window.resourceClinicUI=CarestepResources.mountClinic(document.getElementById('clinicResourceUsage'),(p,o)=>saasRequest(p,o),()=>({scope:saasMode==='auth'&&saasMe?clinicReadScope():'',canManage:!!saasMe&&clinicPermissionKeys(saasMe.permissions,saasMe.role).includes('billing.manage')}));
+globalThis.carestepBillingPlan=()=>billingOverviewState?.accountVerified?saasMe?.entitlements?.plan:null;
+window.resourceClinicUI=CarestepResources.mountClinic(document.getElementById('clinicResourceUsage'),(p,o)=>saasRequest(p,o),()=>({scope:saasMode==='auth'&&saasMe?clinicReadScope():'',canManage:!!saasMe&&clinicPermissionKeys(saasMe.permissions,saasMe.role).includes('billing.manage')}),()=>updateBillingPlanPrice());
 (()=>{const box=document.getElementById('clinicResourceUsage'),pane=box.closest('[data-account-pane]');let shown=false;new MutationObserver(()=>{const next=pane.classList.contains('active');if(next&&!shown)resourceClinicUI.load();shown=next;}).observe(pane,{attributes:true,attributeFilter:['class']});})();
 </script>
 </body>
