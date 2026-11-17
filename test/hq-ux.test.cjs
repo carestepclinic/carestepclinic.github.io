@@ -6,7 +6,7 @@ const http=require('node:http');
 const {chromium}=require('playwright');
 let browser,server,origin;
 const root=resolve(__dirname,'..');
-const allowed=new Set(['subscription-resources.js','subscription-resources.css','hq-healthcheck-usage.js','hq-clinical-storage.js','deployment-status.js','clinic-capabilities.js','guardian-studio.js','guardian-studio.css','hq.html','hq-workspace.js','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
+const allowed=new Set(['hq-incidents.js','hq-incidents.css','subscription-resources.js','subscription-resources.css','hq-healthcheck-usage.js','hq-clinical-storage.js','deployment-status.js','clinic-capabilities.js','guardian-studio.js','guardian-studio.css','hq.html','hq-workspace.js','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
 before(async()=>{
   server=http.createServer((req,res)=>{
     const file=new URL(req.url,'http://localhost').pathname.slice(1);
@@ -80,11 +80,11 @@ for(const width of [390,1440])test('integrations loads without removed Calendar 
  });
  await p.waitForFunction(()=>document.getElementById('msgSent').textContent==='7');
  assert.equal(await p.locator('#msgEnabledClinics').innerText(),'2');assert.equal(await p.evaluate(()=>integrationReads.some(x=>x.includes('/calendar'))),false);
- await p.evaluate(()=>integrationFail=true);if(width<768)await p.locator('#hqToolsToggle').click();await p.locator('#refresh').click();if(width<768)await p.keyboard.press('Escape');
+ await p.evaluate(()=>integrationFail=true);await p.locator('#integrationRefresh').click();
  await p.locator('#integrations').getByRole('button',{name:'다시 시도',exact:true}).waitFor();
  assert.ok((await p.locator('#integrations').innerText()).includes('시험 연동 조회 실패'));
  await p.evaluate(()=>integrationFail=false);await p.locator('#integrations').getByRole('button',{name:'다시 시도',exact:true}).click();
- await p.waitForFunction(()=>!document.querySelector('#integrations button[data-retry]')&&document.getElementById('msgQueueSummary').textContent.includes('완료 7'));
+ await p.waitForFunction(()=>document.querySelector('#integrations .hq-load-status').dataset.state==='ready'&&document.getElementById('msgSent').textContent==='7');
  assert.equal(await p.locator('#integrations').getByRole('button',{name:'다시 시도',exact:true}).count(),0);assert.equal(await p.evaluate(()=>writes.length),0);
 });
 test('dashboard keeps its current title after loading and places work before collapsed statistics',async t=>{
@@ -269,7 +269,8 @@ for(const width of [390,1280])test(`onboarding and subscription tables show five
  assert.equal(await p.locator('#subscriptionTable tbody tr').first().locator('td').count(),5);
  assert.match(await p.locator('#subscriptionTable').innerText(),/BASIC · 월 결제[\s\S]*86,900원/);
  await p.locator('#subscriptionTable .hq-row-toggle').click();assert.match(await p.locator('#subscriptionTable').innerText(),/판매 채널[\s\S]*청구 주체[\s\S]*가입 승인/);
- await p.locator('#hqSubscriptionSearch').fill('없음');assert.equal(await p.locator('#subscriptionTable tbody tr:visible').count(),0);
+ await p.locator('#hqSubscriptionSearch').fill('없음');assert.equal(await p.locator('#subscriptionTable .hq-compact-main-row:visible').count(),0);
+ assert.match(await p.locator('#subscriptionTable tbody tr:visible').innerText(),/검색 조건/);
  await p.locator('#hqSubscriptionSearch').fill('');
  assert.equal(await p.locator('#subscriptionTable .hq-compact-detail-row').isVisible(),true);
  await p.evaluate(()=>{document.activeElement.blur();scrollTo(0,0);});
@@ -278,7 +279,7 @@ for(const width of [390,1280])test(`onboarding and subscription tables show five
 });
 test('failed onboarding refresh retains prior rows with an error and retries without claiming current data',async t=>{
  const p=await fixture(t);await onboardingPage(p);
- await p.evaluate(()=>onboardFail=true);await p.locator('#refresh').click();
+ await p.evaluate(()=>onboardFail=true);await p.locator('#onboardingRefresh').click();
  await p.locator('#onboarding .hq-load-status[data-state="error"]').waitFor();
  assert.match(await p.locator('#onboarding .hq-load-status').innerText(),/시험 개통 조회 실패.*이전 결과/);
  assert.equal(await p.locator('#onboardingRows .hq-compact-main-row').count(),2);
@@ -366,6 +367,7 @@ async function contentFixture(t,width=1280){
     ];
     req=async(path,options)=>{
       if(path==='/hq/guardian-studio/drafts')return {drafts:[],limit:200};
+      if(path==='/hq/category-overrides'){if(window.categoryReadFail)throw Error('시험 분류 조회 실패');return {overrides:[]};}
       if(path==='/hq/content'){contentReads++;if(contentFail)throw Error('시험 콘텐츠 조회 실패');return {contents:contentReply.map(x=>({...x}))};}
       if(path.startsWith('/hq/content/')){
         writes.push({path,method:options.method,body:JSON.parse(options.body||'{}')});
@@ -409,7 +411,7 @@ test('central content lists safe text, counts, category and review filters witho
   assert.equal(await p.locator('[data-content-row]').count(),3);
   assert.equal(await p.locator('#contentTable img').count(),0);
   assert.match(await p.locator('#contentTable').innerText(),/<img src=x onerror=alert\(1\)>/);
-  await p.locator('#contentCategory').selectOption('수술');assert.equal(await p.locator('[data-content-row]').count(),2);
+  await p.locator('#content .hq-secondary-filters>summary').click();await p.locator('#contentCategory').selectOption('수술');assert.equal(await p.locator('[data-content-row]').count(),2);
   await p.locator('#contentDueOnly').check();assert.equal(await p.locator('[data-content-row]').count(),1);
   await p.locator('#contentSearch').fill('일치 없음');assert.match(await p.locator('#contentTable').innerText(),/검색 조건을 초기화/);
   await p.locator('#contentReset').click();assert.equal(await p.locator('[data-content-row]').count(),3);
@@ -455,34 +457,45 @@ test('content keeps the newest load and restores category, checkbox and search t
     pendingContent[0]({contents:[]});await first;req=original;
   });
   assert.equal(await p.locator('#contentTotal').innerText(),'3');
-  await p.locator('#contentCategory').selectOption('수술');await p.locator('#contentDueOnly').check();await p.locator('#contentSearch').fill('시험 게시');
+  await p.locator('#content .hq-secondary-filters>summary').click();await p.locator('#contentCategory').selectOption('수술');await p.locator('#contentDueOnly').check();await p.locator('#contentSearch').fill('시험 게시');
   await p.evaluate(()=>{history.replaceState(null,'','#content');$('contentCategory').innerHTML='<option value="all">전체 분류</option>';$('contentDueOnly').checked=false;$('contentSearch').value='';CarestepHqUX.restoreRoute();});
   await p.locator('#content .hq-load-status[data-state="ready"]').waitFor({state:'attached'});
   assert.equal(await p.locator('#contentCategory').inputValue(),'수술');assert.equal(await p.locator('#contentDueOnly').isChecked(),true);
   assert.equal(await p.locator('#contentSearch').inputValue(),'시험 게시');assert.equal(await p.locator('[data-content-row]').count(),1);
 });
 
-test('content status writes once, blocks navigation during save, then reloads confirmed state',async t=>{
+for(const categoryFailure of [false,true])test('content status writes once and preserves confirmed result with category failure '+categoryFailure,async t=>{
   const p=await contentFixture(t);await contentPage(p);
-  await p.evaluate(()=>{allowContentWrite=true;contentWriteDelay=true;});
+  await p.evaluate(fail=>{allowContentWrite=true;contentWriteDelay=true;categoryReadFail=fail;},categoryFailure);
   await p.locator('[data-content-status="sample-live"]').click();await p.locator('[data-hq-confirm-accept]').dblclick();
   await p.waitForFunction(()=>writes.length===1);
   assert.equal(await p.locator('#contentRefresh').isDisabled(),true);
   await p.evaluate(()=>showView('voice'));assert.equal(await p.locator('.view.active').getAttribute('id'),'content');
   await p.evaluate(()=>{contentWriteDelay=false;releaseContent();});
-  await p.waitForFunction(()=>$('contentPublished').textContent==='0');
+  await p.waitForFunction(()=>$('contentPublished').textContent==='0'&&!$('contentRefresh').disabled);
   assert.deepEqual((await p.evaluate(()=>writes))[0],{path:'/hq/content/sample-live',method:'PATCH',body:{status:'archived'}});
-  assert.match(await p.locator('#contentBulkResult').innerText(),/게시 중단 완료 1건/);
+  assert.match(await p.locator('#contentBulkResult').innerText(),/공개 중단 완료 1건/);
   assert.equal(await p.locator('#contentRefresh').isDisabled(),false);
+  assert.equal(await p.locator('#contentCategoryNotice').isVisible(),categoryFailure);
+  if(categoryFailure){
+    assert.match(await p.locator('#contentCategoryNotice').innerText(),/분류 설정을 불러오지 못했습니다/);
+    assert.equal(await p.locator('[data-guardian-category]').first().isDisabled(),true);
+    await p.evaluate(()=>categoryReadFail=false);await p.locator('#contentRefresh').click();
+    await p.waitForFunction(()=>!$('contentRefresh').disabled);
+    assert.equal(await p.locator('#contentCategoryNotice').isVisible(),false);
+    assert.equal(await p.locator('[data-guardian-category]').first().isEnabled(),true);
+    assert.equal(await p.evaluate(()=>writes.length),1);
+  }
 });
 
-test('content bulk deletion reports partial failure, retains only failed selection and does not retry automatically',async t=>{
+for(const categoryFailure of [false,true])test('content bulk deletion retains partial result and failed selection with category failure '+categoryFailure,async t=>{
   const p=await contentFixture(t);await contentPage(p);
-  await p.evaluate(()=>{allowContentWrite=true;contentWriteFail='sample-archive-b';});
+  await p.evaluate(fail=>{allowContentWrite=true;contentWriteFail='sample-archive-b';categoryReadFail=fail;},categoryFailure);
   await p.locator('#contentManageMode').check();await p.locator('#contentSelectAllArchived').check();await p.locator('#contentBulkDelete').click();await p.locator('[data-hq-confirm-accept]').click();
-  await p.waitForFunction(()=>$('contentBulkResult').textContent.includes('결과 확인 필요 1건')&&$('contentArchived').textContent==='1');
+  await p.waitForFunction(()=>$('contentArchived').textContent==='1'&&!$('contentRefresh').disabled);
   assert.equal(await p.evaluate(()=>writes.length),2);
-  assert.match(await p.locator('#contentBulkResult').innerText(),/삭제 완료 1건[\s\S]*시험 보관 자료 B: 시험 콘텐츠 저장 실패/);
+  assert.match(await p.locator('#contentBulkResult').innerText(),/삭제 완료 1건[\s\S]*결과 확인 필요 1건[\s\S]*시험 보관 자료 B: 시험 콘텐츠 저장 실패/);
+  assert.equal(await p.locator('#contentCategoryNotice').isVisible(),categoryFailure);
   assert.equal(await p.locator('[data-content-bulk]:checked').count(),1);
   assert.equal(await p.locator('[data-content-bulk]:checked').inputValue(),'sample-archive-b');
 });
@@ -847,11 +860,11 @@ test('a failed supplementary payment hospital lookup does not invent a distinct 
  assert.equal(await p.locator('#acTargetClinics').innerText(),'대상 병원 일부 확인 불가');
 });
 
-test('work cards set matching list conditions before loading and preserve ready hospitals needing attention',async t=>{
+test('work cards set matching conditions and distinguish required setup from optional adoption',async t=>{
  const p=await fixture(t);
  await p.evaluate(()=>{
   req=async(path,o)=>{
-   if(path==='/hq/onboarding')return {summary:{attention:1},clinics:[{clinicId:'A',clinicName:'대상 병원',goLiveStatus:'live',needsAttention:true,steps:[]},{clinicId:'B',clinicName:'정상 병원',goLiveStatus:'live',needsAttention:false,steps:[]}]};
+   if(path==='/hq/onboarding')return {summary:{attention:1},clinics:[{clinicId:'A',clinicName:'대상 병원',steps:[{key:'profile',done:true},{key:'team',done:false}]},{clinicId:'B',clinicName:'정상 병원',steps:[{key:'profile',done:true},{key:'team',done:true},{key:'messaging',done:false},{key:'package',done:false}]}]};
    if(path==='/hq/customer-success')return {summary:{risk:1},clinics:[{clinicId:'A',clinicName:'도입 확인 대상',status:'risk'},{clinicId:'B',clinicName:'도입 양호',status:'healthy'}]};
    if(path.startsWith('/hq/messaging/sender-onboarding'))return {requests:[{clinicId:'A',clinicName:'승인 신청 병원',status:'pending'},{clinicId:'B',clinicName:'등록 진행 병원',status:'registering'},{clinicId:'C',clinicName:'승인 완료 병원',status:'approved'}]};
    if(path==='/hq/content')return {contents:[{contentId:'a',title:'재검토 대상',status:'published',reviewDueAt:'2020-01-01'},{contentId:'b',title:'검토 완료',status:'published',reviewDueAt:'2099-01-01'}]};
@@ -949,7 +962,7 @@ async function adoptionPortfolio(p){
 }
 test('adoption All clears combined conditions and reports the full versus visible hospital count',async t=>{
  const p=await fixture(t);await adoptionPortfolio(p);
- assert.match(await p.locator('#hqAdoptionResults').innerText(),/전체 4곳 · 현재 표시 3곳.*이용 중단 위험/);
+ assert.match(await p.locator('#hqAdoptionResults').innerText(),/전체 4곳 · 현재 표시 3곳.*사용 현황 확인 필요/);
  assert.equal(await p.locator('[data-cs-quick="all"]').getAttribute('aria-pressed'),'false');
  await p.locator('#hqAdoptionFilters>summary').click();
  await p.locator('#customerSuccessSearch').fill('구독');
@@ -1042,20 +1055,24 @@ test('first portfolio load uses final columns and a failure remains different fr
  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  await p.evaluate(()=>portfolioJobs[2].resolve({summary:{total:0},clinics:[]}));
 });
-test('refresh keeps expanded hospital details by ID even after order changes and ignores earlier replies',async t=>{
+test('refresh keeps expanded hospital details, prevents duplicate reads and rejects an old identity response',async t=>{
  const p=await fixture(t);await adoptionPortfolio(p);
  await p.locator('[data-cs-clinic="B"]').locator('..').locator('..').locator('.hq-row-toggle').click();
  await p.evaluate(()=>{
   window.adoptionJobs=[];req=path=>new Promise((resolve,reject)=>adoptionJobs.push({path,resolve,reject}));
   window.olderAdoption=loadCustomerSuccess();window.newerAdoption=loadCustomerSuccess();
  });
- await p.evaluate(()=>adoptionJobs[1].resolve({...adoptionData,clinics:adoptionData.clinics.map(x=>({...x,riskScore:x.clinicId==='B'?99:x.riskScore}))}));
- await p.evaluate(()=>newerAdoption);
+ assert.equal(await p.evaluate(()=>adoptionJobs.length),1);
+ assert.equal(await p.locator('#customerSuccessRefresh').isDisabled(),true);
+ await p.evaluate(()=>adoptionJobs[0].resolve({...adoptionData,clinics:adoptionData.clinics.map(x=>({...x,riskScore:x.clinicId==='B'?99:x.riskScore}))}));
+ await p.evaluate(()=>Promise.all([olderAdoption,newerAdoption]));
  const b=p.locator('.hq-compact-main-row').filter({has:p.locator('[data-cs-clinic="B"]')});
  assert.equal(await b.locator('.hq-row-toggle').getAttribute('aria-expanded'),'true');
  assert.equal(await p.locator('#customerSuccessRows .hq-compact-main-row').first().locator('[data-cs-clinic]').getAttribute('data-cs-clinic'),'B');
- await p.evaluate(()=>adoptionJobs[0].resolve({summary:{total:0},clinics:[]}));
- await p.evaluate(()=>olderAdoption);
+ await p.evaluate(()=>{window.obsoleteAdoption=loadCustomerSuccess();hqOwner='replacement-owner';});
+ await p.evaluate(()=>adoptionJobs[1].resolve({summary:{total:0},clinics:[]}));
+ await p.evaluate(()=>obsoleteAdoption);
+ assert.equal(await p.locator('#customerSuccessRefresh').isDisabled(),false);
  assert.equal(await p.locator('#customerSuccessRows .hq-compact-main-row').count(),3);
  await p.locator('#customerSuccessSearch').fill('구독');await p.locator('#customerSuccessSearch').fill('');
  assert.equal(await p.locator('.hq-compact-main-row').filter({has:p.locator('[data-cs-clinic="B"]')}).locator('.hq-row-toggle').getAttribute('aria-expanded'),'true');
@@ -1129,7 +1146,9 @@ test('message and monthly tables reveal secondary metrics and keep hospital navi
 });
 
 test('production checks prioritize attention and collapse passed checks without changing manual state',async t=>{
- const p=await fixture(t);await p.evaluate(()=>{
+ const p=await fixture(t);
+ assert.equal(await p.evaluate(()=>typeof window.CarestepHqIncidents?.render),'function','The production fixture must load the incident renderer used by the deployed page.');
+ await p.evaluate(()=>{
   req=(path,options)=>path==='/hq/production-launch'?Promise.resolve({security:{criticalPassed:1,criticalTotal:2,testMode:true,checks:[{label:'정상 점검',pass:true},{label:'확인할 점검',pass:false,severity:'warning'}]},checklist:{done:1,total:2,state:{privacy:true}},operations:{}}):baseReq(path,options);showView('production');
  });
  await p.locator('.hq-passed-checks').waitFor();

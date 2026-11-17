@@ -43,10 +43,11 @@ for(const width of [390,768,1440])test('three independent material tabs and mobi
 });
 test('protocol filters, document review and queue are retained without automatic generation',async t=>{
  const p=await fixture(t);await p.evaluate(()=>showView('protocols'));await p.locator('.hq-protocol-card').first().waitFor();
+ await p.locator('#protocols .hq-secondary-filters>summary').click();
  await p.locator('[data-protocol-filter]').selectOption('published');assert.equal(await p.locator('.hq-protocol-card').count(),1);
  await p.locator('[data-protocol-search]').fill('없음');assert.match(await p.locator('[data-protocol-list]').innerText(),/검색 조건/);
  await p.locator('[data-protocol-search]').fill('시험 질환 A');await p.locator('[data-protocol-filter]').selectOption('all');
- await p.getByRole('button',{name:'본문·검토 열기',exact:true}).click();await p.locator('[data-ck-editor]').waitFor();
+ await p.getByRole('button',{name:'초안 검토',exact:true}).click();await p.locator('[data-ck-editor]').waitFor();
  assert.equal(await p.locator('[name=title]').inputValue(),'시험 질환 A');
  await p.locator('[data-ck=back]').click();await p.locator('.hq-protocol-card').first().waitFor();
  await p.locator('[data-protocol-queue]').click();await p.locator('[data-ck=process]').waitFor();
@@ -113,16 +114,17 @@ for(const width of [390,1440])test('common species, triage actions and reset sho
  const p=await fixture(t,width);await p.evaluate(protocolOperationsData);await p.evaluate(()=>showView('protocols'));await p.locator('.hq-protocol-card').first().waitFor();
  await p.locator('#protocols .hq-secondary-filters').evaluate(e=>e.open=true);await p.locator('[data-protocol-species]').selectOption('dog');assert.deepEqual(await p.locator('.hq-protocol-card h2').allTextContents(),['가 강아지 자료','나 공통 자료']);
  await p.locator('#protocols .hq-secondary-filters').evaluate(e=>e.open=true);await p.locator('[data-protocol-species]').selectOption('cat');assert.deepEqual(await p.locator('.hq-protocol-card h2').allTextContents(),['나 공통 자료','다 고양이 자료']);
- await p.locator('[data-protocol-search]').fill('일치 없음');await p.locator('[data-protocol-quick=changed]').click();assert.deepEqual(await p.locator('.hq-protocol-card h2').allTextContents(),['나 공통 자료']);assert.match(await p.locator('.hq-protocol-card').innerText(),/변경된 원본/);
+ await p.locator('[data-protocol-search]').fill('일치 없음');await p.locator('[data-protocol-quick=changed]').click();assert.equal(await p.locator('.hq-protocol-card').count(),0);assert.equal(await p.locator('[data-protocol-search]').inputValue(),'일치 없음');assert.equal(await p.locator('[data-protocol-species]').inputValue(),'cat');
+ await p.locator('[data-protocol-search]').fill('');assert.deepEqual(await p.locator('.hq-protocol-card h2').allTextContents(),['나 공통 자료']);assert.match(await p.locator('.hq-protocol-card').innerText(),/변경된 원본/);
  await p.locator('[data-protocol-quick=review]').click();assert.equal(await p.locator('.hq-protocol-card').count(),2);
- await p.locator('[data-protocol-quick=failed]').click();assert.match(await p.locator('.hq-protocol-card').innerText(),/합성 근거 부족/);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+ await p.locator('[data-protocol-species]').selectOption('all');await p.locator('[data-protocol-quick=failed]').click();assert.match(await p.locator('.hq-protocol-card').innerText(),/합성 근거 부족/);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
  if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:path.join(process.env.HQ_SCREENSHOTS,'hq-operations-protocols-'+width+'.png'),fullPage:true});
  await p.getByRole('button',{name:'실패 원인·재시도 열기',exact:true}).click();await p.locator('[data-ck-job-status]').waitFor();assert.equal(await p.locator('[data-ck-job-status]').inputValue(),'failed');assert.equal(await p.locator('[data-ck-job-details]').evaluate(el=>el.open),true);assert.equal(await p.locator('[data-ck-job]').count(),1);assert.equal(await p.locator('[data-ck="retry:failed-one"]').isVisible(),true);
  await p.locator('[data-ck-close]').click();await p.locator('[data-protocol-reset]').click();assert.equal(await p.locator('.hq-protocol-card').count(),3);assert.equal(await p.locator('[data-protocol-species]').inputValue(),'all');assert.deepEqual(await p.evaluate(()=>operationWrites),[]);
 });
 test('protocol conditions survive a real browser reload including fields resolved from the source catalog',async t=>{
  const p=await fixture(t);await p.evaluate(protocolOperationsData);await p.evaluate(()=>showView('protocols'));await p.locator('.hq-protocol-card').first().waitFor();
- await p.locator('[data-protocol-search]').fill('공통');await p.locator('[data-protocol-filter]').selectOption('draft');await p.locator('#protocols .hq-secondary-filters').evaluate(e=>e.open=true);await p.locator('[data-protocol-species]').selectOption('dog');await p.locator('[data-protocol-field]').selectOption('내과');await p.locator('[data-protocol-sort]').selectOption('title');
+ await p.locator('[data-protocol-search]').fill('공통');await p.locator('#protocols .hq-secondary-filters>summary').click();await p.locator('[data-protocol-filter]').selectOption('draft');await p.locator('[data-protocol-species]').selectOption('dog');await p.locator('[data-protocol-field]').selectOption('내과');await p.locator('[data-protocol-sort]').selectOption('title');
  await p.reload();await p.evaluate(protocolOperationsData);await p.evaluate(()=>CarestepHqUX.restoreRoute());await p.locator('.hq-protocol-card').first().waitFor();
  assert.equal(await p.locator('[data-protocol-search]').inputValue(),'공통');assert.equal(await p.locator('[data-protocol-species]').inputValue(),'dog');assert.equal(await p.locator('[data-protocol-field]').inputValue(),'내과');assert.equal(await p.locator('[data-protocol-sort]').inputValue(),'title');assert.equal(await p.locator('[data-protocol-filter]').inputValue(),'draft');assert.deepEqual(await p.locator('.hq-protocol-card h2').allTextContents(),['나 공통 자료']);assert.deepEqual(await p.evaluate(()=>operationWrites),[]);
 });
@@ -134,9 +136,9 @@ for(const width of [390,1440])test('HQ display semantics and compact protocol ra
  const p=await fixture(t,width);await p.evaluate(()=>{
  const old=req;req=async(path,o)=>path==='/hq/training/knowledge-protocols'?{items:Array.from({length:30},(_,i)=>({id:'p'+i,title:i===0?'슬개골 탈구 초안':'자료 '+i,status:'published',category:'예방',species:'dog',sourceCurrent:true})),queue:{counts:{},items:[]}}:old(path,o);
  });await p.evaluate(()=>showView('protocols'));await p.locator('.hq-protocol-card').first().waitFor();
- assert.equal(await p.locator('.hq-protocol-card').count(),24);assert.match(await p.locator('[data-protocol-count]').innerText(),/검색 결과 30개 · 현재 1–24개/);
+ assert.equal(await p.locator('.hq-protocol-card').count(),24);assert.equal(await p.locator('#protocols .hq-pagination-top [role=status]').innerText(),'1–24 / 30개');assert.equal(await p.locator('[data-protocol-count]').innerText(),'');
  assert.equal(await p.locator('#protocols .hq-secondary-filters').evaluate(e=>e.open),false);
- await p.locator('#protocols .hq-pagination').first().getByRole('button',{name:'다음',exact:true}).click();assert.match(await p.locator('[data-protocol-count]').innerText(),/현재 25–30개/);
+ await p.locator('#protocols .hq-pagination').first().getByRole('button',{name:'다음',exact:true}).click();assert.equal(await p.locator('#protocols .hq-pagination-top [role=status]').innerText(),'25–30 / 30개');assert.equal(await p.locator('.hq-protocol-card').count(),6);
  assert.deepEqual(await p.evaluate(()=>({title:CarestepHqWorkspace.materialTitle({title:'슬개골 탈구 초안',status:'published'}),draft:CarestepHqWorkspace.materialTitle({title:'슬개골 탈구 초안',status:'draft'}),category:CarestepHqWorkspace.category({title:'슬개골 탈구',category:'예방'}),noGuess:CarestepHqWorkspace.category({title:'specific test',category:'기타'}),next:CarestepHqWorkspace.adoptionAction({nextAction:'첫 퇴원자료 생성'})})),{title:'슬개골 탈구',draft:'슬개골 탈구 초안',category:'정형외과',noGuess:'기타',next:'최근 30일 보호자 안내자료 사용 현황을 확인해주세요.'});
  assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
  if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:path.join(process.env.HQ_SCREENSHOTS,'hq-refine-'+width+'.png'),fullPage:true});

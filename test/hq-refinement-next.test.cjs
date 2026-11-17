@@ -53,7 +53,8 @@ for(const width of [390,1440])test('top and bottom protocol pagination agree and
  });await p.locator('.hq-protocol-card').first().waitFor();assert.equal(await p.locator('#protocols .hq-pagination').count(),2);
  assert.equal(await p.locator('.hq-protocol-card h2').first().innerText(),'PLE');
  assert.match(await p.locator('.hq-protocol-card h2').first().getAttribute('title'),/단백소실성/);
- assert.match(await p.locator('.hq-protocol-description').first().innerText(),/재평가 프로토콜/);
+ assert.equal(await p.locator('.hq-protocol-card h2').first().getAttribute('title'),'단백소실성 장질환 의심 환자의 진단적 평가 및 원인 기반 관리와 재평가 프로토콜 0');
+ assert.equal(await p.locator('.hq-protocol-description').count(),0); // Compact cards keep the original title on the heading instead of repeating it below.
  await p.locator('#protocols .hq-pagination-top').getByRole('button',{name:'다음',exact:true}).click();
  assert.equal(await p.locator('.hq-protocol-card').count(),6);assert.ok(await p.locator('#protocols .hq-pagination-top').evaluate(e=>e.getBoundingClientRect().top>=document.querySelector('.top').getBoundingClientRect().bottom));for(const nav of await p.locator('#protocols .hq-pagination').all())assert.match(await nav.innerText(),/25–30/);
  await p.locator('#protocols .hq-pagination').last().getByRole('button',{name:'이전',exact:true}).click();assert.equal(await p.locator('.hq-protocol-card').count(),24);

@@ -772,6 +772,11 @@
   const contentCounts=['contentTotal','contentPublished','contentArchived','contentReviewDue'];
   const contentStates={published:'공개 중',archived:'공개 중단',draft:'작성 중',review:'검토 대기',deleted:'삭제 이력'};
   let contentReady=false,contentLoading=false,contentCategoriesReady=false;const contentWindow={};
+  // Lookup warnings must not replace the confirmed result of a content write.
+  const contentCategoryNotice=document.createElement('p');
+  contentCategoryNotice.id='contentCategoryNotice';contentCategoryNotice.className='notice';
+  contentCategoryNotice.setAttribute('role','status');contentCategoryNotice.hidden=true;
+  byId('contentBulkResult').before(contentCategoryNotice);
   const contentDue=x=>x.status==='published'&&!!x.reviewDueAt&&Number.isFinite(Date.parse(x.reviewDueAt))&&Date.parse(x.reviewDueAt)<=Date.now();
   const contentDate=value=>value&&Number.isFinite(Date.parse(value))?new Date(value).toLocaleDateString('ko-KR'):'미등록';
   function lockContent(locked){
@@ -787,6 +792,7 @@
     globalThis.GuardianStudio?.refresh();
     setRegion('content','loading');if(!keep)clearCounts(contentCounts);lockContent(true);
     if(!keepResult)byId('contentBulkResult').textContent='';
+    contentCategoryNotice.hidden=true;contentCategoryNotice.textContent='';
     if(!keep){byId('contentResultSummary').textContent='';byId('contentTable').replaceChildren();}
     updateContentBulkUi();
     try{
@@ -804,7 +810,7 @@
       const counts=[contents.filter(x=>x.status!=='deleted').length,contents.filter(x=>x.status==='published').length,contents.filter(x=>x.status==='archived').length,contents.filter(contentDue).length];
       contentCounts.forEach((id,i)=>byId(id).textContent=fmt(counts[i]));
       renderContent();setRegion('content','ready');
-      if(!contentCategoriesReady)byId('contentBulkResult').textContent='분류 설정을 불러오지 못했습니다. 원본 분류로 표시합니다. 새로고침 후 다시 확인해주세요.';
+      if(!contentCategoriesReady){contentCategoryNotice.textContent='분류 설정을 불러오지 못했습니다. 원본 분류로 표시합니다. 새로고침 후 다시 확인해주세요.';contentCategoryNotice.hidden=false;}
     }catch(error){
       if(!current())return;
       contentReady=false;if(!keep){contents=[];clearCounts(contentCounts);byId('contentResultSummary').textContent='';byId('contentTable').replaceChildren();}
