@@ -16,11 +16,11 @@ for(const tab of ['surgery','dental','neuro','ophthalmic','chronic'])for(const w
 test('update opens new version and keeps unsaved input in original tab',async()=>{
  const {p}=await page('chronic');try{
   await p.locator('input[name=q]').fill('유지할 검색');
-  const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace('clinic-calm.css?v=20261107-review-polish','clinic-calm.css?v=test-next-version');
-  await p.route(url+'/index.html',r=>r.fulfill({status:200,contentType:'text/html',headers:{etag:'"new"'},body:html}));
+  const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/clinic-calm\.css\?v=[^"]+/, 'clinic-calm.css?v=test-next-version');
+  const respond=r=>r.fulfill({status:200,contentType:'text/html; charset=utf-8',headers:{etag:'"new"'},body:html});await p.route(u=>u.pathname==='/index.html',respond);await p.context().route(u=>u.pathname==='/index.html',respond);
   await p.evaluate(()=>ClinicUpdateNotice.check());assert.ok(await p.locator('.cs-update-notice').isVisible());
   const [popup]=await Promise.all([p.waitForEvent('popup'),p.locator('.cs-update-open').click()]);await popup.waitForLoadState('domcontentloaded');
-  assert.equal(await p.locator('input[name=q]').inputValue(),'유지할 검색');assert.ok(popup.url().includes('updated='));await popup.close();
+  assert.equal(await p.locator('input[name=q]').inputValue(),'유지할 검색');assert.ok(popup.url().includes('updated='));await popup.evaluate(()=>ClinicUpdateNotice.check());assert.equal(await popup.locator('.cs-update-notice').count(),0);await popup.evaluate(()=>ClinicUpdateNotice.check());assert.equal(await popup.locator('.cs-update-notice').count(),0);await popup.close();
   await p.locator('.cs-update-notice button').click();await p.evaluate(()=>ClinicUpdateNotice.check());assert.equal(await p.locator('.cs-update-notice').count(),0);
  }finally{await p.close();}
 });
@@ -47,3 +47,12 @@ for(const width of [390,1280,1440])test('calculator compact input and type layou
   await p.screenshot({path:root+'/../clinic-redesign-preview/calculator-review-'+width+'.png',fullPage:false});
  }finally{await p.close();}
 });
+
+ test('update version capture waits for trailing assets and ignores inserted optional definitions',async()=>{
+  const p=await browser.newPage();try{const shell='<html><head><meta charset="utf-8"><script id="clinic-module-manifest" type="application/json">{"dental":["optional.js?v=1"]}</script></head><body><input id="draft" value="작성 중"><script src="clinic-update-notice.js"></script><script>const s=document.createElement("script");s.src="optional.js?v=1";document.head.append(s);</script><script src="tail.js?v=1"></script></body></html>';
+   await p.route('**/*',r=>{const u=new URL(r.request().url());if(u.pathname==='/fixture.html'||u.pathname==='/index.html')return r.fulfill({status:200,contentType:'text/html',body:shell});if(u.pathname==='/clinic-update-notice.js')return r.fulfill({status:200,contentType:'application/javascript',body:fs.readFileSync(path.join(root,'clinic-update-notice.js'),'utf8')});return r.fulfill({status:200,contentType:'application/javascript',body:''});});
+   await p.goto(url+'/fixture.html');await p.evaluate(()=>ClinicUpdateNotice.check());assert.equal(await p.locator('.cs-update-notice').count(),0);await p.evaluate(()=>{const s=document.createElement('script');s.src='later-runtime.js';document.head.append(s);});await p.evaluate(()=>ClinicUpdateNotice.check());assert.equal(await p.locator('.cs-update-notice').count(),0);assert.equal(await p.locator('#draft').inputValue(),'작성 중');
+  }finally{await p.close();}
+ });
+
+test('navigation update checks use the shared notice without a duplicate banner',async()=>{const {p}=await page('dental');try{await p.evaluate(()=>{window.sharedUpdateChecks=0;window.ClinicUpdateNotice={check:async()=>{window.sharedUpdateChecks++;}};});await p.evaluate(()=>document.dispatchEvent(new Event('visibilitychange')));assert.equal(await p.evaluate(()=>window.sharedUpdateChecks),1);assert.equal(await p.locator('#clinicUIUpdate').count(),0);}finally{await p.close();}});

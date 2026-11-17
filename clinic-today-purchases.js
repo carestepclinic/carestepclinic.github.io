@@ -14,8 +14,7 @@
   const status=node('p',message||('최근 확인 '+new Date(checked).toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit'})),'cs-supply-status');status.setAttribute('role','status');e.append(status);if(!data)return;
   const needed=data.items.filter(x=>x.status==='needed'),urgent=needed.filter(x=>x.urgent).length,incoming=data.items.filter(x=>['ordered','partial'].includes(x.status)),claims=(data.claims||[]).filter(x=>['requested','sent'].includes(x.status));
   const grid=node('div',undefined,'cs-supply-counts');for(const [label,count,note] of [['주문 필요',needed.length,urgent?'긴급 '+urgent+'건':''],['입고 대기',incoming.length,''],['교환·반품',claims.length,'진행 중']]){const item=node('div');item.append(node('span',label),node('b',count+'건'));if(note)item.append(node('small',note,urgent&&label==='주문 필요'?'cs-supply-urgent':''));grid.append(item);}e.append(grid);
-  if(needed.length){const list=node('ul',undefined,'cs-supply-preview');for(const item of [...needed].sort((a,b)=>Number(!!b.urgent)-Number(!!a.urgent)).slice(0,3)){const row=node('li');row.append(node('span',(item.urgent?'긴급 · ':'')+item.name+(item.spec?' · '+item.spec:'')),node('b',item.quantity+' '+(item.unit||'개')));if(item.urgent)row.className='cs-supply-urgent';list.append(row);}e.append(list);if(needed.length>3)e.append(node('small','외 '+(needed.length-3)+'건 · 전체 목록은 물품 관리에서 확인하세요.'));}
-  else e.append(node('p','현재 주문이 필요한 물품이 없습니다.','cs-supply-status'));
+
  }
  async function load(force=false){
   if(!allowed()){clear();return;}const scope=identity();if(key!==scope){clear();key=scope;}
