@@ -1149,7 +1149,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="hospital-operations.css">
 <link rel="stylesheet" href="practice-intake.css?v=20261105-selection"><link rel="stylesheet" href="clinic-purchases.css?v=20261107-toolbar-vendors">
 <link rel="stylesheet" href="healthcheck-record.css?v=20261117-editor-flow">
-<link rel="stylesheet" href="subscription-resources.css?v=20261117-billing-flow"><script src="subscription-resources.js?v=20261117-billing-flow"></script><script src="billing-flow.js?v=20261117-billing-flow"></script>
+<link rel="stylesheet" href="subscription-resources.css?v=20261117-billing-safety"><script src="subscription-resources.js?v=20261117-billing-safety"></script><script src="billing-flow.js?v=20261117-billing-safety"></script>
 </head>
 <body class="clinic-calm">
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -1838,7 +1838,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
                 <div class="billing-note">신규 무료체험은 30일입니다. 유료 요금제와 결제금액을 확인하고 전환을 신청한 경우에만 체험 종료 후 결제합니다. 유료 구독 중 요금제 변경은 다음 결제일부터 적용되며 중도 일할계산은 하지 않습니다.</div></details>
               </div>
               <div class="billing-box">
-                <h4>정기결제 카드</h4><p>카드번호는 CARESTEP이 직접 받지 않고 토스페이먼츠 카드 등록창에서 인증합니다.</p>
+                <h4>정기결제 카드</h4><p>카드 등록·변경만으로 결제하거나 요금제를 변경하지 않습니다. 기존 정기결제 일정은 유지됩니다. 카드정보는 토스페이먼츠에서 인증합니다.</p>
                 <div id="billingCardBox" class="billing-card"><div><b>등록된 카드 없음</b><span>자동결제를 사용하려면 카드를 등록해주세요.</span></div></div>
                 <div class="billing-actions"><button id="billingRegisterCard" class="btn btn-primary" type="button">카드 등록 / 변경</button><button id="billingRetryPayment" class="btn btn-secondary hidden" type="button">결제 다시 시도</button></div>
                 <div id="billingFailureNote" class="billing-note"></div>
@@ -4412,9 +4412,9 @@ async function loadTossPaymentsSdk(){
 }
 async function startBillingCardRegistration(){
   if(!billingOverviewState?.canManage){toast('원장·관리자 계정에서 결제수단을 변경할 수 있습니다.');return;}
-  const {code,cycle}=billingSelectedPlanInfo();const btn=$('billingRegisterCard'),old=btn?.textContent;if(btn){btn.disabled=true;btn.textContent='카드 등록창 준비 중…';}
+  const btn=$('billingRegisterCard'),old=btn?.textContent;if(btn){btn.disabled=true;btn.textContent='카드 등록창 준비 중…';}
   try{
-    const d=await saasRequest('/saas/payments/setup-intent',{method:'POST',body:JSON.stringify({planCode:code,billingCycle:cycle})});
+    const d=await saasRequest('/saas/payments/setup-intent',{method:'POST',body:JSON.stringify({purpose:'payment_method_only'})});
     await loadTossPaymentsSdk();const toss=window.TossPayments(d.clientKey),payment=toss.payment({customerKey:d.customerKey});
     const success=new URL(cleanBillingReturnUrl());success.searchParams.set('carestepBilling','success');success.searchParams.set('intentId',d.intentId);
     const fail=new URL(cleanBillingReturnUrl());fail.searchParams.set('carestepBilling','fail');fail.searchParams.set('intentId',d.intentId);
@@ -4424,7 +4424,7 @@ async function startBillingCardRegistration(){
 async function handleBillingRedirect(){
   if(billingRedirectHandled||saasMode!=='auth'||!saasMe)return;const u=new URL(location.href),mode=u.searchParams.get('carestepBilling');if(!mode)return;billingRedirectHandled=true;go('account');setAccountTab('billing');
   try{
-    if(mode==='success'){const intentId=u.searchParams.get('intentId')||'',authKey=u.searchParams.get('authKey')||'',customerKey=u.searchParams.get('customerKey')||'';if(!authKey||!customerKey)throw new Error('카드 인증 결과를 확인하지 못했습니다.');const d=await saasRequest('/saas/payments/setup-complete',{method:'POST',body:JSON.stringify({intentId,authKey,customerKey})});billingOverviewState=d.overview||null;renderBillingOverview();toast(d.chargeResult?.paid?'카드 등록과 구독 결제가 완료되었습니다.':'정기결제 카드 등록이 완료되었습니다.');}
+    if(mode==='success'){const intentId=u.searchParams.get('intentId')||'',authKey=u.searchParams.get('authKey')||'',customerKey=u.searchParams.get('customerKey')||'';if(!authKey||!customerKey)throw new Error('카드 인증 결과를 확인하지 못했습니다.');const d=await saasRequest('/saas/payments/setup-complete',{method:'POST',body:JSON.stringify({intentId,authKey,customerKey})});billingOverviewState=d.overview||null;renderBillingOverview();toast('카드를 등록했습니다. 이번 등록으로 결제하거나 구독 조건을 변경하지 않았습니다.');}
     else{toast(`카드 등록이 완료되지 않았습니다.${u.searchParams.get('message')?' '+u.searchParams.get('message'):''}`);}
   }catch(e){toast(e.message||'카드 등록 완료 처리에 실패했습니다.');}
   finally{history.replaceState(history.state&&typeof history.state==='object'?{...history.state}:{},document.title,cleanBillingReturnUrl());await saasRefreshAccount(false);await loadBillingOverview(false);}
@@ -4438,8 +4438,11 @@ async function setBillingCancel(flag){
   try{await uxButtonTask(btn,flag?'해지 예약 중…':'취소 중…',flag?'✓ 해지 예약됨':'✓ 예약 취소됨',async()=>{billingOverviewState=await saasRequest('/saas/payments/subscription/cancel',{method:'POST',body:JSON.stringify({cancelAtPeriodEnd:flag})});await loadBillingOverview(false);toast(flag?'구독 해지를 예약했습니다.':'구독 해지 예약을 취소했습니다.');},{resetText:flag?'구독 해지 예약':'해지 예약 취소'});}catch(e){toast(e.message||'구독 상태 변경 실패');}
 }
 async function retryBillingPayment(){
-  if(!confirm('등록된 카드로 구독 결제를 다시 시도할까요?'))return;const b=$('billingRetryPayment');
-  try{await uxButtonTask(b,'결제 처리 중…','✓ 결제 완료',async()=>{const d=await saasRequest('/saas/payments/retry',{method:'POST'});billingOverviewState=d.overview||null;renderBillingOverview();await saasRefreshAccount(false);toast('구독 결제가 완료되었습니다.');return d;},{resetText:'결제 다시 시도'});}catch(e){toast(e.message||'구독 결제 재시도에 실패했습니다.');await loadBillingOverview(false);}
+  const b=$('billingRetryPayment');if(b?.disabled)return;if(b)b.disabled=true;
+  let quote;try{const d=await saasRequest('/saas/payments/retry',{method:'POST',body:JSON.stringify({action:'preview'})});quote=d.quote;if(!quote||!Number.isSafeInteger(quote.amountKrw))throw Error('결제 금액을 확인하지 못했습니다.');}catch(e){toast(e.message||'결제 금액 확인 실패');if(b)b.disabled=false;return;}
+  if(b)b.disabled=false;
+  if(!confirm(`${quote.purpose==='overage_final'?'구독 해지 · 문자 사용료 최종 정산':quote.planCode+' 구독 '+(quote.billingCycle==='annual'?'연 결제':'월 결제')}\n구독료 ${billingMoney(quote.baseAmountKrw)} + 문자 사용료 ${billingMoney(quote.overageAmountKrw)}\n총 ${billingMoney(quote.amountKrw)} · 부가세 포함\n\n등록된 카드로 이 금액을 결제할까요?`))return;
+  try{await uxButtonTask(b,'결제 처리 중…','✓ 결제 완료',async()=>{const d=await saasRequest('/saas/payments/retry',{method:'POST',body:JSON.stringify({confirmed:true,quote})});billingOverviewState=d.overview||null;renderBillingOverview();await saasRefreshAccount(false);toast(d.result?.paid?'구독 결제가 완료되었습니다.':d.result?.canceled?'최종 정산·해지 처리를 완료했습니다.':'결제가 실행되지 않았습니다. 현재 구독 상태를 확인해주세요.');return d;},{resetText:'결제 다시 시도'});}catch(e){toast(e.message||'구독 결제 재시도에 실패했습니다.');await loadBillingOverview(false);}
 }
 
 async function loadLegalDocs(){if(legalDocsState)return legalDocsState;try{legalDocsState=await saasRequest('/saas/legal/docs',{method:'GET',auth:false});return legalDocsState;}catch(e){toast(e.message||'법적 문서를 불러오지 못했습니다.');return null;}}
