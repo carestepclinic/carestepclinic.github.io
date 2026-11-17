@@ -1876,7 +1876,8 @@
  .clinic-calm #dashboard .cs-today-ward-empty .pt-today-ward-list {display:none}
  .clinic-calm #dashboard .cs-today-ward-empty>[role=status] {margin:0;flex:1 1 80px}
  .clinic-calm #dashboard .cs-today-ward-empty .pt-today-ward-footer {margin:0}
- .clinic-calm #dashboard .cs-today-ward-empty .pt-today-ward-time {margin:0;flex-basis:100%}
+ .clinic-calm #dashboard .pt-today-ward-heading {display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px}
+ .clinic-calm #dashboard .pt-today-ward-heading .pt-today-ward-time {margin:0;flex-basis:auto;white-space:nowrap}
  .clinic-calm #dashboard .pt-today-ward[aria-busy=true]>[role=status] {color:var(--cs-accent);font-weight:600}
  .clinic-calm #dashboard .cs-today-empty .pt-today-summary h3 {font-size:15px}
  .clinic-calm #dashboard .cs-today-empty .pt-today-summary {gap:4px 10px}
