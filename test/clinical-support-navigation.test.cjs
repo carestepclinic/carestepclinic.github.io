@@ -20,3 +20,9 @@ for(const width of [390,1440])test('support routes live in clinical support and 
 test('unsaved consent prevents navigation until user discards',async t=>{const {p}=await page();t.after(()=>p.close());await p.evaluate(()=>go('practice',{practiceTab:'consents'}));await p.locator('#practiceRoot [data-act=new]').click();await p.locator('#practiceRoot [name=patientName]').fill('합성 입력');await p.evaluate(()=>go('practice',{practiceTab:'bookings'}));assert.equal(await p.evaluate(()=>CarestepPractice.route()),'consents');assert.equal(await p.locator('#practiceRoot [name=patientName]').inputValue(),'합성 입력');});
 
 test('clicking the active consent menu preserves in-progress input',async t=>{const {p}=await page();t.after(()=>p.close());await p.evaluate(()=>go('practice',{practiceTab:'consents'}));await p.locator('#practiceRoot [data-act=new]').click();await p.locator('#practiceRoot [name=patientName]').fill('유지할 입력');await p.evaluate(()=>go('practice',{practiceTab:'consents'}));assert.equal(await p.locator('#practiceRoot [name=patientName]').inputValue(),'유지할 입력');});
+
+for(const width of [390,1440])test('support menu typography and spacing matches existing clinical tools '+width,async t=>{
+ const {p}=await page(width);t.after(()=>p.close());await p.evaluate(()=>go('practice',{practiceTab:'intake'}));
+ const styles=await p.evaluate(()=>['consents','bookings','calc','ward'].map(key=>{const btn=document.querySelector('.clinic-navigation [data-tab="'+key+'"]'),s=getComputedStyle(btn),text=getComputedStyle(btn.querySelector('b'));return {font:text.fontFamily,size:text.fontSize,weight:text.fontWeight,line:text.lineHeight,paddingLeft:s.paddingLeft,paddingRight:s.paddingRight,paddingBottom:s.paddingBottom,minHeight:s.minHeight};}));
+ for(const style of styles)assert.deepEqual(style,styles[2]);
+});
