@@ -1148,7 +1148,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 </style>
 <link rel="stylesheet" href="hospital-operations.css">
 <link rel="stylesheet" href="practice-intake.css?v=20261105-selection"><link rel="stylesheet" href="clinic-purchases.css?v=20261107-toolbar-vendors">
-<link rel="stylesheet" href="healthcheck-record.css?v=20261117-editor-flow">
+<link rel="stylesheet" href="healthcheck-record.css?v=20261117-clinic-review-four">
 <link rel="stylesheet" href="subscription-resources.css?v=20261117-billing-retry"><script src="subscription-resources.js?v=20261117-billing-retry"></script><script src="billing-flow.js?v=20261117-activation"></script>
 </head>
 <body class="clinic-calm">
@@ -1299,7 +1299,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
         <section id="workFirstDashboard" class="work-first-dashboard" aria-label="오늘 처리할 업무">
           <div class="work-first-head"><button id="refreshWorkFirst" class="btn btn-secondary" type="button">업무 새로고침</button></div>
           <div class="work-first-kpis" role="list">
-            <button type="button" class="work-first-kpi active" data-work-filter="all"><span>전체</span><b id="workCountAll">0</b><small>우선순위순</small></button>
+            <button type="button" class="work-first-kpi active" data-work-filter="all"><span>오늘 전체</span><b id="workCountAll">0</b><small>우선순위순</small></button>
             <button type="button" class="work-first-kpi" data-work-filter="preventive"><span>오늘 접종·사상충</span><b id="workCountPreventive">0</b><small>오늘 예방 예정</small></button>
             <button type="button" class="work-first-kpi" data-work-filter="care"><span>오늘 진료·후속관리</span><b id="workCountCare">0</b><small>진료와 HOME 일정</small></button>
             <button type="button" class="work-first-kpi alert" data-work-filter="consult"><span>보호자 상담 필요</span><b id="workCountConsult">0</b><small>답변 대기</small></button>
@@ -5063,7 +5063,7 @@ function renderWorkFirstDashboard(){
   [['workCountAll',buckets.all.length],['workCountPreventive',buckets.preventive.length],['workCountCare',buckets.care.length],['workCountConsult',buckets.consult.length],['workCountDelivery',buckets.delivery.length],['workCountUnassigned',buckets.unassigned.length],['workCountOverdue',buckets.overdue.length]].forEach(([id,n])=>{if($(id))$(id).textContent=String(n)});document.querySelectorAll('[data-work-filter]').forEach(b=>{b.classList.toggle('active',b.dataset.workFilter===workFirstFilter);b.hidden=b.dataset.workFilter!=='all'&&!(buckets[b.dataset.workFilter]||[]).length&&b.dataset.workFilter!==workFirstFilter;});if($('workFirstListTitle')){$('workFirstListTitle').textContent=labels[workFirstFilter]||labels.all;$('workFirstListTitle').hidden=workFirstFilter==='all';}
   let rows=[...(buckets[workFirstFilter]||buckets.all)];rows.sort((a,b)=>Number(!!b.action?.breached)-Number(!!a.action?.breached)||({urgent:0,high:1,normal:2}[a.action?.priority]??3)-({urgent:0,high:1,normal:2}[b.action?.priority]??3)||String(a.dueDate||'').localeCompare(String(b.dueDate||'')));
   if($('workFirstListMeta')){$('workFirstListMeta').textContent=`${rows.length}건`;$('workFirstListMeta').title='긴급·지연·오늘 일정 순';}
-  window.carestepClinicalSummary=()=>({state:clinicClinicalReadState,refreshing:followupScheduleLoading&&!!clinicalLoadCheckedAt,stale:!!clinicalLoadError&&!!clinicalLoadCheckedAt,total:buckets.all.length+buckets.backlog.length});window.ClinicOrganization?.updateTodayCounts();
+  window.carestepClinicalSummary=()=>({state:clinicClinicalReadState,refreshing:followupScheduleLoading&&!!clinicalLoadCheckedAt,stale:!!clinicalLoadError&&!!clinicalLoadCheckedAt,total:buckets.all.length+buckets.backlog.length,today:buckets.all.length,backlog:buckets.backlog.length});window.ClinicOrganization?.updateTodayCounts();
   renderWorkFirstRows(list,rows,12);workFirstFocusNext();
   let freshness=$('clinicClinicalFreshness');if(!freshness){freshness=document.createElement('p');freshness.id='clinicClinicalFreshness';freshness.setAttribute('role','status');}const listHeader=$('workFirstListMeta')?.parentElement;if(listHeader&&freshness.parentElement!==listHeader)listHeader.append(freshness);freshness.textContent=clinicalLoadCheckedAt?[(clinicalLoadError|| (followupScheduleLoading?'갱신 중':'')), '마지막 확인 '+new Date(clinicalLoadCheckedAt).toLocaleTimeString('ko-KR')].filter(Boolean).join(' · '):'';freshness.hidden=!freshness.textContent;
   list.setAttribute('aria-busy',String(clinicClinicalReadState==='loading'));
@@ -10991,8 +10991,8 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="home-access-clinic.js?v=20261031-practical-terms"></script>
 <script src="clinic-care.js?v=20261107-interface-cohesion"></script>
 <script src="clinic-account-reads.js?v=20261031-account"></script>
-<script src="clinic-organization.js?v=20261107-refresh-toolbar"></script>
-<script src="staff-training.js?v=20261107-refresh-toolbar"></script>
+<script src="clinic-organization.js?v=20261117-clinic-review-four"></script>
+<script src="staff-training.js?v=20261117-clinic-review-four"></script>
 <script src="staff-training-clinic.js?v=20261105-operations"></script>
 <script src="practice-intake.js?v=20261105-selection"></script>
 <script src="practice-reference.js?v=20261025reuse1"></script>
@@ -11056,11 +11056,11 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinical-assist.js?v=20261103-clinical-assist"></script>
 
 
-<script id="clinic-module-manifest" type="application/json">{"dental":["dental-record.js?v=20261115-portrait-print","dental-workflow.js?v=20261115-print-refinement"],"neuro":["neuro-record.js?v=20261115-content-optimized"],"ophthalmic":["ophthalmic-record.js?v=20261115-content-optimized"],"chronic":["ophthalmic-record.js?v=20261115-content-optimized","chronic-choices.js?v=20261112-record-choices-2","chronic-record.js?v=20261116-print-flow"],"calc":["practice-acid-base.js?v=20261026tb1","practice-calcium-transfusion.js?v=20261031-calc-cleanup-2","practice-emergency.js?v=20261031-calc-cleanup-2","practice-potassium-mix.js?v=20261031-calc-cleanup-2","practice-cri-presets.js?v=20261031-calc-clarity-1","practice-nutrition-foods.js?v=20261031-prunus","practice-nutrition.js?v=20261031-food1","practice-calculator-workspace.js?v=20261031-calc-cleanup-2","practice-calcium-guided.js?v=20261026ca1","practice-fluid-plan.js?v=20261031-calc-cleanup-2"],"healthcheck":["healthcheck-record.js?v=20261117-editor-flow"]}</script>
+<script id="clinic-module-manifest" type="application/json">{"dental":["dental-record.js?v=20261115-portrait-print","dental-workflow.js?v=20261115-print-refinement"],"neuro":["neuro-record.js?v=20261115-content-optimized"],"ophthalmic":["ophthalmic-record.js?v=20261115-content-optimized"],"chronic":["ophthalmic-record.js?v=20261115-content-optimized","chronic-choices.js?v=20261112-record-choices-2","chronic-record.js?v=20261116-print-flow"],"calc":["practice-acid-base.js?v=20261026tb1","practice-calcium-transfusion.js?v=20261031-calc-cleanup-2","practice-emergency.js?v=20261031-calc-cleanup-2","practice-potassium-mix.js?v=20261031-calc-cleanup-2","practice-cri-presets.js?v=20261031-calc-clarity-1","practice-nutrition-foods.js?v=20261031-prunus","practice-nutrition.js?v=20261031-food1","practice-calculator-workspace.js?v=20261031-calc-cleanup-2","practice-calcium-guided.js?v=20261026ca1","practice-fluid-plan.js?v=20261031-calc-cleanup-2"],"healthcheck":["healthcheck-record.js?v=20261117-clinic-review-four"]}</script>
 <script src="clinic-lazy-modules.js?v=20261105-flow"></script>
 <script src="clinic-inpatients.js?v=20261106-workflow9"></script>
 <script src="clinic-record-start.js?v=20261115-prior-refinements"></script>
-<script src="clinic-record-workspace.js?v=20261115-healthcheck-flow"></script>
+<script src="clinic-record-workspace.js?v=20261117-clinic-review-four"></script>
 <script src="clinic-purchases.js?v=20261116-claim-rights"></script>
 <script src="practice-tools.js?v=20261113-intake-review"></script>
 <script src="clinic-today-ward.js?v=20261107-review4"></script>

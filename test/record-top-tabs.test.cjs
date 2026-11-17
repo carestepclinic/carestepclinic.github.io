@@ -18,12 +18,12 @@ async function page(width=1440){const p=await browser.newPage({viewport:{width,h
 async function route(p,key){await p.evaluate(key=>go('practice',{practiceTab:key}),key);await p.waitForFunction(key=>CarestepPractice.route()===key,key);await p.waitForTimeout(60);}
 async function load(p,key){await route(p,key);if(key==='surgery')await p.locator('[data-cl-case=cc_surgery]').click();else {const candidates=p.locator('[data-open="cc_'+key+'"],[data-dn-open="cc_'+key+'"],[data-record="cc_'+key+'"],[data-act="open"][data-id="cc_'+key+'"],[data-dn="open"][data-id="cc_'+key+'"]');if(!await candidates.count())throw Error('Missing record selector '+key+' '+await p.locator('[data-body]').innerText());await candidates.first().click();}await p.waitForTimeout(80);}
 
-for(const width of [360,768,1440])test('page tabs above the heading on all five record screens '+width,async()=>{
+for(const width of [360,768,1440])test('page tabs above the heading on all six record screens '+width,async()=>{
  const {p,errors}=await page(width);
- for(const key of ['surgery','dental','neuro','ophthalmic','chronic']){
+ for(const key of ['surgery','dental','neuro','ophthalmic','chronic','healthcheck']){
   await route(p,key);const nav=p.locator('.main > .cs-record-page-tabs');
   await nav.waitFor({state:'visible'});assert.equal(await p.locator('.cs-record-navigation').count(),1);
-  assert.equal(await nav.locator('[data-record-tab]').count(),5);
+  assert.equal(await nav.locator('[data-record-tab]').count(),6);
   assert.equal(await nav.locator('[aria-pressed=true]').getAttribute('data-record-tab'),key);
   const box=await nav.boundingBox(),heading=await p.locator('.topbar').boundingBox();
   assert.ok(box.y+box.height<=heading.y+1,'tabs precede page heading');
