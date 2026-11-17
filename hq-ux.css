@@ -596,3 +596,15 @@ button,input,select,textarea{font-family:inherit}
  .view>.head:has(>.hq-read-summary:not([hidden]))>button,.view>.head:has(>.hq-read-summary:not([hidden]))>.toolbar,#staffTrainingRoot .st-heading:has(.st-read-summary:not(:empty))>.st-button{margin-left:0}
  #staffTrainingRoot .st-tabs button{min-height:44px;padding:8px}
 }
+
+/* Unified subscription settings: common choices first, exact saved values in advanced controls. */
+#planGrid .price-row,#planGrid .hq-plan-resources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}
+#planGrid .hq-plan-resources label,#planGrid .price-row label{display:grid;gap:6px}
+#planGrid label.feature{display:flex;align-items:center;gap:8px}
+#planGrid [data-plan-quantity][hidden]{display:none!important}
+#planGrid .hq-allowance{padding:14px;background:#f2f7f6;border:1px solid #d6e2e1;border-radius:10px}
+#planGrid .hq-allowance [data-plan-quantity]{margin-top:10px}
+#planGrid details{border-top:1px solid #d6e2e1;margin-top:16px;padding-top:12px}
+#planGrid summary{cursor:pointer;padding:6px 0;font-weight:700}
+#planGrid .save-plan{margin-top:18px;width:100%}
+@media(max-width:650px){#planGrid .price-row,#planGrid .hq-plan-resources{grid-template-columns:1fr}}

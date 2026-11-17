@@ -33,7 +33,7 @@ for(const width of [390,900,1440])test(`Clinic billing uses shared typography, b
   $('billingProviderBadge').textContent='Toss Payments · 연결됨';$('billingProviderBadge').classList.add('on');$('billingPlanPrice').textContent='결제 총액 169,000원 · 부가세 포함 · 기존 계약 조건 유지';
   $('billingInvoiceList').innerHTML='<div class="invoice-row"><div><b>PRO 월 구독 · 169,000원</b><span>2026. 10. 20. · 테스트 청구내역</span></div><span class="invoice-status paid">결제완료</span><a class="btn btn-ghost" href="#receipt">영수증</a></div>';
  });
- await page.locator('#subscriptionBillingPanel').scrollIntoViewIfNeeded();
+ await page.locator('#subscriptionBillingPanel').scrollIntoViewIfNeeded();await page.locator('#billingChangePlan>summary').click();
  const styles=await page.locator('#subscriptionBillingPanel').evaluate(el=>{const s=x=>getComputedStyle(el.querySelector(x));return {grid:s('.billing-grid').display,status:s('.billing-mini span').display,mini:s('.billing-mini b').fontSize,button:s('#billingSchedulePlan').fontSize,control:s('#billingPlanSelect').fontSize,family:s('#billingPlanSelect').fontFamily,body:getComputedStyle(document.body).fontFamily,price:s('.billing-contract-columns strong').fontSize,heading:s('h4').fontSize};});
  assert.equal(styles.grid,'grid');assert.equal(styles.mini,'15px');assert.equal(styles.button,'14px');assert.equal(styles.control,'14px');assert.equal(styles.price,'20px');assert.equal(styles.heading,'16px');assert.match(styles.family,/Carestep Pretendard/);assert.match(styles.body,/Carestep Pretendard/);
  for(const selector of ['.billing-box','.billing-contract-comparison','.billing-plan-row','.invoice-row']){

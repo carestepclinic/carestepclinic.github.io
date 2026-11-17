@@ -6,7 +6,7 @@ const http=require('node:http');
 const {chromium}=require('playwright');
 let browser,server,origin;
 const root=resolve(__dirname,'..');
-const allowed=new Set(['deployment-status.js','clinic-capabilities.js','guardian-studio.js','guardian-studio.css','hq.html','hq-workspace.js','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
+const allowed=new Set(['subscription-resources.js','subscription-resources.css','hq-healthcheck-usage.js','hq-clinical-storage.js','deployment-status.js','clinic-capabilities.js','guardian-studio.js','guardian-studio.css','hq.html','hq-workspace.js','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
 before(async()=>{
   server=http.createServer((req,res)=>{
     const file=new URL(req.url,'http://localhost').pathname.slice(1);
@@ -27,10 +27,11 @@ async function fixture(t,width=1280){
   await page.evaluate(()=>{
     document.getElementById('loginOverlay').classList.add('hidden');
     window.hqOwner='synthetic-hq';hqSessionToken=()=>hqOwner;window.writes=[];window.failPayment=false;window.failWrite=false;
-    window.syntheticPlans=['PILOT','BASIC','PRO','ENTERPRISE'].map((code,i)=>({planCode:code,displayName:code,monthlyPriceKrw:[0,79000,169000,329000][i],annualPriceKrw:[0,790000,1690000,3290000][i],foundingMonthlyPriceKrw:[0,59000,129000,249000][i],features:{carestepHome:true,homePush:true,homeConsultation:true},limits:{members:5,packagesMonthly:500,messageCreditKrw:0,vatExclusive:true},isActive:true}));
+    window.syntheticPlans=['PILOT','BASIC','PRO','ENTERPRISE'].map((code,i)=>({planCode:code,displayName:code,monthlyPriceKrw:[0,79000,169000,329000][i],annualPriceKrw:[0,790000,1690000,3290000][i],foundingMonthlyPriceKrw:[0,59000,129000,249000][i],features:{carestepHome:true,homePush:true,homeConsultation:true},limits:{members:5,packagesMonthly:500,messageCreditKrw:0,vatExclusive:true,quoteRequired:code==='ENTERPRISE',aiMode:code==='ENTERPRISE'?'contract':'limited',aiCasesMonthly:[3,10,50,0][i],storageMode:code==='ENTERPRISE'?'contract':'limited',storageGb:[2,10,50,0][i],importsPerRecord:5,summariesPerRecord:3,customException:'retain'},updatedAt:'before',resourceRevision:'saved-raw',isActive:true}));
     window.detail=id=>({clinic:{id,name:'시험 병원 '+id,plan:'BASIC',status:'active',approvalStatus:'approved'},usage:{},subscription:{planCode:'BASIC',status:'active',billingCycle:'monthly',priceOverrideKrw:86900,messagesMonthlyOverride:-1},entitlements:{plan:syntheticPlans[1]},members:[],content:[],errors:[]});
     window.baseReq=async(path,options)=>{
-      if(options?.method&&options.method!=='GET'){writes.push({path,body:JSON.parse(options.body||'{}')});if(failWrite)throw Error('시험 저장 실패');if(path.startsWith('/hq/plans/'))Object.assign(syntheticPlans.find(p=>p.planCode===path.split('/').pop()),JSON.parse(options.body));return {ok:true};}
+      if(options?.method&&options.method!=='GET'){writes.push({path,body:JSON.parse(options.body||'{}')});if(failWrite)throw Error('시험 저장 실패');if(path.startsWith('/hq/plans/')){const plan=syntheticPlans.find(p=>p.planCode===path.split('/').pop()),body=JSON.parse(options.body);Object.assign(plan,{...body,limits:{...plan.limits,...body.limits},features:{...plan.features,...body.features}});}return {ok:true};}
+      if(path==='/hq/resources')return {month:'2026-11',clinics:[],requests:[],cost:{revision:0,body:{}}};
       if(path==='/hq/plans')return {plans:syntheticPlans};
       if(path==='/hq/subscriptions')return {subscriptions:[{clinicId:'A',clinicName:'시험 병원 A',planCode:'BASIC',status:'active',approvalStatus:'approved',billingCycle:'monthly',effectivePriceKrw:86900,credit:{includedKrw:0,extraBudgetKrw:0}}]};
       if(path==='/hq/overview')return {salesChannels:{direct:1,partner:0,activePartners:0}};
@@ -47,6 +48,29 @@ async function fixture(t,width=1280){
   return page;
 }
 async function billing(page){await page.evaluate(()=>showView('billing'));await page.locator('.plan-card').first().waitFor({state:'attached'});await page.evaluate(()=>loadPaymentAutomation());await page.waitForFunction(()=>document.getElementById('hqPaymentProvider').textContent==='정상');}
+
+for(const width of [390,1440])test('unified plan saves reviewed price and allowances once, preserves exceptions '+width,async t=>{
+ const p=await fixture(t,width);await billing(p);await p.locator('#hqTabplans').click();const card=p.locator('[data-plan="BASIC"]');
+ assert.equal(await p.locator('#hqResourcePlans').count(),0);assert.equal(await card.locator('.founding').isVisible(),false);assert.equal(await card.locator('[data-feature]').first().isVisible(),false);
+ await card.getByRole('button',{name:'수정',exact:true}).click();assert.equal(await card.locator('.save-plan').isEnabled(),false);
+ await card.locator('.ai').fill('12');await card.locator('.storageMode').selectOption('unlimited');assert.equal(await card.locator('.storage').isVisible(),false);
+ await card.locator('.storageMode').selectOption('limited');assert.equal(await card.locator('.storage').inputValue(),'10');await card.locator('.monthly').fill('80000');
+ await card.locator('.save-plan').click();assert.match(await p.locator('.hq-review').innerText(),/월 AI 검진.*10.*12/s);assert.equal(await p.evaluate(()=>writes.length),0);
+ await p.locator('[data-review-save]').click();await p.waitForFunction(()=>writes.length===1);await p.waitForFunction(()=>document.querySelector('[data-plan=BASIC]').dataset.editing==='false');
+ const body=await p.evaluate(()=>writes[0].body);assert.equal(body.monthlyPriceKrw,80000);assert.equal(body.annualPriceKrw,790000);assert.equal(body.foundingMonthlyPriceKrw,59000);assert.equal(body.limits.aiCasesMonthly,12);assert.equal(body.limits.storageGb,10);assert.equal(body.limits.customException,undefined);assert.equal(body.expectedUpdatedAt,'before');assert.equal(body.expectedLimits,'saved-raw');
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+});
+test('Enterprise unlimited choice retains fixed prices, technical caps and existing feature flags',async t=>{
+ const p=await fixture(t);await billing(p);await p.locator('#hqTabplans').click();await p.locator('[data-choose-plan="ENTERPRISE"]').click();const card=p.locator('[data-plan="ENTERPRISE"]');
+ await card.getByRole('button',{name:'수정',exact:true}).click();await card.locator('.aiMode').selectOption('unlimited');await card.locator('.storageMode').selectOption('unlimited');await card.locator('.hq-plan-advanced>summary').click();await card.locator('.membersUnlimited').check();await card.locator('.packagesUnlimited').check();await card.locator('.quoteRequired').uncheck();
+ assert.match(await card.locator('.hq-price-summary').innerText(),/361,900원/);assert.equal(await card.locator('.members').isVisible(),false);
+ await card.locator('.save-plan').click();await p.locator('[data-review-save]').click();await p.waitForFunction(()=>writes.length===1);
+ const b=await p.evaluate(()=>writes[0].body);assert.equal(b.monthlyPriceKrw,329000);assert.equal(b.annualPriceKrw,3290000);assert.equal(b.foundingMonthlyPriceKrw,249000);assert.equal(b.limits.aiMode,'unlimited');assert.equal(b.limits.storageMode,'unlimited');assert.equal(b.limits.members,0);assert.equal(b.limits.packagesMonthly,0);assert.equal(b.limits.quoteRequired,false);assert.equal(b.limits.importsPerRecord,5);assert.equal(b.limits.summariesPerRecord,3);assert.equal(b.features.carestepHome,true);
+ await p.waitForFunction(()=>document.getElementById('hqPlanComparison').textContent.includes('361,900원'));
+});
+test('failed unified plan save keeps input and selected allowance modes',async t=>{
+ const p=await fixture(t);await billing(p);await p.locator('#hqTabplans').click();const card=p.locator('[data-plan="BASIC"]');await card.getByRole('button',{name:'수정',exact:true}).click();await card.locator('.ai').fill('17');await card.locator('.storageMode').selectOption('unlimited');await p.evaluate(()=>failWrite=true);await card.locator('.save-plan').click();await p.locator('[data-review-save]').click();await p.waitForFunction(()=>writes.length===1);assert.equal(await card.locator('.ai').inputValue(),'17');assert.equal(await card.locator('.storageMode').inputValue(),'unlimited');assert.equal(await card.getAttribute('data-editing'),'true');
+});
 
 for(const width of [390,1440])test('integrations loads without removed Calendar and failed messaging can retry '+width,async t=>{
  const p=await fixture(t,width);await p.evaluate(()=>{

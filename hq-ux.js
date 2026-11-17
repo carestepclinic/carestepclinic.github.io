@@ -53,11 +53,11 @@
   function wrapList(view,load){return async function(options={}){const state=listState(view);if(options.reuse&&state.pending)return state.pending;if(options.reuse&&state.good&&!state.failed&&Date.now()-state.freshAt<30000&&!(view==='content'&&byId('contentCategory').dataset.restoreValue!==undefined))return true;const position=currentView===view?window.scrollY:null,nav=navigationEpoch,change=listChangeSequence;let moved=false;const onScroll=()=>{if(window.scrollY!==position)moved=true;};window.addEventListener('scroll',onScroll,{passive:true});const work=Promise.resolve(load(options));state.pending=work;try{return await work;}finally{window.removeEventListener('scroll',onScroll);if(state.pending===work)state.pending=null;if(change!==listChangeSequence)state.freshAt=0;if(position!==null&&!moved&&nav===navigationEpoch&&currentView===view)window.scrollTo({top:position,behavior:'instant'});}};}
 
   const changes=(before,after)=>after.filter(x=>!before.some(y=>y.key===x.key&&y.value===x.value)).map(x=>({...x,before:before.find(y=>y.key===x.key)?.value??''}));
-  function priceText(plan,net) {
+  function priceText(plan,net,quoteRequired=false) {
     if(plan==='PILOT')return {detail:'PRO 기능 30일 무료체험',total:'무료체험 · 0원'};
     if(!safeNumber(net))return {detail:'요금 정보를 확인해주세요.',total:'금액 확인 필요'};
     const supply=Number(net),tax=Math.round(supply*.1);
-    return plan==='ENTERPRISE'
+    return quoteRequired
       ? {detail:`월 기준 공급가 ${won(supply)} · 부가세 별도`,total:'최종 결제금액은 개별 계약에 따릅니다.'}
       : {detail:`월 공급가 ${won(supply)} + 부가세 ${won(tax)}`,total:`월 결제 총액 ${won(supply+tax)}`};
   }
@@ -124,7 +124,7 @@
       }
     });
     editor.save.disabled=!changed||!!activeSave;
-    if(editor.root.matches('.plan-card'))updatePlanPrice(editor.root);
+    if(editor.root.matches('.plan-card')){updatePlanPrice(editor.root);for(const key of ['ai','storage','members','packages']){const box=editor.root.querySelector('[data-plan-quantity='+key+']');if(box)box.hidden=key==='ai'||key==='storage'?editor.root.querySelector('.'+key+'Mode').value!=='limited':editor.root.querySelector('.'+key+'Unlimited').checked;}}
   }
   function cancelEdit(editor){
     editor.fields.forEach((el,i)=>{if(el.type==='checkbox')el.checked=editor.baseline[i].value;else el.value=editor.baseline[i].value;});
@@ -180,13 +180,13 @@
   }
   function updatePlanPrice(card){
     const box=card.querySelector('.hq-price-summary');if(!box)return;
-    const p=priceText(card.dataset.plan,card.querySelector('.monthly')?.value);
+    const p=priceText(card.dataset.plan,card.querySelector('.monthly')?.value,card.querySelector('.quoteRequired')?.checked);
     box.innerHTML=`${esc(p.detail)}<strong>${esc(p.total)}</strong>`;
   }
   function enhancePlans(){
     for(const [key,e] of editors)if(key.startsWith('plan:')&&!e.root.isConnected)editors.delete(key);
     document.querySelectorAll('#planGrid .plan-card').forEach(card=>{
-      registerEditor('plan:'+card.dataset.plan,card,[...card.querySelectorAll('input')],card.querySelector('.save-plan'),
+      registerEditor('plan:'+card.dataset.plan,card,[...card.querySelectorAll('input,select')],card.querySelector('.save-plan'),
         `${card.dataset.plan} 공통 요금제 변경`,'저장 후 신규 계약과 명시적인 플랜 변경에 적용됩니다. 기존 계약 가격·할인·제공량은 유지됩니다.');
     });
   }
@@ -582,10 +582,10 @@
   function renderPlanComparison(){
     let comparison=byId('hqPlanComparison');
     if(!comparison){comparison=document.createElement('section');comparison.id='hqPlanComparison';comparison.className='hq-plan-comparison';byId('planGrid').before(comparison);}
-    const limit=(n,unit)=>!safeNumber(n)?'확인 필요':Number(n)===0?'제한 없음':Number(n).toLocaleString('ko-KR')+unit;
-    comparison.innerHTML=`<h2>요금제 비교</h2><p class="muted">월 결제 총액은 부가세 포함입니다. 요금제를 선택하면 아래에서 상세 조건을 확인하고 수정할 수 있습니다.</p><div class="table-wrap"><table class="table hq-plan-compare-table"><thead><tr><th>요금제</th><th>월 결제 총액</th><th>직원</th><th>월 HOME 게시</th><th>상세</th></tr></thead><tbody>${plans.map(plan=>{
-      const code=plan.planCode,price=code==='PILOT'?'무료체험 · 0원':code==='ENTERPRISE'?'별도 견적':safeNumber(plan.monthlyPriceKrw)?won(Math.round(Number(plan.monthlyPriceKrw)*(plan.limits?.vatExclusive?1.1:1))):'금액 확인 필요';
-      return `<tr><th scope="row">${esc(plan.displayName||code)}${!plan.isActive?'<small class="hq-plan-disabled">신규 선택 중단</small>':''}</th><td data-label="월 결제 총액"><b>${esc(price)}</b></td><td data-label="직원">${esc(limit(plan.limits?.members,'명'))}</td><td data-label="월 HOME 게시">${esc(limit(plan.limits?.packagesMonthly,'건'))}</td><td><button type="button" class="btn" data-choose-plan="${esc(code)}" aria-controls="hqPlanDetail-${esc(code)}" aria-pressed="false">${esc(code)} 상세</button></td></tr>`;
+    const resource=(l={},k,u)=>l[k+'Mode']==='unlimited'?'무제한':l[k+'Mode']==='contract'?'별도 계약':l[k+'Mode']==='disabled'?'미제공':safeNumber(l[k==='ai'?'aiCasesMonthly':'storageGb'])?Number(l[k==='ai'?'aiCasesMonthly':'storageGb']).toLocaleString('ko-KR')+u:'확인 필요';
+    comparison.innerHTML=`<h2>요금제 비교</h2><p class="muted">월 결제 총액은 부가세 포함입니다. 요금제를 선택하면 아래에서 상세 조건을 확인하고 수정할 수 있습니다.</p><div class="table-wrap"><table class="table hq-plan-compare-table"><thead><tr><th>요금제</th><th>월 결제 총액</th><th>월 AI 검진</th><th>사진 저장</th><th>상세</th></tr></thead><tbody>${plans.map(plan=>{
+      const code=plan.planCode,price=code==='PILOT'?'무료체험 · 0원':plan.limits?.quoteRequired?'별도 견적':safeNumber(plan.monthlyPriceKrw)?won(Math.round(Number(plan.monthlyPriceKrw)*(plan.limits?.vatExclusive?1.1:1))):'금액 확인 필요';
+      return `<tr><th scope="row">${esc(plan.displayName||code)}${!plan.isActive?'<small class="hq-plan-disabled">신규 선택 중단</small>':''}</th><td data-label="월 결제 총액"><b>${esc(price)}</b></td><td data-label="월 AI 검진">${esc(resource(plan.limits,'ai','건'))}</td><td data-label="사진 저장">${esc(resource(plan.limits,'storage','GB'))}</td><td><button type="button" class="btn" data-choose-plan="${esc(code)}" aria-controls="hqPlanDetail-${esc(code)}" aria-pressed="false">${esc(code)} 상세</button></td></tr>`;
     }).join('')||'<tr><td colspan="5">등록된 요금제가 없습니다.</td></tr>'}</tbody></table></div>`;
     for(const card of document.querySelectorAll('#planGrid .plan-card')){
       card.id='hqPlanDetail-'+card.dataset.plan;
