@@ -217,3 +217,49 @@ thead{break-after:avoid}
 .management-page-link{font-variant-numeric:tabular-nums;white-space:nowrap;font-size:8.5pt}
 .management-issue-heading{margin:0 0 5mm;break-after:avoid}.management-detail{margin:0 0 5mm}.management-detail h3{font-size:11pt;border-left:2pt solid #4b8176;padding-left:2.5mm;margin-bottom:2mm}.management-detail p{font-size:10.5pt;line-height:1.6;orphans:3;widows:3}
 .management-evidence{display:block;margin-top:1.5mm;font-size:8pt;font-weight:400;line-height:1.45}.management-evidence .management-badge{font-size:8pt}
+
+/* Readable A4 hierarchy. Every report part retains its own starting sheet. */
+.report-part{font-size:11pt;line-height:1.6}
+.part-title{margin:2mm 0 6mm;padding-bottom:3mm;line-height:1.4}
+.report-note,.report-problem{margin-bottom:6mm}
+.report-problem h3{padding-bottom:2mm;margin-bottom:3mm}
+.management-detail{padding:3mm 4mm;margin:0 0 5mm;border-left:1pt solid #b7ceca;background:#f8faf9}
+.management-detail h3{border:0;padding:0;font-size:11pt;margin-bottom:2mm}
+.management-detail p{font-size:11pt;line-height:1.6}
+.management-issue-heading{margin-bottom:6mm}
+.management-badge,.management-evidence .management-badge{font-size:9.5pt;font-weight:600;line-height:1.45;padding:.7mm 1.6mm;width:auto}
+.management-counts{line-height:2.6;margin-bottom:5mm}
+.management-counts>span{margin-right:3mm}
+.management-table{font-size:10pt;line-height:1.5}
+.management-table th{font-size:9.5pt;padding:3mm 2mm}
+.management-table td{padding:3.5mm 2mm}
+.management-table th:nth-child(1){width:23%}.management-table th:nth-child(2){width:24%}.management-table th:nth-child(3){width:23%}.management-table th:nth-child(4){width:23%}.management-table th:last-child{width:7%}
+.management-table td>.management-badge{display:inline-block}
+.management-page-link{font-size:9.5pt}
+.management-intro,.management-reading-note{font-size:9.5pt;line-height:1.5;color:#435c63}
+.management-reading-note{margin-top:4mm}
+.finding-row{font-size:11pt;line-height:1.6;padding:3mm 0}
+.finding-row>strong{width:27%;font-weight:600}
+.finding-row>span[role=cell]{width:72%}
+.finding-row .management-evidence{display:block;width:auto;margin-top:2mm}
+.finding-row .management-evidence span{width:auto;display:inline-block}
+.management-evidence{display:block;font-size:9.5pt;margin-top:2mm;line-height:1.6}
+.management-reference{display:inline-block;font-size:9.5pt;color:#355e57;margin:1mm 0 0;text-decoration:underline;text-underline-offset:2px}
+.lab-table .management-reference{display:block}
+.lab-table td small,.lab-table th small,.comparison-note{font-size:9.5pt}
+.lab-table .lab-result td:nth-child(2){font-size:11pt}
+.lab-table td{padding-top:2mm;padding-bottom:2mm}
+.cover-heading{padding:9mm 0 7mm;margin-bottom:7mm}
+.cover-heading h1{font-size:28pt}
+.report-cover-page .patient-block{padding:5mm}
+.cover-meta{margin:4mm 0 7mm;gap:3mm 6mm}
+.cover-meta span{font-size:10pt}
+.report-cover-page[data-compact=true] .cover-heading{padding:7mm 0 6mm;margin-bottom:6mm}
+.report-cover-page[data-compact=true] .cover-meta{margin-bottom:6mm}
+.cover-summary{padding-top:3mm}.cover-summary h2{font-size:12pt;margin-bottom:3mm}
+.report-contents-page .report-toc h2{font-size:17pt;margin:2mm 0 6mm;padding-bottom:3mm}
+.report-contents-page .report-toc td{padding:1.7mm 0;font-size:10.5pt;line-height:1.5}
+.report-contents-page .report-toc .toc-group{break-after:avoid}
+.report-contents-page .report-toc .toc-group td{padding:5mm 0 2mm;font-size:11pt;font-weight:700;color:#165e59;border-bottom:0}
+.report-contents-page .report-guide{margin-top:6mm;font-size:9.5pt}
+.hospital-cover p,.report-kicker,.report-coverage,.report-prior,.muted,.lab-source{font-size:9.5pt}

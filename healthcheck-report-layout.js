@@ -33,8 +33,35 @@
  printButton.addEventListener('click',()=>{if(document.body.dataset.reportReady==='true')window.print();});
  window.addEventListener('resize',fitScreen);
  function fitScreen(){document.documentElement.style.setProperty('--report-zoom',String(Math.min(1,document.documentElement.clientWidth/(210*96/25.4))));}
+ // Review-only overrides stay in this window; no chart data is sent or overwritten.
+ const summaryEdits=new Map(),duplicateChoices=[];let summaryEditing=false;
+ const summaryBox=document.querySelector('[data-summary-options]'),duplicateBox=document.querySelector('[data-duplicate-options]');
+ const missing=document.querySelector('[data-report-missing]');if(missing&&settings.missing?.length)missing.textContent='출력 전 정보 확인: '+settings.missing.join(' · ');
+ const reviewToggle=document.querySelector('.report-review-options>summary');
+ for(const cell of template.content.querySelectorAll('[data-management-summary]')){
+  const label=document.createElement('label'),input=document.createElement('textarea');label.textContent=cell.dataset.summaryLabel;input.value=cell.textContent;input.maxLength=120;input.dataset.summaryEdit=cell.dataset.managementSummary;input.rows=2;label.append(input);summaryBox?.append(label);summaryEdits.set(cell.dataset.managementSummary,input);
+  const original=document.createElement('details'),title=document.createElement('summary'),text=document.createElement('pre');title.textContent='원문 확인';text.textContent=cell.dataset.summaryOriginal;original.append(title,text);summaryBox?.append(original);
+  input.addEventListener('input',()=>{summaryEditing=true;document.body.dataset.reportReady='false';printButton.disabled=true;setStatus('요약 문구를 편집하고 있습니다. 입력을 마치고 다른 곳을 누르면 반영됩니다.');});input.addEventListener('blur',()=>{if(summaryEditing){summaryEditing=false;schedule();}});const reset=document.createElement('button');reset.type='button';reset.textContent='원래 요약 복원';reset.dataset.summaryReset=cell.dataset.managementSummary;summaryBox?.append(reset);reset.addEventListener('click',()=>{input.value=cell.textContent;summaryEditing=false;schedule();});
+ }
+ if(!summaryEdits.size&&summaryBox)summaryBox.textContent='의료진이 확인한 관리 항목이 있으면 요약 문구를 다듬을 수 있습니다.';
+ const normalized=value=>String(value||'').replace(/\s+/g,'');
+ const detailParagraphs=[...template.content.querySelectorAll('.management-detail p')].map(node=>({text:normalized(node.textContent),title:node.closest('.report-part').dataset.reportTitle}));
+ for(const node of template.content.querySelectorAll('[data-report-legacy=true] .report-problem p')){
+  const value=normalized(node.textContent),match=value.length>=12&&detailParagraphs.find(x=>x.text.includes(value));if(!match)continue;
+  const key='duplicate-'+duplicateChoices.length;node.dataset.duplicateKey=key;
+  const field=document.createElement('fieldset'),legend=document.createElement('legend'),source=document.createElement('pre'),label=document.createElement('label'),input=document.createElement('input');legend.textContent='중복 후보 · '+node.closest('.report-part').dataset.reportTitle;source.textContent=node.textContent;input.type='checkbox';input.dataset.duplicateChoice=key;label.append(input,document.createTextNode('이번 출력에서 이 중복 문단 생략'));const hint=document.createElement('small');hint.textContent=match.title+'에 같은 내용이 포함되어 있습니다. 상세 관리 내용은 유지됩니다.';field.append(legend,source,hint,label);duplicateBox?.append(field);duplicateChoices.push({key,input});input.addEventListener('change',schedule);
+ }
+ if(!duplicateChoices.length&&duplicateBox)duplicateBox.textContent='상세 관리 내용과 일치하는 중복 문단이 없습니다.';
+ if(reviewToggle)reviewToggle.textContent='출력 전 확인 · 요약 문구'+(duplicateChoices.length?' · 중복 후보 '+duplicateChoices.length+'개':'')+(settings.missing?.length?' · 정보 확인 '+settings.missing.length+'개':'');
+
  function source(){
   const root=document.createElement('div');root.append(template.content.cloneNode(true));
+  for(const cell of root.querySelectorAll('[data-management-summary]')){const input=summaryEdits.get(cell.dataset.managementSummary);if(input)cell.textContent=input.value.trim()||'상세 페이지에서 확인';}
+  for(const choice of duplicateChoices)if(choice.input.checked)root.querySelector('[data-duplicate-key="'+choice.key+'"]')?.remove();
+  for(const part of root.querySelectorAll('[data-report-legacy=true]')){
+   for(const article of part.querySelectorAll('.report-problem'))if(!article.querySelector('p:not(.plan-topic)'))article.remove();
+   if(!part.querySelector('.report-problem'))part.remove();
+  }
   if(mode.value==='summary'){root.querySelectorAll('.report-part:not([data-report-summary=true])').forEach(x=>x.remove());root.querySelectorAll('.report-part').forEach(x=>x.dataset.compact='true');}
   if(!include.checked)root.querySelectorAll('[data-report-appendix=true]').forEach(x=>x.remove());
   else{
@@ -54,7 +81,8 @@
   }
   const rows=root.querySelector('[data-toc-rows]'),headings=[...root.querySelectorAll('.part-title')];
   headings.forEach((heading,i)=>{heading.dataset.sectionNumber=String(i+1).padStart(2,'0');});
-  for(const heading of headings){const tr=document.createElement('tr');{const td=document.createElement('td'),a=document.createElement('a'),label=document.createElement('span'),number=document.createElement('span');a.className='toc-link';a.setAttribute('href','#'+heading.id);label.className='toc-label';label.textContent=heading.textContent;number.className='toc-page';number.textContent='—';a.append(label,number);td.append(a);tr.append(td);}if(rows)rows.append(tr);}
+  let previousGroup='';
+  for(const heading of headings){const group=heading.closest('.report-part').dataset.reportGroup;if(rows&&group!==previousGroup){const tr=document.createElement('tr'),td=document.createElement('td');tr.className='toc-group';td.textContent=({plan:'관리 요약·계획',exam:'상세 검사 결과',guide:'참고 안내'})[group]||'보고서';tr.append(td);rows.append(tr);previousGroup=group;}const tr=document.createElement('tr');{const td=document.createElement('td'),a=document.createElement('a'),label=document.createElement('span'),number=document.createElement('span');a.className='toc-link';a.setAttribute('href','#'+heading.id);label.className='toc-label';label.textContent=heading.textContent;number.className='toc-page';number.textContent='—';a.append(label,number);td.append(a);tr.append(td);}if(rows)rows.append(tr);}
   if(!headings.length)root.querySelector('.report-toc')?.remove();
   return root;
  }
@@ -96,7 +124,7 @@
     const id=link.getAttribute('href').slice(1),heading=pages.querySelector('[id="'+id+'"]'),page=heading?.closest('.pagedjs_page'),n=rendered.indexOf(page)+1;
     if(!n)throw Error('목차의 페이지를 확인하지 못했습니다.');link.querySelector('.toc-page').textContent=String(n);toc.push({title:heading.textContent,page:n,id});
    }
-   for(const link of pages.querySelectorAll('.management-page-link')){const id=link.getAttribute('href').slice(1),target=pages.querySelector('[id="'+CSS.escape(id)+'"]');const n=rendered.indexOf(target?.closest('.pagedjs_page'))+1;if(!n)throw Error('관리 항목의 상세 페이지를 확인하지 못했습니다.');link.querySelector('[data-management-page]').textContent=String(n);}
+   for(const link of pages.querySelectorAll('.management-page-link,[data-management-ref]')){const id=link.getAttribute('href').slice(1),target=pages.querySelector('[id="'+CSS.escape(id)+'"]');const n=rendered.indexOf(target?.closest('.pagedjs_page'))+1;if(!n)throw Error('관리 항목의 상세 페이지를 확인하지 못했습니다.');link.querySelector('[data-management-page]').textContent=String(n);}
    const actual=new Map();for(const node of pages.querySelectorAll('[data-print-check]'))actual.set(node.dataset.printCheck,(actual.get(node.dataset.printCheck)||'')+node.textContent.replace(/\s+/g,''));
    for(const [key,value] of expected)if(value&&!(actual.get(key)||'').includes(value)){throw Error('내용 누락이 확인되어 출력을 중단했습니다. 다시 준비를 눌러주세요.');}
    for(const area of pages.querySelectorAll('.pagedjs_page_content')){
@@ -106,6 +134,7 @@
      for(const rect of range.getClientRects())if(rect.width&&rect.height&&(rect.left<box.left-3||rect.right>box.right+3||rect.top<box.top-3||rect.bottom>box.bottom+3)){throw Error('페이지 밖으로 벗어나는 내용이 있어 출력을 중단했습니다. 다시 준비를 눌러주세요.');}
     }
    }
+   if(summaryEditing){pages.setAttribute('aria-busy','false');fitScreen();setStatus('요약 문구를 편집하고 있습니다. 입력을 마치고 다른 곳을 누르면 반영됩니다.');return;}
    window.reportLayout={revision:token,pages:rendered.length,toc};document.body.dataset.reportReady='true';pages.setAttribute('aria-busy','false');printButton.disabled=false;fitScreen();setStatus('출력 준비 완료 · '+rendered.length+'쪽 · 목차 자동 생성');
   }catch(e){clean();setStatus(e.message||'출력 준비에 실패했습니다. 다시 준비를 눌러주세요.',true);retry.hidden=false;pages.setAttribute('aria-busy','false');}
   finally{busy=false;if(queued)void build();}
