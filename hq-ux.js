@@ -4,7 +4,19 @@
   const byId=id=>document.getElementById(id);
   const regions=new Map(),sequences=new Map(),editors=new Map(),viewPositions=new Map();
   const stateKey='carestep_hq_ui_v20261020';
-  let currentView='dashboard',billingPane='subscriptions',restoring=false,reviewOpen=false,closeReview=null;
+  let currentView='dashboard',billingPane='subscriptions',sectionAnchor='',restoring=false,reviewOpen=false,closeReview=null;
+  const sectionTargets={usageBilling:{cost:'hqHealthcheckUsage'},production:{storage:'hqClinicalStorage'}};
+  function syncMenuSelection(){
+    const shortcut=currentView==='billing'&&billingPane==='payments'?'payments':sectionAnchor;
+    document.querySelectorAll('#nav [data-view],#nav [data-hq-shortcut]').forEach(b=>{
+      const on=b.dataset.hqShortcut ? b.dataset.hqShortcut===shortcut : !shortcut&&b.dataset.view===currentView;
+      b.classList.toggle('active',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
+    });
+  }
+  function scrollToMenuSection(){
+    const target=byId(sectionTargets[currentView]?.[sectionAnchor]);if(!target)return;
+    target.style.scrollMarginTop='100px';target.tabIndex=-1;target.scrollIntoView({block:'start',behavior:'instant'});target.focus({preventScroll:true});
+  }
   let activeSave=null,quickSequence=0,clinicListSequence=0,clinicDetailSequence=0;
   const clinicPanes=new Map();
   let clinicFocusRequested='';
@@ -68,10 +80,10 @@
   function loadState() {try{return JSON.parse(sessionStorage.getItem(stateKey)||'{}');}catch{return {};}}
   function route(hash) {
     const [view,pane]=String(hash||'').replace(/^#/,'').split('/');
-    return {view:byId(view)?.classList.contains('view')?view:'dashboard',pane:['subscriptions','plans','payments'].includes(pane)?pane:'subscriptions'};
+    return {view:byId(view)?.classList.contains('view')?view:'dashboard',pane:['subscriptions','plans','payments'].includes(pane)?pane:'subscriptions',anchor:sectionTargets[view]?.[pane]?pane:''};
   }
   function writeRoute(replace=false) {
-    const hash='#'+currentView+(currentView==='billing'?'/'+billingPane:'');
+    const hash='#'+currentView+(currentView==='billing'?'/'+billingPane:sectionAnchor?'/'+sectionAnchor:'');
     if(location.hash!==hash)history[replace?'replaceState':'pushState'](null,'',hash);
     saveState();
   }
@@ -326,7 +338,7 @@
     document.querySelectorAll('[data-billing-pane]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.billingPane===billingPane)));
     if(byId('hqBillingChannels'))byId('hqBillingChannels').hidden=billingPane!=='subscriptions';
     if(regions.get('hqBillingChannels'))regions.get('hqBillingChannels').box.hidden=billingPane!=='subscriptions';
-    if(push){writeRoute();if(currentView==='billing'&&byId('loginOverlay').classList.contains('hidden'))void reloadView('billing');}return true;
+    syncMenuSelection();if(push){writeRoute();if(currentView==='billing'&&byId('loginOverlay').classList.contains('hidden'))void reloadView('billing');}return true;
   }
   function viewLoader(view,force=true){
     return ({protocols:()=>window.CarestepHqProtocols?.open({reuse:!force}),training:()=>window.CarestepTraining?.open({reuse:!force}),dashboard:()=>loadOverview({reuse:!force}),approval:loadApproval,clinics:()=>loadClinics({forceCatalog:force}),onboarding:()=>loadOnboardingPortfolio({reuse:!force}),customerSuccess:()=>loadCustomerSuccess({reuse:!force}),billing:()=>loadBilling({forceCatalog:force}),usageBilling:loadUsageBilling,
@@ -346,12 +358,12 @@
     }finally{if(currentView===view)restoreClinicReturn(view);}})();
     pendingViews.set(key,work);try{return await work;}finally{if(pendingViews.get(key)===work)pendingViews.delete(key);}
   }
-  function navigate(view,{push=true,check=true}={}){
+  function navigate(view,{push=true,check=true,anchor=''}={}){
     const target=byId(view);if(!target?.classList.contains('view')){toast('현재 제공되지 않는 화면입니다.');return false;}
-    if(check&&!allowLeave(()=>navigate(view,{push,check})))return false;
+    if(check&&!allowLeave(()=>navigate(view,{push,check,anchor})))return false;
     viewPositions.set(currentView,window.scrollY||0);
     if(view!=='clinics'&&!pendingClinicReturn)clinicReturnContext=null;
-    currentView=view;navigationEpoch++;
+    currentView=view;sectionAnchor=sectionTargets[view]?.[anchor]?anchor:'';navigationEpoch++;
     document.querySelectorAll('[data-material-view]').forEach(button=>{
       if(button.dataset.materialView===view)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
     });
@@ -367,6 +379,7 @@
     syncHqNavForView(view);if(view==='billing')setBillingPane(billingPane,{push:false,check:false});
     if(push)writeRoute();saveState();
     window.scrollTo({top:viewPositions.get(view)||0,behavior:'instant'});
+    syncMenuSelection();if(sectionAnchor)scrollToMenuSection();
     summarizeReadStatus();void reloadView(view,{force:false});return true;
   }
   function restoreRoute(){
@@ -378,7 +391,7 @@
     }
     selectedClinic=typeof saved.clinic==='string'?saved.clinic:'';
     customerSuccessQuick=['all','action','risk','trial3','payment','inactive14'].includes(saved.adoptionQuick)?saved.adoptionQuick:'all';
-    billingPane=parsed.pane;navigate(parsed.view,{push:false,check:false});writeRoute(true);
+    billingPane=parsed.pane;navigate(parsed.view,{push:false,check:false,anchor:parsed.anchor});writeRoute(true);
   }
   let compactDetailSequence=0;
   const compactExpanded=new Set();
@@ -613,6 +626,21 @@
   savePlan=card=>reviewedSave('plan:'+card.dataset.plan,()=>originalSavePlan(card));
   saveSubscription=()=>reviewedSave('subscription',()=>originalSaveSubscription());
   showView=view=>navigate(view);
+  document.querySelectorAll('[data-hq-shortcut]').forEach(button=>button.onclick=()=>{
+    const key=button.dataset.hqShortcut,open=()=>{
+      if(!byId('loginOverlay').classList.contains('hidden'))return;
+      if(key==='payments'){billingPane='payments';navigate('billing',{check:false});}
+      else navigate(key==='cost'?'usageBilling':'production',{check:false,anchor:key});
+    };
+    if(allowLeave(open))open();
+  });
+  const accountControls=document.querySelector('[data-hq-account-controls]');
+  if(accountControls){
+    const status=document.createElement('span'),lock=document.createElement('button');
+    status.className='muted';lock.type='button';lock.textContent='현재 연결 잠그기';lock.onclick=()=>byId('lock').click();
+    accountControls.append(status,lock);const sync=()=>status.textContent=byId('conn').textContent;
+    new MutationObserver(sync).observe(byId('conn'),{childList:true,characterData:true,subtree:true});sync();
+  }
   document.querySelectorAll('[data-material-view]').forEach(button=>button.onclick=()=>showView(button.dataset.materialView));
   loadBilling=async function(options={}){
     if(hasDirty()&&!activeSave&&!allowLeave(()=>loadBilling(options)))return;
@@ -690,8 +718,8 @@
   window.addEventListener('popstate',()=>{
     if(restoring)return;
     const next=route(location.hash);
-    if(!allowLeave(()=>{billingPane=next.pane;navigate(next.view,{push:true,check:false});})){writeRoute();return;}
-    restoring=true;billingPane=next.pane;navigate(next.view,{push:false,check:false});restoring=false;
+    if(!allowLeave(()=>{billingPane=next.pane;navigate(next.view,{push:true,check:false,anchor:next.anchor});})){writeRoute();return;}
+    restoring=true;billingPane=next.pane;navigate(next.view,{push:false,check:false,anchor:next.anchor});restoring=false;
   });
   filterIds.forEach(id=>{byId(id)?.addEventListener('change',saveState);byId(id)?.addEventListener('input',saveState);});
   const originalUsageRender=renderUsageBilling,originalReportRender=renderMonthlyOperationsReportsHQ;

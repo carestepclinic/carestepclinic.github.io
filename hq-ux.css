@@ -427,6 +427,21 @@ button,input,select,textarea{font-family:inherit}
 }
 .approval-center-card span,.approval-center-card small,.mini span,.hq-nav-count,.hq-priority-legend,.plan-card .feature{font-size:var(--hq-help-text)}
 .hq-nav-group-toggle{font-size:var(--hq-help-text)!important}
+
+/* Same two-level hierarchy and control rhythm as Clinic. */
+#nav.hq-nav{display:flex;flex-direction:column;overflow:hidden;gap:0}
+@media(min-width:901px){#nav.hq-nav{position:sticky;top:var(--hq-header-height,80px);height:calc(100dvh - var(--hq-header-height,80px));align-self:start}}
+.hq-nav-main{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:4px}
+#nav .hq-nav-group{margin:0 0 5px}
+#nav .hq-nav-group-toggle{width:100%!important;min-height:46px;font-size:14px!important;font-weight:600;padding:10px 12px!important;border:0!important;background:transparent!important;color:#4a6265!important;border-radius:9px;line-height:1.4;text-align:left}
+#nav .hq-nav-group.open>.hq-nav-group-toggle{background:#eef5f3!important;color:#16766e!important}
+#nav .hq-nav-items{padding-left:10px}
+#nav .hq-nav-items>button,#nav .hq-nav-link{min-height:42px;font-size:13px;font-weight:650;line-height:1.4;padding:10px 12px;white-space:normal}
+.hq-nav-utilities{flex-shrink:0;margin-top:auto;padding-top:10px;border-top:1px solid var(--line)}
+.hq-account-menu{padding:0;border:0;background:transparent;margin:5px 0 0}
+.hq-account-menu>summary{cursor:pointer;font-size:14px;font-weight:650;min-height:42px;padding:10px 12px}
+[data-hq-account-controls]{display:grid;gap:8px;padding:8px 12px;font-size:13px}
+@media(max-width:900px){#nav.hq-nav{display:none}.hq-menu-open #nav.hq-nav{display:flex}#nav .hq-nav-items>button,#nav .hq-nav-link{min-height:44px;font-size:14px}.hq-nav-utilities{max-height:30dvh;overflow-y:auto}}
 .status,.cs-status,.pay-badge,.launch-status{font-size:var(--hq-table-text)}
 
 /* Shared material navigation, independent of list renderers. */

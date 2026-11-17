@@ -232,7 +232,7 @@ test('compact header opens an accessible mobile menu and restores content focus 
  assert.ok(await p.evaluate(()=>document.querySelector('#nav').contains(document.activeElement)));
  await p.keyboard.press('Escape');assert.equal(await p.locator('#nav').isVisible(),false);
  assert.equal(await p.evaluate(()=>document.activeElement.id),'hqMenuToggle');
- await p.locator('#hqMenuToggle').click();await p.locator('#nav [data-view="onboarding"]').click();
+ await p.locator('#hqMenuToggle').click();await p.locator('[data-hq-nav-toggle=clinic]').click();await p.locator('#nav [data-view="onboarding"]').click();
  assert.equal(await p.locator('#nav').isVisible(),false);assert.equal(await p.locator('#hqCurrentView').innerText(),'병원 개통·설정');
  assert.equal(await p.evaluate(()=>document.activeElement.textContent),'병원 개통·설정');
  await p.locator('#hqToolsToggle').click();assert.equal(await p.locator('#hqQuickClinicSearch').isVisible(),true);
@@ -688,12 +688,13 @@ async function feedbackFixture(t,width=1280){
 }
 test('CRM and Customer Voice menu clicks show populated screens and send the expected filters',async t=>{
   const p=await feedbackFixture(t);
-  await p.locator('[data-hq-nav-toggle="content"]').click();
+  await p.locator('[data-hq-nav-toggle="today"]').click();
   await p.getByRole('button',{name:'후속관리 현황',exact:true}).click();
   await p.waitForFunction(()=>$('crmHqActive').textContent==='12');
   assert.match(p.url(),/#crm$/);assert.match(await p.locator('#crmHqClinicTable').innerText(),/시험 병원 A/);
   assert.match(await p.locator('#crmHqJourneyTable').innerText(),/시험 회복관리/);
   await p.locator('#crmHqPeriod').selectOption('90');
+  await p.locator('[data-hq-nav-toggle="clinic"]').click();
   await p.getByRole('button',{name:'병원 요청·문의',exact:true}).click();
   await p.waitForFunction(()=>$('voiceResultSummary').textContent.startsWith('조회 1건'));
   assert.match(p.url(),/#voice$/);

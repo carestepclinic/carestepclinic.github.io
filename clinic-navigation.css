@@ -14,3 +14,18 @@
 
 /* Subtle grouping without another submenu or repeated category headings. */
 .clinic-navigation .nav-submenu>.nav-section-start{margin-top:9px}
+
+/* Keep work navigation scrollable while settings and account stay within reach. */
+.clinic-navigation-ready .nav-list{overflow:hidden;padding-right:0;gap:0}
+.cs-nav-main{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:4px;display:flex;flex-direction:column;gap:5px}
+.cs-nav-utilities{flex-shrink:0;margin-top:auto;border-top:1px solid #d9e4e0;padding-top:5px;max-height:45%;overflow-y:auto;scrollbar-width:thin}
+.cs-nav-utilities .nav-divider{display:none}
+.clinic-navigation-ready .sidebar-foot .nav-item{width:100%;min-height:42px;text-align:left;font:inherit}
+.clinic-navigation-ready .sidebar-foot .nav-copy b{font-size:13px}
+.clinic-calm #appView .clinic-navigation .nav-home,.clinic-calm #appView .clinic-navigation .clinic-nav-group>summary{padding:10px 12px;display:flex;align-items:center;gap:10px;font-weight:600}
+.clinic-calm #appView .cs-nav-utilities [data-view=settings]{display:flex;align-items:center;gap:10px;padding:10px 12px;min-height:44px;width:100%}
+@media(max-width:760px){
+ .clinic-navigation-ready .sidebar.pt-menu-expanded .nav-list{max-height:60dvh;overflow:hidden}
+ .clinic-navigation-ready .sidebar.pt-menu-expanded .sidebar-foot{display:block}
+ .cs-nav-main{flex:1 1 auto;min-height:70px}.cs-nav-utilities{max-height:24dvh}
+}
