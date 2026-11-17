@@ -273,8 +273,11 @@ thead{break-after:avoid}
 .report-heading-start{break-before:page}
 
 /* The first sheet is always identity-only, including short and summary reports. */
-.report-cover-page .hospital-cover{padding-bottom:6mm;margin-bottom:0}
-.report-cover-page .cover-heading,.report-cover-page[data-compact=true] .cover-heading{padding:22mm 0 12mm;margin:0 0 10mm}
+.report-cover-page .cover-sheet{display:flex;flex-direction:column;min-height:250mm}
+.report-cover-page .hospital-cover{margin: auto 0 0;padding:6mm 0 0;border-top:1px solid #b7ceca;border-bottom:0}
+.report-cover-page .hospital-cover>div{min-width:0}
+.report-cover-page .hospital-cover img{flex-shrink:0}
+.report-cover-page .cover-heading,.report-cover-page[data-compact=true] .cover-heading{padding:6mm 0 10mm;margin:0 0 8mm}
 .report-cover-page .cover-heading h1{font-size:32pt;line-height:1.25;margin:4mm 0}
 .report-cover-page .patient-block{padding:7mm 6mm;background:#f5f9f8}
 .report-cover-page .patient-block strong{font-size:23pt}

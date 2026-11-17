@@ -100,7 +100,7 @@ test('dedicated cover keeps logo and identity only across desktop, mobile and ou
    await p.locator('[data-report-mode]').selectOption(mode);await ready(p);
    const cover=p.locator('.pagedjs_page').first();assert.equal(await p.locator('.report-cover-page').count(),1);
    assert.equal(await cover.locator('.hospital-cover img').count(),1);assert.ok(await cover.locator('.hospital-cover img').evaluate(e=>e.complete&&e.naturalWidth>0));
-   assert.equal(await cover.locator('.cover-summary,.cover-actions,.report-toc,.part-title').count(),0);
+   assert.equal(await cover.locator('.cover-summary,.cover-actions,.report-toc,.part-title').count(),0);assert.ok(await cover.evaluate(page=>{const area=page.querySelector('.pagedjs_page_content').getBoundingClientRect(),title=page.querySelector('.cover-heading').getBoundingClientRect(),patient=page.querySelector('.patient-block').getBoundingClientRect(),meta=page.querySelector('.cover-meta').getBoundingClientRect(),hospital=page.querySelector('.hospital-cover').getBoundingClientRect();return title.top-area.top<30&&title.bottom<=patient.top&&patient.bottom<=meta.top&&meta.bottom<hospital.top&&hospital.top>area.top+area.height*.75&&hospital.bottom<=area.bottom;}),'title and identity at top, hospital at bottom without overlap');
    assert.ok((await cover.innerText()).includes(patient.guardianName));assert.ok((await cover.innerText()).includes(brand.phone));
    assert.ok((await p.locator('#report-pages').innerText()).includes(d.overview.split('\n')[0]));
    assert.ok(await p.locator('[data-report-title="검진 결과 요약"]').evaluate(e=>Number(e.closest('.pagedjs_page').dataset.pageNumber)>1));
