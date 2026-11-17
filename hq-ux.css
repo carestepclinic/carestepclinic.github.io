@@ -623,3 +623,5 @@ button,input,select,textarea{font-family:inherit}
 #planGrid summary{cursor:pointer;padding:6px 0;font-weight:700}
 #planGrid .save-plan{margin-top:18px;width:100%}
 @media(max-width:650px){#planGrid .price-row,#planGrid .hq-plan-resources{grid-template-columns:1fr}}
+
+#nav .hq-nav-home{width:100%;min-height:46px;margin:0 0 5px;padding:10px 12px;font-size:14px;font-weight:650;text-align:left}#nav .hq-nav-group-toggle{gap:8px}#nav .nav-group-attention{margin-left:auto;flex-shrink:0;padding:2px 6px;border-radius:12px;background:#fff0ef;color:#a82720;font-size:11px;font-weight:700;line-height:1.4}#nav .nav-group-attention[hidden],#nav .hq-nav-group.open .nav-group-attention{display:none}

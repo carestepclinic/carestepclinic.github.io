@@ -465,7 +465,7 @@
         items.id='hqNavItems-'+group.dataset.hqNavGroup;button.setAttribute('aria-controls',items.id);button.setAttribute('aria-expanded',String(group.classList.contains('open')));
       });
     };
-    setHqNavGroup(document.querySelector('[data-hq-nav-group].open')?.dataset.hqNavGroup||'today');
+    setHqNavGroup(document.querySelector('[data-hq-nav-group].open')?.dataset.hqNavGroup||'home');
     function setMenu(open,restore=true){
       const visible=!!open&&mobile.matches;document.body.classList.toggle('hq-menu-open',visible);
       menu.setAttribute('aria-expanded',String(visible));backdrop.hidden=!visible;
