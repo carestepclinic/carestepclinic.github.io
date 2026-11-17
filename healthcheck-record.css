@@ -426,3 +426,9 @@
 .management-badge{display:inline-block;font-size:12px;font-weight:700;border:1px solid currentColor;border-radius:5px;padding:2px 7px;line-height:1.5;color:#52625d;background:#f0f3f2}
 .management-priority{color:#9f302c;background:#fff0ee}.management-followup{color:#8a5412;background:#fff7e5}.management-care{color:#12695e;background:#e9f5f1}.management-clear{color:#39694c;background:#eff7ee}
 @media(max-width:650px){.hc-management{padding:12px}.hc-management-fields,.hc-management-links>div{grid-template-columns:1fr}.hc-management-card{padding:10px}.hc-management-card footer{align-items:flex-start}}
+
+.hc-normal-tools,.hc-followup-import{margin:12px 0;padding:10px 12px;border:1px solid #d6e2de;border-radius:8px;background:#f5faf8}
+.hc-normal-tools summary,.hc-followup-import summary{cursor:pointer;font-weight:700}
+.hc-normal-tools p,.hc-followup-import p{font-size:13px;line-height:1.6;color:#526862}
+.hc-normal-picks{display:flex;flex-wrap:wrap;gap:10px 20px;margin:12px 0}.hc-normal-picks label:has(input:disabled){color:#74817d}
+.hc-followup-import [data-followup-import-options]>.hc-check{display:flex;align-items:flex-start;margin:12px 0}.hc-followup-import small{display:block;margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere}
