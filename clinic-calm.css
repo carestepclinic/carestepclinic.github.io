@@ -1956,3 +1956,59 @@
 #practiceRoot .cs-list-tools:empty{display:none}
 @media(max-width:760px){#appView .main:has(#practice.active-view) > .cs-record-page-tabs{gap:4px;padding:4px;margin-bottom:10px}#appView .main > .cs-record-page-tabs button{font-size:12px;min-height:44px;padding:8px 2px}}
 @media print{#appView .main > .cs-record-page-tabs{display:none!important}}
+
+/* Surgery/exam schedules and consents use the Clinic screen design system.
+   Keep timeline geometry and the separate printable consent stylesheet intact. */
+@media screen {
+ .clinic-calm #practiceRoot.pt .su{--su-ink:var(--cs-ink);--su-teal:var(--cs-accent);font-size:15px;line-height:1.55}
+ .clinic-calm #practiceRoot.pt .su label{margin:0;gap:6px;font-size:14px;font-weight:600;line-height:1.5}
+ .clinic-calm #practiceRoot.pt .su label.su-check{font-weight:400;padding:4px 0;gap:8px}
+ .clinic-calm #practiceRoot.pt .su :is(input:not([type=checkbox]):not([type=radio]),select,textarea){font-family:inherit;font-size:16px;font-weight:400;line-height:1.5;color:var(--cs-ink);border-color:#bccbc5;border-radius:8px;margin:0;min-width:0;max-width:100%;padding:9px 11px}
+ .clinic-calm #practiceRoot.pt .su :is(input:not([type=checkbox]):not([type=radio]),select){box-sizing:border-box;height:44px;min-height:44px}
+ .clinic-calm #practiceRoot.pt .su textarea{min-height:96px;padding:10px 11px}
+ .clinic-calm #practiceRoot.pt .su :is(input,select,textarea):disabled{background:#f2f5f3;color:var(--cs-muted)}
+ .clinic-calm #practiceRoot.pt .su textarea[aria-invalid=true]{border-color:#ac493a}
+ .clinic-calm #practiceRoot.pt .su button:not(.su-timetable button){font-family:inherit;font-size:14px;font-weight:600;line-height:20px;border-color:var(--cs-line)}
+ .clinic-calm #practiceRoot.pt .su button.su-primary{background:var(--cs-accent);border-color:var(--cs-accent);color:#fff}
+ .clinic-calm #practiceRoot.pt .su :is(.su-patient .su-actions,.su-template-row,.su-consent-filters,[data-consent-tools] .su-actions)>button{height:44px;min-height:44px;padding:9px 12px}
+ .clinic-calm #practiceRoot.pt .su .su-patient .su-actions{gap:8px;flex-wrap:nowrap}
+ .clinic-calm #practiceRoot.pt .su .su-patient [data-patient-query]{flex:1;min-width:0}
+ .clinic-calm #practiceRoot.pt .su .su-patient .su-actions>button{flex:none}
+ .clinic-calm #practiceRoot.pt .su :is(.su-card,.su-patient,.su-selection,.su-explanation-loader,.su-consent-education,.su-consent-auto,.su-consent-dialog,.su-booking-panel,.su-day-list){border-color:var(--cs-line);border-radius:10px}
+ .clinic-calm #practiceRoot.pt .su .su-card{padding:14px;margin:12px 0}
+ .clinic-calm #practiceRoot.pt .su :is(.su-card,.su-panel-heading,.su-consent-dialog)>h3{font-size:18px;line-height:1.4;margin:0 0 12px}
+ .clinic-calm #practiceRoot.pt .su .su-panel-heading>h3{margin:0}
+ .clinic-calm #practiceRoot.pt .su :is(.su-panel-heading,.su-panel-actions){padding:12px 14px;border-color:var(--cs-line)}
+ .clinic-calm #practiceRoot.pt .su .su-panel-content{padding:14px}
+ .clinic-calm #practiceRoot.pt .su .su-panel-heading{background:#f1f5f2}
+ .clinic-calm #practiceRoot.pt .su .su-consent-dialog{color:var(--cs-ink);padding:18px}
+ .clinic-calm #practiceRoot.pt .su :is(.su-explanation-loader,.su-consent-education,.su-consent-auto){padding:12px}
+ .clinic-calm #practiceRoot.pt .su .su-explanation-loader{margin-bottom:16px}
+ .clinic-calm #practiceRoot.pt .su .su-explanation-loader h4{font-size:14px;line-height:1.5;margin:0 0 8px}
+ .clinic-calm #practiceRoot.pt .su .su-grid{gap:16px}
+ .clinic-calm #practiceRoot.pt .su .su-required{font-size:12px;line-height:18px;font-weight:400;color:var(--cs-muted);margin:0}
+ .clinic-calm #practiceRoot.pt .su .su-area-tools{margin:0;gap:8px;min-height:18px;align-items:center}
+ .clinic-calm #practiceRoot.pt .su .su-area-tools small{font-size:12px;line-height:18px;color:var(--cs-muted);margin:0}
+ .clinic-calm #practiceRoot.pt .su .su-area-tools.su-warning small{color:#963e2f}
+ .clinic-calm #practiceRoot.pt .su .su-area-tools button{font-size:12px;min-height:32px;line-height:18px;padding:4px 9px}
+ .clinic-calm #practiceRoot.pt .su :is(.su-small,.su-sync-status,.su-date-caption,.su-schedule-count){color:var(--cs-muted);font-size:13px}
+ .clinic-calm #practiceRoot.pt .su .su-consent-progress{font-size:13px;color:var(--cs-muted)}
+ .clinic-calm #practiceRoot.pt .su .su-consent-progress li{background:var(--cs-tint)}
+ .clinic-calm #practiceRoot.pt .su :is(.su-kind-filters button[aria-pressed=true],.su-view-switch button[aria-pressed=true],.su-consent-progress [aria-current=step]){background:var(--cs-accent);border-color:var(--cs-accent);color:#fff}
+ .clinic-calm #practiceRoot.pt .su .su-duration button[aria-pressed=true]{background:var(--cs-tint);border-color:var(--cs-accent);color:var(--cs-accent-hover)}
+ .clinic-calm #practiceRoot.pt .su .su-consent-dock{background:#f7faf8;border-color:var(--cs-line)}
+}
+@media screen and (max-width:650px) {
+ .clinic-calm #practiceRoot.pt .su .su-panel-actions{padding-bottom:max(12px,env(safe-area-inset-bottom))}
+ .clinic-calm #practiceRoot.pt .su .su-booking-panel{border-radius:0;border:0}
+ .clinic-calm #practiceRoot.pt .su .su-consent-dialog{padding:16px}
+}
+
+@media screen {
+ .clinic-calm #practiceRoot.pt .su.su-bookings{--su-control-height:42px}
+ .clinic-calm #practiceRoot.pt .su.su-bookings :is(.su-booking-controls,.su-schedule-summary) :is(button,input,select){height:var(--su-control-height);min-height:var(--su-control-height);max-height:var(--su-control-height)}
+ .clinic-calm #practiceRoot.pt .su.su-bookings .su-booking-actions>[data-act=refresh]{height:var(--su-control-height)!important;min-height:var(--su-control-height)!important}
+}
+@media screen and (max-width:650px) {
+ .clinic-calm #practiceRoot.pt .su.su-bookings{--su-control-height:44px}
+}

@@ -145,3 +145,17 @@
 .su [data-consent-form] textarea[aria-invalid=true]{border-color:#ac493a}
 .su-consents .su-complete-dock{position:sticky;bottom:env(safe-area-inset-bottom,0px);margin-top:16px}
 .su-consents .su-complete-dock span{font-weight:700;color:#21634e}
+
+/* Date selection and primary booking actions share one responsive toolbar. */
+@media screen {
+ .su-bookings>.su-heading:empty{display:none}
+ .su-booking-controls{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 8px}
+ .su.su-bookings .su-booking-controls>.su-booking-toolbar{flex:1;min-width:0;margin:0}
+ .su-booking-controls>.su-booking-actions{flex:none;gap:8px}
+ .su.su-bookings .su-booking-actions>button,
+ .clinic-calm #practiceRoot.pt .su.su-bookings .su-booking-actions>button{height:42px;min-height:42px;max-height:42px;margin:0;padding:10px 12px;line-height:20px;white-space:nowrap}
+}
+@media screen and (max-width:1100px) {
+ .su.su-bookings .su-booking-controls>.su-booking-toolbar{flex-basis:100%}
+ .su-booking-controls>.su-booking-actions{margin-left:auto}
+}
