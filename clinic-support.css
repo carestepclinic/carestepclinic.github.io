@@ -53,3 +53,54 @@
  .su.su-bookings .su-schedule-summary>[data-act=toggle-booking-filters],.su.su-bookings .su-view-switch{justify-self:start}
  .su.su-bookings .su-schedule-summary>[data-act=current-hour]{justify-self:end}
 }
+
+/* Consent entry: compact patient details and persistent next action. */
+.su-consents .su-heading[hidden]{display:none}
+.su-consent-progress{display:flex;gap:8px;list-style:none;padding:0;margin:12px 0;color:#536c78;font-size:13px}
+.su-consent-progress li{padding:5px 12px;border-radius:16px;background:#edf2f1}
+.su-consent-progress [aria-current=step]{background:#173d4b;color:#fff;font-weight:700}
+.su-consents .su-card{margin:12px 0;padding:18px}
+.su-consents .su-card h3{margin-bottom:12px}
+.su-consents details{margin-top:12px}
+.su-consents summary{cursor:pointer;font-weight:600;padding:8px 0;overflow-wrap:anywhere}
+.su-consents details>.su-grid{margin-top:10px}
+.su-consents .su-patient{margin:16px 0 8px}
+.su-consents .su-patient-selected:empty{display:none}
+.su-consents .su-patient-selected{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.su-consents .su-patient-selected>span{flex:1;min-width:100px}
+.su-consents .su-patient:has(.su-patient-selected:not(:empty))>b{display:none}
+.su-consent-templates{display:flex;align-items:start;gap:16px;flex-wrap:wrap}
+.su-consent-templates>label{flex:1;min-width:180px}
+.su-consent-templates>details{flex:1;min-width:230px}
+.su-consents [data-consent-tools] .su-actions{margin:8px 0}
+.su-consents [data-consent-tools] input{flex:1;min-width:150px;width:auto}
+.su-consents .su-required{font-size:11px;color:#697c85;font-weight:400;margin:0;line-height:1}
+.su-consents label:has(.su-required){gap:4px}
+.su-consent-dock{position:sticky;bottom:0;z-index:8;display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;padding:12px;background:#f8fbfa;border:1px solid #c7d8d9;border-radius:10px;box-shadow:0 -3px 12px #173d4b12;margin-top:12px}
+.su-consent-dock>span{margin-right:auto;font-size:12px;color:#536c78}
+.su-review-dock{top:8px;bottom:auto;margin-bottom:12px}
+.su-consent-issues{border:1px solid #d7b381;background:#fff8ec;padding:12px;border-radius:8px;margin:12px 0;color:#70471c}
+.su-consent-issues>div{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.su-consents .su-consent-issues button{font-size:12px;min-height:32px;padding:4px 8px}
+.su-consent-saving canvas{pointer-events:none;opacity:.55}
+.su-consents [disabled]{cursor:wait;opacity:.65}
+.su-consent-filters{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.su-consent-filters label{flex:1;min-width:130px}
+.su-consent-filters label:has([data-filter=search]){flex:2;min-width:200px}
+.su-consent-more{margin-top:0!important;margin-left:auto}
+.su-consents .su-sign-panel{scroll-margin-top:90px}
+.su-consents [data-consent-form]{padding-bottom:12px}
+@media(max-width:650px){
+ .su-consents .su-grid{grid-template-columns:1fr}
+ .su-consents .su-card{padding:14px}
+ .su-consent-templates>details{min-width:0;flex-basis:100%}
+ .su-consent-dock{padding:10px;bottom:env(safe-area-inset-bottom,0px)}
+ .su-review-dock{top:0;bottom:auto}
+ .su-consent-dock>span{flex-basis:100%}
+ .su-consent-dock>button{flex:1;min-width:0}
+ .su-consent-filters label{min-width:calc(50% - 10px)}
+ .su-consent-filters label:has([data-filter=search]){flex-basis:100%}
+}
+.su-consents label:has(.su-required){display:grid;grid-template-columns:minmax(0,1fr) auto;align-content:start;gap:6px}
+.su-consents label:has(.su-required)>input,.su-consents label:has(.su-required)>textarea{grid-column:1/-1}
+.su-consents .su-required{align-self:center}
