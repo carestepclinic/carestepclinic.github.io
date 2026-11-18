@@ -115,3 +115,11 @@
 .su-consent-education label{display:grid;gap:6px;margin:10px 0}
 .su-consent-education select,.su-consent-education input{width:100%;min-width:0;box-sizing:border-box}
 .su [data-consent-doctor-fields]{margin:10px 0}
+
+.su-consent-auto{padding:16px;margin:12px 0;border:1px solid #9abfc1;border-radius:12px;background:#edf6f5}
+.su-consent-auto label{display:grid;gap:7px;font-weight:700;margin-bottom:10px}
+.su-consent-auto input{width:100%;min-width:0;box-sizing:border-box}
+.su-consent-auto [role=status]{overflow-wrap:anywhere}
+.su-consent-auto [data-consent-auto-choices]{display:grid;gap:6px}
+.su-consent-auto [data-consent-auto-choice]{text-align:left;white-space:normal}
+.su-consent-auto [data-consent-auto-choice] small{display:block;font-weight:400}
