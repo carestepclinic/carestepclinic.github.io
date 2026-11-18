@@ -165,3 +165,20 @@
  .su.su-bookings .su-booking-controls>.su-booking-toolbar{flex-basis:100%}
  .su-booking-controls>.su-booking-actions{margin-left:auto}
 }
+/* Consent drafting: patient-specific inputs, plain-text output and one review group. */
+.su-consents .su-consent-field{min-width:0;padding:16px 0;border-bottom:1px solid var(--cs-line,#ccd8d4)}
+.su-consents .su-consent-field>label{display:block;margin-bottom:10px;font-weight:700}
+.su-consents .su-draft-inputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.su-consents .su-draft-inputs>label{min-width:0;font-size:13px;line-height:1.5}
+.su-consents .su-draft-inputs>h4,.su-consents .su-draft-inputs>.su-check{grid-column:1/-1}
+.su-consents .su-draft-inputs textarea{box-sizing:border-box;width:100%;min-height:76px;font-size:14px;line-height:1.6;resize:vertical}
+.su-consents [data-draft-full]{margin-top:12px;font-size:13px}
+.su-consents [data-draft-full]>textarea{display:block;box-sizing:border-box;width:100%;margin-top:10px}
+.su-consents .su-loader-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.su-consents .su-loader-tabs [aria-pressed=true]{background:#173d4b;color:white;border-color:#173d4b}
+.su-consents .su-consent-presets{margin:12px 0 0;padding:10px 0 0;border-top:1px solid var(--cs-line,#ccd8d4);border-bottom:0;font-size:13px}
+.su-consents .su-consent-presets>.su-actions{margin-top:10px}
+.su-consents .su-clinical-review .su-actions{margin-bottom:12px}
+.su-consents [data-anesthesia-notice]:empty{display:none}
+.su-consents [hidden]{display:none!important}
+@media(max-width:650px){.su-consents .su-draft-inputs{grid-template-columns:1fr}.su-consents .su-clinical-review>[data-act]{width:100%}.su-consents .su-loader-tabs>button{flex:1}}
