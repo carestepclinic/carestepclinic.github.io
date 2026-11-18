@@ -11,32 +11,18 @@ async function carestepConsentEducation(){
 }
 const carestepConsentScope=()=>JSON.stringify([saasMe?.clinic?.id,saasMe?.user?.id,saasSessionMeta?.id,saasMe?.role,saasMe?.permissions]);
 async function carestepConsentSources(){
- const scope=carestepConsentScope(),jobs=[];
- if(saasPermission('materials.read',true)){
-  jobs.push(['보호자 안내자료',()=>carestepConsentEducation().then(r=>r.items.map(t=>({...t,sourceKind:'education'})))]);
-  jobs.push(['공통 진료 프로토콜',()=>saasRequest('/saas/practice/knowledge-protocols').then(r=>(r.items||[]).filter(t=>t.status==='published'&&t.sourceCurrent!==false).map(t=>({...t,sourceKind:'common'})))]);
- }
- if(saasPermission('clinical.calculate',false)&&saasPermission('clinical.protocols.read',false))jobs.push(['병원 진료 프로토콜',()=>saasRequest('/saas/practice/clinical/protocols').then(r=>(r.items||[]).filter(t=>t.status==='published').map(t=>({...t,disease:t.body?.disease,sourceKind:'hospital'})))]);
- if(!jobs.length)throw Error('안내자료 또는 진료 프로토콜 조회 권한이 필요합니다.');
- const results=await Promise.allSettled(jobs.map(([,fn])=>fn()));
+ if(!saasPermission('materials.read',true))throw Error('동의서 설명 조회 권한이 필요합니다.');
+ const scope=carestepConsentScope(),r=await saasRequest('/saas/practice/consent-explanations');
  if(scope!==carestepConsentScope())throw Error('병원 또는 계정이 변경되었습니다. 다시 찾아주세요.');
- const items=[],warnings=[];results.forEach((r,i)=>{if(r.status==='fulfilled')items.push(...r.value);else warnings.push(jobs[i][0]+' 조회 실패');});
- if(results.every(r=>r.status==='rejected'))throw Error('자료를 불러오지 못했습니다. 다시 시도해주세요.');
- return {items,warnings};
+ return {items:(r.items||[]).filter(x=>x.status==='published'&&x.sourceCurrent!==false).map(x=>({...x,sourceKind:'prepared'})),warnings:[]};
 }
 async function carestepConsentSourceDocument(source){
- const scope=carestepConsentScope();let item;
- if(source.sourceKind==='education'){item=(await carestepConsentEducation()).items.find(t=>t.id===source.id);}
- else if(source.sourceKind==='common'){
-  if(!saasPermission('materials.read',true))throw Error('자료 조회 권한이 없습니다.');
-  item=(await saasRequest('/saas/practice/knowledge-protocols/'+encodeURIComponent(source.id))).document;
- }else if(source.sourceKind==='hospital'){
-  if(!saasPermission('clinical.calculate',false)||!saasPermission('clinical.protocols.read',false))throw Error('프로토콜 조회 권한이 없습니다.');
-  item=(await saasRequest('/saas/practice/clinical/protocols')).items?.find(t=>t.id===source.id);
- }
+ if(!saasPermission('materials.read',true)||source.sourceKind!=='prepared')throw Error('승인된 동의서 설명을 선택해주세요.');
+ const scope=carestepConsentScope(),r=await saasRequest('/saas/practice/consent-explanations/'+encodeURIComponent(source.id));
  if(scope!==carestepConsentScope())throw Error('병원 또는 계정이 변경되었습니다.');
- if(!item||source.sourceKind!=='education'&&item.status!=='published')throw Error('현재 공개된 자료를 확인하지 못했습니다. 다시 찾아주세요.');
- return {...item,sourceKind:source.sourceKind,title:item.body?.title||item.title,disease:item.body?.disease||item.disease,species:item.body?.species||item.species};
+ const d=r.document,v=d?.variants?.find(x=>x.id===source.variantId);
+ if(!v||d.status!=='published'||d.sourceCurrent===false)throw Error('현재 공개된 설명을 확인하지 못했습니다. 다시 찾아주세요.');
+ return {...source,...v,id:d.id,variantId:v.id,disease:d.disease,species:d.species,revision:d.revision,reviewedBy:d.reviewedBy,reviewedAt:d.reviewedAt,sourceKind:'prepared'};
 }
 window.CarestepPractice=PracticeTools.mount(document.getElementById('practiceRoot'),{
  hospital:()=>({name:hospital.name||saasMe?.clinic?.name||'',logo:hospital.logo||'',address:hospital.address||'',phone:hospital.phone||''}),

@@ -341,7 +341,7 @@
     syncMenuSelection();if(push){writeRoute();if(currentView==='billing'&&byId('loginOverlay').classList.contains('hidden'))void reloadView('billing');}return true;
   }
   function viewLoader(view,force=true){
-    return ({protocols:()=>window.CarestepHqProtocols?.open({reuse:!force}),training:()=>window.CarestepTraining?.open({reuse:!force}),dashboard:()=>loadOverview({reuse:!force}),approval:loadApproval,clinics:()=>loadClinics({forceCatalog:force}),onboarding:()=>loadOnboardingPortfolio({reuse:!force}),customerSuccess:()=>loadCustomerSuccess({reuse:!force}),billing:()=>loadBilling({forceCatalog:force}),usageBilling:loadUsageBilling,
+    return ({consentLibrary:()=>window.CarestepConsentLibrary?.open(),protocols:()=>window.CarestepHqProtocols?.open({reuse:!force}),training:()=>window.CarestepTraining?.open({reuse:!force}),dashboard:()=>loadOverview({reuse:!force}),approval:loadApproval,clinics:()=>loadClinics({forceCatalog:force}),onboarding:()=>loadOnboardingPortfolio({reuse:!force}),customerSuccess:()=>loadCustomerSuccess({reuse:!force}),billing:()=>loadBilling({forceCatalog:force}),usageBilling:loadUsageBilling,
       integrations:async()=>{if(await loadMessagingIntegration()===false)throw Error(byId('msgQueueSummary')?.textContent||'외부 연동 상태를 불러오지 못했습니다.');},senders:()=>Promise.all([loadSenderOnboarding(),loadMessagingIntegration()]),
       journeys:loadPatientJourneysHQ,surveys:()=>loadGuardianSurveyHQ({reuse:!force}),crm:()=>loadFollowupCrmHQ({reuse:!force}),content:()=>loadContent({reuse:!force}),voice:()=>loadVoice({reuse:!force}),production:loadProductionLaunch,audit:loadAudit})[view];
   }
@@ -353,7 +353,7 @@
     const key=JSON.stringify([endpoint(),hqSessionToken(),view,billingPane,selectedClinic,...filterIds.map(id=>byId(id)?.value)]);
     if(pendingViews.has(key))return pendingViews.get(key);
     const work=(async()=>{try{
-      if(['training','protocols','dashboard','billing','usageBilling','clinics','onboarding','customerSuccess','surveys','crm','voice','content'].includes(view)){await loader();return;}
+      if(['training','protocols','consentLibrary','dashboard','billing','usageBilling','clinics','onboarding','customerSuccess','surveys','crm','voice','content'].includes(view)){await loader();return;}
       await region(view,loader,()=>{},()=>reloadView(view));
     }finally{if(currentView===view)restoreClinicReturn(view);}})();
     pendingViews.set(key,work);try{return await work;}finally{if(pendingViews.get(key)===work)pendingViews.delete(key);}
@@ -375,7 +375,7 @@
     document.title=`${target.querySelector('h1')?.textContent||'관리'} · CARESTEP HQ`;
     byId('hqCurrentView').textContent=target.querySelector('h1')?.textContent||'운영 관리';
     if(closeCompactMenu()){const heading=target.querySelector('h1');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}}
-    byId('refresh').title=byId('hqCurrentView').textContent+' 새로고침';byId('refresh').hidden=['content','training','protocols','integrations','onboarding','customerSuccess','senders'].includes(view);
+    byId('refresh').title=byId('hqCurrentView').textContent+' 새로고침';byId('refresh').hidden=['content','training','protocols','consentLibrary','integrations','onboarding','customerSuccess','senders'].includes(view);
     syncHqNavForView(view);if(view==='billing')setBillingPane(billingPane,{push:false,check:false});
     if(push)writeRoute();saveState();
     window.scrollTo({top:viewPositions.get(view)||0,behavior:'instant'});
