@@ -147,6 +147,12 @@
 .su-consents .su-complete-dock span{font-weight:700;color:#21634e}
 
 /* Date selection and primary booking actions share one responsive toolbar. */
+.su-consent-presets{margin:0 0 12px;padding-bottom:12px;border-bottom:1px solid var(--cs-line,#ccd8d4)}
+.su-consent-presets .su-actions{align-items:center;gap:8px}
+.su-consent-presets .su-actions>b{font-size:14px;margin-right:auto}
+.su-consent-presets details{font-size:13px;margin-top:8px}
+.su-consent-presets ul{padding-left:20px;margin:8px 0}
+.su-consent-presets a{overflow-wrap:anywhere}
 @media screen {
  .su-bookings>.su-heading:empty{display:none}
  .su-booking-controls{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 8px}
