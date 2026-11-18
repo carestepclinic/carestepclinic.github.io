@@ -143,3 +143,5 @@
 .su [data-sign-document-issues] button{margin:4px}
 .su [data-sign-document-issues] p{font-size:13px;line-height:1.6}
 .su [data-consent-form] textarea[aria-invalid=true]{border-color:#ac493a}
+.su-consents .su-complete-dock{position:sticky;bottom:env(safe-area-inset-bottom,0px);margin-top:16px}
+.su-consents .su-complete-dock span{font-weight:700;color:#21634e}
