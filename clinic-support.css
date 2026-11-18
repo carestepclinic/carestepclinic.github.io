@@ -104,3 +104,14 @@
 .su-consents label:has(.su-required){display:grid;grid-template-columns:minmax(0,1fr) auto;align-content:start;gap:6px}
 .su-consents label:has(.su-required)>input,.su-consents label:has(.su-required)>textarea{grid-column:1/-1}
 .su-consents .su-required{align-self:center}
+
+/* Consent source preview stays within the writing flow. */
+.su-consent-education{margin:12px 0;padding:14px;border:1px solid #c6dadd;border-radius:12px;background:#f4f9f9}
+.su-education-results{display:grid;gap:6px;max-height:260px;overflow:auto;margin:10px 0}
+.su-education-results button{text-align:left;white-space:normal;min-width:0}
+.su-education-results small{display:block;font-weight:400}
+.su-education-block{margin:12px 0;padding:12px;border:1px solid #d8e3e5;border-radius:10px;background:white}
+.su-education-block p{white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow:auto}
+.su-consent-education label{display:grid;gap:6px;margin:10px 0}
+.su-consent-education select,.su-consent-education input{width:100%;min-width:0;box-sizing:border-box}
+.su [data-consent-doctor-fields]{margin:10px 0}

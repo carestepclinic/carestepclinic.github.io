@@ -4,6 +4,17 @@ window.CarestepPractice=PracticeTools.mount(document.getElementById('practiceRoo
  ready:()=>saasMode==='auth'&&!!saasMe,
  identity:()=>[saasMe?.clinic?.id,saasMe?.user?.id,saasSessionMeta?.id,JSON.stringify(saasMe?.permissions||{}),saasMe?.role].join(':'),
  preferencesIdentity:()=>[saasMe?.clinic?.id,saasMe?.user?.id].join(':'),
+ consentEducation:async()=>{
+  if(!saasPermission('materials.read',true))throw Error('교육자료 조회 권한이 필요합니다.');
+  const scope=[saasMe?.clinic?.id,saasMe?.user?.id,saasSessionMeta?.id].join(':');
+  const items=new Map(templates.filter(t=>t.status==='live'&&!t._studioCentral).map(t=>[t.id,t]));
+  if(saasHasFeature('centralContent')){
+   const r=await saasRequest('/saas/content/published',{method:'GET'});
+   if(scope!==[saasMe?.clinic?.id,saasMe?.user?.id,saasSessionMeta?.id].join(':'))throw Error('병원 또는 계정이 변경되었습니다.');
+   for(const d of r.documents||[])if(d.workflowStatus==='published'&&d.vetReviewed&&d.template?.id)items.set(d.template.id,{...d.template,species:d.meta?.species||d.journey?.species||d.template.species||''});
+  }
+  return {items:Array.from(items.values()).map(t=>({id:t.id,title:t.title,short:t.short,category:t.category,species:templateSpeciesLabel(t),description:t.description,sections:t.sections,redFlags:t.redFlags}))};
+ },
  can:key=>saasPermission(key,true),clinicalManage:()=>saasPermission('records.edit',true),medical:()=>saasPermission('clinical.approve',false),access:(tab,action)=>window.ClinicSettings?.access(tab,action)||{allowed:true},education:async id=>{go('training');await window.CarestepTraining.open();if(id)await window.CarestepTraining.openVersion(id);},materials:p=>{const current=window.crmMaterialContext?.();if(p?.id&&current?.patientId!==p.id){go('patients');toast('퇴원 자료를 작성할 환자를 선택해주세요: '+p.name);return;}go('library');},navigation:()=>window.ClinicNavigation?.changed(),navigate:(view,options)=>{if(view==='sop'){go('training',{trainingSection:'sop'});}else go(view,options);},clinicName:()=>saasMe?.clinic?.name||'우리 병원',
  patient:()=>{const x=window.crmMaterialContext?.();return x?.patientId?{id:x.patientId,name:x.patient?.name||'',guardianName:x.guardian?.name||'',species:x.patient?.species||''}:null;}
 });
