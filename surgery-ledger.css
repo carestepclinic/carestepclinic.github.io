@@ -40,7 +40,7 @@
 .sl-difference{border-color:#dbc99e}.sl-diff-values{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.sl-diff-values>div{padding:12px;background:#fffbf2;border-radius:8px}.sl-diff-values p{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0 0}
 .sl fieldset.sl-variant-choice{display:flex;gap:16px;flex-wrap:wrap;border:1px solid var(--sl-line);border-radius:10px;padding:12px 16px;margin:16px 0;background:var(--sl-paper)}.sl-variant-choice legend{font-weight:600;font-size:14px}.sl-variant-choice label{margin:0!important}
 .sl-empty{padding:28px;text-align:center;background:var(--sl-tint);border-radius:10px}.sl-file{margin:16px 0}.sl-file input{height:auto!important}
-.sl-print-frame{position:fixed;width:1px;height:1px;left:-10000px;border:0}
+.sl-print-frame{position:fixed;width:1032px;height:703px;left:-10000px;border:0}
 .sl :is(button,input,textarea,select,summary):focus-visible{outline:3px solid #5baaa2;outline-offset:2px}
 #practiceRoot:has(>.sl)>.pt-tool-intro{display:none}
 .clinic-calm #practiceRoot.pt .sl{font-size:15px;line-height:1.55;color:var(--sl-ink)}
@@ -56,3 +56,6 @@
 }
 @media(max-width:420px){.sl-grid{grid-template-columns:1fr}.sl-grid label{grid-column:1}.sl-toolbar nav{gap:4px}.sl-toolbar nav button{flex:1;padding-inline:6px}.sl-source>button{flex:1;white-space:nowrap;padding-inline:8px}.sl-savebar button{padding-inline:8px}}
 @media print{.sl-savebar,.sl-loader{display:none}.sl-card{break-inside:avoid}}
+
+.sl details.sl-loader{padding:0}.sl .sl-loader>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:none;padding:12px 16px;color:var(--sl-ink);border-radius:10px;min-height:44px}.sl .sl-loader>summary::-webkit-details-marker{display:none}.sl-loader>summary strong{font-size:15px;font-weight:600}.sl-loader-state{flex:none;font-size:14px;color:var(--sl-accent)}.sl-loader .sl-when-open{display:none}.sl-loader[open] .sl-when-open{display:inline}.sl-loader[open] .sl-when-closed{display:none}.sl-loader-body{padding:0 16px 16px}.sl-link-actions{margin-top:12px}.sl-linked-patient{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.sl-linked-patient small{margin:0}.sl [data-record] input[readonly]{background:#f2f5f3;color:var(--sl-muted)}
+@media(max-width:760px){.sl .sl-loader>summary{padding:12px 14px}.sl-loader-body{padding:0 14px 14px}}
