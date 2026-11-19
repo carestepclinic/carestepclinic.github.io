@@ -180,6 +180,10 @@ function mount(root,a){
  function input(k,r){
   const max=k==='notes'?4000:injectionFields.has(k)?3000:200;
   const label=labelFor(k),required=['date','patientName','procedure'].includes(k),pref=prefKey(k),long=injectionFields.has(k)||k==='notes',readonly=!editable()||(r.patientId&&['patientName','chartNumber'].includes(k))?' readonly':'',value=r[k]||'';
+  if(k==='sex'&&editable()&&doc.status!=='deleted'){
+   const values=['IM','CM','IF','SF'];if(value&&!values.includes(value))values.push(value);
+   return '<label><span>성별</span><select name="sex"><option value="">선택</option>'+values.map(v=>'<option value="'+esc(v)+'"'+(v===value?' selected':'')+'>'+esc(v)+'</option>').join('')+'</select></label>';
+  }
   if(['anesthetics','drug','species',...staffFields].includes(k)&&editable()&&doc.status!=='deleted')return '<div class="'+(['anesthetics','drug'].includes(k)?'sl-wide ':'')+'sl-choice-field" data-choice-field="'+k+'"><label for="sl-choice-'+k+'">'+label+'</label><select id="sl-choice-'+k+'" data-choice="'+k+'" aria-label="'+label+' 선택"></select><div data-choice-values="'+k+'" class="sl-choice-values"></div>'+(long?'<textarea name="'+k+'" maxlength="3000" rows="2" aria-label="'+label+' 직접입력" hidden>'+esc(value)+'</textarea>':'<input name="'+k+'" maxlength="200" aria-label="'+label+' 직접입력" value="'+esc(value)+'" hidden>')+'</div>';
   if(k==='breed'&&editable()&&doc.status!=='deleted')return '<div class="sl-breed-field"><label for="sl-breed-input">품종</label><input id="sl-breed-input" name="breed" value="'+esc(value)+'" maxlength="200" placeholder="한글·영문 품종 검색" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sl-breed-results" autocomplete="off"><div id="sl-breed-results" role="listbox" aria-label="품종 검색 결과" hidden></div></div>';
   let control=long?'<textarea name="'+k+'" maxlength="'+max+'" rows="2"'+(required?' required':'')+readonly+'>'+esc(value)+'</textarea>':'<input name="'+k+'" maxlength="'+max+'" type="'+(k==='date'?'date':'text')+'" value="'+esc(value)+'"'+(required?' required':'')+(pref?' list="sl-'+pref+'"':'')+(k==='weight'?' inputmode="decimal"':'')+readonly+'>';
