@@ -393,7 +393,7 @@ function mount(root,a){
    if(!current.date)throw Error('수술일을 먼저 선택해주세요.');const r=await request('/practice/support/bookings?day='+encodeURIComponent(current.date));candidates=(r.items||[]).filter(x=>x.status!=='cancelled').map(x=>({label:bookingLabel(x),record:{patientId:x.body.patientId||'',patientName:x.body.patientName||'',chartNumber:x.body.chartNumber||'',procedure:x.body.title||''}}));
   }
   if(kind==='anesthesia'){
-   if(!current.patientId)throw Error('등록 환자를 먼저 연결해주세요.');const r=await request('/practice/clinical/cases?closed=1&patientId='+encodeURIComponent(current.patientId));candidates=(r.items||[]).filter(x=>x.kind==='surgery').map(x=>{const s=x.body.anesthesiaSheet||{};return {label:[s.date||x.created_at?.slice(0,10),s.operation||x.body.title].filter(Boolean).join(' · '),record:Object.fromEntries(Object.entries({date:s.date,diagnosis:s.diagnosis,procedure:s.operation,surgeon:s.surgeon,assistant1:s.assistant1,assistant2:s.assistant2,anesthetist:s.anesthetist,breed:s.breed,age:s.age,sex:s.sex,weight:x.body.weight==null?'':String(x.body.weight)}).filter(([,v])=>v!==undefined&&v!==''))};});
+   if(!current.patientId)throw Error('등록 환자를 먼저 연결해주세요.');const r=await request('/practice/clinical/cases?closed=1&patientId='+encodeURIComponent(current.patientId));candidates=(r.items||[]).filter(x=>x.kind==='surgery').map(x=>{const s=x.body.anesthesiaSheet||{};return {label:[s.date||x.created_at?.slice(0,10),s.operation||x.body.title].filter(Boolean).join(' · '),record:Object.fromEntries(Object.entries({date:s.date,diagnosis:s.diagnosis,procedure:s.operation,surgeon:s.surgeon,assistant1:s.assistant1,assistant2:s.assistant2,anesthetist:s.anesthetist,breed:g.ClinicConnections?.breedEnglish(s.breed,x.body.species)||s.breed,age:s.age,sex:g.ClinicConnections?.sexCode({sex:s.sex})||s.sex,weight:x.body.weight==null?'':String(x.body.weight)}).filter(([,v])=>v!==undefined&&v!==''))};});
   }
   if(!sourceIsCurrent(context)){if(sourceContext===context)checkSource();return;}
   results.innerHTML=candidates.map((c,i)=>'<button type="button" data-candidate="'+i+'">'+esc(c.label)+'</button>').join('')||'<p>해당 자료가 없습니다.</p>';
@@ -470,6 +470,8 @@ function mount(root,a){
  }
  const unload=e=>{if(dirty||busy){e.preventDefault();e.returnValue='';}};g.addEventListener('beforeunload',unload);
  return {
+  connectionContext:()=>page==='edit'&&doc?.id?{kind:'ledger',id:doc.id,patientId:currentRecord().patientId,dirty:dirty||busy}:null,
+  async fromConnection(c,id){if(busy)return false;if(dirty&&!g.confirm('작성 중인 수술대장 입력을 버리고 연결 기록을 열까요?'))return false;await prefs();if(id){const r=await request(base+'/'+encodeURIComponent(id));doc=r.document;if(doc.body.record?.patientId!==c.patient.id)throw Error('같은 환자의 수술대장을 선택해주세요.');dirty=false;}else{doc={status:'active',revision:0,body:{record:g.ClinicConnections.ledgerDraft(c)}};dirty=true;}edit();message(id?'연결 기록을 열었습니다.':'원본 내용을 확인하고 저장해주세요.');return true;},
   async open(){if(!alive()||dirty||busy||page==='compare'||page==='import'||page==='import-complete')return;if(!root.childNodes.length)shell('<p>수술대장을 불러오는 중입니다.</p>'+btn('refresh','다시 조회'));await run(()=>load());},
   leave(){return !busy;},
   dispose(){disposed=true;sequence++;g.removeEventListener('beforeunload',unload);preview=null;sourceDraft=null;listPosition=null;pendingSaved=null;importResult=null;items=[];doc=null;root.replaceChildren();}

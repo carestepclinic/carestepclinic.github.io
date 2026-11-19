@@ -4751,6 +4751,7 @@ function criticalFallbackPatientReset(){
   carestepSafeCall('reset_med_rows',()=>renderMedicationRows());carestepSafeCall('reset_med_preview',()=>updateMedicationPreview());carestepSafeCall('reset_builder',()=>renderBuilder());carestepSafeCall('reset_output',()=>renderCurrentOutput());carestepSafeCall('reset_readiness',()=>updateReadiness());carestepSafeCall('reset_case_badge',()=>renderGlobalCaseBadge());carestepSafeCall('reset_daily',()=>updateDailyWorkflowIndicators());return true;
 }
 function forceNewCaseReset(templateId='',destination='library'){
+  document.querySelector('[data-clinical-material-reference]')?.remove();
   try{resolveCaseResetGuard(false);}catch{}if(templateId)currentTemplateId=templateId;let ok=true;
   try{ok=beginNewCase(false,true)!==false;}catch(e){console.error('[CARESTEP RECOVERY] beginNewCase failed; using hard fallback',e);ok=criticalFallbackPatientReset();}if(!ok)return false;
   if(typeof clinicSetEducationChoice==='function')clinicSetEducationChoice(templateId);if(templateId){currentTemplateId=templateId;carestepSafeCall('reset_select',()=>renderSelect());carestepSafeCall('reset_recent',()=>markRecentTemplate(currentTemplateId));carestepSafeCall('reset_preset',()=>applyPackagePreset(true));}
@@ -11065,6 +11066,8 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-lazy-modules.js?v=20261105-flow"></script>
 <script src="clinic-inpatients.js?v=20261106-workflow9"></script>
 <script src="clinic-record-start.js?v=20261115-prior-refinements"></script>
+<link rel="stylesheet" href="clinic-connections.css?v=20261119-links">
+<script src="clinic-connections.js?v=20261119-links"></script>
 <script src="clinic-record-workspace.js?v=20261117-clinic-review-four"></script>
 <script src="clinic-purchases.js?v=20261117-today-supplies"></script>
 <link rel="stylesheet" href="clinic-support.css?v=20261119-consent-usability">
