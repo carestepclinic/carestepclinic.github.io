@@ -1,0 +1,8 @@
+const test=require('node:test'),assert=require('node:assert/strict');require('../surgery-ledger.js');const {excelDate,groupRows,csvCell}=global.SurgeryLedger;
+const row=(extra={},sheet='2020',n=2)=>({record:{date:'2020-01-02',chartNumber:'SYN',patientName:'합성환자',procedure:'합성수술',...extra},source:{sheet,row:n}});
+test('matching annual and combined rows merge provenance without duplicating surgery',()=>{const g=groupRows([row(),row({},'통합')]);assert.equal(g.length,1);assert.equal(g[0].variants.length,1);assert.equal(g[0].variants[0].sources.length,2);});
+test('changed content stays as two variants; different operations remain separate',()=>{const g=groupRows([row(),row({weight:'5'},'통합'),row({procedure:'다른수술'})]);assert.equal(g.length,2);assert.equal(g[0].variants.length,2);assert.equal(g[0].variants[0].record.weight,undefined);});
+test('numeric Excel and 1904 dates normalize without timezone drift',()=>{assert.equal(excelDate('43832'),'2020-01-02');assert.equal(excelDate('1',true),'1904-01-02');assert.equal(excelDate('2020.1.2'),'2020-01-02');assert.throws(()=>excelDate('2020-02-31'));});
+test('csv preserves multiline cells and neutralizes formulas',()=>{assert.equal(csvCell('=SUM(A1)'),"\"'=SUM(A1)\"");assert.equal(csvCell('가\n"나"'),'"가\n""나"""');});
+test('only date or operation difference across annual and combined sheets requires comparison',()=>{for(const patch of [{date:'2020-01-03'},{procedure:'다른 표기'}]){const g=groupRows([row(),row(patch,'통합')]);assert.equal(g.length,1);assert.equal(g[0].variants.length,2);}});
+test('distinct operations within an annual sheet are never collapsed',()=>{const g=groupRows([row(),row({procedure:'다른수술'},'2020',3)]);assert.equal(g.length,2);});
