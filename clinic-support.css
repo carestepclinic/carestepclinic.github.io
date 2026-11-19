@@ -193,3 +193,6 @@
 .su-consents [data-discharge-medication]{margin:6px 0;max-width:100%}
 .su-consents [data-preset-status]{color:var(--pt-muted,#5d727b);font-size:14px}
 .su-consents .su-final-review{border-color:var(--pt-primary,#1b7d76)}
+
+/* Disease/procedure assistant follows patient selection on all viewports. */
+.su-consent-assistant .su-explanation-loader{margin:0;border:0;padding:0}.su [data-consent-auto-choices]>button{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;margin:6px 0;padding:12px}.su [data-consent-auto-choices] small{display:block;font-weight:400;margin-top:4px}.su [data-consent-auto-choices]>button>span:first-child{min-width:0;overflow-wrap:anywhere}.su [data-consent-auto-choices]>button>span:last-child{flex-shrink:0;color:var(--su-teal,#167b74)}

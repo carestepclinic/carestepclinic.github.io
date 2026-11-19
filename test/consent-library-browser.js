@@ -17,6 +17,7 @@ window.ConsentLibraryFixture=(()=>{'use strict';
  await test('조회 실패·재시도·연결 변경 보호',async()=>{await reset();fail=true;await app.open();check(q('[data-ce-status]').textContent.includes('합성 조회 실패'),'오류');fail=false;await app.open();check(q('[data-ce-open]'),'재시도');delay=70;q('[data-ce-open]').click();scope='another';await new Promise(r=>setTimeout(r,100));check(!q('dialog'),'계정 변경 후 열림');});
  await test('수정 내용 닫기 보호',async()=>{await reset();await click('[data-ce-open]');input('[data-ce-field=method]','저장하지 않은 수정');await click('[data-ce-close]');check(q('dialog'),'수정 유실');await click('[data-fixture-discard]');check(!q('dialog'),'명시 취소');});
  await test('모바일 폭에서 가로 넘침 없음',async()=>{await reset();root().classList.add('mobile');check(root().scrollWidth<=root().clientWidth+1,'목록 가로 넘침');});
+ await test('처치 검색명·환자별 입력항목 수정은 초안 저장 후 승인 전 재확인',async()=>{await reset();await click('[data-ce-open]');input('[data-ce-field=procedure]','합성 교정술');input('[data-ce-field=title]','합성 교정술 설명');input('[data-ce-field=patientChecks]','수술 부위·좌우\n실제 수술 범위');await click('[data-ce-save]');check(doc.variants[0].procedure==='합성 교정술'&&doc.variants[0].patientChecks.length===2,'추천 정보 저장 실패');check(q('[data-ce-field=patientChecks]').value==='수술 부위·좌우\n실제 수술 범위','입력칸 재개 실패');check(!q('[data-ce-reviewed]').checked&&doc.status==='draft','승인 자동 처리');});
  await reset();document.getElementById('state').textContent=results.some(x=>x.startsWith('FAIL'))?'실패 확인 필요':'검증 완료';document.getElementById('run').disabled=false;};}
  return {start};
 })();
