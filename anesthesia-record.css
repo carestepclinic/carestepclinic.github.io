@@ -248,3 +248,5 @@
 .ar-duration-summary small{font-size:12px;color:#52657b}
 .ar-duration-summary strong{font-size:15px;font-variant-numeric:tabular-nums;color:#173859}
 @media(max-width:900px){.ar-simple .ad-settings>div{grid-template-columns:repeat(2,minmax(0,1fr))}.ar-tube-setting input{font-size:16px}}
+
+.ar-sheet .ar-record-bar .ar-weight-edit{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;min-height:36px;padding:5px 10px;margin:0 0 0 8px;font:inherit;font-size:13px;font-weight:600;white-space:nowrap}@media(max-width:820px){.ar-sheet .ar-record-bar .ar-weight-edit{min-height:44px;margin-left:6px}}@media print{.ar-sheet .ar-record-bar .ar-weight-edit{display:none!important}}
