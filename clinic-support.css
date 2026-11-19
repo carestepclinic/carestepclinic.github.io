@@ -185,7 +185,9 @@
 
 /* Visible consent wording and explicit final review. */
 .su-consents .su-draft-preview{margin-top:16px;padding:16px;background:var(--pt-bg,#f6f8f8);border:1px solid var(--pt-border,#d5e1e3);border-radius:10px;overflow-wrap:anywhere}
-.su-consents .su-draft-preview>b{font-size:14px;color:var(--pt-muted,#5d727b)}
+.su-consents .su-draft-preview>summary{font-size:14px;font-weight:600;color:var(--pt-muted,#5d727b);cursor:pointer}
+.su-consents .su-draft-preview:not([open]){padding:10px 14px;margin-top:10px}
+.su-consents .su-operation-shortcut{margin-left:auto}
 .su-consents .su-draft-preview p{margin:8px 0 0;white-space:pre-wrap;font-size:15px;line-height:1.7}
 .su-consents .su-draft-preview mark{background:#fff1cb;color:#79531d;border-radius:3px;padding:1px 3px}
 .su-consents [data-draft-reuse]{display:block;margin-top:6px}
