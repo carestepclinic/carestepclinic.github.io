@@ -284,7 +284,7 @@ function mount(root,a){
  }
  async function source(kind){
   if(!editable()||doc.status==='deleted')return;const current=read(),results=root.querySelector('[data-source-results]');if(!results)return;
-  clearSource();const query=root.querySelector('[data-patient-q]').value.trim(),context={kind,query,date:current.date,token:sequence,results};sourceContext=context;let candidates=[];
+  clearSource();message('');const query=root.querySelector('[data-patient-q]').value.trim(),context={kind,query,date:current.date,token:sequence,results};sourceContext=context;let candidates=[];
   try{
   if(kind==='patients'){
    if(!a.can('patients.read'))throw Error('환자 조회 권한이 필요합니다.');if(!query)throw Error('검색어를 입력해주세요.');
