@@ -190,11 +190,16 @@ function mount(root,a){
   if(long&&pref&&preferences?.[pref]?.length&&editable())control+='<select data-preset="'+k+'" aria-label="'+label+' 자주 쓰는 항목"><option value="">자주 쓰는 '+label+' 추가</option>'+preferences[pref].map(v=>'<option>'+esc(v)+'</option>').join('')+'</select>';
   return '<label class="'+(long?'sl-wide':'')+'"><span>'+label+(required?' <span class="sl-required">필수</span>':'')+'</span>'+control+'</label>';
  }
- const choiceDefaults={species:['Canine','Feline'],anesthetics:['Injection','Inhalation'],drug:['Propofol','Ketamine','medetomidine']};
- const choiceValues=key=>staffFields.includes(key)?staffNames||[]:key==='species'?choiceDefaults.species:[...new Set([...choiceDefaults[key],...(preferences?.[prefKey(key)]||[])].filter(v=>v&&v!=='__custom__'))];
+ const choiceDefaults={species:['Canine','Feline'],anesthetics:['Injection','Inhalation'],drug:['Propofol','Ketamine, medetomidine']};
+ const choiceValues=key=>staffFields.includes(key)?staffNames||[]:key==='species'?choiceDefaults.species:[...new Set([...choiceDefaults[key],...(preferences?.[prefKey(key)]||[])].filter(v=>v&&v!=='__custom__'&&!(key==='drug'&&['ketamine','medetomidine'].includes(text(v).toLowerCase()))))];
+ function drugParts(value){
+  const parts=text(value).split(/[,\n]/).map(text).filter(Boolean),result=[];
+  for(let i=0;i<parts.length;i++){if(parts[i]==='Ketamine'&&parts[i+1]==='medetomidine'){result.push('Ketamine, medetomidine');i++;}else result.push(parts[i]);}
+  return result;
+ }
  function syncChoice(key){
   const field=root.querySelector('[data-choice-field="'+key+'"]');if(!field)return;
-  const select=field.querySelector('[data-choice]'),input=field.querySelector('[name]'),values=choiceValues(key),parts=input.value?input.value.split(/[,\n]/).map(text).filter(Boolean):[],shown=key==='species'?speciesEnglish(input.value):input.value,known=key!=='drug'?values.includes(shown):parts.every(v=>values.includes(v));
+  const select=field.querySelector('[data-choice]'),input=field.querySelector('[name]'),values=choiceValues(key),parts=key==='drug'?drugParts(input.value):[],shown=key==='species'?speciesEnglish(input.value):input.value,known=key!=='drug'?values.includes(shown):parts.every(v=>values.includes(v));
   const custom=field.dataset.custom==='1'||!!input.value&&!known;
   input.hidden=!custom;
   select.innerHTML='<option value="">'+(key==='drug'?'약물 추가 선택':'선택')+'</option>'+values.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('')+'<option value="__custom__">직접입력</option>';
@@ -210,7 +215,7 @@ function mount(root,a){
    if(busy)return;const field=select.closest('[data-choice-field]'),input=field.querySelector('[name]'),value=select.value;
    if(value==='__custom__'){field.dataset.custom='1';syncChoice(key);input.focus();return;}
    if(key!=='drug'){field.dataset.custom='0';input.value=value;changedChoice(input);return;}
-   if(!value)return;const parts=input.value.split(/[,\n]/).map(text);if(parts.includes(value)){syncChoice(key);return;}
+   if(!value)return;const parts=drugParts(input.value);if(parts.includes(value)){syncChoice(key);return;}
    const next=[input.value,value].filter(Boolean).join(', ');if(next.length>3000){message('마취 약물은 3000자 이하로 입력해주세요.',true);syncChoice(key);return;}
    input.value=next;changedChoice(input);
   };});
