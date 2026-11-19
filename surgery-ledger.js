@@ -102,10 +102,15 @@ function printHTML(records,{clinicName='',from='',to=''}={}){
   '@page{size:A4 landscape;margin:12mm}*{box-sizing:border-box}body{margin:0;font:11pt/1.5 Pretendard,Arial,sans-serif;color:#20323e}h1{font-size:18pt;line-height:1.4;margin:0 0 8px}p{margin:0 0 14px}table{border-collapse:collapse;width:100%;table-layout:fixed}th,td{border:1px solid #bccbc5;padding:8px;overflow-wrap:anywhere;vertical-align:top;white-space:pre-wrap;text-align:left}thead{display:table-header-group}tr{break-inside:avoid;page-break-inside:avoid}tr.sl-print-long{break-inside:auto;page-break-inside:auto}small{display:block;font-size:10pt;line-height:1.5;margin-top:5px}th{background:#e8f2ef;font-size:11pt;font-weight:600}b{font-weight:600}'+
   '</style></head><body><h1>'+esc(clinicName)+' 수술대장</h1><p>'+records.length+'건 · '+esc(from||'전체 기간')+' ~ '+esc(to||'현재')+'</p><table><colgroup>'+columns.map(([,width])=>'<col style="width:'+width+'%">').join('')+'</colgroup><thead><tr>'+columns.map(([label])=>'<th>'+label+'</th>').join('')+'</tr></thead><tbody>'+rows+'</tbody></table></body></html>';
 }
+function bookingLabel(item){
+ const local=v=>{const n=v?Date.parse(v):NaN;return Number.isFinite(n)?new Date(n+32400000).toISOString().slice(0,16):'';},start=local(item.startAt),end=local(item.endAt);
+ const time=start?(end?(start.slice(0,10)===end.slice(0,10)?start.slice(11)+' ~ '+end.slice(11):start.slice(5).replace('T',' ')+' ~ '+end.slice(5).replace('T',' ')):start.slice(11)):'시간 미등록';
+ return [time,item.body.patientName||'환자 미연결',item.body.chartNumber?'차트 '+item.body.chartNumber:'차트번호 없음',item.body.title].filter(Boolean).join(' · ');
+}
 function mount(root,a){
  const scope=a.identity(),alive=()=>!disposed&&a.ready()&&scope===a.identity(),editable=()=>a.can('records.edit'),base='/practice/support/ledger';
  let disposed=false,busy=false,dirty=false,page='list',doc=null,items=[],next='',counts={},status='active',q='',from='',to='',preferences=null,preview=null,importAt=0,imported=0,sequence=0;
- let listPosition=null,loadedPages=1,listDirty=false,sourceDraft=null,sourceContext=null,pendingSaved=null,savedId='',importResult=null;
+ let listPosition=null,loadedPages=1,listDirty=false,sourceDraft=null,sourceContext=null,pendingSaved=null,savedId='',importResult=null,preferencesSequence=0,settingsSavedPending=false;
  const request=async(path,options)=>{if(!alive())throw Error('병원 또는 계정이 변경되었습니다.');const r=await a.request(path,options);if(!alive())throw Error('병원 또는 계정이 변경되었습니다.');return r;};
  const post=(path,b)=>request(path,{method:'POST',body:JSON.stringify(b)});
  const message=(s,error=false)=>root.querySelectorAll('[data-ledger-message],[data-ledger-feedback]').forEach(n=>{n.textContent=s;n.classList.toggle('sl-error',error);});
@@ -173,10 +178,29 @@ function mount(root,a){
  async function prefs(){preferences=await request(base+'/preferences');return preferences;}
  function read(){const f=root.querySelector('[data-record]');if(!f)return currentRecord();const r={...currentRecord()};for(const [k] of exportFields)r[k]=f.elements[k].value;return verifyPatientIdentity(currentRecord(),r);}
  function grow(el){el.style.height='auto';el.style.height=Math.min(260,Math.max(72,el.scrollHeight+2))+'px';}
+ function bindPresets(form){
+  root.querySelectorAll('[data-preset]').forEach(select=>select.onchange=()=>{if(!select.value)return;const input=form.elements[select.dataset.preset],lines=input.value.split('\n');if(!lines.includes(select.value))input.value=[input.value,select.value].filter(Boolean).join('\n');select.value='';grow(input);dirty=true;message('항목을 추가했습니다. 저장해주세요.');input.focus();});
+ }
+ async function loadRecordPreferences(){
+  const form=root.querySelector('[data-record]'),notice=root.querySelector('[data-preferences-notice]'),token=++preferencesSequence;
+  if(!form||!notice)return;notice.textContent='자주 쓰는 항목을 불러오는 중입니다.';
+  try{
+   const loaded=await request(base+'/preferences');if(!alive()||!form.isConnected||token!==preferencesSequence)return;preferences=loaded;
+   for(const [key] of settings){const list=root.querySelector('#sl-'+key);if(list)list.innerHTML=(preferences[key]||[]).map(v=>'<option value="'+esc(v)+'"></option>').join('');}
+   for(const key of ['procedure','anesthetics','drug']){
+    let select=form.querySelector('[data-preset="'+key+'"]');const values=preferences[prefKey(key)]||[];
+    if(!editable()||doc.status==='deleted'||!values.length){select?.remove();continue;}
+    if(!select){form.elements[key].insertAdjacentHTML('afterend','<select data-preset="'+key+'" aria-label="'+labelFor(key)+' 자주 쓰는 항목"></select>');select=form.querySelector('[data-preset="'+key+'"]');if(busy){select.disabled=true;select.dataset.wasDisabled='0';}}
+    select.innerHTML='<option value="">자주 쓰는 '+labelFor(key)+' 추가</option>'+values.map(v=>'<option>'+esc(v)+'</option>').join('');
+   }
+   bindPresets(form);notice.replaceChildren();
+  }catch(e){if(alive()&&form.isConnected&&token===preferencesSequence){notice.innerHTML='<p>자주 쓰는 항목을 불러오지 못했습니다. 수술 기록은 그대로 확인할 수 있습니다.</p>'+btn('retry-record-prefs','입력 항목 다시 조회');bind(notice);}}
+ }
  function edit(){
-  const r=currentRecord(),canEdit=editable()&&doc.status!=='deleted';page='edit';clearSource();
+  const r=currentRecord(),canEdit=editable()&&doc.status!=='deleted';page='edit';preferencesSequence++;clearSource();
   const groups=[['환자 정보',['date','chartNumber','patientName','species','breed','age','sex','weight']],['수술 내용',['diagnosis','procedure']],['참여 인력',['surgeon','assistant1','assistant2','anesthetist']],['마취·약물',['anesthetics','drug','notes']]];
   shell('<div class="sl-toolbar"><div><strong class="sl-heading">'+(doc.id?'수술 기록':'새 수술 기록')+'</strong></div><div>'+btn('back','목록으로')+(canEdit?btn('save','저장','primary'):'')+(editable()&&doc.id?'<details class="sl-more"><summary>더 보기</summary>'+btn(doc.status==='deleted'?'restore':'delete',doc.status==='deleted'?'복원':'휴지통으로 이동',doc.status==='deleted'?'':'sl-danger')+'</details>':'')+'</div></div>'+
+   '<div data-preferences-notice role="status"></div>'+
    (doc.status==='deleted'?'<p class="sl-help">휴지통의 기록입니다. 복원 후 수정할 수 있습니다.</p>':'')+
    (canEdit?'<details class="sl-card sl-loader"'+(!doc.id&&!r.patientId?' open':'')+'><summary><span><strong>환자·기록 불러오기</strong><small>'+esc(r.patientId?'연결 환자 · '+[r.patientName,r.chartNumber].filter(Boolean).join(' · '):doc.id?'기존 수술 기록 · 필요할 때 환자나 기록을 연결하세요.':'환자 연결 없이도 작성할 수 있습니다.')+'</small></span><span class="sl-loader-state"><span class="sl-when-closed">펼치기</span><span class="sl-when-open">접기</span></span></summary><div class="sl-loader-body"><form data-source-search class="sl-source"><label>환자 검색<input data-patient-q placeholder="환자명·차트번호"></label>'+btn('patients','환자 검색')+btn('booking','수술일 일정')+(a.can('clinical.anesthesia.read')?'<button type="button" data-ledger="anesthesia"'+(!r.patientId?' disabled title="등록 환자를 먼저 연결해주세요."':'')+'>마취 기록</button>':'')+'</form>'+(!r.patientId&&a.can('clinical.anesthesia.read')?'<small>환자를 연결하면 마취 기록을 불러올 수 있습니다.</small>':'')+(r.patientId?'<div class="sl-link-actions">'+btn('unlink-patient','연결 해제 후 직접 입력')+'</div>':'')+'<div data-source-results></div><div data-source-preview></div></div></details>':'')+
    '<form data-record><fieldset '+(!canEdit?'disabled':'')+'>'+groups.map(([title,keys])=>'<section class="sl-card"><div class="sl-panel-heading"><h3>'+title+'</h3>'+(title==='환자 정보'&&r.patientId?'<div class="sl-linked-patient"><small>연결 환자 · '+esc(r.patientName)+' · '+esc(r.chartNumber||'차트번호 없음')+'</small>'+(canEdit?btn('change-patient','환자 변경'):'')+'</div>':'')+'</div><div class="sl-grid '+(keys.includes('diagnosis')?'sl-clinical-grid':'')+'">'+keys.map(k=>input(k,r)).join('')+'</div></section>').join('')+'</fieldset></form>'+
@@ -188,7 +212,7 @@ function mount(root,a){
   form.oninput=e=>{dirty=true;invalidateBooking();if(e.target.matches('textarea'))grow(e.target);message('저장하지 않은 변경사항이 있습니다.');};
   form.elements.date.onchange=invalidateBooking;
   root.querySelectorAll('[data-record] textarea').forEach(grow);
-  root.querySelectorAll('[data-preset]').forEach(select=>select.onchange=()=>{if(!select.value)return;const input=form.elements[select.dataset.preset],lines=input.value.split('\n');if(!lines.includes(select.value))input.value=[input.value,select.value].filter(Boolean).join('\n');select.value='';grow(input);dirty=true;message('항목을 추가했습니다. 저장해주세요.');input.focus();});
+  bindPresets(form);
   const search=root.querySelector('[data-source-search]');if(search)search.onsubmit=e=>{e.preventDefault();void run(()=>source('patients'));};
   const patientQuery=root.querySelector('[data-patient-q]');if(patientQuery)patientQuery.oninput=patientQuery.onchange=()=>{if(sourceContext?.kind==='patients'&&patientQuery.value.trim()!==sourceContext.query)clearSource('검색어가 변경되었습니다. 환자 검색을 다시 눌러주세요.');};
  }
@@ -258,7 +282,15 @@ function mount(root,a){
  async function showImportResult(){
   if(!importResult)return;const result=importResult;await load(false,{status:result.status,q:'',from:'',to:''});listPosition=null;importResult=null;message(result.message);
  }
- async function configuration(){preferences=await request(base+'/preferences');page='settings';shell('<div class="sl-toolbar"><strong class="sl-heading">우리 병원 입력 항목</strong><div>'+btn('back','목록으로')+btn('save-settings','설정 저장','primary')+'</div></div><p>한 줄에 하나씩 입력하세요. 목록에 없는 내용도 직접 입력할 수 있습니다.</p><form data-settings class="sl-card sl-grid sl-settings">'+settings.map(([key,label])=>'<label>'+label+'<textarea name="'+key+'" rows="6">'+esc(preferences[key].join('\n'))+'</textarea></label>').join('')+'</form>');root.querySelector('[data-settings]').oninput=()=>dirty=true;}
+ async function configuration(){preferences=await request(base+'/preferences');settingsSavedPending=false;page='settings';shell('<div class="sl-toolbar"><strong class="sl-heading">우리 병원 입력 항목</strong><div>'+btn('back','목록으로')+btn('save-settings','설정 저장','primary')+'<button type="button" data-ledger="reload-saved-settings" hidden>저장한 설정 다시 조회</button></div></div><p>한 줄에 하나씩 입력하세요. 목록에 없는 내용도 직접 입력할 수 있습니다.</p><form data-settings class="sl-card sl-grid sl-settings">'+settings.map(([key,label])=>'<label>'+label+'<textarea name="'+key+'" rows="6">'+esc(preferences[key].join('\n'))+'</textarea></label>').join('')+'</form>');root.querySelector('[data-settings]').oninput=()=>dirty=true;}
+ async function reloadSavedSettings(){
+  try{await configuration();message('우리 병원 설정을 저장했습니다.');}
+  catch(e){
+   root.querySelectorAll('[data-settings] textarea,[data-ledger="save-settings"]').forEach(el=>{el.disabled=true;el.removeAttribute('data-was-disabled');});
+   const retry=root.querySelector('[data-ledger="reload-saved-settings"]');if(retry)retry.hidden=false;
+   message('설정은 저장되었습니다. 화면을 갱신하지 못했습니다. 저장한 설정 다시 조회를 눌러주세요. '+e.message,true);
+  }
+ }
  function clearSource(notice=''){
   sequence++;sourceContext=null;sourceDraft=null;
   const results=root.querySelector('[data-source-results]');if(results)results.textContent=notice;
@@ -291,7 +323,7 @@ function mount(root,a){
    const r=await request('/patient-directory?'+new URLSearchParams({q:query,active:'active',pageSize:'20',limit:'20',page:'1'}));candidates=(r.patients||[]).map(p=>({label:[p.name,p.chartNumber||p.externalPatientId,p.guardianName].filter(Boolean).join(' · '),record:{patientId:p.id,patientName:p.name,chartNumber:p.chartNumber||p.externalPatientId||'',species:({dog:'개',cat:'고양이'})[p.species]||p.species||''}}));
   }
   if(kind==='booking'){
-   if(!current.date)throw Error('수술일을 먼저 선택해주세요.');const r=await request('/practice/support/bookings?day='+encodeURIComponent(current.date));candidates=(r.items||[]).filter(x=>x.status!=='cancelled').map(x=>({label:[x.body.patientName,x.body.title].filter(Boolean).join(' · '),record:{patientId:x.body.patientId||'',patientName:x.body.patientName||'',chartNumber:x.body.chartNumber||'',procedure:x.body.title||''}}));
+   if(!current.date)throw Error('수술일을 먼저 선택해주세요.');const r=await request('/practice/support/bookings?day='+encodeURIComponent(current.date));candidates=(r.items||[]).filter(x=>x.status!=='cancelled').map(x=>({label:bookingLabel(x),record:{patientId:x.body.patientId||'',patientName:x.body.patientName||'',chartNumber:x.body.chartNumber||'',procedure:x.body.title||''}}));
   }
   if(kind==='anesthesia'){
    if(!current.patientId)throw Error('등록 환자를 먼저 연결해주세요.');const r=await request('/practice/clinical/cases?closed=1&patientId='+encodeURIComponent(current.patientId));candidates=(r.items||[]).filter(x=>x.kind==='surgery').map(x=>{const s=x.body.anesthesiaSheet||{};return {label:[s.date||x.created_at?.slice(0,10),s.operation||x.body.title].filter(Boolean).join(' · '),record:Object.fromEntries(Object.entries({date:s.date,diagnosis:s.diagnosis,procedure:s.operation,surgeon:s.surgeon,assistant1:s.assistant1,assistant2:s.assistant2,anesthetist:s.anesthetist,breed:s.breed,age:s.age,sex:s.sex,weight:x.body.weight==null?'':String(x.body.weight)}).filter(([,v])=>v!==undefined&&v!==''))};});
@@ -316,6 +348,8 @@ function mount(root,a){
 
  }
  async function action(key,b){
+  if(key==='retry-record-prefs'){void loadRecordPreferences();return;}
+  if(key==='refresh'&&root.querySelector('[data-filter]')){const filter=filterInputs();if(!filter)return;await run(async()=>{await load(false,filter);listPosition=null;});return;}
   if(['export','print'].includes(key)){
    if(status!=='active')return;const filter=filterInputs();if(!filter)return;
    await run(async()=>{if(filter.q!==q||filter.from!==from||filter.to!==to){await load(false,filter);listPosition=null;}await output(key==='print');});return;
@@ -330,7 +364,7 @@ function mount(root,a){
    case 'status':listPosition=null;await load(false,{status:b.dataset.value,q,from,to});break;
    case 'reset':listPosition=null;await load(false,{status,q:'',from:'',to:''});break;
    case 'period':{const range=periodRange(b.dataset.value);listPosition=null;await load(false,{status,q:root.querySelector('[name=q]').value.trim(),...range});break;}
-   case 'open':doc=(await request(base+'/'+items[+b.dataset.index].id)).document;await prefs();doc.status==='review'?compare():edit();break;
+   case 'open':doc=(await request(base+'/'+items[+b.dataset.index].id)).document;if(doc.status==='review')compare();else{edit();void loadRecordPreferences();}break;
    case 'save':case 'save-list':case 'save-new':await save(key==='save-list'?'list':key==='save-new'?'new':'edit');break;
    case 'delete':case 'restore':if(!editable()||!g.confirm(key==='delete'?'이 수술 기록을 휴지통으로 이동할까요?':'이 기록을 복원할까요?'))break;await post(base+'/'+doc.id+'/'+key,{revision:doc.revision});if(pendingSaved===doc.id)pendingSaved=null;dirty=false;listDirty=true;await returnList();message(key==='delete'?'휴지통으로 이동했습니다. 휴지통에서 복원할 수 있습니다.':'복원했습니다.');break;
    case 'normalize-case':if(editable()&&status==='review')await normalizeCaseReviews();break;
@@ -348,10 +382,11 @@ function mount(root,a){
    case 'import-errors':if(preview?.errors?.length)download('수술대장_가져오기_오류.txt','text/plain;charset=utf-8',preview.errors.join('\r\n'));break;
    case 'settings':if(editable()&&a.can('clinical.settings'))await configuration();break;
    case 'save-settings':{
-    if(!editable()||!a.can('clinical.settings'))break;const f=root.querySelector('[data-settings]'),body={revision:preferences.revision};
+    if(!editable()||!a.can('clinical.settings')||settingsSavedPending)break;const f=root.querySelector('[data-settings]'),body={revision:preferences.revision};
     for(const [k] of settings)body[k]=[...new Set(f.elements[k].value.split('\n').map(v=>normalizeText(({procedures:'procedure',anesthetics:'anesthetics',drugs:'drug'})[k]||k,v)).filter(Boolean))];
-    await post(base+'/preferences',body);dirty=false;await configuration();message('우리 병원 설정을 저장했습니다.');break;
+    await post(base+'/preferences',body);dirty=false;settingsSavedPending=true;await reloadSavedSettings();break;
    }
+   case 'reload-saved-settings':if(settingsSavedPending&&editable()&&a.can('clinical.settings'))await reloadSavedSettings();break;
    case 'unlink-patient':{
     if(!editable()||!g.confirm('환자 연결을 해제하고 직접 입력할까요? 수술 기록의 입력 내용은 유지됩니다.'))break;
     doc.body.record={...read(),patientId:''};dirty=true;edit();message('환자 연결을 해제했습니다. 입력 내용을 확인한 뒤 저장해주세요.');break;
@@ -372,5 +407,5 @@ function mount(root,a){
   dispose(){disposed=true;sequence++;g.removeEventListener('beforeunload',unload);preview=null;sourceDraft=null;listPosition=null;pendingSaved=null;importResult=null;items=[];doc=null;root.replaceChildren();}
  };
 }
-g.SurgeryLedger={mount,fields,excelDate,groupRows,workbookRows,workbookBytes,csvCell,normalizeRecord,caseResolution,sourcePlan,applySource,periodRange,selectedPeriod,verifyPatientIdentity,printHTML};
+g.SurgeryLedger={mount,fields,excelDate,groupRows,workbookRows,workbookBytes,csvCell,normalizeRecord,caseResolution,sourcePlan,applySource,periodRange,selectedPeriod,verifyPatientIdentity,printHTML,bookingLabel};
 })(typeof window==='undefined'?globalThis:window);
