@@ -27,3 +27,6 @@ test('save success followed by preferences failure keeps the saved ID for retry'
 
 const {bookingLabel}=global.SurgeryLedger;
 test('booking labels use Korean time, chart identity and safe missing-time fallback',()=>{const body={patientName:'합성환자',chartNumber:'0001',title:'수술'};assert.equal(bookingLabel({startAt:'2026-11-19T00:00:00Z',endAt:'2026-11-19T01:00:00Z',body}),'09:00 ~ 10:00 · 합성환자 · 차트 0001 · 수술');assert.match(bookingLabel({startAt:'2026-11-19T14:00:00Z',endAt:'2026-11-19T16:00:00Z',body}),/11-19 23:00 ~ 11-20 01:00/);assert.match(bookingLabel({startAt:'invalid',body:{}}),/시간 미등록.*차트번호 없음/);});
+
+const breedContext={window:{}};require('node:vm').runInNewContext(require('node:fs').readFileSync(require.resolve('../patient-breeds.js'),'utf8'),breedContext);global.CARESTEP_BREEDS=breedContext.window.CARESTEP_BREEDS;
+test('ledger uses the shared breed dictionary for Korean, English, aliases and initials',()=>{const {breedMatches,speciesKey}=global.SurgeryLedger;assert.equal(speciesKey('Canine'),'dog');assert.equal(speciesKey('고양이'),'cat');assert.equal(speciesKey('Rabbit'),'other');for(const q of ['말티즈','Maltese','마르티즈','ㅁㅌㅈ'])assert.equal(breedMatches('Canine',q)[0].en,'Maltese');assert.equal(breedMatches('Feline','러블')[0].en,'Russian Blue');assert.equal(breedMatches('Feline','Maltese').length,0);assert.equal(breedMatches('Rabbit','').length,0);});
