@@ -1,6 +1,6 @@
 /* Hospital-private surgical register; shared code contains no hospital records. */
 (function(g){'use strict';
-const fields=[['date','수술일','Date'],['chartNumber','차트번호','ID'],['patientName','환자명','Name'],['species','동물종','Species'],['breed','품종','Breed'],['age','당시 나이','Age'],['sex','성별','Sex'],['weight','당시 체중 (kg)','B.W. (kg)'],['diagnosis','진단명','Diagnosis'],['procedure','수술명','OP name'],['surgeon','집도의','Surgeon'],['assistant1','제1 보조자','Assistant1'],['assistant2','제2 보조자','Assistant2'],['anesthetist','마취 담당자','Anesthetist'],['anesthetics','마취제','Anesthetics'],['drug','사용 약물','Drug']];
+const fields=[['date','수술일','Date'],['chartNumber','차트번호','ID'],['patientName','환자명','Name'],['species','동물종','Species'],['breed','품종','Breed'],['age','당시 나이','Age'],['sex','성별','Sex'],['weight','당시 체중 (kg)','B.W. (kg)'],['diagnosis','진단명','Diagnosis'],['procedure','수술명','OP name'],['surgeon','집도의','Surgeon'],['assistant1','제1 보조자','Assistant1'],['assistant2','제2 보조자','Assistant2'],['anesthetist','마취 담당자','Anesthetist'],['anesthetics','마취 방법','Anesthetics'],['drug','마취 약물','Drug']];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const today=()=>new Date(Date.now()+32400000).toISOString().slice(0,10);
 const text=v=>String(v??'').trim(),signature=r=>JSON.stringify([...fields.map(([k])=>text(r[k])),text(r.notes)]);
@@ -10,7 +10,7 @@ const normalizeText=(key,value)=>injectionFields.has(key)?text(value).replace(/\
 function normalizeRecord(record){return {...record,...Object.fromEntries([...injectionFields].filter(k=>Object.hasOwn(record,k)).map(k=>[k,normalizeText(k,record[k])]))};}
 const recordSignature=record=>JSON.stringify([...fields.map(([key])=>text(record[key])),text(record.notes),text(record.patientId)]);
 function caseResolution(variants){if(!Array.isArray(variants)||variants.length<2)return -1;const originals=variants.map(v=>recordSignature(v.record)),normalized=variants.map(v=>recordSignature(normalizeRecord(v.record)));if(new Set(originals).size<2||new Set(normalized).size!==1)return -1;return originals.indexOf(normalized[0]);}
-const settings=[['surgeons','집도의'],['assistants','보조자'],['anesthetists','마취 담당자'],['procedures','수술명'],['anesthetics','마취제'],['drugs','사용 약물']];
+const settings=[['surgeons','집도의'],['assistants','보조자'],['anesthetists','마취 담당자'],['procedures','수술명'],['anesthetics','마취 방법'],['drugs','마취 약물']];
 function excelDate(value,date1904=false){const v=text(value);if(/^\d+(\.\d+)?$/.test(v)){const n=Number(v);if(n<1||n>100000)throw Error('수술 날짜를 확인해주세요.');return new Date(Date.UTC(date1904?1904:1899,date1904?0:11,date1904?1:30)+Math.floor(n)*86400000).toISOString().slice(0,10);}const normalized=v.replace(/[./]/g,'-');const m=normalized.match(/^(20\d{2})-(\d{1,2})-(\d{1,2})$/);if(!m)throw Error('수술 날짜를 확인해주세요.');const d=m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');if(!Number.isFinite(Date.parse(d))||new Date(d).toISOString().slice(0,10)!==d)throw Error('수술 날짜를 확인해주세요.');return d;}
 function groupRows(rows){
  const groups=new Map();for(const x of rows){const original=x.record,r=normalizeRecord(original),key=JSON.stringify([r.date,text(r.chartNumber)||text(r.patientName),text(r.procedure)]);let item=groups.get(key);if(!item){item={sourceKey:JSON.stringify([original.date,text(original.chartNumber)||text(original.patientName),text(original.procedure)]),variants:[]};groups.set(key,item);}const sig=signature(r),v=item.variants.find(v=>signature(v.record)===sig);if(v)v.sources.push(x.source);else item.variants.push({record:r,sources:[x.source]});}
@@ -29,7 +29,7 @@ async function workbookRows(file){
  const rows=[],errors=[],sheets=[];for(const sheet of wb.getElementsByTagName('sheet')){const rid=sheet.getAttribute('r:id'),rel=[...rels.getElementsByTagName('Relationship')].find(r=>r.getAttribute('Id')===rid);if(!rel||rel.getAttribute('TargetMode')==='External')continue;const target=rel.getAttribute('Target'),path=target.startsWith('/')?target.slice(1):'xl/'+target;if(path.includes('..'))throw Error('지원하지 않는 파일 경로입니다.');const doc=await xml(path),name=sheet.getAttribute('name');let columns=null,accepted=0;
   for(const row of doc.getElementsByTagName('row')){const cells={};for(const c of row.getElementsByTagName('c')){const col=c.getAttribute('r').replace(/\d/g,''),v=c.getElementsByTagName('v')[0]?.textContent||'';cells[col]=c.getAttribute('t')==='s'?strings[Number(v)]||'':c.getAttribute('t')==='inlineStr'?[...c.getElementsByTagName('t')].map(t=>t.textContent).join(''):v;}
    if(!Object.values(cells).some(v=>text(v)))continue;
-   if(!columns){const found=Object.fromEntries(exportFields.map(([key,label,english])=>[key,Object.keys(cells).find(c=>[label,english].some(h=>h.toLowerCase()===text(cells[c]).toLowerCase()))]));if(found.date&&found.patientName&&found.procedure){columns=found;}continue;}
+   if(!columns){const found=Object.fromEntries(exportFields.map(([key,label,english])=>[key,Object.keys(cells).find(c=>[label,english,...(key==='anesthetics'?['마취제']:key==='drug'?['사용 약물']:[])].some(h=>h.toLowerCase()===text(cells[c]).toLowerCase()))]));if(found.date&&found.patientName&&found.procedure){columns=found;}continue;}
    if(['Date','수술일'].includes(text(cells[columns.date])))continue;
    try{const record=Object.fromEntries(exportFields.map(([key])=>[key,text(cells[columns[key]])]));record.date=excelDate(record.date,date1904);if(!record.patientName||!record.procedure)throw Error('환자명·수술명 누락');record.species=({Canine:'개',Feline:'고양이'})[record.species]||record.species;for(const [key,label] of exportFields){const max=key==='notes'?4000:injectionFields.has(key)?3000:200;if(record[key].length>max)throw Error(label+'은 '+max+'자 이하로 입력해주세요.');}rows.push({record,source:{sheet:name,row:Number(row.getAttribute('r'))}});accepted++;if(rows.length>15000)throw Error('기록은 15,000행까지 읽을 수 있습니다.');}catch(e){errors.push(name+' '+row.getAttribute('r')+'행: '+e.message);}
   }if(columns)sheets.push({name,rows:accepted});else errors.push(name+': 기본 서식의 제목 행을 찾지 못했습니다.');
@@ -92,7 +92,7 @@ function workbookBytes(records){
  const out=new Uint8Array(offset+centralSize+end.length);let at=0;for(const part of [...parts,...central,end]){out.set(part,at);at+=part.length;}return out;
 }
 function printHTML(records,{clinicName='',from='',to=''}={}){
- const columns=[['수술일',9],['환자·기본정보',19],['진단·수술',26],['집도·보조·마취 담당',18],['마취제·약물',28]];
+ const columns=[['수술일',9],['환자·기본정보',19],['진단·수술',26],['집도·보조·마취 담당',18],['마취 방법·약물',28]];
  const rows=records.map(r=>{
   const content=exportFields.map(([key])=>text(r[key])).join('\n'),long=content.length>1200||content.split('\n').length>35;
   return '<tr'+(long?' class="sl-print-long"':'')+'><td>'+esc(r.date)+'</td><td><b>'+esc(r.patientName)+'</b><small>'+esc([r.chartNumber,r.species,r.breed,r.age,r.sex,r.weight&&r.weight+'kg'].filter(Boolean).join(' · '))+'</small></td><td><b>'+esc(r.procedure)+'</b><small>'+esc(r.diagnosis)+'</small></td><td>'+esc([r.surgeon&&'집도 '+r.surgeon,r.assistant1&&'보조 '+r.assistant1,r.assistant2&&'보조 '+r.assistant2,r.anesthetist&&'마취 '+r.anesthetist].filter(Boolean).join('\n'))+'</td><td>'+esc(r.anesthetics)+'<small>'+esc(r.drug)+'</small>'+(r.notes?'<small>비고: '+esc(r.notes)+'</small>':'')+'</td></tr>';
@@ -171,9 +171,35 @@ function mount(root,a){
  function input(k,r){
   const max=k==='notes'?4000:injectionFields.has(k)?3000:200;
   const label=labelFor(k),required=['date','patientName','procedure'].includes(k),pref=prefKey(k),long=injectionFields.has(k)||k==='notes',readonly=!editable()||(r.patientId&&['patientName','chartNumber'].includes(k))?' readonly':'',value=r[k]||'';
+  if(['anesthetics','drug'].includes(k)&&editable()&&doc.status!=='deleted')return '<div class="sl-wide sl-choice-field" data-choice-field="'+k+'"><label for="sl-choice-'+k+'">'+label+'</label><select id="sl-choice-'+k+'" data-choice="'+k+'" aria-label="'+label+' 선택"></select><div data-choice-values="'+k+'" class="sl-choice-values"></div><textarea name="'+k+'" maxlength="3000" rows="2" aria-label="'+label+' 직접입력" hidden>'+esc(value)+'</textarea></div>';
   let control=long?'<textarea name="'+k+'" maxlength="'+max+'" rows="2"'+(required?' required':'')+readonly+'>'+esc(value)+'</textarea>':'<input name="'+k+'" maxlength="'+max+'" type="'+(k==='date'?'date':'text')+'" value="'+esc(value)+'"'+(required?' required':'')+(pref?' list="sl-'+pref+'"':'')+(k==='weight'?' inputmode="decimal"':'')+readonly+'>';
   if(long&&pref&&preferences?.[pref]?.length&&editable())control+='<select data-preset="'+k+'" aria-label="'+label+' 자주 쓰는 항목"><option value="">자주 쓰는 '+label+' 추가</option>'+preferences[pref].map(v=>'<option>'+esc(v)+'</option>').join('')+'</select>';
   return '<label class="'+(long?'sl-wide':'')+'"><span>'+label+(required?' <span class="sl-required">필수</span>':'')+'</span>'+control+'</label>';
+ }
+ const choiceDefaults={anesthetics:['Injection','Inhalation'],drug:['Propofol','Ketamine','medetomidine']};
+ const choiceValues=key=>[...new Set([...choiceDefaults[key],...(preferences?.[prefKey(key)]||[])].filter(v=>v&&v!=='__custom__'))];
+ function syncChoice(key){
+  const field=root.querySelector('[data-choice-field="'+key+'"]');if(!field)return;
+  const select=field.querySelector('[data-choice]'),input=field.querySelector('textarea'),values=choiceValues(key),parts=input.value?input.value.split(/[,\n]/).map(text).filter(Boolean):[],known=key==='anesthetics'?values.includes(input.value):parts.every(v=>values.includes(v));
+  const custom=field.dataset.custom==='1'||!!input.value&&!known;
+  input.hidden=!custom;
+  select.innerHTML='<option value="">'+(key==='drug'?'약물 추가 선택':'선택')+'</option>'+values.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('')+'<option value="__custom__">직접입력</option>';
+  select.value=key==='anesthetics'?(custom?'__custom__':input.value):custom?'__custom__':'';
+  const selected=field.querySelector('[data-choice-values]');selected.replaceChildren();
+  if(key==='drug'&&!custom)selected.innerHTML=parts.map((v,i)=>'<span class="sl-choice-tag">'+esc(v)+'<button type="button" data-choice-remove="'+i+'" aria-label="'+esc(v)+' 삭제">×</button></span>').join('');
+  selected.querySelectorAll('[data-choice-remove]').forEach(button=>button.onclick=()=>{if(busy)return;parts.splice(Number(button.dataset.choiceRemove),1);input.value=parts.join(', ');changedChoice(input);});
+  if(custom)grow(input);
+ }
+ function changedChoice(input){syncChoice(input.name);dirty=true;message('저장하지 않은 변경사항이 있습니다.');}
+ function bindChoices(){
+  root.querySelectorAll('[data-choice]').forEach(select=>{const key=select.dataset.choice;syncChoice(key);select.onchange=()=>{
+   if(busy)return;const field=select.closest('[data-choice-field]'),input=field.querySelector('textarea'),value=select.value;
+   if(value==='__custom__'){field.dataset.custom='1';syncChoice(key);input.focus();return;}
+   if(key==='anesthetics'){field.dataset.custom='0';input.value=value;changedChoice(input);return;}
+   if(!value)return;const parts=input.value.split(/[,\n]/).map(text);if(parts.includes(value)){syncChoice(key);return;}
+   const next=[input.value,value].filter(Boolean).join(', ');if(next.length>3000){message('마취 약물은 3000자 이하로 입력해주세요.',true);syncChoice(key);return;}
+   input.value=next;changedChoice(input);
+  };});
  }
  async function prefs(){preferences=await request(base+'/preferences');return preferences;}
  function read(){const f=root.querySelector('[data-record]');if(!f)return currentRecord();const r={...currentRecord()};for(const [k] of exportFields)r[k]=f.elements[k].value;return verifyPatientIdentity(currentRecord(),r);}
@@ -187,13 +213,13 @@ function mount(root,a){
   try{
    const loaded=await request(base+'/preferences');if(!alive()||!form.isConnected||token!==preferencesSequence)return;preferences=loaded;
    for(const [key] of settings){const list=root.querySelector('#sl-'+key);if(list)list.innerHTML=(preferences[key]||[]).map(v=>'<option value="'+esc(v)+'"></option>').join('');}
-   for(const key of ['procedure','anesthetics','drug']){
+   for(const key of ['procedure']){
     let select=form.querySelector('[data-preset="'+key+'"]');const values=preferences[prefKey(key)]||[];
     if(!editable()||doc.status==='deleted'||!values.length){select?.remove();continue;}
     if(!select){form.elements[key].insertAdjacentHTML('afterend','<select data-preset="'+key+'" aria-label="'+labelFor(key)+' 자주 쓰는 항목"></select>');select=form.querySelector('[data-preset="'+key+'"]');if(busy){select.disabled=true;select.dataset.wasDisabled='0';}}
     select.innerHTML='<option value="">자주 쓰는 '+labelFor(key)+' 추가</option>'+values.map(v=>'<option>'+esc(v)+'</option>').join('');
    }
-   bindPresets(form);notice.replaceChildren();
+   bindPresets(form);for(const key of ['anesthetics','drug'])syncChoice(key);notice.replaceChildren();
   }catch(e){if(alive()&&form.isConnected&&token===preferencesSequence){notice.innerHTML='<p>자주 쓰는 항목을 불러오지 못했습니다. 수술 기록은 그대로 확인할 수 있습니다.</p>'+btn('retry-record-prefs','입력 항목 다시 조회');bind(notice);}}
  }
  function edit(){
@@ -209,10 +235,10 @@ function mount(root,a){
    (doc.body.variants?'<details class="sl-original"><summary>가져온 원본·선택 이력</summary><p>'+esc(doc.body.sourceFile)+' · '+(doc.body.selected!==undefined?'원본 '+(doc.body.selected+1)+' 선택 · '+esc(doc.body.resolvedAt?.slice(0,10)):'원본 보존')+'</p>'+compareTable(doc.body.variants)+'</details>':''));
   const form=root.querySelector('[data-record]');form.onsubmit=e=>{e.preventDefault();void run(()=>save());};
   const invalidateBooking=()=>{if(sourceContext?.kind==='booking'&&form.elements.date.value!==sourceContext.date)clearSource('수술일이 변경되었습니다. 수술일 일정을 다시 조회해주세요.');};
-  form.oninput=e=>{dirty=true;invalidateBooking();if(e.target.matches('textarea'))grow(e.target);message('저장하지 않은 변경사항이 있습니다.');};
+  form.oninput=e=>{dirty=true;invalidateBooking();if(e.target.matches('textarea')){grow(e.target);if(e.target.closest('[data-choice-field]')){e.target.closest('[data-choice-field]').dataset.custom='1';syncChoice(e.target.name);}}message('저장하지 않은 변경사항이 있습니다.');};
   form.elements.date.onchange=invalidateBooking;
   root.querySelectorAll('[data-record] textarea').forEach(grow);
-  bindPresets(form);
+  bindPresets(form);bindChoices();
   const search=root.querySelector('[data-source-search]');if(search)search.onsubmit=e=>{e.preventDefault();void run(()=>source('patients'));};
   const patientQuery=root.querySelector('[data-patient-q]');if(patientQuery)patientQuery.oninput=patientQuery.onchange=()=>{if(sourceContext?.kind==='patients'&&patientQuery.value.trim()!==sourceContext.query)clearSource('검색어가 변경되었습니다. 환자 검색을 다시 눌러주세요.');};
  }
