@@ -233,3 +233,26 @@
 @media(max-width:650px){.su-consents [data-consent-form] .su-card{padding:12px}.su-consents .su-consent-readiness{display:block}.su-consents .su-consent-readiness details+details{margin-top:10px}}
 
 .su-consents .su-operation-group .su-operation-hint{display:none}
+
+/* Common surgery consent: one continuous document, without folded input fields. */
+.su-surgery-intro{font-weight:600;margin:1rem 0}
+.su-surgery-section>h3{display:flex;align-items:center;gap:.7rem;margin-bottom:1.25rem}
+.su-surgery-section>h3>span{font-size:.85em;color:var(--muted,#526c71);font-variant-numeric:tabular-nums}
+.su-surgery-section>label{display:block;margin:1rem 0}
+.su-surgery-section textarea{width:100%;min-height:120px;max-height:none;resize:vertical}
+.su-surgery-section [data-surgery-flat]{border:0;padding:0;margin:.75rem 0}
+.su-surgery-section [data-surgery-flat]>summary{display:none}
+.su-surgery-optional{margin:.5rem 0 1rem}
+.su-surgery-form [data-clinical-review],.su-surgery-form [data-surgery-canonical]{display:none!important}
+.su-surgery-form [data-consent-readiness]{display:block}
+.su-surgery-form [data-consent-readiness]>div{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem}
+.su-surgery-section .su-consent-dock{position:static;box-shadow:none;border:0;padding:.5rem 0}
+.su-surgery-document-section{margin:1.5rem 0;border-top:1px solid #d6e1df;padding-top:1rem}
+.su-surgery-document-section h2{font-size:1.15em}
+.su-surgery-document-section h4{margin:1rem 0 .35rem;font-size:1em}
+.su-surgery-document .su-sign-panel{box-shadow:none;border:0;padding:0}
+@media print{.su-surgery-document-section{break-inside:auto}.su-surgery-document-section h2,.su-surgery-document-section h4{break-after:avoid}.su-surgery-document-section p{orphans:3;widows:3}}
+.su-surgery-form .su-area-tools{justify-content:flex-end}
+.su-surgery-form label:not(:focus-within)>.su-area-tools{visibility:hidden}
+.su-surgery-form [data-consent-readiness]{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+.su-surgery-form [data-consent-readiness]>div{margin:0}
