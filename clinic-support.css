@@ -405,3 +405,10 @@
 .su .su-consent-target{outline:3px solid #167c75;outline-offset:3px;background:#f1f8f5}
 .su-issue-detail{font-weight:400;line-height:1.6;margin:6px 0 12px;max-width:70ch}
 .su-print .su-paper-date{display:inline-block;white-space:nowrap;letter-spacing:.03em}
+
+.su .su-length-error{display:block;color:#a02e24;font-size:12px;font-weight:600;margin-top:6px}
+.su .su-sign-panel canvas{box-sizing:border-box;width:100%;height:auto;aspect-ratio:15/4;padding:0;border:0;outline:1px solid #afc5c6;outline-offset:0}
+.su-signature-dialog{width:min(960px,96vw);max-width:96vw;max-height:94dvh;box-sizing:border-box;padding:20px;border:1px solid #b8ced0;border-radius:12px;color:#20323e;background:white;overflow:auto}
+.su-signature-dialog::backdrop{background:#102f4077}
+.su-signature-dialog .su-actions{justify-content:flex-end;margin-top:16px}
+@media(max-width:650px){.su-signature-dialog{padding:12px}.su-sign-panel>.su-grid{grid-template-columns:1fr}}
