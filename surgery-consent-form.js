@@ -30,8 +30,8 @@
  assistant.querySelector('h3').textContent='진료별 설명·병원 저장 서식';const chooser=optional('진료별 설명·저장 서식 불러오기',assistant);chooser.dataset.surgeryLoader='';sections[2].querySelector('h3').after(chooser);
  sections[4].insertAdjacentHTML('beforeend','<p class="su-surgery-law">「수의사법」 제13조의2 및 같은 법 시행규칙 제13조의2는 적용 대상 중대진료 전에 진단명, 진료의 필요성·방법, 전형적 후유증·부작용, 진료 전후 준수사항을 설명하고 서면 동의를 받도록 정하고 있습니다.</p><a href="https://law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lspttninfSeq=176521" target="_blank" rel="noopener">법령·법정 서식 확인</a>');for(const n of [...doctor.children])if(n.tagName!=='H3')sections[4].append(n);unfold(sections[4]);const tools=sections[4].querySelector('[data-consent-tools]');if(tools){tools.open=true;tools.querySelector('summary').hidden=true;sections[4].append(optional('수의사 정보 등록·관리',tools));}if(emergency)sections[4].append(optional('응급진료 후 사후 동의',emergency));
  sections[5].insertAdjacentHTML('beforeend','<p>작성한 내용을 확인한 뒤 다음 화면에서 수의사와 보호자가 직접 서명합니다.</p>');const dock=form.querySelector('.su-consent-dock');dock.querySelector('[type=submit]').textContent='내용 확인·서명 받기';sections[5].append(dock);for(const card of cards)if(card!==assistant)card.remove();const review=form.querySelector('[data-clinical-review]');if(review)review.hidden=true;
- form.addEventListener('input',event=>{const n=event.target;if(!n.matches('[data-surgery-key]'))return;const original=form.elements[n.dataset.surgeryKey];original.value=replace(original.value,n.dataset.surgeryPart,n.value);original.dispatchEvent(new Event('input',{bubbles:true}));});if(b.kind!=='surgery'){const n=form.elements.necessity.parentElement;n.firstChild.textContent=cfg.labels[1];}if(b.kind==='other'){sections[4].querySelector('.su-surgery-law').textContent='진료의 목적·방법·위험·주의사항을 설명하고 동의를 확인합니다.';sections[4].querySelector('a').remove();}quickTemplates(form);sync(form);}
- function sync(form){if(!form?.classList.contains('su-linear-form'))return;for(const n of form.querySelectorAll('[data-surgery-key]')){const p=split(form.elements[n.dataset.surgeryKey].value),value=p[n.dataset.surgeryPart];if(n.value!==value){n.value=value;if(n._slot){n._slot.box.remove();n._slot.toggle.remove();n.hidden=false;delete n.dataset.slotReady;delete n._slot;}}if(n.dataset.surgeryPart==='anesthesia')n.parentElement.hidden=!p.hasAnesthesia;}
+ form.addEventListener('input',event=>{const n=event.target;if(!n.matches('[data-surgery-key]'))return;const original=form.elements[n.dataset.surgeryKey];original.value=replace(original.value,n.dataset.surgeryPart,n.value);original.dispatchEvent(new Event('input',{bubbles:true}));});if(b.kind!=='surgery'){const n=form.elements.necessity.parentElement;n.firstChild.textContent=cfg.labels[1];}if(b.kind==='other'){sections[4].querySelector('.su-surgery-law').textContent='진료의 목적·방법·위험·주의사항을 설명하고 동의를 확인합니다.';sections[4].querySelector('a').remove();}quickTemplates(form);sync(form,b);}
+ function sync(form,b){if(!form?.classList.contains('su-linear-form'))return;if(b)form._consentBody=b;for(const n of form.querySelectorAll('[data-surgery-key]')){const p=split(form.elements[n.dataset.surgeryKey].value),value=p[n.dataset.surgeryPart];if(n.value!==value){n.value=value;if(n._slot)n._slot.dispose();}if(n.dataset.surgeryPart==='anesthesia')n.parentElement.hidden=!p.hasAnesthesia;}
  for(const d of form.querySelectorAll('[data-surgery-flat]')){d.open=true;d.querySelector('summary').hidden=true;}const review=form.querySelector('[data-clinical-review]');if(review)review.hidden=true;if(form.classList.contains('su-surgery-form'))enhanceSlots(form);const pending=form.querySelector('[data-consent-replacement]');if(pending?.textContent.trim()){const box=form.querySelector('.su-consent-assistant');box.hidden=false;form.querySelector('[data-surgery-loader] > button').setAttribute('aria-expanded','true');}}
  function focus(form,key){if(!form?.classList.contains('su-surgery-form'))return false;const fields=[...form.querySelectorAll('[data-surgery-key="'+key+'"],textarea[name="'+key+'"]')].filter(n=>!n.parentElement.hidden),n=fields.find(n=>/\[입력\s*:/.test(n.value))||fields[0];if(!n)return false;const target=n._slot?.box.querySelector('textarea');if(target){target.focus();target.scrollIntoView({block:'center'});return true;}n.hidden=false;n.focus({preventScroll:true});n.scrollIntoView({block:'center',behavior:'smooth'});return true;}
 
@@ -53,26 +53,53 @@
  }
  // Short answers update the original full-text field; full-text editing remains available.
  // No answer, normal finding, or examination result is invented by this helper.
- function enhanceSlots(form,b){for(const n of form.querySelectorAll('[data-surgery-key],textarea[name=necessity]')){
-  if(n._slot&&n.value!==n._slot.render()){n._slot.box.remove();n._slot.toggle.remove();n.hidden=false;delete n.dataset.slotReady;delete n._slot;}if(n.dataset.slotReady)continue;const raw=n.value,matches=[...raw.matchAll(/\[입력\s*:\s*([^\]]*)\]/g)];if(!matches.length)continue;
-  n.dataset.slotReady='true';const box=document.createElement('div');box.className='su-short-answers';const values=matches.map(()=>''),inputs=[];const render=()=>{let pos=0,out='';matches.forEach((m,i)=>{out+=raw.slice(pos,m.index)+(values[i].trim()||m[0]);pos=m.index+m[0].length;});return out+raw.slice(pos);};
-  for(const [i,m] of matches.entries()){const label=document.createElement('label');label.textContent=m[1];const input=document.createElement('textarea');input.rows=2;input.dataset.shortAnswer=String(i);input.maxLength=2000;input.placeholder='이번 환자에 해당하는 내용';label.append(input);box.append(label);inputs.push(input);input.addEventListener('input',e=>{e.stopPropagation();values[i]=input.value;const next=render();if(next.length>Number(n.maxLength||6000)){input.setCustomValidity('설명이 너무 깁니다. 내용을 줄여주세요.');return;}input.setCustomValidity('');n.value=next;n.dispatchEvent(new Event('input',{bubbles:true}));});}
-  const toggle=document.createElement('button');toggle.type='button';toggle.className='su-surgery-optional';toggle.textContent='전체 문구 보기·수정';toggle.setAttribute('aria-expanded','false');toggle.onclick=()=>{n.hidden=!n.hidden;toggle.setAttribute('aria-expanded',String(!n.hidden));};n.before(box,toggle);n.hidden=true;
-  n.addEventListener('input',()=>{if(n.value!==render()){box.remove();toggle.remove();n.hidden=false;delete n.dataset.slotReady;delete n._slot;}});
-  n._slot={box,toggle,render};
- }}
+ function slotModel(b,key,part,raw){
+  const model=g.ClinicSupport?.consentDraftModel(b,key),rows=model?.[part];
+  const prefix=key==='method'&&part==='base'?(model?.nonePlan||''):'';if(Array.isArray(rows)&&prefix+g.ClinicSupport.consentDraftRender(rows)===raw&&rows.some(r=>r.token))return {rows,render:()=>prefix+g.ClinicSupport.consentDraftRender(rows)};
+  const matches=[...raw.matchAll(/\[입력\s*:\s*([^\]]*)\]/g)];if(!matches.length)return null;
+  const fallback=matches.map(m=>({token:m[0],hint:m[1],label:raw.slice(raw.lastIndexOf('\n',m.index-1)+1,m.index).replace(/:\s*$/,''),value:'',enabled:true}));
+  return {rows:fallback,render:()=>{let pos=0,out='';matches.forEach((m,i)=>{out+=raw.slice(pos,m.index)+(fallback[i].value.trim()||m[0]);pos=m.index+m[0].length;});return out+raw.slice(pos);}};
+ }
+ function entryChoices(kind,key,label){
+  if(kind==='transfusion'&&key==='method'&&label.startsWith('사용할 혈액제제'))return ['전혈','농축적혈구','신선동결혈장','혈소판제제'];
+  if(kind==='euthanasia'&&key==='precautions'&&label.startsWith('진행 중 보호자'))return ['입회함','입회하지 않음','일부 과정만 입회'];
+  if(kind==='euthanasia'&&key==='precautions'&&label.startsWith('안락사 후'))return ['보호자 직접 인계','보호자가 지정한 장례업체 인계'];
+  return [];
+ }
+ function addChoices(input,choices){if(!choices.length||input._choice)return;const select=document.createElement('select');select.dataset.consentChoice='';select.setAttribute('aria-label',input.closest('label').firstChild.textContent+' 선택');select.innerHTML='<option value="">선택하세요</option>'+choices.map(c=>'<option>'+esc(c)+'</option>').join('')+'<option value="custom">직접입력</option>';input.before(select);input._choice=select;
+  const sync=()=>{select.value=choices.includes(input.value)?input.value:input.value?'custom':'';};sync();input.addEventListener('input',sync);
+  select.addEventListener('change',e=>{e.stopPropagation();if(select.value==='custom'||!select.value){input.focus();return;}const chosen=select.value,old=input.value.trim();input.value=old&&!choices.includes(old)?chosen+' · '+old:chosen;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();});
+ }
+ function enhanceSlots(form,b){b=b||form._consentBody;if(!b)return;
+  for(const n of form.querySelectorAll('[data-surgery-key],textarea[name=necessity]')){
+   if(n._slot&&n.value!==n._slot.render()){n._slot.dispose();}if(n._slot)continue;
+   const key=n.dataset.surgeryKey||n.name,part=n.dataset.surgeryPart||'base',model=slotModel(b,key,part,n.value);if(!model)continue;
+   const box=document.createElement('div');box.className='su-short-answers';const toggle=document.createElement('button');toggle.type='button';toggle.className='su-surgery-optional';toggle.textContent='전체 문구 보기·수정';toggle.setAttribute('aria-expanded','false');toggle.onclick=()=>{n.hidden=!n.hidden;toggle.setAttribute('aria-expanded',String(!n.hidden));};
+   const refreshReuse=[];
+   for(const [i,row] of model.rows.entries()){if(!row.token||!row.enabled)continue;const label=document.createElement('label');label.textContent=row.label||row.hint;const input=document.createElement('textarea');input.rows=2;input.dataset.shortAnswer=String(i);input.dataset.shortKey=key;input.dataset.shortPart=part;input.maxLength=Number(n.maxLength)||6000;input.placeholder=row.hint;input.value=row.value;label.append(input);box.append(label);
+    input.addEventListener('input',e=>{e.stopPropagation();const old=row.value;row.value=input.value;const next=model.render();if(next.length>Number(n.maxLength||6000)){row.value=old;input.setCustomValidity('설명이 너무 깁니다. 내용을 줄여주세요.');return;}input.setCustomValidity('');n.value=next;n.dispatchEvent(new Event('input',{bubbles:true}));});
+    if(part==='base'){addChoices(input,entryChoices(b.kind,key,row.label));const button=document.createElement('button');button.type='button';button.dataset.shortReuse='';button.className='su-surgery-optional';label.append(button);const refresh=()=>{const reuse=form._consentHelpers?.knownInfo(key,row);button.hidden=!reuse;button.textContent=reuse?.label||'';};refreshReuse.push(refresh);refresh();button.onclick=()=>{const reuse=form._consentHelpers?.knownInfo(key,row);if(reuse){input.value=reuse.value;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();}};}
+   }
+   n.before(box,toggle);n.hidden=true;
+   const onInput=()=>{if(n.value!==model.render())n._slot?.dispose();};n.addEventListener('input',onInput);
+   n._slot={box,toggle,render:model.render,refresh:()=>refreshReuse.forEach(fn=>fn()),dispose:()=>{box.remove();toggle.remove();n.hidden=false;n.removeEventListener('input',onInput);delete n._slot;}};
+  }
+  for(const n of form.querySelectorAll('[data-surgery-key],textarea[name=necessity]'))n._slot?.refresh();
+ }
+ function careTimeLabel(b){return (b.emergency?'응급진료 실제 일시':({surgery:'수술 예정 일시',transfusion:'수혈 예정 일시',admission:'입원 예정 일시',discharge:'퇴원 예정 일시',euthanasia:'시행 예정 일시'})[b.kind]||'진료 예정 일시')+' · 한국시간';}
+ function anesthesiaLabel(b){const explicit=String(b.method||'').match(/선택한 마취 계획: (전신마취|진정|마취·진정 없음)/)?.[1];if(explicit==='마취·진정 없음'&&!b.generalAnesthesia)return '마취·진정 없이 진행';if(b.generalAnesthesia)return '전신마취';if(explicit==='진정')return '진정';return [b.method,b.risks,b.precautions].some(v=>/마취|진정/.test(v||''))?'저장된 진료 설명에 따름':'마취·진정 없이 진행';}
  function cleanText(text){return String(text||'').replace(/^선택한 마취 계획: 마취·진정 없음\n/,'');}
  function documentHTML(d,{screen=false,stamp=v=>v,svg=()=>'',sources='',legal=false}={}){
   const b=d.body,cfg=profile(b),parts=Object.fromEntries(['method','risks','precautions'].map(k=>[k,split(b[k])])),value=v=>esc(v||'미기재');
   const clause=(label,text,key)=>'<div class="su-clause"'+(key?' data-clinical-field="'+key+'"':'')+'><h3>'+esc(label)+'</h3><p>'+value(cleanText(text))+'</p></div>';
   const info=entries=>'<dl class="su-info">'+entries.map(([k,v])=>'<dt>'+esc(k)+'</dt><dd>'+value(v)+'</dd>').join('')+'</dl>';
   const section=(i,content)=>'<section class="su-surgery-document-section" data-document-section="'+i+'"><h2>'+i+'. '+esc(cfg.titles[i-1])+'</h2>'+content+'</section>';
-  const plan=String(b.method||'').match(/선택한 마취 계획: (전신마취|진정|마취·진정 없음)/)?.[1]||(b.generalAnesthesia?'전신마취':'저장된 진료 설명에 따름');
-  const anesthesia='<p><b>마취·진정 계획: '+esc(plan)+'</b></p>'+(Object.values(parts).some(x=>x.hasAnesthesia)?clause('마취 방법·사전 평가·관찰',parts.method.anesthesia)+clause('마취 위험·회복 중 주의',parts.risks.anesthesia)+clause('마취 전후 관리',parts.precautions.anesthesia):'<p>아래 진료 설명에 기록된 실제 마취·진정 계획을 함께 확인하세요.</p>');
+  const plan=anesthesiaLabel(b);
+  const anesthesia='<p><b>마취·진정 계획: '+esc(plan)+'</b></p>'+(plan==='마취·진정 없이 진행'&&!Object.values(parts).some(x=>x.hasAnesthesia)?'':Object.values(parts).some(x=>x.hasAnesthesia)?clause('마취 방법·사전 평가·관찰',parts.method.anesthesia)+clause('마취 위험·회복 중 주의',parts.risks.anesthesia)+clause('마취 전후 관리',parts.precautions.anesthesia):'<p>아래 진료 설명에 기록된 실제 마취·진정 계획을 함께 확인하세요.</p>');
   const accepts=legal?law:cfg.accept||'위 진료의 필요성·방법·부작용·주의사항을 설명받고 위 내용에 동의합니다.';
   const signedSignature=(key,name)=>'<div><b>'+esc(name)+'</b><span class="su-statutory-signature">'+(b.signatures?.[key]?.length?svg(b.signatures[key]):'<span>(서명 또는 인)</span>')+'</span></div>';
   return '<article class="su-document su-surgery-document su-unified-document"'+(legal?' data-statutory-form="11"':'')+'><header class="su-document-heading"><small>CARESTEP · '+(legal?'수술등중대진료 동의서':'진료 설명·동의서')+'</small><h1>'+esc(cfg.name)+'</h1><p class="su-status">'+(d.status==='signed'?'서명 완료':d.status==='void'?'철회·사용 중지 · '+value(d.voidReason):'서명 전 검토용')+'</p></header>'+
-  section(1,info([['소유자·관리자',[b.guardianName,b.relationship].filter(Boolean).join(' · ')],['연락처',b.guardianPhone],['주소',b.guardianAddress],['환자',[b.patientName,b.species,b.sex].filter(Boolean).join(' · ')],['차트번호',b.chartNumber],['특이사항',b.patientNotes],['진료명',b.title],['예정 일시 · 한국시간',(b.emergency?b.emergencyAt:b.plannedAt)?.replace('T',' ')]] )+clause(cfg.labels[0],b.diagnosis,'diagnosis'))+
+  section(1,info([['소유자·관리자',[b.guardianName,b.relationship].filter(Boolean).join(' · ')],['연락처',b.guardianPhone],['주소',b.guardianAddress],['환자',[b.patientName,b.species,b.sex].filter(Boolean).join(' · ')],['차트번호',b.chartNumber],['특이사항',b.patientNotes],['진료명',b.title],[careTimeLabel(b),(b.emergency?b.emergencyAt:b.plannedAt)?.replace('T',' ')]] )+clause(cfg.labels[0],b.diagnosis,'diagnosis'))+
   section(2,hasPlan(b)?anesthesia:clause(cfg.labels[1],b.necessity,'necessity'))+
   section(3,(!hasPlan(b)&&Object.values(parts).some(x=>x.hasAnesthesia)?anesthesia:'')+(hasPlan(b)?clause(cfg.labels[1],b.necessity,'necessity'):'')+clause(cfg.labels[2],parts.method.base,'method')+clause('예상 비용·변동 안내',b.cost,'cost'))+
   section(4,clause(cfg.labels[3],parts.risks.base,'risks')+clause(cfg.labels[4],parts.precautions.base,'precautions'))+
@@ -81,5 +108,5 @@
   (screen?'<footer class="su-consent-audit">원본 확인값 '+value(d.hash||'저장 후 생성')+(d.retainUntil?'<br>최소 보존 기한 '+esc(stamp(d.retainUntil)):'')+'</footer><aside class="su-consent-audit">'+sources+'</aside>':'')+'</article>';
  }
  function statutoryHTML(d,options){return documentHTML(d,{...options,legal:true});}
- g.SurgeryConsentForm={split,replace,mount,sync,focus,documentHTML,statutoryHTML,titles,profiles,enhanceSlots};if(typeof module==='object')module.exports=g.SurgeryConsentForm;
+ g.SurgeryConsentForm={split,replace,mount,sync,focus,documentHTML,statutoryHTML,titles,profiles,enhanceSlots,slotModel,entryChoices,addChoices,careTimeLabel,anesthesiaLabel};if(typeof module==='object')module.exports=g.SurgeryConsentForm;
 })(typeof window==='undefined'?globalThis:window);

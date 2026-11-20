@@ -388,3 +388,16 @@
 @media print{@page{size:A4 portrait;margin:0}.su-paged-print{background:white}.su-a4-page{margin:0;box-shadow:none}.su-page-content{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
 
 .su-linear-form [data-draft-preview]{display:none!important}
+
+/* Zoom affects only the preview; physical sheets keep their native A4 dimensions. */
+.su-print-preview[open]{display:flex;flex-direction:column;overflow:hidden}
+.su-print-preview>header{flex:none;align-items:center}
+.su-print-preview>header label{display:flex;flex-direction:column;gap:4px;font-size:12px}
+.su-print-preview select{font:inherit;min-height:38px;border:1px solid #b8ced0;border-radius:6px;background:white;padding:6px}
+.su-print-preview iframe{flex:1;min-height:0;height:auto}
+.su-page-sheet{position:relative;margin:12px auto;flex:none}
+.su-page-sheet .su-a4-page{margin:0;transform-origin:top left}
+.su-short-answers label>select{margin-bottom:6px}
+@media print{.su-page-sheet{width:auto!important;height:auto!important;margin:0!important;break-after:page}.su-page-sheet:last-child{break-after:auto}.su-page-sheet .su-a4-page{transform:none!important;margin:0;break-after:auto}}
+.su-page-sheet{overflow:hidden}
+@media print{.su-page-sheet{overflow:visible}}
