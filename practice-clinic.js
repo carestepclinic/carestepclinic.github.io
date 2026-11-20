@@ -10,18 +10,27 @@ async function carestepConsentEducation(){
   return {items:Array.from(items.values()).map(t=>({id:t.id,title:t.title,short:t.short,category:t.category,species:templateSpeciesLabel(t),description:t.description,sections:t.sections,redFlags:t.redFlags}))};
 }
 const carestepConsentScope=()=>JSON.stringify([saasMe?.clinic?.id,saasMe?.user?.id,saasSessionMeta?.id,saasMe?.role,saasMe?.permissions]);
-async function carestepConsentSources(){
- if(!saasPermission('materials.read',true))throw Error('동의서 설명 조회 권한이 필요합니다.');
- const scope=carestepConsentScope(),r=await saasRequest('/saas/practice/consent-explanations');
- if(scope!==carestepConsentScope())throw Error('병원 또는 계정이 변경되었습니다. 다시 찾아주세요.');
- return {items:(r.items||[]).filter(x=>x.status==='published'&&x.sourceCurrent!==false).map(x=>({...x,sourceKind:'prepared'})),warnings:[]};
+// Page-memory only; isolate hospital, user, session and permissions. Never cache detail approval checks.
+let carestepConsentCatalog=null;
+async function carestepConsentSources({force=false}={}){
+ if(!saasPermission('materials.read',true)){carestepConsentCatalog=null;throw Error('동의서 설명 조회 권한이 필요합니다.');}
+ const scope=carestepConsentScope();
+ if(carestepConsentCatalog?.scope!==scope)carestepConsentCatalog=null;
+ let entry=carestepConsentCatalog;
+ if(force||!entry||(!entry.pending&&Date.now()-entry.at>=60000)){
+  entry={scope,at:0,pending:null,value:null};carestepConsentCatalog=entry;
+  entry.pending=(async()=>{try{const r=await saasRequest('/saas/practice/consent-explanations');if(scope!==carestepConsentScope())throw Error('병원 또는 계정이 변경되었습니다. 다시 찾아주세요.');entry.value={items:(r.items||[]).filter(x=>x.status==='published'&&x.sourceCurrent!==false&&!x.exclusion?.active).map(x=>({...x,sourceKind:'prepared'})),warnings:[]};entry.at=Date.now();return entry.value;}catch(e){if(carestepConsentCatalog===entry)carestepConsentCatalog=null;throw e;}finally{entry.pending=null;}})();
+ }
+ const value=entry.pending?await entry.pending:entry.value;
+ if(scope!==carestepConsentScope()||!saasPermission('materials.read',true))throw Error('병원 또는 계정이 변경되었습니다. 다시 찾아주세요.');
+ return structuredClone(value);
 }
 async function carestepConsentSourceDocument(source){
  if(!saasPermission('materials.read',true)||source.sourceKind!=='prepared')throw Error('승인된 동의서 설명을 선택해주세요.');
  const scope=carestepConsentScope(),r=await saasRequest('/saas/practice/consent-explanations/'+encodeURIComponent(source.id));
  if(scope!==carestepConsentScope())throw Error('병원 또는 계정이 변경되었습니다.');
  const d=r.document,v=d?.variants?.find(x=>x.id===source.variantId);
- if(!v||d.status!=='published'||d.sourceCurrent===false)throw Error('현재 공개된 설명을 확인하지 못했습니다. 다시 찾아주세요.');
+ if(!v||v.exclusion?.active||d.status!=='published'||d.sourceCurrent===false){carestepConsentCatalog=null;throw Error('현재 공개된 설명을 확인하지 못했습니다. 승인 목록을 새로고침해주세요.');}
  return {...source,...v,id:d.id,variantId:v.id,disease:d.disease,species:d.species,revision:d.revision,reviewedBy:d.reviewedBy,reviewedAt:d.reviewedAt,sourceKind:'prepared'};
 }
 window.CarestepPractice=PracticeTools.mount(document.getElementById('practiceRoot'),{
