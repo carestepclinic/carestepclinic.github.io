@@ -209,3 +209,27 @@
 .su-operations-dialog fieldset{border:1px solid #cadcda;border-radius:8px;margin:12px 0;padding:12px;min-width:0}.su-operation-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px}.su-operation-compare label{min-width:0;margin:4px 0}.su-operation-compare pre{font:inherit;font-weight:400;white-space:pre-wrap;overflow-wrap:anywhere;background:#f2f6f5;padding:10px;border-radius:6px}.su-operation-compare input{accent-color:#167a73}@media(max-width:540px){.su-operation-compare{grid-template-columns:1fr}}
 
 .su-operations-dialog .su-operation-compare input[type=radio]{display:inline-block;width:18px!important;min-width:18px!important;height:18px!important;min-height:18px!important;max-height:18px;margin:0 6px 0 0;padding:0;vertical-align:middle}
+
+/* Concise consent authoring; full reviewed/signed documents keep their layout. */
+.su-consents [data-consent-form] .su-card{padding:16px;margin:12px 0}
+.su-consents [data-consent-form] h3{margin:0 0 12px}
+.su-consents .su-explanation-loader{padding:10px;margin-bottom:0}
+.su-consents .su-consent-presets{margin-top:10px;padding-top:10px}
+.su-consents .su-draft-inputs textarea{min-height:44px;resize:vertical;field-sizing:content}
+.su-consents .su-draft-inputs [data-shared-answer]{display:block;color:#246c67;font-weight:400}
+.su-consents .su-draft-inputs label[hidden]{display:none!important}
+.su-consents .su-operation-group{margin-top:12px;border-top:1px solid #d6e3e1;padding-top:10px}
+.su-consents .su-operation-group>.su-actions{margin:10px 0}
+.su-consents .su-source-choice{margin:8px 0;border:1px solid #d6e3e1;border-radius:8px;overflow:hidden}
+.su-consents [data-consent-auto-choices] .su-source-choice>button{border:0;margin:0;width:100%}
+.su-consents .su-choice-procedure{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.su-consents .su-choice-detail{padding:0 12px 10px;font-size:13px}
+.su-consents .su-choice-detail p{white-space:pre-wrap;font-weight:400}
+.su-consents .su-consent-readiness{display:flex;flex-wrap:wrap;gap:10px 24px}
+.su-consents .su-consent-readiness details{flex:1;min-width:180px}
+.su-consents .su-consent-readiness details>div{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.su-consents [data-draft-full]>summary{font-size:14px;color:#146e66;padding:8px 0}
+.su-consents .su-clinical-review{background:#f3f8f7}
+@media(max-width:650px){.su-consents [data-consent-form] .su-card{padding:12px}.su-consents .su-consent-readiness{display:block}.su-consents .su-consent-readiness details+details{margin-top:10px}}
+
+.su-consents .su-operation-group .su-operation-hint{display:none}

@@ -1065,11 +1065,11 @@
   .clinic-calm #practiceRoot .cl-room-groups,.clinic-calm #practiceRoot .cl-room-groups:not([data-group-count="3"]) {grid-template-columns:var(--room-columns)!important}
   .clinic-calm #practiceRoot .cl-room-group:not([data-room-kind="dog"]):not([data-room-kind="cat"]):not([data-room-kind="large_dog"]) {grid-column:1/-1}
  }
- @media(min-width:801px) {
+ @media(min-width:761px) {
   .clinic-calm .cs-desktop-menu {display:block;margin:0 0 10px auto;padding:5px 9px;font-size:12px;min-height:32px}
   .clinic-calm.cs-menu-collapsed #appView {grid-template-columns:76px minmax(0,1fr)}
   .clinic-calm.cs-menu-collapsed #appView .sidebar {width:76px;padding:14px 6px}
-  .clinic-calm.cs-menu-collapsed #appView .sidebar>:not(.cs-desktop-menu):not(.cs-nav-rail) {display:none!important}
+  .clinic-calm.cs-menu-collapsed #appView .sidebar>:not(.sidebar-brand):not(.cs-nav-rail) {display:none!important}
   .clinic-calm.cs-menu-collapsed .cs-desktop-menu {margin:0;white-space:normal;width:100%}
  }
  @media(max-width:800px) {
@@ -1146,7 +1146,7 @@
   .clinic-calm #practiceRoot>.cs-record-navigation button {padding-inline:7px}
   .clinic-calm #practiceRoot>.cs-record-navigation .cs-navigation-scope {flex-basis:100%;font-size:11px;line-height:1.2}
  }
- @media(min-width:801px) {
+ @media(min-width:761px) {
   .clinic-calm.cs-menu-collapsed #appView .cs-nav-rail {display:flex;flex-direction:column;gap:4px;margin-top:10px}
   .clinic-calm #appView .cs-nav-rail button {display:flex;flex-direction:column;align-items:center;gap:2px;font:inherit;font-size:12px;padding:5px 2px;min-height:44px;border:0;border-radius:8px;background:transparent;color:var(--cs-muted);cursor:pointer}
   .clinic-calm #appView .cs-nav-rail button[hidden] {display:none}
@@ -2024,3 +2024,19 @@
 @media(max-width:760px){.clinic-calm .hc-linked-tools[open]>div{min-width:0;width:min(280px,75vw)}#appView .main > .cs-record-page-tabs .cs-navigation-scope{font-size:12px}}
 
 @media(max-width:650px){.clinic-calm .hc-linked-tools[open]>div{top:auto;bottom:calc(100% + 8px);max-height:65vh;overflow:auto}}
+
+/* Keep the menu control in the brand row, with a stable reopening target. */
+@media screen and (min-width:761px){
+ .clinic-calm #appView .sidebar-brand{gap:8px;padding:0 0 16px;align-items:center}
+ .clinic-calm #appView .sidebar-brand>div:not(.brand-mark){flex:1;min-width:0}
+ .clinic-calm #appView .sidebar-brand strong{font-size:15px;letter-spacing:0}
+ .clinic-calm #appView .sidebar-brand .cs-desktop-menu{display:flex;align-items:center;justify-content:center;flex:0 0 32px;width:32px;height:36px;min-height:36px;margin:0;padding:0}
+ .clinic-calm #appView .cs-desktop-menu>span{font:24px/1 system-ui;color:inherit;margin:0}
+ .clinic-calm.cs-menu-collapsed #appView .sidebar-brand{display:flex!important;justify-content:center;padding:0}
+ .clinic-calm.cs-menu-collapsed #appView .sidebar-brand>:not(.cs-desktop-menu){display:none!important}
+}
+
+@media screen{
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] textarea{min-height:64px}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] textarea[data-draft-input]{min-height:44px;field-sizing:content}
+}
