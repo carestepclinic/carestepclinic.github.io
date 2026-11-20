@@ -32,6 +32,6 @@ async function setup(width=1440){
  });
  return {p,errors};
 }
-async function start(p,registered=true){await p.locator('[data-action=new]').click();if(registered){await p.locator('[data-start-mode=registered]').click();await p.locator('[data-start-search-form] input').fill('가상');await p.locator('[data-start-search-form] button').click();await p.locator('[data-start-pick="0"]').click();}else{await p.locator('[data-start-field=name]').fill('빠른 환자');await p.locator('[data-start-field=species]').selectOption('dog');}await p.locator('[data-start-submit]').click();await p.locator('[data-hc-editor]').waitFor();}
+async function start(p,registered=true){await p.locator('[data-action=new]').click();if(registered){await p.locator('[data-start-mode=registered]').click();await p.locator('[data-start-search-form] input').fill('가상');await p.locator('[data-start-search-form] button').click();await p.locator('[data-start-pick="0"]').click();}else{await p.locator('[data-start-mode=quick]').click();await p.locator('[data-start-field=name]').fill('빠른 환자');await p.locator('[data-start-field=species]').selectOption('dog');}await p.locator('[data-start-submit]').click();await p.locator('[data-hc-editor]').waitFor();}
 return {setup,start};
 };
