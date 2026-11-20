@@ -2040,3 +2040,32 @@
  .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] textarea{min-height:64px}
  .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] textarea[data-draft-input]{min-height:44px;field-sizing:content}
 }
+
+/* Consent authoring hierarchy; scoped away from the immutable printable document. */
+@media screen {
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form]{font-family:inherit;font-size:15px;line-height:1.6}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-grid{gap:18px 20px}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-consent-field{padding:18px;background:#fbfcfb;border:1px solid #d6e2de;border-radius:10px}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-field-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 12px;margin:0 0 12px}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-field-heading>label{display:block;font-size:16px;font-weight:700;line-height:1.5;margin:0}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-required{display:inline-block;flex:none;font-size:12px;line-height:1.5;font-weight:400;color:#61756e;margin:0;padding:2px 7px;border:1px solid #dce6e1;border-radius:5px;background:#f3f6f4}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] label>.su-field-heading{margin:0;font-size:14px;font-weight:600}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-draft-inputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px;margin:0}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-draft-inputs:empty{display:none}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-draft-inputs>label:only-child{grid-column:1/-1}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-draft-inputs+.su-draft-inputs:not(:empty){margin-top:18px;padding-top:18px;border-top:1px solid #dce6e1}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-draft-inputs>label{display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.55;margin:0}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-draft-inputs>label.su-check{flex-direction:row;padding:4px 0}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] [data-draft-reuse]:empty{display:none}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] textarea[data-draft-input]{min-height:48px;padding:11px 12px;font-size:15px;line-height:1.6}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] [data-draft-full]{margin:10px 0 0;border-top:1px solid #e0e8e4;padding-top:8px}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] [data-draft-full]>summary{font-size:14px;font-weight:500;line-height:1.6;padding:6px 0;color:#31635b;cursor:pointer}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-draft-preview{margin:16px 0 0;padding:10px 12px;background:#f0f5f3;border-color:#dae5df}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-draft-preview>summary{font-size:14px;font-weight:500;line-height:1.6}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-operation-group{margin-top:18px;padding-top:14px}
+ .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-operation-group>summary{font-size:14px;line-height:1.6;font-weight:600}
+ @media(max-width:650px){
+  .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-consent-field{padding:14px}
+  .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-draft-inputs{grid-template-columns:1fr;gap:16px}
+ }
+}
