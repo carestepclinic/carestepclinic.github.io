@@ -1,5 +1,6 @@
 (function(g){
  'use strict';
+ const closedControls=new WeakMap();
  const series={heartRate:{label:'심박수',unit:'회/분',color:'#b42318',dash:''},respiratoryRate:{label:'호흡수',unit:'회/분',color:'#0369a1',dash:'7 3'},meanPressure:{label:'MAP',unit:'mmHg',color:'#7c3aed',dash:'3 3'},spo2:{label:'SpO₂',unit:'%',color:'#087f72',dash:''},etco2:{label:'EtCO₂',unit:'mmHg',color:'#a65a00',dash:'9 3 2 3'}};
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const local=t=>new Date(new Date(t).getTime()+32400000).toISOString().slice(0,16).replace('T',' '),clock=t=>local(t).slice(11);
@@ -135,7 +136,7 @@
     const management=root.closest('.cl-anesthesia-page')?.querySelector('.cl-surgery-management');if(management)review.append(management);
     const note=sheet.querySelector('.ar-direct-status');if(note)note.hidden=true;
    }
-   const print=sheet.querySelector('.ar-print-menu'),controls=sheet.querySelector('.cs-anesthesia-commandbar');if(print&&controls)controls.append(print);const teamButton=root.closest('.cl-anesthesia-page')?.querySelector('[data-cl-action=care-team]');if(teamButton&&controls)controls.append(teamButton);
+   const print=sheet.querySelector('.ar-print-menu'),controls=sheet.querySelector('.cs-anesthesia-commandbar');if(print&&controls)controls.append(print);const workspace=root.closest('.cl-anesthesia-page'),previous=closedControls.get(root),kept=previous?.id===a.item.id?previous:{id:a.item.id};for(const [key,action] of [['list','anesthesia-list'],['team','care-team']]){const button=workspace?.querySelector('[data-cl-action='+action+']')||kept[key];if(button&&controls&&(key!=='team'||a.medical)){controls.append(button);kept[key]=button;}}closedControls.set(root,kept);
   }
   const reminder=query('[data-ar-reminder]');if(reminder)timing.after(reminder);
   if(a.onePage&&reminder){const fold=sheet.querySelector('.cs-pending-disclosure'),alerts=document.createElement('div');alerts.className='cs-anesthesia-alerts';reminder.before(alerts);alerts.append(reminder);if(fold)alerts.append(fold);}
