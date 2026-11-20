@@ -401,3 +401,7 @@
 @media print{.su-page-sheet{width:auto!important;height:auto!important;margin:0!important;break-after:page}.su-page-sheet:last-child{break-after:auto}.su-page-sheet .su-a4-page{transform:none!important;margin:0;break-after:auto}}
 .su-page-sheet{overflow:hidden}
 @media print{.su-page-sheet{overflow:visible}}
+
+.su .su-consent-target{outline:3px solid #167c75;outline-offset:3px;background:#f1f8f5}
+.su-issue-detail{font-weight:400;line-height:1.6;margin:6px 0 12px;max-width:70ch}
+.su-print .su-paper-date{display:inline-block;white-space:nowrap;letter-spacing:.03em}
