@@ -257,7 +257,84 @@
 .su-surgery-form [data-consent-readiness]{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
 .su-surgery-form [data-consent-readiness]>div{margin:0}
 
-/* Enforcement Rule Form 11: statutory cover and a linked, complete clinical annex. */
-.su-statutory-document{color:#111}.su-statutory-document .su-statutory-cover h1{text-align:center;color:#111;border:0;padding:8px 0;margin:10px 0 20px;font-size:26px}.su-statutory-source{display:block;color:#222!important}.su-statutory-table{width:100%;table-layout:fixed;border-collapse:collapse;border:1px solid #222;font:inherit}.su-statutory-category{width:23%}.su-statutory-table th,.su-statutory-table td{border:1px solid #222;padding:10px;vertical-align:middle;text-align:left;overflow-wrap:anywhere;white-space:pre-wrap}.su-statutory-table th{font-weight:500;text-align:center;background:#f6f6f6;color:#111}.su-statutory-table td>span:first-child{display:block;font-size:.85em;margin-bottom:4px;color:#333}.su-statutory-signer{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.su-statutory-signature{display:inline-flex;vertical-align:middle;align-items:center;justify-content:center;width:130px;min-height:42px;flex-shrink:0;font-size:12px}.su-statutory-signature svg{display:block;width:130px;height:42px;max-width:100%}.su-statutory-document .su-statutory-explanation-title{text-align:center;border-top:1px solid #222;border-bottom:1px solid #222;padding:8px;margin:20px 0 0;font-size:17px}.su-statutory-items{margin:12px 0;padding-left:24px}.su-statutory-items li{padding:6px 0;overflow-wrap:anywhere}.su-statutory-items strong{font-weight:500}.su-statutory-items p{margin:4px 0 0;font-size:12px;color:#444}.su-statutory-annex-note{font-size:12px;margin:14px 0}.su-statutory-acceptance{border-top:1px solid #222;padding-top:12px;break-inside:avoid}.su-statutory-date{text-align:right}.su-statutory-guardian{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px}.su-statutory-cover-footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:10px;color:#444;margin-top:24px;border-top:1px solid #222;padding-top:8px;overflow-wrap:anywhere}.su-statutory-reference{overflow-wrap:anywhere}.su-statutory-annex{margin-top:40px;border-top:2px solid #222;padding-top:16px}.su-statutory-annex>.su-statutory-reference{font-size:12px}.su-statutory-annex-item>p,.su-statutory-clinical>p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65}.su-statutory-annex-item{margin:24px 0}.su-statutory-sign-slot{margin-top:24px;border-top:2px solid #222;padding-top:12px}.su-statutory-sign-slot .su-sign-panel{margin:12px 0 0}.su-statutory-additional{margin-top:24px}
-.su-print .su-statutory-cover h1{font-size:21pt;margin:6mm 0;padding:0}.su-print .su-statutory-source{font-size:8pt}.su-print .su-statutory-table{font-size:10pt}.su-print .su-statutory-table th,.su-print .su-statutory-table td{padding:2mm 3mm}.su-print .su-statutory-table tr{break-inside:avoid}.su-print .su-statutory-explanation-title{font-size:12pt;margin-top:6mm;padding:2mm}.su-print .su-statutory-items{margin:3mm 0;padding-left:6mm}.su-print .su-statutory-items li{padding:2mm 0;break-inside:avoid}.su-print .su-statutory-items p,.su-print .su-statutory-annex-note{font-size:9pt}.su-print .su-statutory-signature,.su-print .su-statutory-signature svg{width:32mm;height:10mm;min-height:10mm}.su-print .su-statutory-acceptance{padding-top:3mm}.su-print .su-statutory-cover-footer{margin-top:5mm;font-size:7pt}.su-print .su-statutory-annex{break-before:page;margin-top:0;padding-top:0;border-top:0}.su-print .su-statutory-annex-item{break-inside:auto}.su-print .su-statutory-annex-item>p,.su-print .su-statutory-clinical>p{line-height:1.6;overflow:visible;max-height:none}.su-print .su-statutory-annex-item h2,.su-print .su-statutory-clinical h3{break-after:avoid}.su-print .su-statutory-reference{font-size:8pt}.su-print .su-statutory-document{color:#000}.su-print .su-statutory-sign-slot{display:none}
-@media screen and (max-width:650px){.su-statutory-table th,.su-statutory-table td{padding:7px 5px;font-size:12px}.su-statutory-category{width:26%}.su-statutory-document .su-statutory-cover h1{font-size:21px}.su-statutory-guardian{justify-content:flex-start}.su-statutory-signature,.su-statutory-signature svg{width:100px}.su-statutory-document .su-statutory-items{padding-left:20px}}
+/* CARESTEP presentation of the unchanged statutory cover and clinical annex. */
+@font-face{font-family:'Carestep Pretendard';font-style:normal;font-weight:45 920;font-display:swap;src:url('./pretendard-variable-1.3.9.woff2') format('woff2')}
+.su-statutory-document{--consent-ink:#20323e;--consent-muted:#596b71;--consent-accent:#19766e;--consent-line:#dce3df;--consent-tint:#e8f2ef;color:var(--consent-ink);font-family:'Carestep Pretendard','Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif;line-height:1.6}
+.su-statutory-cover::before{content:'CARESTEP';display:block;color:var(--consent-accent);font-size:13px;font-weight:750;letter-spacing:.16em;margin-bottom:8px}
+.su-statutory-document .su-statutory-source{display:block;color:var(--consent-muted);font-size:11px;margin:0}
+.su-statutory-document .su-statutory-cover h1{text-align:left;color:var(--consent-ink);border:0;border-bottom:2px solid var(--consent-accent);padding:0 0 16px;margin:8px 0 24px;font-size:28px;font-weight:700;letter-spacing:-.035em;line-height:1.35}
+.su-statutory-table{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0;border:1px solid var(--consent-line);border-radius:10px;font:inherit}
+.su-statutory-category{width:23%}
+.su-statutory-table th,.su-statutory-table td{border:0;border-bottom:1px solid var(--consent-line);padding:11px 14px;vertical-align:middle;text-align:left;overflow-wrap:anywhere;white-space:pre-wrap}
+.su-statutory-table th{font-weight:600;background:var(--consent-tint);color:var(--consent-ink);border-right:1px solid var(--consent-line)}
+.su-statutory-table td+td{border-left:1px solid var(--consent-line)}
+.su-statutory-table tr:first-child th{border-top-left-radius:9px}
+.su-statutory-table tr:nth-last-child(2) th{border-bottom-left-radius:9px;border-bottom:0}
+.su-statutory-table tr:last-child td{border-bottom:0}
+.su-statutory-table td>span:first-child{display:block;font-size:.85em;margin-bottom:3px;color:var(--consent-muted)}
+.su-statutory-signer{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.su-statutory-signature{display:inline-flex;vertical-align:middle;align-items:center;justify-content:center;width:130px;min-height:42px;flex-shrink:0;font-size:12px}
+.su-statutory-signature svg{display:block;width:130px;height:42px;max-width:100%}
+.su-statutory-document .su-statutory-explanation-title{text-align:left;color:var(--consent-ink);border:0;border-bottom:1px solid var(--consent-line);padding:0 0 10px;margin:24px 0 8px;font-size:18px;font-weight:650;letter-spacing:-.02em}
+.su-statutory-items{margin:0;padding-left:25px}
+.su-statutory-items li{padding:8px 0 8px 4px;overflow-wrap:anywhere}
+.su-statutory-items li::marker{color:var(--consent-accent);font-weight:700}
+.su-statutory-items strong{font-weight:550}
+.su-statutory-items p{margin:3px 0 0;font-size:12px;color:var(--consent-muted)}
+.su-statutory-annex-note{font-size:12px;color:var(--consent-muted);margin:14px 0}
+.su-statutory-acceptance{border:1px solid var(--consent-line);border-radius:10px;background:#f5f8f6;padding:14px 16px;break-inside:avoid}
+.su-statutory-acceptance>p:first-child{margin-top:0}
+.su-statutory-date{text-align:right;color:var(--consent-muted);margin:12px 0 4px}
+.su-statutory-guardian{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px}
+.su-statutory-cover-footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:10px;color:var(--consent-muted);margin-top:20px;border-top:1px solid var(--consent-line);padding-top:8px;overflow-wrap:anywhere}
+.su-statutory-reference{overflow-wrap:anywhere}
+.su-statutory-annex{margin-top:36px;border-top:2px solid var(--consent-accent);padding-top:20px}
+.su-statutory-annex>h2{color:var(--consent-ink);font-size:22px;letter-spacing:-.03em}
+.su-statutory-annex>.su-statutory-reference{font-size:12px;color:var(--consent-muted)}
+.su-statutory-document .su-statutory-annex-item>h2{font-size:17px;line-height:1.5;border-left:3px solid var(--consent-accent);padding-left:12px;color:var(--consent-ink)}
+.su-statutory-annex-item>p,.su-statutory-clinical>p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7}
+.su-statutory-clinical>h3{color:var(--consent-accent);font-weight:600}
+.su-statutory-annex-item{margin:24px 0}
+.su-statutory-sign-slot{margin-top:24px;border-top:2px solid var(--consent-accent);padding-top:12px}
+.su-statutory-sign-slot .su-sign-panel{margin:12px 0 0}
+.su-statutory-additional{margin-top:28px}
+.su-statutory-additional .su-info{border:1px solid var(--consent-line);border-radius:10px}
+.su-statutory-additional .su-info dt{background:#f5f8f6;font-weight:550}
+.su-statutory-additional .su-info dt,.su-statutory-additional .su-info dd{border-color:var(--consent-line)}
+.su-statutory-additional .su-info dt:nth-last-child(2),.su-statutory-additional .su-info dd:last-child{border-bottom:0}
+.su-statutory-document footer{border-color:var(--consent-line);color:var(--consent-muted)}
+/* Keep A4 output compact and readable with or without background printing. */
+.su-print .su-statutory-document{font-size:10pt;line-height:1.45}
+.su-print .su-statutory-cover::before{font-size:9pt;margin-bottom:2mm}
+.su-print .su-statutory-cover h1{font-size:20pt;margin:2mm 0 4mm;padding:0 0 3mm}
+.su-print .su-statutory-source{font-size:7.5pt}
+.su-print .su-statutory-table{font-size:10pt}
+.su-print .su-statutory-table th,.su-print .su-statutory-table td{padding:1.5mm 2.5mm}
+.su-print .su-statutory-table tr{break-inside:avoid}
+.su-print .su-statutory-explanation-title{font-size:12pt;margin:4mm 0 1mm;padding:0 0 2mm}
+.su-print .su-statutory-items{margin:0;padding-left:6mm}
+.su-print .su-statutory-items li{padding:1.5mm 0 1.5mm 1mm;break-inside:avoid}
+.su-print .su-statutory-items p,.su-print .su-statutory-annex-note{font-size:9pt}
+.su-print .su-statutory-annex-note{margin:3mm 0}
+.su-print .su-statutory-signature,.su-print .su-statutory-signature svg{width:32mm;height:10mm;min-height:10mm}
+.su-print .su-statutory-acceptance{padding:3mm 4mm}
+.su-print .su-statutory-date{margin:2mm 0 1mm}
+.su-print .su-statutory-cover-footer{margin-top:4mm;font-size:7pt}
+.su-print .su-statutory-annex{break-before:page;margin-top:0;padding-top:0;border-top:0}
+.su-print .su-statutory-annex>h2{font-size:16pt}
+.su-print .su-statutory-annex-item{break-inside:auto;margin:5mm 0}
+.su-print .su-statutory-annex-item>h2{font-size:11pt;padding-left:3mm}
+.su-print .su-statutory-annex-item>p,.su-print .su-statutory-clinical>p{line-height:1.6;overflow:visible;max-height:none}
+.su-print .su-statutory-annex-item h2,.su-print .su-statutory-clinical h3{break-after:avoid}
+.su-print .su-statutory-reference{font-size:8pt}
+.su-print .su-statutory-sign-slot{display:none}
+@media screen and (max-width:650px){
+ .su-statutory-table th,.su-statutory-table td{padding:8px 6px;font-size:12px}
+ .su-statutory-category{width:26%}
+ .su-statutory-document .su-statutory-cover h1{font-size:23px;margin-bottom:18px}
+ .su-statutory-document .su-statutory-source{font-size:10px}
+ .su-statutory-guardian{justify-content:flex-start}
+ .su-statutory-signature,.su-statutory-signature svg{width:100px}
+ .su-statutory-document .su-statutory-items{padding-left:20px}
+ .su-statutory-acceptance{padding:12px}
+}
