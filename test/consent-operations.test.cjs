@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const window={};vm.runInNewContext(fs.readFileSync('clinic-support.js','utf8'),{window});const api=window.ClinicSupport;
+const window={SurgeryConsentForm:require('../surgery-consent-form.js')};vm.runInNewContext(fs.readFileSync('clinic-support.js','utf8'),{window});const api=window.ClinicSupport;
 test('patient and hospital prompts are separate and contain no automatic operational promises',()=>{
  const text=api.consentPatientMethod('공통 진료 설명',{kind:'other',patientChecks:['환자별 처방 계획','병원 운영 · 응급·야간 연락','병원 운영 · 입원 경과 안내']});
  assert.match(text,/이번 환자에서 확인한 내용\n환자별 처방 계획/);assert.match(text,/이번 진료에 적용할 병원 운영 안내\n병원 운영/);assert.doesNotMatch(text,/24시간|항상|자동 승인/);assert.ok(api.consentHasPlaceholder(text));
