@@ -197,6 +197,7 @@
    if(!locked())apply();s.pending=true;form.inert=true;paint();
    try{const ok=await a.save();if(live()&&!ok)showError(a.error?.()||'저장하지 못했습니다. 입력을 확인한 뒤 다시 시도해주세요.');}catch(e){if(live())showError('저장 실패 · 입력 유지 · '+(e.message||'다시 시도해주세요.'));}finally{s.pending=false;if(live()){form.inert=false;paint();}}
   };
+  if(s.picked?.entryDate){const visit=document.createElement('p');visit.textContent='작성 진료일 · '+s.picked.entryDate;form.prepend(visit);}
   paintPrior();paint();void loadPrior(false,resumePrior);void loadDental();root.recordStart={state:s,update(next){a=next;paint();},busy:()=>!!s.pending,back};return root.recordStart;
  }
  const api={mount,values,patient,priorSections,syncPrior,dentalAbsences};if(typeof module==='object'&&module.exports)module.exports=api;else g.ClinicRecordStart=api;

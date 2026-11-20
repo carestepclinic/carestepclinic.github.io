@@ -135,7 +135,7 @@
     const management=root.closest('.cl-anesthesia-page')?.querySelector('.cl-surgery-management');if(management)review.append(management);
     const note=sheet.querySelector('.ar-direct-status');if(note)note.hidden=true;
    }
-   const print=sheet.querySelector('.ar-print-menu'),controls=sheet.querySelector('.cs-anesthesia-commandbar');if(print&&controls)controls.append(print);
+   const print=sheet.querySelector('.ar-print-menu'),controls=sheet.querySelector('.cs-anesthesia-commandbar');if(print&&controls)controls.append(print);const teamButton=root.closest('.cl-anesthesia-page')?.querySelector('[data-cl-action=care-team]');if(teamButton&&controls)controls.append(teamButton);
   }
   const reminder=query('[data-ar-reminder]');if(reminder)timing.after(reminder);
   if(a.onePage&&reminder){const fold=sheet.querySelector('.cs-pending-disclosure'),alerts=document.createElement('div');alerts.className='cs-anesthesia-alerts';reminder.before(alerts);alerts.append(reminder);if(fold)alerts.append(fold);}

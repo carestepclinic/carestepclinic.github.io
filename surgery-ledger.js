@@ -303,7 +303,7 @@ function mount(root,a){
  async function newRecord(date=today()){await prefs();doc={status:'active',body:{record:{date}},revision:0};dirty=false;edit();root.querySelector('[data-patient-q]')?.focus();}
  async function save(destination='edit'){
   if(!editable()||doc.status==='deleted')return;const f=root.querySelector('[data-record]');if(!f.reportValidity())return;
-  const isNew=!doc.id;doc=(await post(base+(doc.id?'/'+doc.id:''),{record:normalizeRecord(read()),revision:doc.revision})).document;dirty=false;listDirty=true;if(isNew||pendingSaved===doc.id)pendingSaved=doc.id;
+  const isNew=!doc.id,origin=doc.connectionContext;doc=(await post(base+(doc.id?'/'+doc.id:''),{record:normalizeRecord(read()),revision:doc.revision})).document;if(isNew)await g.ClinicConnections?.created('ledger',doc.id,doc.body.record.patientId,origin);dirty=false;listDirty=true;if(isNew||pendingSaved===doc.id)pendingSaved=doc.id;
   edit();
   try{if(destination==='list')await returnList();else if(destination==='new')await newRecord(currentRecord().date);}
   catch(e){message('저장은 완료되었습니다. '+(destination==='new'?'새 기록을 준비하지 못했습니다. 목록에서 새 수술 기록을 눌러주세요.':'목록을 불러오지 못했습니다. 목록으로 버튼을 다시 눌러주세요.')+' '+e.message,true);return;}
@@ -485,7 +485,7 @@ function mount(root,a){
  const unload=e=>{if(dirty||busy){e.preventDefault();e.returnValue='';}};g.addEventListener('beforeunload',unload);
  return {
   connectionContext:()=>page==='edit'&&doc?.id?{kind:'ledger',id:doc.id,patientId:currentRecord().patientId,dirty:dirty||busy}:null,
-  async fromConnection(c,id){if(busy)return false;if(dirty&&!g.confirm('작성 중인 수술대장 입력을 버리고 연결 기록을 열까요?'))return false;await prefs();if(id){const r=await request(base+'/'+encodeURIComponent(id));doc=r.document;if(doc.body.record?.patientId!==c.patient.id)throw Error('같은 환자의 수술대장을 선택해주세요.');dirty=false;}else{doc={status:'active',revision:0,body:{record:g.ClinicConnections.ledgerDraft(c)}};dirty=true;}edit();message(id?'연결 기록을 열었습니다.':'원본 내용을 확인하고 저장해주세요.');return true;},
+  async fromConnection(c,id){if(busy)return false;if(dirty&&!g.confirm('작성 중인 수술대장 입력을 버리고 연결 기록을 열까요?'))return false;await prefs();if(id){const r=await request(base+'/'+encodeURIComponent(id));doc=r.document;if(doc.body.record?.patientId!==c.patient.id)throw Error('같은 환자의 수술대장을 선택해주세요.');dirty=false;}else{doc={status:'active',revision:0,connectionContext:c,body:{record:g.ClinicConnections.ledgerDraft(c)}};dirty=true;}edit();message(id?'연결 기록을 열었습니다.':'원본 내용을 확인하고 저장해주세요.');return true;},
   async open(){if(!alive()||dirty||busy||page==='compare'||page==='import'||page==='import-complete')return;if(!root.childNodes.length)shell('<p>수술대장을 불러오는 중입니다.</p>'+btn('refresh','다시 조회'));await run(()=>load());},
   leave(){return !busy;},
   dispose(){disposed=true;sequence++;g.removeEventListener('beforeunload',unload);preview=null;sourceDraft=null;listPosition=null;pendingSaved=null;importResult=null;items=[];doc=null;root.replaceChildren();}
