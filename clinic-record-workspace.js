@@ -64,7 +64,8 @@
   }
   async function choose(target){
    if(!names[target]||!a.allowed(target)||target===a.route())return;const c=a.context();if(!c?.recordId){a.navigate(target);return;}
-   const route=a.route(),k=a.adapter.identity(),n=++epoch,d=a.modal(c.patient.name+' · '+names[target]+' 기록','<p data-cs-find role="status">이 환자의 기록을 찾는 중…</p><div data-cs-results></div><button type="button" data-cs-all>전체 '+names[target]+' 기록으로 이동</button><small class="cs-route-hint">전체 기록으로 이동하면 이전에 열었던 다른 환자가 표시될 수 있습니다.</small>');
+   const route=a.route(),k=a.adapter.identity(),n=++epoch,d=a.modal(c.patient.name+' · '+names[target]+' 기록','<p data-cs-find role="status">이 환자의 기록을 찾는 중…</p><div data-cs-results></div><button type="button" data-cs-all>전체 '+names[target]+' 기록으로 이동</button><button type="button" data-cs-new>이 환자로 새 기록 시작</button><small class="cs-route-hint">전체 기록으로 이동하면 이전에 열었던 다른 환자가 표시될 수 있습니다.</small>');
+   const create=d.querySelector('[data-cs-new]');create.hidden=a.adapter.access?.(target,'edit')?.allowed===false||!a.adapter.can('records.edit');create.onclick=()=>{if(!valid(n,k,route))return;if(c.state==='editing'||c.state==='saving'){create.textContent='현재 기록을 먼저 저장해주세요';return;}if(a.close())g.ClinicConnections?.startFrom({kind:route,id:c.recordId,patientId:c.patientId||c.patient?.id},target);};
    d.querySelector('[data-cs-all]').onclick=()=>{if(valid(n,k,route)&&a.close()){epoch++;a.navigate(target);}};
    const live=()=>valid(n,k,route)&&d.isConnected&&d.open;
    let rows=[],cursor='',seen=new Set();
