@@ -112,7 +112,7 @@
    out.querySelector('[data-dental-retry]')?.addEventListener('click',()=>loadDental(true));
   }
   async function loadDental(force=false){
-   const pid=s.mode==='registered'?s.picked?.id:'';if(a.kind!=='dental')return;
+   const pid=(s.mode==='registered'?s.picked?.id:'')||'';if(a.kind!=='dental')return;
    if(!force&&dental.patientId===pid)return;const seq=++dentalSeq;dental={patientId:pid,busy:!!pid,rows:[],chosen:new Set(),error:''};apply();paintDental();paint();if(!pid)return;
    const species=s.values.species,asOf=a.date?.()||new Date(Date.now()+32400000).toISOString().slice(0,10),valid=()=>live()&&seq===dentalSeq&&s.mode==='registered'&&s.picked?.id===pid;
    try{
@@ -131,7 +131,7 @@
    }catch(e){if(valid()){dental.error=e.message||'치아 이력 조회 실패';dental.rows=[];dental.chosen.clear();apply();}}finally{if(valid()){dental.busy=false;paintDental();paint();}}
   }
   async function loadPrior(more=false,force=false){
-   const pid=s.mode==='registered'?s.picked?.id:'';
+   const pid=(s.mode==='registered'?s.picked?.id:'')||'';
    if(!pid){++priorSeq;++priorDetailSeq;prior=freshPrior('');void loadDental();paintPrior();return;}
    if(!force&&!more&&prior.patientId===pid)return;
    if(more&&(prior.busy||!prior.cursor))return;
@@ -163,12 +163,12 @@
   function apply(){a.apply(copy(s.values),s.mode==='registered'?s.picked:null,s.options||[],linkedPrior());}
   function paint(){
    lockPrior();
-   const registered=s.mode==='registered';page.querySelector('[data-start-search]').hidden=!registered;let hint=page.querySelector('[data-start-mode-hint]');if(!hint){hint=document.createElement('p');hint.dataset.startModeHint='';hint.className='cs-start-mode-hint';page.querySelector('.cs-start-modes').after(hint);}hint.textContent=registered?'기존 환자를 선택하면 이전 기록을 연결할 수 있습니다.':'기존 기록 연결 없이 작성합니다.';
+   const registered=s.mode==='registered',selected=!!s.picked?.id;page.querySelector('[data-start-search]').hidden=!registered;form.hidden=registered&&!selected;priorBox.hidden=!registered||!selected;let hint=page.querySelector('[data-start-mode-hint]');if(!hint){hint=document.createElement('p');hint.dataset.startModeHint='';hint.className='cs-start-mode-hint';page.querySelector('.cs-start-modes').after(hint);}hint.textContent=registered?'환자를 검색해 선택하면 기본정보와 이전 기록이 표시됩니다.':'기존 기록 연결 없이 작성합니다.';hint.hidden=registered&&selected;
    page.querySelectorAll('[data-start-mode]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.startMode===s.mode));b.disabled=locked()||!!a.identityLocked;});
    for(const k of fields){const el=form.querySelector('[data-start-field="'+k+'"]');if(document.activeElement!==el)el.value=s.values[k]??'';el.disabled=locked()||!a.canEdit()||(registered&&['name','chartNumber','species','guardianName'].includes(k))||(!!a.identityLocked&&['name','chartNumber','species','guardianName'].includes(k));}
    form.querySelectorAll('[data-start-option]').forEach(el=>el.disabled=locked()||!a.canEdit());
-   page.querySelector('[data-start-picked]').textContent=s.picked?'선택: '+s.picked.name+' · '+(s.picked.chartNumber||s.picked.externalPatientId||'차트번호 미입력')+' · 보호자 '+(s.picked.guardianName||'미입력'):'검색 결과에서 환자를 선택해주세요.';
-   const button=page.querySelector('[data-start-submit]');button.disabled=!!s.pending||!a.canEdit()||(a.kind==='dental'&&dental.busy);button.textContent=s.pending?'저장 중…':locked()?'저장 재시도':'기본정보 저장·기록 작성';
+   page.querySelector('[data-start-picked]').hidden=!registered||!selected;page.querySelector('[data-start-picked]').textContent=s.picked?'선택: '+s.picked.name+' · '+(s.picked.chartNumber||s.picked.externalPatientId||'차트번호 미입력')+' · 보호자 '+(s.picked.guardianName||'미입력'):'검색 결과에서 환자를 선택해주세요.';
+   const button=page.querySelector('[data-start-submit]');button.disabled=!!s.pending||!a.canEdit()||(registered&&!selected)||(a.kind==='dental'&&dental.busy);button.textContent=s.pending?'저장 중…':locked()?'저장 재시도':'기본정보 저장·기록 작성';
    page.querySelector('[data-start-back]').disabled=!!s.pending;
    page.querySelector('[data-start-search-form]').inert=locked()||!!a.identityLocked;
    status.textContent=s.pending?'기본정보 저장 중…':locked()?'저장 확인 필요 · 입력 유지':s.touched?'작성 중 · 저장 전':'작성 준비 · 저장 전';
