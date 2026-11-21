@@ -2152,3 +2152,33 @@
  .clinic-calm #appView .topbar.clinic-patient-header>.topbar-actions{grid-column:1;grid-row:2}
  .clinic-calm #appView .topbar.clinic-patient-header>.clinic-patient-header-tools{grid-column:1;grid-row:3;justify-content:flex-start;flex-wrap:wrap;min-width:0}
 }
+
+/* Practical readability and compact guidance across Clinic. */
+@media screen {
+ .clinic-calm #appView .clinic-navigation .clinic-nav-group>summary{gap:6px;padding-inline:8px;white-space:nowrap;font-size:14px}
+ .clinic-calm #appView .clinic-navigation .clinic-nav-group>summary::after{flex-shrink:0}
+ .clinic-calm #appView .clinic-navigation .nav-group-attention{padding-inline:4px}
+ .clinic-calm #library :is(.purpose-badge,.species-badge,.category,.library-filter-label span,.library-result-meta){font-size:12px;line-height:1.5}
+ .clinic-calm #library :is(.library-filter-label span,.library-result-meta){color:var(--cs-muted)}
+ .clinic-calm #followup :is(.followup-guide-step>span:not(.guide-num),.guide-summary-box>span,.followup-guide-status){font-size:12px;line-height:1.5}
+ .clinic-calm #followup .guide-callout{font-size:12px;line-height:1.6}
+ .clinic-calm #followup #clinicReadNotice{display:inline-block;flex:0 1 auto;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;margin:0!important;font-size:12px;color:var(--cs-muted)}
+ .clinic-calm #followup .followup-guide-mode-tabs{align-items:center;flex-wrap:wrap;gap:8px}
+ .clinic-calm #followup #followupGuideBack{min-width:72px;white-space:nowrap}
+ .clinic-calm #followup #followupGuideNext{white-space:nowrap}
+ .clinic-calm #patientCrmList .patient-crm-error{padding:24px 16px;border-style:solid;text-align:center}
+ .clinic-calm #patientCrmList .patient-crm-error>div{display:flex;align-items:center;flex-direction:column;gap:10px}
+ .clinic-calm #patientCrmList .patient-crm-error :is(span,small){margin:0;font-size:13px;line-height:1.6;color:var(--cs-muted)}
+ .clinic-calm #practiceRoot .su-resource-empty{padding:32px 20px;border:1px solid var(--cs-line);border-radius:10px;background:var(--cs-paper);text-align:center}
+ .clinic-calm #practiceRoot .su-resource-empty h3{font-size:18px;margin:0 0 8px}
+ .clinic-calm #practiceRoot .su-resource-empty p{font-size:14px;line-height:1.6;color:var(--cs-muted);margin:0 0 16px}
+}
+@media screen and (max-width:760px){
+ .clinic-calm #followup .followup-guide-nav{display:flex;flex-wrap:nowrap;align-items:flex-end;gap:10px}
+ .clinic-calm #followup .followup-guide-nav-left{flex:0 0 72px;min-width:72px}
+ .clinic-calm #followup .followup-guide-nav-right{flex:1 1 auto;min-width:0;justify-content:flex-end}
+ .clinic-calm #followup .followup-guide-status{display:none}
+ .clinic-calm #followup #followupGuideSkip{flex-basis:100%;white-space:normal;word-break:keep-all}
+ .clinic-calm #followup :is(#followupGuideBack,#followupGuideNext){min-height:44px;font-size:13px;padding:10px 12px}
+ .clinic-calm #followup #followupGuideNext{flex:1 1 100%;min-width:0}
+}
