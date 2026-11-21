@@ -17,7 +17,7 @@ async function carestepConsentSources({force=false}={}){
  const scope=carestepConsentScope();
  if(carestepConsentCatalog?.scope!==scope)carestepConsentCatalog=null;
  let entry=carestepConsentCatalog;
- if(force||!entry||(!entry.pending&&Date.now()-entry.at>=60000)){
+ if(force||!entry||(!entry.pending&&Date.now()-entry.at>=300000)){
   entry={scope,at:0,pending:null,value:null};carestepConsentCatalog=entry;
   entry.pending=(async()=>{try{const r=await saasRequest('/saas/practice/consent-explanations');if(scope!==carestepConsentScope())throw Error('병원 또는 계정이 변경되었습니다. 다시 찾아주세요.');entry.value={items:(r.items||[]).filter(x=>x.status==='published'&&x.sourceCurrent!==false&&!x.exclusion?.active).map(x=>({...x,sourceKind:'prepared'})),warnings:[]};entry.at=Date.now();return entry.value;}catch(e){if(carestepConsentCatalog===entry)carestepConsentCatalog=null;throw e;}finally{entry.pending=null;}})();
  }
@@ -25,6 +25,7 @@ async function carestepConsentSources({force=false}={}){
  if(scope!==carestepConsentScope()||!saasPermission('materials.read',true))throw Error('병원 또는 계정이 변경되었습니다. 다시 찾아주세요.');
  return structuredClone(value);
 }
+function carestepPreloadConsentSources(){void carestepConsentSources().catch(()=>{});}
 async function carestepConsentSourceDocument(source){
  if(!saasPermission('materials.read',true)||source.sourceKind!=='prepared')throw Error('승인된 동의서 설명을 선택해주세요.');
  const scope=carestepConsentScope(),r=await saasRequest('/saas/practice/consent-explanations/'+encodeURIComponent(source.id));
@@ -39,7 +40,7 @@ window.CarestepPractice=PracticeTools.mount(document.getElementById('practiceRoo
  ready:()=>saasMode==='auth'&&!!saasMe,
  identity:()=>[saasMe?.clinic?.id,saasMe?.user?.id,saasSessionMeta?.id,JSON.stringify(saasMe?.permissions||{}),saasMe?.role].join(':'),
  preferencesIdentity:()=>[saasMe?.clinic?.id,saasMe?.user?.id].join(':'),
- consentEducation:carestepConsentEducation,consentSources:carestepConsentSources,consentSourceDocument:carestepConsentSourceDocument,
+ preloadConsentSources:carestepPreloadConsentSources,consentEducation:carestepConsentEducation,consentSources:carestepConsentSources,consentSourceDocument:carestepConsentSourceDocument,
  can:key=>saasPermission(key,true),clinicalManage:()=>saasPermission('records.edit',true),medical:()=>saasPermission('clinical.approve',false),access:(tab,action)=>window.ClinicSettings?.access(tab,action)||{allowed:true},education:async id=>{go('training');await window.CarestepTraining.open();if(id)await window.CarestepTraining.openVersion(id);},materials:p=>{const current=window.crmMaterialContext?.();if(p?.id&&current?.patientId!==p.id){go('patients');toast('퇴원 자료를 작성할 환자를 선택해주세요: '+p.name);return;}go('library');},navigation:()=>window.ClinicNavigation?.changed(),navigate:(view,options)=>{if(view==='sop'){go('training',{trainingSection:'sop'});}else go(view,options);},clinicName:()=>saasMe?.clinic?.name||'우리 병원',
  patient:()=>{const x=window.crmMaterialContext?.();return x?.patientId?{id:x.patientId,name:x.patient?.name||'',guardianName:x.guardian?.name||'',species:x.patient?.species||''}:null;}
 });
