@@ -1,0 +1,52 @@
+/* Demo uses the Clinic palette and keeps production panes inaccessible. */
+body.clinic-demo-active #appView .main>.view,
+body.clinic-demo-active #screenHelpBar,
+body.clinic-demo-active #caseContextBar,
+body.clinic-demo-active .care-global-search,
+body.clinic-demo-active .care-notification-wrap,
+body.clinic-demo-active .cs-nav-favorites,
+body.clinic-demo-active .nav-group-attention,
+body.clinic-demo-active #navFollowupBadge,
+body.clinic-demo-active #onboardingNavBadge,
+body.clinic-demo-active .cs-account-details,
+body.clinic-demo-active #globalNewCase,
+body.clinic-demo-active #globalCaseBadge {display:none!important}
+#clinicDemoRoot {font-size:14px;line-height:1.6;color:#143c49;min-width:0}
+#clinicDemoRoot [hidden] {display:none!important}
+#clinicDemoRoot .cd-banner {display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;border:1px solid #b4d7d2;border-radius:12px;background:#edf6f4;margin:12px 0}
+#clinicDemoRoot .cd-banner b {display:block;font-size:16px;color:#126f68}
+#clinicDemoRoot .cd-banner span,.cd-note {color:#506973;font-size:13px}
+#clinicDemoRoot .cd-note {margin:8px 0}
+#clinicDemoRoot .cd-status {color:#126f68;margin:8px 0;min-height:0}
+#clinicDemoRoot .cd-status:empty {display:none}
+#clinicDemoRoot .cd-heading {margin:24px 0 14px}
+#clinicDemoRoot .cd-heading h3 {font-size:20px;margin:0 0 6px;line-height:1.4}
+#clinicDemoRoot .cd-heading p {margin:0;color:#506973}
+#clinicDemoRoot .cd-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px}
+#clinicDemoRoot .cd-card {background:#fff;border:1px solid #d3e0df;border-radius:12px;padding:20px;min-width:0;margin:0 0 12px}
+#clinicDemoRoot .cd-card h4 {font-size:16px;margin:0 0 8px}
+#clinicDemoRoot .cd-card p {margin:6px 0 16px;color:#506973}
+#clinicDemoRoot .cd-actions,#clinicDemoRoot .cd-steps {display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#clinicDemoRoot .cd-steps {padding:14px 0;margin-bottom:14px}
+#clinicDemoRoot .cd-steps span {padding:10px 16px;border-radius:8px;background:#edf6f4}
+#clinicDemoRoot .cd-body button,#clinicDemoRoot .cd-banner button,.cd-dialog button {font:inherit;font-weight:600;line-height:1.4;min-height:40px;border:1px solid #c7d9d7;border-radius:8px;background:white;color:#126f68;padding:9px 14px;cursor:pointer}
+#clinicDemoRoot button:focus-visible,#clinicDemoRoot input:focus-visible,#clinicDemoRoot textarea:focus-visible,.cd-dialog button:focus-visible {outline:3px solid #80bcb5;outline-offset:2px}
+#clinicDemoRoot .cd-body button:hover,#clinicDemoRoot .cd-banner button:hover {background:#edf6f4}
+#clinicDemoRoot .cd-body .cd-primary {background:#147a73;color:white}
+#clinicDemoRoot .cd-form label,#clinicDemoRoot .cd-search {display:flex;flex-direction:column;gap:6px;font-weight:600;margin-bottom:14px;min-width:0}
+#clinicDemoRoot .cd-form input,#clinicDemoRoot .cd-form textarea,#clinicDemoRoot .cd-search input {font:inherit;line-height:1.5;padding:10px;border:1px solid #bdcfcd;border-radius:7px;color:#143c49;width:100%;box-sizing:border-box;background:white}
+#clinicDemoRoot .cd-form textarea {resize:vertical}
+#clinicDemoRoot .cd-check {display:flex;align-items:center;gap:12px;min-height:48px;border-bottom:1px solid #edf2f2}
+#clinicDemoRoot .cd-check:last-child {border:0}
+#clinicDemoRoot .cd-check input {width:18px;height:18px;accent-color:#147a73;flex-shrink:0}
+#clinicDemoRoot .cd-table-wrap {overflow:auto;margin:18px 0}
+#clinicDemoRoot .cd-table-wrap table {width:100%;border-collapse:collapse;background:white;text-align:left}
+#clinicDemoRoot th,#clinicDemoRoot td {padding:12px;border-bottom:1px solid #d3e0df}
+#clinicDemoRoot caption {text-align:left;font-weight:700;margin-bottom:8px}
+#clinicDemoRoot .cd-guide {padding-left:42px}
+#clinicDemoRoot .cd-guide li {padding:10px 0}
+#clinicDemoRoot [data-demo-healthcheck] {margin-top:16px}
+.cd-dialog {max-width:640px;width:calc(100% - 32px);max-height:85vh;overflow:auto;padding:24px;border:1px solid #c7d9d7;border-radius:12px;color:#143c49;font:14px/1.7 Arial,sans-serif;box-sizing:border-box}
+.cd-dialog::backdrop {background:#173b4966}
+.cd-dialog p {white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:640px){#clinicDemoRoot .cd-banner{align-items:stretch;flex-direction:column;padding:14px}#clinicDemoRoot .cd-card{padding:16px}#clinicDemoRoot .cd-heading h3{font-size:18px}#clinicDemoRoot .cd-actions button{flex:1 1 auto}#clinicDemoRoot .cd-steps button{width:100%}}

@@ -4001,6 +4001,7 @@ function saasAuthHeaders(extra={}){
   return {...extra,'Authorization':'Bearer '+saasToken,'Accept':'application/json'};
 }
 async function saasRawRequest(path,opt={}){
+  if(saasMode==='demo')throw new Error('체험에서는 실제 병원 서버에 연결하지 않습니다.');
   saasCheckPermissionRequest(path,opt);
   const base=saasEndpoint();if(!base)throw new Error('Worker API URL을 입력해주세요.');
   const headers={...(opt.headers||{})};
@@ -4141,11 +4142,12 @@ async function saasBootstrapRun(){
 }
 function saasCancelRestoreAndLogin(){saasToken='';saasMe=null;persistSaasSessionToken('');try{sessionStorage.removeItem(SAAS_LAST_VIEW_SESSION_KEY);}catch{}showLogin();saasSetAuthStatus('로그인 화면으로 전환했습니다.','');}
 async function saasLogout(){
+  if(window.ClinicDemo?.active()){window.ClinicDemo.exit();return;}
   if(saasMode==='auth'&&saasToken){try{await saasRequest('/saas/logout',{method:'POST'});}catch{}}
   saasToken='';saasMe=null;saasSessionMeta=null;saasSessions=[];saasDiagnostics=[];billingOverviewState=null;billingRedirectHandled=false;legalStatusState=null;legalDocsState=null;configBackupsState=[];clinicDeletionState=null;saasMode='auth';googleCalendarToken={connected:false,expiresAt:0};googleCalendarTokenClient=null;microsoftCalendarApp=null;microsoftCalendarAccount=null;calendarIntegrationConfig={googleClientId:'',microsoftClientId:'',microsoftTenant:'common',updatedAt:''};centralStudioItems=[];centralContentMeta={loaded:false,count:0,updatedAt:'',error:''};categoryOverrides={};syncPublishedStudioItems();applyCategoryOverrides();persistSaasSessionToken('');try{sessionStorage.removeItem(SAAS_LAST_VIEW_SESSION_KEY);}catch{}showLogin();saasSetAuthStatus('로그아웃되었습니다.','ok');
 }
-function saasEnterDemo(){window.ClinicReliability?.clearPrivate();
-  saasMode='demo';saasMe=null;saasSessionMeta=null;saasSessions=[];saasDiagnostics=[];billingOverviewState=null;billingRedirectHandled=false;legalStatusState=null;configBackupsState=[];clinicDeletionState=null;googleCalendarToken={connected:false,expiresAt:0};googleCalendarTokenClient=null;microsoftCalendarApp=null;microsoftCalendarAccount=null;calendarIntegrationConfig={googleClientId:'',microsoftClientId:'',microsoftTenant:'common',updatedAt:''};centralStudioItems=[];centralContentMeta={loaded:false,count:0,updatedAt:'',error:''};categoryOverrides={};syncPublishedStudioItems();applyCategoryOverrides();showApp();applySaasPermissions();renderSaasAccount();toast('체험 화면로 입장했습니다.');
+function saasEnterDemo(){if(!window.ClinicDemo){toast('체험 화면을 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.');return;}window.ClinicReliability?.clearPrivate();
+  saasMode='demo';saasMe=null;saasSessionMeta=null;saasSessions=[];saasDiagnostics=[];billingOverviewState=null;billingRedirectHandled=false;legalStatusState=null;configBackupsState=[];clinicDeletionState=null;googleCalendarToken={connected:false,expiresAt:0};googleCalendarTokenClient=null;microsoftCalendarApp=null;microsoftCalendarAccount=null;calendarIntegrationConfig={googleClientId:'',microsoftClientId:'',microsoftTenant:'common',updatedAt:''};centralStudioItems=[];centralContentMeta={loaded:false,count:0,updatedAt:'',error:''};categoryOverrides={};syncPublishedStudioItems();applyCategoryOverrides();window.ClinicDemo.start({exit(){saasMode='auth';showLogin();saasSetAuthStatus('체험을 종료했습니다. 로그인하거나 새 병원을 등록하세요.','');}});
 }
 function saasEntitlements(){return saasMe?.entitlements||null;}
 function saasHasFeature(feature){if(saasMode==='demo'||!saasMe)return true;const e=saasEntitlements();return !e?.accessBlocked&&e?.plan?.features?.[feature]!==false;}
@@ -5845,11 +5847,12 @@ function escapeHtml(v=''){ return String(v).replace(/[&<>'"]/g, s => ({'&':'&amp
 function fillHospitalText(v=''){ return String(v).replaceAll('{{병원명}}', hospitalName()); }
 
 function showApp({deferFullRender=false}={}){
+  if(saasMode!=='demo')window.ClinicDemo?.stop();
   carestepSafeCall('show_app_views',()=>{$('loginView')?.classList.add('hidden');$('sessionRestoreView')?.classList.add('hidden');$('appView')?.classList.remove('hidden');});
   if(!deferFullRender)renderAll();carestepSafeCall('permissions',()=>applySaasPermissions());carestepSafeCall('account_render',()=>renderSaasAccount());carestepSafeCall('history_init',()=>carestepInitHistory(carestepActiveView()));
   setTimeout(()=>{try{refreshDailyWorkflowIndicators(false);}catch(e){console.error('[CARESTEP RECOVERY] daily_indicators',e);}},0);
 }
-function showLogin(){globalThis.resourceClinicUI?.clear();resetClinicalLoad();window.CarestepTodayWard?.clear();window.CarestepTodayPurchases?.clear();document.getElementById('practiceTodayRoot')?.replaceChildren();window.CarestepPractice?.clear();globalThis.CarestepTraining?.clear();window.ClinicReliability?.clearPrivate();r19GoogleStatusScope=''; clearFollowupScopedDetails();carestepResetHistoryForLogin(); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
+function showLogin(){window.ClinicDemo?.stop();globalThis.resourceClinicUI?.clear();resetClinicalLoad();window.CarestepTodayWard?.clear();window.CarestepTodayPurchases?.clear();document.getElementById('practiceTodayRoot')?.replaceChildren();window.CarestepPractice?.clear();globalThis.CarestepTraining?.clear();window.ClinicReliability?.clearPrivate();r19GoogleStatusScope=''; clearFollowupScopedDetails();carestepResetHistoryForLogin(); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
 
 /* v9.0.2 HOTFIX 25 · IN-APP BROWSER BACK NAVIGATION
    CARESTEP behaves like a single-page app, so browser Back should move through CARESTEP views
@@ -5915,6 +5918,7 @@ function syncSidebarNavGroup(view){window.ClinicNavigation?.sync(view);}
 function announceClinicView(view,title){let live=$('clinicViewAnnouncement');if(!live){live=document.createElement('p');live.id='clinicViewAnnouncement';live.className='care-sr-only';live.setAttribute('role','status');live.setAttribute('aria-live','polite');document.body.append(live);}live.textContent=title+' 화면으로 이동했습니다.';const heading=$('viewTitle'),origin=document.activeElement;if(heading){heading.setAttribute('tabindex','-1');requestAnimationFrame(()=>{if(document.querySelector('.view.active-view')?.id!==view||document.querySelector('dialog[open]')||(document.activeElement!==origin&&document.activeElement!==document.body))return;heading.focus({preventScroll:true});});}document.querySelectorAll('.nav-item').forEach(n=>{if(n.dataset.view===view)n.setAttribute('aria-current','page');else n.removeAttribute('aria-current');});}
 
 function go(view,options={}){
+  if(window.ClinicDemo?.active())return window.ClinicDemo.show(view,options);
   const previousView=document.querySelector('.view.active-view')?.id;
   if(previousView!==view){if(previousView==='practice'&&window.CarestepPractice?.leave?.(()=>go(view,options))===false)return false;if(previousView==='training'&&window.CarestepTraining?.leave?.()===false)return false;}
   if(options.practiceTab&&view==='practice'&&window.CarestepPractice?.prepareTab(options.practiceTab,()=>go(view,options))===false)return false;
@@ -11094,11 +11098,13 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="carestep-privacy.js?v=20261116-review"></script>
 <script src="clinic-update-notice.js?v=20261117-stable-updates"></script>
 <script>
-window.CarestepClinicalRights={ai:()=>!!saasMe&&clinicPermissionKeys(saasMe.permissions,saasMe.role).includes('clinical.ai'),approve:()=>!!saasMe&&clinicPermissionKeys(saasMe.permissions,saasMe.role).includes('clinical.approve')};
+window.CarestepClinicalRights={ai:()=>!!saasMe&&clinicPermissionKeys(saasMe.permissions,saasMe.role).includes('clinical.ai'),approve:()=>window.ClinicDemo?.active()||!!saasMe&&clinicPermissionKeys(saasMe.permissions,saasMe.role).includes('clinical.approve')};
 globalThis.carestepBillingPlan=()=>billingOverviewState?.accountVerified?saasMe?.entitlements?.plan:null;
 window.resourceClinicUI=CarestepResources.mountClinic(document.getElementById('clinicResourceUsage'),(p,o)=>saasRequest(p,o),()=>({scope:saasMode==='auth'&&saasMe?clinicReadScope():'',canManage:!!saasMe&&clinicPermissionKeys(saasMe.permissions,saasMe.role).includes('billing.manage')}),()=>{renderBillingContractComparison();updateBillingPlanPrice();});
 (()=>{const box=document.getElementById('clinicResourceUsage'),pane=box.closest('[data-account-pane]');let shown=false;new MutationObserver(()=>{const next=pane.classList.contains('active');if(next&&!shown)resourceClinicUI.load();shown=next;}).observe(pane,{attributes:true,attributeFilter:['class']});})();
 </script>
 <script src="navigation-attention.js?v=20261117-menu-access"></script>
+<link rel="stylesheet" href="clinic-demo.css?v=20261121-demo">
+<script src="clinic-demo.js?v=20261121-demo"></script>
 </body>
 </html>
