@@ -88,3 +88,27 @@ body.clinic-demo-active .sidebar .cd-mode-badge {display:block;font-size:10px;fo
  #clinicDemoRoot .cd-preview table {font-size:12px}
  #clinicDemoRoot .cd-preview td,#clinicDemoRoot .cd-preview th {padding:9px}
 }
+
+#clinicDemoRoot [data-demo-ai-entry] {display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0}
+#clinicDemoRoot [data-demo-ai-entry] button {font:inherit;font-size:12px;min-height:36px;border:1px solid #c7d9d7;border-radius:8px;background:#fff;color:#126f68;padding:7px 10px;cursor:pointer}
+#clinicDemoRoot [data-demo-ai-entry] small {font-size:11px;color:#506973}
+#clinicDemoRoot .cd-body button:disabled {opacity:.5;cursor:not-allowed}
+#clinicDemoRoot .cd-ai-steps {display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:12px 0}
+#clinicDemoRoot .cd-ai-steps li {padding:7px 12px;border-radius:7px;background:#edf2f3;font-size:13px}
+#clinicDemoRoot .cd-ai-steps [aria-current] {background:#147a73;color:white;font-weight:700}
+#clinicDemoRoot .cd-ai-row {border:1px solid #d3e0df;border-radius:8px;padding:12px}
+#clinicDemoRoot .cd-ai-compare {border-top:1px solid #d3e0df;margin:14px 0;padding-top:10px}
+#clinicDemoRoot .cd-ai-compare .cd-grid>div {padding:12px;background:#f4f8f7;border-radius:8px}
+#clinicDemoRoot .cd-tour-away {padding:10px 12px}
+@media(max-width:640px){
+ #clinicDemoRoot [data-demo-tour] {padding:10px 12px;margin:8px 0}
+ #clinicDemoRoot .cd-tour-head strong {font-size:13px}
+ #clinicDemoRoot .cd-tour-steps {display:flex;gap:6px;justify-content:space-between;margin:8px 0}
+ #clinicDemoRoot .cd-tour-steps li {font-size:10px;gap:3px;flex-direction:column}
+ #clinicDemoRoot .cd-tour-steps span {width:18px;height:18px}
+ #clinicDemoRoot [data-demo-tour] p {font-size:12px;margin:6px 0}
+ #clinicDemoRoot [data-demo-tour] button {min-height:34px;font-size:12px;padding:6px 8px}
+ #clinicDemoRoot .cd-tour-away .cd-tour-head {flex-wrap:wrap}
+ #clinicDemoRoot [data-demo-ai-entry] {gap:6px;margin:6px 0}
+ #clinicDemoRoot .cd-ai-steps {display:grid;grid-template-columns:1fr 1fr}
+}
