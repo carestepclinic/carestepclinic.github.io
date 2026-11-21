@@ -484,3 +484,9 @@
 .su .su-consent-template-access select{width:100%;min-width:0;margin-bottom:0}
 .su .su-consent-template-access>button{flex:none;white-space:nowrap;margin:0;min-height:38px}
 .su #su-consent-template-manager{scroll-margin-top:110px}
+
+/* Missing entries are indicated at their input, not in a separate top list. */
+.su [data-consent-form] .su-input-pending{background:#fff8e8;border-color:#ae7a26;box-shadow:inset 3px 0 0 #ae7a26}
+.su [data-consent-form] .su-input-pending:focus{outline:2px solid #197c78;outline-offset:2px}
+.su .su-input-pending-note{display:block;font-size:12px;line-height:1.4;color:#79531b;margin:3px 0 0;font-weight:500}
+@media print{.su .su-input-pending-note{display:none}.su [data-consent-form] .su-input-pending{background:white;box-shadow:none}}
