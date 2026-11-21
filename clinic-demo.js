@@ -86,7 +86,7 @@
   if(!g.HealthcheckRecord){body.innerHTML='<p role="status">건강검진 화면을 불러오는 중입니다…</p>';await g.ClinicLazyModules.ensure('healthcheck');}
   if(!active||epoch!==token||navigation!==nav||!['healthcheck','healthcheck-example'].includes(route))return;
   initHealthcheck();body.hidden=true;hcHost.hidden=false;
-  if(!hc){const scope=epoch;hc=g.HealthcheckRecord.mount(hcHost,{ready:()=>active&&epoch===scope,identity:()=>String(epoch),can:()=>true,hospital:()=>hospital,request:(p,o)=>{if(!active||epoch!==scope)throw Error('체험 자료가 초기화되었습니다.');return request(p,o);}});}
+  if(!hc){const scope=epoch;hc=g.HealthcheckRecord.mount(hcHost,{demo:true,ready:()=>active&&epoch===scope,identity:()=>String(epoch),can:()=>true,hospital:()=>hospital,request:(p,o)=>{if(!active||epoch!==scope)throw Error('체험 자료가 초기화되었습니다.');return request(p,o);}});}
   if(patientId)await hc.fromPatient(copy(store.patients.find(x=>x.id===patientId)||store.patients[0]));else if(example)await hc.openRecord('demo-hc-0');else hc.open();
  }
  function syncNav(key){

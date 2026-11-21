@@ -50,3 +50,5 @@ body.clinic-demo-active #globalCaseBadge {display:none!important}
 .cd-dialog::backdrop {background:#173b4966}
 .cd-dialog p {white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:640px){#clinicDemoRoot .cd-banner{align-items:stretch;flex-direction:column;padding:14px}#clinicDemoRoot .cd-card{padding:16px}#clinicDemoRoot .cd-heading h3{font-size:18px}#clinicDemoRoot .cd-actions button{flex:1 1 auto}#clinicDemoRoot .cd-steps button{width:100%}}
+
+#clinicDemoRoot .hc-ai-tools,#clinicDemoRoot .hc-linked-tools,#clinicDemoRoot [data-action="import"] {display:none!important}
