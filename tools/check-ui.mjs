@@ -20,7 +20,7 @@ export const uiFiles = new Set([
  'clinic-purchases.js','clinic-purchases.css',
  'clinic-calm.css','clinic-record-workspace.js','clinic-record-start.js','clinic-record-start.css','clinic-inpatients.js',
  'builder-flow.js','builder-flow.css',
- 'clinic-lazy-modules.js','hospital-operations.css',
+ 'clinic-read-deadline.js','clinic-lazy-modules.js','hospital-operations.css',
  'clinic-followup-tasks.js','clinic-followup-tasks.css',
  'clinic-settings.js','clinic-settings.css','clinic-capabilities.js',
  'clinical-assist.js','clinical-assist.css',

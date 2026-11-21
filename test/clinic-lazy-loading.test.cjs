@@ -12,9 +12,43 @@ async function fixture(t,width=1440){
  });t.after(async()=>{assert.deepEqual(errors,[]);await p.close();});return {p,requests};
 }
 async function goTab(p,key){await p.evaluate(key=>go('practice',{practiceTab:key}),key);}
+for(const width of [390,1440])test('support modules load on demand and scaling stays in surgery through save and reload '+width,async t=>{
+ const {p,requests}=await fixture(t,width);
+ for(const file of ['clinic-support.js','surgery-ledger.js','clinic-purchases.js','surgery-consent-form.js','consent-pagination.js'])assert.ok(!requests.includes('/'+file));
+ await p.evaluate(()=>{
+  window.syntheticConsents=[];
+  const source={id:'synthetic-source',variantId:'v1',kind:'other',disease:'치석·치은염·치주질환',title:'스케일링 시술 전 설명',procedure:'스케일링',species:'both',status:'published',sourceCurrent:true};
+  const original=saasRequest;saasRequest=async(path,opt={})=>{
+   if(path==='/saas/practice/consent-explanations')return {items:[source]};
+   if(path==='/saas/practice/consent-explanations/synthetic-source')return {document:{...source,revision:2,reviewedBy:'합성 검토자',variants:[{id:'v1',kind:'other',title:source.title,procedure:source.procedure,fields:{diagnosis:{text:'합성 치주 소견'},necessity:{text:'합성 시술 필요성'},method:{text:'합성 스케일링 시술 설명'},risks:{text:'합성 시술 위험'},precautions:{text:'합성 시술 후 관리'}},patientChecks:['실제 시술 범위']}]}};
+   if(path.endsWith('/consents/preferences'))return {doctors:[],templates:[],revision:1,canManage:true};
+   if(path.includes('/support/consents')){
+    if(opt.method==='POST'){const body=JSON.parse(opt.body).body,document={id:'synthetic-draft',status:'draft',revision:1,body};syntheticConsents=[document];return {document};}
+    if(path.includes('/consents?'))return {items:syntheticConsents.map(x=>({...x,patientName:x.body.patientName,title:x.body.title})),next:''};
+    return {document:structuredClone(syntheticConsents[0])};
+   }
+   return original(path,opt);
+  };
+ });
+ await goTab(p,'consents');await p.locator('[data-act=new]').click();
+ await p.locator('[name=patientName]').fill('합성 환자');await p.locator('[name=species]').fill('개');
+ await p.evaluate(()=>{for(const [key,value] of [['risks','직접 작성한 환자별 주의사항'],['cost','보존할 비용']]){const e=document.querySelector('[name='+key+']');e.value=value;e.dispatchEvent(new Event('input',{bubbles:true}));}});
+ const anesthesia=await p.locator('[name=generalAnesthesia]').isChecked();
+ await p.locator('[data-surgery-loader] > button').click();await p.locator('[data-consent-auto-query]').fill('스케일링');await p.locator('[data-act=auto-consent-fill]').click();await p.locator('[data-consent-auto-choice]').first().click();
+ assert.equal(await p.locator('[data-consent-dialog][open]').count(),0);assert.equal(await p.locator('[name=kind]').inputValue(),'surgery');
+ await p.locator('[data-act=apply-consent-replacement]').click();
+ assert.equal(await p.locator('[name=risks]').inputValue(),'직접 작성한 환자별 주의사항');assert.equal(await p.locator('[name=cost]').inputValue(),'보존할 비용');assert.equal(await p.locator('[name=generalAnesthesia]').isChecked(),anesthesia);
+ assert.match(await p.locator('[name=method]').inputValue(),/합성 스케일링 시술 설명/);
+ await p.locator('[data-act=save-consent-draft]').click();await p.waitForFunction(()=>syntheticConsents.length===1);
+ await p.locator('[data-act=back]').click();await p.locator('[data-consent=synthetic-draft]').click();assert.equal(await p.locator('[name=kind]').inputValue(),'surgery');assert.equal(await p.locator('[name=risks]').inputValue(),'직접 작성한 환자별 주의사항');assert.match(await p.locator('[name=method]').inputValue(),/합성 스케일링/);
+ // A slow common-content refresh must not replace this editor or its current values.
+ await p.evaluate(async()=>{const old=saasRequest;saasRequest=async(path,opt)=>path==='/saas/content/published'?{documents:[],syncToken:'synthetic'}:old(path,opt);saasHasFeature=()=>true;await saasLoadCentralContent(true);});
+ assert.equal(await p.locator('[name=cost]').inputValue(),'보존할 비용');
+ await p.locator('[data-act=back]').click();await goTab(p,'ledger');await p.waitForFunction(()=>window.SurgeryLedger&&document.querySelector('[data-body]')?.textContent.includes('수술'));await goTab(p,'purchases');await p.waitForFunction(()=>window.ClinicPurchases);await goTab(p,'consents');await p.locator('[data-act=new]').waitFor();assert.equal(requests.filter(x=>x==='/clinic-support.js').length,1);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+});
 for(const width of [390,1440])test('healthcheck integrated menu, lazy loading and retained draft '+width,async t=>{
  const {p,requests}=await fixture(t,width);await goTab(p,'healthcheck');await p.locator('[data-action=new]').waitFor();
- await p.locator('[data-action=new]').click();await p.locator('[data-start-field=name]').fill('가상 검진 환자');
+ await p.locator('[data-action=new]').click();await p.locator('[data-start-mode=quick]').click();await p.locator('[data-start-field=name]').fill('가상 검진 환자');
  await goTab(p,'dental');await p.locator('[data-dn=new]').waitFor();await goTab(p,'healthcheck');
  assert.equal(await p.locator('[data-start-field=name]').inputValue(),'가상 검진 환자');
  assert.equal(requests.filter(x=>x==='/healthcheck-record.js').length,1);

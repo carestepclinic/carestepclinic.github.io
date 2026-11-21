@@ -1111,7 +1111,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="practice-tools.css?v=20261101-intake-compact">
 <link rel="stylesheet" href="clinic-today-purchases.css?v=20261117-inline-times">
 <link rel="stylesheet" href="clinic-navigation.css?v=20261117-today-supplies">
-<link rel="stylesheet" href="clinic-settings.css?v=20261108-permissions-wide"><script src="clinic-capabilities.js?v=20261116-resources"></script>
+<link rel="stylesheet" href="clinic-settings.css?v=20261108-permissions-wide"><script src="clinic-read-deadline.js?v=20261121-loading"></script><script src="clinic-capabilities.js?v=20261116-resources"></script>
 <style id="clinic-onboarding-start">
 #onboarding{font-size:14px;line-height:1.6}
 #onboarding :is(button,input,select){font:inherit}
@@ -3604,7 +3604,7 @@ async function loadCategoryOverrides(silent=true){
     if(operatorUnlocked){const base=saasEndpoint();const r=await fetch(base+'/hq/category-overrides',{headers:{'X-CARESTEP-HQ-KEY':operatorHqKey(),'Accept':'application/json'},cache:'no-store'});d=await r.json();if(!r.ok||d.ok===false)throw new Error(d.error||`HTTP ${r.status}`);}
     else if(saasMode==='auth'&&saasToken){d=await saasRequest('/saas/content/category-overrides',{method:'GET'});}
     else{categoryOverrides={};applyCategoryOverrides();return;}
-    categoryOverrides=Object.fromEntries((d.overrides||[]).map(x=>[x.contentId,x.category]));applyCategoryOverrides();renderLibrary();renderQuick();renderSelect();renderAdmin();if(operatorUnlocked)renderCategoryManager();
+    categoryOverrides=Object.fromEntries((d.overrides||[]).map(x=>[x.contentId,x.category]));applyCategoryOverrides();refreshCentralContentViews(true);if(operatorUnlocked)renderCategoryManager();
   }catch(e){if(!silent)toast(e.message||'분류 설정을 불러오지 못했습니다.');}
 }
 function renderCategoryManager(){
@@ -4007,8 +4007,10 @@ async function saasRawRequest(path,opt={}){
   const headers={...(opt.headers||{})};
   if(opt.auth!==false&&saasToken)headers['Authorization']='Bearer '+saasToken;
   if(opt.body&&!headers['Content-Type'])headers['Content-Type']='application/json';
-  const r=await fetch(base+path,{...opt,headers,cache:'no-store'});
-  let d={};try{d=await r.json()}catch{}
+  const {readTimeoutMs=30000,...requestOptions}=opt;
+  const perform=async signal=>{const r=await fetch(base+path,{...requestOptions,signal,headers,cache:'no-store'});let d={};try{d=await r.json()}catch(e){if(signal?.aborted)throw signal.reason||e;}return {r,d};};
+  const read=['GET','HEAD'].includes((opt.method||'GET').toUpperCase());
+  const {r,d}=read&&globalThis.ClinicReadDeadline?await ClinicReadDeadline.run(perform,{signal:opt.signal,timeoutMs:readTimeoutMs}):await perform(opt.signal);
   if(d.details?.code==='CLINIC_PERMISSION_DENIED'&&path!=='/saas/me')void saasRefreshPermissions(true);
   if(!r.ok||d.ok===false)throw Object.assign(new Error(d.error||`HTTP ${r.status}`),{status:r.status,details:d.details||null});
   return d;
@@ -5936,6 +5938,7 @@ function go(view,options={}){
   $('viewTitle').textContent=titles[view]||'';
   announceClinicView(view,titles[view]||'');
   renderScreenHelp(view);
+  refreshCentralContentViews();
   if(view==='dashboard'){void window.carestepPracticeToday?.();setTimeout(()=>refreshClinicActionCenter(false),0);}
   if(view==='patients'&&typeof window.crmOpen==='function')setTimeout(()=>window.crmOpen(),0);
   if(view==='training')window.CarestepTraining?.open();
@@ -8587,20 +8590,36 @@ function renderStudioCloudStatus(){
   studioHydrateCentralKey();
   renderStudioPublishMode();
 }
+// Refresh only catalogue surfaces; never rehydrate a form after a background response.
+function refreshCentralContentViews(changed=false){
+  const pending=refreshCentralContentViews.pending||(refreshCentralContentViews.pending=new Set());
+  if(changed)for(const view of ['dashboard','library','builder','admin','contentStudio'])pending.add(view);
+  const view=carestepActiveView();if(!pending.has(view))return;
+  if(view==='dashboard')renderQuick();
+  else if(view==='library')renderLibrary();
+  else if(view==='builder')renderSelect();
+  else if(view==='admin')renderAdmin();
+  else if(view==='contentStudio')renderStudio();
+  pending.delete(view);
+}
 async function saasLoadCentralContent(silent=false){
   if(saasMode==='auth'&&!saasHasFeature('centralContent')){centralStudioItems=[];centralContentMeta={loaded:false,count:0,updatedAt:'',syncToken:'',error:saasFeatureMessage('centralContent')};syncPublishedStudioItems();renderStudioCloudStatus();return null;}
   if(saasMode!=='auth'||!saasToken){centralStudioItems=[];centralContentMeta={loaded:false,count:0,updatedAt:'',syncToken:'',error:''};syncPublishedStudioItems();renderStudioCloudStatus();return null;}
+  const identity=clinicReadScope(),current=()=>saasMode==='auth'&&identity===clinicReadScope();
   let lastError=null;
   for(let attempt=1;attempt<=3;attempt++){
+    if(!current())return null;
     try{
       const d=await saasRequest('/saas/content/published',{method:'GET'});
+      if(!current())return null;
       centralStudioItems=(Array.isArray(d.documents)?d.documents:[]).filter(x=>x?.workflowStatus==='published'&&x?.vetReviewed).map(x=>({...x,_central:true}));
       centralContentMeta={loaded:true,count:centralStudioItems.length,updatedAt:d.updatedAt||'',syncToken:d.syncToken||'',error:''};
-      syncPublishedStudioItems();renderAll();applySaasPermissions();renderStudioCloudStatus();
+      syncPublishedStudioItems();refreshCentralContentViews(true);renderStudioCloudStatus();
       if(!silent)toast(`공통 공개 자료 ${centralStudioItems.length}개를 새로고침했습니다.`);
       return d;
-    }catch(e){lastError=e;if(attempt<3)await new Promise(r=>setTimeout(r,attempt===1?300:800));}
+    }catch(e){lastError=e;if(e.code==='READ_TIMEOUT'||e.name==='AbortError')break;if(attempt<3)await new Promise(r=>setTimeout(r,attempt===1?300:800));}
   }
+  if(!current())return null;
   centralContentMeta={...centralContentMeta,loaded:false,error:lastError?.message||'중앙 콘텐츠 불러오기 실패'};renderStudioCloudStatus();saasLogClientError('content_sync',String(lastError?.status||''),centralContentMeta.error);if(!silent)toast(centralContentMeta.error);return null;
 }
 async function studioPushCentralDocs(documents,{silent=false}={}){
@@ -11070,22 +11089,22 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinical-assist.js?v=20261103-clinical-assist"></script>
 
 
-<script id="clinic-module-manifest" type="application/json">{"dental":["dental-record.js?v=20261115-portrait-print","dental-workflow.js?v=20261120-connections-refined"],"neuro":["neuro-record.js?v=20261120-connections-refined"],"ophthalmic":["ophthalmic-record.js?v=20261120-connections-refined"],"chronic":["ophthalmic-record.js?v=20261120-connections-refined","chronic-choices.js?v=20261112-record-choices-2","chronic-record.js?v=20261120-connections-refined"],"calc":["practice-acid-base.js?v=20261026tb1","practice-calcium-transfusion.js?v=20261031-calc-cleanup-2","practice-emergency.js?v=20261031-calc-cleanup-2","practice-potassium-mix.js?v=20261031-calc-cleanup-2","practice-cri-presets.js?v=20261031-calc-clarity-1","practice-nutrition-foods.js?v=20261031-prunus","practice-nutrition.js?v=20261031-food1","practice-calculator-workspace.js?v=20261031-calc-cleanup-2","practice-calcium-guided.js?v=20261026ca1","practice-fluid-plan.js?v=20261031-calc-cleanup-2"],"healthcheck":["healthcheck-record.js?v=20261121-demo-flow"]}</script>
-<script src="clinic-lazy-modules.js?v=20261105-flow"></script>
+<script id="clinic-module-manifest" type="application/json">{"dental":["dental-record.js?v=20261115-portrait-print","dental-workflow.js?v=20261120-connections-refined"],"neuro":["neuro-record.js?v=20261120-connections-refined"],"ophthalmic":["ophthalmic-record.js?v=20261120-connections-refined"],"chronic":["ophthalmic-record.js?v=20261120-connections-refined","chronic-choices.js?v=20261112-record-choices-2","chronic-record.js?v=20261120-connections-refined"],"calc":["practice-acid-base.js?v=20261026tb1","practice-calcium-transfusion.js?v=20261031-calc-cleanup-2","practice-emergency.js?v=20261031-calc-cleanup-2","practice-potassium-mix.js?v=20261031-calc-cleanup-2","practice-cri-presets.js?v=20261031-calc-clarity-1","practice-nutrition-foods.js?v=20261031-prunus","practice-nutrition.js?v=20261031-food1","practice-calculator-workspace.js?v=20261031-calc-cleanup-2","practice-calcium-guided.js?v=20261026ca1","practice-fluid-plan.js?v=20261031-calc-cleanup-2"],"healthcheck":["healthcheck-record.js?v=20261121-demo-flow"],"consents":["consent-pagination.js?v=20261121-loading-consent","surgery-consent-form.js?v=20261121-loading-consent","clinic-support.js?v=20261121-loading-consent"],"bookings":["consent-pagination.js?v=20261121-loading-consent","surgery-consent-form.js?v=20261121-loading-consent","clinic-support.js?v=20261121-loading-consent"],"ledger":["surgery-ledger.js?v=20261120-chart-identity"],"purchases":["clinic-purchases.js?v=20261117-today-supplies"]}</script>
+<script src="clinic-lazy-modules.js?v=20261121-loading"></script>
 <script src="clinic-inpatients.js?v=20261106-workflow9"></script>
 <script src="clinic-record-start.js?v=20261120-ux-state-actions"></script>
 <link rel="stylesheet" href="clinic-connections.css?v=20261120-interoperability">
 <script src="record-handoff.js?v=20261120-ux-clarity"></script>
 <script src="clinic-connections.js?v=20261120-connections-refined"></script>
 <script src="clinic-record-workspace.js?v=20261120-ux-clarity"></script>
-<script src="clinic-purchases.js?v=20261117-today-supplies"></script>
+
 <link rel="stylesheet" href="clinic-support.css?v=20261121-consent-input-signature">
 <link rel="stylesheet" href="surgery-ledger.css?v=20261119-flow">
-<script src="surgery-ledger.js?v=20261120-chart-identity"></script>
-<script src="consent-pagination.js?v=20261121-consent-input-signature"></script>
-<script src="surgery-consent-form.js?v=20261121-consent-input-signature"></script>
-<script src="clinic-support.js?v=20261121-consent-input-signature"></script>
-<script src="practice-tools.js?v=20261118-consent-refine"></script>
+
+
+
+
+<script src="practice-tools.js?v=20261121-loading"></script>
 <script src="clinic-today-ward.js?v=20261117-inline-times"></script>
 <script src="clinic-today-purchases.js?v=20261117-inline-times"></script>
 <script src="practice-clinic.js?v=20261120-consent-linkage"></script>

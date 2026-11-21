@@ -45,7 +45,7 @@
    const requestedTab=tab;
    if(g.ClinicLazyModules?.needs(tab)){
     const notice=root.querySelector('[data-notice]');notice.textContent='화면을 불러오는 중…';notice.setAttribute('role','status');const placeholder=root.querySelector('[data-body]');if(placeholder&&!placeholder.textContent.trim())placeholder.innerHTML='<div class="cs-module-loading cs-record-placeholder" aria-hidden="true"><span></span><span></span><span></span></div>';
-    try{await g.ClinicLazyModules.ensure(tab);}catch(error){if(moduleTicket!==moduleOpenSequence||!current(key)||tab!==requestedTab)return;root.querySelector('.cs-module-loading')?.remove();notice.textContent='화면을 불러오지 못했습니다. ';const retry=document.createElement('button');retry.textContent='다시 시도';retry.onclick=()=>open();notice.append(retry);return;}
+    try{await g.ClinicLazyModules.ensure(tab);}catch(error){if(moduleTicket!==moduleOpenSequence||!current(key)||tab!==requestedTab)return;root.querySelector('.cs-module-loading')?.remove();notice.textContent=(error.message||'화면을 불러오지 못했습니다.')+' ';const retry=document.createElement('button');retry.textContent='다시 시도';retry.onclick=()=>open();notice.append(retry);return;}
     if(moduleTicket!==moduleOpenSequence||!current(key)||tab!==requestedTab)return;
     notice.textContent='';root.querySelector('.cs-module-loading')?.remove();
    }
