@@ -52,3 +52,39 @@ body.clinic-demo-active #globalCaseBadge {display:none!important}
 @media(max-width:640px){#clinicDemoRoot .cd-banner{align-items:stretch;flex-direction:column;padding:14px}#clinicDemoRoot .cd-card{padding:16px}#clinicDemoRoot .cd-heading h3{font-size:18px}#clinicDemoRoot .cd-actions button{flex:1 1 auto}#clinicDemoRoot .cd-steps button{width:100%}}
 
 #clinicDemoRoot .hc-ai-tools,#clinicDemoRoot .hc-linked-tools,#clinicDemoRoot [data-action="import"] {display:none!important}
+
+/* Availability is visible before opening a menu; mobile keeps only one compact bar. */
+body.clinic-demo-active .sidebar .cd-mode-badge {display:block;font-size:10px;font-weight:500;line-height:1.4;color:#50716e;margin-top:3px;white-space:nowrap}
+#clinicDemoRoot .cd-banner {display:block;padding:12px 16px}
+#clinicDemoRoot .cd-banner-summary {display:flex;align-items:center;justify-content:space-between;gap:10px}
+#clinicDemoRoot .cd-banner-summary b {font-size:14px}
+#clinicDemoRoot .cd-banner-summary span {font-size:11px}
+#clinicDemoRoot .cd-banner-summary button {font-size:12px;flex-shrink:0;padding:8px;min-height:36px}
+#clinicDemoRoot #cdDemoDetails {border-top:1px solid #c9dedb;margin-top:10px;padding-top:10px}
+#clinicDemoRoot #cdDemoDetails p {margin:0 0 10px;color:#506973;font-size:12px}
+#clinicDemoRoot [data-demo-scope] {display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;margin:12px 0;color:#506973}
+#clinicDemoRoot .cd-kind {background:#e6f2ef;color:#126f68;border-radius:5px;padding:3px 7px;font-weight:700;flex-shrink:0}
+#clinicDemoRoot .cd-patient-context {font-weight:600;color:#143c49}
+#clinicDemoRoot .cd-preview {border:1px solid #d3e0df;border-radius:12px;background:#fff;padding:16px;margin-bottom:16px}
+#clinicDemoRoot .cd-preview h4 {margin:0 0 6px;font-size:15px}
+#clinicDemoRoot .cd-preview p {font-size:12px;color:#506973;margin:0}
+#clinicDemoRoot .cd-preview th {background:#edf6f4;white-space:nowrap}
+#clinicDemoRoot .cd-preview td {min-width:70px;word-break:keep-all}
+#clinicDemoRoot [data-demo-tour] {background:#fff;border:1px solid #94c4bd;border-radius:12px;padding:14px 16px;margin:14px 0}
+#clinicDemoRoot .cd-tour-head {display:flex;align-items:center;justify-content:space-between;gap:8px}
+#clinicDemoRoot [data-demo-tour] button {font:inherit;font-size:13px;min-height:36px;border:1px solid #c7d9d7;border-radius:7px;color:#126f68;background:#fff;padding:7px 10px;cursor:pointer}
+#clinicDemoRoot [data-demo-tour] .cd-primary {background:#147a73;color:#fff}
+#clinicDemoRoot .cd-tour-steps {list-style:none;display:flex;gap:12px;padding:0;margin:12px 0}
+#clinicDemoRoot .cd-tour-steps li {display:flex;align-items:center;gap:5px;font-size:12px;color:#627680}
+#clinicDemoRoot .cd-tour-steps span {display:inline-flex;align-items:center;justify-content:center;border-radius:50%;width:22px;height:22px;background:#edf2f3}
+#clinicDemoRoot .cd-tour-steps .current {color:#126f68;font-weight:700}
+#clinicDemoRoot .cd-tour-steps .current span,#clinicDemoRoot .cd-tour-steps .done span {background:#147a73;color:#fff}
+#clinicDemoRoot [data-demo-tour] p {font-size:13px;margin:10px 0}
+@media(max-width:640px){
+ #clinicDemoRoot .cd-banner {padding:10px 12px;margin:8px 0}
+ #clinicDemoRoot [data-demo-scope] {font-size:11px;gap:6px;margin:8px 0}
+ #clinicDemoRoot .cd-tour-steps {gap:6px;display:grid;grid-template-columns:1fr 1fr}
+ #clinicDemoRoot .cd-preview {padding:12px}
+ #clinicDemoRoot .cd-preview table {font-size:12px}
+ #clinicDemoRoot .cd-preview td,#clinicDemoRoot .cd-preview th {padding:9px}
+}

@@ -11070,7 +11070,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinical-assist.js?v=20261103-clinical-assist"></script>
 
 
-<script id="clinic-module-manifest" type="application/json">{"dental":["dental-record.js?v=20261115-portrait-print","dental-workflow.js?v=20261120-connections-refined"],"neuro":["neuro-record.js?v=20261120-connections-refined"],"ophthalmic":["ophthalmic-record.js?v=20261120-connections-refined"],"chronic":["ophthalmic-record.js?v=20261120-connections-refined","chronic-choices.js?v=20261112-record-choices-2","chronic-record.js?v=20261120-connections-refined"],"calc":["practice-acid-base.js?v=20261026tb1","practice-calcium-transfusion.js?v=20261031-calc-cleanup-2","practice-emergency.js?v=20261031-calc-cleanup-2","practice-potassium-mix.js?v=20261031-calc-cleanup-2","practice-cri-presets.js?v=20261031-calc-clarity-1","practice-nutrition-foods.js?v=20261031-prunus","practice-nutrition.js?v=20261031-food1","practice-calculator-workspace.js?v=20261031-calc-cleanup-2","practice-calcium-guided.js?v=20261026ca1","practice-fluid-plan.js?v=20261031-calc-cleanup-2"],"healthcheck":["healthcheck-record.js?v=20261121-demo"]}</script>
+<script id="clinic-module-manifest" type="application/json">{"dental":["dental-record.js?v=20261115-portrait-print","dental-workflow.js?v=20261120-connections-refined"],"neuro":["neuro-record.js?v=20261120-connections-refined"],"ophthalmic":["ophthalmic-record.js?v=20261120-connections-refined"],"chronic":["ophthalmic-record.js?v=20261120-connections-refined","chronic-choices.js?v=20261112-record-choices-2","chronic-record.js?v=20261120-connections-refined"],"calc":["practice-acid-base.js?v=20261026tb1","practice-calcium-transfusion.js?v=20261031-calc-cleanup-2","practice-emergency.js?v=20261031-calc-cleanup-2","practice-potassium-mix.js?v=20261031-calc-cleanup-2","practice-cri-presets.js?v=20261031-calc-clarity-1","practice-nutrition-foods.js?v=20261031-prunus","practice-nutrition.js?v=20261031-food1","practice-calculator-workspace.js?v=20261031-calc-cleanup-2","practice-calcium-guided.js?v=20261026ca1","practice-fluid-plan.js?v=20261031-calc-cleanup-2"],"healthcheck":["healthcheck-record.js?v=20261121-demo-flow"]}</script>
 <script src="clinic-lazy-modules.js?v=20261105-flow"></script>
 <script src="clinic-inpatients.js?v=20261106-workflow9"></script>
 <script src="clinic-record-start.js?v=20261120-ux-state-actions"></script>
@@ -11104,7 +11104,7 @@ window.resourceClinicUI=CarestepResources.mountClinic(document.getElementById('c
 (()=>{const box=document.getElementById('clinicResourceUsage'),pane=box.closest('[data-account-pane]');let shown=false;new MutationObserver(()=>{const next=pane.classList.contains('active');if(next&&!shown)resourceClinicUI.load();shown=next;}).observe(pane,{attributes:true,attributeFilter:['class']});})();
 </script>
 <script src="navigation-attention.js?v=20261117-menu-access"></script>
-<link rel="stylesheet" href="clinic-demo.css?v=20261121-demo">
-<script src="clinic-demo.js?v=20261121-demo"></script>
+<link rel="stylesheet" href="clinic-demo.css?v=20261121-demo-flow">
+<script src="clinic-demo.js?v=20261121-demo-flow"></script>
 </body>
 </html>
