@@ -53,6 +53,32 @@
  }
  // Short answers update the original full-text field; full-text editing remains available.
  // No answer, normal finding, or examination result is invented by this helper.
+ // Presentation only: keep original inputs and snapshot values in the form.
+ function identitySummary(form,b){
+  for(const [kind,eligible,keys,required] of [
+   ['patient',!!b.patientId,['patientName','species','sex','chartNumber','guardianName','relationship','guardianPhone','guardianAddress','patientNotes'],['patientName','sex','guardianName','relationship','guardianPhone','guardianAddress']],
+   ['hospital',!!b.hospitalName,['hospitalName','hospitalPhone','hospitalAddress'],['hospitalName']]
+  ]){const host=form.querySelector('[data-consent-'+kind+']');if(!host)continue;
+   let box=host.querySelector('[data-identity-summary]');if(!box){box=document.createElement('div');box.className='su-identity-summary';box.dataset.identitySummary=kind;box.innerHTML='<div data-identity-values></div><button type="button" data-identity-edit="'+kind+'">정보 수정</button>';host.querySelector('.su-grid').before(box);box.querySelector('button').onclick=()=>{host._identity.expanded=!host._identity.expanded;if(!host._identity.expanded)host._identity.visible=new Set();identitySummary(form,form._identityBody);};}
+   const token=kind==='patient'?b.patientId:'hospital',inputs=keys.map(k=>form.elements[k]).filter(Boolean);if(!host._identity||host._identity.token!==token){host._identity={token,expanded:false,visible:new Set(inputs.filter(n=>required.includes(n.name)&&!n.value.trim()).map(n=>n.name))};}
+   const state=host._identity;box.hidden=!eligible;host.open=true;
+   const names={patientName:'환자',species:'동물종',sex:'성별',chartNumber:'차트',guardianName:'보호자',relationship:'관계',guardianPhone:'연락처',guardianAddress:'주소',patientNotes:'특이사항',hospitalName:'병원',hospitalPhone:'전화',hospitalAddress:'주소'};
+   box.querySelector('[data-identity-values]').innerHTML=inputs.filter(n=>n.value.trim()&&!(kind==='patient'&&form.querySelector('[data-patient-selected]')&&['patientName','chartNumber','guardianName'].includes(n.name))).map(n=>'<span><b>'+names[n.name]+'</b> '+esc(n.value)+'</span>').join('');
+   for(const n of inputs){const label=n.closest('label');if(!label)continue;if(required.includes(n.name)&&!n.value.trim())state.visible.add(n.name);label.hidden=eligible&&!state.expanded&&!state.visible.has(n.name);}
+   const button=box.querySelector('button');button.textContent=state.expanded?'정보 접기':'정보 수정';button.setAttribute('aria-expanded',String(state.expanded));
+  }form._identityBody=b;
+ }
+ let pendingId=0;
+ function pendingFields(form,issues){
+  const found=[],seen=new Set();
+  for(const issue of issues){const canonical=issue.key==='generalAnesthesia'?form.querySelector('[data-anesthesia-plan]'):form.elements[issue.key],fields=[...form.querySelectorAll('[data-surgery-key="'+issue.key+'"]')].filter(n=>!n.parentElement.hidden);if(!fields.length&&canonical)fields.push(canonical);
+   let targets=[];for(const field of fields){const slots=field._slot?[...field._slot.box.querySelectorAll('[data-short-answer]')].filter(n=>!n.closest('label').hidden&&(!n.value.trim()||/\[입력\s*:/.test(n.value))):[];if(slots.length)targets.push(...slots);else if(!field.value.trim()||/\[입력\s*:/.test(field.value))targets.push(field);}
+   if(!targets.length)targets=[fields.find(n=>n.value.length===Math.max(...fields.map(n=>n.value.length)))||canonical||form.querySelector('[data-anesthesia-plan]')].filter(Boolean);
+   for(const target of targets){if(seen.has(target))continue;seen.add(target);if(!target.id)target.id='su-pending-'+(++pendingId);const section=target.closest('[data-surgery-section]'),part=target.dataset.shortPart||target.dataset.surgeryPart,sectionId=section?.dataset.surgerySection||(issue.key==='generalAnesthesia'?'2':'1');const wrap=target.closest('label'),caption=wrap?.querySelector(':scope > span'),shortLabel=[...(wrap?.childNodes||[])].filter(n=>n.nodeType===3).map(n=>n.textContent).join('').trim(),label=target.matches('[data-short-answer]')?(shortLabel||caption?.textContent||issue.label):issue.label;found.push({key:issue.key,target:target.id,section:sectionId,label,detail:issue.detail||'',part});}
+  }return found;
+ }
+ function pendingHTML(form,items){if(!items.length)return '<span>입력 완료 · 내용을 확인하고 서명을 받으세요.</span>';const groups=new Map();for(const x of items){if(!groups.has(x.section))groups.set(x.section,[]);groups.get(x.section).push(x);}return '<b>작성할 입력칸 '+items.length+'개</b><div class="su-pending-groups">'+[...groups].sort((a,b)=>Number(a[0])-Number(b[0])).map(([section,rows])=>{const title=form.querySelector('[data-surgery-section="'+section+'"] h3')?.textContent.replace(/^\d+\s*/, '').trim()||'환자·진료 정보';return '<section><b>'+esc(title)+' <span>'+rows.length+'</span></b><div>'+rows.map(x=>'<button type="button" data-consent-issue="'+esc(x.key)+'" data-consent-target="'+esc(x.target)+'">'+esc(x.label)+'</button>').join('')+'</div></section>';}).join('')+'</div>';}
+ function focusPending(form,id){const input=[...form.querySelectorAll('[id]')].find(n=>n.id===id);if(!input)return false;const host=input.closest('[data-consent-patient],[data-consent-hospital]');if(host?._identity)host._identity.visible.add(input.name);for(let p=input;p&&p!==form;p=p.parentElement){if(p.tagName==='DETAILS')p.open=true;if(p.tagName==='LABEL')p.hidden=false;}if(input.hidden){input.hidden=false;input._slot?.toggle.setAttribute('aria-expanded','true');}focusInput(input);return true;}
  function slotModel(b,key,part,raw){
   const model=g.ClinicSupport?.consentDraftModel(b,key),rows=model?.[part];
   const prefix=key==='method'&&part==='base'?(model?.nonePlan||''):'';if(Array.isArray(rows)&&prefix+g.ClinicSupport.consentDraftRender(rows)===raw&&rows.some(r=>r.token))return {rows,render:()=>prefix+g.ClinicSupport.consentDraftRender(rows)};
@@ -152,5 +178,5 @@
    (screen&&d.status==='draft'?'<section class="su-statutory-sign-slot" data-document-section="6"><h2>설명·동의 및 서명</h2><p>법정 서식과 별첨의 설명 내용을 확인한 뒤 서명해주세요.</p></section>':'')+'</article>';
  }
 
- g.SurgeryConsentForm={split,replace,mount,sync,focus,documentHTML,statutoryHTML,titles,profiles,enhanceSlots,slotModel,entryChoices,addChoices,choiceParts,choiceValue,focusInput,refreshLimits,careTimeLabel,anesthesiaLabel};if(typeof module==='object')module.exports=g.SurgeryConsentForm;
+ g.SurgeryConsentForm={identitySummary,pendingFields,pendingHTML,focusPending,split,replace,mount,sync,focus,documentHTML,statutoryHTML,titles,profiles,enhanceSlots,slotModel,entryChoices,addChoices,choiceParts,choiceValue,focusInput,refreshLimits,careTimeLabel,anesthesiaLabel};if(typeof module==='object')module.exports=g.SurgeryConsentForm;
 })(typeof window==='undefined'?globalThis:window);

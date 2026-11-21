@@ -2,14 +2,14 @@
 (function(g){'use strict';
  function paginate(doc,html,identity){
   const source=doc.createElement('div');source.innerHTML=html;const article=source.querySelector('.su-document'),units=[];
-  const visit=n=>{if(n.matches('.su-consent-audit,.su-source-footer'))return;
+  const visit=(n,context='')=>{if(n.matches('.su-consent-audit,.su-source-footer'))return;
    if(n.matches('.su-info')){const children=[...n.children];for(let i=0;i<children.length;i+=2){const row=n.cloneNode(false);row.append(children[i].cloneNode(true),children[i+1].cloneNode(true));row.dataset.infoLabel=children[i].textContent;units.push(row);}return;}
-   if(n.matches('.su-statutory-annex')){const first=units.length;for(const c of n.children)visit(c);if(units[first])units[first].dataset.pageStart='true';return;}
-   if(n.matches('.su-surgery-document-section,.su-clause,.su-statutory-annex-item,.su-statutory-clinical,.su-statutory-additional')){for(const c of n.children)visit(c);return;}
-   units.push(n.cloneNode(true));
+   if(n.matches('.su-statutory-annex')){const first=units.length;for(const c of n.children)visit(c,context);if(units[first])units[first].dataset.pageStart='true';return;}
+   if(n.matches('.su-surgery-document-section,.su-clause,.su-statutory-annex-item,.su-statutory-clinical,.su-statutory-additional')){const heading=n.querySelector(':scope > h2,:scope > h3,:scope > h4')?.textContent||context;for(const c of n.children)visit(c,heading);return;}
+   const unit=n.cloneNode(true);if(context)unit.dataset.continuation=context;units.push(unit);
   };for(const n of article.children)visit(n);
   const pages=[];let body,page;
-  const next=()=>{page=doc.createElement('section');page.className='su-a4-page';const header=doc.createElement('header');header.className='su-page-identity';header.textContent=identity;body=doc.createElement('article');body.className=article.className+' su-page-content';const footer=doc.createElement('footer');footer.className='su-page-number';page.append(header,body,footer);doc.body.append(page);pages.push(page);};
+  const next=(continued='')=>{page=doc.createElement('section');page.className='su-a4-page';const header=doc.createElement('header');header.className='su-page-identity';header.textContent=identity;body=doc.createElement('article');body.className=article.className+' su-page-content';const footer=doc.createElement('footer');footer.className='su-page-number';page.append(header,body,footer);doc.body.append(page);pages.push(page);if(continued){const heading=doc.createElement('h3');heading.className='su-continuation-heading';heading.dataset.continuationHeading='';heading.textContent=continued+' — 계속';body.append(heading);}};
   const fits=()=>body.scrollHeight<=body.clientHeight+1;
   const append=nodes=>nodes.forEach(n=>body.append(n));
   const remove=nodes=>nodes.forEach(n=>n.remove());
@@ -25,7 +25,7 @@
      while(lo<hi){const mid=Math.ceil((lo+hi)/2);target.textContent=chars.slice(offset,offset+mid).join('');if(fits())lo=mid;else hi=mid-1;}
      if(!lo)throw Error('페이지에 설명을 배치하지 못했습니다.');
      let end=lo;if(offset+lo<chars.length){const part=chars.slice(offset,offset+lo),cut=Math.max(part.lastIndexOf('\n'),part.lastIndexOf(' '));if(cut>lo*.7)end=cut+1;}
-     target.textContent=chars.slice(offset,offset+end).join('');offset+=end;continued=true;if(offset<chars.length)next();
+     target.textContent=chars.slice(offset,offset+end).join('');offset+=end;continued=true;if(offset<chars.length)next(table?'':unit.dataset.continuation);
     }
    }else throw Error('페이지에 정보를 배치하지 못했습니다.');
   }

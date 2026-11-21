@@ -447,3 +447,16 @@
 .su-paged-print .su-statutory-document>h3{font-size:10.5pt;margin:3mm 0 1.5mm}
 .su-paged-print .su-statutory-document>.su-info{margin:0}
 .su-paged-print .su-statutory-cover>.su-status{margin:0 0 2mm;font-size:8pt;color:#596b71}
+
+.su .su-identity-summary{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#eff6f4;border:1px solid #d4e3df;border-radius:8px;margin-bottom:12px}
+.su .su-identity-summary[hidden],.su [data-consent-patient] label[hidden],.su [data-consent-hospital] label[hidden]{display:none}
+.su [data-identity-values]{flex:1;display:flex;flex-wrap:wrap;gap:5px 18px;min-width:0;overflow-wrap:anywhere;white-space:pre-wrap}
+.su [data-identity-values] b{font-size:12px;color:#526b73;font-weight:500;margin-right:4px}
+.su [data-identity-edit]{flex-shrink:0;min-height:36px;padding:6px 10px}
+.su .su-pending-groups{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.su .su-pending-groups>section{flex:1 1 220px;border:1px solid #d4e3df;border-radius:8px;padding:10px;background:#fff;min-width:0}
+.su .su-pending-groups>section>b{display:block;font-size:12px;color:#526b73;margin-bottom:6px}
+.su .su-pending-groups>section>div{display:flex;gap:5px;flex-wrap:wrap}
+.su .su-pending-groups button{font-size:12px;padding:6px 8px;min-height:34px;white-space:normal;text-align:left}
+.su-paged-print .su-page-content>.su-continuation-heading{font-size:10.5pt;line-height:1.4;margin:0 0 3mm;padding-bottom:2mm;border-bottom:1px solid #dce3df;color:#526b73}
+@media(max-width:650px){.su .su-identity-summary{flex-wrap:wrap}.su [data-identity-values]{flex-basis:100%}.su .su-pending-groups>section{flex-basis:100%}}
