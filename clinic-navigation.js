@@ -1,7 +1,7 @@
 /* One navigation tree over the existing views. Routes contain no clinical data. */
 (function(g){
  'use strict';
- const practice={ledger:['진료 지원','수술대장'],consents:['진료 지원','동의서·서명'],bookings:['진료 지원','수술검사일정'],healthcheck:['진료 기록','건강검진 기록'],purchases:['병원 운영','물품 관리'],ops:['병원 운영','업무 체크리스트'],intake:['환자 관리','사전문진'],calc:['진료 지원','처방 계산'],ward:['진료 지원','입원 보드'],surgery:['진료 기록','마취 기록'],dental:['진료 기록','치과 기록'],neuro:['진료 기록','신경검사 기록'],chronic:['진료 기록','만성질환 기록'],ophthalmic:['진료 기록','안과 기록'],protocols:['진료 지원','진료 프로토콜']};
+ const practice={ledger:['진료 지원','수술대장'],consents:['진료 지원','진료 동의서'],bookings:['진료 지원','수술검사일정'],healthcheck:['진료 기록','건강검진 기록'],purchases:['병원 운영','물품 관리'],ops:['병원 운영','업무 체크리스트'],intake:['환자 관리','사전문진'],calc:['진료 지원','처방 계산'],ward:['진료 지원','입원 보드'],surgery:['진료 기록','마취 기록'],dental:['진료 기록','치과 기록'],neuro:['진료 기록','신경검사 기록'],chronic:['진료 기록','만성질환 기록'],ophthalmic:['진료 기록','안과 기록'],protocols:['진료 지원','진료 프로토콜']};
  const views={dashboard:['','오늘 진료'],patients:['환자 관리','환자 목록'],library:['보호자 관리','보호자 안내자료'],builder:['보호자 관리','안내자료 작성'],followup:['보호자 관리','상담·후속관리'],training:['병원 운영','직원 교육'],pilot:['병원 운영','운영 통계'],settings:['설정·계정','병원 설정'],onboarding:['도움말·문의','처음 사용 설정'],voice:['도움말·문의','문의·요청']};
  const account={my:'내 계정',team:'직원·권한',billing:'요금제·구독',security:'보안·데이터',legal:'이용약관·개인정보'};
  const nav=document.querySelector('.clinic-navigation');let signature='';

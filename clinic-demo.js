@@ -4,7 +4,7 @@
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const copy=v=>structuredClone(v),today=()=>new Date(Date.now()+32400000).toISOString().slice(0,10);
  const hospital={name:'CARESTEP 체험 동물병원 · 가상 자료',address:'체험용 주소 · 실제 병원 정보가 아닙니다',phone:'연락처 예시'};
- const titles={dashboard:'오늘 진료',patients:'환자 목록',healthcheck:'건강검진 기록',surgery:'마취 기록',consents:'동의서·서명',ward:'입원 보드',purchases:'물품 관리',ledger:'수술대장',bookings:'수술검사일정',training:'직원 교육',sop:'업무지침(SOP)',library:'보호자 안내자료',builder:'안내자료 작성',followup:'상담·후속관리',dental:'치과 기록',neuro:'신경검사 기록',ophthalmic:'안과 기록',chronic:'만성질환 기록',protocols:'진료 프로토콜',intake:'사전문진',ops:'업무 체크리스트',calc:'처방 계산',settings:'병원 설정',account:'설정·계정',onboarding:'처음 사용 설정',voice:'문의·요청',pilot:'운영 통계'};
+ const titles={dashboard:'오늘 진료',patients:'환자 목록',healthcheck:'건강검진 기록',surgery:'마취 기록',consents:'진료 동의서',ward:'입원 보드',purchases:'물품 관리',ledger:'수술대장',bookings:'수술검사일정',training:'직원 교육',sop:'업무지침(SOP)',library:'보호자 안내자료',builder:'안내자료 작성',followup:'상담·후속관리',dental:'치과 기록',neuro:'신경검사 기록',ophthalmic:'안과 기록',chronic:'만성질환 기록',protocols:'진료 프로토콜',intake:'사전문진',ops:'업무 체크리스트',calc:'처방 계산',settings:'병원 설정',account:'설정·계정',onboarding:'처음 사용 설정',voice:'문의·요청',pilot:'운영 통계'};
  let active=false,epoch=0,navigation=0,route='dashboard',root,body,status,hcHost,hc,store,config,navSnapshot=[],headerSnapshot=[];
  const button=(label,target,patient='')=>'<button type="button" data-demo-route="'+esc(target)+'"'+(patient?' data-demo-patient="'+esc(patient)+'"':'')+'>'+esc(label)+'</button>';
  function seed(){
