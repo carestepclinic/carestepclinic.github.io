@@ -476,3 +476,11 @@
 
 .su-consents .su-surgery-section>label:has(>.su-field-heading){display:flex;flex-direction:column;align-items:stretch;min-width:0}
 .su-consents .su-surgery-section>label>.su-field-heading{width:100%}
+
+/* Keep hospital template management next to its reusable-template picker. */
+.su [data-consent-template-picker]{max-width:680px}
+.su .su-consent-template-access{display:flex;align-items:flex-end;gap:8px;min-width:0}
+.su .su-consent-template-access>label{flex:1;min-width:0;margin:0}
+.su .su-consent-template-access select{width:100%;min-width:0;margin-bottom:0}
+.su .su-consent-template-access>button{flex:none;white-space:nowrap;margin:0;min-height:38px}
+.su #su-consent-template-manager{scroll-margin-top:110px}
