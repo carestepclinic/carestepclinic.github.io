@@ -99,6 +99,7 @@
  function anesthesiaLabel(b){const explicit=String(b.method||'').match(/선택한 마취 계획: (전신마취|진정|마취·진정 없음)/)?.[1];if(explicit==='마취·진정 없음'&&!b.generalAnesthesia)return '마취·진정 없이 진행';if(b.generalAnesthesia)return '전신마취';if(explicit==='진정')return '진정';return [b.method,b.risks,b.precautions].some(v=>/마취|진정/.test(v||''))?'저장된 진료 설명에 따름':'마취·진정 없이 진행';}
  function cleanText(text){return String(text||'').replace(/^선택한 마취 계획: 마취·진정 없음\n/,'');}
  function documentHTML(d,{screen=false,stamp=v=>v,svg=()=>'',sources='',legal=false}={}){
+  if(legal&&!screen)return statutoryHTML(d,{stamp,svg,sources});
   const b=d.body,cfg=profile(b),parts=Object.fromEntries(['method','risks','precautions'].map(k=>[k,split(b[k])])),value=v=>esc(v||'미기재');
   const clause=(label,text,key)=>'<div class="su-clause"'+(key?' data-clinical-field="'+key+'"':'')+'><h3>'+esc(label)+'</h3><p>'+value(cleanText(text))+'</p></div>';
   const info=entries=>'<dl class="su-info">'+entries.map(([k,v])=>'<dt>'+esc(k)+'</dt><dd>'+value(v)+'</dd>').join('')+'</dl>';
@@ -116,6 +117,40 @@
   section(6,'<div class="su-consent-acceptance"><p>'+esc(accepts)+'</p>'+(b.kind==='euthanasia'&&b.confirmations?.authorityConfirmed&&b.confirmations?.irreversibleConsented?'<p>소유자·위임 권한, 가능한 대안 및 회복 불가능성에 대한 설명·최종 동의 확인 완료</p>':'')+(screen&&d.status==='draft'?'':'<div class="su-signatures">'+signedSignature('doctor','설명 수의사 '+(b.doctorName||''))+signedSignature('guardian','소유자·관리자 '+(b.guardianName||''))+'</div>')+'<p>동의 일시: '+(d.signedAt?esc(stamp(d.signedAt)):!screen&&d.status==='draft'?'<span class="su-paper-date">________년 ____월 ____일 ____시 ____분</span>':d.status==='draft'?'서명 완료 시 기록':'서명 일시 미기재')+'</p></div>')+
   (screen?'<footer class="su-consent-audit">원본 확인값 '+value(d.hash||'저장 후 생성')+(d.retainUntil?'<br>최소 보존 기한 '+esc(stamp(d.retainUntil)):'')+'</footer><aside class="su-consent-audit">'+sources+'</aside>':'')+'</article>';
  }
- function statutoryHTML(d,options){return documentHTML(d,{...options,legal:true});}
+ const statutoryItems=[
+  '동물에게 발생하거나 발생 가능한 증상의 진단명',
+  '수술등중대진료의 필요성, 방법 및 내용',
+  '수술등중대진료에 따라 전형적으로 발생이 예상되는 후유증 또는 부작용',
+  '수술등중대진료 전후에 동물의 소유자 또는 관리자가 준수해야 할 사항'
+ ];
+ function statutoryHTML(d,{screen=false,stamp=v=>v,svg=()=>'',sources=''}={}){
+  if(screen)return documentHTML(d,{screen,stamp,svg,sources,legal:true});
+  const b=d.body,longIdentity=[],coverValue=(label,v)=>{if(String(v||'').length<=160&&String(v||'').split('\n').length<=3)return value(v);longIdentity.push([label,v]);return value(String(v).replace(/\s+/g,' ').slice(0,100))+' … (별첨 추가 정보 참조)';},signature=key=>'<span class="su-statutory-signature">'+(b.signatures?.[key]?.length?svg(b.signatures[key]):'<span>(서명 또는 인)</span>')+'</span>',value=v=>esc(v||'미기재'),
+   reference='<span class="su-statutory-reference">환자 '+value(b.patientName)+' · '+value(b.title)+'</span>',
+   date=()=>{if(!d.signedAt)return '<span class="su-paper-date">________년 ____월 ____일 ____시 ____분</span>';const at=new Date(d.signedAt);if(!Number.isFinite(at.getTime()))return '동의 일시 확인 필요';const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(at),get=k=>parts.find(x=>x.type===k).value;return get('year')+'년 '+get('month')+'월 '+get('day')+'일';},
+   clause=(heading,text)=>'<div class="su-statutory-clinical"><h3>'+heading+'</h3><p>'+clinicalText(text)+'</p></div>',
+   clinicalText=text=>{const p=split(text);return value(cleanText(p.base))+(p.hasAnesthesia?'\n\n마취·진정 설명\n'+value(p.anesthesia):'');},
+   metadata=[['진료명',b.title],[careTimeLabel(b),(b.emergency?b.emergencyAt:b.plannedAt)?.replace('T',' ')],['동물종 · 차트번호',[b.species,b.chartNumber].filter(Boolean).join(' · ')],['동물과의 관계',b.relationship],['예상 비용·변동 안내',b.cost],['병원 연락처',b.hospitalPhone],['병원 주소',b.hospitalAddress],...(d.signedAt?[['동의 일시 · 한국시간',stamp(d.signedAt)]]:[]),...(b.emergency?[['응급 사후 설명 사유',b.emergencyReason]]:[])];
+  return '<article class="su-document su-statutory-document" data-statutory-form="11">'+
+   '<section class="su-statutory-cover"><small class="su-statutory-source">■ 수의사법 시행규칙 [별지 제11호서식] &lt;신설 2022. 7. 5.&gt;</small><h1>수술등중대진료 동의서</h1>'+
+   (d.status==='draft'?'<p class="su-status">종이 서명용 · 서명 전</p>':d.status==='void'?'<p class="su-warning">철회·사용 중지 · '+value(d.voidReason)+'</p>':'<p class="su-status">서명 완료</p>')+
+   '<table class="su-statutory-table" aria-label="동물 소유자·대상 동물·수의사 정보"><colgroup><col class="su-statutory-category"><col><col></colgroup><tbody>'+
+   '<tr><th rowspan="2" scope="rowgroup">동물의 소유자<br>또는 관리자</th><td><span>성명</span>'+value(b.guardianName)+'</td><td><span>연락처</span>'+value(b.guardianPhone)+'</td></tr>'+
+   '<tr><td colspan="2"><span>주소</span>'+coverValue('보호자 주소',b.guardianAddress)+'</td></tr>'+
+   '<tr><th rowspan="2" scope="rowgroup">수술등중대진료<br>대상 동물</th><td><span>이름</span>'+value(b.patientName)+'</td><td><span>성별</span>'+value(b.sex)+'</td></tr>'+
+   '<tr><td colspan="2"><span>특이사항(필요시)</span>'+coverValue('특이사항',b.patientNotes)+'</td></tr>'+
+   '<tr><th rowspan="2" scope="rowgroup">수의사</th><td><span>동물병원명</span>'+value(b.hospitalName)+'</td><td><span>면허번호</span>'+value(b.licenseNumber)+'</td></tr>'+
+   '<tr><td colspan="2"><span>성명</span><div class="su-statutory-signer">'+value(b.doctorName)+signature('doctor')+'</div></td></tr></tbody></table>'+
+   '<h2 class="su-statutory-explanation-title">설명 및 동의 사항</h2><ol class="su-statutory-items">'+statutoryItems.map((title,i)=>'<li><strong>'+title+'</strong><p>별첨 「설명 및 동의 사항 상세」 '+(i+1)+'번 참조</p></li>').join('')+'</ol>'+
+   '<p class="su-statutory-annex-note">별첨 「설명 및 동의 사항 상세」는 이 동의서의 일부이며, 함께 설명·확인한 내용입니다.</p>'+
+   '<div class="su-statutory-acceptance"><p>「수의사법」 제13조의2 및 같은 법 시행규칙 제13조의2에 따라 위와 같이 수의사로부터 수술등중대진료에 관한 설명을 들었으며, 위 진료행위에 동의합니다.</p><p class="su-statutory-date">'+date()+'</p><div class="su-statutory-guardian">동물의 소유자 또는 관리자 <b>'+value(b.guardianName)+'</b>'+signature('guardian')+'</div></div>'+
+   '</section>'+
+   '<section class="su-statutory-annex"><h2>별첨 · 설명 및 동의 사항 상세</h2>'+reference+
+   statutoryItems.map((title,i)=>'<section class="su-statutory-annex-item" data-statutory-item="'+(i+1)+'"><h2>'+(i+1)+'. '+title+'</h2>'+(i===1?clause('필요성',b.necessity)+clause('방법 및 내용 · 수술·마취 설명',b.method):'<p>'+clinicalText(b[['diagnosis','method','risks','precautions'][i]])+'</p>')+'</section>').join('')+
+   '<section class="su-statutory-additional"><h2>추가 진료·비용 안내</h2><dl class="su-info">'+[...metadata,...longIdentity].map(([k,v])=>'<dt>'+k+'</dt><dd>'+value(v)+'</dd>').join('')+'</dl></section>'+
+   '</section>'+
+   (screen&&d.status==='draft'?'<section class="su-statutory-sign-slot" data-document-section="6"><h2>설명·동의 및 서명</h2><p>법정 서식과 별첨의 설명 내용을 확인한 뒤 서명해주세요.</p></section>':'')+'</article>';
+ }
+
  g.SurgeryConsentForm={split,replace,mount,sync,focus,documentHTML,statutoryHTML,titles,profiles,enhanceSlots,slotModel,entryChoices,addChoices,choiceParts,choiceValue,focusInput,refreshLimits,careTimeLabel,anesthesiaLabel};if(typeof module==='object')module.exports=g.SurgeryConsentForm;
 })(typeof window==='undefined'?globalThis:window);

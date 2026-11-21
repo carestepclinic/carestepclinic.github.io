@@ -429,3 +429,21 @@
 .su-signature-dialog::backdrop{background:#102f4077}
 .su-signature-dialog .su-actions{justify-content:flex-end;margin-top:16px}
 @media(max-width:650px){.su-signature-dialog{padding:12px}.su-sign-panel>.su-grid{grid-template-columns:1fr}}
+
+/* Legal first sheet and detailed annex share the measured A4 pipeline. */
+.su-paged-print .su-statutory-cover{font-size:10pt;line-height:1.45}
+.su-paged-print .su-statutory-cover .su-statutory-table{font-size:10pt}
+.su-paged-print .su-statutory-cover .su-statutory-signature{width:36mm;height:9.6mm;min-height:9.6mm}
+.su-paged-print .su-statutory-cover .su-statutory-signature svg{width:36mm;height:9.6mm;min-height:9.6mm;object-fit:contain}
+.su-paged-print .su-statutory-cover.su-statutory-compact{font-size:9pt;line-height:1.35}
+.su-paged-print .su-statutory-compact .su-statutory-table{font-size:9pt}
+.su-paged-print .su-statutory-compact .su-statutory-table th,.su-paged-print .su-statutory-compact .su-statutory-table td{padding:1mm 2mm}
+.su-paged-print .su-statutory-compact .su-statutory-items li{padding:1mm 0}
+.su-paged-print .su-statutory-compact h1{margin-bottom:2mm}
+.su-paged-print .su-statutory-document>p{white-space:pre-wrap;overflow-wrap:anywhere}
+
+.su-paged-print .su-statutory-document>h2{font-size:11pt;line-height:1.45;margin:4mm 0 2mm}
+.su-paged-print .su-statutory-document>h2[data-page-start]{font-size:16pt;margin-top:0}
+.su-paged-print .su-statutory-document>h3{font-size:10.5pt;margin:3mm 0 1.5mm}
+.su-paged-print .su-statutory-document>.su-info{margin:0}
+.su-paged-print .su-statutory-cover>.su-status{margin:0 0 2mm;font-size:8pt;color:#596b71}

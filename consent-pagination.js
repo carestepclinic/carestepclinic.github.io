@@ -4,7 +4,8 @@
   const source=doc.createElement('div');source.innerHTML=html;const article=source.querySelector('.su-document'),units=[];
   const visit=n=>{if(n.matches('.su-consent-audit,.su-source-footer'))return;
    if(n.matches('.su-info')){const children=[...n.children];for(let i=0;i<children.length;i+=2){const row=n.cloneNode(false);row.append(children[i].cloneNode(true),children[i+1].cloneNode(true));row.dataset.infoLabel=children[i].textContent;units.push(row);}return;}
-   if(n.matches('.su-surgery-document-section,.su-clause')){for(const c of n.children)visit(c);return;}
+   if(n.matches('.su-statutory-annex')){const first=units.length;for(const c of n.children)visit(c);if(units[first])units[first].dataset.pageStart='true';return;}
+   if(n.matches('.su-surgery-document-section,.su-clause,.su-statutory-annex-item,.su-statutory-clinical,.su-statutory-additional')){for(const c of n.children)visit(c);return;}
    units.push(n.cloneNode(true));
   };for(const n of article.children)visit(n);
   const pages=[];let body,page;
@@ -13,9 +14,9 @@
   const append=nodes=>nodes.forEach(n=>body.append(n));
   const remove=nodes=>nodes.forEach(n=>n.remove());
   next();let pending=[];
-  for(const unit of units){if(/^H[1-4]$/.test(unit.tagName)){pending.push(unit);continue;}
+  for(const unit of units){if(unit.dataset.pageStart&&body.childElementCount)next();if(/^H[1-4]$/.test(unit.tagName)){pending.push(unit);continue;}
    let nodes=[...pending,unit];pending=[];const hadContent=body.childElementCount>0;append(nodes);
-   if(fits())continue;remove(nodes);if(hadContent)next();append(nodes);if(fits())continue;
+   if(fits())continue;if(unit.matches('.su-statutory-cover')){unit.classList.add('su-statutory-compact');if(fits())continue;}remove(nodes);if(hadContent)next();append(nodes);if(fits())continue;
    // Split both prose and table values without changing their saved text. The
    // label repeats on continuation pages, so long notes remain attributable.
    const table=unit.matches('.su-info'),textNode=table?unit.querySelector('dd'):unit;
