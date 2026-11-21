@@ -11,6 +11,53 @@
     font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     font-size:15px; line-height:1.55;
   }
+  /* Entry screens share the clinical workspace's colors, typography and controls. */
+  .clinic-calm :is(#loginView,#sessionRestoreView) {background:var(--cs-bg);padding:32px 20px;color:var(--cs-ink)}
+  .clinic-calm :is(#loginView,#sessionRestoreView) :is(button,input) {font-family:inherit}
+  .clinic-calm #loginView .login-card {width:min(480px,100%);padding:32px;border-radius:var(--cs-radius);border:1px solid var(--cs-line);background:var(--cs-paper);box-shadow:0 8px 28px #20323e08}
+  .clinic-calm #loginView .clinic-login-brand {display:flex;align-items:center;gap:14px;margin:0 0 16px}
+  .clinic-calm #loginView .brand-mark {flex:0 0 46px;width:46px;height:46px;margin:0;border-radius:10px;background:var(--cs-accent);font-size:18px}
+  .clinic-calm #loginView h1 {margin:0;color:var(--cs-ink);font-size:26px;line-height:1.25;letter-spacing:-.04em}
+  .clinic-calm #loginView h1 span {display:block;margin-top:3px;color:var(--cs-muted);font-size:14px;font-weight:500;letter-spacing:0}
+  .clinic-calm #loginView .login-copy {margin:0 0 24px;color:var(--cs-muted);font-size:14px;line-height:1.6;word-break:keep-all;overflow-wrap:anywhere}
+  .clinic-calm #loginView .saas-auth-tabs {grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px;margin:0 0 24px;border-radius:10px;background:var(--cs-tint)}
+  .clinic-calm #loginView .saas-auth-tab {min-height:44px;min-width:0;padding:8px 4px;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--cs-ink);font-size:14px;font-weight:600;line-height:1.4;word-break:keep-all}
+  .clinic-calm #loginView .saas-auth-tab.active {background:var(--cs-accent);color:#fff;border-color:var(--cs-accent)}
+  .clinic-calm #loginView .saas-auth-tab:hover:not(.active) {background:#fff9}
+  .clinic-calm #loginView .field-label {margin:18px 0 7px;color:var(--cs-ink);font-size:14px;font-weight:600;line-height:1.5}
+  .clinic-calm #loginView .saas-auth-panel>.field-label:first-child {margin-top:0}
+  .clinic-calm #loginView .input {min-height:46px;padding:11px 12px;border:1px solid #bccbc5;border-radius:8px;color:var(--cs-ink);background:#fff;font-size:16px;line-height:1.5}
+  .clinic-calm #loginView .input::placeholder {color:#73817f;opacity:1}
+  .clinic-calm #loginView .input:focus {border-color:var(--cs-accent);box-shadow:0 0 0 3px #19766e19}
+  .clinic-calm :is(#loginView,#sessionRestoreView) .btn {min-height:46px;padding:11px 16px;border:1px solid var(--cs-line);border-radius:8px;font-size:15px;font-weight:600;line-height:1.5;box-shadow:none;transform:none}
+  .clinic-calm :is(#loginView,#sessionRestoreView) .btn-primary {background:var(--cs-accent);border-color:var(--cs-accent);color:#fff}
+  .clinic-calm :is(#loginView,#sessionRestoreView) .btn-primary:hover:not(:disabled) {background:var(--cs-accent-hover)}
+  .clinic-calm :is(#loginView,#sessionRestoreView) .btn-secondary {background:#fff;color:var(--cs-ink);border-color:var(--cs-line)}
+  .clinic-calm #loginView .saas-auth-panel>.btn-block {margin-top:24px}
+  .clinic-calm #loginView .btn:disabled {opacity:.55;cursor:wait}
+  .clinic-calm #loginView .saas-auth-status {margin:12px 0 0;min-height:0;font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+  .clinic-calm #loginView .saas-auth-status:empty {display:none}
+  .clinic-calm #loginView .saas-auth-status:not(:empty) {padding:10px 12px;border-radius:8px;background:var(--cs-tint);color:var(--cs-accent-hover)}
+  .clinic-calm #loginView .saas-auth-status.error {background:#fff1ed;color:#a13022}
+  .clinic-calm #loginView .saas-divider {margin:20px 0;color:var(--cs-muted);font-size:13px}
+  .clinic-calm #loginView .saas-divider:before,.clinic-calm #loginView .saas-divider:after {background:var(--cs-line)}
+  .clinic-calm #loginView .legal-consent-row {display:flex;align-items:flex-start;gap:8px;margin:14px 0;color:var(--cs-muted);font-size:13px;line-height:1.65}
+  .clinic-calm #loginView .legal-consent-row input {flex:0 0 18px;width:18px;height:18px;margin:3px 0 0;accent-color:var(--cs-accent)}
+  .clinic-calm #loginView .legal-link {padding:0;border:0;background:transparent;color:var(--cs-accent-hover);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .clinic-calm #loginView .clinic-login-footer {margin-top:24px;padding-top:16px;border-top:1px solid var(--cs-line)}
+  .clinic-calm #loginView .clinic-login-links {display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px}
+  .clinic-calm #loginView .clinic-login-links button {min-height:32px}
+  .clinic-calm #loginView .clinic-login-notice {margin-top:8px;color:var(--cs-muted);font-size:13px}
+  .clinic-calm #loginView .clinic-login-notice summary {padding:6px 0;cursor:pointer}
+  .clinic-calm #loginView .fineprint {margin:8px 0 0;color:var(--cs-muted);font-size:13px;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere}
+  .clinic-calm :is(#loginView,#sessionRestoreView) :is(button,input,summary):focus-visible {outline:3px solid #58a99f;outline-offset:2px}
+  .clinic-calm #sessionRestoreView .session-restore-card {background:#fff;border:1px solid var(--cs-line);border-radius:10px;box-shadow:none}
+  .clinic-calm #sessionRestoreView .session-restore-card p {font-size:14px;color:var(--cs-muted)}
+  @media(max-width:520px) {
+    .clinic-calm :is(#loginView,#sessionRestoreView) {padding:20px 12px}
+    .clinic-calm #loginView .login-card {padding:24px 20px}
+    .clinic-calm #loginView .saas-auth-tab {font-size:13px}
+  }
   .clinic-calm :is(#appView,.cl-dialog,.pt-dialog,.chr-dialog) {font-family:inherit;color:var(--cs-ink)}
   .clinic-calm #appView {background:var(--cs-bg)}
   .clinic-calm #appView :is(button,input,select,textarea),

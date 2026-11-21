@@ -1181,25 +1181,26 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 
   <section id="loginView" class="login-shell">
     <div class="login-card saas-login-card">
-      <div class="brand-mark">CS</div>
-      <p class="eyebrow">CARESTEP SAAS · PATIENT JOURNEY · v10.7-A</p>
-      <h1>CARESTEP Clinic</h1>
-      <p class="login-copy">병원별 계정과 직원 권한으로 CARESTEP을 시작합니다.</p>
+      <header class="clinic-login-brand">
+        <div class="brand-mark" aria-hidden="true">CS</div>
+        <h1>CARESTEP <span>Clinic</span></h1>
+      </header>
+      <p class="login-copy">병원 계정으로 로그인해 진료 업무를 시작하세요.</p>
 
       <!-- PILOT READY HOTFIX 16: CARESTEP Worker endpoint is centrally configured. -->
       <input id="saasEndpoint" type="hidden" value="https://carestep-ai-api.kk04sdw.workers.dev" />
 
-      <div class="saas-auth-tabs" id="saasAuthTabs">
-        <button class="saas-auth-tab active" type="button" data-saas-auth="login">로그인</button>
-        <button class="saas-auth-tab" type="button" data-saas-auth="register">병원 가입</button>
-        <button class="saas-auth-tab" type="button" data-saas-auth="invite">초대코드 가입</button>
+      <div class="saas-auth-tabs" id="saasAuthTabs" role="group" aria-label="접속 방법">
+        <button class="saas-auth-tab active" type="button" data-saas-auth="login" aria-pressed="true">로그인</button>
+        <button class="saas-auth-tab" type="button" data-saas-auth="register" aria-pressed="false">병원 가입</button>
+        <button class="saas-auth-tab" type="button" data-saas-auth="invite" aria-pressed="false">초대코드 가입</button>
       </div>
 
       <form id="saasLoginForm" class="saas-auth-panel active" data-saas-panel="login" novalidate>
         <label class="field-label" for="saasLoginEmail">이메일</label>
-        <input id="saasLoginEmail" class="input" type="email" autocomplete="username" placeholder="doctor@clinic.com" />
+        <input id="saasLoginEmail" class="input" type="email" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="가입한 이메일 주소" />
         <label class="field-label" for="saasLoginPassword">비밀번호</label>
-        <input id="saasLoginPassword" class="input" type="password" autocomplete="current-password" placeholder="10자 이상" />
+        <input id="saasLoginPassword" class="input" type="password" autocomplete="current-password" placeholder="비밀번호 입력" />
         <button id="saasLoginBtn" class="btn btn-primary btn-block" type="submit">로그인</button>
       </form>
 
@@ -1231,10 +1232,13 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
         <button id="saasInviteAcceptBtn" class="btn btn-primary btn-block" type="button">초대코드로 가입</button>
       </div>
 
-      <div id="saasAuthStatus" class="saas-auth-status"></div>
+      <div id="saasAuthStatus" class="saas-auth-status" role="status" aria-live="polite" aria-atomic="true"></div>
       <div class="saas-divider">또는</div>
       <button id="enterDemo" class="btn btn-secondary btn-block" type="button">체험 화면 둘러보기</button>
-      <p class="fineprint">환자·보호자 정보, 게시 자료와 복약 일정은 사용하는 기능에 따라 CARESTEP 서버에 저장됩니다. 보호자 연락처와 발송 내용은 문자 발송 처리에 필요한 범위에서 SOLAPI로 전달됩니다. 상세 보관 기준은 개인정보 처리방침에서 확인하세요.</p>
+      <footer class="clinic-login-footer">
+        <div class="clinic-login-links"><button class="legal-link" type="button" data-legal-doc="terms">이용약관</button><button class="legal-link" type="button" data-legal-doc="privacy">개인정보 처리방침</button></div>
+        <details class="clinic-login-notice"><summary>개인정보 보관·이용 안내</summary><p class="fineprint">환자·보호자 정보, 게시 자료와 복약 일정은 사용하는 기능에 따라 CARESTEP 서버에 저장됩니다. 보호자 연락처와 발송 내용은 문자 발송 처리에 필요한 범위에서 SOLAPI로 전달됩니다. 상세 보관 기준은 개인정보 처리방침에서 확인하세요.</p></details>
+      </footer>
     </div>
   </section>
 
@@ -4035,7 +4039,7 @@ function renderFollowupSafety(){const state=followupSafetyState||{},members=stat
 async function loadFollowupSafety(silent=true){if(!serverFollowupState||saasMode!=='auth')return null;try{followupSafetyState=await saasRequest(`/saas/followup/cases/${encodeURIComponent(followupCaseNonce)}/safety`);renderFollowupSafety();await acquireMultiStaffLock('followup_case',followupCaseNonce,silent);return followupSafetyState;}catch(e){followupSafetyState=null;renderFollowupSafety();if(!silent&&e.status!==404)toast(e.message||'담당자 정보를 불러오지 못했습니다.');return null;}}
 async function saveFollowupAssignment(){if(!followupSafetyState)return;try{await acquireMultiStaffLock('followup_case',followupCaseNonce,false);const lock=multiStaffLocks.get(multiStaffKey('followup_case',followupCaseNonce));if(lock?.blocked)return;await saasRequest(`/saas/followup/cases/${encodeURIComponent(followupCaseNonce)}/safety`,{method:'PUT',body:JSON.stringify({assigneeUserId:$('followupAssignee')?.value||'',vetUserId:$('followupVet')?.value||'',expectedRevision:followupSafetyState.revision})});await Promise.allSettled([loadServerFollowupState(true),loadFollowupSafety(true)]);toast('후속관리 담당자를 저장했습니다.');}catch(e){if(e.status===409)await loadFollowupSafety(true);toast(e.message||'담당자를 저장하지 못했습니다.');}}
 function saasSelectAuth(mode){
-  document.querySelectorAll('[data-saas-auth]').forEach(b=>b.classList.toggle('active',b.dataset.saasAuth===mode));
+  document.querySelectorAll('[data-saas-auth]').forEach(b=>{const selected=b.dataset.saasAuth===mode;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected));});
   document.querySelectorAll('[data-saas-panel]').forEach(p=>p.classList.toggle('active',p.dataset.saasPanel===mode));
   saasSetAuthStatus('');
 }
@@ -11086,7 +11090,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-followup-tasks.js?v=20261117-today-supplies"></script>
 <link rel="stylesheet" href="builder-flow.css?v=20261105-flow3">
 <script src="builder-flow.js?v=20261112-recheck"></script>
-<link rel="stylesheet" href="clinic-calm.css?v=20261120-consent-design">
+<link rel="stylesheet" href="clinic-calm.css?v=20261121-login-design">
 <script src="carestep-privacy.js?v=20261116-review"></script>
 <script src="clinic-update-notice.js?v=20261117-stable-updates"></script>
 <script>
