@@ -357,6 +357,11 @@
 .su-anesthesia-dialog>label{display:block;margin:16px 0;font-weight:600}
 .su-anesthesia-dialog textarea{display:block;width:100%;box-sizing:border-box;margin-top:8px;font:inherit;line-height:1.6;min-height:96px}
 .su-anesthesia-dialog [data-anesthesia-compare]{background:#f0f6f5;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.su-anesthesia-compare-row{border:1px solid #d6e3e1;border-radius:8px;padding:12px;margin:12px 0}
+.su-anesthesia-compare-row .su-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
+.su-anesthesia-compare-row p{white-space:pre-wrap;overflow-wrap:anywhere;font-weight:400;line-height:1.6;margin:6px 0}
+.su-anesthesia-compare-row small{color:#526c71}
+@media(max-width:600px){.su-anesthesia-compare-row .su-grid{grid-template-columns:1fr}.su-anesthesia-dialog{padding:16px}}
 .su-surgery-section .su-short-answers{margin-top:8px;gap:12px}
 .su-surgery-section .su-short-answers label{font-weight:400}
 .su-surgery-section .su-surgery-optional{margin-top:8px}
