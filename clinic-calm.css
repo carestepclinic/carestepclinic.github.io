@@ -2182,3 +2182,15 @@
  .clinic-calm #followup :is(#followupGuideBack,#followupGuideNext){min-height:44px;font-size:13px;padding:10px 12px}
  .clinic-calm #followup #followupGuideNext{flex:1 1 100%;min-width:0}
 }
+
+/* Sidebar leaf labels share one type scale, regardless of their route markup. */
+@media screen {
+ .clinic-calm #appView .sidebar .nav-item.nav-sub,
+ .clinic-calm #appView .sidebar .nav-item.nav-sub .nav-copy,
+ .clinic-calm #appView .sidebar .nav-item.nav-sub .nav-copy b {
+  font-family:inherit;font-size:14px!important;font-weight:500;line-height:1.45;letter-spacing:0;
+ }
+ .clinic-calm #appView .sidebar .nav-item.nav-sub.active,
+ .clinic-calm #appView .sidebar .nav-item.nav-sub.active .nav-copy,
+ .clinic-calm #appView .sidebar .nav-item.nav-sub.active .nav-copy b {font-weight:700}
+}
