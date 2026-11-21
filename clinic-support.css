@@ -460,3 +460,11 @@
 .su .su-pending-groups button{font-size:12px;padding:6px 8px;min-height:34px;white-space:normal;text-align:left}
 .su-paged-print .su-page-content>.su-continuation-heading{font-size:10.5pt;line-height:1.4;margin:0 0 3mm;padding-bottom:2mm;border-bottom:1px solid #dce3df;color:#526b73}
 @media(max-width:650px){.su .su-identity-summary{flex-wrap:wrap}.su [data-identity-values]{flex-basis:100%}.su .su-pending-groups>section{flex-basis:100%}}
+
+.su .su-consent-list-item{display:flex;align-items:center;gap:10px}
+.su .su-consent-list-item>.su-listrow{flex:1;min-width:0}
+.su .su-consent-list-item>[data-consent-list-delete]{flex:none}
+.su .su-statutory-document .su-statutory-cover,.su .su-statutory-document .su-statutory-annex{max-width:178mm;margin-left:auto;margin-right:auto}
+@media(max-width:650px){.su .su-consent-list-item{gap:6px}.su .su-consent-list-item>.su-listrow{flex-wrap:wrap;gap:6px}.su .su-statutory-document{padding:14px}.su .su-statutory-table{border-radius:6px}.su .su-statutory-items li{padding-top:8px;padding-bottom:8px}}
+
+.su .su-statutory-document,.su .su-statutory-cover{scroll-margin-top:120px}

@@ -15,6 +15,7 @@ function consentFixture(){
   if((o.method||'GET')==='GET'){const d=docs.find(d=>d.id===id);if(!d)throw Error('없음');return {document:structuredClone(d)};}
   if(fail)throw Error('합성 저장 실패');
   if(action==='delete'||action==='restore'){const d=docs.find(x=>x.id===id);if(d.status!=='draft'||d.revision!==b.revision)throw Error('삭제 불가');d.deleted=action==='delete';d.revision++;return {document:structuredClone(d)};}
+  if(action==='void'){const d=docs.find(x=>x.id===id);if(d.status!=='signed'||d.revision!==b.revision)throw Error('사용 중지 불가');d.status='void';d.voidReason=b.reason;d.revision++;d.audit=[...(d.audit||[]),{action:'consent.void',created_at:new Date().toISOString()}];return {document:structuredClone(d)};}
   if(action==='sign'){const d=docs.find(d=>d.id===id);if(d.body.patientReviewFields?.length)throw Error('환자 변경 후 재확인 필요');if(b.revision!==d.revision)throw Error('버전 충돌');d.body.signatures={doctor:b.doctorSignature,guardian:b.guardianSignature};d.status='signed';d.signedAt=new Date().toISOString();d.revision++;return {document:structuredClone(d)};}
   const old=docs.find(d=>d.id===id),d=make(id||'new-'+docs.length,b.body);d.revision=old?old.revision+1:1;if(old)docs[docs.indexOf(old)]=d;else docs.unshift(d);return {document:structuredClone(d)};
  }};
