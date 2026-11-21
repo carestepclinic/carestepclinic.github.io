@@ -2130,3 +2130,25 @@
  .clinic-calm #appView .sidebar-brand>.cs-brand-tagline>span{display:inline;font-size:inherit}
 }
 @media screen and (max-width:480px){.clinic-calm #loginView .clinic-login-headline{font-size:22px}}
+
+/* One quiet brand line shared by every Clinic route. */
+@media screen {
+ .clinic-calm #appView .cs-page-title-line{display:flex;align-items:baseline;flex-wrap:wrap;gap:3px 14px;min-width:0}
+ .clinic-calm #appView .cs-page-title-line #viewTitle{flex:0 1 auto;min-width:0;word-break:keep-all;overflow-wrap:anywhere}
+ .clinic-calm #appView .cs-page-tagline{margin:0;color:var(--cs-muted);font-size:12px;font-weight:400;line-height:1.5;letter-spacing:0;word-break:keep-all;overflow-wrap:anywhere}
+ .clinic-calm #appView .cs-page-tagline-short{display:none}
+}
+@media screen and (max-width:1100px){
+ .clinic-calm #appView .cs-page-tagline-full{display:none}
+ .clinic-calm #appView .cs-page-tagline-short{display:inline}
+ .clinic-calm #appView .cs-page-title-line{column-gap:10px}
+}
+@media screen and (max-width:600px){.clinic-calm #appView .cs-page-tagline{font-size:11px}}
+@media print{.cs-page-tagline{display:none!important}}
+
+@media screen and (max-width:760px){
+ .clinic-calm #appView .topbar.clinic-patient-header{grid-template-columns:minmax(0,1fr)}
+ .clinic-calm #appView .topbar.clinic-patient-header>.clinic-install-heading{grid-column:1;grid-row:1}
+ .clinic-calm #appView .topbar.clinic-patient-header>.topbar-actions{grid-column:1;grid-row:2}
+ .clinic-calm #appView .topbar.clinic-patient-header>.clinic-patient-header-tools{grid-column:1;grid-row:3;justify-content:flex-start;flex-wrap:wrap;min-width:0}
+}
