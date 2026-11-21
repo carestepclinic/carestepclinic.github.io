@@ -11,7 +11,7 @@ const input=f=>f.locator('[data-short-key=method][data-short-part=base]');
 for(const width of [390,1200])test('saved approved source with added patient questions exposes every missing input and proceeds after completion '+width,async t=>{
  const {p,f}=await fixture(t,width),template='승인된 합성 수술 설명';
  await draft(p,f,template,{text:template+'\n\n이번 환자에서 확인한 내용\n수술 부위·좌우: [입력: 부위]\n실제 수술 범위: [입력: 범위]\n별도 상담: [입력: 확인 내용]\n병원 운영 · 응급·야간 연락: [입력: 병원 안내]'});
- await f.locator('[data-anesthesia-plan]').selectOption('general');await ready(p);
+ assert.match(await f.locator('[data-default-summary]').allTextContents().then(x=>x.join(' ')),/승인된 합성 수술 설명/);await f.locator('[data-anesthesia-plan]').selectOption('general');await ready(p);
  const anesthetic=f.locator('[data-short-key=method][data-short-part=anesthesia]');assert.equal(await anesthetic.count(),1);
  for(const n of await anesthetic.all())await n.fill('합성 마취 계획');
  await f.locator('[name=plannedAt]').fill('');await f.locator('[data-act=save-consent-draft]').click();await ready(p);

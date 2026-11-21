@@ -349,6 +349,18 @@
 .su-short-answers{display:grid;gap:12px;margin-top:10px}
 .su-short-answers label{font-weight:500}
 .su-short-answers textarea{min-height:72px}
+.su-default-summary{white-space:pre-line;background:#f0f6f5;border-left:3px solid #177f78;padding:12px 14px;margin:10px 0;color:#324f59;font-size:14px;line-height:1.65;font-weight:400}
+.su-default-summary[hidden]{display:none}
+.su-input-caption{display:block;font-weight:600;margin-bottom:6px}
+.su-anesthesia-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 20px}
+.su-anesthesia-dialog{width:min(640px,calc(100vw - 32px));max-height:85vh;overflow:auto;box-sizing:border-box;border:1px solid #c8d9d8;border-radius:12px;padding:22px;color:#153e4c}
+.su-anesthesia-dialog>label{display:block;margin:16px 0;font-weight:600}
+.su-anesthesia-dialog textarea{display:block;width:100%;box-sizing:border-box;margin-top:8px;font:inherit;line-height:1.6;min-height:96px}
+.su-anesthesia-dialog [data-anesthesia-compare]{background:#f0f6f5;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.su-surgery-section .su-short-answers{margin-top:8px;gap:12px}
+.su-surgery-section .su-short-answers label{font-weight:400}
+.su-surgery-section .su-surgery-optional{margin-top:8px}
+.su-surgery-section .su-area-tools:has(small:empty):has(button[hidden]){display:none}
 .su-quick-template{background:#f1f7f4;border-radius:8px;padding:12px;margin-top:16px}
 .su-unified-document{font-family:'Carestep Pretendard','Malgun Gothic',sans-serif;color:#20323e;line-height:1.65}
 .su-unified-document h1{font-size:26px;line-height:1.35;letter-spacing:-.03em;border-color:#19766e}

@@ -34,7 +34,7 @@ for(const width of [390,1440])test('support modules load on demand and scaling s
  await p.locator('[name=patientName]').fill('합성 환자');await p.locator('[name=species]').fill('개');
  await p.evaluate(()=>{for(const [key,value] of [['risks','직접 작성한 환자별 주의사항'],['cost','보존할 비용']]){const e=document.querySelector('[name='+key+']');e.value=value;e.dispatchEvent(new Event('input',{bubbles:true}));}});
  const anesthesia=await p.locator('[name=generalAnesthesia]').isChecked();
- await p.locator('[data-surgery-loader] > button').click();await p.locator('[data-consent-auto-query]').fill('스케일링');await p.locator('[data-act=auto-consent-fill]').click();await p.locator('[data-consent-auto-choice]').first().click();
+ if(await p.locator('[data-surgery-loader] > button').getAttribute('aria-expanded')!=='true')await p.locator('[data-surgery-loader] > button').click();await p.locator('[data-consent-auto-query]').fill('스케일링');await p.locator('[data-act=auto-consent-fill]').click();await p.locator('[data-consent-auto-choice]').first().click();
  assert.equal(await p.locator('[data-consent-dialog][open]').count(),0);assert.equal(await p.locator('[name=kind]').inputValue(),'surgery');
  await p.locator('[data-act=apply-consent-replacement]').click();
  assert.equal(await p.locator('[name=risks]').inputValue(),'직접 작성한 환자별 주의사항');assert.equal(await p.locator('[name=cost]').inputValue(),'보존할 비용');assert.equal(await p.locator('[name=generalAnesthesia]').isChecked(),anesthesia);
