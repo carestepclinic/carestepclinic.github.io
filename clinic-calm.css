@@ -2116,3 +2116,17 @@
   .clinic-calm #practiceRoot.pt .su-consents [data-consent-form] .su-draft-inputs{grid-template-columns:1fr;gap:16px}
  }
 }
+
+/* Brand wording stays with the logo without competing with clinical controls. */
+@media screen {
+ .clinic-calm #loginView .clinic-login-brand{flex-wrap:wrap;row-gap:8px;margin-bottom:24px}
+ .clinic-calm .cs-brand-tagline{margin:0;color:var(--cs-muted);font-weight:500;line-height:1.5;letter-spacing:0;word-break:keep-all}
+ .clinic-calm .cs-brand-tagline>span{white-space:nowrap}
+ .clinic-calm #loginView .cs-brand-tagline{flex-basis:100%;font-size:13px}
+ .clinic-calm #loginView .clinic-login-headline{margin:0 0 10px;font-size:24px;font-weight:700;line-height:1.45;letter-spacing:-.035em;color:var(--cs-ink);word-break:keep-all}
+ .clinic-calm #loginView .clinic-login-headline>span{display:block}
+ .clinic-calm #appView .sidebar-brand{flex-wrap:wrap;row-gap:7px}
+ .clinic-calm #appView .sidebar-brand>.cs-brand-tagline{order:5;flex:0 0 100%;font-size:11px}
+ .clinic-calm #appView .sidebar-brand>.cs-brand-tagline>span{display:inline;font-size:inherit}
+}
+@media screen and (max-width:480px){.clinic-calm #loginView .clinic-login-headline{font-size:22px}}
