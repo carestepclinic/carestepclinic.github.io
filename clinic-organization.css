@@ -122,8 +122,8 @@
 
 /* Daily work has one queue; detailed lists remain available below it. */
 #clinicTodayQueue{min-width:0}#clinicTodayQueue>.clinic-section-tabs{margin-bottom:14px}
-#clinicClinicalTasks .work-first-content{grid-template-columns:1fr}
-#clinicClinicalTasks .work-first-kpis{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
+#clinicTodayQueue .work-first-content{grid-template-columns:1fr}
+#clinicTodayQueue .work-first-kpis{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
 #dashboard .hero-panel,#roleWorkspaceBanner,.screen-help-bar>span{display:none}
 .screen-help-bar{justify-content:flex-end;background:transparent;border:0;padding:0;margin:0 0 8px}
 .topbar>.eyebrow:empty,.topbar>div>.eyebrow:empty,.section-head .eyebrow:empty,.consult-inbox-head .eyebrow:empty,.work-first-head .eyebrow:empty{display:none}
@@ -560,3 +560,5 @@ body:has(#builder.active-view) #r61-patient-context[data-ready="true"]~* .builde
 #builder .crm-builder-picker{padding:8px 10px}
 #appView .topbar.clinic-patient-header{gap:8px 16px;margin-bottom:12px;padding-bottom:10px}
 #appView .topbar #viewTitle{margin:0}
+
+@media(max-width:700px){.clinic-calm #clinicTodayQueue .clinic-today-toolbar{flex-wrap:wrap;gap:8px}.clinic-calm #clinicTodayQueue .clinic-today-toolbar>[role=tablist]{display:flex;flex:1 1 100%;width:100%;flex-wrap:nowrap;gap:5px}.clinic-calm #clinicTodayQueue .clinic-today-toolbar>[role=tablist]>button{flex:1 1 0;min-width:0;padding:8px 5px;font-size:12px;white-space:normal;word-break:keep-all}.clinic-calm #clinicTodayQueue .clinic-today-toolbar>#refreshWorkFirst{margin-left:auto}}

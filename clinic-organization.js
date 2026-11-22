@@ -2,7 +2,7 @@
 (function(global){
  'use strict';
  const $=id=>document.getElementById(id),tabs=new Map();
- let workspace=null,timelineOpen=null,todayControl=null,todayPicked=false,todayResolved=false;
+ let workspace=null,timelineOpen=null,todayControl=null,todayCategory='followup';
  function ageLabel(birth,today=new Date(Date.now()+32400000).toISOString().slice(0,10)){
   const valid=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v+'T00:00:00Z'))&&new Date(v+'T00:00:00Z').toISOString().slice(0,10)===v;
   const day=String(birth||'').slice(0,10);if(!valid(day)||!valid(today)||day>today)return '나이 미입력';
@@ -68,10 +68,16 @@
    });
   }
  }
+ function checkedTime(value=Date.now()){
+  const n=typeof value==='number'?value:Date.parse(value);if(!Number.isFinite(n))return '';
+  const d=new Date(n+32400000),hour=d.getUTCHours();return (hour<12?'오전':'오후')+' '+String(hour%12||12).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0')+' 기준';
+ }
+ function taskCategory(row){return ['visit','vaccination','heartworm'].includes(row?.sourceType)?'clinical':'followup';}
+ function categoryRows(rows,category=todayCategory){return (rows||[]).filter(row=>taskCategory(row)===category);}
+ function categoryCounts(buckets){return Object.fromEntries(['followup','clinical'].map(key=>{const today=categoryRows(buckets.all,key).length,backlog=categoryRows(buckets.backlog,key).length;return [key,{today,backlog,total:today+backlog}];}));}
  function updateTodayCounts(){
   const attention=global.carestepAttentionSummary?.(),clinical=global.carestepClinicalSummary?.();
-  if(todayControl&&!todayResolved&&!todayPicked&&attention?.state==='ready'&&clinical?.state==='ready'){todayResolved=true;if(!attention.total&&clinical.total>0)todayControl.select('clinical');}
-  for(const [key,label,value] of [['attention','확인·조치 필요',attention],['clinical','진료·예방·후속관리',clinical]]){
+  for(const [key,label,value] of [['attention','확인·조치 필요',attention],['followup','후속관리',clinical?.groups?{...clinical,...clinical.groups.followup}:clinical],['clinical','진료·예방',clinical?.groups?{...clinical,...clinical.groups.clinical}:clinical]]){
    const button=$('clinicToday-tab-'+key);if(!button)continue;
    const suffix=!value||value.state==='loading'?'확인 중':value.state==='failed'?'':value.state==='unavailable'?'이용 불가':key==='attention'?((value.targets??value.total)===value.total?value.total+'건':value.total+'항목 · 대상 '+value.targets+'건'):Number.isInteger(value.today)&&Number.isInteger(value.backlog)?'오늘 '+value.today+'건 · 지난 미처리 '+value.backlog+'건':'업무 '+value.total+'건';
    const text=label+(suffix?' · '+suffix:'')+(value?.refreshing?' · 갱신 중':'');if(button.textContent!==text)button.textContent=text;
@@ -112,13 +118,12 @@
  function mountDashboard(){
   const host=$('workFirstDashboard'),box=$('clinicCareInbox');if(!host||!box||$('clinicHomePrimary'))return;
   const grid=document.createElement('div');grid.id='clinicHomePrimary';host.querySelector('.work-first-head').after(grid);const queue=document.createElement('section');queue.id='clinicTodayQueue';queue.setAttribute('aria-label','오늘 업무 목록');
-  const clinical=document.createElement('section');clinical.id='clinicClinicalTasks';
+  const clinical=document.createElement('section');clinical.id='clinicClinicalTasks';const followup=document.createElement('section');followup.id='clinicFollowupTasks';const content=document.createElement('div');content.className='clinic-today-task-content';clinical.append(content);
   const existing=host.querySelector('.care-work-more');
-  if(existing){for(const n of [...existing.children])if(n.tagName!=='SUMMARY')clinical.append(n);existing.remove();}
-  for(const id of ['workFirstBacklog','workFirstCleanupStatus']){const n=$(id);if(n)clinical.append(n);}
+  if(existing){for(const n of [...existing.children])if(n.tagName!=='SUMMARY')content.append(n);existing.remove();}
+  for(const id of ['workFirstBacklog','workFirstCleanupStatus']){const n=$(id);if(n)content.append(n);}
   const attention=document.createElement('section');attention.append(box);
-  todayControl=createTabs(queue,[['attention','확인·조치 필요',attention],['clinical','진료·예방·후속관리',clinical]],{prefix:'clinicToday',selected:'attention'});
-  queue.querySelector('[role=tablist]').addEventListener('click',()=>todayPicked=true);queue.querySelector('[role=tablist]').addEventListener('keydown',()=>todayPicked=true);
+  todayControl=createTabs(queue,[['attention','확인·조치 필요',attention],['followup','후속관리',followup],['clinical','진료·예방',clinical]],{prefix:'clinicToday',selected:'attention',onChange:key=>{if(key==='attention')return;todayCategory=key;(key==='followup'?followup:clinical).append(content);if(typeof workFirstFilter!=='undefined')workFirstFilter='all';const backlog=$('workFirstBacklog');if(backlog)backlog.open=false;global.renderWorkFirstDashboard?.();}});
   const toolbar=document.createElement('div');toolbar.className='clinic-today-toolbar';const nav=queue.querySelector('[role="tablist"]');nav.before(toolbar);toolbar.append(nav);const refresh=$('refreshWorkFirst');if(refresh)toolbar.append(refresh);host.querySelector('.work-first-head')?.remove();
   grid.append(queue);updateTodayCounts();
   const explorer=document.createElement('details');explorer.id='clinicTaskExplorer';explorer.className='clinic-task-explorer';explorer.innerHTML='<summary>상담·일정 상세 보기</summary>';
@@ -262,7 +267,7 @@
    const loaded=workspace?.recordsLoaded;if(showWorkspaceTab('records',patient.id)&&loaded)return original(patient,guardian);
   };
  }
- global.ClinicOrganization={groupPreventiveRows,mountCompactSearch,mountPatientHeader,clinicalRows,noticeLabel,updateTodayCounts,ageLabel,recentTemplates,taskPreview,createTabs,mountHospitalManagement,organizeWorkspace,showWorkspaceTab,mountDashboard,syncNav};
+ global.ClinicOrganization={checkedTime,taskCategory,categoryRows,categoryCounts,resetToday:()=>todayControl?.select('attention'),groupPreventiveRows,mountCompactSearch,mountPatientHeader,clinicalRows,noticeLabel,updateTodayCounts,ageLabel,recentTemplates,taskPreview,createTabs,mountHospitalManagement,organizeWorkspace,showWorkspaceTab,mountDashboard,syncNav};
  if(typeof module!=='undefined')module.exports=global.ClinicOrganization;
  if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();}
 })(typeof window==='undefined'?globalThis:window);

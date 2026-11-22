@@ -57,7 +57,7 @@ for(const width of [390,1280])test('ward has one vertical scroll surface and nex
 });
 test('today chooses available clinical work once and respects manual selection',async()=>{
  const {p}=await page();const result=await p.evaluate(()=>{go('dashboard');carestepAttentionSummary=()=>({state:'ready',total:0,targets:0});carestepClinicalSummary=()=>({state:'ready',total:7});ClinicOrganization.updateTodayCounts();const selected=()=>document.querySelector('#clinicTodayQueue [aria-selected=true]').id;const first=selected();document.getElementById('clinicToday-tab-attention').click();ClinicOrganization.updateTodayCounts();return [first,selected()];});
- assert.deepEqual(result,['clinicToday-tab-clinical','clinicToday-tab-attention']);await p.close();
+ assert.deepEqual(result,['clinicToday-tab-followup','clinicToday-tab-attention']);await p.close();
 });
 test('initial billing load and failure do not claim login failure or absent payment card',async()=>{
  const {p}=await page();const result=await p.evaluate(()=>{billingOverviewState=null;billingOverviewLoading=true;renderBillingOverview();const pending=[document.getElementById('billingSubscriptionSummary').textContent,document.getElementById('billingCardBox').textContent];billingOverviewLoading=false;renderBillingOverview();return {pending,failed:document.getElementById('billingCardBox').textContent};});

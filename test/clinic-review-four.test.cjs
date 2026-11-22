@@ -22,5 +22,5 @@ for(const width of [390,1440])test('education to SOP switches cached area immedi
 });
 test('today count labels distinguish backlog and preserve loading and failure state',()=>{
  const button={textContent:''},c=vm.createContext({module:{exports:{}},document:{readyState:'loading',addEventListener(){},getElementById:id=>id==='clinicToday-tab-clinical'?button:null}});vm.runInContext(fs.readFileSync(path.join(root,'clinic-organization.js'),'utf8'),c);
- for(const [value,expected] of [[{state:'ready',total:7,today:3,backlog:4},'오늘 3건 · 지난 미처리 4건'],[{state:'ready',total:0,today:0,backlog:0},'오늘 0건 · 지난 미처리 0건'],[{state:'loading'},'확인 중'],[{state:'failed'},'진료·예방·후속관리']]){c.carestepClinicalSummary=()=>value;c.module.exports.updateTodayCounts();assert.ok(button.textContent.includes(expected),button.textContent);if(value.state!=='ready')assert.doesNotMatch(button.textContent,/0건/);}
+ for(const [value,expected] of [[{state:'ready',total:7,today:3,backlog:4},'오늘 3건 · 지난 미처리 4건'],[{state:'ready',total:0,today:0,backlog:0},'오늘 0건 · 지난 미처리 0건'],[{state:'loading'},'확인 중'],[{state:'failed'},'진료·예방']]){c.carestepClinicalSummary=()=>value;c.module.exports.updateTodayCounts();assert.ok(button.textContent.includes(expected),button.textContent);if(value.state!=='ready')assert.doesNotMatch(button.textContent,/0건/);}
 });
