@@ -1109,6 +1109,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="clinical-care-ui.css?v=20261115-anesthesia-ward-usability">
 <link rel="stylesheet" href="clinic-record-start.css?v=20261115-prior-refinements">
 <link rel="stylesheet" href="practice-tools.css?v=20261101-intake-compact">
+<link rel="stylesheet" href="clinic-today-documents.css?v=20261122-documents">
 <link rel="stylesheet" href="clinic-today-purchases.css?v=20261117-inline-times">
 <link rel="stylesheet" href="clinic-navigation.css?v=20261117-today-supplies">
 <link rel="stylesheet" href="clinic-settings.css?v=20261108-permissions-wide"><script src="clinic-read-deadline.js?v=20261121-loading"></script><script src="clinic-capabilities.js?v=20261116-resources"></script>
@@ -1287,7 +1288,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 
       <section id="practice" class="view"><div id="practiceRoot"></div></section>
       <section id="training" class="view"><div id="staffTrainingRoot"></div></section>
-<section id="dashboard" class="view active-view"><div class="pt-today-layout"><div id="practiceTodayRoot" hidden></div><div id="wardTodayRoot" hidden></div></div>
+<section id="dashboard" class="view active-view"><div class="pt-today-layout"><div id="practiceTodayRoot" hidden></div><div id="wardTodayRoot" hidden></div></div><div id="todayDocumentsRoot" hidden></div>
         <div class="hero-panel">
           <div>
             <p class="eyebrow">오늘의 CARESTEP</p>
@@ -5857,7 +5858,7 @@ function showApp({deferFullRender=false}={}){
   if(!deferFullRender)renderAll();carestepSafeCall('permissions',()=>applySaasPermissions());carestepSafeCall('account_render',()=>renderSaasAccount());carestepSafeCall('history_init',()=>carestepInitHistory(carestepActiveView()));
   setTimeout(()=>{try{refreshDailyWorkflowIndicators(false);}catch(e){console.error('[CARESTEP RECOVERY] daily_indicators',e);}},0);
 }
-function showLogin(){window.ClinicDemo?.stop();globalThis.resourceClinicUI?.clear();resetClinicalLoad();window.CarestepTodayWard?.clear();window.CarestepTodayPurchases?.clear();document.getElementById('practiceTodayRoot')?.replaceChildren();window.CarestepPractice?.clear();globalThis.CarestepTraining?.clear();window.ClinicReliability?.clearPrivate();r19GoogleStatusScope=''; clearFollowupScopedDetails();carestepResetHistoryForLogin(); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
+function showLogin(){window.ClinicDemo?.stop();globalThis.resourceClinicUI?.clear();resetClinicalLoad();window.CarestepTodayWard?.clear();window.CarestepTodayDocuments?.clear();window.CarestepTodayPurchases?.clear();document.getElementById('practiceTodayRoot')?.replaceChildren();window.CarestepPractice?.clear();globalThis.CarestepTraining?.clear();window.ClinicReliability?.clearPrivate();r19GoogleStatusScope=''; clearFollowupScopedDetails();carestepResetHistoryForLogin(); $('sessionRestoreView')?.classList.add('hidden'); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
 
 /* v9.0.2 HOTFIX 25 · IN-APP BROWSER BACK NAVIGATION
    CARESTEP behaves like a single-page app, so browser Back should move through CARESTEP views
@@ -5945,7 +5946,7 @@ function go(view,options={}){
   if(view==='dashboard'){void window.carestepPracticeToday?.();setTimeout(()=>refreshClinicActionCenter(false),0);}
   if(view==='patients'&&typeof window.crmOpen==='function')setTimeout(()=>window.crmOpen(),0);
   if(view==='training')window.CarestepTraining?.open();
-  if(view==='practice')window.CarestepPractice?.open();
+  if(view==='practice')window.CarestepPractice?.open(options);
   if(view==='builder') renderBuilder();
   if(view==='followup'){followupGuideMode='setup';window.crmSyncFollowupPhone?.();initFollowupGuidedLayout();ensureFollowupExecutionPlacement();renderFollowupCenter();renderFollowupWorkboard();renderFollowupAnalytics();renderFollowupCrm();if(saasMode==='auth'&&saasMe)setTimeout(()=>{loadPatientJourneys(false,true);loadMessagingSettings(false,true);loadServerFollowupState(true);observeFollowupReads();},0);setTimeout(()=>{if(followupGuideMode==='operation'){window.ClinicFollowupTasks?.mount();window.ClinicFollowupTasks?.load();}},0);}
   if(view==='settings'){ if(window.ClinicSettings?.enter)window.ClinicSettings.enter();else{hydrateSettings();hydrateWorkflowSettings();} }
@@ -11092,7 +11093,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinical-assist.js?v=20261103-clinical-assist"></script>
 
 
-<script id="clinic-module-manifest" type="application/json">{"dental":["dental-record.js?v=20261115-portrait-print","dental-workflow.js?v=20261120-connections-refined"],"neuro":["neuro-record.js?v=20261120-connections-refined"],"ophthalmic":["ophthalmic-record.js?v=20261120-connections-refined"],"chronic":["ophthalmic-record.js?v=20261120-connections-refined","chronic-choices.js?v=20261112-record-choices-2","chronic-record.js?v=20261120-connections-refined"],"calc":["practice-acid-base.js?v=20261026tb1","practice-calcium-transfusion.js?v=20261031-calc-cleanup-2","practice-emergency.js?v=20261031-calc-cleanup-2","practice-potassium-mix.js?v=20261031-calc-cleanup-2","practice-cri-presets.js?v=20261031-calc-clarity-1","practice-nutrition-foods.js?v=20261031-prunus","practice-nutrition.js?v=20261031-food1","practice-calculator-workspace.js?v=20261031-calc-cleanup-2","practice-calcium-guided.js?v=20261026ca1","practice-fluid-plan.js?v=20261031-calc-cleanup-2"],"healthcheck":["healthcheck-record.js?v=20261121-demo-flow"],"consents":["consent-pagination.js?v=20261121-consent-navigation","surgery-consent-form.js?v=20261121-consent-combined-text","clinic-support.js?v=20261121-consent-title"],"bookings":["consent-pagination.js?v=20261121-consent-navigation","surgery-consent-form.js?v=20261121-consent-combined-text","clinic-support.js?v=20261121-consent-title"],"ledger":["surgery-ledger.js?v=20261120-chart-identity"],"purchases":["clinic-purchases.js?v=20261117-today-supplies"]}</script>
+<script id="clinic-module-manifest" type="application/json">{"dental":["dental-record.js?v=20261115-portrait-print","dental-workflow.js?v=20261120-connections-refined"],"neuro":["neuro-record.js?v=20261120-connections-refined"],"ophthalmic":["ophthalmic-record.js?v=20261120-connections-refined"],"chronic":["ophthalmic-record.js?v=20261120-connections-refined","chronic-choices.js?v=20261112-record-choices-2","chronic-record.js?v=20261120-connections-refined"],"calc":["practice-acid-base.js?v=20261026tb1","practice-calcium-transfusion.js?v=20261031-calc-cleanup-2","practice-emergency.js?v=20261031-calc-cleanup-2","practice-potassium-mix.js?v=20261031-calc-cleanup-2","practice-cri-presets.js?v=20261031-calc-clarity-1","practice-nutrition-foods.js?v=20261031-prunus","practice-nutrition.js?v=20261031-food1","practice-calculator-workspace.js?v=20261031-calc-cleanup-2","practice-calcium-guided.js?v=20261026ca1","practice-fluid-plan.js?v=20261031-calc-cleanup-2"],"healthcheck":["healthcheck-record.js?v=20261121-demo-flow"],"consents":["consent-pagination.js?v=20261121-consent-navigation","surgery-consent-form.js?v=20261121-consent-combined-text","clinic-support.js?v=20261122-documents"],"bookings":["consent-pagination.js?v=20261121-consent-navigation","surgery-consent-form.js?v=20261121-consent-combined-text","clinic-support.js?v=20261122-documents"],"ledger":["surgery-ledger.js?v=20261120-chart-identity"],"purchases":["clinic-purchases.js?v=20261117-today-supplies"]}</script>
 <script src="clinic-lazy-modules.js?v=20261121-loading"></script>
 <script src="clinic-inpatients.js?v=20261106-workflow9"></script>
 <script src="clinic-record-start.js?v=20261120-ux-state-actions"></script>
@@ -11107,10 +11108,11 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 
 
 
-<script src="practice-tools.js?v=20261121-consent-title"></script>
+<script src="practice-tools.js?v=20261122-documents"></script>
 <script src="clinic-today-ward.js?v=20261117-inline-times"></script>
 <script src="clinic-today-purchases.js?v=20261117-inline-times"></script>
-<script src="practice-clinic.js?v=20261121-consent-search-trim"></script>
+<script src="clinic-today-documents.js?v=20261122-documents"></script>
+<script src="practice-clinic.js?v=20261122-documents"></script>
 <script src="clinic-settings.js?v=20261116-permissions-v3"></script>
 <link rel="stylesheet" href="clinic-followup-tasks.css?v=20261117-message-selection">
 <script src="clinic-followup-tasks.js?v=20261117-today-supplies"></script>
