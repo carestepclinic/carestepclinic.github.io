@@ -562,3 +562,6 @@ body:has(#builder.active-view) #r61-patient-context[data-ready="true"]~* .builde
 #appView .topbar #viewTitle{margin:0}
 
 @media(max-width:700px){.clinic-calm #clinicTodayQueue .clinic-today-toolbar{flex-wrap:wrap;gap:8px}.clinic-calm #clinicTodayQueue .clinic-today-toolbar>[role=tablist]{display:flex;flex:1 1 100%;width:100%;flex-wrap:nowrap;gap:5px}.clinic-calm #clinicTodayQueue .clinic-today-toolbar>[role=tablist]>button{flex:1 1 0;min-width:0;padding:8px 5px;font-size:12px;white-space:normal;word-break:keep-all}.clinic-calm #clinicTodayQueue .clinic-today-toolbar>#refreshWorkFirst{margin-left:auto}}
+
+.cs-today-tab-short,#clinicTodayCategorySummary{display:none}
+@media(max-width:700px){#clinicTodayQueue .cs-today-tab-full{display:none}#clinicTodayQueue .cs-today-tab-short{display:inline}#clinicTodayCategorySummary{display:block;margin:8px 0;font-size:12px;color:#60767e}.clinic-calm #clinicTodayQueue .clinic-today-toolbar>[role=tablist]>button{padding:9px 5px;min-height:42px}.clinic-calm #workFirstDashboard .care-inbox nav[hidden]{display:none!important}}

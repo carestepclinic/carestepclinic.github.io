@@ -25,10 +25,14 @@ try{for(const width of [1440,390]){
  await check("document.getElementById('todayDocumentsRoot').getBoundingClientRect().height<100",'empty document card compact');
  await ev("document.getElementById('clinicToday-tab-followup').click()");
  await check("[...document.querySelectorAll('#workFirstList .work-first-row')].map(x=>x.dataset.workType).sort().join(',')==='home,internal,message'",'followup excludes clinical and preventive tasks');
+ await check("document.querySelector('[data-work-filter=care] span').textContent==='원내·HOME'",'followup filter uses relevant label');
+ await check("document.getElementById('clinicTodayCategorySummary').textContent==='오늘 3건 · 지난 미처리 1건'",'selected tab breakdown retained');
+ await check("getComputedStyle(document.querySelector('.cs-today-tab-short')).display==="+(width===390?"'inline'":"'none'"),'tab label responsive');
  await check("document.getElementById('clinicToday-tab-followup').textContent.includes('오늘 3건 · 지난 미처리 1건')",'followup counts correct');
  await check("document.querySelector('#workFirstBacklogList .work-first-row').dataset.workId==='old-internal'&&!!document.getElementById('workFirstBacklog').closest('#clinicFollowupTasks')&&!document.getElementById('workFirstBacklog').hidden",'followup backlog retained');
  await check("!!document.querySelector('#workFirstList [data-work-resolve]')&&!!document.querySelector('#workFirstList [data-work-retry]')",'existing complete and retry controls retained');
  await ev("document.querySelector('[data-work-filter=unassigned]').click();document.getElementById('clinicToday-tab-clinical').click()");
+ await check("document.querySelector('[data-work-filter=care] span').textContent==='진료'",'clinical filter uses relevant label');
  await check("workFirstFilter==='all'",'changing main tab resets subfilter');
  await check("[...document.querySelectorAll('#workFirstList .work-first-row')].map(x=>x.dataset.workType).sort().join(',')==='heartworm,vaccination,visit'",'clinical tab contains visit vaccination heartworm');
  await check("document.getElementById('clinicToday-tab-clinical').textContent.includes('오늘 3건 · 지난 미처리 0건')",'clinical counts independent');
@@ -38,8 +42,32 @@ try{for(const width of [1440,390]){
  await ev("document.getElementById('clinicToday-tab-clinical').dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowLeft',bubbles:true}))");await check("document.getElementById('clinicToday-tab-followup').getAttribute('aria-selected')==='true'",'keyboard navigation works');
  await ev("go('patients');go('dashboard')");await check("document.getElementById('clinicToday-tab-attention').getAttribute('aria-selected')==='true'",'return to today opens attention');
  await check("testWrites.length===0",'no writes or messages');await check("document.documentElement.scrollWidth<=innerWidth+1",'no horizontal overflow');
+ await ev("document.getElementById('refreshWorkFirst').click();new Promise(r=>setTimeout(r,100))");
+ await check("document.querySelector('#clinicCareInbox nav').hidden&&document.getElementById('clinicCareInbox').classList.contains('cs-inbox-empty')",'fully loaded empty attention is compact');
+ await ev("window.savedRequest=crmApiRequest;window.holdInbox=[];crmApiRequest=(p,o)=>p==='/saas/consultations'?new Promise((resolve,reject)=>holdInbox.push({resolve,reject})):savedRequest(p,o);document.getElementById('refreshWorkFirst').click()");
+ await check("!document.querySelector('#clinicCareInbox nav').hidden&&!document.getElementById('clinicCareInbox').classList.contains('cs-inbox-empty')",'pending refresh remains visible');
+ await ev("holdInbox.forEach(x=>x.reject(Error('synthetic failure')));new Promise(r=>setTimeout(r,100))");
+ await check("!document.querySelector('#clinicCareInbox nav').hidden&&!!document.querySelector('.care-failure-details button')",'failure keeps recovery controls visible');
+ await ev("crmApiRequest=savedRequest;document.getElementById('refreshWorkFirst').click();new Promise(r=>setTimeout(r,100))");
+ await check("document.querySelector('#clinicCareInbox nav').hidden&&!document.querySelector('.care-failure-details')",'recovery returns empty compact state');
+ await ev("document.getElementById('careConsultInbox').closest('details').open=true;document.querySelector('[data-consult-filter=completed]').click()");
+ await check("document.querySelector('[data-consult-filter=completed]').classList.contains('active')",'consult status filters still work');
+ await check("(()=>{const b=document.querySelector('#careConsultInbox .consult-status-tabs .active'),p=document.createElement('i');p.style.backgroundColor=getComputedStyle(b).getPropertyValue('--cs-accent');b.append(p);const expected=getComputedStyle(p).backgroundColor;p.remove();return getComputedStyle(b).backgroundColor===expected;})()",'consult active button matches teal');
+ await check("getComputedStyle(document.querySelector('[data-consult-filter=new]')).backgroundColor==='rgb(255, 255, 255)'",'inactive consultation button neutral');
  const shot=await send('Page.captureScreenshot',{format:'png'});fs.writeFileSync('../today-layout-'+width+'.png',Buffer.from(shot.data,'base64'));
+ await check("(()=>{for(const v of [{state:'ready',total:7,today:3,backlog:4},{state:'ready',total:0,today:0,backlog:0},{state:'loading'},{state:'failed'}]){window.carestepClinicalSummary=()=>v;ClinicOrganization.updateTodayCounts();const t=document.getElementById('clinicToday-tab-clinical').textContent;if(v.state==='ready'?!t.includes('오늘 '+v.today+'건 · 지난 미처리 '+v.backlog+'건'):t.includes('0건'))return false;}return true;})()",'legacy count states retained without false zero');
+ await ev("go('practice',{practiceTab:'healthcheck'});new Promise(r=>setTimeout(r,100))");
+ await check("(()=>{const bar=document.querySelector('.hc-record .cs-record-list-actions'),bs=[...bar.querySelectorAll('button')].filter(x=>x.offsetWidth),ys=bs.map(x=>x.getBoundingClientRect().y);return bs.length===3&&(innerWidth<640||ys.every(y=>Math.abs(y-ys[0])<2))&&!bar.querySelector('[data-action=new]').disabled&&!bar.querySelector('[data-action=refresh]').disabled&&document.documentElement.scrollWidth<=innerWidth+1;})()",'legacy healthcheck toolbar layout and actions');
+ await ev("document.querySelector('.hc-record [data-cs-inpatient]').click();new Promise(r=>setTimeout(r,100))");
+ await check("[...document.querySelectorAll('dialog,[role=dialog]')].some(x=>x.textContent.includes('입원'))",'legacy inpatient picker opens');
+ await ev("(async()=>{document.querySelectorAll('dialog,[role=dialog]').forEach(x=>x.remove());window.trainingTest=document.createElement('main');document.body.append(trainingTest);window.trainingKey='clinic:a';window.trainingHold=false;window.trainingFail=false;const doc=(id,kind)=>({id,course_id:id,kind,title:kind==='sop'?'합성 업무지침':'합성 교육자료',status:'published',current_version_id:id,version:1,updated_at:'2026-01-01',common:true});window.trainingQA=StaffTraining.mount(trainingTest,{separateSop:true,identity:()=>trainingKey,isReady:()=>true,request:async()=>{if(trainingHold)await new Promise(r=>window.trainingRelease=r);if(trainingFail)throw Error('합성 연결 오류');return {actor:{userId:'a',capabilities:{}},courses:[doc('e','education'),doc('s','sop')],assignments:[],members:[]};}});await trainingQA.open();trainingHold=true;trainingQA.prepareSection('sop');window.trainingPending=trainingQA.open({reuse:false});})()");
+ await check("trainingTest.textContent.includes('합성 업무지침')&&!trainingTest.textContent.includes('합성 교육자료')&&trainingTest.querySelector('[data-status]').textContent.includes('업데이트')",'legacy cached SOP switch immediate during refresh');
+ await ev("(async()=>{trainingFail=true;trainingRelease();await trainingPending;})()");
+ await check("trainingTest.textContent.includes('합성 업무지침')&&trainingTest.querySelector('[data-status]').textContent.includes('합성 연결 오류')",'legacy SOP content survives refresh failure');
+ await ev("(async()=>{trainingFail=false;trainingQA.prepareSection('education');window.trainingPending=trainingQA.open({reuse:false});trainingRelease();await trainingPending;trainingKey='clinic:b';trainingQA.prepareSection('sop');})()");
+ await check("!trainingTest.querySelector('.st-card')",'legacy training clinic switch clears old cards');
+ 
  }
- for(const width of [1440,390]){await send('Emulation.setDeviceMetricsOverride',{width,height:1050,deviceScaleFactor:1,mobile:false});await send('Page.navigate',{url:base+'/test/clinic-today-documents-browser.html'});let qa;for(let n=0;n<100;n++){qa=await ev('window.qaResults');if(qa)break;await new Promise(r=>setTimeout(r,100));}assert.equal(qa?.passed,24,JSON.stringify(qa));assert.ok(!qa.results.some(x=>x.startsWith('FAIL')),JSON.stringify(qa));results.push(...qa.results.map(x=>width+' documents: '+x));}
+ for(const width of [1440,390]){await send('Emulation.setDeviceMetricsOverride',{width,height:1050,deviceScaleFactor:1,mobile:false});await send('Page.navigate',{url:base+'/test/clinic-today-documents-browser.html'});let qa;for(let n=0;n<100;n++){qa=await ev('window.qaResults');if(qa)break;await new Promise(r=>setTimeout(r,100));}assert.equal(qa?.passed,32,JSON.stringify(qa));assert.ok(!qa.results.some(x=>x.startsWith('FAIL')),JSON.stringify(qa));results.push(...qa.results.map(x=>width+' documents: '+x));}
  console.log(JSON.stringify({passed:results.length,results,errors}));assert.deepEqual(errors,[]);
 }finally{await send('Page.close');ws.close();}

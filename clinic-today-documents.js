@@ -43,12 +43,12 @@
   return {refresh,more,clear,snapshot};
  }
  function mount(root,a){
-  let pastOpen=false,opening=false,notice='';
+  let pastOpen=false,opening=false,notice='',expanded=false,viewScope='';
   const node=(tag,text,cls)=>{const e=document.createElement(tag);if(text)e.textContent=text;if(cls)e.className=cls;return e;};
   const button=(text,fn)=>{const b=node('button',text);b.type='button';b.onclick=fn;return b;};
   const loader=createLoader(a,render);
   function render(){
-   if(!root)return;const state=loader.snapshot();if(!state.visible){root.replaceChildren();root.hidden=true;pastOpen=false;notice='';return;}root.hidden=false;root.className='pt cs-today-documents';
+   if(!root)return;if(viewScope!==a.identity()){viewScope=a.identity();expanded=false;pastOpen=false;}const state=loader.snapshot();if(!state.visible){root.replaceChildren();root.hidden=true;pastOpen=false;notice='';return;}root.hidden=false;root.className='pt cs-today-documents';
    const old=root.querySelector('details');if(old)pastOpen=old.open;const focused=document.activeElement,focusKey=root.contains(focused)?focused.dataset.documentAction||'':'';
    root.replaceChildren();const card=node('section',null,'pt-card'),head=node('div',null,'cs-documents-head'),heading=node('div'),h=node('h3','작성 중인 문서');heading.append(h);const checked=kinds.filter(k=>a.allowed(k)).map(k=>state.sources[k].checked);if(checked.length&&checked.every(Boolean)){heading.append(node('small',g.ClinicOrganization.checkedTime(Math.min(...checked)),'cs-document-time'));}head.append(heading);card.setAttribute('aria-label','작성 중인 검진 보고서와 서명 전 동의서');
    const active=kinds.filter(k=>a.allowed(k)),busy=active.some(k=>state.sources[k].busy),incomplete=active.some(k=>state.sources[k].next||state.sources[k].error||!state.sources[k].loaded);
@@ -57,14 +57,14 @@
    if(busy||incomplete){const status=node('p',busy?'문서 확인 중…':'일부 목록 표시 · 조회 상태를 확인해주세요.','cs-document-help');status.setAttribute('role','status');card.append(status);}
    function row(item){const line=node('div',null,'cs-document-row'),copy=node('div',null,'cs-document-copy'),type=node('span',labels[item.kind],'cs-document-kind'),title=node('b',item.name+' · '+item.title),meta=node('small',[item.date||'날짜 확인 필요',item.guardian?'보호자 '+item.guardian:'',item.chart?'차트 '+item.chart:'',item.status].filter(Boolean).join(' · '));copy.append(type,title,meta);const key=a.identity(),open=button(a.editable(item.kind)?'이어서 작성':'문서 보기',async()=>{if(opening||!a.ready()||key!==a.identity()||!a.allowed(item.kind))return;opening=true;notice='';open.disabled=true;open.textContent='여는 중…';try{const opened=await a.open(item.kind,item.id);if(opened===false&&key===a.identity())notice='현재 문서의 저장 또는 이동 안내를 확인해주세요.';}catch{if(key===a.identity())notice='문서를 열지 못했습니다. 새로고침 후 다시 시도해주세요.';}finally{opening=false;if(key===a.identity())render();}});open.dataset.documentAction=item.kind+':'+item.id;open.disabled=opening;open.setAttribute('aria-label',item.name+' '+item.title+' '+open.textContent);line.append(copy,open);return line;}
    const grouped=groups(state.rows,a.today?.()||day()),current=node('div',null,'cs-documents-current');
-   if(grouped.today.length){current.append(node('h4','오늘 작성·수정 '+grouped.today.length+'건'));for(const item of grouped.today)current.append(row(item));}
+   if(grouped.today.length){current.append(node('h4','오늘 작성·수정 '+grouped.today.length+'건'));for(const item of grouped.today.slice(0,expanded?grouped.today.length:5))current.append(row(item));if(grouped.today.length>5){const more=button(expanded?'처음 5건만 보기':'나머지 '+(grouped.today.length-5)+'건 더 보기',()=>{expanded=!expanded;render();root.querySelector('[data-document-action=expand-today]')?.focus({preventScroll:true});});more.dataset.documentAction='expand-today';more.setAttribute('aria-expanded',String(expanded));current.append(more);}}
    else if(!busy&&!incomplete&&!state.rows.length)heading.append(node('span','미완료 문서 없음','cs-document-empty'));card.append(current);
    if(grouped.past.length){const details=node('details',null,'cs-documents-past'),summary=node('summary','지난 미완료 문서 '+grouped.past.length+'건');details.open=pastOpen;details.append(summary);for(const item of grouped.past)details.append(row(item));details.ontoggle=()=>{pastOpen=details.open;};card.append(details);}
    for(const kind of active){const s=state.sources[kind];if(s.error){const err=node('div',null,'cs-document-error');err.setAttribute('role','status');err.append(node('span',labels[kind]+' · '+s.error));card.append(err);}if(s.next){const more=button(labels[kind]+' 더 불러오기',()=>void loader.more(kind));more.disabled=s.busy;more.dataset.documentAction='more-'+kind;more.className='cs-document-more';card.append(more);}}
    if(notice){const n=node('p',notice,'cs-document-error');n.setAttribute('role','status');card.append(n);}root.append(card);
    if(focusKey){const target=[...root.querySelectorAll('[data-document-action]')].find(x=>x.dataset.documentAction===focusKey);target?.focus({preventScroll:true});}
   }
-  return {...loader,clear(){pastOpen=false;notice='';loader.clear();if(root){root.replaceChildren();root.hidden=true;}}};
+  return {...loader,clear(){pastOpen=false;expanded=false;viewScope='';notice='';loader.clear();if(root){root.replaceChildren();root.hidden=true;}}};
  }
  const api={day,normalize,groups,createLoader,mount};if(typeof module==='object'&&module.exports)module.exports=api;else g.ClinicTodayDocuments=api;
 })(typeof window==='undefined'?globalThis:window);

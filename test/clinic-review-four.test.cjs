@@ -20,7 +20,7 @@ for(const width of [390,1440])test('education to SOP switches cached area immedi
  await p.evaluate(()=>{hold=true;fail=false;training.prepareSection('education');window.pending=training.open({reuse:false});});assert.equal(await p.getByRole('heading',{name:'합성 교육자료',exact:true}).count(),1);assert.equal(await p.getByRole('heading',{name:'합성 업무지침',exact:true}).count(),0);await p.evaluate(async()=>{release();await pending;});
  await p.evaluate(()=>{key='clinic:b';training.prepareSection('sop');});assert.equal(await p.locator('.st-card').count(),0);
 });
-test('today count labels distinguish backlog and preserve loading and failure state',()=>{
- const button={textContent:''},c=vm.createContext({module:{exports:{}},document:{readyState:'loading',addEventListener(){},getElementById:id=>id==='clinicToday-tab-clinical'?button:null}});vm.runInContext(fs.readFileSync(path.join(root,'clinic-organization.js'),'utf8'),c);
- for(const [value,expected] of [[{state:'ready',total:7,today:3,backlog:4},'오늘 3건 · 지난 미처리 4건'],[{state:'ready',total:0,today:0,backlog:0},'오늘 0건 · 지난 미처리 0건'],[{state:'loading'},'확인 중'],[{state:'failed'},'진료·예방']]){c.carestepClinicalSummary=()=>value;c.module.exports.updateTodayCounts();assert.ok(button.textContent.includes(expected),button.textContent);if(value.state!=='ready')assert.doesNotMatch(button.textContent,/0건/);}
+test('today count labels distinguish backlog and preserve loading and failure state',async t=>{
+ const p=await page(t);await p.locator('#clinicToday-tab-clinical').waitFor({state:'attached'});
+ for(const [value,expected] of [[{state:'ready',total:7,today:3,backlog:4},'오늘 3건 · 지난 미처리 4건'],[{state:'ready',total:0,today:0,backlog:0},'오늘 0건 · 지난 미처리 0건'],[{state:'loading'},'확인 중'],[{state:'failed'},'진료·예방']]){const text=await p.evaluate(value=>{window.carestepClinicalSummary=()=>value;ClinicOrganization.updateTodayCounts();return document.getElementById('clinicToday-tab-clinical').textContent;},value);assert.ok(text.includes(expected),text);if(value.state!=='ready')assert.doesNotMatch(text,/0건/);}
 });

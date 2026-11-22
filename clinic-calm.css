@@ -2194,3 +2194,14 @@
  .clinic-calm #appView .sidebar .nav-item.nav-sub.active .nav-copy,
  .clinic-calm #appView .sidebar .nav-item.nav-sub.active .nav-copy b {font-weight:700}
 }
+
+/* Today: quiet empty state and consistent consultation status controls. */
+.clinic-calm #workFirstDashboard .care-inbox nav[hidden]{display:none!important}
+.clinic-calm #workFirstDashboard .cs-inbox-empty{padding-bottom:0}
+.clinic-calm #workFirstDashboard .cs-inbox-empty #clinicCareRows{display:none}
+.clinic-calm #workFirstDashboard .cs-inbox-empty #clinicCareStatus{margin:8px 0}
+.clinic-calm #careConsultInbox .consult-status-tabs button{background:#fff;border:1px solid var(--cs-line);color:var(--cs-muted);font:inherit;font-size:13px;min-height:38px;border-radius:7px;padding:8px 10px}
+.clinic-calm #careConsultInbox .consult-status-tabs button:hover{background:var(--cs-tint);color:var(--cs-accent-hover)}
+.clinic-calm #careConsultInbox .consult-status-tabs button.active{background:var(--cs-accent);border-color:var(--cs-accent);color:#fff}
+.clinic-calm #careConsultInbox .consult-status-tabs button.active:hover{background:var(--cs-accent-hover);border-color:var(--cs-accent-hover)}
+.clinic-calm #careConsultInbox .consult-status-tabs button:focus-visible{outline:2px solid var(--cs-accent);outline-offset:3px}

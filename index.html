@@ -1097,7 +1097,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="carestep-workflow.css?v=flow-20261017">
   <link rel="stylesheet" href="home-access-clinic.css?v=readable-20261017">
 <link rel="stylesheet" href="carestep-ui.css?v=deployment-check-20261019a">
-<link rel="stylesheet" href="clinic-organization.css?v=20261122-today-layout">
+<link rel="stylesheet" href="clinic-organization.css?v=20261122-today-compact">
 <style>
 .billing-contract-comparison{margin:16px 0;border:1px solid var(--line);border-radius:12px;padding:14px;background:#f8faff;line-height:1.65;font-size:14px}.billing-contract-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.billing-contract-columns span,.billing-contract-columns strong,.billing-contract-columns small{display:block}.billing-contract-columns strong{font-size:19px;margin:5px 0;color:#143d83}.billing-contract-comparison p{font-size:13px}.billing-contract-comparison summary{cursor:pointer;padding:8px 0;font-weight:700}.billing-catalog-row{padding:10px 0;border-top:1px solid var(--line)}.billing-catalog-row b,.billing-catalog-row span,.billing-catalog-row small{display:block}#billingReadStatus[data-state="error"]{color:#9a372d;background:#fff3f0;padding:12px;border-radius:10px}@media(max-width:600px){.billing-contract-columns{grid-template-columns:minmax(0,1fr)}.billing-contract-columns>div+div{border-top:1px solid var(--line);padding-top:12px}}
 </style>
@@ -5078,7 +5078,7 @@ function renderWorkFirstRows(list,rows,limit){
 }
 function renderWorkFirstDashboard(){
   const list=$('workFirstList');if(!list)return;const rawBuckets=workFirstBuckets(),allBuckets=Object.fromEntries(Object.entries(rawBuckets).map(([key,rows])=>[key,window.ClinicOrganization?.clinicalRows(rows,window.carestepAttentionSummary?.().consult)||rows])),buckets=Object.fromEntries(Object.entries(allBuckets).map(([key,rows])=>[key,window.ClinicOrganization?.categoryRows(rows)||rows])),labels={all:'업무 목록',preventive:'오늘 접종·사상충',care:'오늘 업무',consult:'보호자 상담 필요',delivery:'발송 실패·미열람',unassigned:'담당자 미지정',overdue:'지연 업무'};
-  [['workCountAll',buckets.all.length],['workCountPreventive',buckets.preventive.length],['workCountCare',buckets.care.length],['workCountConsult',buckets.consult.length],['workCountDelivery',buckets.delivery.length],['workCountUnassigned',buckets.unassigned.length],['workCountOverdue',buckets.overdue.length]].forEach(([id,n])=>{if($(id))$(id).textContent=String(n)});document.querySelectorAll('[data-work-filter]').forEach(b=>{b.classList.toggle('active',b.dataset.workFilter===workFirstFilter);b.hidden=b.dataset.workFilter!=='all'&&!(buckets[b.dataset.workFilter]||[]).length&&b.dataset.workFilter!==workFirstFilter;});if($('workFirstListTitle')){$('workFirstListTitle').textContent=labels[workFirstFilter]||labels.all;$('workFirstListTitle').hidden=workFirstFilter==='all';}
+  [['workCountAll',buckets.all.length],['workCountPreventive',buckets.preventive.length],['workCountCare',buckets.care.length],['workCountConsult',buckets.consult.length],['workCountDelivery',buckets.delivery.length],['workCountUnassigned',buckets.unassigned.length],['workCountOverdue',buckets.overdue.length]].forEach(([id,n])=>{if($(id))$(id).textContent=String(n)});document.querySelectorAll('[data-work-filter]').forEach(b=>{b.classList.toggle('active',b.dataset.workFilter===workFirstFilter);const label=b.querySelector('span');if(label&&window.ClinicOrganization?.workFilterLabel)label.textContent=window.ClinicOrganization.workFilterLabel(b.dataset.workFilter);b.hidden=b.dataset.workFilter!=='all'&&!(buckets[b.dataset.workFilter]||[]).length&&b.dataset.workFilter!==workFirstFilter;});if($('workFirstListTitle')){$('workFirstListTitle').textContent=window.ClinicOrganization?.workFilterLabel(workFirstFilter)||labels[workFirstFilter]||labels.all;$('workFirstListTitle').hidden=workFirstFilter==='all';}
   let rows=[...(buckets[workFirstFilter]||buckets.all)];rows.sort((a,b)=>Number(!!b.action?.breached)-Number(!!a.action?.breached)||({urgent:0,high:1,normal:2}[a.action?.priority]??3)-({urgent:0,high:1,normal:2}[b.action?.priority]??3)||String(a.dueDate||'').localeCompare(String(b.dueDate||'')));
   if($('workFirstListMeta')){$('workFirstListMeta').textContent=`${rows.length}건`;$('workFirstListMeta').title='긴급·지연·오늘 일정 순';}
   window.carestepClinicalSummary=()=>({state:clinicClinicalReadState,refreshing:followupScheduleLoading&&!!clinicalLoadCheckedAt,stale:!!clinicalLoadError&&!!clinicalLoadCheckedAt,total:allBuckets.all.length+allBuckets.backlog.length,today:allBuckets.all.length,backlog:allBuckets.backlog.length,groups:window.ClinicOrganization?.categoryCounts(allBuckets)});window.ClinicOrganization?.updateTodayCounts();
@@ -11026,9 +11026,9 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="r83-clinic.js?v=20261031-practical-terms"></script>
 <script src="clinic-read-flow.js?v=flow-20261017"></script>
 <script src="home-access-clinic.js?v=20261031-practical-terms"></script>
-<script src="clinic-care.js?v=20261122-today-layout"></script>
+<script src="clinic-care.js?v=20261122-today-compact"></script>
 <script src="clinic-account-reads.js?v=20261031-account"></script>
-<script src="clinic-organization.js?v=20261122-today-layout"></script>
+<script src="clinic-organization.js?v=20261122-today-compact"></script>
 <script src="staff-training.js?v=20261117-clinic-review-four"></script>
 <script src="staff-training-clinic.js?v=20261105-operations"></script>
 <script src="practice-intake.js?v=20261105-selection"></script>
@@ -11111,14 +11111,14 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="practice-tools.js?v=20261122-documents"></script>
 <script src="clinic-today-ward.js?v=20261122-today-layout"></script>
 <script src="clinic-today-purchases.js?v=20261122-today-layout"></script>
-<script src="clinic-today-documents.js?v=20261122-today-layout"></script>
+<script src="clinic-today-documents.js?v=20261122-today-compact"></script>
 <script src="practice-clinic.js?v=20261122-documents"></script>
 <script src="clinic-settings.js?v=20261116-permissions-v3"></script>
 <link rel="stylesheet" href="clinic-followup-tasks.css?v=20261117-message-selection">
 <script src="clinic-followup-tasks.js?v=20261117-today-supplies"></script>
 <link rel="stylesheet" href="builder-flow.css?v=20261105-flow3">
 <script src="builder-flow.js?v=20261112-recheck"></script>
-<link rel="stylesheet" href="clinic-calm.css?v=20261121-sidebar-type">
+<link rel="stylesheet" href="clinic-calm.css?v=20261122-today-compact">
 <script src="carestep-privacy.js?v=20261116-review"></script>
 <script src="clinic-update-notice.js?v=20261117-stable-updates"></script>
 <script>

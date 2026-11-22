@@ -1,7 +1,7 @@
 /* Synthetic data and mock requests only. No remote services or real records. */
 (async()=>{
  const results=[],ok=(v,label)=>{if(!v)throw Error(label);results.push(label);},wait=()=>new Promise(r=>setTimeout(r,40));
- let identity='synthetic:a',reader=false,denied=false,done=false;const calls=[],opened=[];
+ let identity='synthetic:a',reader=false,denied=false,done=false,many=false;const calls=[],opened=[];
  const root=document.querySelector('#documents'),practiceRoot=document.querySelector('#practiceRoot');
  const patient={id:'synthetic-patient',name:'가상 환자',guardianName:'가상 보호자',chartNumber:'TEST001',species:'cat'};
  const health=id=>({id,clinicalStatus:done?'complete':'inProgress',updatedAt:id==='old'?'2026-11-20T00:00:00Z':'2026-11-22T00:00:00Z',patient});
@@ -12,7 +12,7 @@
  if(path.includes('/consents?'))return {items:[{...docs.c,patientName:'가상 환자',title:'가상 수술 동의서',updatedAt:'2026-11-22T01:00:00Z',status:done?'signed':'draft'},{...docs.signed,patientName:'완료 문서'},{...docs.deleted,patientName:'삭제 문서'}],next:''};
  if(path.includes('/consents/')){const id=path.split('/').at(-1);if(!docs[id])throw Error('찾을 수 없는 문서');return {document:structuredClone(docs[id])};}
  if(path.includes('/cases/')){const id=path.split('/cases/')[1].split('?')[0];const chart=HealthcheckRecord.blank();chart.patient=patient;chart.date='2026-11-22';return {item:{id,revision:1,patient_id:patient.id,patient,body:{species:'cat',healthcheckChart:chart}}};}
- if(path.includes('/healthcheck?'))return {items:[health('h'),health('old'),{...health('complete'),clinicalStatus:'complete'}],next:''};
+ if(path.includes('/healthcheck?'))return {items:[health('h'),health('old'),{...health('complete'),clinicalStatus:'complete'},...(many?Array.from({length:6},(_,i)=>({...health('extra'+i),updatedAt:'2026-11-22T0'+(i+2)+':00:00Z'})):[])],next:''};
  return {items:[],members:[]};};
  const adapter={ready:()=>true,identity:()=>identity,can:()=>!reader,access:()=>({allowed:true}),patient:()=>null,hospital:()=>({name:'가상 병원'}),navigation:()=>{},request,consentSources:async()=>({items:[]}),consentEducation:async()=>({items:[]})};
  let practice=PracticeTools.mount(practiceRoot,adapter);
@@ -36,6 +36,15 @@
  const directRoot=document.createElement('div');practiceRoot.append(directRoot);reader=true;const readonly=ClinicSupport.mount(directRoot,adapter,'consents');await readonly.openDocument('c');ok(!directRoot.querySelector('[data-consent-form]'),'read-only user cannot edit draft');readonly.dispose();
  await board.refresh();ok(root.querySelector('[data-document-action="consents:c"]').textContent==='문서 보기','read-only dashboard action says view');reader=false;
  done=true;await board.refresh();ok(!root.querySelector('.cs-document-row'),'completed/signed documents removed after refresh');done=false;
+ many=true;await board.refresh();
+ ok(root.querySelectorAll('.cs-documents-current .cs-document-row').length===5,'many documents initially show five');
+ ok(root.querySelector('.cs-documents-current [data-document-action]').dataset.documentAction==='healthcheck:extra5','newest document appears first');
+ ok(root.querySelector('[data-document-action=expand-today]').textContent==='나머지 3건 더 보기','remaining count shown');
+ root.querySelector('[data-document-action=expand-today]').click();ok(root.querySelectorAll('.cs-documents-current .cs-document-row').length===8,'expand shows all today documents');
+ await board.refresh();ok(root.querySelectorAll('.cs-documents-current .cs-document-row').length===8,'refresh preserves expanded choice');
+ root.querySelector('[data-document-action=expand-today]').click();ok(root.querySelectorAll('.cs-documents-current .cs-document-row').length===5,'collapse restores five');
+ root.querySelector('[data-document-action=expand-today]').click();identity='synthetic:b';await board.refresh();ok(root.querySelectorAll('.cs-documents-current .cs-document-row').length===5,'clinic switch resets expanded documents');
+ many=false;await board.refresh();ok(!root.querySelector('[data-document-action=expand-today]'),'small list has no unnecessary expand control');
  denied=true;await board.refresh();ok(root.hidden,'no access hides document summary');denied=false;await board.refresh();
  board.clear();ok(root.hidden&&!root.children.length,'logout clear removes all visible documents');await board.refresh();
  ok(calls.every(x=>x.method==='GET'),'all requests read-only; no AI/signature/payment/message actions');

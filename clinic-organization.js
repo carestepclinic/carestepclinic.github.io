@@ -74,13 +74,18 @@
  }
  function taskCategory(row){return ['visit','vaccination','heartworm'].includes(row?.sourceType)?'clinical':'followup';}
  function categoryRows(rows,category=todayCategory){return (rows||[]).filter(row=>taskCategory(row)===category);}
+ function workFilterLabel(key){return ({all:'전체',care:todayCategory==='followup'?'원내·HOME':'진료',preventive:'접종·사상충',consult:'상담 필요',delivery:'발송 확인',unassigned:'담당자 미지정',overdue:'지연 업무'})[key]||'업무 목록';}
  function categoryCounts(buckets){return Object.fromEntries(['followup','clinical'].map(key=>{const today=categoryRows(buckets.all,key).length,backlog=categoryRows(buckets.backlog,key).length;return [key,{today,backlog,total:today+backlog}];}));}
  function updateTodayCounts(){
   const attention=global.carestepAttentionSummary?.(),clinical=global.carestepClinicalSummary?.();
   for(const [key,label,value] of [['attention','확인·조치 필요',attention],['followup','후속관리',clinical?.groups?{...clinical,...clinical.groups.followup}:clinical],['clinical','진료·예방',clinical?.groups?{...clinical,...clinical.groups.clinical}:clinical]]){
    const button=$('clinicToday-tab-'+key);if(!button)continue;
    const suffix=!value||value.state==='loading'?'확인 중':value.state==='failed'?'':value.state==='unavailable'?'이용 불가':key==='attention'?((value.targets??value.total)===value.total?value.total+'건':value.total+'항목 · 대상 '+value.targets+'건'):Number.isInteger(value.today)&&Number.isInteger(value.backlog)?'오늘 '+value.today+'건 · 지난 미처리 '+value.backlog+'건':'업무 '+value.total+'건';
-   const text=label+(suffix?' · '+suffix:'')+(value?.refreshing?' · 갱신 중':'');if(button.textContent!==text)button.textContent=text;
+   const text=label+(suffix?' · '+suffix:'')+(value?.refreshing?' · 갱신 중':'');
+   const total=key==='attention'?(value?.targets??value?.total):value?.total;
+   const short=label+(value?.state==='ready'&&Number.isFinite(total)?' '+total+'건':value?.state==='loading'||!value?' · 확인 중':value?.state==='failed'?' · 조회 실패':value?.state==='unavailable'?' · 이용 불가':'');
+   if(button.getAttribute('aria-label')!==text||!button.querySelector('.cs-today-tab-short')){button.replaceChildren();for(const [cls,copy] of [['cs-today-tab-full',text],['cs-today-tab-short',short]]){const span=document.createElement('span');span.className=cls;span.textContent=copy;span.setAttribute('aria-hidden','true');button.append(span);}button.setAttribute('aria-label',text);}
+   if(key===todayCategory){const summary=$('clinicTodayCategorySummary');if(summary)summary.textContent=value?.state==='ready'?'오늘 '+value.today+'건 · 지난 미처리 '+value.backlog+'건'+(value.refreshing?' · 갱신 중':''):value?.state==='failed'?'업무 조회 실패':value?.state==='unavailable'?'이용 권한 확인 필요':'업무 확인 중…';}
   }
  }
  function createTabs(root,entries,{prefix,selected,onChange=()=>{}}){
@@ -118,7 +123,7 @@
  function mountDashboard(){
   const host=$('workFirstDashboard'),box=$('clinicCareInbox');if(!host||!box||$('clinicHomePrimary'))return;
   const grid=document.createElement('div');grid.id='clinicHomePrimary';host.querySelector('.work-first-head').after(grid);const queue=document.createElement('section');queue.id='clinicTodayQueue';queue.setAttribute('aria-label','오늘 업무 목록');
-  const clinical=document.createElement('section');clinical.id='clinicClinicalTasks';const followup=document.createElement('section');followup.id='clinicFollowupTasks';const content=document.createElement('div');content.className='clinic-today-task-content';clinical.append(content);
+  const clinical=document.createElement('section');clinical.id='clinicClinicalTasks';const followup=document.createElement('section');followup.id='clinicFollowupTasks';const content=document.createElement('div');content.className='clinic-today-task-content';const summary=document.createElement('p');summary.id='clinicTodayCategorySummary';summary.setAttribute('role','status');content.append(summary);clinical.append(content);
   const existing=host.querySelector('.care-work-more');
   if(existing){for(const n of [...existing.children])if(n.tagName!=='SUMMARY')content.append(n);existing.remove();}
   for(const id of ['workFirstBacklog','workFirstCleanupStatus']){const n=$(id);if(n)content.append(n);}
@@ -267,7 +272,7 @@
    const loaded=workspace?.recordsLoaded;if(showWorkspaceTab('records',patient.id)&&loaded)return original(patient,guardian);
   };
  }
- global.ClinicOrganization={checkedTime,taskCategory,categoryRows,categoryCounts,resetToday:()=>todayControl?.select('attention'),groupPreventiveRows,mountCompactSearch,mountPatientHeader,clinicalRows,noticeLabel,updateTodayCounts,ageLabel,recentTemplates,taskPreview,createTabs,mountHospitalManagement,organizeWorkspace,showWorkspaceTab,mountDashboard,syncNav};
+ global.ClinicOrganization={checkedTime,taskCategory,categoryRows,categoryCounts,workFilterLabel,resetToday:()=>todayControl?.select('attention'),groupPreventiveRows,mountCompactSearch,mountPatientHeader,clinicalRows,noticeLabel,updateTodayCounts,ageLabel,recentTemplates,taskPreview,createTabs,mountHospitalManagement,organizeWorkspace,showWorkspaceTab,mountDashboard,syncNav};
  if(typeof module!=='undefined')module.exports=global.ClinicOrganization;
  if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();}
 })(typeof window==='undefined'?globalThis:window);
