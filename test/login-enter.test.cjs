@@ -13,7 +13,7 @@ before(async()=>{
 after(async()=>{await browser?.close();if(server)await new Promise(r=>server.close(r));});
 async function setup(t,kind,width=1440){
   const p=await browser.newPage({viewport:{width,height:900}});p.setDefaultTimeout(6000);t.after(()=>p.close());
-  await p.route('**/*',r=>r.request().url().startsWith(origin)?r.continue():r.abort());
+  await p.route('**/*',r=>r.request().url().startsWith(origin)?r.continue():r.request().url().endsWith('/hq/auth-mode')?r.fulfill({json:{mode:'legacy'}}):r.abort());
   await p.goto(origin+(kind==='clinic'?'/index.html':'/hq.html'));
   await p.evaluate(kind=>{
     window.loginCalls=[];window.loginDelay=0;window.loginFail=false;window.loginDone=0;
@@ -23,7 +23,7 @@ async function setup(t,kind,width=1440){
   },kind);
   const ids=kind==='clinic'?{first:'#saasLoginEmail',secret:'#saasLoginPassword',button:'#saasLoginBtn',form:'#saasLoginForm',path:'/saas/login'}:{first:'#endpoint',secret:'#hqKey',button:'#connect',form:'#hqLoginForm',path:'/hq/session'};
   if(kind==='hq')await p.locator('.hq-login-advanced summary').click();
-  await p.locator(ids.first).fill(kind==='clinic'?'test@example.com':'https://example.invalid');await p.locator(ids.secret).fill('test-only-secret');
+  await p.locator(ids.first).fill(kind==='clinic'?'test@example.com':'https://example.invalid');if(kind==='hq'){await p.locator(ids.first).press('Tab');await p.waitForFunction(()=>document.querySelector('#hqIndividualConnect')?.style.display==='none'&&document.querySelector('#connect')?.style.display!=='none');}await p.locator(ids.secret).fill('test-only-secret');
   return {p,...ids};
 }
 for(const kind of ['clinic','hq']){

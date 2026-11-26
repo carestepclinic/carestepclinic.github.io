@@ -1152,6 +1152,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
 <link rel="stylesheet" href="practice-intake.css?v=20261105-selection"><link rel="stylesheet" href="clinic-purchases.css?v=20261107-toolbar-vendors">
 <link rel="stylesheet" href="healthcheck-record.css?v=20261117-clinic-review-four">
 <link rel="stylesheet" href="subscription-resources.css?v=20261117-billing-retry"><script src="subscription-resources.js?v=20261117-billing-retry"></script><script src="billing-flow.js?v=20261117-activation"></script>
+<link rel="stylesheet" href="carestep-brand.css?v=20261126-logo">
 </head>
 <body class="clinic-calm">
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -1167,7 +1168,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
   <!-- v9.0.2 HOTFIX 23 · valid session refreshes never flash the login form -->
   <section id="sessionRestoreView" class="session-restore-shell hidden" aria-live="polite" aria-busy="true">
     <div class="session-restore-card">
-      <div class="brand-mark">CS</div>
+      <span class="cs-logo-lockup"><img src="carestep-logo.png" width="2160" height="720" alt="CARESTEP"><span class="cs-logo-tagline">더 쉬운 업무, 더 나은 진료</span><span class="cs-logo-product">CLINIC</span></span>
       <p class="eyebrow">CARESTEP CLINIC</p>
       <h2 id="sessionRestoreTitle">로그인 상태를 복원하고 있습니다</h2>
       <div id="sessionRestoreSpinner" class="session-restore-spinner" aria-hidden="true"></div>
@@ -1183,9 +1184,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
   <section id="loginView" class="login-shell">
     <div class="login-card saas-login-card">
       <header class="clinic-login-brand">
-        <div class="brand-mark" aria-hidden="true">CS</div>
-        <h1>CARESTEP <span>Clinic</span></h1>
-        <p class="cs-brand-tagline"><span>더 쉬운 업무,</span> <span>더 나은 진료</span></p>
+        <span class="cs-logo-lockup"><img src="carestep-logo.png" width="2160" height="720" alt="CARESTEP"><span class="cs-logo-tagline">더 쉬운 업무, 더 나은 진료</span><span class="cs-logo-product">CLINIC</span></span>
       </header>
       <h2 class="clinic-login-headline"><span>진료에 집중하도록,</span> <span>업무는 더 간편하게</span></h2>
       <p class="login-copy">병원 계정으로 로그인하세요.</p>
@@ -1248,12 +1247,7 @@ body:has(#builder.active-view) #r61-patient-context{position:relative;top:auto}
   <div id="appView" class="app-shell hidden">
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-mark small">CS</div>
-        <div>
-          <strong>CARESTEP</strong>
-          <span>Clinic</span>
-        </div>
-        <p class="cs-brand-tagline"><span>더 쉬운 업무,</span> <span>더 나은 진료</span></p>
+        <span class="cs-logo-lockup"><img src="carestep-logo.png" width="2160" height="720" alt="CARESTEP"><span class="cs-logo-tagline">더 쉬운 업무, 더 나은 진료</span><span class="cs-logo-product">CLINIC</span></span>
       </div>
       <nav class="nav-list clinic-navigation" aria-label="CARESTEP 메뉴"><div class="cs-nav-main"><button class="nav-item nav-home nav-main" data-view="dashboard" ><span class="nav-copy"><b>오늘 진료</b></span></button><details class="clinic-nav-group" data-nav-group="patients" id="clinicMaterialNav"><summary>환자 관리</summary><div class="nav-submenu"><button class="nav-item nav-sub" data-view="patients" ><span class="nav-copy"><b>환자 목록</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="intake"><span class="nav-copy"><b>사전문진</b></span></button></div></details><details class="clinic-nav-group" data-nav-group="records" ><summary>진료 기록</summary><div class="nav-submenu"><button class="nav-item nav-sub" data-view="practice" data-tab="healthcheck" data-clinical-group="records"><span class="nav-copy"><b>건강검진 기록</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="surgery" data-clinical-group="records"><span class="nav-copy"><b>마취 기록</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="dental" data-clinical-group="records"><span class="nav-copy"><b>치과 기록</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="neuro" data-clinical-group="records"><span class="nav-copy"><b>신경검사 기록</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="ophthalmic" data-clinical-group="records"><span class="nav-copy"><b>안과 기록</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="chronic" data-clinical-group="records"><span class="nav-copy"><b>만성질환 기록</b></span></button></div></details><details class="clinic-nav-group" data-nav-group="clinical" ><summary>진료 지원</summary><div class="nav-submenu"><button class="nav-item nav-sub" data-view="practice" data-tab="calc" data-clinical-group="tools"><span class="nav-copy"><b>처방·처치 계산</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="ward" data-clinical-group="tools"><span class="nav-copy"><b>입원·처치</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="bookings" data-clinical-group="tools"><span class="nav-copy"><b>수술검사일정</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="ledger" data-clinical-group="tools"><span class="nav-copy"><b>수술대장</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="consents" data-clinical-group="tools"><span class="nav-copy"><b>진료 동의서</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="protocols" data-clinical-group="reference"><span class="nav-copy"><b>진료 프로토콜</b></span></button></div></details><details class="clinic-nav-group" data-nav-group="guardians" ><summary>보호자 관리</summary><div class="nav-submenu"><button class="nav-item nav-sub" data-view="library" ><span class="nav-copy"><b>보호자 안내자료</b></span></button><button class="nav-item nav-sub" data-view="followup" ><span class="nav-copy"><b>상담·후속관리</b></span><span class="nav-followup-status" hidden><span id="navFollowupBadge" class="nav-task-badge hidden">0</span><span id="navFollowupScheduled" class="nav-scheduled-badge hidden">0</span></span></button></div></details><details class="clinic-nav-group" data-nav-group="operations" ><summary>병원 운영</summary><div class="nav-submenu"><button class="nav-item nav-sub" data-view="practice" data-tab="ops"><span class="nav-copy"><b>업무 체크리스트</b></span></button><button class="nav-item nav-sub" data-view="practice" data-tab="purchases"><span class="nav-copy"><b>물품 관리</b></span></button><button class="nav-item nav-sub" data-training-section="education" data-view="training" ><span class="nav-copy"><b>직원 교육</b></span></button><button class="nav-item nav-sub" data-view="training" data-training-section="sop"><span class="nav-copy"><b>업무지침(SOP)</b></span></button><button class="nav-item nav-sub" data-view="pilot" ><span class="nav-copy"><b>운영 통계</b></span></button></div></details><div class="nav-operator operator-only hidden"><div class="nav-section-label">운영자</div><button class="nav-item nav-sub" data-view="contentStudio" ><span class="nav-copy"><b>AI Content Studio</b></span></button><button class="nav-item nav-sub" data-view="admin" ><span class="nav-copy"><b>운영자 도구</b></span></button></div></div><div class="cs-nav-utilities"><div class="nav-divider"></div><div class="nav-manage" data-nav-group="settings" id="clinicSettingsNav"><div id="navManageGroup"><button class="nav-item nav-sub" data-view="settings" ><span class="nav-copy"><b>병원 설정</b></span></button></div></div><details class="clinic-nav-group" data-nav-group="help" ><summary>도움말·문의</summary><div class="nav-submenu"><button class="nav-item nav-sub" data-view="account" data-nav-account="legal"><span class="nav-copy"><b>이용약관·개인정보</b></span></button><button type="button" class="nav-item nav-sub" data-nav-guide><span class="nav-copy"><b>사용 가이드</b></span></button><button class="nav-item nav-sub" data-view="onboarding" ><span class="nav-copy"><b>처음 사용 설정</b></span><span id="onboardingNavBadge" class="onboarding-nav-badge">0/6</span></button><button class="nav-item nav-sub" data-view="voice" ><span class="nav-copy"><b>문의·요청</b></span></button></div></details></div></nav>
       <div class="sidebar-foot">
