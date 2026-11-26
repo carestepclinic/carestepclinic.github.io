@@ -329,7 +329,7 @@ function reportAction(value,label){
 function reportHTML(d,p,images,hospital={},options={}){
  const photos=(images||[]).filter(im=>im.includeInPrint!==false),parts=[],previous=options.previous||null;
  const reviewed=d.clinicalStatus==='complete'&&d.reviewed&&d.veterinarian;
- const assetBase=typeof location==='object'&&/^https?:$/.test(location.protocol)?new URL('.',location.href).href:'https://carestepclinic.github.io/';
+ const assetBase=typeof location==='object'&&/^https?:$/.test(location.protocol)?new URL('.',location.href).href:'https://carestepclinic.com/';
  const asset=name=>new URL(name,assetBase).href,version='20261117-report-cover-footer';
  const note=(label,value)=>value?'<article class="report-note"><h3>'+esc(label)+'</h3><p>'+esc(value)+'</p></article>':'';
  const logo=String(hospital.logo||'').trim(),safeLogo=/^(?:data:image\/(?:png|jpeg|webp|gif);base64,|https?:\/\/)/i.test(logo);

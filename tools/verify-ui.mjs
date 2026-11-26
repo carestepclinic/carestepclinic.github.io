@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {setTimeout as wait} from 'node:timers/promises';
 import {readUI} from './check-ui.mjs';
 
-const origin = 'https://carestepclinic.github.io/';
+const origin = 'https://carestepclinic.com/';
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 
 export async function verifyUI(root, paths, {fetchImpl = fetch, attempts = 6, delay = wait} = {}) {
