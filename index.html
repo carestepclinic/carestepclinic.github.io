@@ -9191,13 +9191,14 @@ function preparedFollowupMmsImage(day,{retry=true}={}){
   for(const [key,entry] of followupMmsCache)if(now-entry.at>600000&&!entry.pending)followupMmsCache.delete(key);
   let entry=followupMmsCache.get(context.key);if(entry&&!(entry.failed&&retry))return entry.promise;
   entry={at:now,pending:true,failed:false};followupMmsCache.set(context.key,entry);
+  refreshFollowupMmsPreparation();
   entry.promise=followupMmsQueue.catch(()=>{}).then(async()=>{
     if(!followupMmsImageCurrent(context))throw Error('환자 또는 이미지 내용이 변경되었습니다.');
     const image=await captureFollowupMmsJpeg(context.html);
     if(!followupMmsImageCurrent(context))throw Error('환자 또는 이미지 내용이 변경되었습니다.');
-    return image;
+    entry.image=image;return image;
   }).catch(error=>{entry.failed=true;throw error;}).finally(()=>{
-    entry.pending=false;
+    entry.pending=false;refreshFollowupMmsPreparation();
     while(followupMmsCache.size>32){const old=[...followupMmsCache].find(([key,value])=>key!==context.key&&!value.pending);if(!old)break;followupMmsCache.delete(old[0]);}
   });followupMmsQueue=entry.promise.catch(()=>{});return entry.promise;
 }
@@ -9208,7 +9209,7 @@ function scheduleFollowupMmsPreparation(){
   if(!eligible())return;const revision=followupMmsWarmRevision;
   followupMmsWarmTimer=setTimeout(async()=>{const scope=followupIdentity();for(const day of followupMessagingStages()){
     if(revision!==followupMmsWarmRevision||scope!==followupIdentity()||!eligible())break;
-    try{await preparedFollowupMmsImage(day,{retry:false});}catch{break;}
+    try{await preparedFollowupMmsImage(day,{retry:false});}catch{/* Continue preparing the other selected dates; retry failures only on request. */}
     await new Promise(resolve=>setTimeout(resolve,0));
   }},250);
 }
@@ -9629,13 +9630,17 @@ function setFollowupMessageSelection(days){
  const eligible=followupMessageEligibleStages(),selected=eligible.filter(day=>days.includes(day));
  writeFollowupGuideState({messageSelection:{key:followupMessageSelectionKey(),days:selected},messagesPrepared:false,messagesSkipped:false});return true;
 }
+function followupMessageDateProblem(day){
+ const date=followupDateObject(day);return !date||!Number.isFinite(date.getTime())?'발송일 확인 필요':date.getTime()<=Date.now()+60000?'발송 시간이 지났거나 임박했습니다. 1분 이후로 설정해주세요.':'';
+}
 function renderFollowupMessageSelection(panel){
  let box=$('followupMessageSelection');if(!box){box=document.createElement('fieldset');box.id='followupMessageSelection';panel.querySelector('[data-recipient-heading]').after(box);}
  const eligible=followupMessageEligibleStages(),selected=followupMessagingStages(),state=readFollowupGuideState(),locked=followupGuideNavigationBusy||state.completionAttempted||state.messagesDone;
  if($('messagingStageSummary'))$('messagingStageSummary').textContent=selected.length?selected.map(day=>'D+'+day).join(' · '):'선택 없음';
- box.disabled=locked;box.innerHTML='<legend>발송할 날짜 선택</legend><div class="followup-message-selection-head"><span role="status">'+selected.length+' / '+eligible.length+'건 선택</span><div><button type="button" class="btn btn-secondary" data-message-select-all>전체 선택</button><button type="button" class="btn btn-secondary" data-message-select-none>전체 해제</button></div></div><div class="followup-message-options">'+eligible.map(day=>'<label class="'+(selected.includes(day)?'selected':'')+'"><input type="checkbox" data-message-day="'+day+'" '+(selected.includes(day)?'checked':'')+'><span><b>D+'+day+'</b><small>'+escapeHtml(followupDisplayDate(followupDateObject(day)))+'</small></span></label>').join('')+'</div><p>선택한 날짜의 문자·알림톡만 예약합니다. 원내 업무·HOME 일정은 유지됩니다. 이미 예약한 문자는 예약내역에서 별도로 취소해주세요.</p>';
+ box.disabled=locked;box.innerHTML='<legend>발송할 날짜 선택</legend><div class="followup-message-selection-head"><span role="status">'+selected.length+' / '+eligible.length+'건 선택</span><div><button type="button" class="btn btn-secondary" data-message-select-all>전체 선택</button><button type="button" class="btn btn-secondary" data-message-select-none>전체 해제</button></div></div><div class="followup-message-options">'+eligible.map(day=>'<label class="'+(selected.includes(day)?'selected':'')+(followupMessageDateProblem(day)?' date-needs-review':'')+'"><input type="checkbox" id="followupMessageDay'+day+'" data-message-day="'+day+'" '+(selected.includes(day)?'checked':'')+'><span><b>D+'+day+'</b><small>'+escapeHtml(followupDisplayDate(followupDateObject(day)))+'</small>'+(followupMessageDateProblem(day)?'<small class="date-warning">'+escapeHtml(followupMessageDateProblem(day))+'</small>':'')+'</span></label>').join('')+'</div><p>선택한 날짜의 문자·알림톡만 예약합니다. 원내 업무·HOME 일정은 유지됩니다. 이미 예약한 문자는 예약내역에서 별도로 취소해주세요.</p>';
  const change=(days,selector)=>{if(!setFollowupMessageSelection(days))return;renderFollowupGuide();$('followupMessageSelection')?.querySelector(selector)?.focus({preventScroll:true});};
  box.querySelectorAll('[data-message-day]').forEach(input=>input.onchange=()=>{const day=Number(input.dataset.messageDay),days=followupMessagingStages().filter(d=>d!==day);if(input.checked)days.push(day);change(days,'[data-message-day="'+day+'"]');});
+ const invalid=selected.filter(day=>followupMessageDateProblem(day));if(invalid.length){const notice=document.createElement('div');notice.className='followup-date-actions';notice.innerHTML='<span role="status">발송일 확인 필요 '+invalid.length+'건</span><button type="button" class="btn btn-secondary" data-message-date-edit>시작일 수정</button><button type="button" class="btn btn-secondary" data-message-exclude-past>해당 날짜 선택 해제</button>';box.append(notice);notice.querySelector('[data-message-date-edit]').onclick=()=>{if(!locked)$('followupGoBuilder')?.click();};notice.querySelector('[data-message-exclude-past]').onclick=()=>change(selected.filter(day=>!followupMessageDateProblem(day)),'[data-message-select-all]');}
  box.querySelector('[data-message-select-all]').onclick=()=>change(eligible,'[data-message-select-all]');box.querySelector('[data-message-select-none]').onclick=()=>change([],'[data-message-select-none]');
 }
 
@@ -9812,7 +9817,7 @@ function followupGuideMessageValidation(){
  const phone=String($('messagingRecipientPhone')?.value||'').replace(/[^0-9]/g,'');if(phone.length<10)return {ok:false,field:'messagingRecipientPhone',message:'보호자 휴대전화 번호를 입력해주세요.'};
  if(!$('messagingConsent')?.checked)return {ok:false,field:'messagingConsent',message:'보호자 연락처 사용 및 예약발송 동의를 확인해주세요.'};
  const stages=followupMessagingStages(),channel=$('messagingChannel')?.value||'mms';
- for(const day of stages){const date=followupDateObject(day);if(!date||!Number.isFinite(date.getTime()))return {ok:false,field:'followupGuideStatus',message:'예약 날짜와 시간을 확인해주세요.'};
+ for(const day of stages){const dateProblem=followupMessageDateProblem(day);if(dateProblem)return {ok:false,field:'followupMessageDay'+day,message:'D+'+day+' '+dateProblem};
   if(['sms','mms'].includes(channel)&&!String(followupStageMessage(day,'sms')||'').trim())return {ok:false,field:'followupGuideStatus',message:`D+${day} 문자 내용을 입력해주세요.`};
 
  }return {ok:true};
@@ -9831,7 +9836,7 @@ function followupGuidePrepareMessages(){
 function followupMessageDraft(){return JSON.stringify([$('messagingRecipientPhone')?.value,$('messagingConsent')?.checked,$('messagingChannel')?.value,followupMessageEdits,readFollowupGuideState().messagesSkipped,followupMessagingStages(),($('messagingChannel')?.value||'mms')==='mms'?followupMessagingStages().map(day=>followupMobileCardHtml(day)):null]);}
 async function finishFollowupSetup(){
  const previous=readFollowupGuideState();if(previous.completionAttempted)throw Error('결과를 확인하기 전에는 다시 예약할 수 없습니다.');
- const problem=followupGuideMessageValidation();if(!problem.ok){followupGuideShowError(problem);return;}
+ const problem=followupGuideMessageValidation();if(!problem.ok){if(problem.field?.startsWith('followupMessageDay'))setFollowupGuideStep(4,true);followupGuideShowError(problem);return;}
  const snapshot=followupSetupSnapshot(),identity=followupIdentity(),draft=followupMessageDraft();
  const current=()=>identity===followupIdentity()&&draft===followupMessageDraft();
  const requireCurrent=()=>{if(!current())throw Error('환자 또는 발송 내용이 변경되었습니다.');};
@@ -9997,6 +10002,22 @@ function polishFollowupLayout(){
  const results=$('followupGuideStep5Body');results?.querySelectorAll('.guide-final-row').forEach(row=>{const value=row.querySelector('b'),label=row.querySelector('span')?.textContent;if(!value)return;if(value.textContent==='결과 확인 필요')value.textContent=label==='원내 업무'?'저장 여부 확인 필요':label==='HOME 카드'?'등록 여부 확인 필요':'예약 여부 확인 필요';if(value.textContent==='예약 접수 완료')value.textContent='발송 예약 접수';});
 }
 
+function refreshFollowupMmsPreparation(){
+ const panel=$('followupRecipientPreview');if(!panel||($('messagingChannel')?.value||'mms')!=='mms')return;
+ panel.querySelectorAll('[data-followup-day]').forEach(card=>paintFollowupMmsPreparation(card,Number(card.dataset.followupDay)));
+}
+function paintFollowupMmsPreparation(card,day){
+ const media=card.querySelector('[data-recipient-media]');if(!media)return;
+ const context=followupMmsImageContext(day),entry=followupMmsCache.get(context.key),status=media.querySelector('[role=status]'),button=media.querySelector('button');
+ let preparation=media.querySelector('[data-recipient-preparation]');if(!preparation){preparation=document.createElement('span');preparation.dataset.recipientPreparation='';preparation.setAttribute('aria-live','polite');button.after(preparation);}
+ if(media._contentKey!==context.key){status.replaceChildren();media._contentKey=context.key;}
+ preparation.textContent=entry?.pending?'이미지 준비 중…':entry?.failed?'이미지 준비 실패':entry?.image?'이미지 준비 완료':'이미지 준비 대기';
+ preparation.classList.toggle('preparation-failed',!!entry?.failed);
+ button.textContent=entry?.failed?'이미지 다시 준비':media._previewRequested?'이미지 다시 확인':'MMS 이미지 확인';
+ if(entry?.failed)status.textContent='이미지를 준비하지 못했습니다. 다시 확인해주세요.';
+ else if(entry?.image&&media._previewRequested){const src='data:image/jpeg;base64,'+entry.image;let img=status.querySelector('img');if(!img||img.src!==src){img=document.createElement('img');img.alt='D+'+day+' MMS 발송 이미지';img.src=src;status.replaceChildren(img);}}
+}
+
 function renderFollowupRecipientPreview(){
  const panel=$('followupRecipientPreview');if(!panel)return;compactFollowupMessageLayout(panel);scheduleFollowupMmsPreparation();
  let heading=panel.querySelector('[data-recipient-heading]');if(!heading){heading=document.createElement('div');heading.dataset.recipientHeading='';heading.innerHTML='<h4>보호자 발송 내용 확인</h4><p>문구를 수정하면 최종 예약에 반영됩니다. 원내 업무 문구와는 별도로 관리합니다.</p>';panel.prepend(heading);}
@@ -10005,7 +10026,7 @@ function renderFollowupRecipientPreview(){
  panel.querySelectorAll('[data-followup-day]').forEach(card=>{const day=Number(card.dataset.followupDay);card.hidden=!stages.includes(day);const ch=channel==='kakao'?'kakao':'sms';paintFollowupMessageCard(card,ch);
  const date=followupDateObject(day);card.querySelector('.followup-card-date').textContent=date&&Number.isFinite(date.getTime())?followupDisplayDate(date):'발송일 확인 필요';
  card.querySelector('[data-followup-message-editor]').setAttribute('aria-label',`D+${day} 보호자 발송 문구`);
- let media=card.querySelector('[data-recipient-media]');if(!media){media=document.createElement('div');media.dataset.recipientMedia='';media.innerHTML='<button type="button" class="btn btn-secondary">MMS 이미지 확인</button><div role="status"></div>';card.append(media);media.querySelector('button').addEventListener('click',()=>previewFollowupMms(card,day));}media.hidden=channel!=='mms';
+ let media=card.querySelector('[data-recipient-media]');if(!media){media=document.createElement('div');media.dataset.recipientMedia='';media.innerHTML='<button type="button" class="btn btn-secondary">MMS 이미지 확인</button><div role="status"></div>';card.append(media);media.querySelector('button').addEventListener('click',()=>previewFollowupMms(card,day));}media.hidden=channel!=='mms';if(channel==='mms')paintFollowupMmsPreparation(card,day);
  let note=card.querySelector('[data-recipient-note]');if(!note){note=document.createElement('p');note.dataset.recipientNote='';card.append(note);}note.textContent=channel==='mms'?'문자 수정은 이미지 내용에 반영되지 않습니다. 이미지는 후속관리 계획을 기준으로 생성됩니다.':channel==='kakao'?'승인된 알림톡 서식의 안내 영역입니다. 전체 서식은 발송 설정에서 확인하세요.':'';
  });
  let empty=panel.querySelector('[data-recipient-empty]');if(!empty){empty=document.createElement('p');empty.dataset.recipientEmpty='';panel.append(empty);}empty.textContent=stages.length?'':'보호자 발송으로 선택한 단계가 없습니다.';
@@ -10015,7 +10036,7 @@ async function previewFollowupMms(card,day){
  if(followupMmsPreviewBusy)return;
  const button=card.querySelector('[data-recipient-media] button'),status=card.querySelector('[data-recipient-media] [role=status]');
  const scope=()=>JSON.stringify([followupScope(),followupCaseNonce,window.crmCurrentPatient?.()?.patientId,caseInfo,activePatientJourney,activeJourneyStageSelection]);const key=scope();
- followupMmsPreviewBusy=true;button.disabled=true;status.textContent='이미지 준비 중…';
+ followupMmsPreviewBusy=true;card.querySelector('[data-recipient-media]')._previewRequested=true;button.disabled=true;status.textContent='이미지 준비 중…';
  try{const base64=await preparedFollowupMmsImage(day);if(!card.isConnected||key!==scope())return;const img=document.createElement('img');img.alt=`D+${day} MMS 발송 이미지`;img.src='data:image/jpeg;base64,'+base64;status.replaceChildren(img);button.textContent='이미지 다시 확인';}
  catch{if(card.isConnected&&key===scope())status.textContent='이미지를 불러오지 못했습니다. 다시 확인해주세요.';}
  finally{followupMmsPreviewBusy=false;if(card.isConnected){button.disabled=false;if(key!==scope())status.replaceChildren();}}
@@ -11172,8 +11193,8 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="clinic-today-documents.js?v=20261122-today-compact"></script>
 <script src="practice-clinic.js?v=20261122-documents"></script>
 <script src="clinic-settings.js?v=20261116-permissions-v3"></script>
-<link rel="stylesheet" href="clinic-followup-tasks.css?v=20261117-message-selection">
-<script src="clinic-followup-tasks.js?v=20261117-today-supplies"></script>
+<link rel="stylesheet" href="clinic-followup-tasks.css?v=20261126-followup-preparation">
+<script src="clinic-followup-tasks.js?v=20261126-followup-assignment"></script>
 <link rel="stylesheet" href="builder-flow.css?v=20261105-flow3">
 <script src="builder-flow.js?v=20261112-recheck"></script>
 <link rel="stylesheet" href="clinic-calm.css?v=20261122-today-compact">

@@ -56,10 +56,10 @@ test('background warming honors selected dates and does not run for SMS, skipped
 test('failed prewarm does not loop and explicit retry succeeds',async()=>{
  const {p}=await open();await finalFixture(p);
  await p.evaluate(()=>{clearFollowupMmsCache();window.calls=0;captureFollowupMmsJpeg=async()=>{calls++;throw Error('offline');};$('messagingChannel').value='mms';setFollowupGuideStep(4,true);});
- await p.waitForFunction(()=>calls===1);await p.evaluate(()=>scheduleFollowupMmsPreparation());await p.waitForTimeout(450);
- assert.equal(await p.evaluate(()=>calls),1);
+ await p.waitForFunction(()=>calls===2);await p.evaluate(()=>scheduleFollowupMmsPreparation());await p.waitForTimeout(450);
+ assert.equal(await p.evaluate(()=>calls),2);
  const result=await p.evaluate(async()=>{captureFollowupMmsJpeg=async()=>{calls++;return 'retry';};const image=await preparedFollowupMmsImage(1);return {calls,image};});
- assert.deepEqual(result,{calls:2,image:'retry'});await p.close();
+ assert.deepEqual(result,{calls:3,image:'retry'});await p.close();
 });
 
 test('in-flight capture cannot be reused after content changes and expired entries regenerate',async()=>{

@@ -145,3 +145,13 @@ body:has(#followup.active-view) #followupContextSummary{display:block;font-size:
 .followup-message-options small{font-size:12px;color:#52657d}
 #followupMessageSelection:disabled{opacity:.75}
 #followupMessageSelection p{font-size:13px;margin:10px 0 0}
+
+/* Focused follow-up preparation and unassigned-task controls. */
+#followupMessageSelection .date-needs-review{border-color:#b66b37;background:#fff8ef}
+#followupMessageSelection .date-warning{color:#914b20}
+.followup-date-actions,.internal-followup-bulk{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0;font-size:13px}
+.internal-followup-bulk label{display:flex;align-items:center;gap:8px;margin:0}
+.internal-followup-bulk select{min-width:130px;max-width:100%;padding:8px;border:1px solid #cadbd8;border-radius:7px;background:#fff;color:inherit;font:inherit}
+[data-recipient-preparation]{display:inline-block;margin:6px 8px;color:#52657d;font-size:12px}
+[data-recipient-preparation].preparation-failed{color:#a13b2f}
+@media(max-width:600px){.internal-followup-bulk label{flex-wrap:wrap}.internal-followup-bulk{align-items:flex-start}.internal-followup-bulk [data-bulk-result]{flex-basis:100%}}
