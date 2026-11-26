@@ -55,3 +55,28 @@
 @media(max-width:520px){.home-header .cs-logo-lockup>img{width:180px}.clinic-login-brand .cs-logo-lockup>img{width:240px}}
 
 @media(max-width:760px){.clinic-calm #appView .sidebar-brand .cs-logo-lockup>img{grid-column:1;grid-row:1}.clinic-calm #appView .sidebar-brand .cs-logo-product{grid-column:2;grid-row:1;justify-self:end}}
+
+/* Keep navigation controls separate from the integrated artwork. */
+@media(max-width:900px){
+ .top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 8px}
+ .top>.brand{grid-column:1;grid-row:1/3;justify-self:start}
+ .top .cs-logo-lockup{grid-template-columns:minmax(0,1fr);max-width:100%;padding:5px 10px;gap:2px}.top .cs-logo-lockup>.cs-logo-product{grid-column:1;grid-row:2;justify-self:start}
+ .top .cs-logo-lockup>img{width:220px;max-width:100%}
+ .top #hqMenuToggle{grid-column:2;grid-row:1;min-width:76px;min-height:44px}
+ .top #hqToolsToggle{grid-column:2;grid-row:2;min-width:76px;min-height:44px}
+ .top #hqHeaderTools{grid-column:1/-1;grid-row:3;min-width:0}
+}
+@media(max-width:760px){
+ .clinic-calm #appView .sidebar-brand{display:grid!important;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+ .clinic-calm #appView .sidebar-brand>.cs-logo-lockup{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0}
+ .clinic-calm #appView .sidebar-brand .cs-logo-lockup>img{width:210px;max-width:100%}
+ .clinic-calm #appView .sidebar-brand .cs-logo-product{align-self:flex-start}
+ .clinic-calm #appView .sidebar-brand .pt-mobile-global-menu{grid-column:2;grid-row:1;margin:0;white-space:nowrap;min-height:44px}
+ .clinic-calm #appView .sidebar-brand .cs-desktop-menu{display:none}
+}
+.home-shell:has(#loginView:not([hidden]))>.home-header{width:min(520px,100%);margin-inline:auto;justify-content:center;padding-block:18px 12px;position:relative}
+.home-shell:has(#loginView:not([hidden])) .home-brand .cs-logo-lockup{align-items:center}
+.home-shell:has(#loginView:not([hidden])) .home-header .cs-logo-lockup>img{width:240px;max-width:100%}
+.home-shell:has(#loginView:not([hidden])) .home-main{padding-top:8px}
+
+.home-shell:has(#loginView:not([hidden])) #loginView{margin-top:8px}
