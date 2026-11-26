@@ -1,7 +1,7 @@
 /* Internal follow-up schedule and task controls. No external calendar requests. */
 (function(){
  'use strict';
- let draftKey='',draftInitial='',draftSource='',draft=[],items=[],legacyPlans=[],scope='',loading=false,error='',requestId=0,busy=new Set();
+ let draftContext='',draftSchedule='',draftDates=new WeakMap(),draftKey='',draftInitial='',draftSource='',draft=[],items=[],legacyPlans=[],scope='',loading=false,error='',requestId=0,busy=new Set();
  const esc=v=>escapeHtml(String(v??''));
  const identity=()=>JSON.stringify([clinicReadScope(),saasSessionMeta?.id]);
  const canManage=()=>saasMode==='auth'&&!!saasMe&&saasPermission('followup.manage',saasMe.role==='owner');
@@ -33,11 +33,26 @@
   finally{if(identity()===state.key&&state===memberState){state.loading=false;state.pending=null;refreshMemberControls();render();}}
   })();state.pending=task;return task;
  }
+ function automaticDueAt(day){
+  const base=new Date(String(caseInfo.dischargeDate)+'T00:00:00Z');base.setUTCDate(base.getUTCDate()+day);
+  return Number.isFinite(base.getTime())?utc(base.toISOString().slice(0,10)+'T'+(followupSettings().time||'10:00')):'';
+ }
  function plan(){
-  const days=followupSelectedStages(),key=JSON.stringify([identity(),followupCaseNonce,window.crmCurrentPatient?.()?.patientId,activePatientJourney?.id,activePatientJourney?.version,caseInfo.dischargeDate,days]);
-  const source=serverFollowupState?.caseKey===followupCaseNonce&&serverFollowupState?.journeyId===activePatientJourney?.id?String(serverFollowupState.revision||1):'';if(key===draftKey&&!draftSource&&source){if(JSON.stringify(draft)===draftInitial)draftKey='';else draftSource=source;}
-  if(key!==draftKey){draftKey=key;draftSource=source;draft=days.map(day=>{const old=serverFollowupState?.caseKey===followupCaseNonce&&serverFollowupState?.journeyId===activePatientJourney?.id?[...(serverFollowupState.internalTasks||[]),...(serverFollowupState.disabledInternalTasks||[])].find(x=>x.stageDay===day):null;const base=new Date(String(caseInfo.dischargeDate)+'T00:00:00Z');base.setUTCDate(base.getUTCDate()+day);const date=Number.isFinite(base.getTime())?new Date(base.toISOString().slice(0,10)+'T'+(followupSettings().time||'10:00')+':00+09:00'):null;return {day,title:old?.title||activeJourneyStage(day)?.focus||activeJourneyStage(day)?.title||`D+${day} 상태 확인`,dueAt:old?.dueAt||(date&&Number.isFinite(date.getTime())?date.toISOString():''),assigneeUserId:old?.assigneeUserId||'',enabled:old?old.status!=='canceled':true,status:old?.status||'scheduled'};});draftInitial=JSON.stringify(draft);}
-  return draft;
+  const days=followupSelectedStages(),context=JSON.stringify([identity(),followupCaseNonce,window.crmCurrentPatient?.()?.patientId,activePatientJourney?.id,activePatientJourney?.version,days]),schedule=JSON.stringify([caseInfo.dischargeDate,followupSettings().time||'10:00']),key=JSON.stringify([context,schedule]);
+  const source=serverFollowupState?.caseKey===followupCaseNonce&&serverFollowupState?.journeyId===activePatientJourney?.id?String(serverFollowupState.revision||1):'';
+  let hydrate=false;if(key===draftKey&&!draftSource&&source){if(JSON.stringify(draft)===draftInitial&&!draft.some(row=>draftDates.get(row)?.touched))hydrate=true;else draftSource=source;}
+  if(context===draftContext&&!hydrate){
+   if(schedule!==draftSchedule){const untouched=JSON.stringify(draft)===draftInitial;
+    for(const row of draft){const meta=draftDates.get(row);if(!meta?.automatic||row.status==='completed')continue;if(row.dueAt!==meta.value){meta.automatic=false;continue;}row.dueAt=automaticDueAt(row.day);meta.value=row.dueAt;}
+    if(untouched)draftInitial=JSON.stringify(draft);draftSource=source||draftSource;
+   }
+   draftKey=key;draftSchedule=schedule;return draft;
+  }
+  draftContext=context;draftSchedule=schedule;draftKey=key;draftSource=source;draftDates=new WeakMap();
+  draft=days.map(day=>{const old=source?[...(serverFollowupState.internalTasks||[]),...(serverFollowupState.disabledInternalTasks||[])].find(x=>x.stageDay===day):null;
+   const row={day,title:old?.title||activeJourneyStage(day)?.focus||activeJourneyStage(day)?.title||('D+'+day+' 상태 확인'),dueAt:old?.dueAt||automaticDueAt(day),assigneeUserId:old?.assigneeUserId||'',enabled:old?old.status!=='canceled':true,status:old?.status||'scheduled'};
+   draftDates.set(row,{automatic:!old?.dueAt,value:row.dueAt,touched:false});return row;
+  });draftInitial=JSON.stringify(draft);return draft;
  }
  function valid(){try{return plan().length>0&&plan().every(x=>x.enabled===false||x.title.trim()&&x.dueAt&&Number.isFinite(Date.parse(x.dueAt)));}catch{return false;}}
  function payload(){if(!valid())throw Error('업무 날짜와 내용을 확인해주세요.');return plan().map(({day,title,dueAt,assigneeUserId,enabled})=>({day,title,dueAt,assigneeUserId,enabled:enabled!==false}));}
@@ -54,7 +69,7 @@
   if(canManage()){const key=draftKey,box=document.createElement('div');box.className='internal-followup-bulk';box.dataset.internalBulk='';box.innerHTML='<span data-bulk-count></span><label>같은 담당자 지정<select aria-label="미배정 업무 담당자"></select></label><button type="button" class="btn btn-secondary">미배정 업무에 적용</button><span role="status" data-bulk-result></span>';mount.querySelector('[data-internal-team-status]').after(box);
    box.querySelector('select').onchange=refreshBulkAssignment;box.querySelector('button').onclick=()=>{const member=box.querySelector('select').value,rows=bulkAssignable(),state=currentMembers();if(key!==draftKey||!canManage()||followupGuideNavigationBusy||readFollowupGuideState().completionAttempted||state.loading||state.error||!state.rows.some(x=>x.userId===member))return;for(const row of rows){row.assigneeUserId=member;const select=mount.querySelector('[data-internal-day="'+row.day+'"] [data-field="assigneeUserId"]');if(select)select.value=member;}refreshBulkAssignment();box.querySelector('[data-bulk-result]').textContent=rows.length+'건 적용 · 최종 저장 시 반영';};}
   mount.querySelectorAll('[data-task-enabled]').forEach(el=>el.addEventListener('change',()=>{const row=draft.find(x=>x.day===Number(el.closest('[data-internal-day]').dataset.internalDay));if(row.status==='completed')return;row.enabled=el.checked;renderPlan(mount);renderFollowupGuide();}));
-  mount.querySelectorAll('[data-field]').forEach(el=>el.addEventListener(el.tagName==='SELECT'?'change':'input',()=>{const row=draft.find(x=>x.day===Number(el.closest('[data-internal-day]').dataset.internalDay));row[el.dataset.field]=el.dataset.field==='dueAt'?utc(el.value):el.value;const next=document.getElementById('followupGuideNext');if(next)next.disabled=!valid();refreshBulkAssignment();}));
+  mount.querySelectorAll('[data-field]').forEach(el=>el.addEventListener(el.tagName==='SELECT'?'change':'input',()=>{const row=draft.find(x=>x.day===Number(el.closest('[data-internal-day]').dataset.internalDay));if(el.dataset.field==='dueAt')draftDates.set(row,{automatic:false,value:utc(el.value),touched:true});row[el.dataset.field]=el.dataset.field==='dueAt'?utc(el.value):el.value;const next=document.getElementById('followupGuideNext');if(next)next.disabled=!valid();refreshBulkAssignment();}));
   refreshMemberControls();void ensureMembers();
  }
  async function load(){

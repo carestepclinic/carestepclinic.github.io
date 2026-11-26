@@ -9190,10 +9190,11 @@ function preparedFollowupMmsImage(day,{retry=true}={}){
   const context=followupMmsImageContext(day),now=Date.now();
   for(const [key,entry] of followupMmsCache)if(now-entry.at>600000&&!entry.pending)followupMmsCache.delete(key);
   let entry=followupMmsCache.get(context.key);if(entry&&!(entry.failed&&retry))return entry.promise;
-  entry={at:now,pending:true,failed:false};followupMmsCache.set(context.key,entry);
+  entry={at:now,pending:true,started:false,failed:false};followupMmsCache.set(context.key,entry);
   refreshFollowupMmsPreparation();
   entry.promise=followupMmsQueue.catch(()=>{}).then(async()=>{
     if(!followupMmsImageCurrent(context))throw Error('환자 또는 이미지 내용이 변경되었습니다.');
+    entry.started=true;refreshFollowupMmsPreparation();
     const image=await captureFollowupMmsJpeg(context.html);
     if(!followupMmsImageCurrent(context))throw Error('환자 또는 이미지 내용이 변경되었습니다.');
     entry.image=image;return image;
@@ -10011,7 +10012,7 @@ function paintFollowupMmsPreparation(card,day){
  const context=followupMmsImageContext(day),entry=followupMmsCache.get(context.key),status=media.querySelector('[role=status]'),button=media.querySelector('button');
  let preparation=media.querySelector('[data-recipient-preparation]');if(!preparation){preparation=document.createElement('span');preparation.dataset.recipientPreparation='';preparation.setAttribute('aria-live','polite');button.after(preparation);}
  if(media._contentKey!==context.key){status.replaceChildren();media._contentKey=context.key;}
- preparation.textContent=entry?.pending?'이미지 준비 중…':entry?.failed?'이미지 준비 실패':entry?.image?'이미지 준비 완료':'이미지 준비 대기';
+ preparation.textContent=entry?.pending?(entry.started?'이미지 준비 중…':'이미지 준비 대기…'):entry?.failed?'이미지 준비 실패':entry?.image?'이미지 준비 완료':'이미지 준비 대기';
  preparation.classList.toggle('preparation-failed',!!entry?.failed);
  button.textContent=entry?.failed?'이미지 다시 준비':media._previewRequested?'이미지 다시 확인':'MMS 이미지 확인';
  if(entry?.failed)status.textContent='이미지를 준비하지 못했습니다. 다시 확인해주세요.';
@@ -10031,15 +10032,15 @@ function renderFollowupRecipientPreview(){
  });
  let empty=panel.querySelector('[data-recipient-empty]');if(!empty){empty=document.createElement('p');empty.dataset.recipientEmpty='';panel.append(empty);}empty.textContent=stages.length?'':'보호자 발송으로 선택한 단계가 없습니다.';
 }
-let followupMmsPreviewBusy=false;
+let followupMmsPreviewBusy=false;const followupMmsPreviewRequests=new Set();
 async function previewFollowupMms(card,day){
- if(followupMmsPreviewBusy)return;
+ const media=card.querySelector('[data-recipient-media]');if(!media||media._previewPending)return;
  const button=card.querySelector('[data-recipient-media] button'),status=card.querySelector('[data-recipient-media] [role=status]');
  const scope=()=>JSON.stringify([followupScope(),followupCaseNonce,window.crmCurrentPatient?.()?.patientId,caseInfo,activePatientJourney,activeJourneyStageSelection]);const key=scope();
- followupMmsPreviewBusy=true;card.querySelector('[data-recipient-media]')._previewRequested=true;button.disabled=true;status.textContent='이미지 준비 중…';
+ const queued=followupMmsPreviewRequests.size>0;followupMmsPreviewRequests.add(media);followupMmsPreviewBusy=true;media._previewPending=true;media._previewRequested=true;button.disabled=true;status.textContent=queued?'이미지 준비 대기…':'이미지 준비 중…';
  try{const base64=await preparedFollowupMmsImage(day);if(!card.isConnected||key!==scope())return;const img=document.createElement('img');img.alt=`D+${day} MMS 발송 이미지`;img.src='data:image/jpeg;base64,'+base64;status.replaceChildren(img);button.textContent='이미지 다시 확인';}
  catch{if(card.isConnected&&key===scope())status.textContent='이미지를 불러오지 못했습니다. 다시 확인해주세요.';}
- finally{followupMmsPreviewBusy=false;if(card.isConnected){button.disabled=false;if(key!==scope())status.replaceChildren();}}
+ finally{media._previewPending=false;followupMmsPreviewRequests.delete(media);followupMmsPreviewBusy=followupMmsPreviewRequests.size>0;if(card.isConnected){button.disabled=false;if(key!==scope())paintFollowupMmsPreparation(card,day);}}
 }
 
 function ensureFollowupExecutionPlacement(){
@@ -11194,7 +11195,7 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <script src="practice-clinic.js?v=20261122-documents"></script>
 <script src="clinic-settings.js?v=20261116-permissions-v3"></script>
 <link rel="stylesheet" href="clinic-followup-tasks.css?v=20261126-followup-preparation">
-<script src="clinic-followup-tasks.js?v=20261126-followup-assignment"></script>
+<script src="clinic-followup-tasks.js?v=20261126-followup-draft-preservation"></script>
 <link rel="stylesheet" href="builder-flow.css?v=20261105-flow3">
 <script src="builder-flow.js?v=20261112-recheck"></script>
 <link rel="stylesheet" href="clinic-calm.css?v=20261122-today-compact">
