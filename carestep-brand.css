@@ -13,3 +13,31 @@
 @media print{.cs-logo-lockup{break-inside:avoid}}
 
 .home-header .home-brand>.cs-logo-lockup:first-child{background:transparent;box-shadow:none}
+
+/* Application navigation: logo and service badge, followed by one tagline. */
+.clinic-calm #appView .sidebar-brand{display:grid;grid-template-columns:minmax(0,1fr) 40px;column-gap:6px;row-gap:2px;align-items:center;padding-bottom:14px}
+.clinic-calm #appView .sidebar-brand>.cs-logo-lockup{display:contents}
+.clinic-calm #appView .sidebar-brand .cs-logo-lockup>img{grid-column:1;grid-row:1;width:148px;max-width:100%}
+.clinic-calm #appView .sidebar-brand .cs-logo-product{grid-column:2;grid-row:1;justify-self:end;align-self:center;background:#e7f1ed;border:1px solid #d4e4df;border-radius:5px;padding:3px 5px;font-size:9px!important;line-height:1.25!important;letter-spacing:.04em!important;color:#32635d!important}
+.clinic-calm #appView .sidebar-brand .cs-logo-tagline{grid-column:1;grid-row:2;white-space:nowrap;font-size:11px!important;line-height:1.5!important}
+.clinic-calm #appView .sidebar-brand .cs-desktop-menu{grid-column:2;grid-row:2;justify-self:end;width:30px;min-height:28px;height:28px}
+.top>.brand{display:flex;align-items:center;gap:16px;width:auto;min-width:0}
+.top .cs-logo-lockup{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1px 10px;padding:7px 12px 9px;border-radius:8px;margin:0;max-width:240px}
+.top .cs-logo-lockup>img{grid-column:1;grid-row:1;width:165px}
+.top .cs-logo-lockup>.cs-logo-product{grid-column:2;grid-row:1;align-self:center;border:1px solid #d4e4df;border-radius:5px;background:#e7f1ed;padding:3px 6px;font-size:10px!important;line-height:1.25!important;letter-spacing:.04em!important;color:#32635d!important}
+.top .cs-logo-lockup>.cs-logo-tagline{grid-column:1/-1;grid-row:2;white-space:nowrap;font-size:11px!important}
+.top #hqCurrentView{margin:0;padding:8px 0 8px 16px;border-left:1px solid #ffffff30;font-size:14px;line-height:1.5;color:#e4eaf1;white-space:nowrap}
+@media(max-width:900px){
+ .top>.brand{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+ .top .cs-logo-lockup{width:174px;max-width:100%;padding:5px 8px 7px;gap:0 6px}
+ .top .cs-logo-lockup>img{width:125px}
+ .top .cs-logo-lockup>.cs-logo-tagline{font-size:10px!important}
+ .top #hqCurrentView{display:none}
+}
+@media(max-width:760px){
+ .clinic-calm #appView .sidebar-brand{display:flex;flex-wrap:nowrap;gap:14px;padding:0}
+ .clinic-calm #appView .sidebar-brand>.cs-logo-lockup{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 8px;flex:0 1 202px;min-width:0}
+ .clinic-calm #appView .sidebar-brand .cs-logo-lockup>img{width:150px}
+ .clinic-calm #appView .sidebar-brand .cs-logo-tagline{grid-column:1/-1}
+ .clinic-calm #appView .sidebar-brand .pt-mobile-global-menu{flex:0 0 auto;margin-left:auto}
+}
