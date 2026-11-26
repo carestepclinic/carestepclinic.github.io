@@ -41,3 +41,17 @@
  .clinic-calm #appView .sidebar-brand .cs-logo-tagline{grid-column:1/-1}
  .clinic-calm #appView .sidebar-brand .pt-mobile-global-menu{flex:0 0 auto;margin-left:auto}
 }
+
+/* Original combined artwork: keep the tagline inside the supplied image. */
+.clinic-calm #appView .sidebar-brand .cs-logo-lockup>img{grid-column:1/-1;grid-row:1;width:195px}
+.clinic-calm #appView .sidebar-brand{grid-template-columns:minmax(0,1fr) 36px;row-gap:3px}
+.clinic-calm #appView .sidebar-brand .cs-logo-product{grid-column:1;grid-row:2;justify-self:start}
+.clinic-calm #appView .sidebar-brand .cs-desktop-menu{grid-column:2;grid-row:2}
+.top .cs-logo-lockup>img{width:210px}.top .cs-logo-lockup{max-width:280px;padding:5px 10px}
+.home-header .cs-logo-lockup>img{width:210px}
+.clinic-login-brand .cs-logo-lockup>img{width:280px}
+@media(max-width:900px){.top .cs-logo-lockup{width:auto;max-width:100%}.top .cs-logo-lockup>img{width:155px}}
+@media(max-width:760px){.clinic-calm #appView .sidebar-brand>.cs-logo-lockup{flex:0 1 245px}.clinic-calm #appView .sidebar-brand .cs-logo-lockup>img{width:195px}}
+@media(max-width:520px){.home-header .cs-logo-lockup>img{width:180px}.clinic-login-brand .cs-logo-lockup>img{width:240px}}
+
+@media(max-width:760px){.clinic-calm #appView .sidebar-brand .cs-logo-lockup>img{grid-column:1;grid-row:1}.clinic-calm #appView .sidebar-brand .cs-logo-product{grid-column:2;grid-row:1;justify-self:end}}
