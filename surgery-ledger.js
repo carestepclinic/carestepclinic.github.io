@@ -122,9 +122,35 @@ function bookingLabel(item){
  const time=start?(end?(start.slice(0,10)===end.slice(0,10)?start.slice(11)+' ~ '+end.slice(11):start.slice(5).replace('T',' ')+' ~ '+end.slice(5).replace('T',' ')):start.slice(11)):'시간 미등록';
  return [time,item.body.patientName||'환자 미연결',item.body.chartNumber?'차트 '+item.body.chartNumber:'차트번호 없음',item.body.title].filter(Boolean).join(' · ');
 }
+const classificationFields=[['surgeon','집도의'],['diagnosis','진단명'],['procedure','수술명·방법']];
+const filterText=value=>text(value).normalize('NFKC').replace(/\s+/g,' ').toLowerCase();
+function matchingRecord(document,filter={}){
+ const records=document.body?.record?[document.body.record]:(document.body?.variants||[]).map(v=>v.record);
+ return records.find(record=>classificationFields.every(([key])=>!filterText(filter[key])||filterText(record?.[key]).includes(filterText(filter[key]))));
+}
+function matchesClassification(document,filter={}){return matchingRecord(document,filter)!==undefined;}
+async function filteredPage(fetchPage,cursor,filter={}){
+ const scanned=[],seen=new Set();let result;
+ do{
+  if(seen.has(cursor))throw Error('조회가 반복되어 중단했습니다. 다시 조회해주세요.');seen.add(cursor);
+  result=await fetchPage(cursor);scanned.push(...result.items);
+  if(result.next&&seen.has(result.next))throw Error('조회가 반복되어 중단했습니다. 다시 조회해주세요.');
+  result={...result,items:result.items.filter(item=>matchesClassification(item,filter))};cursor=result.next;
+ }while(!result.items.length&&cursor&&classificationFields.some(([key])=>filterText(filter[key])));
+ return {...result,scanned};
+}
+function classificationChoices(documents){
+ const choices=Object.fromEntries(classificationFields.map(([key])=>[key,new Map()]));
+ for(const doc of documents)for(const record of doc.body?.record?[doc.body.record]:(doc.body?.variants||[]).map(v=>v.record))for(const [key] of classificationFields){
+  for(const value of text(record?.[key]).split(/\r?\n/).map(text).filter(Boolean))if(!choices[key].has(filterText(value)))choices[key].set(filterText(value),value);
+ }
+ return Object.fromEntries(classificationFields.map(([key])=>[key,[...choices[key].values()].sort((a,b)=>a.localeCompare(b,'ko'))]));
+}
 function mount(root,a){
  const scope=a.identity(),alive=()=>!disposed&&a.ready()&&scope===a.identity(),editable=()=>a.can('records.edit'),base='/practice/support/ledger';
  let disposed=false,busy=false,dirty=false,page='list',doc=null,items=[],next='',counts={},status='active',q='',from='',to='',preferences=null,preview=null,importAt=0,imported=0,sequence=0;
+ let classification={surgeon:'',diagnosis:'',procedure:''},suggestionRecords=[];
+ const currentFilter=()=>({status,q,from,to,...classification});
  let listPosition=null,loadedPages=1,listDirty=false,sourceDraft=null,sourceContext=null,pendingSaved=null,savedId='',importResult=null,preferencesSequence=0,settingsSavedPending=false,staffNames=null,staffRequest=null;
  const request=async(path,options)=>{if(!alive())throw Error('병원 또는 계정이 변경되었습니다.');const r=await a.request(path,options);if(!alive())throw Error('병원 또는 계정이 변경되었습니다.');return r;};
  const post=(path,b)=>request(path,{method:'POST',body:JSON.stringify(b)});
@@ -146,40 +172,45 @@ function mount(root,a){
   listPosition={scrolls,x:g.scrollX,y:g.scrollY};
  }
  function restoreListPosition(){if(!listPosition)return;for(const {el,top,left} of listPosition.scrolls)if(el.isConnected){el.scrollTop=top;el.scrollLeft=left;}g.scrollTo(listPosition.x,listPosition.y);}
- const listRequest=(cursor,filter={status,q,from,to})=>request(base+'?'+new URLSearchParams({...filter,before:cursor}));
- async function load(more=false,filter={status,q,from,to},revealId=''){
-  const r=await listRequest(more?next:'',filter);
+ const listRequest=(cursor,filter=currentFilter())=>filteredPage(before=>request(base+'?'+new URLSearchParams({status:filter.status,q:filter.q,from:filter.from,to:filter.to,before})),cursor,filter);
+ async function load(more=false,filter=currentFilter(),revealId=''){
+  let r;try{r=await listRequest(more?next:'',filter);}catch(e){throw Error('목록을 불러오지 못했습니다. 이전 결과는 기존 조건의 결과입니다. 다시 검색해주세요. '+e.message);}
   if(revealId&&!r.items.some(item=>item.id===revealId)){
    const fresh=(await request(base+'/'+revealId)).document;if(fresh?.status==='active')r.items.unshift(fresh);
   }
+  const sameScope=['status','q','from','to'].every(key=>filter[key]===currentFilter()[key]);
+  suggestionRecords=[...new Map((sameScope?suggestionRecords:[]).concat(r.scanned).map(item=>[item.id,item])).values()];
+  classification=Object.fromEntries(classificationFields.map(([key])=>[key,text(filter[key])]));
   ({status,q,from,to}=filter);items=more?[...new Map(items.concat(r.items).map(item=>[item.id,item])).values()]:r.items;
   next=r.next;counts=r.counts;loadedPages=more?loadedPages+1:1;page='list';dirty=false;listDirty=false;if(!more)savedId=revealId;list();
  }
  function filterInputs(){
   const f=root.querySelector('[data-filter]');if(!f.reportValidity())return null;
   if(f.from.value&&f.to.value&&f.from.value>f.to.value){message('시작일을 종료일 이전으로 선택해주세요.',true);f.from.focus();return null;}
-  return {status,q:f.q.value.trim(),from:f.from.value,to:f.to.value};
+  return {status,q:f.q.value.trim(),from:f.from.value,to:f.to.value,...Object.fromEntries(classificationFields.map(([key])=>[key,f.elements[key].value.trim()]))};
  }
  async function returnList(){
   if(pendingSaved){
    await load(false,{status:'active',q:'',from:'',to:''},pendingSaved);
    pendingSaved=null;listPosition=null;root.querySelector('[data-saved-record]')?.scrollIntoView({block:'nearest'});return;
   }
-  if(listDirty){const pages=loadedPages;let cursor='',updated=[],r;for(let i=0;i<pages;i++){r=await listRequest(cursor);updated.push(...r.items);cursor=r.next;if(!cursor)break;}items=updated;next=cursor;counts=r.counts;listDirty=false;}
+  if(listDirty){const pages=loadedPages;let cursor='',updated=[],r;for(let i=0;i<pages;i++){r=await listRequest(cursor);updated.push(...r.items);cursor=r.next;if(!cursor)break;}items=updated;suggestionRecords=[...new Map(suggestionRecords.concat(updated).map(item=>[item.id,item])).values()];next=cursor;counts=r.counts;listDirty=false;}
   page='list';dirty=false;sourceDraft=null;list();restoreListPosition();
  }
  function list(){
+  const choices=classificationChoices(suggestionRecords),applied=classificationFields.filter(([key])=>classification[key]).map(([key,label])=>label+': '+classification[key]);
   const tools=(editable()&&status==='review'?btn('normalize-case','Injection 표기 정리'):'')+(editable()&&a.can('clinical.settings')?btn('import','엑셀 가져오기')+btn('settings','입력 항목 설정'):'');
   shell('<div class="sl-toolbar"><nav aria-label="수술대장 목록">'+[['active','수술 기록'],['review','시트 비교 필요'],['deleted','휴지통']].map(([key,label])=>'<button type="button" data-ledger="status" data-value="'+key+'" aria-pressed="'+(status===key)+'">'+label+' <b>'+Number(counts[key]||0)+'</b></button>').join('')+'</nav><div>'+btn('refresh','새로고침')+(editable()?btn('new','새 수술 기록','primary'):'')+'</div></div>'+
-   '<form data-filter class="sl-filters"><label class="sl-filter-search">검색<input name="q" value="'+esc(q)+'" placeholder="환자·차트번호·수술·담당자"></label><label class="sl-filter-from">시작일<input type="date" name="from" value="'+esc(from)+'"></label><label class="sl-filter-to">종료일<input type="date" name="to" value="'+esc(to)+'"></label><button class="sl-filter-submit">검색</button>'+btn('reset','초기화','sl-filter-reset')+'</form>'+
+   '<form data-filter class="sl-filters"><label class="sl-filter-search">검색<input name="q" value="'+esc(q)+'" placeholder="환자·차트번호·수술·담당자"></label><label class="sl-filter-from">시작일<input type="date" name="from" value="'+esc(from)+'"></label><label class="sl-filter-to">종료일<input type="date" name="to" value="'+esc(to)+'"></label>'+classificationFields.map(([key,label])=>'<label class="sl-filter-'+key+'">'+label+'<input name="'+key+'" value="'+esc(classification[key])+'" list="sl-filter-options-'+key+'" placeholder="선택 또는 입력" maxlength="3000" aria-describedby="sl-filter-help"><datalist id="sl-filter-options-'+key+'">'+choices[key].map(value=>'<option value="'+esc(value)+'"></option>').join('')+'</datalist></label>').join('')+'<small id="sl-filter-help">조회된 값에서 선택하거나 직접 입력하세요. 입력한 글자를 포함하며, 모든 조건에 맞는 기록을 찾습니다.</small><button class="sl-filter-submit">검색</button>'+btn('reset','초기화','sl-filter-reset')+'</form>'+
    '<div class="sl-quick" aria-label="기간 선택">'+[['today','오늘'],['month','이번 달'],['year','올해'],['all','전체 기간']].map(([value,label])=>'<button type="button" data-ledger="period" data-value="'+value+'" aria-pressed="'+(selectedPeriod(from,to)===value)+'">'+label+'</button>').join('')+'</div>'+
-   '<div class="sl-toolbar sl-list-actions"><small>현재 '+items.length+'건 표시'+(next?' · 다음 기록 있음':'')+'<span class="sl-count-note">상단 건수는 전체 기록 기준</span></small><div>'+(status==='active'?btn('export','엑셀 저장 (.xlsx)')+btn('print','인쇄'):'')+(tools?'<details class="sl-list-more"><summary>더 보기</summary><div>'+tools+'</div></details>':'')+'</div></div>'+
+   '<div class="sl-toolbar sl-list-actions"><small>현재 '+items.length+'건 표시'+(next?' · 다음 기록 있음':'')+(applied.length?'<span class="sl-applied-filters">적용 중 · '+esc(applied.join(' / '))+'</span>':'')+'<span class="sl-count-note">상단 건수는 전체 기록 기준</span></small><div>'+(status==='active'?btn('export','엑셀 저장 (.xlsx)')+btn('print','인쇄'):'')+(tools?'<details class="sl-list-more"><summary>더 보기</summary><div>'+tools+'</div></details>':'')+'</div></div>'+
    '<div class="sl-table-wrap sl-list-wrap"><table class="sl-table sl-list"><thead><tr>'+['수술일','환자·차트번호','진단·수술명','집도의·마취 담당','기록'].map(t=>'<th>'+t+'</th>').join('')+'</tr></thead><tbody>'+items.map((d,i)=>{
-    const r=d.body.record||d.body.variants?.[0]?.record||{};
+    const r=matchingRecord(d,classification)||d.body.record||d.body.variants?.[0]?.record||{};
     return '<tr'+(d.id===savedId?' class="sl-saved-record" data-saved-record':'')+'><td data-label="수술일">'+esc(r.date)+'</td><td data-label="환자"><b>'+esc(r.patientName)+'</b>'+(d.id===savedId?'<span class="sl-saved-label">방금 저장</span>':'')+'<small>'+esc([r.chartNumber,r.species].filter(Boolean).join(' · '))+'</small></td><td data-label="수술·진단"><b>'+esc(r.procedure)+'</b><small>'+esc(r.diagnosis)+'</small></td><td data-label="담당자">'+esc(r.surgeon||'—')+'<small>마취 '+esc(r.anesthetist||'—')+'</small></td><td class="sl-open"><button type="button" data-ledger="open" data-index="'+i+'" aria-label="'+esc(r.patientName)+' '+esc(r.date)+' '+(d.status==='review'?'비교·선택':'열기')+'">'+(d.status==='review'?'비교·선택':'열기')+'</button></td></tr>';
    }).join('')+'</tbody></table></div>'+
-   (!items.length?'<p class="sl-empty">'+(next?'이 구간에는 검색 결과가 없습니다. 다음 기록을 조회해주세요.':q||from||to?'조건에 맞는 기록이 없습니다. 검색어나 기간을 변경해주세요.':status==='review'?'비교할 기록이 없습니다.':'등록된 기록이 없습니다.')+'</p>':'')+(next?btn('more','다음 기록 더 보기'):'')+
+   (!items.length?'<p class="sl-empty">'+(next?'이 구간에는 검색 결과가 없습니다. 다음 기록을 조회해주세요.':q||from||to||applied.length?'조건에 맞는 기록이 없습니다. 검색어·기간·분류 필터를 변경해주세요.':status==='review'?'비교할 기록이 없습니다.':'등록된 기록이 없습니다.')+'</p>':'')+(next?btn('more','다음 기록 더 보기'):'')+
    '<p class="sl-help">체중·나이·약물은 수술 당시 기록입니다.</p>');
+  root.querySelector('[data-filter]').oninput=()=>message('조건을 변경했습니다. 검색을 누르면 목록에 적용됩니다.');
   root.querySelector('[data-filter]').onsubmit=e=>{e.preventDefault();if(busy)return;const filter=filterInputs();if(!filter)return;listPosition=null;void run(()=>load(false,filter));};
  }
  const prefKey=k=>({surgeon:'surgeons',assistant1:'assistants',assistant2:'assistants',anesthetist:'anesthetists',procedure:'procedures',anesthetics:'anesthetics',drug:'drugs'})[k];
@@ -418,7 +449,7 @@ function mount(root,a){
  async function allResults(){let cursor='',out=[],seen=new Set();do{const r=await listRequest(cursor);out.push(...r.items);cursor=r.next;if(cursor&&seen.has(cursor))throw Error('조회가 반복되어 중단했습니다.');seen.add(cursor);}while(cursor);return out;}
  function download(name,type,data){const url=URL.createObjectURL(new Blob([data],{type})),link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}
  function downloadWorkbook(records,name){download(name,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',workbookBytes(records));}
- async function output(print){if(status!=='active')throw Error('수술 기록 탭에서만 엑셀 저장·인쇄할 수 있습니다.');const data=await allResults();const records=data.filter(d=>d.status==='active'&&d.body.record).map(d=>d.body.record);if(!records.length)throw Error('출력할 수술 기록이 없습니다. 검색어나 기간을 확인해주세요.');if(!print){downloadWorkbook(records,'수술대장.xlsx');message('현재 검색 조건의 수술 기록 '+records.length+'건을 엑셀로 저장했습니다.');return;}
+ async function output(print){if(status!=='active')throw Error('수술 기록 탭에서만 엑셀 저장·인쇄할 수 있습니다.');const data=await allResults();const records=data.filter(d=>d.status==='active'&&d.body.record).map(d=>d.body.record);if(!records.length)throw Error('출력할 수술 기록이 없습니다. 검색어·기간·분류 필터를 확인해주세요.');if(!print){downloadWorkbook(records,'수술대장.xlsx');message('현재 검색 조건의 수술 기록 '+records.length+'건을 엑셀로 저장했습니다.');return;}
   const frame=document.createElement('iframe');frame.className='sl-print-frame';frame.title='수술대장 인쇄';document.body.append(frame);const d=frame.contentDocument;
   d.open();d.write(printHTML(records,{clinicName:a.clinicName?.()||'',from,to}));d.close();
   try{if(d.fonts?.ready)await d.fonts.ready;if(!alive())return;frame.contentWindow.focus();frame.contentWindow.print();}
@@ -431,7 +462,7 @@ function mount(root,a){
   if(key==='refresh'&&root.querySelector('[data-filter]')){const filter=filterInputs();if(!filter)return;await run(async()=>{await load(false,filter);listPosition=null;});return;}
   if(['export','print'].includes(key)){
    if(status!=='active')return;const filter=filterInputs();if(!filter)return;
-   await run(async()=>{if(filter.q!==q||filter.from!==from||filter.to!==to){await load(false,filter);listPosition=null;}await output(key==='print');});return;
+   await run(async()=>{if(Object.keys(filter).some(key=>filter[key]!==currentFilter()[key])){await load(false,filter);listPosition=null;}await output(key==='print');});return;
   }
   if(key==='change-patient'){if(!editable())return;const loader=root.querySelector('.sl-loader');loader.open=true;loader.scrollIntoView({block:'nearest'});root.querySelector('[data-patient-q]').focus();return;}
   if(['save','save-list','save-new'].includes(key)&&!root.querySelector('[data-record]').reportValidity())return;
@@ -440,9 +471,9 @@ function mount(root,a){
   await run(async()=>{switch(key){
    case 'new':await newRecord();break;
    case 'refresh':case 'more':await load(key==='more');break;
-   case 'status':listPosition=null;await load(false,{status:b.dataset.value,q,from,to});break;
+   case 'status':listPosition=null;await load(false,{...currentFilter(),status:b.dataset.value});break;
    case 'reset':listPosition=null;await load(false,{status,q:'',from:'',to:''});break;
-   case 'period':{const range=periodRange(b.dataset.value);listPosition=null;await load(false,{status,q:root.querySelector('[name=q]').value.trim(),...range});break;}
+   case 'period':{const range=periodRange(b.dataset.value),form=root.querySelector('[data-filter]');listPosition=null;await load(false,{status,q:form.q.value.trim(),...Object.fromEntries(classificationFields.map(([key])=>[key,form.elements[key].value.trim()])),...range});break;}
    case 'open':doc=(await request(base+'/'+items[+b.dataset.index].id)).document;if(doc.status==='review')compare();else{edit();void loadRecordPreferences();}break;
    case 'save':case 'save-list':case 'save-new':await save(key==='save-list'?'list':key==='save-new'?'new':'edit');break;
    case 'delete':case 'restore':if(!editable()||!g.confirm(key==='delete'?'이 수술 기록을 휴지통으로 이동할까요?':'이 기록을 복원할까요?'))break;await post(base+'/'+doc.id+'/'+key,{revision:doc.revision});if(pendingSaved===doc.id)pendingSaved=null;dirty=false;listDirty=true;await returnList();message(key==='delete'?'휴지통으로 이동했습니다. 휴지통에서 복원할 수 있습니다.':'복원했습니다.');break;
@@ -488,8 +519,8 @@ function mount(root,a){
   async fromConnection(c,id){if(busy)return false;if(dirty&&!g.confirm('작성 중인 수술대장 입력을 버리고 연결 기록을 열까요?'))return false;await prefs();if(id){const r=await request(base+'/'+encodeURIComponent(id));doc=r.document;if(doc.body.record?.patientId!==c.patient.id)throw Error('같은 환자의 수술대장을 선택해주세요.');dirty=false;}else{doc={status:'active',revision:0,connectionContext:c,body:{record:g.ClinicConnections.ledgerDraft(c)}};dirty=true;}edit();message(id?'연결 기록을 열었습니다.':'원본 내용을 확인하고 저장해주세요.');return true;},
   async open(){if(!alive()||dirty||busy||page==='compare'||page==='import'||page==='import-complete')return;if(!root.childNodes.length)shell('<p>수술대장을 불러오는 중입니다.</p>'+btn('refresh','다시 조회'));await run(()=>load());},
   leave(){return !busy;},
-  dispose(){disposed=true;sequence++;g.removeEventListener('beforeunload',unload);preview=null;sourceDraft=null;listPosition=null;pendingSaved=null;importResult=null;items=[];doc=null;root.replaceChildren();}
+  dispose(){disposed=true;sequence++;g.removeEventListener('beforeunload',unload);preview=null;sourceDraft=null;listPosition=null;pendingSaved=null;importResult=null;items=[];suggestionRecords=[];doc=null;root.replaceChildren();}
  };
 }
-g.SurgeryLedger={choiceLabel,ageAtDate,patientSource,actualAnesthesia,mount,fields,excelDate,groupRows,workbookRows,workbookBytes,csvCell,normalizeRecord,caseResolution,sourcePlan,applySource,periodRange,selectedPeriod,verifyPatientIdentity,printHTML,bookingLabel,speciesKey,breedMatches};
+g.SurgeryLedger={matchesClassification,filteredPage,classificationChoices,choiceLabel,ageAtDate,patientSource,actualAnesthesia,mount,fields,excelDate,groupRows,workbookRows,workbookBytes,csvCell,normalizeRecord,caseResolution,sourcePlan,applySource,periodRange,selectedPeriod,verifyPatientIdentity,printHTML,bookingLabel,speciesKey,breedMatches};
 })(typeof window==='undefined'?globalThis:window);
