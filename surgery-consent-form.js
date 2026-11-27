@@ -14,7 +14,15 @@
  const profile=b=>profiles[b.kind]||profiles.other;
  const hasPlan=b=>['surgery','transfusion','other'].includes(b.kind);
  const law='「수의사법」 제13조의2 및 같은 법 시행규칙 제13조의2에 따른 진단명, 진료의 필요성·방법, 전형적인 후유증·부작용, 진료 전후 준수사항에 대해 수의사로부터 설명을 들었으며, 위 진료행위에 동의합니다.';
- function split(value){const raw=String(value||''),at=raw.indexOf(heading);if(at<0)return {base:raw,anesthesia:'',bridge:'',hasAnesthesia:false};let start=at;const prefix=raw.slice(0,at),plan=prefix.match(/(?:\n|^)선택한 마취 계획: (?:전신마취|진정)\s*$/);if(plan)start=plan.index;const base=raw.slice(0,start).trimEnd();let end=at+heading.length;while(/\s/.test(raw[end]||'')&&end<raw.length)end++;return {base,anesthesia:raw.slice(end),bridge:raw.slice(base.length,end),hasAnesthesia:true};}
+ function split(value){
+  const raw=String(value||''),at=raw.indexOf(heading);if(at<0)return {base:raw,anesthesia:'',bridge:'',hasAnesthesia:false};
+  const plan=raw.slice(0,at).match(/(?:^|(?<=\n))선택한 마취 계획: (?:전신마취|진정)(?:\r?\n)?$/);let start=plan?plan.index:at;
+  // Only the generated two-line separator belongs to the bridge. Trimming all
+  // whitespace here erased the space/newline just typed when sync ran on input.
+  const separator=raw.slice(0,start).match(/(?:\r?\n){2}$/);if(separator)start-=separator[0].length;
+  let end=at+heading.length;const eol=raw.slice(end).match(/^\r?\n/);if(eol)end+=eol[0].length;
+  return {base:raw.slice(0,start),anesthesia:raw.slice(end),bridge:raw.slice(start,end),hasAnesthesia:true};
+ }
  function replace(value,part,text){const p=split(value);if(!p.hasAnesthesia)return part==='base'?text:value;return (part==='base'?text:p.base)+p.bridge+(part==='anesthesia'?text:p.anesthesia);}
  function field(label,key,part,value){const wrap=document.createElement('label');wrap.className='su-wide';const caption=document.createElement('span');caption.className='su-input-caption';caption.textContent=label;wrap.append(caption);const input=document.createElement('textarea');input.rows=3;input.dataset.surgeryKey=key;input.dataset.surgeryPart=part;input.maxLength=6000;input.value=value;wrap.append(input);return wrap;}
  function flat(form,key){const input=form.elements[key],label=document.createElement('label');label.className='su-wide';label.textContent=({diagnosis:'진단명',necessity:'수술이 필요한 이유·대안',cost:'예상 비용·변동 안내'})[key]||key;if(key==='diagnosis')label.textContent='진단명·의심되는 질환 및 증상';label.append(input);return label;}
