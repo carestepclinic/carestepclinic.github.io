@@ -13,7 +13,7 @@ const requestSource=main.slice(main.indexOf('async function req(path,opt={})'),m
 // Module-only mocks miss a second JSON encoding at this integration boundary.
 function wire({status=200,response={ok:true},session='synthetic-session'}={}){
  const calls=[];let storageRequest,loadCount=0,clearCount=0;
- const elements={hqClinicalStorage:{},production:{classList:{contains:()=>false}},loginOverlay:{classList:{contains:()=>true}}};
+ const elements={hqClinicalStorage:{},storage:{classList:{contains:()=>false}},loginOverlay:{classList:{contains:()=>true}}};
  const observers=[];
  const context=vm.createContext({
   document:{getElementById:id=>elements[id]},
@@ -23,7 +23,7 @@ function wire({status=200,response={ok:true},session='synthetic-session'}={}){
   key:()=>'',hqSessionToken:()=>session,
   fetch:async(url,options)=>{calls.push({url,options});return {ok:status<400,status,json:async()=>response};}
  });
- vm.runInContext(requestSource,context);vm.runInContext(bootstrap,context);
+ context.window=context;vm.runInContext(requestSource,context);vm.runInContext(bootstrap,context);
  return {request:(...args)=>storageRequest(...args),calls,elements,observers,counts:()=>({loadCount,clearCount})};
 }
 
@@ -55,9 +55,9 @@ test('server rejection is surfaced once without retrying a storage write',async(
  await assert.rejects(w.request('/hq/clinical-storage/maintenance',{method:'POST',body:'{"action":"step"}'}),e=>e.status===409&&e.message==='synthetic-busy');
  assert.equal(w.calls.length,1);
 });
-test('the mount still loads on activation and clears when authentication locks',()=>{
+test('dedicated storage loader is exposed and locking clears its data',()=>{
  const w=wire();assert.deepEqual(w.counts(),{loadCount:0,clearCount:0});
- w.elements.production.classList.contains=()=>true;w.observers[0]();w.observers[0]();assert.equal(w.counts().loadCount,1);
+ w.elements.storage.classList.contains=()=>true;w.observers[0]();w.observers[0]();assert.equal(w.counts().loadCount,0);
  w.elements.loginOverlay.classList.contains=()=>false;w.observers[1]();assert.equal(w.counts().clearCount,1);
  assert.equal(w.calls.length,0);
 });

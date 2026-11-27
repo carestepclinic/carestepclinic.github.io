@@ -5,9 +5,9 @@
   const regions=new Map(),sequences=new Map(),editors=new Map(),viewPositions=new Map();
   const stateKey='carestep_hq_ui_v20261020';
   let currentView='dashboard',billingPane='subscriptions',sectionAnchor='',restoring=false,reviewOpen=false,closeReview=null;
-  const sectionTargets={usageBilling:{cost:'hqHealthcheckUsage'},production:{storage:'hqClinicalStorage'}};
+  const sectionTargets={};
   function syncMenuSelection(){
-    const shortcut=currentView==='billing'&&billingPane==='payments'?'payments':sectionAnchor;
+    const shortcut=currentView==='billing'&&billingPane==='payments'?'payments':currentView==='aiCost'?'cost':currentView==='storage'?'storage':sectionAnchor;
     document.querySelectorAll('#nav [data-view],#nav [data-hq-shortcut]').forEach(b=>{
       const on=b.dataset.hqShortcut ? b.dataset.hqShortcut===shortcut : !shortcut&&b.dataset.view===currentView;
       b.classList.toggle('active',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
@@ -79,7 +79,7 @@
   }
   function loadState() {try{return JSON.parse(sessionStorage.getItem(stateKey)||'{}');}catch{return {};}}
   function route(hash) {
-    const [view,pane]=String(hash||'').replace(/^#/,'').split('/');
+    let [view,pane]=String(hash||'').replace(/^#/,'').split('/');if(view==='usageBilling'&&pane==='cost')view='aiCost';if(view==='production'&&pane==='storage')view='storage';
     return {view:byId(view)?.classList.contains('view')?view:'dashboard',pane:['subscriptions','plans','payments'].includes(pane)?pane:'subscriptions',anchor:sectionTargets[view]?.[pane]?pane:''};
   }
   function writeRoute(replace=false) {
@@ -341,7 +341,7 @@
     syncMenuSelection();if(push){writeRoute();if(currentView==='billing'&&byId('loginOverlay').classList.contains('hidden'))void reloadView('billing');}return true;
   }
   function viewLoader(view,force=true){
-    return ({consentLibrary:()=>window.CarestepConsentLibrary?.open(),protocols:()=>window.CarestepHqProtocols?.open({reuse:!force}),training:()=>window.CarestepTraining?.open({reuse:!force}),dashboard:()=>loadOverview({reuse:!force}),approval:loadApproval,clinics:()=>loadClinics({forceCatalog:force}),onboarding:()=>loadOnboardingPortfolio({reuse:!force}),customerSuccess:()=>loadCustomerSuccess({reuse:!force}),billing:()=>loadBilling({forceCatalog:force}),usageBilling:loadUsageBilling,
+    return ({aiCost:()=>window.CarestepHqCost?.load(),storage:()=>window.CarestepHqStorage?.open(),partners:()=>window.CarestepHqPartners?.open(),consentLibrary:()=>window.CarestepConsentLibrary?.open(),protocols:()=>window.CarestepHqProtocols?.open({reuse:!force}),training:()=>window.CarestepTraining?.open({reuse:!force}),dashboard:()=>loadOverview({reuse:!force}),approval:loadApproval,clinics:()=>loadClinics({forceCatalog:force}),onboarding:()=>loadOnboardingPortfolio({reuse:!force}),customerSuccess:()=>loadCustomerSuccess({reuse:!force}),billing:()=>loadBilling({forceCatalog:force}),usageBilling:loadUsageBilling,
       integrations:async()=>{if(await loadMessagingIntegration()===false)throw Error(byId('msgQueueSummary')?.textContent||'외부 연동 상태를 불러오지 못했습니다.');},senders:()=>Promise.all([loadSenderOnboarding(),loadMessagingIntegration()]),
       journeys:loadPatientJourneysHQ,surveys:()=>loadGuardianSurveyHQ({reuse:!force}),crm:()=>loadFollowupCrmHQ({reuse:!force}),content:()=>loadContent({reuse:!force}),voice:()=>loadVoice({reuse:!force}),production:loadProductionLaunch,audit:loadAudit})[view];
   }
@@ -630,7 +630,7 @@
     const key=button.dataset.hqShortcut,open=()=>{
       if(!byId('loginOverlay').classList.contains('hidden'))return;
       if(key==='payments'){billingPane='payments';navigate('billing',{check:false});}
-      else navigate(key==='cost'?'usageBilling':'production',{check:false,anchor:key});
+      else navigate(key==='cost'?'aiCost':'storage',{check:false});
     };
     if(allowLeave(open))open();
   });

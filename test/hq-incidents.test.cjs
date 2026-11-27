@@ -39,8 +39,8 @@ async function fixture(t,width){
 for(const width of [390,1440])test('HQ collapses repeated errors, shows range and preserves responsive readability '+width,async t=>{
  const p=await fixture(t,width);assert.equal(await p.locator('.hq-incident-group').count(),1);
  assert.match(await p.locator('.hq-incident-summary').innerText(),/3건.*1묶음/);assert.match(await p.locator('.hq-incident-count').innerText(),/3회/);
- assert.match(await p.locator('.hq-incident-times').innerText(),/최초.*최근/s);assert.match(await p.locator('.hq-incident-scope').innerText(),/현재 조회 범위.*500건/);
- assert.ok(await p.evaluate(()=>reads.some(x=>x.includes('/hq/incidents?')&&x.includes('limit=500'))));
+ assert.match(await p.locator('.hq-incident-times').innerText(),/최초.*최근/s);assert.match(await p.locator('.hq-incident-scope').innerText(),/현재 조회 범위.*200건/);
+ assert.ok(await p.evaluate(()=>reads.some(x=>x.includes('/hq/incidents?')&&x.includes('limit=200'))));
  assert.equal(await p.locator('.hq-incident-records').isVisible(),false);await p.locator('.hq-incident-group>summary').click();assert.equal(await p.locator('.hq-incident-records li').count(),3);
  assert.equal(await p.locator('.hq-incident-code').evaluate(e=>getComputedStyle(e).whiteSpace),'nowrap');assert.equal(await p.locator('.hq-incident-heading .status').evaluate(e=>getComputedStyle(e).whiteSpace),'nowrap');
  await p.evaluate(()=>renderProductionIncidents());assert.equal(await p.locator('.hq-incident-group').getAttribute('open'),'');
@@ -65,7 +65,7 @@ test('failed pending action cannot duplicate writes or hide original evidence',a
 });
 test('escaped error text remains visible without becoming markup, and empty results are explicit',async t=>{
  const p=await fixture(t,390);const value='<img src=x onerror="window.incidentInjected=true">';
- await p.evaluate(message=>{productionIncidents=[{...incidentFixture[0],message}];renderProductionIncidents();},value);
+ await p.evaluate(message=>{incidentFixture=[{...incidentFixture[0],message}];return CarestepHqIncidentList.load({reset:true});},value);
  assert.equal(await p.locator('.hq-incident-message').innerText(),value);assert.equal(await p.locator('#productionIncidentRows img').count(),0);assert.equal(await p.evaluate(()=>window.incidentInjected),undefined);
- await p.evaluate(()=>{productionIncidents=[];renderProductionIncidents();});assert.equal(await p.locator('.hq-incident-group').count(),0);assert.match(await p.locator('.hq-incident-summary').innerText(),/조건에 맞는 장애로그가 없습니다/);
+ await p.evaluate(()=>{incidentFixture=[];return CarestepHqIncidentList.load({reset:true});});assert.equal(await p.locator('.hq-incident-group').count(),0);assert.match(await p.locator('.hq-incident-summary').innerText(),/조건에 맞는 장애로그가 없습니다/);
 });
