@@ -17,10 +17,12 @@ async function carestepConsentSources({force=false}={}){
  const scope=carestepConsentScope();
  if(carestepConsentCatalog?.scope!==scope)carestepConsentCatalog=null;
  let entry=carestepConsentCatalog;
- if(force||!entry||(!entry.pending&&Date.now()-entry.at>=300000)){
-  entry={scope,at:0,pending:null,value:null};carestepConsentCatalog=entry;
-  entry.pending=(async()=>{try{const r=await saasRequest('/saas/practice/consent-explanations');if(scope!==carestepConsentScope())throw Error('병원 또는 계정이 변경되었습니다. 다시 찾아주세요.');entry.value={items:(r.items||[]).filter(x=>x.status==='published'&&x.sourceCurrent!==false&&!x.exclusion?.active).map(x=>({...x,sourceKind:'prepared'})),warnings:[]};entry.at=Date.now();return entry.value;}catch(e){if(carestepConsentCatalog===entry)carestepConsentCatalog=null;throw e;}finally{entry.pending=null;}})();
+ if(!entry||(!entry.pending&&(force||Date.now()-entry.at>=300000))){
+  entry={scope,at:entry?.at||0,pending:null,value:entry?.value||null};carestepConsentCatalog=entry;
+  entry.pending=(async()=>{try{const r=await saasRequest('/saas/practice/consent-explanations?view=catalog');if(scope!==carestepConsentScope())throw Error('병원 또는 계정이 변경되었습니다. 다시 찾아주세요.');entry.value={items:(r.items||[]).filter(x=>x.status==='published'&&x.sourceCurrent!==false&&!x.exclusion?.active).map(x=>({...x,sourceKind:'prepared'})),warnings:[]};entry.at=Date.now();return entry.value;}catch(e){if(carestepConsentCatalog===entry)carestepConsentCatalog=null;throw e;}finally{entry.pending=null;}})();
  }
+ // A warm catalogue remains searchable during revalidation. Detail approval is always checked on selection.
+ if(!force&&entry.value&&entry.pending){void entry.pending.catch(()=>{});return structuredClone(entry.value);}
  const value=entry.pending?await entry.pending:entry.value;
  if(scope!==carestepConsentScope()||!saasPermission('materials.read',true))throw Error('병원 또는 계정이 변경되었습니다. 다시 찾아주세요.');
  return structuredClone(value);
@@ -28,7 +30,7 @@ async function carestepConsentSources({force=false}={}){
 function carestepPreloadConsentSources(){void carestepConsentSources().catch(()=>{});}
 async function carestepConsentSourceDocument(source){
  if(!saasPermission('materials.read',true)||source.sourceKind!=='prepared')throw Error('승인된 동의서 설명을 선택해주세요.');
- const scope=carestepConsentScope(),r=await saasRequest('/saas/practice/consent-explanations/'+encodeURIComponent(source.id));
+ const scope=carestepConsentScope();let r;try{r=await saasRequest('/saas/practice/consent-explanations/'+encodeURIComponent(source.id));}catch(e){if(scope===carestepConsentScope())carestepConsentCatalog=null;throw e;}
  if(scope!==carestepConsentScope())throw Error('병원 또는 계정이 변경되었습니다.');
  const d=r.document,v=d?.variants?.find(x=>x.id===source.variantId);
  if(!v||v.exclusion?.active||d.status!=='published'||d.sourceCurrent===false){carestepConsentCatalog=null;throw Error('현재 공개된 설명을 확인하지 못했습니다. 승인 목록을 새로고침해주세요.');}
