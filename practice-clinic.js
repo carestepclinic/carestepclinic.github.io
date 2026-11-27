@@ -67,3 +67,13 @@ window.ClinicConnections?.config({
 });
 
 document.getElementById('refreshWorkFirst')?.addEventListener('click',()=>void window.CarestepTodayDocuments?.refresh());
+
+// Resume only visible dashboard summaries; each loader coalesces and throttles stale reads.
+function carestepRefreshVisibleToday(){
+ if(document.hidden||saasMode!=='auth'||!saasMe||!document.getElementById('dashboard')?.classList.contains('active-view'))return;
+ void window.CarestepTodayDocuments?.refresh({ifStale:true});
+ void window.CarestepTodayWard?.refresh({ifStale:true});
+}
+window.addEventListener('focus',carestepRefreshVisibleToday);
+document.addEventListener('visibilitychange',carestepRefreshVisibleToday);
+window.setInterval(carestepRefreshVisibleToday,30000);

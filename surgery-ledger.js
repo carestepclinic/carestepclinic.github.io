@@ -151,7 +151,7 @@ function mount(root,a){
  let disposed=false,busy=false,dirty=false,page='list',doc=null,items=[],next='',counts={},status='active',q='',from='',to='',preferences=null,preview=null,importAt=0,imported=0,sequence=0;
  let classification={surgeon:'',diagnosis:'',procedure:''},suggestionRecords=[],stopSearch=false,prefsPending=null,prefsAt=0,prefsEpoch=0;
  const currentFilter=()=>({status,q,from,to,...classification});
- let listPosition=null,loadedPages=1,listDirty=false,sourceDraft=null,sourceContext=null,pendingSaved=null,savedId='',importResult=null,preferencesSequence=0,settingsSavedPending=false,staffNames=null,staffRequest=null;
+ let listPosition=null,loadedPages=1,listLoaded=false,listDirty=false,sourceDraft=null,sourceContext=null,pendingSaved=null,savedId='',importResult=null,preferencesSequence=0,settingsSavedPending=false,staffNames=null,staffRequest=null;
  const request=async(path,options)=>{if(!alive())throw Error('병원 또는 계정이 변경되었습니다.');const r=await a.request(path,options);if(!alive())throw Error('병원 또는 계정이 변경되었습니다.');return r;};
  const post=(path,b)=>request(path,{method:'POST',body:JSON.stringify(b)});
  const message=(s,error=false)=>root.querySelectorAll('[data-ledger-message],[data-ledger-feedback]').forEach(n=>{n.textContent=s;n.classList.toggle('sl-error',error);});
@@ -185,7 +185,7 @@ function mount(root,a){
   suggestionRecords=[...new Map((sameScope?suggestionRecords:[]).concat(r.scanned).map(item=>[item.id,item])).values()];
   classification=Object.fromEntries(classificationFields.map(([key])=>[key,text(filter[key])]));
   ({status,q,from,to}=filter);items=more?[...new Map(items.concat(r.items).map(item=>[item.id,item])).values()]:r.items;
-  next=r.next;counts=r.counts;loadedPages=more?loadedPages+1:1;page='list';dirty=false;listDirty=false;if(!more)savedId=revealId;list();if(r.stopped&&next)message('검색을 중지했습니다. 더 보기로 이어서 조회할 수 있습니다.');
+  next=r.next;counts=r.counts;loadedPages=more?loadedPages+1:1;listLoaded=true;page='list';dirty=false;listDirty=false;if(!more)savedId=revealId;list();if(r.stopped&&next)message('검색을 중지했습니다. 더 보기로 이어서 조회할 수 있습니다.');
  }
  function filterInputs(){
   const f=root.querySelector('[data-filter]');if(!f.reportValidity())return null;
@@ -524,8 +524,8 @@ function mount(root,a){
  return {
   connectionContext:()=>page==='edit'&&doc?.id?{kind:'ledger',id:doc.id,patientId:currentRecord().patientId,dirty:dirty||busy}:null,
   async fromConnection(c,id){if(busy)return false;if(dirty&&!g.confirm('작성 중인 수술대장 입력을 버리고 연결 기록을 열까요?'))return false;if(id){const r=await request(base+'/'+encodeURIComponent(id));doc=r.document;if(doc.body.record?.patientId!==c.patient.id)throw Error('같은 환자의 수술대장을 선택해주세요.');dirty=false;}else{doc={status:'active',revision:0,connectionContext:c,body:{record:g.ClinicConnections.ledgerDraft(c)}};dirty=true;}edit();void loadRecordPreferences();message(id?'연결 기록을 열었습니다.':'원본 내용을 확인하고 저장해주세요.');return true;},
-  async open(){if(!alive()||dirty||busy||page==='compare'||page==='import'||page==='import-complete')return;if(!root.childNodes.length)shell('<p>수술대장을 불러오는 중입니다.</p>'+btn('refresh','다시 조회'));await run(()=>load());},
-  leave(){return !busy;},
+  async open(){if(!alive()||dirty||busy)return;if(root.childNodes.length&&(listLoaded||page!=='list')){if(page==='list')g.requestAnimationFrame(()=>{if(alive()&&root.isConnected&&root.getClientRects().length&&page==='list')restoreListPosition();});return;}if(!root.childNodes.length)shell('<p>수술대장을 불러오는 중입니다.</p>'+btn('refresh','다시 조회'));await run(()=>load());},
+  leave(){if(busy)return false;captureList();return true;},
   dispose(){disposed=true;sequence++;g.removeEventListener('beforeunload',unload);preview=null;sourceDraft=null;listPosition=null;pendingSaved=null;importResult=null;items=[];suggestionRecords=[];doc=null;root.replaceChildren();}
  };
 }

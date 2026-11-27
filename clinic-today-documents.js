@@ -13,10 +13,10 @@
  }
  function groups(rows,today=day()){const sorted=[...rows].sort((a,b)=>String(b.at||b.date).localeCompare(String(a.at||a.date))||a.id.localeCompare(b.id));return {today:sorted.filter(x=>x.date===today),past:sorted.filter(x=>x.date!==today)};}
  function createLoader(a,changed=()=>{}){
-  let epoch=0,scope='',pending=null;const controllers=new Set();
+  let epoch=0,scope='',pending=null,lastAttempt=0;const controllers=new Set();
   const fresh=()=>({rows:[],next:'',seen:new Set(),loaded:false,busy:false,error:'',checked:0});let sources={healthcheck:fresh(),consents:fresh()};
   const allowed=k=>a.ready()&&a.allowed(k),current=(n,key,k)=>n===epoch&&scope===key&&a.identity()===key&&allowed(k);
-  function clear(){epoch++;for(const c of controllers)c.abort();controllers.clear();scope='';pending=null;sources={healthcheck:fresh(),consents:fresh()};changed();}
+  function clear(){epoch++;for(const c of controllers)c.abort();controllers.clear();scope='';pending=null;lastAttempt=0;sources={healthcheck:fresh(),consents:fresh()};changed();}
   const snapshot=()=>({sources,rows:kinds.flatMap(k=>allowed(k)?sources[k].rows:[]),visible:kinds.some(allowed)});
   async function read(path){const controller=new AbortController();controllers.add(controller);let timer;try{return await Promise.race([a.request(path,{signal:controller.signal}),new Promise((_,reject)=>{timer=setTimeout(()=>{controller.abort();reject(Error('timeout'));},a.timeout||15000);})]);}finally{clearTimeout(timer);controllers.delete(controller);}}
   async function load(kind,append,pages,n,key){
@@ -34,9 +34,9 @@
    }}catch(e){if(current(n,key,kind))state.error='목록을 불러오지 못했습니다. 다시 확인해주세요.';}
    finally{if(current(n,key,kind)){state.busy=false;changed();}}
   }
-  function refresh(){
+  function refresh(options={}){
    if(!kinds.some(allowed)){clear();return Promise.resolve();}const key=a.identity();if(scope===key&&(pending||kinds.some(k=>sources[k].busy)))return pending||Promise.resolve();
-   if(scope!==key){clear();scope=key;}const n=++epoch;for(const k of kinds)if(!allowed(k))sources[k]=fresh();
+   if(scope!==key){clear();scope=key;}if(options.ifStale&&lastAttempt&&Date.now()-lastAttempt<60000)return Promise.resolve();lastAttempt=Date.now();const n=++epoch;for(const k of kinds)if(!allowed(k))sources[k]=fresh();
    const job=Promise.all(kinds.filter(allowed).map(k=>load(k,false,3,n,key))).finally(()=>{if(pending===job)pending=null;});pending=job;return job;
   }
   function more(kind){if(!kinds.includes(kind)||scope!==a.identity()||!allowed(kind))return Promise.resolve();return load(kind,true,1,epoch,scope);}
