@@ -10,6 +10,7 @@ before(async()=>{
 });
 after(async()=>{await browser?.close();await new Promise(r=>server.close(r));});
 async function fixture(t,width=1440,lateOperations=false){
+
  const context=await browser.newContext({viewport:{width,height:1000}});await context.route('**/*',r=>r.request().url().startsWith(origin)?r.continue():r.abort());
  if(lateOperations)await context.route('**/hq-operations.js?*',r=>r.fulfill({contentType:'text/javascript',body:''}));
  const p=await context.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));t.after(async()=>{assert.deepEqual(errors,[]);await context.close();});await p.goto(origin+'/hq.html');
@@ -140,4 +141,22 @@ test('review-ready guardian material is in review tab and direct-open preserves 
  const p=await setup(t);await p.evaluate(()=>{const previous=req;req=async(path,opt)=>path==='/hq/material-work?kind=content'?{writing:1,review:1,items:[{id:'review-doc',title:'합성 검토 자료',status:'review'},{id:'failed-doc',title:'합성 재작성 자료',status:'writing'}]}:previous(path,opt);GuardianStudio.open=id=>window.openedGuardian=id;return CarestepHqOperations.loadMaterials(true);});
  await p.evaluate(()=>showView('dashboard'));assert.equal(await p.locator('[data-work-tab=writing]').innerText(),'작성 중 2');assert.equal(await p.locator('[data-work-tab=review]').innerText(),'검토 대기 1');
  await p.locator('[data-work-tab=review]').click();assert.equal(await p.locator('[data-work-kind=content] .hq-work-item').innerText(),'합성 검토 자료');await p.locator('[data-work-kind=content] .hq-work-item').click();assert.equal(await p.evaluate(()=>openedGuardian),'review-doc');assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+
+for(const width of [1440,390])test('signup overview counts and recent reasons remain compact '+width,async t=>{
+ const p=await fixture(t,width);await p.evaluate(()=>{
+  const before=req;req=async(path,opt)=>path.startsWith('/hq/signup-monitor?')?{ok:true,asOf:'2026-11-27T10:00:00Z',accepted:2,failed:3,cancelled:1,reasons:[{label:'필수 입력·형식 확인',count:3}],recent:[{at:'2026-11-27T10:00:00Z',label:'필수 입력·형식 확인',source:'server'},{at:'2026-11-27T10:00:00Z',label:'통신 실패·응답 확인 불가',source:'browser'}]}:before(path,opt);
+  showView('approval');
+ });await p.locator('#hqSignupMonitor .storage-kpis').waitFor();assert.deepEqual(await p.locator('#hqSignupMonitor strong').allTextContents(),['2건','3건','1건']);await p.locator('#hqSignupMonitor summary').click();assert.match(await p.locator('#hqSignupMonitor').innerText(),/서버 확인/);assert.match(await p.locator('#hqSignupMonitor').innerText(),/접수 여부 확인 필요/);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
+test('signup overview failure preserves approval list and retry never reports false zero',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>{
+  window.failSignupMonitor=true;const before=req;req=async(path,opt)=>{if(path.startsWith('/hq/clinics?'))return {clinics:[{id:'pending',name:'합성 신청 병원',createdAt:'2026-11-27',plan:'PILOT',members:1}]};if(path.startsWith('/hq/signup-monitor?')){if(failSignupMonitor)throw Error('synthetic failure');return {ok:true,asOf:new Date().toISOString(),accepted:1,failed:0,cancelled:0};}return before(path,opt);};showView('approval');
+ });await p.getByRole('button',{name:'현황 다시 조회'}).waitFor();assert.match(await p.locator('#approvalList').innerText(),/합성 신청 병원/);assert.equal(await p.locator('#hqSignupMonitor strong').count(),0);await p.evaluate(()=>failSignupMonitor=false);await p.getByRole('button',{name:'현황 다시 조회'}).click();await p.locator('#hqSignupMonitor strong').first().waitFor();assert.equal(await p.locator('#hqSignupMonitor strong').first().innerText(),'1건');
+});
+test('signup period and operator switches reject stale overview results',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>{
+  const before=req;req=async(path,opt)=>{if(path.startsWith('/hq/signup-monitor?')){const days=new URL(path,'https://synthetic.invalid').searchParams.get('days');if(days==='7')await new Promise(r=>window.releaseSignup=r);return {ok:true,asOf:new Date().toISOString(),accepted:Number(days),failed:0,cancelled:0};}return before(path,opt);};showView('approval');
+ });await p.waitForFunction(()=>!!window.releaseSignup);await p.locator('#hqSignupMonitor select').selectOption('30');await p.waitForFunction(()=>document.querySelector('#hqSignupMonitor strong')?.textContent==='30건');await p.evaluate(()=>releaseSignup());assert.equal(await p.locator('#hqSignupMonitor strong').first().innerText(),'30건');
+ await p.evaluate(()=>{document.getElementById('loginOverlay').classList.remove('hidden');});await p.waitForFunction(()=>document.querySelectorAll('#hqSignupMonitor strong').length===0);
 });

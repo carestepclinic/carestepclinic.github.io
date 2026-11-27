@@ -4086,13 +4086,17 @@ async function saasLogin(){
   }catch(e){saasSetAuthStatus(e.message||'로그인 실패','error');}
   finally{saasLoginPending=false;if(button){button.disabled=false;button.textContent=label;}}
 }
+let saasRegisterPending=false;
 async function saasRegister(){
+  if(saasRegisterPending)return;saasRegisterPending=true;
+  const button=$('saasRegisterBtn'),label=button?.textContent,attemptId=window.CarestepSignupEvents?.newId()||crypto.randomUUID();if(button){button.disabled=true;button.textContent='가입 신청 중…';}
   try{
     saasSaveEndpoint();saasSetAuthStatus('병원 가입 신청 중…');
-    const d=await saasRequest('/saas/register',{method:'POST',auth:false,body:JSON.stringify({clinicName:$('saasRegisterClinic')?.value.trim()||'',displayName:$('saasRegisterName')?.value.trim()||'',email:$('saasRegisterEmail')?.value.trim()||'',password:$('saasRegisterPassword')?.value||'',termsAccepted:!!$('saasRegisterTerms')?.checked,privacyAccepted:!!$('saasRegisterPrivacy')?.checked})});
+    const d=await saasRequest('/saas/register',{method:'POST',auth:false,body:JSON.stringify({attemptId,clinicName:$('saasRegisterClinic')?.value.trim()||'',displayName:$('saasRegisterName')?.value.trim()||'',email:$('saasRegisterEmail')?.value.trim()||'',password:$('saasRegisterPassword')?.value||'',termsAccepted:!!$('saasRegisterTerms')?.checked,privacyAccepted:!!$('saasRegisterPrivacy')?.checked})});
     if(d?.pending){saasSetAuthStatus(d.message||'가입 신청이 접수되었습니다. HQ 승인 후 로그인해주세요.','ok');toast('병원 가입 신청이 접수되었습니다.');saasSelectAuth('login');if($('saasLoginEmail'))$('saasLoginEmail').value=$('saasRegisterEmail')?.value.trim()||'';return;}
     await saasFinishAuth(d);toast('병원 Owner 계정이 생성되었습니다.');go('account');
-  }catch(e){saasSetAuthStatus(e.message||'가입 실패','error');}
+  }catch(e){saasSetAuthStatus(e.message||'가입 실패','error');void window.CarestepSignupEvents?.failed(e,attemptId,saasRawRequest);}
+  finally{saasRegisterPending=false;if(button){button.disabled=false;button.textContent=label;}}
 }
 async function saasAcceptInvite(){
   try{
@@ -11219,7 +11223,8 @@ carestepSafeCall('boot_care_operations_refresh',()=>startCareOperationsAutoRefre
 <link rel="stylesheet" href="builder-flow.css?v=20261105-flow3">
 <script src="builder-flow.js?v=20261112-recheck"></script>
 <link rel="stylesheet" href="clinic-calm.css?v=20261122-today-compact">
-<script src="carestep-privacy.js?v=20261127-signup"></script>
+<script src="signup-events.js?v=20261127-monitor"></script>
+<script src="carestep-privacy.js?v=20261127-monitor"></script>
 <script src="clinic-update-notice.js?v=20261117-stable-updates"></script>
 <script>
 window.CarestepClinicalRights={ai:()=>!!saasMe&&clinicPermissionKeys(saasMe.permissions,saasMe.role).includes('clinical.ai'),approve:()=>window.ClinicDemo?.active()||!!saasMe&&clinicPermissionKeys(saasMe.permissions,saasMe.role).includes('clinical.approve')};

@@ -1366,7 +1366,7 @@
   };
   const auditActions={
     'hq.individual_login':'운영자 개인 인증 로그인','hq.session.created':'HQ 로그인 연결 생성','hq.session.revoked':'HQ 로그인 연결 해제','guardian.publish':'보호자 안내자료 게시','automation.manual_run':'자동화 작업 직접 실행',
-    'clinic.signup':'병원 가입 신청','clinic.approval':'가입 승인 상태 변경','clinic.update':'병원 설정 변경','clinic.content':'병원별 콘텐츠 설정 변경',
+    'clinic.signup_failure':'가입 실패·취소','clinic.signup':'병원 가입 신청','clinic.approval':'가입 승인 상태 변경','clinic.update':'병원 설정 변경','clinic.content':'병원별 콘텐츠 설정 변경',
     'subscription.update':'구독 설정 변경','subscription.canceled':'구독 해지','subscription.channel_changed':'구독 계약 채널 변경','subscription.plan_scheduled':'요금제 변경 예약','subscription.cancel_scheduled':'구독 해지 예약','subscription.cancel_revoked':'구독 해지 예약 취소',
     'plan.update':'공통 요금제 변경','content.status':'콘텐츠 공개 상태 변경','content.delete':'콘텐츠 삭제','content.category':'콘텐츠 분류 변경','content.category.reset':'콘텐츠 분류 초기화','content.short_bulk_repair':'콘텐츠 일괄 정리',
     'billing.payment_succeeded':'구독 결제 성공','billing.payment_failed':'구독 결제 실패','billing.method_registered':'결제 수단 등록','billing.messaging_rates':'메시지 원가 단가 변경','billing.overage_final_succeeded':'추가 사용료 정산 완료','billing.test_failure_simulated':'결제 실패 시험 실행',
@@ -1376,8 +1376,8 @@
     'journey.auto_sync.publish':'회복관리 자동 동기화 게시','journey.auto_sync.rescan':'회복관리 자동 동기화 재검색','legal.accept':'약관 동의','account.withdraw':'계정 탈퇴',
     'partner.create':'제휴사 등록','partner.update':'제휴사 설정 변경','partner.api_key.created':'제휴사 API 키 생성','partner.api_key.revoked':'제휴사 API 키 해제','partner.settlement.generated':'제휴 정산 생성','partner.settlement.status':'제휴 정산 상태 변경','onboarding.team_skipped':'직원 초대 단계 건너뛰기'
   };
-  const auditTargets={hq_session:'HQ 로그인 연결',automation:'자동화 작업',clinic:'병원',subscription:'구독',content:'콘텐츠',plan:'요금제',invoice:'청구',payment_method:'결제 수단',incident:'장애',backup:'백업',partner:'제휴사'};
-  const auditFields={from:'변경 전',to:'변경 후',status:'상태',plan:'요금제',planCode:'요금제',clinicName:'병원',title:'자료명',billingCycle:'결제 주기',amountKrw:'금액',priceOverrideKrw:'계약 금액',reviewNote:'검토 메모',version:'자료 버전',reviewerName:'검토자',days:'로그인 유지 일수',expiresAt:'로그인 만료 시각'};
+  const auditTargets={signup_attempt:'익명 가입 시도',hq_session:'HQ 로그인 연결',automation:'자동화 작업',clinic:'병원',subscription:'구독',content:'콘텐츠',plan:'요금제',invoice:'청구',payment_method:'결제 수단',incident:'장애',backup:'백업',partner:'제휴사'};
+  const auditFields={reason:'실패 원인',source:'확인 방식',outcome:'결과',from:'변경 전',to:'변경 후',status:'상태',plan:'요금제',planCode:'요금제',clinicName:'병원',title:'자료명',billingCycle:'결제 주기',amountKrw:'금액',priceOverrideKrw:'계약 금액',reviewNote:'검토 메모',version:'자료 버전',reviewerName:'검토자',days:'로그인 유지 일수',expiresAt:'로그인 만료 시각'};
   function auditDetail(detail){
     if(typeof detail==='string'){try{return JSON.parse(detail);}catch{return {};}}
     return detail&&typeof detail==='object'?detail:{};
@@ -1389,6 +1389,9 @@
     if(/Krw$/.test(key)&&safeNumber(value))return won(value);
     if(key==='expiresAt'){const date=new Date(value);return Number.isNaN(date.getTime())?'시각 확인 필요':date.toLocaleString('ko-KR',{timeZone:'Asia/Seoul'});}
     if(['from','to','status'].includes(key))return ({resolved:'해결 완료',open:'미처리',investigating:'확인 중',monitoring:'경과 확인',closed:'종료',draft:'초안',published:'게시 완료',failed:'실패',completed:'완료'})[String(value)]||hqStatusLabel(String(value));
+    if(key==='reason')return ({consent_missing:'약관·개인정보 확인 누락',invalid_input:'필수 입력·형식 확인',email_in_use:'이미 가입된 이메일',document_confirmation:'위탁계약 확인 필요',document_unavailable:'개인정보 안내 조회 실패',cancelled:'사용자가 확인 취소',network:'통신 실패·응답 확인 불가',storage_error:'가입 저장 오류',request_failed:'가입 요청 처리 오류'})[value]||'원인 확인 필요';
+    if(key==='source')return ({server:'서버 확인',browser:'브라우저 보고'})[value]||String(value);
+    if(key==='outcome')return ({failed:'실패',cancelled:'취소'})[value]||String(value);
     if(key==='billingCycle')return ({monthly:'월간',annual:'연간'})[value]||String(value);
     return String(value);
   }
@@ -1402,7 +1405,7 @@
     byId('auditList').innerHTML=rows.length?`<div class="table-wrap" tabindex="0" aria-label="운영 감사로그"><table class="table hq-audit-table hq-responsive-table"><thead><tr><th scope="col">시각</th><th scope="col">작업자</th><th scope="col">작업</th><th scope="col">대상</th><th scope="col">변경 내용</th></tr></thead><tbody>${rows.map(x=>{
       const detail=auditDetail(x.detail),known=auditActions[x.action],summary=Object.entries(auditFields).filter(([key])=>Object.hasOwn(detail,key)).map(([key,label])=>`<div><dt>${label}</dt><dd>${esc(auditDisplay(detail[key],key))}</dd></div>`).join('');
       const targetName=detail.clinicName||x.clinicName||detail.title||x.targetName||'',clinicId=auditClinicId(x,detail),clinicLink=clinicId?`<br><button type="button" class="btn small" data-audit-clinic="${esc(clinicId)}">관련 병원 열기</button>`:'';
-      return `<tr><td data-label="시각">${esc(x.createdAt?new Date(x.createdAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}):'미확인')}</td><td data-label="작업자">${esc(x.actor==='HQ'||!x.actor?'HQ 운영자':x.actor)}</td><td data-label="작업"><b>${esc(known||'운영 작업 · 원본 코드 확인')}</b></td><td data-label="대상">${esc(auditTargets[x.targetType]||'기타 대상')}${targetName?'<br><b>'+esc(targetName)+'</b>':''}${clinicLink}</td><td data-label="변경 내용">${summary?'<dl class="hq-audit-summary">'+summary+'</dl>':'<span class="muted">변경 내용은 원본 상세에서 확인하세요.</span>'}<details class="hq-audit-raw"><summary>원본 상세</summary><p>작업 코드: ${esc(x.action)}<br>대상 유형: ${esc(x.targetType)}<br>대상 ID: ${esc(x.targetId)}</p><pre>${esc(typeof x.detail==='string'?x.detail:JSON.stringify(x.detail??{},null,2))}</pre></details></td></tr>`;
+      return `<tr><td data-label="시각">${esc(x.createdAt?new Date(x.createdAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}):'미확인')}</td><td data-label="작업자">${esc(x.action==='clinic.signup_failure'?'익명 가입 시도':x.action==='clinic.signup'?'가입 신청자':x.actor==='HQ'||!x.actor?'HQ 운영자':x.actor)}</td><td data-label="작업"><b>${esc(known||'운영 작업 · 원본 코드 확인')}</b></td><td data-label="대상">${esc(auditTargets[x.targetType]||'기타 대상')}${targetName?'<br><b>'+esc(targetName)+'</b>':''}${clinicLink}</td><td data-label="변경 내용">${summary?'<dl class="hq-audit-summary">'+summary+'</dl>':'<span class="muted">변경 내용은 원본 상세에서 확인하세요.</span>'}<details class="hq-audit-raw"><summary>원본 상세</summary><p>작업 코드: ${esc(x.action)}<br>대상 유형: ${esc(x.targetType)}<br>대상 ID: ${esc(x.targetId)}</p><pre>${esc(typeof x.detail==='string'?x.detail:JSON.stringify(x.detail??{},null,2))}</pre></details></td></tr>`;
     }).join('')}</tbody></table></div>`:`<div class="empty">${auditPending?'운영 기록을 불러오고 있습니다.':auditError?'기록을 확인하지 못했습니다. 안내를 확인하고 다시 조회해주세요.':'조건에 맞는 운영 기록이 없습니다.'}</div>`;
   }
   let auditActionsAvailable=[],auditPageMessage='',auditCursors=[''],auditIndex=0,auditAsOf='',auditNext='',auditSignature='',auditPending=false,auditError=false,auditTimer;
