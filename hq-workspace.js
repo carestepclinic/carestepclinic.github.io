@@ -30,6 +30,17 @@
   return raw==='고양이 특화'?'분류 확인 필요':raw||'미분류';
  }
  function materialTitle(item){const title=String(item.title||'제목 없음');return item.status==='published'?title.replace(/\s*[·:—-]?\s*초안\s*$/,'').trim():title;}
+ function activitySummary(entry={}){
+  const a=entry.activity;if(!a)return '전체 기능 사용 집계 확인 필요';
+  const latest=(a.features||[]).find(f=>f.lastActivity===a.lastActivity)||(a.features||[])[0];
+  const at=Date.parse(a.lastActivity),days=Number.isFinite(at)?Math.max(0,Math.floor((Date.now()-at)/86400000)):null;
+  return (a.complete===false?'일부 집계 · ':'')+(days===null?'저장 이력 없음':(days===0?'오늘':days+'일 전')+' · '+(latest?.label||'기록 저장'));
+ }
+ function activityDetails(a){
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  if(!a)return '<p>전체 기능 사용 집계를 확인하지 못했습니다.</p>';
+  return '<div class="hq-activity-details"><b>최근 30일 저장 작업 '+Number(a.events30||0).toLocaleString('ko-KR')+'회 · 활성 '+Number(a.activeDays30||0)+'일</b>'+(a.complete===false?'<p>일부 기능만 집계되었습니다. 미사용 여부를 확정하지 않습니다.</p>':'')+'<ul>'+(a.features||[]).map(f=>'<li>'+esc(f.label)+' · '+Number(f.events30||0)+'회 · 최근 '+esc(f.lastActivity?new Date(f.lastActivity).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}):'없음')+'</li>').join('')+'</ul><p class="muted">'+esc(a.basis||'서버 저장 이력 기준 · 수정 포함, 환자 수와 다릅니다.')+'</p></div>';
+ }
  function adoptionAction(entry){const text=String(entry.nextAction||'');if(/첫.*(?:퇴원자료|안내자료)/.test(text))return entry.neverUsed===true?'보호자 안내자료 작성 흐름을 안내해주세요.':'최근 30일 보호자 안내자료 사용 현황을 확인해주세요.';return text.replaceAll('퇴원자료','보호자 안내자료');}
 
  function adoptionSummary(rows=[]){
@@ -63,5 +74,5 @@
   const normalized=v=>v.replace(/\s+/g,'').toLowerCase();
   return {title,description:normalized(title)===normalized(description)?'':description,full};
  }
- g.CarestepHqWorkspace={confirm,prompt:message=>confirm(message,{input:true}),discard,documentView,slice,pager,species,category,materialTitle,adoptionAction,adoptionSummary,onboardingEntry,onboardingView,deferredHospital,protocolLabel,owner,ready};
+ g.CarestepHqWorkspace={confirm,prompt:message=>confirm(message,{input:true}),discard,documentView,slice,pager,species,category,materialTitle,activitySummary,activityDetails,adoptionAction,adoptionSummary,onboardingEntry,onboardingView,deferredHospital,protocolLabel,owner,ready};
 })(window);

@@ -8,7 +8,7 @@
   b.classList.add('pt-organized');
   const set=(el,value)=>{if(el&&el.textContent!==value)el.textContent=value;};
   const hide=(el,value)=>{if(el&&el.hidden!==value)el.hidden=value;};
-  const groups=[['약물 투여',[['batch','처방 계산'],['emergency','응급약물'],['anesthesia','마취약물']]],['수액·주입',[['fluid','수액 계산'],['cri','정맥 주입·CRI'],['transfusion','수혈 계산']]],['보충·보정',[['potassium','전해질 보충'],['acid','산·염기 계산']]],['영양·환산',[['nutrition','영양·급여 계산'],['convert','단위·희석']]]];
+  const groups=[['약물 투여',[['batch','처방 계산'],['emergency','응급약물'],['anesthesia','마취약물']]],['수액·주입',[['fluid','수액 계산'],['cri','정맥 주입·CRI'],['transfusion','수혈 계산']]],['보충·보정',[['potassium','전해질 보충'],['acid','산·염기 계산']]],['심장',[['cardiac','심장 계산']]],['영양·환산',[['nutrition','영양·급여 계산'],['convert','단위·희석']]]];
   for(const [title,items] of groups){
    const group=document.createElement('section');group.className='pt-calc-group';
    const heading=document.createElement('h4');heading.textContent=title;group.append(heading);

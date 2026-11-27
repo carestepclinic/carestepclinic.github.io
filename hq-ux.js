@@ -1087,7 +1087,7 @@
     originalSuccessRender();
     const table=byId('customerSuccessRows').closest('table');
     table.classList.add('hq-adoption-table');
-    compactHqTable(table,['병원','사용 현황','안내·후속관리 활용 점수','확인 우선순위 점수','최근 30일 활용','기본 준비','체험·구독','최근 활동','핵심 사유','다음 작업'],[0,1,8,9],'점수·이용 상세');
+    compactHqTable(table,['병원','사용 현황','전체 기능 활용 점수','확인 우선순위 점수','최근 30일 활용','기본 준비','체험·구독','최근 활동','핵심 사유','다음 작업'],[0,1,8,9],'점수·이용 상세');
   };
   function compactAnalytics(id,labels,keep){
     const table=byId(id).querySelector('table');if(table)compactHqTable(table,labels,keep,'집계 상세');
@@ -1277,7 +1277,7 @@
       const status=row.querySelector('.cs-status');if(status?.textContent==='위험')status.textContent='사용 현황 확인 필요';
       const next=row.querySelector('.cs-next');next.textContent=operationalText(CarestepHqWorkspace.adoptionAction(entry));
       const subscription=['past_due','paused','canceled','trialing'].includes(entry.subscription?.status);
-      const setup=entry.onboarding&&(entry.onboarding.ready===false||Number(entry.onboarding.percent)<100);
+      const setup=entry.onboarding&&(entry.onboarding.basicReady===false||(entry.onboarding.basicReady===undefined&&(entry.onboarding.ready===false||Number(entry.onboarding.percent)<100)));
       const action=document.createElement('button');action.type='button';action.className='btn hq-next-action';
       action.dataset.csActionClinic=id;action.dataset.clinicPane=subscription?'subscription':setup?'connection':'operation';
       action.textContent=subscription?'구독 확인':setup?'개통·연동 확인':'병원 운영 확인';

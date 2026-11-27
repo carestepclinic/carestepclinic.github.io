@@ -39,7 +39,7 @@ export const uiFiles = new Set([
  'practice-prescription-summary.js','practice-prescription-library.js','practice-prescription-safety.js','clinical-knowledge.js','clinical-knowledge.css','clinical-workspace.js','clinical-workspace.css','clinical-care-ui.css','clinical-protocol-starters.js',
  'practice-calculator-clarity.js','practice-calculator-clarity.css',
  'practice-calculator-flow.js','practice-calculator-settings.js','practice-calculator-organize.js','practice-calculator-organize.css',
- 'practice-anesthesia.js','practice-fluid-plan.js',
+ 'practice-anesthesia.js','practice-anesthesia-cri.js','practice-cardiac.js','practice-special-calculators.css','practice-fluid-plan.js',
  'practice-calcium-guided.js','practice-preparation.js','practice-medication-flow.js','practice-rx-workflow.js','practice-medication-assist.js',
  'practice-prescription-image.js','clinic-tab-position.js',
  'practice-potassium-mix.js','clinic-install.js','clinic-install.css','clinic.webmanifest','clinic-icon.svg','clinic-icon-192.png','clinic-icon-512.png',
