@@ -1,0 +1,23 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+require('../surgery-ledger.js');
+const ledger=fs.readFileSync(require.resolve('../surgery-ledger.js'),'utf8'),support=fs.readFileSync(require.resolve('../clinic-support.js'),'utf8');
+const extract=(s,a,b)=>s.slice(s.indexOf(a),s.indexOf(b,s.indexOf(a)));
+test('ledger progress uses server scan counts, stops between batches and retains resume cursor',async()=>{let calls=0,stop=false;const updates=[];const r=await SurgeryLedger.filteredPage(async()=>{calls++;return {items:[],next:'2020-01-01|b',scannedCount:1000,filtersApplied:true}},'',{procedure:'없는 수술'},{stopped:()=>stop,progress:n=>{updates.push(n);stop=true}});assert.equal(calls,1);assert.deepEqual(updates,[1000]);assert.equal(r.stopped,true);assert.equal(r.next,'2020-01-01|b');});
+test('ledger continues free-text searches over empty pages too',async()=>{let calls=0;const r=await SurgeryLedger.filteredPage(async c=>{calls++;return c?{items:[{id:'match',body:{record:{}}}],next:''}:{items:[],next:'next'}},'',{q:'찾기'});assert.equal(calls,2);assert.equal(r.items[0].id,'match');});
+test('ledger preferences share reads but management refresh supersedes old responses',async()=>{
+ let reads=0,release;const c=vm.createContext({preferences:null,prefsPending:null,prefsAt:0,prefsEpoch:0,Date,base:'/ledger',alive:()=>true,request:()=>{reads++;return reads===1?new Promise(r=>release=r):Promise.resolve({revision:2})}});
+ vm.runInContext(extract(ledger,'async function prefs(',' function read()'),c);const a=c.prefs({force:false}),b=c.prefs({force:false});assert.equal(reads,1);await c.prefs();release({revision:1});await Promise.all([a,b]);assert.equal(c.preferences.revision,2);await c.prefs({force:false});assert.equal(reads,2);
+});
+test('new ledger opens before optional preferences finish',async()=>{let opened=0,background=0;const c=vm.createContext({today:()=>'',doc:null,dirty:true,edit:()=>opened++,loadRecordPreferences:()=>{background++;return new Promise(()=>{})},root:{querySelector:()=>null}});vm.runInContext(extract(ledger,'async function newRecord(',' async function save('),c);await c.newRecord('2020-01-01');assert.equal(opened,1);assert.equal(background,1);assert.equal(c.doc.body.record.date,'2020-01-01');});
+test('reservation list does not wait for staff but still requires resources and bookings',async()=>{
+ let opened=0,staff=0;const c=vm.createContext({mode:'bookings',seq:0,alive:()=>true,date:'2020-01-01',loadBookingMembers:()=>{staff++;return new Promise(()=>{})},request:async p=>p==='resources'?{items:[{id:'room'}]}:{items:[{id:'booking'}]},root:{querySelector:()=>null},local:()=> '2020-01-01T09:00',displayedBookingDate:'',lastChecked:'',savedReloadDate:'',syncMessage:'',staleBooking:false,resources:[],bookings:[],bookingsComplete:false,booking:null,panelOpen:false,listBookings:()=>opened++,bookingMemberStatus:()=>{}});
+ vm.runInContext(extract(support,'async function load(append=',' function consentStage'),c);await c.load();assert.equal(opened,1);assert.equal(staff,1);assert.equal(c.resources[0].id,'room');assert.equal(c.bookings[0].id,'booking');
+});
+test('delayed staff completion is ignored after hospital view is disposed',async()=>{
+ let release,alive=true,sync=0;const c=vm.createContext({bookingMembersPending:null,bookingMembersAt:0,bookingMembersError:'',members:[],Date,a:{request:()=>new Promise(r=>release=r)},alive:()=>alive,bookingMemberStatus:()=>{},syncBookingMembers:()=>{if(alive)sync++}});vm.runInContext(extract(support,'async function loadBookingMembers(',' async function load(append='),c);const p=c.loadBookingMembers();await Promise.resolve();alive=false;release({members:[{status:'active',userId:'old'}]});await p;assert.equal(c.members.length,0);assert.equal(sync,0);
+});
+test('heavy clinical code is on-demand in dependency order and shared list controls remain eager',()=>{
+ const html=fs.readFileSync(require.resolve('../index.html'),'utf8'),manifest=JSON.parse(html.match(/<script id="clinic-module-manifest"[^>]*>([^<]+)<\/script>/)[1]);
+ for(const file of ['clinical-workspace.js','anesthesia-record.js','practice-prescription-safety.js']){assert.ok(manifest.clinical.some(x=>x.startsWith(file+'?')));assert.ok(manifest.calc.some(x=>x.startsWith(file+'?')));assert.equal(new RegExp('<script src="'+file.replaceAll('.','\\.')).test(html),false);}
+ assert.ok(manifest.clinical.findIndex(x=>x.startsWith('clinical-workspace.js'))<manifest.clinical.findIndex(x=>x.startsWith('practice-prescription-safety.js')));assert.match(html,/<script src="record-list-layout.js/);
+});
