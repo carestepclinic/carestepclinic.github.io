@@ -43,6 +43,13 @@
   const clinics=(data.clinics||[]).map(onboardingEntry);
   return {...data,clinics,summary:{...data.summary,total:clinics.length,live:clinics.filter(x=>!x.needsAttention).length,setting:clinics.filter(x=>x.goLiveStatus==='setting').length,attention:clinics.filter(x=>x.needsAttention).length,avgPercent:clinics.length?Math.round(clinics.reduce((n,x)=>n+x.percent,0)/clinics.length):0}};
  }
+ function deferredHospital(entry={}){
+  const sub=entry.payment||entry.subscription||{},status=sub.subscriptionStatus||sub.status||'';
+  if(entry.clinicStatus==='suspended')return '병원 사용 중지';
+  if(['paused','canceled','cancelled','expired'].includes(status))return status==='paused'?'구독 일시중지':'구독 종료';
+  if(status==='trialing'&&((Number.isFinite(sub.trialDaysLeft)&&sub.trialDaysLeft<0)||(sub.trialEndsAt&&Date.parse(sub.trialEndsAt)<=Date.now())))return '체험 종료';
+  return '';
+ }
  function protocolLabel(item={}){
   const full=materialTitle(item),disease=String(item.body?.disease||item.disease||'').trim();
   // Use an explicit disease title when supplied; otherwise retain the full title with visual clamping.
@@ -50,5 +57,5 @@
   const normalized=v=>v.replace(/\s+/g,'').toLowerCase();
   return {title,description:normalized(title)===normalized(description)?'':description,full};
  }
- g.CarestepHqWorkspace={confirm,prompt:message=>confirm(message,{input:true}),discard,documentView,slice,pager,species,category,materialTitle,adoptionAction,onboardingEntry,onboardingView,protocolLabel,owner,ready};
+ g.CarestepHqWorkspace={confirm,prompt:message=>confirm(message,{input:true}),discard,documentView,slice,pager,species,category,materialTitle,adoptionAction,onboardingEntry,onboardingView,deferredHospital,protocolLabel,owner,ready};
 })(window);

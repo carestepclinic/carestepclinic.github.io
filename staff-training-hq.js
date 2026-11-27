@@ -91,6 +91,6 @@ if(document.getElementById('training').classList.contains('active'))window.Cares
  root.querySelector('[data-protocol-refresh]').onclick=()=>load();
  root.querySelector('[data-protocol-queue]').onclick=()=>{if(ready())ClinicalKnowledge.openQueue(sessionAdapter(),'protocol');};
  new MutationObserver(()=>{if(!document.getElementById('loginOverlay').classList.contains('hidden')){sequence++;loadedAt=0;pending=null;listOwner='';items=[];jobs=[];queueCounts={};sourceFields=new Map();list.replaceChildren();quick.replaceChildren();root.querySelector('[data-protocol-count]').textContent='';globalThis.ClinicalKnowledge?.close(true);message.textContent='HQ 연결 후 자료를 확인할 수 있습니다.';root.setAttribute('aria-busy','false');}}).observe(document.getElementById('loginOverlay'),{attributes:true,attributeFilter:['class']});
- window.CarestepHqProtocols={open:(options={})=>load(options)};
+ window.CarestepHqProtocols={open:(options={})=>load(options),openDocument(id){if(!ready())return;ClinicalKnowledge.openProtocol(sessionAdapter(),encodeURIComponent(id),true,()=>{ClinicalKnowledge.close();load();});}};
  if(root.classList.contains('active'))load();
 })();

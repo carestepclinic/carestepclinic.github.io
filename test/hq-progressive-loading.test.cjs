@@ -6,7 +6,7 @@ const http=require('node:http');
 const {chromium}=require('playwright');
 let browser,server,origin;
 const root=resolve(__dirname,'..');
-const allowed=new Set(['hq-healthcheck-usage.js','hq-clinical-storage.js','subscription-resources.js','subscription-resources.css','hq-incidents.js','hq-incidents.css','hq-incident-list.js','hq-partners.js','hq-partners.css','consent-library.js','consent-library.css','clinic-capabilities.js','guardian-studio.js','guardian-studio.css','hq.html','hq-workspace.js','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
+const allowed=new Set(['hq-operations.js','hq-operations.css','hq-incident-list.js','hq-healthcheck-usage.js','hq-clinical-storage.js','subscription-resources.js','subscription-resources.css','hq-incidents.js','hq-incidents.css','hq-incident-list.js','hq-partners.js','hq-partners.css','consent-library.js','consent-library.css','clinic-capabilities.js','guardian-studio.js','guardian-studio.css','hq.html','hq-workspace.js','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
 before(async()=>{
   server=http.createServer((req,res)=>{
     const file=new URL(req.url,'http://localhost').pathname.slice(1);

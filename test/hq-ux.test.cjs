@@ -6,7 +6,7 @@ const http=require('node:http');
 const {chromium}=require('playwright');
 let browser,server,origin;
 const root=resolve(__dirname,'..');
-const allowed=new Set(['hq-incidents.js','hq-incidents.css','subscription-resources.js','subscription-resources.css','hq-healthcheck-usage.js','hq-clinical-storage.js','deployment-status.js','clinic-capabilities.js','guardian-studio.js','guardian-studio.css','hq.html','hq-workspace.js','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
+const allowed=new Set(['hq-operations.js','hq-operations.css','hq-incident-list.js','hq-incidents.js','hq-incidents.css','subscription-resources.js','subscription-resources.css','hq-healthcheck-usage.js','hq-clinical-storage.js','deployment-status.js','clinic-capabilities.js','guardian-studio.js','guardian-studio.css','hq.html','hq-workspace.js','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
 before(async()=>{
   server=http.createServer((req,res)=>{
     const file=new URL(req.url,'http://localhost').pathname.slice(1);
@@ -1190,7 +1190,7 @@ test('quick search supports arrow selection, Enter navigation and Escape clearin
 for(const width of [390,1280])test(`refined sender, audit and production screens fit ${width}px`,async t=>{
  const p=await fixture(t,width);await p.evaluate(()=>{
   window.screenData={events:[{createdAt:'2026-10-20',action:'subscription.update',actor:'HQ',targetType:'subscription',targetId:'A',detail:{clinicName:'가독성을 확인하기 위한 긴 이름의 시험 동물병원',amountKrw:129000,plan:'PRO'}}]};
-  req=(path,o)=>path==='/hq/audit'?Promise.resolve(screenData):path==='/hq/production-launch'?Promise.resolve({security:{checks:[{pass:false,label:'연동 설정 확인',detail:'운영 준비 상태를 확인해주세요.'},{pass:true,label:'정상 확인'}]},checklist:{},operations:{}}):path.startsWith('/hq/messaging/sender-onboarding')?Promise.resolve({requests:[{clinicId:'A',clinicName:'긴 이름의 시험 동물병원',status:'pending',senderNumber:'000-0000-0000'}]}):baseReq(path,o);
+  req=(path,o)=>path.startsWith('/hq/audit?')?Promise.resolve(screenData):path==='/hq/production-launch'?Promise.resolve({security:{checks:[{pass:false,label:'연동 설정 확인',detail:'운영 준비 상태를 확인해주세요.'},{pass:true,label:'정상 확인'}]},checklist:{},operations:{}}):path.startsWith('/hq/messaging/sender-onboarding')?Promise.resolve({requests:[{clinicId:'A',clinicName:'긴 이름의 시험 동물병원',status:'pending',senderNumber:'000-0000-0000'}]}):baseReq(path,o);
  });
  for(const view of ['senders','audit','production']){
   await p.evaluate(v=>showView(v),view);await p.locator('#'+view).waitFor({state:'visible'});
@@ -1213,9 +1213,9 @@ test('monthly rates distinguish zero percent from missing data',async t=>{
 test('production and integration failures retain a persistent error and retry',async t=>{
  const p=await fixture(t);
  await p.evaluate(()=>{req=async()=>{throw Error('시험 연결 실패');};showView('production');});
- await p.waitForFunction(()=>document.querySelector('#production .hq-load-status')?.textContent.includes('조회하지 못했습니다'));
- assert.match(await p.locator('#production .hq-load-status').innerText(),/이전 결과/);
- assert.equal(await p.locator('#production .hq-load-status button').innerText(),'다시 시도');
+ await p.waitForFunction(()=>document.querySelector('[data-hq-panel-state=launch]')?.textContent.includes('조회 실패'));
+ assert.match(await p.locator('[data-hq-panel-state=launch]').innerText(),/시험 연결 실패/);
+ assert.equal(await p.locator('[data-hq-panel-state=launch] button').innerText(),'이 항목 다시 조회');
  await p.evaluate(()=>showView('integrations'));
  await p.waitForFunction(()=>document.querySelector('#integrations .hq-load-status')?.textContent.includes('조회하지 못했습니다'));
  assert.equal(await p.locator('#integrations .hq-load-status button').innerText(),'다시 시도');
@@ -1253,18 +1253,18 @@ test('deployment read ignores an older response and a response after locking',as
 });
 for(const width of [390,1440])test('audit filters use inclusive Korean dates, clinic, action and actor, with return navigation '+width,async t=>{
  const p=await fixture(t,width);await p.evaluate(()=>{
-  const original=req;req=(path,o)=>path==='/hq/audit'?Promise.resolve({events:[
+  const original=req;req=(path,o)=>{if(!path.startsWith('/hq/audit?'))return original(path,o);const q=new URL(path,'https://synthetic.invalid').searchParams;const rows=[
    {createdAt:'2026-11-06T15:00:00Z',actor:'홍길동',action:'clinic.update',targetType:'clinic',targetId:'A',detail:{clinicName:'시험 병원 A',status:'active'}},
    {createdAt:'2026-11-07T14:59:59Z',actor:'HQ',action:'subscription.update',targetType:'subscription',targetId:'sub-b',detail:{clinicId:'B',clinicName:'시험 병원 B'}},
    {createdAt:'2026-11-07T15:00:00Z',actor:'홍길동',action:'clinic.update',targetType:'clinic',targetId:'A',detail:{clinicName:'시험 병원 A'}}
-  ]}):original(path,o);showView('audit');
+  ];return Promise.resolve({actions:['clinic.update','subscription.update'],events:rows.filter(x=>{const when=Date.parse(x.createdAt),from=q.get('from'),to=q.get('to');return (!from||when>=Date.parse(from+'T00:00:00+09:00'))&&(!to||when<Date.parse(to+'T00:00:00+09:00')+86400000)&&(!q.get('clinic')||x.detail.clinicName.includes(q.get('clinic')))&&(!q.get('actor')||x.actor.includes(q.get('actor')))&&(!q.get('action')||q.get('action')==='all'||q.get('action')===x.action);})});};showView('audit');
  });await p.locator('.hq-audit-table').waitFor();
- await p.locator('#hqAuditFrom').fill('2026-11-07');await p.locator('#hqAuditTo').fill('2026-11-07');assert.equal(await p.locator('.hq-audit-table tbody tr').count(),2);
- await p.locator('#hqAuditClinic').fill('병원 A');await p.locator('#hqAuditActor').fill('홍길동');await p.locator('#hqAuditAction').selectOption('clinic.update');assert.equal(await p.locator('.hq-audit-table tbody tr').count(),1);
- assert.match(await p.locator('#hqAuditSummary').innerText(),/최근 기록 3건 내 검색/);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+ await p.locator('#hqAuditFrom').fill('2026-11-07');await p.locator('#hqAuditTo').fill('2026-11-07');await p.waitForFunction(()=>document.querySelectorAll('.hq-audit-table tbody tr').length===2);
+ await p.locator('#hqAuditClinic').fill('병원 A');await p.locator('#hqAuditActor').fill('홍길동');await p.locator('#hqAuditAction').selectOption('clinic.update');await p.waitForFunction(()=>document.querySelectorAll('.hq-audit-table tbody tr').length===1);
+ assert.match(await p.locator('#hqAuditSummary').innerText(),/전체 이력 검색/);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
  if(process.env.HQ_SCREENSHOTS)await p.screenshot({path:resolve(process.env.HQ_SCREENSHOTS,'hq-operations-audit-'+width+'.png'),fullPage:true});
- await p.locator('[data-audit-clinic=A]').click();await p.locator('.hq-contract-summary').waitFor();await p.getByRole('button',{name:'운영 감사로그 · 돌아가기',exact:true}).click();assert.equal(await p.locator('#hqAuditClinic').inputValue(),'병원 A');assert.equal(await p.locator('.hq-audit-table tbody tr').count(),1);
- await p.locator('#hqAuditReset').click();assert.equal(await p.locator('.hq-audit-table tbody tr').count(),3);await p.locator('#hqAuditFrom').fill('2026-11-08');await p.locator('#hqAuditTo').fill('2026-11-07');assert.match(await p.locator('#hqAuditSummary').innerText(),/시작일/);assert.deepEqual(await p.evaluate(()=>writes),[]);
+ await p.locator('[data-audit-clinic=A]').click();await p.locator('.hq-contract-summary').waitFor();await p.getByRole('button',{name:'운영 감사로그 · 돌아가기',exact:true}).click();assert.equal(await p.locator('#hqAuditClinic').inputValue(),'병원 A');await p.waitForFunction(()=>document.querySelectorAll('.hq-audit-table tbody tr').length===1);
+ await p.locator('#hqAuditReset').click();await p.waitForFunction(()=>document.querySelectorAll('.hq-audit-table tbody tr').length===3);await p.locator('#hqAuditFrom').fill('2026-11-08');await p.locator('#hqAuditTo').fill('2026-11-07');await p.waitForFunction(()=>document.querySelector('#hqAuditSummary').textContent.includes('시작일'));assert.deepEqual(await p.evaluate(()=>writes),[]);
 });
 
 test('subscription review cannot write to a newly selected hospital',async t=>{

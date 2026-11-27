@@ -68,7 +68,7 @@
    else if(b.dataset.ceRetry){if(!await g.CarestepHqWorkspace.confirm('이 항목을 다시 작성합니다. 추가 AI 사용료가 발생할 수 있습니다. 진행할까요?'))return;await call('/control',{action:'retry',ids:[b.dataset.ceRetry],confirmSend:true});}
    else return;await load();
   }catch(e){if(alive())notice(e.message,true);}finally{busy=false;if(b.isConnected)b.disabled=false;}});
-  return {open:load,close:()=>close(true),clear(){sequence++;sourceSequence++;sourceState='';data=null;close(true);root.querySelector('[data-ce-list]').replaceChildren();root.querySelector('[data-ce-jobs]').replaceChildren();owner='';}};
+  return {open:load,openDocument(id){if(!a.ready())return;owner=a.identity();return open(encodeURIComponent(id));},close:()=>close(true),clear(){sequence++;sourceSequence++;sourceState='';data=null;close(true);root.querySelector('[data-ce-list]').replaceChildren();root.querySelector('[data-ce-jobs]').replaceChildren();owner='';}};
  }
  g.ConsentLibrary={mount,groupDrafts,diseaseGroup,reviewProgress};
  if(document.getElementById('consentLibraryRoot')){const app=mount(document.getElementById('consentLibraryRoot'),{ready:()=>g.CarestepHqWorkspace.ready(),identity:()=>g.CarestepHqWorkspace.owner(),request:(p,o)=>req('/hq/training'+p,o)});g.CarestepConsentLibrary=app;new MutationObserver(()=>{if(!g.CarestepHqWorkspace.ready())app.clear();}).observe(document.getElementById('loginOverlay'),{attributes:true,attributeFilter:['class']});}
