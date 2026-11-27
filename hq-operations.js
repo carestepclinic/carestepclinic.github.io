@@ -57,7 +57,7 @@
    if(!d)section.innerHTML+='<p role="status">확인 중…</p>';
    else if(d.error){const p=document.createElement('p');p.textContent='조회 실패 · '+d.error;const b=document.createElement('button');b.className='btn small';b.textContent='다시 조회';b.onclick=()=>loadKind(kind);section.append(p,b);}
    else{const items=d.items.filter(x=>x.status===materialTab);if(!items.length)section.innerHTML+='<p class="muted">'+(Number(d[materialTab])?'이어서 볼 자료는 전체 목록에서 확인하세요.':'해당 자료 없음')+'</p>';
-    for(const item of items.slice(0,5)){const b=document.createElement('button');b.className='hq-work-item';b.textContent=item.title||'제목 없음';b.title=item.title||'';b.onclick=()=>openMaterial(kind,item.id);section.append(b);}
+    for(const item of items.slice(0,5)){const b=document.createElement('button');b.className='hq-work-item';b.textContent=item.title||'제목 없음';b.title=item.title||'';if(item.updatedAt){const meta=document.createElement('small');meta.className='hq-work-date';meta.textContent=new Date(item.updatedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})+' 수정';b.append(meta);}b.onclick=()=>openMaterial(kind,item.id);section.append(b);}
     const more=document.createElement('button');more.className='btn small';more.textContent='전체 목록';more.onclick=()=>showView(kind);section.append(more);
    }root.append(section);
   }

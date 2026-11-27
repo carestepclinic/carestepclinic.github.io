@@ -445,7 +445,7 @@
    ++sequence;loadedAt=0;listPending=null;tabState={};areaTabs={education:'library',sop:'sop'};resumeScroll=null;mineFilter='all';mineQuery='';reportQuery='';reportMember='';reportState='all';reportDue='all';reportPage=0;manageView='assign';sort='number';view='';data=null;identity='';dirty=false;activeDoc=null;activeAssignment=null;activeSupplement=null;query='';category='';courseType='';message='';
    if(dialog){dialog.close();dialog.remove();dialog=null;}shell();
   }
-  return {open:(options={})=>load({reuse:true,...options}),openVersion:id=>openDocument(id),close:closeDialog,leave(){if(!closeDialog())return false;remember();++sequence;return true;},clear,section:()=>area,prepareSection:prepareArea,selectSop(){return prepareArea('sop');}};
+  return {open:(options={})=>load({reuse:true,...options}),openVersion:async id=>{if(!ready())return;const pending=load({reuse:true}),turn=sequence,current=identity;await pending;if(!ready()||!data||turn!==sequence||current!==(adapter.identity?.()||''))return;return openDocument(id);},close:closeDialog,leave(){if(!closeDialog())return false;remember();++sequence;return true;},clear,section:()=>area,prepareSection:prepareArea,selectSop(){return prepareArea('sop');}};
  }
  global.StaffTraining={mount,filterCourses,sortCourses,groupCourses};
 })(globalThis);
