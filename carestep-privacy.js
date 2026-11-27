@@ -45,7 +45,8 @@
  async function contract(api,opt,body){
   if(!body.termsAccepted||!body.privacyAccepted)throw Error('이용약관 동의와 개인정보 처리방침 확인을 완료해주세요.');
   const scope=api.scope();const {publication:p}=await api.request('/saas/privacy/notice',{method:'GET',auth:false});
-  if(!p?.ready)throw Error('운영자가 개인정보 처리 문서를 검토 중입니다. 신규 가입은 문서 확정 후 신청할 수 있습니다.');
+  if(!p)throw Error('개인정보 안내를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+  if(!p.ready){if(api.scope()!==scope)throw cancel();const {dpaAccepted,authorizedRepresentative,publicationDigest,...application}=body;return {...opt,body:JSON.stringify(application)};}
   await dialog('병원 위탁계약 확인',(d,finish,abort)=>{documents(d,p);const a=check(d,'위탁계약과 재위탁 내역에 동의합니다.'),b=check(d,'병원을 대표하여 위탁계약을 체결할 권한이 있습니다.'),{back,go}=buttons(d,'확인하고 가입 신청');back.onclick=abort;const update=()=>go.disabled=!(a.checked&&b.checked);a.onchange=b.onchange=update;update();go.onclick=()=>finish(true);},opt);
   if(api.scope()!==scope)throw cancel();return {...opt,body:JSON.stringify({...body,dpaAccepted:true,authorizedRepresentative:true,publicationDigest:p.digest})};
  }
