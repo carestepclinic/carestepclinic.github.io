@@ -2,7 +2,7 @@
 (function(g){
  'use strict';
  const node=typeof module==='object'&&module.exports;
- const C=node?require('./clinical-workspace.js'):g.ClinicalWorkspace;
+ const C=node?require('./prescription-review-core.js'):(g.PrescriptionReviewCore||g.ClinicalWorkspace);
  const P=node?require('./practice-prescription.js'):g.PracticePrescription;
  const FDA='https://www.fda.gov/animal-veterinary/animal-health-literacy/get-facts-about-pain-relievers-pets';
  const ENRO='https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=5b17309c-5f00-4af3-97bc-d84805261439';

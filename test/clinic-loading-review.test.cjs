@@ -18,6 +18,6 @@ test('delayed staff completion is ignored after hospital view is disposed',async
 });
 test('heavy clinical code is on-demand in dependency order and shared list controls remain eager',()=>{
  const html=fs.readFileSync(require.resolve('../index.html'),'utf8'),manifest=JSON.parse(html.match(/<script id="clinic-module-manifest"[^>]*>([^<]+)<\/script>/)[1]);
- for(const file of ['clinical-workspace.js','anesthesia-record.js','practice-prescription-safety.js']){assert.ok(manifest.clinical.some(x=>x.startsWith(file+'?')));assert.ok(manifest.calc.some(x=>x.startsWith(file+'?')));assert.equal(new RegExp('<script src="'+file.replaceAll('.','\\.')).test(html),false);}
+ for(const file of ['clinical-workspace.js','anesthesia-record.js','practice-prescription-safety.js']){assert.ok(manifest.clinical.some(x=>x.startsWith(file+'?')));assert.equal(manifest.calc.some(x=>x.startsWith(file+'?')),file==='practice-prescription-safety.js');assert.equal(new RegExp('<script src="'+file.replaceAll('.','\\.')).test(html),false);}
  assert.ok(manifest.clinical.findIndex(x=>x.startsWith('clinical-workspace.js'))<manifest.clinical.findIndex(x=>x.startsWith('practice-prescription-safety.js')));assert.match(html,/<script src="record-list-layout.js/);
 });

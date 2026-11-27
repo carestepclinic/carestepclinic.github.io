@@ -32,6 +32,15 @@ addEventListener('load',()=>{
    return {ok:true,items:[],members:[],rooms:[],events:[],courses:[],runs:[],templates:[],patients:[],canManage:true,canRecord:true,userId:'synthetic-owner',manager:true,next:'',preferences:{},settings:{},revision:1};
   };showApp({deferFullRender:true});
   await run('처음에는 큰 마취·입원 파일을 실행하지 않음',async()=>{check(!window.ClinicalWorkspace,'초기 마취/입원 파일 로딩');check(!!window.RecordListLayout,'공통 목록 도구');});
+  await run('처방 계산 단독 진입은 마취·입원 화면을 읽지 않음',async()=>{
+   await goTab('calc');await wait(()=>!$('.cs-module-loading'));check(!window.ClinicalWorkspace&&!window.AnesthesiaRecord,'불필요한 임상 화면 로딩');check(!!window.PrescriptionReviewCore&&!!window.PracticePrescriptionSafety,'공통 계산 기능');
+   // The catalog adapter must work even before any ward screen has been opened.
+   check(PrescriptionReviewCore.wardCatalogRows({ingredients:[{id:'synthetic',name:'합성',english:'test',options:[{id:'one',kind:'tablet',unit:'mg',value:5}]}]})[0].body.value===5,'약품 목록 변환');
+  });
+  await run('상담함 동시 조회·답변 이후 최신 재조회 및 알림 유지',async()=>{
+   const request=saasRequest;let reads=0,releases=[];saasRequest=async(p,o)=>p==='/saas/consultations'?(reads++,await new Promise(r=>releases.push(r))):request(p,o);
+   try{const a=loadConsultInbox(),b=loadConsultInbox();check(reads===1,'중복 조회');const c=loadConsultInbox(false,{fresh:true});releases[0]({items:[],counts:{new:99}});await wait(()=>reads===2);check(careConsultInboxCounts.new!==99,'이전 상태 적용');releases[1]({items:[],counts:{new:3}});await Promise.all([a,b,c]);check(document.getElementById('consultCountNew').textContent==='3','상담 건수 갱신');check(typeof notifyNewCareConsultations==='function','알림 연결');}finally{saasRequest=request;}
+  });
   await goTab('ledger');await ready();
   await run('병원 설정 대기 중 새 기록 작성 및 늦은 응답의 내용 보존',async()=>{
    slowPrefs=true;$('[data-ledger=new]').click();await wait(()=>$('[data-record]')&&releasePrefs);fill('[data-record] [name=patientName]','가상 작성 유지');fill('[data-record] [name=procedure]','직접 작성 유지');releasePrefs();await wait(()=>!$('[data-preferences-notice]').textContent);check($('[name=procedure]').value==='직접 작성 유지','수술명 덮어쓰기');check($('[name=patientName]').value==='가상 작성 유지','환자명 덮어쓰기');
