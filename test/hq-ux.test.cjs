@@ -6,7 +6,7 @@ const http=require('node:http');
 const {chromium}=require('playwright');
 let browser,server,origin;
 const root=resolve(__dirname,'..');
-const allowed=new Set(['hq-operations.js','hq-operations.css','hq-incident-list.js','hq-incidents.js','hq-incidents.css','subscription-resources.js','subscription-resources.css','hq-healthcheck-usage.js','hq-clinical-storage.js','deployment-status.js','clinic-capabilities.js','guardian-studio.js','guardian-studio.css','hq.html','hq-workspace.js','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
+const allowed=new Set(['consent-library.js','consent-library.css','hq-operations.js','hq-operations.css','hq-incident-list.js','hq-incidents.js','hq-incidents.css','subscription-resources.js','subscription-resources.css','hq-healthcheck-usage.js','hq-clinical-storage.js','deployment-status.js','clinic-capabilities.js','guardian-studio.js','guardian-studio.css','hq.html','hq-workspace.js','hq-ux.js','hq-ux.css','staff-training.js','staff-training-hq.js','staff-training.css','pretendard-variable-1.3.9.woff2']);
 before(async()=>{
   server=http.createServer((req,res)=>{
     const file=new URL(req.url,'http://localhost').pathname.slice(1);
@@ -958,6 +958,8 @@ async function adoptionPortfolio(p){
   req=(path,o)=>path==='/hq/customer-success'?Promise.resolve(adoptionData):path.startsWith('/hq/clinics?')?Promise.resolve({clinics:adoptionData.clinics.map(x=>({id:x.clinicId,name:x.clinicName,status:'active',approvalStatus:'approved',plan:'BASIC'}))}):baseReq(path,o);
   openApprovalCenterTarget('customerSuccess');
  });
+ // This fixture exercises all hospitals, including paused contracts.
+ await p.locator('#hqScope-customerSuccess').selectOption('all');
  await p.locator('[data-cs-clinic="A"]').waitFor();
 }
 test('adoption All clears combined conditions and reports the full versus visible hospital count',async t=>{
