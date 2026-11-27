@@ -51,7 +51,7 @@
    for(const state of remaining){const {f,host}=state;const fields=[...f.querySelectorAll('input[required],select[name],textarea[required]')].filter(x=>!x.disabled&&x.type!=='hidden'&&!x.closest('[hidden]')&&!(x.closest('[data-calc-records]')&&!x.required)&&(x.type==='checkbox'?!x.checked:!x.value.trim()));
     if(usesWeight(f)&&!g.PracticeCalculatorFlow){if(!species.value)fields.unshift(species);if(!weight.value.trim())fields.unshift(weight);if(record&&!confirm.checked)fields.push(confirm);}
     const names=fields.map(field=>fieldLabel(field,f)).join('|');if(state.previous&&fields.length===state.previous.length&&fields.every((x,i)=>x===state.previous[i])&&state.names===names)continue;state.previous=fields;state.names=names;
-    host.replaceChildren();const label=document.createElement('span');const checks=fields.filter(x=>x.type==='checkbox').length;label.textContent=fields.length?`남은 입력 ${fields.length-checks}개${checks?' · 확인 '+checks+'개':''}`:f.dataset.calc==='cardiac'?'측정값 입력 후 심장 지표 계산을 눌러주세요.':'필수 입력 완료 · 자동 계산';host.append(label);
+    host.replaceChildren();const label=document.createElement('span');const checks=fields.filter(x=>x.type==='checkbox').length;label.textContent=fields.length?`남은 입력 ${fields.length-checks}개${checks?' · 확인 '+checks+'개':''}`:f.dataset.calc==='cardiac'?'체중·품종군·측정값 변경 시 자동 계산':'필수 입력 완료 · 자동 계산';host.append(label);
     for(const field of fields){const button=document.createElement('button');button.type='button';button.dataset.fieldName=field.name;button.textContent=fieldLabel(field,f);button.onclick=()=>focus(field);host.append(button);}
    }
   }

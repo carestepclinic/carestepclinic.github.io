@@ -1,1 +1,22 @@
 .pt-special-calculator{font-size:1rem;line-height:1.6}.pt-special-calculator fieldset{border:1px solid var(--line,#d5e2df);border-radius:12px;margin:1rem 0;padding:1rem;min-width:0}.pt-special-calculator legend{font-weight:700;padding:0 .5rem}.pt-special-calculator label{display:grid;gap:.35rem;margin:.5rem 0}.pt-special-calculator .pt-choice{display:flex;align-items:flex-start}.pt-special-calculator input,.pt-special-calculator select{min-width:0;width:100%;font:inherit;min-height:44px}.pt-special-calculator input[type=checkbox]{width:auto;min-height:0;margin-top:.4rem}.pt-special-calculator output{display:block;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:1rem}.pt-special-calculator button{min-height:44px;margin:.4rem .4rem .4rem 0}.pt-special-calculator .pt-help{font-size:.875rem}.pt-special-calculator [hidden]{display:none!important}
+/* Match the Clinic workspace without altering other calculator themes. */
+.pt .pt-anesthesia{color:var(--cs-ink,#20323e);font:inherit}
+.pt .pt-anesthesia :is(button,input,select,textarea){font:inherit;border-color:var(--cs-line,#dce3df);border-radius:var(--cs-radius,10px)}
+.pt .pt-anesthesia button{min-height:44px;color:var(--cs-ink,#20323e)}
+.pt .pt-anesthesia :is(button.pt-primary,button[aria-pressed=true]){background:var(--cs-accent,#19766e);border-color:var(--cs-accent,#19766e);color:white}
+.pt .pt-anesthesia :is(button.pt-primary,button[aria-pressed=true]):hover:not(:disabled){background:var(--cs-accent-hover,#125c56)}
+.pt .pt-anesthesia :is(input,select,textarea){min-height:44px;background:var(--cs-paper,#fff);color:var(--cs-ink,#20323e)}
+.pt .pt-anesthesia input[type=checkbox]{min-height:20px;accent-color:var(--cs-accent,#19766e)}
+.pt .pt-anesthesia :focus-visible{outline:3px solid #a7ccc6;outline-offset:2px}
+.pt .pt-anesthesia :is(.pt-card,.pt-an-card,fieldset){border-color:var(--cs-line,#dce3df);border-radius:var(--cs-radius,10px);background:var(--cs-paper,#fff)}
+.pt .pt-anesthesia :is(.pt-notice,.pt-an-result,.pt-an-plan-summary,.pt-output,.pt-badge){background:var(--cs-tint,#e8f2ef);color:var(--cs-ink,#20323e);border-color:var(--cs-line,#dce3df)}
+.pt .pt-anesthesia :is(.pt-an-result strong,a){color:var(--cs-accent-hover,#125c56)}
+.pt .pt-anesthesia :is(.pt-help,small){color:var(--cs-muted,#596b71);line-height:1.6}
+.pt .pt-special-calculator .pt-output{font-size:16px;font-weight:500;line-height:1.7}
+.pt .pt-special-calculator .pt-bar{gap:8px 12px;align-items:center}
+.pt .pt-special-calculator .pt-bar .pt-help{flex:1 1 200px}
+.pt .pt-anesthesia nav.pt-bar{gap:8px}
+.pt .pt-special-calculator :is(input,select){max-width:100%}
+@media(max-width:640px){.pt .pt-special-calculator .pt-grid{grid-template-columns:minmax(0,1fr)}.pt .pt-special-calculator{padding:16px}.pt .pt-special-calculator fieldset{padding:12px}.pt .pt-anesthesia nav.pt-bar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.pt .pt-anesthesia nav.pt-bar button{margin:0;padding:10px 8px}.pt .pt-special-calculator .pt-bar button{width:100%}.pt .pt-special-calculator select{font-size:15px}}
+
+.pt .pt-anesthesia .pt-an-result.pt-error{background:#fff2ef;color:#9b2424;border-color:#e4b9b2}
