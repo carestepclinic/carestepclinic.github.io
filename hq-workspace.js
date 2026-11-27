@@ -32,6 +32,12 @@
  function materialTitle(item){const title=String(item.title||'제목 없음');return item.status==='published'?title.replace(/\s*[·:—-]?\s*초안\s*$/,'').trim():title;}
  function adoptionAction(entry){const text=String(entry.nextAction||'');if(/첫.*(?:퇴원자료|안내자료)/.test(text))return entry.neverUsed===true?'보호자 안내자료 작성 흐름을 안내해주세요.':'최근 30일 보호자 안내자료 사용 현황을 확인해주세요.';return text.replaceAll('퇴원자료','보호자 안내자료');}
 
+ function adoptionSummary(rows=[]){
+  const count=key=>rows.filter(x=>x.status===key).length;
+  const average=key=>rows.length?Math.round(rows.reduce((n,x)=>n+(Number(x[key])||0),0)/rows.length):0;
+  return {total:rows.length,success:count('success'),healthy:count('healthy'),watch:count('watch'),risk:count('risk'),trialEnding7:rows.filter(x=>x.trialEnding).length,inactive14:rows.filter(x=>x.inactive14).length,avgAdoption:average('adoptionScore'),avgRisk:average('riskScore')};
+ }
+
  // Derive a display-only base setup summary; optional adoption is never a prerequisite.
  function onboardingEntry(entry={}){
   const steps=Array.isArray(entry.steps)?entry.steps:[];
@@ -57,5 +63,5 @@
   const normalized=v=>v.replace(/\s+/g,'').toLowerCase();
   return {title,description:normalized(title)===normalized(description)?'':description,full};
  }
- g.CarestepHqWorkspace={confirm,prompt:message=>confirm(message,{input:true}),discard,documentView,slice,pager,species,category,materialTitle,adoptionAction,onboardingEntry,onboardingView,deferredHospital,protocolLabel,owner,ready};
+ g.CarestepHqWorkspace={confirm,prompt:message=>confirm(message,{input:true}),discard,documentView,slice,pager,species,category,materialTitle,adoptionAction,adoptionSummary,onboardingEntry,onboardingView,deferredHospital,protocolLabel,owner,ready};
 })(window);

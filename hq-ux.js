@@ -1145,7 +1145,7 @@
   const onboardingMetrics=foldPortfolioMetrics('onboarding','.hq-onboarding-kpis',['obTotal','obLive','obAttention'],'hqOnboardingMetrics');
   adoptionMetrics.append(byId('customerSuccessGenerated'));
   onboardingMetrics.append(byId('onboardingGenerated'));
-  byId('csTotal').previousElementSibling.textContent='전체 병원';
+  byId('csTotal').previousElementSibling.textContent='현재 조건의 병원';
   byId('csRisk').previousElementSibling.textContent='사용 현황 확인 필요';
   byId('obTotal').previousElementSibling.textContent='전체 병원';
   byId('obLive').previousElementSibling.textContent='기본 준비 완료';
@@ -1185,7 +1185,8 @@
   function updateAdoptionResults(){
     const conditions=adoptionConditions(),loaded=Array.isArray(customerSuccessPortfolio?.clinics);
     const count=byId('customerSuccessRows').querySelectorAll('.hq-compact-main-row').length;
-    adoptionSummary.textContent=loaded?`전체 ${fmt(customerSuccessPortfolio.clinics.length)}곳 · 현재 표시 ${fmt(count)}곳${conditions.length?' · '+conditions.join(' · '):''}`:'병원 목록을 확인하고 있습니다.';
+    const scoped=byId('hqScope-customerSuccess')?.value!=='all';
+    adoptionSummary.textContent=loaded?`${scoped?'선택 범위':'전체'} ${fmt(customerSuccessPortfolio.clinics.length)}곳 · 현재 표시 ${fmt(count)}곳${conditions.length?' · '+conditions.join(' · '):''}`:'병원 목록을 확인하고 있습니다.';
     adoptionFilters.querySelector('summary').textContent='상세 조건'+(conditions.length?` · 적용 ${conditions.length}개`:'');
     document.querySelectorAll('[data-cs-quick]').forEach(button=>{
       const selected=button.dataset.csQuick===customerSuccessQuick&&(customerSuccessQuick!=='all'||!conditions.length);

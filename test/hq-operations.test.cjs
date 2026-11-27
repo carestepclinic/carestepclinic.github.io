@@ -116,3 +116,28 @@ test('lock during material refresh clears cached data and ignores late responses
  const p=await setup(t);await p.evaluate(()=>{const prior=req;req=async(path,opt)=>{if(path.includes('material-work?kind=training'))await new Promise(r=>window.finishMaterial=r);return prior(path,opt);};void CarestepHqOperations.loadMaterials(true);});
  await p.waitForFunction(()=>typeof finishMaterial==='function');await p.evaluate(()=>{document.querySelector('#loginOverlay').classList.remove('hidden');identity='other';finishMaterial();});await p.waitForFunction(()=>document.querySelectorAll('.hq-work-item').length===0);assert.equal(await p.locator('.hq-work-item').count(),0);
 });
+
+for(const width of [1440,390])test('adoption metrics follow scope, search and quick filters without changing source records '+width,async t=>{
+ const p=await setup(t,width);await p.evaluate(()=>{
+  window.originalPortfolio={generatedAt:'2026-11-27T00:00:00Z',summary:{total:99,risk:99},clinics:[
+   {clinicId:'a',clinicName:'정상 병원',status:'healthy',planCode:'BASIC',adoptionScore:80,riskScore:10,subscription:{status:'active'}},
+   {clinicId:'b',clinicName:'확인 병원',status:'risk',planCode:'PRO',adoptionScore:20,riskScore:90,inactive14:true,trialEnding:true,subscription:{status:'active'}},
+   {clinicId:'c',clinicName:'중지 병원',status:'risk',planCode:'PRO',adoptionScore:0,riskScore:100,inactive14:true,subscription:{status:'paused'}}]};
+  window.portfolioBefore=JSON.stringify(originalPortfolio);const prior=req;req=(path,opt)=>path==='/hq/customer-success'?Promise.resolve(originalPortfolio):prior(path,opt);showView('customerSuccess');
+ });
+ await p.waitForFunction(()=>!document.getElementById('customerSuccessRefresh').disabled);
+ assert.equal(await p.locator('#csTotal').innerText(),'3');assert.equal(await p.locator('#csRisk').innerText(),'2');
+ await p.locator('#hqScope-customerSuccess').selectOption('active');
+ assert.equal(await p.locator('#csTotal').innerText(),'2');assert.equal(await p.locator('#csRisk').innerText(),'1');assert.equal(await p.locator('#csTrialEnding').innerText(),'1');assert.match(await p.locator('#hqAdoptionResults').innerText(),/선택 범위 2곳 · 현재 표시 2곳/);
+ await p.locator('#customerSuccessSearch').fill('정상');assert.equal(await p.locator('#csTotal').innerText(),'1');assert.equal(await p.locator('#csRisk').innerText(),'0');assert.equal(await p.locator('#csTrialEnding').innerText(),'0');
+ await p.locator('#customerSuccessSearch').fill('없는 병원');assert.equal(await p.locator('#csTotal').innerText(),'0');assert.equal(await p.locator('#csRisk').innerText(),'0');
+ await p.locator('#hqAdoptionReset').click();await p.locator('[data-cs-quick=risk]').click();assert.equal(await p.locator('#csTotal').innerText(),'2');assert.equal(await p.locator('#csRisk').innerText(),'2');
+ await p.locator('#hqAdoptionReset').click();assert.equal(await p.locator('#csTotal').innerText(),'3');
+ assert.equal(await p.evaluate(()=>JSON.stringify(customerSuccessPortfolio)),await p.evaluate(()=>portfolioBefore));assert.deepEqual(await p.evaluate(()=>writes),[]);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+});
+
+test('review-ready guardian material is in review tab and direct-open preserves its identity',async t=>{
+ const p=await setup(t);await p.evaluate(()=>{const previous=req;req=async(path,opt)=>path==='/hq/material-work?kind=content'?{writing:1,review:1,items:[{id:'review-doc',title:'합성 검토 자료',status:'review'},{id:'failed-doc',title:'합성 재작성 자료',status:'writing'}]}:previous(path,opt);GuardianStudio.open=id=>window.openedGuardian=id;return CarestepHqOperations.loadMaterials(true);});
+ await p.evaluate(()=>showView('dashboard'));assert.equal(await p.locator('[data-work-tab=writing]').innerText(),'작성 중 2');assert.equal(await p.locator('[data-work-tab=review]').innerText(),'검토 대기 1');
+ await p.locator('[data-work-tab=review]').click();assert.equal(await p.locator('[data-work-kind=content] .hq-work-item').innerText(),'합성 검토 자료');await p.locator('[data-work-kind=content] .hq-work-item').click();assert.equal(await p.evaluate(()=>openedGuardian),'review-doc');assert.deepEqual(await p.evaluate(()=>writes),[]);
+});
