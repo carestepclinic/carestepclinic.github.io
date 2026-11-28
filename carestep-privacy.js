@@ -21,7 +21,7 @@
  function check(parent,text){const label=node('label'),input=node('input',undefined,{type:'checkbox'});label.append(input,document.createTextNode(text));parent.append(label);return input;}
  function buttons(parent,ok,cancelText='취소'){const bar=node('div',undefined,{class:'actions'}),back=node('button',cancelText,{type:'button'}),go=node('button',ok,{type:'button','data-accept':''});bar.append(back,go);parent.append(bar);return {back,go};}
  function documents(parent,p){
-  parent.append(node('p',p.ready?'운영자가 확정한 처리 내역입니다.':'검토 중인 초안입니다. 아직 위탁계약을 체결하거나 AI 전송을 승인할 수 없습니다.'));
+  parent.append(node('p',p.ready?'운영자가 확정한 처리 내역입니다.':'검토 중인 초안입니다. 아직 위탁계약을 체결하거나 개인정보가 포함된 자료의 AI 전송을 승인할 수 없습니다.'));
   if(!p.ready)parent.append(node('p','확인 필요: '+(p.issues||[]).join(', ')));
   if(p.operator?.legalName)parent.append(node('p','운영자: '+p.operator.legalName+' · 개인정보 문의: '+p.operator.privacyContact+' '+p.operator.privacyEmail));
   for(const doc of [p.dpa,p.privacy]){if(!doc?.sections?.length)continue;const details=node('details'),summary=node('summary',doc.title+' · '+doc.version);details.append(summary,node('p','시행일 '+doc.effectiveDate));for(const [h,t] of doc.sections)details.append(node('h3',h),node('p',t));parent.append(details);}
@@ -51,12 +51,12 @@
  }
  function notice(parent,p){const ai=p.processors.find(x=>x.id==='openai');parent.append(node('p','전송 대상: '+ai.recipient+' · 처리 국가: '+ai.countries),node('p','목적: '+ai.purpose+'\n보유기간: '+ai.retention));const det=node('details');det.append(node('summary','전체 처리·위탁 안내'));documents(det,p);parent.append(det);parent.append(node('p','아래 확인은 이번 자료의 전송 검토 기록이며 보호자의 법적 동의를 대신하지 않습니다. AI를 사용하지 않아도 직접 입력·저장할 수 있습니다.'));
  }
- async function fileReview(data,p,options){
+ async function fileReview(data,p,options,pilot=null){
   return dialog('AI에 보낼 파일 확인',(d,finish,abort,cleanup)=>{
-   notice(d,p);let current=data,source=null,objectUrl='',loading=false,sequence=0,fileSequence=0;
+   if(pilot){d.append(node('p','건강검진 파일 시범 읽기 · 개인정보 처리 문서는 초안으로 유지됩니다.'),node('p',pilot.restriction),node('p','전송 대상: '+pilot.recipient+' · '+pilot.region),node('p','목적: '+pilot.purpose+'\n보유기간: '+pilot.retention),node('p','이름·연락처·주소·차트번호·바코드·QR코드와 파일 안의 숨은 식별정보를 제거해주세요. 다른 정보와 결합해 개인을 알아볼 수 있는 내용도 제외해야 합니다. 파일 내용은 자동으로 익명화되거나 검증되지 않습니다. 직접 입력·저장도 계속 사용할 수 있습니다.'));}else notice(d,p);let current=data,source=null,objectUrl='',loading=false,sequence=0,fileSequence=0;
    const preview=node('div'),help=node('p'),status=node('p','',{role:'status'}),tools=node('div'),file=node('input',undefined,{type:'file',accept:'application/pdf,image/jpeg,image/png,image/webp'});
    d.append(help,preview,tools,node('p','개인정보를 제거한 파일로 교체'),file,status);
-   const reviewed=check(d,'모든 페이지에서 이름·연락처·차트번호·주소·바코드 등 식별정보를 제거한 것을 확인했습니다.'),{back,go}=buttons(d,'이 내용만 전송');back.onclick=abort;
+   const reviewed=check(d,pilot?'모든 페이지와 숨은 정보까지 확인했으며, 개인을 알아볼 수 있는 정보가 없는 검사 파일만 OpenAI로 보내는 것을 확인합니다.':'모든 페이지에서 이름·연락처·차트번호·주소·바코드 등 식별정보를 제거한 것을 확인했습니다.'),{back,go}=buttons(d,'이 내용만 전송');back.onclick=abort;
    const update=()=>go.disabled=!reviewed.checked||loading||!current;reviewed.onchange=update;update();
    cleanup.push(()=>{sequence++;fileSequence++;if(objectUrl)URL.revokeObjectURL(objectUrl);source=null;current='';});
    function mask(canvas,rect){const c=canvas.getContext('2d');c.fillStyle='#000';c.fillRect(rect.x,rect.y,rect.w,rect.h);current=canvas.toDataURL('image/png');reviewed.checked=false;update();}
@@ -82,6 +82,13 @@
   const body=typeof opt.body==='string'?JSON.parse(opt.body):opt.body||{},scope=api.scope();
   if(path==='/saas/register')return contract(api,opt,body);
   const status=await api.request('/saas/privacy/status',{method:'GET'}),p=status.publication;
+  const pilot=!p?.ready&&p&&status.fileReadingPilot?.active===true&&status.fileReadingPilot.operation==='healthcheck_lab_import'&&path==='/saas/practice/clinical/lab-import'&&body.mode==='healthcheck'?status.fileReadingPilot:null;
+  if(pilot){
+   if(!body.recordId)throw Error('건강검진 기록을 먼저 저장한 뒤 파일을 읽어주세요.');
+   body.image=await fileReview(body.image,p,opt,pilot);
+   body.privacyReview={reviewed:true,nonPersonalFile:true,pilotVersion:pilot.version,pilotDigest:pilot.digest,recordId:body.recordId,payloadDigest:await digest(body.image)};
+   if(api.scope()!==scope||opt.signal?.aborted)throw cancel();return {...opt,body:JSON.stringify(body)};
+  }
   if(!p?.ready)throw Error('AI 전송 안내의 운영자 확인이 필요합니다. 직접 입력·저장은 계속 사용할 수 있습니다.');
   if(!status.dpa?.accepted)throw Error('병원 대표가 계정 → 개인정보 처리·위탁 안내에서 위탁계약을 먼저 확인해주세요.');
   let payload;
