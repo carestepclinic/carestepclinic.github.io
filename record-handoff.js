@@ -23,16 +23,43 @@ const eyeFields=[
  function compatibleRow(a,b){const sa=specimen(a),sb=specimen(b);return sa===sb&&norm(a.group)===norm(b.group)&&norm(a.method)===norm(b.method);}
  function eyeFindings(r){return ['od','os'].flatMap(side=>Object.entries(r[side]||{}).filter(([,v])=>present(v)).map(([key,value])=>{const f=eyeFields.find(f=>f[0]===key);return (side==='od'?'우안 OD':'좌안 OS')+' · '+(f?.[1]||key)+': '+(Array.isArray(f?.[2])?f[2].find(x=>x[0]===value)?.[1]||value:value+(f?.[2]&&f[2]!=='text'?' '+f[2]:''));}));}
  function fieldFor(row,fields){return fields.find(f=>[f[0],...f[1].split(' · '),...(aliases[f[0]]||[])].some(n=>norm(n)===norm(row.name))&&norm(f[2])===norm(row.unit)&&specimen(row)===fieldSpecimen(f[0])&&!text(row.method));}
+ const eyeMeasureKeys=['stt','iop','menace','dazzle','palpebral','plrDirect','plrConsensual'];
+ const sourceHeader=c=>'['+c.date+' · '+c.kind+' · '+c.id+']';
+ const referenceHeader=c=>'[검사 연결 · '+c.date+' · '+c.kind+' · '+c.id+']';
+ function references(chart,kind){
+  const lines=String(chart.history||'').split('\n'),out=[];let block=null;
+  for(const line of lines){const m=line.match(/^\[(?:검사 연결 · )?(\d{4}-\d{2}-\d{2}) · (ophthalmic|dental) · ([^\]]+)\]$/);if(m){block={date:m[1],kind:m[2],id:m[3],lines:[]};out.push(block);}else if(line==='[/검사 연결]'||/^\[/.test(line))block=null;else if(block&&line.trim())block.lines.push(line);}
+  return out.filter(x=>x.kind===kind&&x.lines.length);
+ }
+ function addReference(chart,c,lines){
+  const header=referenceHeader(c),end='[/검사 연결]',history=String(chart.history||''),start=history.indexOf(header+'\n'),stop=start<0?-1:history.indexOf('\n'+end,start);
+  const old=stop<0?[]:history.slice(start+header.length+1,stop).split('\n'),merged=[...new Set([...old,...lines].filter(Boolean))],block=header+'\n'+merged.join('\n')+'\n'+end;
+  chart.history=stop<0?[history,block].filter(Boolean).join('\n'):history.slice(0,start)+block+history.slice(stop+end.length+1);
+  if(chart.history.length>3000)throw Error('과거력 글자 수가 많습니다. 선택을 줄여주세요.');
+ }
+ function eyeImportRows(c,chart){
+  const out=[];for(const side of ['od','os'])for(const key of eyeMeasureKeys){const raw=c.record?.[side]?.[key];if(!present(raw))continue;
+   const line=eyeFindings({[side]:{[key]:raw}})[0],at=line.indexOf(': '),label=line.slice(0,at),value=line.slice(at+2),prefix=label+': ',currentLines=String(chart.exams?.eyes||'').split('\n').filter(l=>l.startsWith(prefix)),current=currentLines[0]?.slice(prefix.length)||'',same=c.date===chart.date;
+   const referenced=references(chart,'ophthalmic').some(b=>b.id===c.id&&b.date===c.date&&b.lines.includes(line)),duplicate=same?current===value:referenced;
+   out.push({key:'eye:'+side+':'+key,type:'eye',fieldLabel:label,value,current,label:line,allowed:same,duplicate,conflict:!!current&&current!==value,reason:duplicate?'이미 반영된 값':!same?'검사일이 달라 과거 참고로만 반영':current&&current!==value?'기존 값과 다름 · 반영 방법을 선택하세요':''});
+  }return out;
+ }
  function candidates(c,target,chart,available=fields){
   const out=labs(c,available).map(r=>{const field=target==='chronic'?fieldFor(r,available):null,sameDate=r.date===chart.date,numeric=/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(text(r.value));const compatible=target==='healthcheck'||field&&numeric&&Number(r.value)>=field[3]&&Number(r.value)<=field[4];const matches=target==='healthcheck'?(chart.labs||[]).filter(x=>norm(x.name)===norm(r.name)&&norm(x.unit)===norm(r.unit)&&compatibleRow(x,r)):[];const duplicate=target==='healthcheck'&&(chart.labs||[]).some(x=>x.id===sourceId(c,'lab:'+r.id));const current=target==='chronic'?chart.measurements?.[field?.[0]]:matches.find(x=>present(x.value))?.value;return {key:'lab:'+r.id,type:'lab',row:r,field:field?.[0],destination:target==='chronic'?field?.[0]:matches[0]?.id||[norm(r.name),norm(r.unit),norm(r.group),specimen(r),norm(r.method)].join('|'),label:[r.group||'분류 미확인',r.name,r.value,r.unit,r.date,'참고 '+(r.reference||'미기재')].join(' · '),current,allowed:!!compatible&&sameDate&&!duplicate&&matches.length<2,reason:duplicate?'이미 연결됨':!sameDate?'검사일이 달라 과거 참고로만 반영':!compatible?'항목·단위 확인 필요 · 참고로만 반영':matches.length>1?'같은 검사 여러 개 · 참고로만 반영':'',existingId:matches[0]?.id};});
   for(const im of c.record?.images||[])out.push({key:'photo:'+im.id,type:'photo',image:copy(im),label:'사진 · '+(im.caption||im.kind),allowed:!(chart.images||[]).some(x=>x.id===sourceId(c,'photo:'+im.id))});
-  const r=c.record||{},findings=c.kind==='dental'?[['진단·구강 소견',r.diagnosis],['시행한 처치·수술',r.procedure],['방사선 소견',r.radiographs]].filter(([,v])=>text(v)).map(([l,v])=>l+': '+v):c.kind==='ophthalmic'?[r.diagnosis,r.plan,...eyeFindings(r)]:Object.values(r.exams||r.examNotes||{});
-  const value=findings.filter(x=>typeof x==='string'&&x.trim()).join('\n');if(value)out.push({key:'finding',type:'finding',value,label:'기록된 소견 · '+value.slice(0,140),allowed:true});return out;
+  const r=c.record||{},separateEye=target==='healthcheck'&&c.kind==='ophthalmic';if(separateEye)out.push(...eyeImportRows(c,chart));const findings=c.kind==='dental'?[['진단·구강 소견',r.diagnosis],['시행한 처치·수술',r.procedure],['방사선 소견',r.radiographs]].filter(([,v])=>text(v)).map(([l,v])=>l+': '+v):c.kind==='ophthalmic'?[r.diagnosis,r.plan,...eyeFindings(separateEye?{od:Object.fromEntries(Object.entries(r.od||{}).filter(([k])=>!eyeMeasureKeys.includes(k))),os:Object.fromEntries(Object.entries(r.os||{}).filter(([k])=>!eyeMeasureKeys.includes(k)))}:r)]:Object.values(r.exams||r.examNotes||{});
+  const value=findings.filter(x=>typeof x==='string'&&x.trim()).join('\n');if(value){const block=sourceHeader(c)+'\n'+value,k=c.kind==='dental'?'oral':c.kind==='ophthalmic'?'eyes':'other',duplicate=target==='healthcheck'&&(String(chart.exams?.[k]||'').includes(block)||String(chart.history||'').includes(block)||references(chart,c.kind).some(b=>b.id===c.id&&b.date===c.date&&b.lines.join('\n').includes(value)));out.push({key:'finding',type:'finding',value,label:'기록된 소견 · '+value.slice(0,140),allowed:true,duplicate,reason:duplicate?'이미 가져온 소견':c.date!==chart.date?'검사일이 달라 과거 참고로만 반영':''});}return out;
  }
  function apply(c,target,chart,selected,available=fields){
   const next=copy(chart),current=candidates(c,target,chart,available),notes=[],destinations=new Set();let count=0;
   for(const selection of selected){const x=current.find(x=>x.key===selection.key);if(!x)throw Error('원본 항목이 변경되었습니다. 다시 불러와주세요.');
-   if(x.type==='lab'){
+   if(x.duplicate)continue;if(x.type==='eye'){
+    if(selection.mode==='keep')continue;const line=x.fieldLabel+': '+x.value;
+    if(!x.allowed||selection.reference||selection.mode==='reference'){addReference(next,c,[line]);count++;continue;}
+    if(x.conflict&&selection.mode!=='replace'&&!selection.replace)throw Error(x.fieldLabel+' 기존 값 유지 또는 가져온 값 반영을 선택해주세요.');
+    const prefix=x.fieldLabel+': ',lines=String(next.exams.eyes||'').split('\n'),i=lines.findIndex(l=>l.startsWith(prefix));if(i>=0)lines[i]=line;else lines.unshift(line);next.exams.eyes=lines.filter(Boolean).join('\n');if(next.exams.eyes.length>4000)throw Error('안과 소견 길이가 입력 한도를 초과합니다.');
+    if(Array.isArray(next.examSelection)&&!next.examSelection.includes('eyes'))next.examSelection.push('eyes');addReference(next,c,[line,...(x.conflict?['변경 전 입력 · '+x.fieldLabel+': '+x.current]:[])]);
+   }else if(x.type==='lab'){
     const r=x.row,provenance=[r.date,c.kind,c.id,r.name,r.value,r.unit,'참고범위: '+(r.reference||'미기재')].join(' · ');
     if(selection.reference||!x.allowed){notes.push(provenance);count++;continue;}
     if(destinations.has(x.destination))throw Error(r.name+' 같은 검사 결과가 여러 개입니다. 현재 값으로 반영할 결과를 하나만 선택해주세요.');destinations.add(x.destination);
@@ -43,14 +70,14 @@ const eyeFields=[
     if(!x.allowed)throw Error('이미 연결한 사진입니다.');const dataUrl=selection.dataUrl;if(!/^data:image\/(jpeg|png|webp);base64,/.test(dataUrl||''))throw Error('사진을 다시 불러와주세요.');
     const kind=target==='chronic'?(x.image.kind==='radiograph'?'radiograph':'oral'):['radiograph','ultrasound','eye','oral','patient','other'].includes(x.image.kind)?x.image.kind:c.kind==='ophthalmic'?'eye':c.kind==='dental'?'oral':'other';
     next.images.push({id:sourceId(c,x.key),kind,caption:([c.date,c.kind,c.id,x.image.caption].filter(Boolean).join(' · ')).slice(0,160),dataUrl});if(next.images.length>(target==='healthcheck'?60:4))throw Error('사진 한도를 초과합니다. 선택을 줄여주세요.');
-   }else {const value='['+c.date+' · '+c.kind+' · '+c.id+']\n'+x.value;if(target==='healthcheck'&&c.date===chart.date){const k=c.kind==='dental'?'oral':c.kind==='ophthalmic'?'eyes':'other';next.exams[k]=[next.exams[k],value].filter(Boolean).join('\n');if(next.exams[k].length>4000)throw Error('소견 길이가 입력 한도를 초과합니다. 선택을 줄여주세요.');if(Array.isArray(next.examSelection)&&!next.examSelection.includes(k))next.examSelection.push(k);}else notes.push(value);}
+   }else {const value='['+c.date+' · '+c.kind+' · '+c.id+']\n'+x.value;if(target==='healthcheck'&&c.date===chart.date){const k=c.kind==='dental'?'oral':c.kind==='ophthalmic'?'eyes':'other';next.exams[k]=[next.exams[k],value].filter(Boolean).join('\n');if(next.exams[k].length>4000)throw Error('소견 길이가 입력 한도를 초과합니다. 선택을 줄여주세요.');if(Array.isArray(next.examSelection)&&!next.examSelection.includes(k))next.examSelection.push(k);}else if(target==='healthcheck'&&['ophthalmic','dental'].includes(c.kind))addReference(next,c,x.value.split('\n'));else if(!String(next.history||'').includes(value))notes.push(value);}
    count++;
   }
   if(notes.length){next.history=[next.history,'[다른 기록에서 확인한 참고 자료]\n'+notes.join('\n')].filter(Boolean).join('\n');if(next.history.length>3000)throw Error('과거력 글자 수가 많습니다. 선택을 줄여주세요.');}
-  if(count){if(next.clinicalStatus==='complete')next.clinicalStatus='amended';if(target==='healthcheck'){next.reviewed=false;for(const issue of next.managementIssues||[])issue.confirmed=false;}}
+  if(count&&JSON.stringify(next)!==JSON.stringify(chart)){if(next.clinicalStatus==='complete')next.clinicalStatus='amended';if(target==='healthcheck'){next.reviewed=false;for(const issue of next.managementIssues||[])issue.confirmed=false;}}
   return next;
  }
  function medications(c){return (c.record?.prescriptions||[]).filter(r=>['od','os','ou'].includes(r.eye)&&['name','amount','frequency','duration'].every(k=>text(r[k]))).map(r=>{const eye={od:'우안',os:'좌안',ou:'양안'}[r.eye],m=/^(\d{1,2})(?:\s*일)?$/.exec(text(r.duration)),duration=m&&Number(m[1])>0&&Number(m[1])<=90?m[1]:'';const v={name:r.name,dose:eye+' · '+r.amount,frequency:r.frequency,duration,times:'',meal:'식사와 무관',note:[r.note,!duration?'기간 '+r.duration:''].filter(Boolean).join(' · ')};return {id:r.id,eye,original:copy(r),value:v,allowed:v.name.length<=40&&v.dose.length<=30&&v.frequency.length<=30&&v.note.length<=70&&!!duration};});}
  function attach(root,a){root.querySelector('[data-handoff-import]')?.remove();const state=a.get();if(!state?.item?.patient_id||!state.item.id||!a.allowed())return;const b=document.createElement('button');b.type='button';b.dataset.handoffImport='';b.textContent='다른 기록에서 검사·사진 가져오기';b.onclick=()=>g.ClinicConnections?.importInto(a);const host=root.querySelector('[data-hc-linked-tools],.nr-actions,.chr-toolbar')||root;host.append(b);}
- const api={fields,specimen,compatibleRow,eyeFindings,labs,fieldFor,candidates,apply,medications,sourceId,attach};if(typeof module==='object'&&module.exports)module.exports=api;else g.RecordHandoff=api;
+ const api={references,fields,specimen,compatibleRow,eyeFindings,labs,fieldFor,candidates,apply,medications,sourceId,attach};if(typeof module==='object'&&module.exports)module.exports=api;else g.RecordHandoff=api;
 })(typeof window==='undefined'?globalThis:window);
