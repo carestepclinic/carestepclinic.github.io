@@ -90,7 +90,8 @@
    const record=q('[data-record-weight-confirm]');
    missing=!species?.value?species:!(Number(weight?.value)>0)?weight:record&&!record.closest('label').hidden&&!record.checked?record:null;
    const needsContext=!['convert','acid'].includes(active);
-   hide(notice,!needsContext||!missing);for(const field of [species,weight])if(field)field.setAttribute('aria-invalid',String(needsContext&&field===missing));text(notice.querySelector('span'),missing===species?'동물종 선택 필요':missing===weight?'체중 입력 필요':'기록 체중과 측정일을 확인해주세요.');
+   hide(notice,!needsContext||!missing);for(const field of [species,weight])if(field)field.setAttribute('aria-invalid',String(needsContext&&field===missing&&!!field.value));text(notice.querySelector('span'),missing===species?'동물종 선택 필요':missing===weight?'체중 입력 필요':'기록 체중과 측정일을 확인해주세요.');
+   g.ClinicWorkflowState?.calculator(b,needsContext?missing:null);
    // Emergency values remain hidden until the common context is complete; no repeated errors.
    b.classList.toggle('pt-flow-missing-context',!!missing);
    if(emSelect){const selected=emNav.querySelector('[aria-pressed=true]');if(selected&&emSelect.value!==selected.dataset.emFilter)emSelect.value=selected.dataset.emFilter;const count=all('[data-em-row]').filter(x=>!x.hidden).length;for(const opt of emSelect.options){const btn=emNav.querySelector('[data-em-filter="'+opt.value+'"]');text(opt,btn.textContent+(opt.selected?' · '+count+'개':''));}}
@@ -105,10 +106,11 @@
    for(const x of all('[data-protocol-status],[data-quick-product-status],.pt-quick-product > .pt-help,[data-cri-status]'))hide(x,x.textContent.startsWith('저장된 서식이 없습니다.')||!!missing&&/상단에서 동물 종류|종을 선택|상단에서 개 또는 고양이/.test(x.textContent));
   }
   const schedule=()=>{if(!frame&&!disposed)frame=requestAnimationFrame(refresh);};
-  const observer=new MutationObserver(schedule);observer.observe(b,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','aria-pressed']});
-  for(const event of ['input','change','practice-kind-selected'])b.addEventListener(event,schedule);
+  const interaction=()=>queueMicrotask(()=>{if(frame)cancelAnimationFrame(frame);refresh();});
+  const observer=new MutationObserver(schedule);observer.observe(b,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','aria-pressed','data-calculation-state']});
+  for(const event of ['input','change','practice-kind-selected'])b.addEventListener(event,interaction);
   refresh();
-  return {dispose(){disposed=true;observer.disconnect();rx?.removeEventListener('click',moveRxStatus,true);if(frame)cancelAnimationFrame(frame);primary?.removeEventListener('input',mirror);for(const event of ['input','change','practice-kind-selected'])b.removeEventListener(event,schedule);}};
+  return {dispose(){disposed=true;observer.disconnect();rx?.removeEventListener('click',moveRxStatus,true);if(frame)cancelAnimationFrame(frame);primary?.removeEventListener('input',mirror);for(const event of ['input','change','practice-kind-selected'])b.removeEventListener(event,interaction);}};
  }
  g.PracticeCalculatorFlow={mount};
 })(window);

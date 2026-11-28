@@ -1,0 +1,36 @@
+/* Workflow colors stay separate from clinical measurement ranges and report colors. */
+:root{--cs-state-ink:#46605c;--cs-state-bg:#f0f3f2;--cs-state-border:#cbd7d3}
+[data-cs-state=neutral]{--cs-state-ink:#46605c;--cs-state-bg:#f0f3f2;--cs-state-border:#cbd7d3}
+[data-cs-state=attention]{--cs-state-ink:#80501d;--cs-state-bg:#fff5e9;--cs-state-border:#d3aa77}
+[data-cs-state=current]{--cs-state-ink:#146e67;--cs-state-bg:#eaf6f2;--cs-state-border:#80b4aa}
+[data-cs-state=complete]{--cs-state-ink:#286342;--cs-state-bg:#eef7f0;--cs-state-border:#a5cbb1}
+[data-cs-state=error]{--cs-state-ink:#a12e2e;--cs-state-bg:#fff1ef;--cs-state-border:#d8a09c}
+body .cs-state-badge{display:inline-flex!important;align-items:center;gap:4px;max-width:100%;padding:2px 7px;margin:2px 4px 2px 0;border:1px solid var(--cs-state-border);border-radius:6px;background:var(--cs-state-bg)!important;color:var(--cs-state-ink)!important;font-size:12px!important;font-weight:600;line-height:1.5;white-space:normal;vertical-align:middle;overflow-wrap:anywhere}
+body .cs-state-badge>span{display:inline!important;color:inherit!important;margin:0!important}
+.cs-delivery-counts{display:flex;gap:4px;flex-wrap:wrap}.cs-delivery-counts .cs-state-badge{font-size:11px!important;margin:0}
+body .cs-state-field{border-color:var(--cs-state-border)!important;background-color:var(--cs-state-bg)!important;box-shadow:inset 3px 0 var(--cs-state-border)}
+body input[type=checkbox].cs-state-field{outline:2px solid var(--cs-state-border);outline-offset:2px;box-shadow:none}
+.cs-state-field-note{display:block;color:#80501d;font-size:12px;line-height:1.5;grid-column:1/-1}
+body .cs-state-field[aria-invalid=true]{border-color:#b64040!important;background:#fff1ef!important;box-shadow:inset 3px 0 #b64040}
+.cs-workflow-form :is(fieldset,.pt-flow-entry,.pt-rx-row,.pt-calc-common):focus-within{outline:2px solid #146e67;outline-offset:2px;border-radius:10px}
+.cs-workflow-form .pt-rx-row[data-review-state=pending]{border-left:3px solid #d3aa77}
+.cs-workflow-form .pt-rx-row[data-review-state=ready]{border-left:3px solid #cbd7d3}
+.cs-explicit-review{color:#286342!important}.cs-explicit-review input[type=checkbox]{accent-color:#286342}
+.cs-calculation-status{margin:6px 0}.cs-calculation-status[hidden]{display:none}
+#practiceRoot .cs-workflow-form output.pt-output{background:#f2f6f5;color:#183d3b}
+#practiceRoot .pt-an-card output.pt-an-result:not(.pt-error){background:#f2f6f5;color:#183d3b}
+#practiceRoot .cs-workflow-form output.pt-error{background:#fff1ef;color:#a12e2e}
+#practiceRoot .cl-task.cl-state-late,#practiceRoot .cl-task.cl-state-held{border-left-color:#d3aa77}
+#practiceRoot .cl-task.cl-state-done{border-left-color:#5d9470}
+#practiceRoot .cl-task.cl-state-omitted,#practiceRoot .cl-task.cl-state-cancelled{border-left:3px solid #cbd7d3}
+#practiceRoot .cl-calendar-event.cl-calendar-late>small{background:#fff5e9;color:#80501d;border-radius:5px;padding:2px 5px}
+#practiceRoot .cl-calendar-event.cl-calendar-done>small{background:#eef7f0;color:#286342;border-radius:5px;padding:2px 5px}
+#practiceRoot .cl-calendar-event:is(.cl-calendar-closed,.cl-calendar-planned)>small{background:#f0f3f2;color:#46605c;border-radius:5px;padding:2px 5px}
+#practiceRoot .su-conflict-preview.su-conflict-found{background:#fff1ef;color:#a12e2e;border-color:#d8a09c}
+#practiceRoot .su-time-state[data-cs-state]{background:var(--cs-state-bg);color:var(--cs-state-ink);border:1px solid var(--cs-state-border);border-radius:5px;padding:1px 4px}
+.work-first-row.warn{border-left-color:#d3aa77!important}.work-first-row.urgent{border-left-color:#b64040!important}
+.work-first-row .care-assignee-select[data-cs-state=attention]{border-color:#d3aa77;background:#fff5e9}
+#practiceRoot .purchase-state[data-cs-state]{background:var(--cs-state-bg);color:var(--cs-state-ink);border:1px solid var(--cs-state-border)}
+#practiceRoot .purchase-remaining{font-weight:650;color:#80501d;background:#fff5e9;border-radius:5px;padding:2px 6px}
+@media(max-width:600px){body .cs-state-badge{font-size:11px!important}.cs-workflow-form :is(fieldset,.pt-flow-entry,.pt-rx-row):focus-within{outline-offset:0}}
+@media print{[data-cs-calculation],[data-cs-field-note],.cs-delivery-counts{display:none!important}body .cs-state-badge{background:transparent!important;border-color:#999!important;color:#222!important}.cs-workflow-form :focus-within{outline:none!important}.cs-state-field{background:transparent!important;box-shadow:none!important}}

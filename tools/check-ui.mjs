@@ -30,7 +30,7 @@ export const uiFiles = new Set([
  'clinic-settings.js','clinic-settings.css','clinic-capabilities.js',
  'clinical-assist.js','clinical-assist.css',
  'record-input-choices.js','record-input-choices.css',
- 'record-flow-guidance.js','record-flow-guidance.css',
+ 'record-flow-guidance.js','record-flow-guidance.css','clinic-workflow-state.js','clinic-workflow-state.css',
  'chronic-record.js','chronic-choices.js','chronic-record.css',
  'ophthalmic-record.js','ophthalmic-record.css',
  'neuro-record.js','neuro-record.css',

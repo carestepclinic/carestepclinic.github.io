@@ -74,7 +74,7 @@
  }
  function taskCategory(row){return ['visit','vaccination','heartworm'].includes(row?.sourceType)?'clinical':'followup';}
  function categoryRows(rows,category=todayCategory){return (rows||[]).filter(row=>taskCategory(row)===category);}
- function workFilterLabel(key){return ({all:'전체',care:todayCategory==='followup'?'원내·HOME':'진료',preventive:'접종·사상충',consult:'상담 필요',delivery:'발송 확인',unassigned:'담당자 미지정',overdue:'지연 업무'})[key]||'업무 목록';}
+ function workFilterLabel(key){return ({all:'전체',care:todayCategory==='followup'?'원내·HOME':'진료',preventive:'접종·사상충',consult:'상담 필요',delivery:'발송·열람 확인',unassigned:'담당자 미지정',overdue:'지연 업무'})[key]||'업무 목록';}
  function categoryCounts(buckets){return Object.fromEntries(['followup','clinical'].map(key=>{const today=categoryRows(buckets.all,key).length,backlog=categoryRows(buckets.backlog,key).length;return [key,{today,backlog,total:today+backlog}];}));}
  function updateTodayCounts(){
   const attention=global.carestepAttentionSummary?.(),clinical=global.carestepClinicalSummary?.();

@@ -85,7 +85,7 @@
   function lockPrior(){priorBox.querySelectorAll('button,select,input,textarea').forEach(e=>e.disabled=locked()||!a.canEdit()||prior.busy||(!!e.closest('[data-dental-prior]')&&dental.busy));}
   function paintBasket(){
    const out=priorBox.querySelector('[data-prior-basket]');if(!out)return;
-   out.innerHTML=prior.chosen.size?'<strong>가져올 내용 · '+prior.chosen.size+'개 기록</strong><ul>'+[...prior.chosen].map(([id,{item,texts}])=>{const {kind,date}=sourceInfo(item);return '<li><span>'+esc(date+' · '+names[kind]+' · '+Object.keys(texts).map(k=>priorLabels[k]).join(', '))+'</span><button type=button data-prior-remove="'+esc(id)+'">선택 취소</button></li>';}).join('')+'</ul><button type=button data-prior-clear>모두 선택 취소</button>':'';
+   out.innerHTML=prior.chosen.size?'<strong>가져올 내용 · '+prior.chosen.size+'개 기록</strong>'+(g.ClinicWorkflowState?.markup('neutral','이전 기록 참고 · 이번 진료 확인 별도')||'')+'<ul>'+[...prior.chosen].map(([id,{item,texts}])=>{const {kind,date}=sourceInfo(item);return '<li><span>'+esc(date+' · '+names[kind]+' · '+Object.keys(texts).map(k=>priorLabels[k]).join(', '))+'</span><button type=button data-prior-remove="'+esc(id)+'">선택 취소</button></li>';}).join('')+'</ul><button type=button data-prior-clear>모두 선택 취소</button>':'';
    const remove=id=>{if(!editable()||locked())return;if(id){prior.chosen.delete(id);for(const k of prior.pendingEdits)if(k.startsWith(id+':'))prior.pendingEdits.delete(k);}else {prior.chosen.clear();prior.pendingEdits.clear();}apply();s.touched=true;showError('');paintBasket();paintPriorDetail();paint();};
    out.querySelectorAll('[data-prior-remove]').forEach(el=>el.onclick=()=>remove(el.dataset.priorRemove));out.querySelector('[data-prior-clear]')?.addEventListener('click',()=>remove());
   }
