@@ -691,6 +691,7 @@ function mount(root,a){
     const dates=[...new Set(chosen.map(x=>String(x.timing||'').trim()))],candidate=dates.length===1&&/^\d{4}-\d{2}-\d{2}$/.test(dates[0])&&Number.isFinite(Date.parse(dates[0]))&&new Date(dates[0]).toISOString().slice(0,10)===dates[0]?dates[0]:'';
     const date=parts['재검 날짜']||candidate,tests=[...new Set([parts['예정 검사']||'',...chosen.map(x=>x.tests||'')].flatMap(x=>x.split(',').map(y=>y.trim()).filter(Boolean)))].join(', '),next=joinClinicalText({'재검 날짜':date,'예정 검사':tests},note),message=target.querySelector('[data-followup-import-status]');
     if(next.length>8000){message.textContent='재검 안내가 8,000자를 넘습니다. 가져올 항목을 줄여주세요. 기존 입력은 유지했습니다.';return;}
+    revealProse(section.querySelector('[data-prose=followup]'));
     if(next===d.followup){message.textContent='선택한 재검 정보가 이미 반영되어 있습니다.';return;}
     section.querySelector('[data-followup-date]').value=date;section.querySelector('[data-followup-tests]').value=tests;editProse('followup',note);updateFollowupHint();
     target.querySelectorAll('[data-followup-import-pick]').forEach(e=>e.checked=false);buttons();message.textContent=added+'개 재검 정보를 가져왔습니다. '+(!candidate||parts['재검 날짜']&&parts['재검 날짜']!==candidate?'각 일정은 추가 안내에서 확인하세요. 기존 날짜는 유지했습니다.':'날짜·예정 검사·추가 안내를 확인해주세요.');
