@@ -54,6 +54,7 @@
    draftDates.set(row,{automatic:!old?.dueAt,value:row.dueAt,touched:false});return row;
   });draftInitial=JSON.stringify(draft);return draft;
  }
+ function hasDraftChanges(){const current=JSON.stringify([identity(),followupCaseNonce,window.crmCurrentPatient?.()?.patientId,activePatientJourney?.id,activePatientJourney?.version,followupSelectedStages()]);return current===draftContext&&(!!draftSource||JSON.stringify(draft)!==draftInitial||draft.some(row=>draftDates.get(row)?.touched));}
  function valid(){try{return plan().length>0&&plan().every(x=>x.enabled===false||x.title.trim()&&x.dueAt&&Number.isFinite(Date.parse(x.dueAt)));}catch{return false;}}
  function payload(){if(!valid())throw Error('업무 날짜와 내용을 확인해주세요.');return plan().map(({day,title,dueAt,assigneeUserId,enabled})=>({day,title,dueAt,assigneeUserId,enabled:enabled!==false}));}
  function bulkAssignable(){return plan().filter(x=>x.enabled!==false&&x.status!=='completed'&&!x.assigneeUserId);}
@@ -134,5 +135,5 @@
  function analyticsCsv(){const d=analyticsSnapshot();if(!d||analyticsError||analyticsLoading)return '';const rows=[['기간',d.from,d.to],['구분','항목','전체','예정','완료','보류','지연']],add=(group,label,x)=>rows.push([group,label,...['total','scheduled','completed','held','overdue'].map(k=>Number(x[k])||0)]);add('요약','전체',d.totals);d.stages.forEach(x=>add('단계','D+'+x.stageDay,x));d.staff.forEach(x=>add('담당자',x.assigneeUserId?(followupMemberById(x.assigneeUserId)?.displayName||'기존 담당자'):'미배정',x));return '\ufeff'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/^[=+\-@\t\r]/,"'$&").replace(/"/g,'""')+'"').join(',')).join('\r\n');}
  function exportAnalytics(){if(!followupAnalyticsAllowed(true))return;const content=analyticsCsv();if(!content){toast('먼저 통계를 새로고침해주세요.');return;}downloadTextFile('후속관리_업무집계.csv',content,'text/csv;charset=utf-8');}
 
- window.ClinicFollowupTasks={analyticsSnapshot,renderAnalytics,loadAnalytics,analyticsCsv,exportAnalytics,counts:()=>{const rows=scope===identity()?items.filter(x=>!['completed','cancelled','canceled'].includes(x.status)):[];const today=new Date(Date.now()+32400000).toISOString().slice(0,10),attention=rows.filter(x=>x.operationalStatus==='overdue').length;return {total:rows.length,today:rows.filter(x=>x.dueDate===today).length,attention,scheduled:rows.length-attention};},plan,valid,payload,renderPlan,load,render,open,bind,buttons,enhance,mount};
+ window.ClinicFollowupTasks={analyticsSnapshot,renderAnalytics,loadAnalytics,analyticsCsv,exportAnalytics,counts:()=>{const rows=scope===identity()?items.filter(x=>!['completed','cancelled','canceled'].includes(x.status)):[];const today=new Date(Date.now()+32400000).toISOString().slice(0,10),attention=rows.filter(x=>x.operationalStatus==='overdue').length;return {total:rows.length,today:rows.filter(x=>x.dueDate===today).length,attention,scheduled:rows.length-attention};},plan,hasDraftChanges,valid,payload,renderPlan,load,render,open,bind,buttons,enhance,mount};
 })();
