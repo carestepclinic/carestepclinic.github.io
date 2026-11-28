@@ -13,7 +13,7 @@ export const uiFiles = new Set([
  'clinic-demo.js','clinic-demo.css',
  'clinic-connections.js','clinic-connections.css','record-handoff.js',
  'record-list-layout.js','surgery-ledger.js','surgery-ledger.css',
- 'surgery-consent-form.js','consent-pagination.js','clinic-support.js','clinic-support.css','consent-library.js','consent-library.css',
+ 'surgery-consent-form.js','consent-pagination.js','upng-2.1.0.js','UPNG-LICENSE.txt','pako-deflate-2.1.0.min.js','PAKO-LICENSE.txt','consent-ink.js','consent-ink.css','html2canvas-1.4.1.min.js','html2canvas-1.4.1.LICENSE.txt','clinic-support.js','clinic-support.css','consent-library.js','consent-library.css',
  'clinic-today-purchases.js','clinic-today-purchases.css','navigation-attention.js','billing-flow.js','subscription-resources.js','subscription-resources.css',
  'carestep-privacy.js','hq-individual-auth.js',
  'clinical-print.js','clinical-print.css',

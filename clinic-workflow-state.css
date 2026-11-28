@@ -34,3 +34,11 @@ body .cs-state-field[aria-invalid=true]{border-color:#b64040!important;backgroun
 #practiceRoot .purchase-remaining{font-weight:650;color:#80501d;background:#fff5e9;border-radius:5px;padding:2px 6px}
 @media(max-width:600px){body .cs-state-badge{font-size:11px!important}.cs-workflow-form :is(fieldset,.pt-flow-entry,.pt-rx-row):focus-within{outline-offset:0}}
 @media print{[data-cs-calculation],[data-cs-field-note],.cs-delivery-counts{display:none!important}body .cs-state-badge{background:transparent!important;border-color:#999!important;color:#222!important}.cs-workflow-form :focus-within{outline:none!important}.cs-state-field{background:transparent!important;box-shadow:none!important}}
+
+/* Consent steps and availability checks use the same status palette. */
+#practiceRoot .su [data-sign-readiness][data-cs-state],#practiceRoot .su-conflict-preview[data-cs-state]{background:var(--cs-state-bg);color:var(--cs-state-ink);border:1px solid var(--cs-state-border);border-radius:8px;padding:8px 12px}
+#practiceRoot .su .su-sign-pending{color:#80501d;background:#fff5e9;border-radius:5px;padding:3px 6px;display:inline-block}
+#practiceRoot .su .su-sign-done{color:#286342;background:#eef7f0;border-radius:5px;padding:3px 6px;display:inline-block}
+#practiceRoot .su-sign-field:has(.su-sign-pending) canvas{border-color:#d3aa77;background:#fffdf9}
+#practiceRoot .su-sign-field:has(.su-sign-done) canvas{border-color:#a5cbb1;background:#fcfefc}
+@media print{.su [data-sign-readiness],.su-sign-pending,.su-sign-done{background:transparent!important;color:#222!important}}
