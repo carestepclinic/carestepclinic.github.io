@@ -61,10 +61,10 @@ for(const width of [1440,1024,390,320])test('editor streamlined actions, vitals 
  assert.equal(await p.locator('[data-step=images]').count(),0);
  assert.equal(await p.locator('[data-action=delete]').isVisible(),false);
  assert.match(await p.locator('[data-selected-exams]').innerText(),/신체/);
- const inputs=p.locator('[data-vital]');assert.equal(await inputs.count(),3);
+ const inputs=p.locator('[data-vital]');assert.equal(await inputs.count(),9);
  for(let i=0;i<3;i++){assert.equal(await inputs.nth(i).inputValue(),'');await inputs.nth(i).fill(['38.5','120','24'][i]);}
  await p.locator('[data-exam=physical]').fill('기존 촉진 메모');
- await inputs.first().fill('-1');await go(p,'labs');assert.equal(await inputs.count(),3);
+ await inputs.first().fill('-1');await go(p,'labs');assert.equal(await inputs.count(),9);
  const count=await p.evaluate(()=>calls.length);await p.locator('[data-action=save]').click();assert.equal(await p.evaluate(()=>calls.length),count);
  await inputs.first().fill('38.5');await go(p,'labs');await go(p,'exams');
  assert.equal(await inputs.first().inputValue(),'38.5');assert.equal(await p.locator('[data-exam=physical]').inputValue(),'기존 촉진 메모');
@@ -99,9 +99,9 @@ test('workflow statuses never turn blank or pending results into normal',()=>{
  assert.equal(H.additionalFamily({name:'분변 기생충 검사'}),'stool');assert.equal(H.additionalFamily({name:'조직 병리검사'}),'cytology');
  assert.equal(H.additionalFamily({name:'cTnI'}),'cardiac');assert.equal(H.additionalFamily({name:'ACTH 후 Cortisol'}),'endocrine');
 });
-for(const width of [1440,390])test('workflow structured intake and recheck persist; seven tabs and one preview '+width,async()=>{
+for(const width of [1440,390])test('workflow structured intake and recheck persist; nine tabs and one preview '+width,async()=>{
  const {p,errors}=await setup(width);await start(p);
- assert.equal(await p.locator('.hc-steps [data-step]').count(),7);assert.equal(await p.locator('[data-action=print]').count(),1);
+ assert.equal(await p.locator('.hc-steps [data-step]').count(),9);assert.equal(await p.locator('[data-action=print]').count(),1);
  await p.locator('[data-history-purpose]').fill('정기 건강검진');await p.locator('[data-history-symptoms]').fill('음수량 증가');await p.locator('[data-field=history]').fill('기존 자유 문진');
  await go(p,'summary');await p.locator('[data-followup-date]').fill('2027-01-10');await p.locator('[data-followup-tests]').fill('혈압·요검사');await p.locator('[data-prose=followup]').fill('상태 변화 시 먼저 연락');
  assert.match(await p.locator('[data-review-jump=plans]').textContent(),/소견·계획 입력 중/);await p.locator('[data-prose=overview]').fill('가상 검진 핵심');assert.match(await p.locator('[data-review-jump=plans]').textContent(),/소견·계획 입력 중/);
@@ -124,8 +124,8 @@ test('workflow pending action and output jump preserve results and distinguish m
 test('workflow additional categories retain other results and eye photos use shared gallery',async()=>{
  const {p,errors}=await setup();await start(p);await go(p,'additional');await p.locator('[data-template]').selectOption('심장표지자');await p.locator('[data-additional-category]').selectOption('stool');assert.equal(await p.locator('[data-row]').count(),0);
  await p.locator('[data-action=addrow]').click();assert.equal(await p.locator('[data-lab=name]').inputValue(),'분변검사');await p.locator('[data-lab=value]').fill('원본 기록');await p.locator('[data-lab=value]').blur();await p.locator('[data-additional-category]').selectOption('all');assert.equal(await p.locator('[data-row]').count(),3);
- await go(p,'exams');await p.locator('.hc-exam-selector summary').click();await p.locator('[data-exam-pick=eyes]').check();assert.equal(await p.locator('[data-exam-pick=eyes]').evaluate(e=>e===document.activeElement),true);
- await p.locator('[data-context-photo=eye]').click();assert.equal(await p.locator('[data-image-kind]').inputValue(),'eye');await p.locator('[data-next-step]').click();assert.equal(await p.locator('[data-exam-choice=eyes]').inputValue(),'');
+ await go(p,'eyes');assert.equal(await p.locator('[data-eye-value]').count(),14);
+ await p.locator('[data-step=images]').click();await p.locator('[data-image-kind]').selectOption('eye');assert.equal(await p.locator('[data-image-kind]').inputValue(),'eye');await p.locator('[data-next-step]').click();assert.equal(await p.locator('[data-eye-value]').count(),14);
  assert.deepEqual(errors,[]);await p.close();
 });
 // All report fixtures are synthetic; no source patient reports are stored here.

@@ -110,9 +110,9 @@
  }
  async function importInto(target){
   if(!adapter?.ready()||!target.allowed())return;const initial=target.get(),pid=initial.item.patient_id;if(!pid)return;const fingerprint=JSON.stringify(initial.chart),recordId=initial.item.id;
-  const d=modal('다른 기록에서 검사·사진 가져오기'),s=session(d),body=d.querySelector('[data-cx-body]'),out=d.querySelector('[data-cx-message]');out.textContent='같은 환자의 기록 조회 중…';
+  const d=modal(target.sourceKind==='ophthalmic'?'안과기록에서 소견·사진 가져오기':'다른 기록에서 검사·사진 가져오기'),s=session(d),body=d.querySelector('[data-cx-body]'),out=d.querySelector('[data-cx-message]');out.textContent='같은 환자의 기록 조회 중…';
   const current=()=>{const v=target.get();return s.valid()&&target.allowed()&&v.item.id===recordId&&v.item.patient_id===pid&&JSON.stringify(v.chart)===fingerprint;};
-  try{const records=(await related({patient:{id:pid}},'clinical',s.request)).filter(x=>['healthcheck','chronic','dental','ophthalmic'].includes(x.kind)&&x.id!==recordId&&s.a.access?.(x.kind,'read')?.allowed!==false);if(!s.valid())return;
+  try{const records=(await related({patient:{id:pid}},'clinical',s.request)).filter(x=>['healthcheck','chronic','dental','ophthalmic'].includes(x.kind)&&(!target.sourceKind||x.kind===target.sourceKind)&&x.id!==recordId&&s.a.access?.(x.kind,'read')?.allowed!==false);if(!s.valid())return;
    body.innerHTML='<label>원본 기록<select data-import-source><option value="">선택하세요</option>'+records.map((r,i)=>'<option value="'+i+'">'+esc(r.date+' · '+names[r.kind]+' · '+r.title)+'</option>').join('')+'</select></label><div data-import-rows></div>';out.textContent=records.length?'현재 입력은 선택 반영 전까지 유지됩니다.':'가져올 같은 환자의 기록이 없습니다.';
    let loadEpoch=0;body.querySelector('[data-import-source]').onchange=async e=>{const n=++loadEpoch,box=body.querySelector('[data-import-rows]');box.replaceChildren();if(e.target.value==='')return;out.textContent='원본 확인 중…';
     try{const c=await fresh(records[+e.target.value],s.request);if(!current()||n!==loadEpoch)return;if(c.patient.id!==pid)throw Error('같은 환자의 원본을 선택해주세요.');const sourceFingerprint=JSON.stringify(c.source),fields=g.RecordHandoff.fields,rows=g.RecordHandoff.candidates(c,target.kind,initial.chart,fields);

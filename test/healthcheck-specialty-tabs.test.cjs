@@ -1,0 +1,54 @@
+const {test,before,after}=require('node:test'),assert=require('node:assert/strict'),path=require('node:path');
+const {chromium}=require('playwright');const H=require('../healthcheck-record.js'),R=require('../record-handoff.js');let browser;
+before(async()=>browser=await chromium.launch({headless:true,executablePath:process.env.HQ_TEST_BROWSER}));after(async()=>browser?.close());
+async function setup(t,width=1440){
+ const p=await browser.newPage({viewport:{width,height:1000}}),errors=[];p.setDefaultTimeout(6000);p.on('pageerror',e=>errors.push(e.message));t.after(async()=>{assert.deepEqual(errors,[]);await p.close();});
+ await p.route('**/*',r=>r.request().url()==='http://localhost/'?r.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><div id="root"></div>'}):r.abort());await p.goto('http://localhost/');
+ await p.addStyleTag({path:path.resolve(__dirname,'../healthcheck-record.css')});
+ for(const name of ['clinic-record-start.js','record-handoff.js','clinic-connections.js','healthcheck-record.js','test/healthcheck-editing-browser.js'])await p.addScriptTag({path:path.resolve(__dirname,'..',name)});
+ await p.evaluate(async()=>{window.f=await HealthcheckEditingChecks.fixture();const d=f.records['record-1'].body.healthcheckChart;d.exams={physical:'기존 신체 메모',eyes:'기존 안과 소견',oral:'기존 구강 소견'};d.summary='보존 소견';d.labs=[HealthcheckRecord.row({name:'CREA',value:'1.2',unit:'mg/dL',reference:'0.4–2.0',confirmed:true})];await f.view.openRecord('record-1');});return p;
+}
+async function go(p,key){await p.evaluate(()=>{window.scrollTo(0,0);return new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));});const button=p.locator('[data-step='+key+']');await button.waitFor({state:'visible'});await button.click();}
+const stored=p=>p.evaluate(()=>f.records['record-1'].body.healthcheckChart);
+async function save(p){await p.locator('[data-action=save]').click();await p.waitForFunction(()=>document.querySelector('[data-save-state]').textContent.includes('저장 완료'));}
+for(const width of [390,1440]){
+ test('physical fields and bilateral ophthalmic values save/reopen without changing existing results '+width,async t=>{
+  const p=await setup(t,width);assert.equal(await p.locator('[data-vital]').count(),9);assert.equal(await p.locator('[data-exam=physical]').inputValue(),'기존 신체 메모');
+  for(const [i,v] of [[3,'<2'],[4,'분홍색'],[5,'좌측 턱밑 촉진 소견'],[6,'각성'],[7,'심잡음 확인'],[8,'회복 지연']])await p.locator('[data-vital="'+i+'"]').fill(v);
+  await go(p,'eyes');assert.equal(await p.locator('[data-eye-value]').count(),14);assert.equal(await p.locator('[data-eye-value="4"]').inputValue(),'');
+  await p.locator('[data-eye-value="0"]').fill('0');await p.locator('[data-eye-value="1"]').fill('16');await p.locator('[data-eye-value="2"]').fill('18.5');await p.locator('[data-eye-value="3"]').fill('19');await p.locator('[data-eye-value="4"]').selectOption('감소·지연');
+  await p.locator('[data-exam=eyes]').fill('기존 안과 소견\n추가 관찰');await go(p,'oral');assert.equal(await p.locator('[data-exam=oral]').inputValue(),'기존 구강 소견');await p.locator('[data-exam=oral]').fill('기존 구강 소견\n치석 확인');await save(p);
+  let d=await stored(p);for(const text of ['CRT (초): <2','MMC: 분홍색','Superficial lymph node: 좌측 턱밑','Mentation: 각성','Auscultation: 심잡음','Skin turgor: 회복 지연','기존 신체 메모'])assert.ok(d.exams.physical.includes(text),text);
+  assert.match(d.exams.eyes,/STT-1: 0 mm\/min/);assert.match(d.exams.eyes,/우안 OD · 안압 · IOP: 18.5 mmHg/);assert.match(d.exams.eyes,/위협반응 · Menace: 감소·지연/);assert.equal(d.summary,'보존 소견');assert.equal(d.labs[0].reference,'0.4–2.0');assert.equal(d.labs[0].confirmed,true);
+  await p.evaluate(()=>f.view.openRecord('record-1'));await go(p,'eyes');assert.equal(await p.locator('[data-eye-value="0"]').inputValue(),'0');assert.equal(await p.locator('[data-eye-value="2"]').inputValue(),'18.5');assert.equal(await p.locator('[data-exam=eyes]').inputValue(),'기존 안과 소견\n추가 관찰');
+  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await p.screenshot({path:path.resolve(__dirname,'../../healthcheck-specialty-eyes-'+width+'.png'),fullPage:true});
+ });
+ test('eye and oral photos remain correctly categorized with independent findings '+width,async t=>{
+  const p=await setup(t,width);const png={name:'synthetic.png',mimeType:'image/png',buffer:Buffer.from(await p.evaluate(()=>{const c=document.createElement('canvas');c.width=300;c.height=200;c.getContext('2d').fillRect(0,0,300,200);return c.toDataURL('image/png').split(',')[1];}),'base64')};
+  for(const [step,kind] of [['eyes','eye'],['oral','oral']]){await go(p,step);await p.locator('[data-image-file]').setInputFiles(png);await p.waitForFunction(()=>document.querySelectorAll('[data-photo-card]').length===1);assert.equal(await p.locator('[data-image-kind]').inputValue(),kind);await p.locator('[data-photo-details] summary').click();await p.locator('[data-caption]').fill(step+' photo');}
+  await save(p);const d=await stored(p);assert.deepEqual(d.images.map(x=>x.kind),['eye','oral']);assert.equal(d.exams.eyes,'기존 안과 소견');assert.equal(d.exams.oral,'기존 구강 소견');await go(p,'eyes');assert.equal(await p.locator('[data-photo-card]').count(),1);
+ });
+}
+test('invalid eye measurement cannot be lost by switching tabs or saving',async t=>{
+ const p=await setup(t);await go(p,'eyes');await p.locator('[data-eye-value="2"]').fill('-1');await go(p,'oral');assert.equal(await p.locator('[data-eye-value="2"]').inputValue(),'-1');assert.equal(await p.locator('[data-action=save]').isDisabled(),true);assert.equal((await stored(p)).exams.eyes,'기존 안과 소견');await p.locator('[data-eye-value="2"]').fill('17');await save(p);assert.match((await stored(p)).exams.eyes,/IOP: 17 mmHg/);
+});
+test('legacy nonnumeric eye results and source information survive a new measurement',async t=>{
+ const p=await setup(t);await p.evaluate(async()=>{f.records['record-1'].body.healthcheckChart.exams.eyes='[원본 기록]\n우안 OD · 안압 · IOP: 측정 불가\n좌안 OS · 위협반응 · Menace: 사용자 설명';await f.view.openRecord('record-1');});await go(p,'eyes');assert.equal(await p.locator('[data-eye-value="5"]').inputValue(),'사용자 설명');await p.locator('[data-eye-value="0"]').fill('12');await save(p);const d=await stored(p);assert.match(d.exams.eyes,/IOP: 측정 불가/);assert.match(d.exams.eyes,/사용자 설명/);assert.match(d.exams.eyes,/\[원본 기록\]/);
+});
+test('dedicated eye import supplies filtered source kind and retains current chart',async t=>{
+ const p=await setup(t);await p.evaluate(()=>{ClinicConnections.importInto=t=>{window.importTarget=t;};});await go(p,'eyes');await p.locator('[data-eye-import]').click();const v=await p.evaluate(()=>({kind:importTarget.sourceKind,chart:importTarget.get().chart,allowed:importTarget.allowed()}));assert.equal(v.kind,'ophthalmic');assert.equal(v.allowed,true);assert.equal(v.chart.exams.eyes,'기존 안과 소견');
+ await p.evaluate(async()=>{f.records['record-1'].patient_id='';await f.view.openRecord('record-1');});await go(p,'eyes');assert.equal(await p.locator('[data-eye-import]').isDisabled(),true);
+});
+test('actual eye import dialog filters record types and permissions, applies selected source without modifying it',async t=>{
+ const p=await setup(t);await p.evaluate(()=>{
+  const date=f.records['record-1'].body.healthcheckChart.date;window.eyeSource={id:'eye-source',patient_id:'fixture-patient',patient:f.records['record-1'].patient,body:{ophthalmicChart:{date,diagnosis:'가상 안과 진단',od:{iop:22,stt:0,menace:'reduced'},os:{stt:14},images:[]}}};window.sourceBefore=JSON.stringify(eyeSource);
+  ClinicConnections.config({ready:()=>true,identity:()=>f.identity,access:()=>({allowed:true}),notice:()=>{},request:async url=>url.includes('patient-summary')?{patient:{id:'fixture-patient'},items:[{id:'dental-source',category:'dental',date,title:'치과기록'},{id:'eye-source',category:'ophthalmic',date,title:'안과기록'}]}:{item:structuredClone(eyeSource)}});
+ });await go(p,'eyes');await p.locator('[data-eye-import]').click();assert.equal(await p.locator('[data-import-source] option').count(),2);assert.equal(await p.locator('[data-import-source] option').last().textContent().then(x=>x.includes('치과')),false);await p.locator('[data-import-source]').selectOption('0');await p.locator('[data-import-pick]').check();await p.locator('[data-import-confirm]').check();await p.locator('[data-import-apply]').click();assert.equal(await p.locator('dialog[open]').count(),0);assert.equal(await p.locator('[data-eye-value="2"]').inputValue(),'22');assert.equal(await p.locator('[data-eye-value="0"]').inputValue(),'0');assert.match(await p.locator('[data-exam=eyes]').inputValue(),/기존 안과 소견/);assert.equal(await p.evaluate(()=>JSON.stringify(eyeSource)===sourceBefore),true);await save(p);assert.match((await stored(p)).exams.eyes,/eye-source/);
+ await p.evaluate(()=>ClinicConnections.config({ready:()=>true,identity:()=>f.identity,access:()=>({allowed:false}),request:async()=>({patient:{id:'fixture-patient'},items:[{id:'eye-source',category:'ophthalmic',date:'2026-11-28'}]})}));await p.locator('[data-eye-import]').click();assert.equal(await p.locator('[data-import-source] option').count(),1);
+});
+test('imported ophthalmic record preserves source and dates; old findings do not become current measurements',()=>{
+ const d=H.blank();d.date='2026-11-28';d.exams.eyes='현재 소견';const c={kind:'ophthalmic',id:'synthetic-eye',date:d.date,record:{od:{iop:18,stt:0,menace:'present'},os:{iop:19},diagnosis:'가상 소견',images:[{id:'photo',kind:'anterior',caption:'가상 사진'}]}};const original=JSON.stringify(c),next=R.apply(c,'healthcheck',d,[{key:'finding'},{key:'photo:photo',dataUrl:'data:image/png;base64,AAAA'}]);assert.match(next.exams.eyes,/현재 소견/);assert.match(next.exams.eyes,/IOP: 18 mmHg/);assert.match(next.exams.eyes,/STT-1: 0 mm\/min/);assert.equal(next.images[0].kind,'eye');assert.equal(JSON.stringify(c),original);c.date='2026-11-01';const old=R.apply(c,'healthcheck',d,[{key:'finding'}]);assert.equal(old.exams.eyes,'현재 소견');assert.match(old.history,/2026-11-01/);
+});
+test('report separates eye and oral findings/photos once and retains independent cover and section pagination',()=>{
+ const d=H.blank();d.exams={physical:'CRT: <2',eyes:'unique-eye-finding',oral:'unique-oral-finding'};d.images=[{id:'eye',kind:'eye',caption:'eye-photo',dataUrl:'data:image/png;base64,AAAA'},{id:'oral',kind:'oral',caption:'oral-photo',dataUrl:'data:image/png;base64,AAAA'}];const html=H.reportHTML(d,{name:'가상 환자',species:'cat'},d.images,{name:'가상 병원'});assert.equal(html.split('unique-eye-finding').length,2);assert.equal(html.split('unique-oral-finding').length,2);assert.match(html,/안과 검사/);assert.match(html,/구강·치아 검사/);assert.match(html,/cover-sheet/);assert.match(html,/data-gallery="eye"/);assert.match(html,/data-gallery="oral"/);assert.equal(H.workflowState({...d,exams:{}},'eyes'),'소견 미입력');
+});
