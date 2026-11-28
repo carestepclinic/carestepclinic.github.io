@@ -450,3 +450,22 @@
 .hc-manual-entry{margin:0 0 12px;padding:12px;border:1px solid #d3e2df;border-radius:10px;background:#f4f8f7}.hc-manual-entry>summary{font-weight:600;cursor:pointer}.hc-manual-controls{display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin:10px 0}.hc-manual-controls label{display:flex;flex-direction:column;gap:4px;min-width:0}.hc-manual-entry small{display:block;color:#526b66;line-height:1.5}.hc-manual-sources{margin-top:8px;font-size:12px;line-height:1.6}.hc-manual-sources a{color:#126b65}.hc-manual-entry [data-manual-message]:empty{display:none}@media(max-width:600px){.hc-manual-controls label{flex:1 1 100%;max-width:100%}.hc-manual-controls button{flex:1 1 40%}.hc-manual-controls select{width:100%;min-width:0}}
 
 .hc-manual-method{font-weight:600;margin:10px 0 4px}.hc-manual-preview-scroll{overflow:auto;margin:8px 0}.hc-manual-preview-scroll table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}.hc-manual-preview-scroll th,.hc-manual-preview-scroll td{border-bottom:1px solid #d5e3e2;padding:8px;overflow-wrap:anywhere}.hc-manual-preview-scroll th{font-weight:600}.hc-manual-entry [data-manual-extra-preview]>details{margin:8px 0}.hc-manual-entry [data-manual-extra-preview]:empty{display:none}
+
+/* Compact entry choices and optional prose; clinical values remain untouched. */
+.hc-record .hc-lab-start{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 10px}
+.hc-record .hc-manual-custom{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.hc-record .hc-manual-custom select{width:auto;max-width:100%}
+.hc-record .hc-lab-tools[hidden],.hc-record .hc-photo-bulk[hidden],.hc-record [data-fill-defaults-open][hidden],.hc-record .hc-additional-category[hidden]{display:none!important}
+.hc-record .hc-optional-field{min-width:0;padding:10px 12px;border:1px solid #d5e0de;border-radius:8px;background:#fff}
+.hc-record .hc-optional-field>summary{font-size:14px;font-weight:600;line-height:1.6;cursor:pointer}
+.hc-record .hc-optional-field>.hc-prose-field{padding:10px 0 0;border:0}
+.hc-record .hc-folded-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.hc-record .hc-optional-field .hc-prose-heading{justify-content:flex-end;margin-top:8px}
+.hc-record .hc-summary-grid textarea,.hc-record .hc-summary-grid [data-prose=overview]{min-height:78px}
+.hc-record .hc-summary-grid [data-prose=summary]{min-height:120px}
+.hc-record .hc-management-empty{padding:10px 12px}
+.hc-record .hc-management-empty .hc-management-heading p{display:none}
+.hc-record .hc-management-empty [data-management-notice]{margin:4px 0 0}
+.hc-record .hc-imaging-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.hc-record .hc-imaging-notes>.hc-specialty-heading{margin:12px 0}
+@media(max-width:640px){.hc-record .hc-lab-start>button{flex:1}.hc-record .hc-imaging-actions{width:100%}.hc-record .hc-imaging-actions>button{flex:1}}
