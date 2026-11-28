@@ -1,6 +1,21 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),H=require('../healthcheck-record.js'),R=require('../record-handoff.js');
 const chart=()=>({...H.blank(),date:'2026-11-28',exams:{eyes:'우안 OD · 안압 · IOP: 18 mmHg\n기존 메모',oral:'기존 구강 소견'},history:'기존 과거력',summary:'기존 종합소견',labs:[H.row({name:'CREA',value:'1.1',reference:'수정 범위',confirmed:true})]});
 const source=(date='2026-11-28')=>({id:'synthetic-eye',kind:'ophthalmic',date,record:{diagnosis:'가상 안과 진단',od:{iop:22,stt:0,menace:'reduced'},os:{iop:19},images:[]}});
+const dental=(date='2026-11-28')=>({id:'synthetic-teeth',kind:'dental',date,record:{teeth:{'108':{missing:true},'208':{extractionPlan:true,extracted:true},'309':{fractured:true,pd:0,pockets:{MB:3},note:'직접 설명'},'310':{},'311':{missing:false}}}});
+test('tooth-only records expose actual flags and values without inventing normal findings',()=>{
+ const rows=R.candidates(dental(),'healthcheck',chart());assert.deepEqual(rows.map(x=>x.key),['tooth:108','tooth:208','tooth:309']);assert.match(rows[1].value,/발치 예정.*발치 시행/);assert.match(rows[2].value,/PD 0.*협측 근심: 3 mm.*직접 설명/);assert.doesNotMatch(rows.map(x=>x.value).join(' '),/정상|특이 소견 없음/);
+});
+test('tooth conflicts require comparison, preserve prose, and deduplicate repeated imports',()=>{
+ const d=chart(),c=dental();assert.throws(()=>R.apply(c,'healthcheck',d,[{key:'tooth:108'}]),/선택/);assert.deepEqual(R.apply(c,'healthcheck',d,[{key:'tooth:108',mode:'keep'}]),d);
+ const n=R.apply(c,'healthcheck',d,[{key:'tooth:108',mode:'append'}]);assert.match(n.exams.oral,/108번 치아: 결손/);assert.match(n.exams.oral,/기존 구강 소견/);assert.deepEqual(n.labs,d.labs);assert.deepEqual(R.apply(c,'healthcheck',n,[{key:'tooth:108',mode:'append'}]),n);
+ c.record.teeth['108']={fractured:true};assert.throws(()=>R.apply(c,'healthcheck',n,[{key:'tooth:108',mode:'append'}]),/선택/);const replaced=R.apply(c,'healthcheck',n,[{key:'tooth:108',mode:'replace'}]);assert.match(replaced.exams.oral,/108번 치아: 파절/);assert.match(replaced.history,/변경 전 입력 · 108번 치아: 결손/);assert.match(replaced.exams.oral,/기존 구강 소견/);
+});
+test('past or undated tooth record remains reference only even with forced replacement',()=>{
+ for(const date of ['2020-01-01','']){const d=chart(),c=dental(date),n=R.apply(c,'healthcheck',d,[{key:'tooth:108',mode:'replace'}]);assert.deepEqual(n.exams,d.exams);assert.match(n.history,/108번 치아: 결손/);assert.equal(n.labs[0].reference,'수정 범위');}
+});
+test('empty tooth destination can be selected, and reference overflow is atomic',()=>{
+ const d=chart();d.exams.oral='';const c=dental(),n=R.apply(c,'healthcheck',d,[{key:'tooth:309'}]);assert.match(n.exams.oral,/309번 치아/);assert.doesNotMatch(n.exams.oral,/108번 치아/);d.history='가'.repeat(2999);assert.throws(()=>R.apply(c,'healthcheck',d,[{key:'tooth:309'}]),/과거력/);assert.equal(d.exams.oral,'');
+});
 test('eye conflict exposes each field and requires an explicit replace; keep is a no-op',()=>{
  const d=chart(),c=source(),r=R.candidates(c,'healthcheck',d).find(x=>x.key==='eye:od:iop');assert.equal(r.current,'18 mmHg');assert.equal(r.value,'22 mmHg');assert.equal(r.conflict,true);
  assert.throws(()=>R.apply(c,'healthcheck',d,[{key:r.key}]),/선택/);assert.deepEqual(R.apply(c,'healthcheck',d,[{key:r.key,mode:'keep'}]),d);
