@@ -23,7 +23,9 @@ test('healthcheck entry completion and input reuse',async t=>{
   const before={skin:'발적\n기존 직접 입력',ears:'미검사',eyes:'결과 대기',oral:'평가 불가'};
   await seed({examSelection:['physical','nutrition','skin','ears','eyes','oral','cardiac','respiratory'],exams:before});await page.locator('.hc-normal-tools>summary').click();
   assert.equal(await page.locator('[data-normal-pick]:checked').count(),0);assert.equal(await page.locator('[data-normal-apply]').isDisabled(),true);
-  for(const key of Object.keys(before))assert.equal(await page.locator('[data-normal-pick="'+key+'"]').isDisabled(),true);
+  for(const key of ["skin","ears"])assert.equal(await page.locator('[data-normal-pick="'+key+'"]').isDisabled(),true);
+  // Eye and oral findings now belong to their own tabs; neither is auto-filled here.
+  for(const key of ["eyes","oral"])assert.equal(await page.locator('[data-normal-pick="'+key+'"]').count(),0);
   await page.locator('[data-normal-pick=cardiac]').check();await page.locator('[data-normal-apply]').click();await save();const d=await chart();for(const key of Object.keys(before))assert.equal(d.exams[key],before[key]);assert.equal(d.exams.cardiac,'특이 소견 없음');assert.ok(!d.exams.respiratory);assert.equal(d.bcs,null);assert.equal(d.mcs,'');
   await page.evaluate(()=>hcFixture.view.openRecord('record-1'));assert.match(await page.locator('[data-exam-selected=cardiac]').innerText(),/특이 소견 없음/);
  });
