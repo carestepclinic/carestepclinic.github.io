@@ -82,6 +82,18 @@
   const body=typeof opt.body==='string'?JSON.parse(opt.body):opt.body||{},scope=api.scope();
   if(path==='/saas/register')return contract(api,opt,body);
   const status=await api.request('/saas/privacy/status',{method:'GET'}),p=status.publication;
+  const summaryPilot=!p?.ready&&p&&status.healthcheckSummaryPilot?.active===true&&status.healthcheckSummaryPilot.operation==='healthcheck_summary'&&path==='/saas/practice/clinical/healthcheck-summary'?status.healthcheckSummaryPilot:null;
+  if(summaryPilot){
+   if(!body.recordId)throw Error('건강검진 기록을 먼저 저장한 뒤 AI 작성을 시작해주세요.');
+   const preview=await api.request(path+'/preview',{...opt,body:JSON.stringify(body)});
+   if(preview.pilotDigest!==summaryPilot.digest||preview.pilotVersion!==summaryPilot.version||preview.payloadDigest!==await digest(JSON.stringify(preview.evidence)))throw Error('검사 내용 또는 처리 안내가 변경되었습니다. 다시 확인해주세요.');
+   await dialog('AI에 보낼 검사 내용 확인',(d,finish,abort)=>{
+    d.append(node('p','건강검진 종합소견·관리계획 시범 작성 · 개인정보 처리 문서는 초안으로 유지됩니다.'),node('p',summaryPilot.restriction),node('p','전송 대상: '+summaryPilot.recipient+' · '+summaryPilot.region),node('p','목적: '+summaryPilot.purpose+'\n보유기간: '+summaryPilot.retention),node('p','현재 검사와 연결한 이전 검사에서 전송할 내용입니다. 알려진 이름·연락처 등은 일부 제외하지만 자동 검사는 완전하지 않습니다. 개인을 알아볼 수 있는 내용이 남아 있으면 취소하고 원문을 수정해주세요. 사진 원본은 보내지 않으며 사진 설명은 아래에 포함될 수 있습니다.'),node('pre',evidenceText(preview.evidence)));
+    const reviewed=check(d,'전송할 전체 내용을 확인했고 개인을 알아볼 수 있는 정보가 없습니다. 이 내용만 OpenAI로 보내 초안을 작성합니다.'),{back,go}=buttons(d,'이 내용으로 AI 작성');back.onclick=abort;go.disabled=true;reviewed.onchange=()=>go.disabled=!reviewed.checked;go.onclick=()=>{if(reviewed.checked)finish(true);};
+   },opt);
+   body.privacyReview={reviewed:true,nonPersonalEvidence:true,pilotVersion:summaryPilot.version,pilotDigest:summaryPilot.digest,recordId:body.recordId,payloadDigest:preview.payloadDigest};
+   if(api.scope()!==scope||opt.signal?.aborted)throw cancel();return {...opt,body:JSON.stringify(body)};
+  }
   const pilot=!p?.ready&&p&&status.fileReadingPilot?.active===true&&status.fileReadingPilot.operation==='healthcheck_lab_import'&&path==='/saas/practice/clinical/lab-import'&&body.mode==='healthcheck'?status.fileReadingPilot:null;
   if(pilot){
    if(!body.recordId)throw Error('건강검진 기록을 먼저 저장한 뒤 파일을 읽어주세요.');
