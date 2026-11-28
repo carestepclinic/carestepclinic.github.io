@@ -1,0 +1,23 @@
+/* Shared, non-clinical input states. Never recolor measured values or printed reports. */
+.rf-record{--rf-teal:#146e67;--rf-apricot:#fff5e9;--rf-amber:#82501c;--rf-mint:#f0f8f5}
+.rf-record .rf-guide{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 16px;padding:12px 16px;border:1px solid #d4e2df;border-radius:12px;background:#f7faf9;color:#234843;font-size:14px;line-height:1.55;min-width:0}
+.rf-guide>div{min-width:0}.rf-guide strong,.rf-guide small{display:block}.rf-guide strong{font-size:14px;font-weight:700}.rf-guide small{color:#536c68;font-size:12px;margin-top:3px}
+.rf-record .rf-guide button{flex:0 1 auto;min-height:40px;max-width:46%;padding:8px 12px;border:1px solid #aecdc7;border-radius:9px;background:white;color:#155e59;font:inherit;font-weight:650;white-space:normal;overflow-wrap:anywhere;text-align:left}
+.rf-guide[data-flow-state=required]{border-left:4px solid #c68742}.rf-guide[data-flow-state=review]{border-left:4px solid #a37c36}
+.rf-guide[data-flow-state=reviewed]{background:#eef7f0;border-left:4px solid #43815a}.rf-guide[data-flow-state=error]{border-left:4px solid #b64040}
+.rf-record :is(input,select,textarea).rf-required,.rf-record :is(input,select,textarea).rf-review{background-color:var(--rf-apricot);border-color:#bf8b51;box-shadow:inset 3px 0 #c68742}
+.rf-record input[type=checkbox].rf-required,.rf-record input[type=checkbox].rf-review{outline:2px solid #bf8b51;outline-offset:2px;box-shadow:none}
+.rf-record .rf-tag{display:inline-block!important;width:auto;margin:4px 0 0 6px;padding:1px 6px;border:1px solid #e5ccab;border-radius:5px;background:var(--rf-apricot);color:var(--rf-amber);font-size:11px!important;font-weight:650;line-height:1.5;vertical-align:middle;white-space:nowrap}
+.rf-record label>.rf-tag{margin-left:0;align-self:start;grid-column:1/-1}
+.rf-record .rf-current{outline:2px solid var(--rf-teal);outline-offset:3px;border-radius:12px;scroll-margin-top:160px}
+.rf-record .rf-current>h3,.rf-record .rf-current>summary,.rf-record .rf-current>.sl-panel-heading{color:var(--rf-teal);background:var(--rf-mint);border-radius:6px}
+.rf-record .rf-reviewed{color:#286342}.rf-record .rf-reviewed>.rf-tag{border-color:#b6d7bf;background:#eef7f0;color:#286342}
+.rf-record .rf-reviewed input[type=checkbox]{accent-color:#286342}
+.rf-record .hc-steps [data-flow-pending=true] [data-step-badge]{display:none}
+.rf-record .hc-steps [aria-pressed=true] [data-step-badge]{color:#135f59}
+.rf-record :is(.hc-steps,.nr-jumps,.er-jumps,.dn-section-nav) button:is([aria-pressed=true],[aria-selected=true],[aria-current=true]){background:#e8f4f0;color:#135f59;border-color:#6da99e;box-shadow:inset 0 -3px #146e67}
+.rf-record :is(input,textarea,select)[aria-invalid=true]{border-color:#b64040;background-color:#fff3f2;box-shadow:inset 3px 0 #b64040}
+.rf-record :is(button,input,select,textarea):focus-visible{outline:3px solid #146e67;outline-offset:2px}
+.rf-record [hidden]{display:none!important}
+@media(max-width:600px){.rf-record .rf-guide{align-items:stretch;flex-direction:column;padding:10px 12px;gap:8px}.rf-record .rf-guide button{max-width:100%;width:100%}.rf-record .rf-current{outline-offset:1px}.rf-record .rf-tag{white-space:normal}}
+@media print{[data-flow-ui]{display:none!important}.rf-record .rf-current{outline:none!important}.rf-record :is(input,select,textarea).rf-required,.rf-record :is(input,select,textarea).rf-review,.rf-record :is(input,select,textarea)[aria-invalid=true]{background:transparent!important;box-shadow:none!important;border-color:#ccc!important}.rf-record .rf-current>h3,.rf-record .rf-current>summary,.rf-record .rf-current>.sl-panel-heading{background:transparent!important;color:inherit!important}}
