@@ -35,7 +35,7 @@ for(const width of [390,1200])test('physical and paired eye results remain reada
 test('source dates, repeated values, blank side and unstructured prose are never discarded or inferred',async()=>{
  const d=fixture();d.exams.eyes='단독 소견\n[2026-11-01 · ophthalmic · source-one]\n우안 OD · 안압 · IOP: 21 mmHg\n우안 OD · 안압 · IOP: 23 mmHg\n좌안 OS · 안압 · IOP: 19 mmHg\n[직접 작성 메모]\n알 수 없는 검사: 원문';const {p}=await open(d);
  const rows=p.locator('#report-pages [data-exam-table=eyes] tbody tr');assert.equal(await rows.count(),2);assert.deepEqual(await rows.first().locator('td').allTextContents(),['21 mmHg','미기록']);assert.deepEqual(await rows.nth(1).locator('td').allTextContents(),['23 mmHg','19 mmHg']);
- const text=await p.locator('#report-pages').innerText();for(const word of ['단독 소견','2026-11-01','source-one','직접 작성 메모','알 수 없는 검사: 원문'])assert.ok(text.includes(word));await boundaries(p);await p.close();
+ const text=await p.locator('#report-pages').innerText();for(const word of ['단독 소견','안과 기록 · 검사일 2026-11-01','직접 작성 메모','알 수 없는 검사: 원문'])assert.ok(text.includes(word));assert.ok(!text.includes('source-one'));assert.ok(d.exams.eyes.includes('source-one'));await boundaries(p);await p.close();
 });
 test('long eye cells continue with repeated headers without clipping values or following section',async()=>{
  const d=fixture(),long='긴 관찰 소견의 원문을 보존합니다. '.repeat(80)+'끝표시';d.exams.eyes='우안 OD · 각막 · Cornea: '+long+'\n좌안 OS · 각막 · Cornea: '+long;const {p,errors}=await open(d);await boundaries(p);assert.deepEqual(errors,[]);
