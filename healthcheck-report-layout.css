@@ -285,3 +285,6 @@ thead{break-after:avoid}
 .report-cover-page .cover-meta,.report-cover-page[data-compact=true] .cover-meta{display:block;margin:8mm 0 0;padding:0;border:0}
 .report-cover-page .cover-meta span{display:block;padding:3mm 0;border-bottom:1px solid #dbe4e2;font-size:11pt}
 .report-cover-page .cover-meta b{margin-left:5mm}
+
+/* Paired clinical findings use the same table in preview and printed A4 pages. */
+.exam-result-table{font-size:10.5pt;line-height:1.45;margin:2mm 0 4mm}.exam-result-table .exam-label-col{width:36%}.exam-result-table th,.exam-result-table td{padding:1.7mm 2mm}.exam-result-table tbody th{font-weight:500;color:#304c3d}.exam-result-table tbody tr:nth-child(even){background:#f7faf8}.exam-result-table tbody th small{display:inline;font-size:8.5pt;margin:0 0 0 1.5mm;font-weight:400}.exam-result-table tr th:first-child{width:36%}.eye-result-table thead th:nth-child(2),.eye-result-table thead th:nth-child(3){width:32%}.physical-result-table thead th:nth-child(2){width:64%}.exam-result-table tr{break-inside:avoid}.exam-result-table td{white-space:pre-wrap;overflow-wrap:anywhere}.exam-result-table thead{break-inside:avoid;break-after:avoid}.exam-unrecorded{color:#687873;font-size:9pt}.exam-table-title{margin:3mm 0 1.5mm;font-size:11pt;break-after:avoid}

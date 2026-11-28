@@ -336,11 +336,32 @@ function reportAction(value,label){
  for(const s of reportSections(value))for(const line of s.lines){const m=line.match(new RegExp('^\\s*'+label+'\\s*[:：]\\s*(.+)$'));if(m&&m[1].length<=240)return m[1];}
  const plain=String(value||'').trim();return plain&&!plain.includes('\n')&&plain.length<=180?plain:'';
 }
+// Presentation only: preserve unrecognized prose, repeated measurements and source boundaries.
+function reportExamTable(value,kind){
+ const output=[],pending=[],notes=[];let recognized=false;
+ const chunks=value=>{const out=[];let part='',lines=0;for(const c of String(value)){part+=c;if(c==='\n')lines++;if(part.length>=240||lines>=6){out.push(part);part='';lines=0;}}if(part)out.push(part);return out;};
+ const flushNotes=()=>{if(notes.length){output.push('<article class="report-note"><p>'+esc(notes.join('\n'))+'</p></article>');notes.length=0;}};
+ const flushTable=()=>{if(!pending.length)return;const eye=kind==='eyes',cells=row=>eye?[row.od,row.os]:[row.result];
+  output.push('<table class="exam-result-table '+(eye?'eye-result-table':'physical-result-table')+'" data-exam-table="'+kind+'" aria-label="'+(eye?'안과 검사 결과':'신체검사 결과')+'"><colgroup><col class="exam-label-col">'+(eye?'<col><col>':'<col>')+'</colgroup><thead><tr><th scope="col">검사 항목</th>'+(eye?'<th scope="col">우안 OD</th><th scope="col">좌안 OS</th>':'<th scope="col">결과</th>')+'</tr></thead><tbody>'+pending.map(row=>{const values=cells(row),pieces=values.map(v=>chunks(v??'')),count=Math.max(1,...pieces.map(x=>x.length)),label=row.label.split(' · ');return Array.from({length:count},(_,i)=>'<tr><th scope="row">'+esc(label[0])+(label.length>1?'<small>'+esc(label.slice(1).join(' · '))+'</small>':'')+(i?'<small>계속</small>':'')+'</th>'+values.map((v,j)=>'<td>'+(pieces[j][i]!==undefined?esc(pieces[j][i]):i?'':'<span class="exam-unrecorded">미기록</span>')+'</td>').join('')+'</tr>').join('');}).join('')+'</tbody></table>');
+  pending.length=0;
+ };
+ for(const line of String(value||'').split(/\r?\n/)){
+  let parsed=null;
+  if(kind==='physical'){const i=physicalFields.findIndex(([label])=>line.startsWith(label+':'));if(i>=0)parsed={label:physicalCaptions[i],result:line.slice(physicalFields[i][0].length+1).trim()};}
+  else{const m=line.match(/^(우안 OD|좌안 OS)\s*·\s*([^:]+):\s*(.*)$/);if(m)parsed={label:m[2].trim(),side:m[1]==='우안 OD'?'od':'os',result:m[3]};}
+  if(!parsed){flushTable();notes.push(line);continue;}
+  recognized=true;flushNotes();
+  if(kind==='physical'){pending.push(parsed);continue;}
+  let row=pending.find(r=>r.label===parsed.label);if(row&&Object.hasOwn(row,parsed.side)){flushTable();row=null;}
+  if(!row){row={label:parsed.label};pending.push(row);}row[parsed.side]=parsed.result;
+ }
+ flushTable();flushNotes();return recognized?output.join(''):null;
+}
 function reportHTML(d,p,images,hospital={},options={}){
  const photos=(images||[]).filter(im=>im.includeInPrint!==false),parts=[],previous=options.previous||null;
  const reviewed=d.clinicalStatus==='complete'&&d.reviewed&&d.veterinarian;
  const assetBase=typeof location==='object'&&/^https?:$/.test(location.protocol)?new URL('.',location.href).href:'https://carestepclinic.com/';
- const asset=name=>new URL(name,assetBase).href,version='20261117-report-cover-footer';
+ const asset=name=>new URL(name,assetBase).href,version='20261128-exam-report-tables';
  const note=(label,value)=>value?'<article class="report-note"><h3>'+esc(label)+'</h3><p>'+esc(value)+'</p></article>':'';
  const logo=String(hospital.logo||'').trim(),safeLogo=/^(?:data:image\/(?:png|jpeg|webp|gif);base64,|https?:\/\/)/i.test(logo);
  const hospitalCover='<div class="hospital-cover">'+(safeLogo?'<img src="'+esc(logo)+'" alt="병원 로고" onerror="this.hidden=true">':'')+'<div><strong>'+esc(hospital.name||'')+'</strong>'+(hospital.address?'<p>'+esc(hospital.address)+'</p>':'')+(hospital.phone?'<p>전화 '+esc(hospital.phone)+'</p>':'')+'</div></div>';
@@ -360,11 +381,12 @@ function reportHTML(d,p,images,hospital={},options={}){
  for(const part of parts.slice(legacyStart))part.legacy=true;d=original;
  const findingRows=[];if(d.bcs||d.mcs)findingRows.push(['체형·근육 상태',[d.bcs?'BCS '+d.bcs+'/9':'',d.mcs?'MCS '+d.mcs:''].filter(Boolean).join(' · ')]);
  for(const [k,l] of Object.entries(exams))if(!imageStep(k)&&String(d.exams?.[k]||'').trim())findingRows.push([l,d.exams[k]]);
- if(findingRows.length){const brief=findingRows.filter(([,v])=>v.length<=180&&!v.includes('\n')),long=findingRows.filter(x=>!brief.includes(x));parts.push({title:'신체검사·진료 소견',exam:true,keepTogether:!long.length&&brief.map(([,v])=>v).join('').length<600,body:(brief.length?'<div class="finding-table" role="table" aria-label="신체검사 소견">'+brief.map(([l,v])=>'<p class="finding-row" role="row"><strong role="rowheader">'+esc(l)+'</strong><span role="cell">'+esc(v)+managementLinked(confirmedIssues,'exam:'+Object.keys(exams).find(k=>exams[k]===l))+'</span></p>').join('')+'</div>':'')+long.map(([l,v])=>managementLinked(confirmedIssues,'exam:'+Object.keys(exams).find(k=>exams[k]===l))+note(l,v)).join('')});}
+ const physicalTable=reportExamTable(d.exams?.physical,'physical');
+ if(findingRows.length){const brief=findingRows.filter(([l,v])=>!(l===exams.physical&&physicalTable)&&v.length<=180&&!v.includes('\n')),long=findingRows.filter(x=>!brief.includes(x));parts.push({title:'신체검사·진료 소견',exam:true,keepTogether:!long.length&&brief.map(([,v])=>v).join('').length<600,body:(brief.length?'<div class="finding-table" role="table" aria-label="신체검사 소견">'+brief.map(([l,v])=>'<p class="finding-row" role="row"><strong role="rowheader">'+esc(l)+'</strong><span role="cell">'+esc(v)+managementLinked(confirmedIssues,'exam:'+Object.keys(exams).find(k=>exams[k]===l))+'</span></p>').join('')+'</div>':'')+long.map(([l,v])=>managementLinked(confirmedIssues,'exam:'+Object.keys(exams).find(k=>exams[k]===l))+(l===exams.physical&&physicalTable?'<h3 class="exam-table-title">'+esc(l)+'</h3>'+physicalTable:note(l,v))).join('')});}
  for(const [key,title] of [['labs','혈액검사'],['urine','요검사'],['additional','추가 검사']]){const rows=(d.labs||[]).filter(r=>labTab(r)===key&&String(r.value??'').trim());const groups=key==='labs'?[{title:'혈액검사 · CBC',rows:rows.filter(r=>labGroup(r)==='CBC · 혈구검사')},{title:'혈액검사 · 생화학',rows:rows.filter(r=>labGroup(r)!=='CBC · 혈구검사')}]:[{title,rows}];for(const group of groups)if(group.rows.length)parts.push({title:group.title,exam:true,body:'<p class="muted">참고범위는 검사기관 원본 기준입니다.'+(previous?' 이전 검사 '+esc(previous.date)+' · 비교 조건이 다르면 증감 판단을 보류합니다.':'')+'</p>'+printLabs(group.rows,previous,confirmedIssues)});}
  for(const kind of Object.keys(kinds)){
   const examKey=examForPhoto(kind),prose=imageStep(examKey)?d.exams?.[examKey]:'',list=photos.filter(im=>im.kind===kind);
-  if(prose||list.length)parts.push({title:imageStep(examKey)?kinds[kind]+' 검사':kinds[kind],exam:true,body:managementLinked(confirmedIssues,'exam:'+examKey)+note('검사 소견',prose)+'<div data-gallery="'+kind+'">'+list.map((im,i)=>'<figure data-photo-kind="'+esc(kinds[kind])+'" data-photo-id="'+esc(im.id||kind+'-'+i)+'"><img src="'+esc(im.dataUrl)+'" alt="'+esc(kinds[kind])+' '+(i+1)+'"><figcaption><b>'+esc(kinds[kind])+' '+(i+1)+'</b>'+(im.caption?' · <span class="photo-caption">'+esc(im.caption)+'</span>':'')+managementLinked(confirmedIssues,'image:'+im.id)+'</figcaption></figure>').join('')+'</div>'});
+  if(prose||list.length)parts.push({title:imageStep(examKey)?kinds[kind]+' 검사':kinds[kind],exam:true,body:managementLinked(confirmedIssues,'exam:'+examKey)+(kind==='eye'?(reportExamTable(prose,'eyes')||note('검사 소견',prose)):note('검사 소견',prose))+'<div data-gallery="'+kind+'">'+list.map((im,i)=>'<figure data-photo-kind="'+esc(kinds[kind])+'" data-photo-id="'+esc(im.id||kind+'-'+i)+'"><img src="'+esc(im.dataUrl)+'" alt="'+esc(kinds[kind])+' '+(i+1)+'"><figcaption><b>'+esc(kinds[kind])+' '+(i+1)+'</b>'+(im.caption?' · <span class="photo-caption">'+esc(im.caption)+'</span>':'')+managementLinked(confirmedIssues,'image:'+im.id)+'</figcaption></figure>').join('')+'</div>'});
  }
  parts.push(...[...examGuideParts(d,p.species),...labGuideParts(d.labs,p.species)].map(part=>({...part,appendix:true})));
  const missing=[!hospital.name&&'병원명',!p.name&&'환자명',!d.date&&'검진일',!d.veterinarian&&'담당 수의사'].filter(Boolean);

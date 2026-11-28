@@ -31,7 +31,7 @@ test('each examination section starts on its own page while biochemistry keeps o
  const d=fixture();d.labs.push(h.row({name:'USG',value:'1.03',group:'요검사',confirmed:true}),h.row({name:'Total T4',value:'2',group:'호르몬검사',confirmed:true}));d.exams.radiograph='가상 방사선 소견';d.exams.ultrasound='가상 초음파 소견';
  const {p,errors}=await open(d),toc=await assertToc(p);
  const sections=await p.locator('.report-part[data-new-page=true]:not([data-report-appendix=true])').evaluateAll(parts=>parts.map(part=>({title:part.dataset.reportTitle,page:part.closest('.pagedjs_page').dataset.pageNumber,first:part.closest('.pagedjs_page').querySelector('.report-part')===part})));
- assert.equal(sections.length,11);assert.equal(new Set(sections.map(s=>s.page)).size,sections.length);assert.ok(sections.every(s=>s.first));
+ assert.deepEqual(sections.map(s=>s.title),['목차','검진 결과 요약','종합소견','관리·재검 계획','신체검사·진료 소견','혈액검사 · CBC','혈액검사 · 생화학','요검사','추가 검사','방사선 검사','초음파 검사','구강·치아 검사']);assert.equal(new Set(sections.map(s=>s.page)).size,sections.length);assert.ok(sections.every(s=>s.first));
  const bio=p.locator('[data-report-title="혈액검사 · 생화학"]');assert.equal(await bio.locator('table').count(),1);assert.equal(await bio.locator('.lab-source').count(),1);assert.equal(await bio.locator('thead').count(),1);assert.ok(await bio.locator('.lab-group-row').count()>3);
  assert.ok(await bio.locator('.lab-abnormal').count()>0);assert.ok(toc.pages>=8);assert.deepEqual(errors,[]);
  await p.pdf({path:path.join(out,'all-sections.pdf'),preferCSSPageSize:true,printBackground:true});await p.close();
